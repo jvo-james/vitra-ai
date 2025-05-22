@@ -233,88 +233,199 @@
   </div>
 
   <script>
-    // —— CONFIG ——
+    // ————————— CONFIG —————————
     const OPENAI_PROXY = '/.netlify/functions/openai-proxy';
-    async function callOpenAI(msgs){
-      let res = await fetch(OPENAI_PROXY, {
-        method:'POST', headers:{'Content-Type':'application/json'},
-        body:JSON.stringify({ messages: msgs })
-      });
-      if(!res.ok) throw await res.text();
-      let { choices } = await res.json();
-      return choices[0].message.content.trim();
-    }
-    function bumpStat(k){
-      let el = document.getElementById('stat-'+k);
-      let v = (+el.textContent||0)+1; el.textContent = v;
-    }
-    // —— HANDLERS ——
-    async function handle(section, system, userContent, resultEl, statKey){
-      document.getElementById(resultEl).textContent = '🔄 Thinking…';
-      bumpStat(statKey);
+
+    async function callOpenAI(messages) {
+      // Show any low-level network errors
+      let res;
       try {
-        let reply = await callOpenAI([
-          { role:'system', content:system },
-          { role:'user', content:userContent }
-        ]);
-        document.getElementById(resultEl).textContent = reply;
-      } catch(e){
-        document.getElementById(resultEl).textContent = '⚠️ '+e;
+        res = await fetch(OPENAI_PROXY, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ messages }),
+        });
+      } catch (e) {
+        throw new Error('Network error: ' + e.message);
       }
+
+      if (!res.ok) {
+        const text = await res.text().catch(() => res.statusText);
+        throw new Error(text || res.statusText);
+      }
+
+      const payload = await res.json();
+      if (!payload.choices || !payload.choices[0]) {
+        throw new Error('Malformed response from AI');
+      }
+      return payload.choices[0].message.content.trim();
     }
-    // —— WIRING —— 
-    document.addEventListener('DOMContentLoaded', ()=>{
-      // sidebar toggle
-      document.getElementById('toggleSidebarBtn').onclick = ()=> document.querySelector('aside').classList.toggle('collapsed');
-      // theme toggle
-      let btn = document.getElementById('themeToggle');
-      if(localStorage.theme=='light') document.documentElement.classList.add('light');
-      btn.onclick = ()=>{
+
+    function bumpStat(key) {
+      const el = document.getElementById(`stat-${key}`);
+      const next = Math.max(0, parseInt(el.textContent || '0', 10)) + 1;
+      el.textContent = next;
+    }
+
+    // —————————— HANDLER GENERATOR ——————————
+    function makeHandler({ formId, systemPrompt, getUserContent, resultId, statKey }) {
+      const form = document.getElementById(formId);
+      form.addEventListener('submit', async e => {
+        e.preventDefault();
+        const resultEl = document.getElementById(resultId);
+        resultEl.textContent = '🔄 Thinking…';
+        bumpStat(statKey);
+        try {
+          const user = typeof getUserContent === 'function'
+            ? getUserContent()
+            : getUserContent;
+          const reply = await callOpenAI([
+            { role: 'system', content: systemPrompt },
+            { role: 'user', content: user }
+          ]);
+          resultEl.textContent = reply;
+        } catch (err) {
+          resultEl.textContent = '⚠️ ' + err.message;
+        }
+      });
+    }
+
+    // ————————— INITIALIZATION —————————
+    document.addEventListener('DOMContentLoaded', () => {
+      // Sidebar & theme toggles (unchanged)
+      document.getElementById('toggleSidebarBtn').onclick =
+        () => document.querySelector('aside').classList.toggle('collapsed');
+      const themeBtn = document.getElementById('themeToggle');
+      if (localStorage.getItem('theme') === 'light')
+        document.documentElement.classList.add('light');
+      themeBtn.onclick = () => {
         document.documentElement.classList.toggle('light');
-        localStorage.theme = document.documentElement.classList.contains('light')?'light':'dark';
+        localStorage.setItem(
+          'theme',
+          document.documentElement.classList.contains('light') ? 'light' : 'dark'
+        );
       };
-      // Chart
+
+      // Trending chart
       new Chart(document.getElementById('trendingChart'), {
-        type:'bar',
-        data:{ labels:['Turmeric','Ginkgo','Echinacea','Valerian','Ashwagandha'],
-               datasets:[{ data:[120,95,85,70,65], backgroundColor:'#8ECDF1' }]
+        type: 'bar',
+        data: {
+          labels: ['Turmeric','Ginkgo','Echinacea','Valerian','Ashwagandha'],
+          datasets:[{ data:[120,95,85,70,65], backgroundColor:'var(--accent)' }]
         },
         options:{ plugins:{legend:{display:false}}, scales:{y:{beginAtZero:true}} }
       });
-      // form list: [id, systemPrompt, getUserContentFn, resultEl, statKey]
-      const forms = [
-        ['dx-form','You are an herbal diagnostic AI.', ()=>document.getElementById('dxInput').value,'dxResult','dx'],
-        ['pf-form','You are a formulator.','Herbs:'+[...document.getElementById('pfHerbs').selectedOptions].map(o=>o.value).join(',')+'; Age:'+document.getElementById('pfAge').value+'; Weight:'+document.getElementById('pfWeight').value,'pfResult','form'],
-        ['ing-form','You identify plants from filenames.', ()=>document.getElementById('ingUpload').files[0].name,'ingResult','id'],
-        ['pred-form','You predict efficacy scores.', ()=>document.getElementById('predInput').value,'predResult','pred'],
-        ['research-form','You summarize scientific texts.', ()=>document.getElementById('researchQuery').value,'researchResults','research'],
-        ['inventory-form','You forecast herb demand.', ()=>`Herb:${document.getElementById('forecastHerb').value};Weeks:${document.getElementById('forecastPeriod').value}`,'inventoryResult','inventory'],
-        ['genetics-form','You interpret genetic reports.', ()=>document.getElementById('geneticUpload').files[0].name,'geneticResult','genetics'],
-        ['dose-form','You calculate dosage.', ()=>`Weight:${document.getElementById('weight').value}kg;Symptom:${document.getElementById('symptom').value}`,'dosageResult','dose'],
-        ['int-form','You check herb interactions.', ()=>`${document.getElementById('herbA').value} & ${document.getElementById('herbB').value}`,'interactionResult','int']
+
+      // Wire up each form
+      const configs = [
+        {
+          formId: 'dx-form',
+          systemPrompt: 'You are an expert herbal medicine diagnostic assistant.',
+          getUserContent: () => document.getElementById('dxInput').value,
+          resultId: 'dxResult',
+          statKey: 'dx'
+        },
+        {
+          formId: 'pf-form',
+          systemPrompt: 'You formulate custom herbal mixtures based on herbs, age and weight.',
+          getUserContent: () => {
+            const herbs = [...document.getElementById('pfHerbs').selectedOptions]
+              .map(o=>o.value).join(', ');
+            const age = document.getElementById('pfAge').value;
+            const wt = document.getElementById('pfWeight').value;
+            return `Herbs: ${herbs}. Age: ${age}. Weight: ${wt}kg.`;
+          },
+          resultId: 'pfResult',
+          statKey: 'form'
+        },
+        {
+          formId: 'ing-form',
+          systemPrompt: 'You identify the plant species from image filenames.',
+          getUserContent: () => document.getElementById('ingUpload').files[0].name,
+          resultId: 'ingResult',
+          statKey: 'id'
+        },
+        {
+          formId: 'pred-form',
+          systemPrompt: 'You predict a numeric efficacy score (0–100) for a herb/condition pair.',
+          getUserContent: () => document.getElementById('predInput').value,
+          resultId: 'predResult',
+          statKey: 'pred'
+        },
+        {
+          formId: 'research-form',
+          systemPrompt: 'You summarize clinical and scientific findings concisely.',
+          getUserContent: () => document.getElementById('researchQuery').value,
+          resultId: 'researchResults',
+          statKey: 'research'
+        },
+        {
+          formId: 'inventory-form',
+          systemPrompt: 'You forecast weekly demand for herbal inventory.',
+          getUserContent: () => {
+            const herb = document.getElementById('forecastHerb').value;
+            const weeks = document.getElementById('forecastPeriod').value;
+            return `Herb: ${herb}. Forecast period: ${weeks} weeks.`;
+          },
+          resultId: 'inventoryResult',
+          statKey: 'inventory'
+        },
+        {
+          formId: 'genetics-form',
+          systemPrompt: 'You interpret genetic reports to recommend herbs.',
+          getUserContent: () => document.getElementById('geneticUpload').files[0].name,
+          resultId: 'geneticResult',
+          statKey: 'genetics'
+        },
+        {
+          formId: 'dose-form',
+          systemPrompt: 'You calculate herbal dosage based on weight and symptom.',
+          getUserContent: () => {
+            const wt = document.getElementById('weight').value;
+            const sym = document.getElementById('symptom').value;
+            return `Weight: ${wt}kg. Symptom: ${sym}.`;
+          },
+          resultId: 'dosageResult',
+          statKey: 'dose'
+        },
+        {
+          formId: 'int-form',
+          systemPrompt: 'You check for interactions between two herbs.',
+          getUserContent: () => {
+            const a = document.getElementById('herbA').value;
+            const b = document.getElementById('herbB').value;
+            return `Check interactions between ${a} and ${b}.`;
+          },
+          resultId: 'interactionResult',
+          statKey: 'int'
+        }
       ];
-      forms.forEach(([fid, sys, userFn, resEl, stat])=>{
-        document.getElementById(fid).addEventListener('submit',e=>{
-          e.preventDefault();
-          handle(fid, sys, typeof userFn==='function'?userFn():userFn, resEl, stat);
-        });
-      });
+
+      configs.forEach(makeHandler);
+
       // Chatbot
-      let history=[{role:'system',content:'You are a friendly herbal tutor.'}];
-      document.getElementById('sendChat').onclick=async()=>{
-        let msg=document.getElementById('chatInput').value.trim();
-        if(!msg) return;
+      const chatBox = document.getElementById('chatBox');
+      const chatHistory = [{ role:'system', content:'You are a friendly herbal medicine tutor.' }];
+      document.getElementById('sendChat').onclick = async () => {
+        const inp = document.getElementById('chatInput');
+        const msg = inp.value.trim();
+        if (!msg) return;
         bumpStat('chat');
-        let box=document.getElementById('chatBox');
-        box.innerHTML+=`<p><strong>You:</strong> ${msg}</p>`;
-        history.push({role:'user',content:msg});
-        document.getElementById('chatInput').value='';
-        let reply=await callOpenAI(history);
-        history.push({role:'assistant',content:reply});
-        box.innerHTML+=`<p><strong>Vitra AI:</strong> ${reply}</p>`;
-        box.scrollTop=box.scrollHeight;
+        chatBox.innerHTML += `<p><strong>You:</strong> ${msg}</p>`;
+        inp.value = '';
+        chatHistory.push({ role: 'user', content: msg });
+        let reply;
+        try {
+          reply = await callOpenAI(chatHistory);
+        } catch (e) {
+          reply = '⚠️ ' + e.message;
+        }
+        chatHistory.push({ role:'assistant', content: reply });
+        chatBox.innerHTML += `<p><strong>Vitra AI:</strong> ${reply}</p>`;
+        chatBox.scrollTop = chatBox.scrollHeight;
       };
     });
   </script>
+
 </body>
 </html>
