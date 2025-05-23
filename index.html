@@ -15,485 +15,331 @@
         href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"/>
   <!-- Chart.js -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<style>
-  /*──────────────── RESET & THEME ─────────────────*/
-  * {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-    font-family: 'Montserrat', sans-serif;
-  }
-  :root {
-    --accent:      #4A90E2;
-    --bg-light:    #F0F4F8;
-    --fg-light:    #1A1A1A;
-    --card-light:  #FFFFFF;
-    --muted-light: #6C7A89;
-    --bg-dark:     #1E1E1E;
-    --fg-dark:     #ECECEC;
-    --card-dark:   #2A2A2A;
-    --muted-dark:  #888888;
-    --radius:      12px;
-    --trans:       0.25s;
-    --sidebar-w:   260px;
-  }
-  html.light {
-    --bg:    var(--bg-light);
-    --fg:    var(--fg-light);
-    --card:  var(--card-light);
-    --muted: var(--muted-light);
-  }
-  html.dark {
-    --bg:    var(--bg-dark);
-    --fg:    var(--fg-dark);
-    --card:  var(--card-dark);
-    --muted: var(--muted-dark);
-  }
-
-  body {
-    display: flex;
-    min-height: 100vh;
-    background: var(--bg);
-    color: var(--fg);
-    transition: background var(--trans), color var(--trans);
-    overflow-x: hidden;
-  }
-  a {
-    color: inherit;
-    text-decoration: none;
-  }
-
-  /*──────────────── SIDEBAR & NAV ─────────────────*/
-  aside {
-    position: sticky;
-    top: 0;
-    height: 100vh;
-    width: var(--sidebar-w);
-    background: var(--card);
-   transition: background var(--trans), box-shadow var(--trans);
-    box-shadow: 2px 0 12px rgba(0,0,0,0.1);
-    transition: width var(--trans), transform var(--trans), background var(--trans);
-    z-index: 1000;
-  }
-  aside.closed {
-    transform: translateX(-100%);
-  }
-  aside.collapsed {
-    width: 80px;
-  }
-  aside.collapsed .brand span,
-  aside.collapsed nav a span {
-    display: none;
-  }
-  aside.collapsed nav a {
-    justify-content: center;
-  }
-  .brand {
-    display: flex;
-    align-items: center;
-    gap: 0.75rem;
-    padding: 1.5rem 1rem;
-    font-size: 1.35rem;
-    font-weight: 700;
-    color: var(--accent);
-  }
-  nav[role="navigation"] {
-    margin-top: 1rem;
-  }
-  nav a {
-    display: flex;
-    align-items: center;
-    gap: 0.75rem;
-    padding: 0.8rem 1.25rem;
-    border-radius: var(--radius);
-    font-weight: 500;
-    font-size: 0.95rem;
-    transition: background var(--trans), padding-left var(--trans);
-  }
-  nav a:hover,
-  nav a.active {
-    background: var(--accent)20;
-  }
-  nav a:hover {
-    background: var(--accent)30;
-    padding-left: 1.5rem;
-  }
-  nav a i {
-    width: 1rem;
-    text-align: center;
-    font-size: 1.1rem;
-    color: var(--accent);
-  }
-html.dark aside {
- 
-  background: var(--card);
+/*──────────────── RESET & THEME ─────────────────*/
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: 'Montserrat', sans-serif;
 }
-  /*──────────────── SHRINK-SIDEBAR BUTTON ─────────────────*/
-  .shrink-btn {
-    position: absolute;
-    bottom: 1rem;
-    right: -12px;
-    background: var(--card);
-    border: 2px solid var(--accent);
-    border-radius: 50%;
-    padding: 0.4rem;
-    cursor: pointer;
-    box-shadow: 0 2px 6px rgba(0,0,0,0.1);
-    transition: transform var(--trans);
-    z-index: 1001;
-  }
-  .shrink-btn:hover {
-    transform: rotate(180deg);
-  }
+:root {
+  --accent:      #4A90E2;
+  --bg-light:    #F0F4F8;
+  --fg-light:    #1A1A1A;
+  --card-light:  #FFFFFF;
+  --muted-light: #6C7A89;
+  --bg-dark:     #1E1E1E;
+  --fg-dark:     #ECECEC;
+  --card-dark:   #2A2A2A;
+  --muted-dark:  #888888;
+  --radius:      12px;
+  --trans:       0.25s;
+  --sidebar-w:   260px;
+}
+/* Default to light mode */
+html.light, html:not(.dark) {
+  --bg:    var(--bg-light);
+  --fg:    var(--fg-light);
+  --card:  var(--card-light);
+  --muted: var(--muted-light);
+}
+html.dark {
+  --bg:    var(--bg-dark);
+  --fg:    var(--fg-dark);
+  --card:  var(--card-dark);
+  --muted: var(--muted-dark);
+}
 
-  /*──────────────── HEADER ─────────────────*/
-  header {
-    position: fixed;
+body {
+  display: flex;
+  min-height: 100vh;
+  background: var(--bg);
+  color: var(--fg);
+  transition: background var(--trans), color var(--trans);
+  overflow-x: hidden;
+}
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+/*──────────────── SIDEBAR & NAV ─────────────────*/
+aside {
+  position: sticky;
   top: 0;
+  width: var(--sidebar-w);
+  height: 100vh;
+  background: var(--card);
+  box-shadow: 2px 0 12px rgba(0,0,0,0.1);
+  transition: width var(--trans), background var(--trans);
+  z-index: 1000;
+}
+aside.collapsed {
+  width: 80px;
+}
+aside.collapsed .brand span,
+aside.collapsed nav a span {
+  display: none;
+}
+aside.collapsed nav a {
+  justify-content: center;
+}
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 1.5rem 1rem;
+  font-size: 1.35rem;
+  font-weight: 700;
+  color: var(--accent);
+}
+nav[role="navigation"] {
+  margin-top: 1rem;
+}
+nav a {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.8rem 1.25rem;
+  border-radius: var(--radius);
+  font-weight: 500;
+  font-size: 0.95rem;
+  transition: background var(--trans), padding-left var(--trans);
+}
+nav a:hover,
+nav a.active {
+  background: var(--accent)20;
+}
+nav a:hover {
+  padding-left: 1.5rem;
+}
+nav a i {
+  width: 1rem;
+  text-align: center;
+  font-size: 1.1rem;
+  color: var(--accent);
+}
+
+/*──────────────── SHRINK-SIDEBAR BUTTON ─────────────────*/
+.shrink-btn {
+  position: absolute;
+  bottom: 1rem;
+  right: -12px;
+  background: var(--accent);
+  color: var(--card);
+  width: 36px;
+  height: 36px;
+  border: none;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 3px 8px rgba(0,0,0,0.2);
+  transition: transform var(--trans);
+  cursor: pointer;
+  z-index: 1001;
+}
+.shrink-btn:hover {
+  transform: scale(1.1);
+}
+.shrink-btn i {
+  transition: transform var(--trans);
+}
+
+/*──────────────── HEADER ─────────────────*/
+header {
+  position: sticky;
+  top: 0;
+  left: var(--sidebar-w);
+  right: 0;
   height: 60px;
-  width: calc(100% - var(--sidebar-w));
+  padding: 0 1.5rem;
+  background: var(--card);
+  border-bottom: 1px solid var(--muted);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  z-index: 1100;
+  transition: background var(--trans), border-color var(--trans);
+}
+header h1 {
+  font-size: 1.5rem;
+  font-weight: 700;
+}
+.hamburger,
+.theme-toggle {
+  font-size: 1.4rem;
+  cursor: pointer;
+  padding: 0.3rem;
+  color: var(--accent);
+}
+.hamburger { display: none; }
+
+/*──────────────── MAIN CONTENT ─────────────────*/
+main[role="main"] {
+  flex: 1;
+  margin-top: 60px; /* push below header */
   margin-left: var(--sidebar-w);
-   padding: 0 1.5rem;
-   background: var(--card);
-   border-bottom: 1px solid var(--muted);
-   display: flex;
-   align-items: center;
-   justify-content: space-between;
-   z-index: 1001;
-   transition: background var(--trans), border-color var(--trans);
-    width: 100%;
-   margin: 0;
- }
-  header h1 {
-    font-size: 1.5rem;
-    font-weight: 700;
-    position: relative;
-    margin-left: 0.5rem;
-  }
-  header h1::after {
-    content: '';
-    position: absolute;
-    bottom: -4px;
-    left: 0;
-    width: 100%;
-    height: 3px;
-    background: rgba(255,255,255,0.5);
-    transform-origin: left;
-    transform: scaleX(0);
-    transition: transform 0.3s ease;
-  }
-  header h1:hover::after {
-    transform: scaleX(1);
-  }
-  .hamburger,
-  .theme-toggle {
-    font-size: 1.4rem;
-    cursor: pointer;
-    padding: 0.3rem;
-    color: var(--accent);
-  }
-  .hamburger {
-    display: none;
-  }
+  padding: 2rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
 
-  /*──────────────── MAIN CONTENT ─────────────────*/
-  main[role="main"] {
-    flex: 1;
-    overflow-y: auto;
-    padding: 2rem;
-    display: flex;
-    flex-direction: column;
-    gap: 1.5rem;
-  }
-  .module {
-    background: var(--card);
-    border-radius: var(--radius);
-    padding: 1.75rem;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
-    transition: transform var(--trans);
-  }
-  .module:hover {
-    transform: translateY(-2px);
-  }
-  .module h2 {
-    display: flex;
-    align-items: center;
-    gap: 0.75rem;
-    margin-bottom: 1rem;
-    font-size: 1.3rem;
-    font-weight: 600;
-  }
-  .module p.desc {
-    color: var(--muted);
-    margin-bottom: 1rem;
-    font-size: 0.95rem;
-  }
-  .module form {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 1rem;
-    align-items: flex-end;
-  }
+/*──────────────── MODULES ─────────────────*/
+.module {
+  background: var(--card);
+  border-radius: var(--radius);
+  padding: 1.75rem;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+  transition: transform var(--trans);
+}
+.module:hover {
+  transform: translateY(-2px);
+}
+.module h2 {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+  font-size: 1.3rem;
+  font-weight: 600;
+}
+.module p.desc {
+  color: var(--muted);
+  margin-bottom: 1rem;
+  font-size: 0.95rem;
+}
+.module form {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  align-items: flex-end;
+}
 
-  /*──────────────── INPUT + TEXTAREA STYLING ─────────────────*/
-  .module input,
-  .module select,
-  .module textarea {
-    flex: 1 1 220px;
-    padding: 0.75rem;
-    border: 2px solid var(--muted);
-    border-radius: var(--radius);
-    background: var(--bg);
-    color: var(--fg);
-    font-size: 0.95rem;
-    transition: border-color var(--trans), box-shadow var(--trans);
-  }
-  .module input:focus,
-  .module select:focus,
-  .module textarea:focus {
-    outline: none;
-    border-color: var(--accent);
-    box-shadow: 0 0 5px var(--accent);
-  }
-
-  /*──────────────── HINT TEXT ─────────────────*/
-  .module form .hint {
-    display: block;
-    margin-top: 0.5rem;
-    color: var(--muted);
-    font-size: 0.85rem;
-    clear: both;
-  }
-
-  /*──────────────── BUTTON STYLING ─────────────────*/
-  button {
-    background: var(--accent);
-    color: var(--card);
-    padding: 0.7rem 1.4rem;
-    border: none;
-    border-radius: var(--radius);
-    font-size: 0.95rem;
-    font-weight: 600;
-    cursor: pointer;
-    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-    transition: transform var(--trans), box-shadow var(--trans);
-  }
-  button:hover {
-    transform: scale(1.05);
-    box-shadow: 0 6px 14px rgba(0,0,0,0.15);
-  }
+/*──────────────── INPUTS ─────────────────*/
+.module input,
+.module select,
+.module textarea {
+  flex: 1 1 220px;
+  padding: 0.75rem;
+  border: 2px solid var(--muted);
+  border-radius: var(--radius);
+  background: var(--bg);
+  color: var(--fg);
+  font-size: 0.95rem;
+  transition: border-color var(--trans), box-shadow var(--trans);
+}
+.module input:focus,
+.module select:focus,
+.module textarea:focus {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 5px var(--accent);
+}
+/* always-visible border in light mode */
 html.light .module input,
- html.light .module select,
- html.light .module textarea {
-   border-color: #ccc;
- }
-  /*──────────────── RESPONSE PANEL & SPINNER ─────────────────*/
-  .response {
-    position: relative;
-    background: var(--accent)15;
-    border-left: 5px solid var(--accent);
-    padding: 1.25rem;
-    margin-top: 1rem;
-    border-radius: var(--radius);
-  }
-  .response .close-btn {
-    position: absolute;
-    top: 0.5rem;
-    right: 0.75rem;
-    background: var(--accent);
-    color: var(--card);
-    border: none;
-    border-radius: 50%;
-    width: 24px;
-    height: 24px;
-    font-size: 1.1rem;
-    line-height: 1;
-    cursor: pointer;
-    box-shadow: 0 2px 6px rgba(0,0,0,0.2);
-  }
-  .spinner {
-    width: 20px;
-    height: 20px;
-    border: 3px solid var(--muted);
-    border-top: 3px solid var(--accent);
-    border-radius: 50%;
-    animation: spin 1s linear infinite;
-    display: inline-block;
-    vertical-align: middle;
-    margin-left: 0.5rem;
-  }
-  @keyframes spin {
-    to { transform: rotate(360deg); }
-  }
+html.light .module select,
+html.light .module textarea {
+  border-color: #bbb;
+}
 
-  /*──────────────── CHAT & CHARTS ─────────────────*/
-  #chatBox {
-    min-height: 180px;
-    max-height: 240px;
-    overflow-y: auto;
-    padding: 0.75rem;
-    background: var(--bg);
-    border: 1px solid var(--muted);
-    border-radius: var(--radius);
-    margin-bottom: 0.5rem;
-  }
-  .charts {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 1.5rem;
-    margin-top: 1rem;
-  }
-  .chart-card {
-    padding: 1rem;
-    border-radius: var(--radius);
-    background: var(--card);
-    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
-  }
-  canvas {
-    max-height: 220px !important;
-  }
+/*──────────────── HINT TEXT ─────────────────*/
 .module .hint {
   display: block;
+  width: 100%;
   margin-top: 0.5rem;
   color: var(--muted);
   font-size: 0.85rem;
 }
 
-  /*──────────────── RESPONSIVE & MOBILE SIDEBAR ─────────────────*/
-  @media (max-width: 960px) {
-    aside {
-      transform: translateX(-100%);
-      position: fixed;
-      left: 0;
-    }
-    aside:not(.closed) {
-      transform: translateX(0);
-      box-shadow: 2px 0 12px rgba(0,0,0,0.3);
-    }
-    .hamburger {
-      display: block;
-      z-index: 1002;
-    }
-    header {
-      width: 100%;
-      margin-left: 0;
-      padding: 1rem;
-    }
-    main {
-      margin-left: 0;
-      padding: 1.5rem;
-    }
-    .shrink-btn {
-      display: none;
-    }
-  }
-  @media (max-width: 768px) {
-  aside {
-    width: 100%;
-    position: fixed;
-    transform: translateX(-100%);
-  }
-  aside.open {
-    transform: translateX(0);
-  }
-  main[role="main"] {
-    margin-left: 0;
-    padding: 1rem;
-  }
-  header {
-    padding: 0.75rem 1rem;
-  }
-}
-/* 1. Always-visible borders in light mode */
-html.light .module input,
-html.light .module select,
-html.light .module textarea {
-  border-color: #bbb !important;
-}
-
-/* 2. Force header to stick above everything */
-header {
-  position: sticky !important;
-  top: 0 !important;
-  z-index: 2000 !important;
-}
-
-/* 3. Make the shrink button prettier */
-.shrink-btn {
+/*──────────────── BUTTONS ─────────────────*/
+button {
   background: var(--accent);
   color: var(--card);
+  padding: 0.7rem 1.4rem;
   border: none;
-  width: 36px;
-  height: 36px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 50%;
-  box-shadow: 0 3px 8px rgba(0,0,0,0.2);
+  border-radius: var(--radius);
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+  transition: transform var(--trans), box-shadow var(--trans);
 }
-.shrink-btn i {
-  transition: transform var(--trans);
-}
-.shrink-btn:hover {
-  transform: scale(1.1);
+button:hover {
+  transform: scale(1.05);
+  box-shadow: 0 6px 14px rgba(0,0,0,0.15);
 }
 
-/* 4. Ensure hints sit on their own line */
-.module form .hint {
-  /* already block, but force clear floats & margin */
-  clear: both;
-  width: 100%;
-  margin-top: 0.5rem;
+/*──────────────── RESPONSE PANELS ─────────────────*/
+.response {
+  position: relative;
+  background: var(--accent)15;
+  border-left: 5px solid var(--accent);
+  padding: 1.25rem;
+  margin-top: 1rem;
+  border-radius: var(--radius);
 }
-
-/* 5. Mobile sidebar improvements */
-@media (max-width: 768px) {
-  /* full-screen overlay nav */
-  aside {
-    width: 100%;
-    background: var(--card) !important;
-    box-shadow: none !important;
-    transform: translateX(-100%) !important;
-  }
-  aside.open {
-    transform: translateX(0) !important;
-  }
-  nav a {
-    padding: 1rem 2rem !important;
-    font-size: 1.1rem;
-  }
-}
-
-/* 6. Tidy up close-buttons inside responses */
 .response .close-btn {
+  position: absolute;
+  top: 0.75rem;
+  right: 0.75rem;
   background: transparent;
   color: var(--muted);
   border: none;
   font-size: 1.2rem;
-  width: auto;
-  height: auto;
-  line-height: 1;
   padding: 0.2rem;
-  top: 0.75rem;
-  right: 0.75rem;
-  box-shadow: none;
+  cursor: pointer;
+  transition: color var(--trans);
 }
 .response .close-btn:hover {
   color: var(--accent);
 }
-@media (max-width: 960px) {
-  aside { transform: translateX(-100%); }
-  aside.open { transform: translateX(0); }
+
+/*──────────────── CHAT & CHARTS ─────────────────*/
+#chatBox {
+  min-height: 180px;
+  max-height: 240px;
+  overflow-y: auto;
+  padding: 0.75rem;
+  background: var(--bg);
+  border: 1px solid var(--muted);
+  border-radius: var(--radius);
+  margin-bottom: 0.5rem;
 }
-html.light .module input,
-html.light .module select,
-html.light .module textarea {
-  border: 2px solid #999 !important;
-  background: #fff !important;
-  color: #000 !important; /* ensure typed text is visible */
+.charts {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.5rem;
+  margin-top: 1rem;
+}
+.chart-card {
+  background: var(--card);
+  padding: 1rem;
+  border-radius: var(--radius);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+}
+canvas {
+  max-height: 220px !important;
 }
 
-</style>
+/*──────────────── RESPONSIVE & MOBILE ─────────────────*/
+@media (max-width: 960px) {
+  aside { transform: translateX(-100%); position: fixed; }
+  aside.open { transform: translateX(0); }
+  .hamburger { display: block; }
+  header { left: 0; width: 100%; }
+  main {
+    margin-left: 0;
+    padding: 1.5rem;
+  }
+  .shrink-btn { display: none; }
+}
+@media (max-width: 768px) {
+  aside { width: 100%; }
+  nav a { padding: 1rem 2rem; font-size: 1.1rem; }
+}
+
 
 
 </head>
