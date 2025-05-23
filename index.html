@@ -156,16 +156,35 @@ header .controls i:hover {
   transform: scale(1.1);
 }
 
-/* Main area */
+body {
+  display: flex;
+  gap: 0;                    /* no extra space between flex items */
+  min-height: 100vh;
+  background: var(--bg);
+  color: var(--text);
+}
+
+aside {
+  flex: 0 0 var(--sidebar-w);       /* fixed width */
+}
+
+aside.collapsed {
+  flex: 0 0 var(--sidebar-collapsed-w);
+}
+
 main {
-  flex: 1;
+  flex: 1;                          /* fill remaining space */
   padding: calc(var(--header-h) + var(--padding)) var(--padding) var(--padding);
   background: var(--bg);
-  transition: margin-left var(--transition);
 }
-aside.collapsed ~ main {
-  margin-left: 80px;
+@media (max-width: 1024px) {
+  /* sidebar slides in/out, header spans full */
+  header { left: 0 !important; }
+  main {
+    padding: calc(var(--header-h) + var(--padding)) var(--padding);
+  }
 }
+
 
 /*────────────────── MODULE CARDS ──────────────────*/
 .module {
