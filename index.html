@@ -382,26 +382,38 @@ button:hover {
 
 /*──────────────────────────────────────────────────*/
 /* 4. Response-close button: bold circular pill */
-/*──────────────────────────────────────────────────*/
+.response {
+  padding-top: 2rem;           /* reserve space for close */
+  position: relative;
+}
 .response .close-btn {
-  width: 24px;
-  height: 24px;
-  background: var(--primary);
-  color: #fff;
-  font-size: 0.9rem;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+  display: none;               /* hidden by default */
   position: absolute;
   top: 0.5rem;
   right: 0.5rem;
-  transition: background var(--transition), transform var(--transition);
+  width: 24px; height: 24px;
+  background: var(--primary);
+  color: #fff;
+  border-radius: 50%;
+  align-items: center;
+  justify-content: center;
+  display: flex;
 }
-.response .close-btn:hover {
-  background: darken(var(--primary),10%);
-  transform: scale(1.1);
+.response.show-close .close-btn {
+  display: flex;               /* only when flagged */
+}
+
+/* container at bottom of sidebar */
+.shrink-container {
+  position: absolute;
+  bottom: 1rem;
+  left: 0;
+  width: 100%;
+  text-align: center;
+  cursor: pointer;
+}
+.shrink-container .shrink-btn {
+  margin: 0 auto;
 }
 
 /*──────────────────────────────────────────────────*/
@@ -443,6 +455,18 @@ button:hover {
   }
 }
 
+  @media (max-width: 640px) {
+  .module input,
+  .module select,
+  .module textarea {
+    font-size: 0.9rem;
+    padding: 0.6rem;
+  }
+  .module form {
+    gap: 0.5rem;
+  }
+}
+
 </style>
 
   
@@ -464,9 +488,12 @@ button:hover {
       <a href="#"><i class="fas fa-user"></i><span>Profile</span></a>
       <a href="#"><i class="fas fa-cog"></i><span>Settings</span></a>
     </nav>
-    <button id="shrinkBtn" class="shrink-btn" aria-label="Toggle sidebar">
-  <i class="fas fa-angle-double-left"></i>
-</button>
+      <div id="shrinkContainer" class="shrink-container" aria-label="Toggle sidebar">
+    <button id="shrinkBtn" class="shrink-btn">
+      <i class="fas fa-angle-double-left"></i>
+    </button>
+  </div>
+
 
   </aside>
 
@@ -672,10 +699,7 @@ button:hover {
         <h2><i class="fas fa-chart-bar"></i> Top Growing Herbs</h2>
         <canvas id="barChart"></canvas>
       </div>
-      <div class="chart-card">
-        <h2><i class="fas fa-chart-pie"></i> Category Breakdown</h2>
-        <canvas id="pieChart"></canvas>
-      </div>
+     
     </div>
   </main>
 
@@ -691,12 +715,12 @@ button:hover {
 hamburger.onclick = () => sidebar.classList.toggle('open');
 
 // inside DOMContentLoaded:
-const shrinkBtn = document.getElementById('shrinkBtn');
-shrinkBtn.onclick = () => {
+const shrinkContainer = document.getElementById('shrinkContainer');
+shrinkContainer.onclick = () => {
   sidebar.classList.toggle('collapsed');
-  // optionally flip the arrow:
-  shrinkBtn.querySelector('i').classList.toggle('fa-angle-double-left');
-  shrinkBtn.querySelector('i').classList.toggle('fa-angle-double-right');
+  const icon = document.querySelector('#shrinkBtn i');
+  icon.classList.toggle('fa-angle-double-left');
+  icon.classList.toggle('fa-angle-double-right');
 };
 
 function toggleTheme() {
@@ -719,12 +743,14 @@ function toggleTheme() {
     panel.querySelector('.result-content').innerHTML =
       'Brewing your herbal wisdom… <span class="spinner"></span>';
     panel.hidden = false;
+    panel.classList.remove('show-close');
   }
 
   // Show the AI’s reply inside a panel
   function showResult(panel, text) {
     panel.querySelector('.result-content').textContent = text;
     panel.hidden = false;
+    panel.classList.add('show-close');
   }
 
   // Call your OpenAI proxy function
@@ -916,16 +942,7 @@ function toggleTheme() {
       }
     });
 
-    new Chart(document.getElementById('pieChart'), {
-      type: 'pie',
-      data: {
-        labels: ['Roots','Leaves','Flowers','Seeds','Barks'],
-        datasets: [{
-          data: [30,25,20,15,10],
-          backgroundColor: ['#8ECDF1','#A0E0E0','#C0F0F0','#E0FFFF','#F0FFFF']
-        }]
-      }
-    });
+    
   });
 </script>
 
