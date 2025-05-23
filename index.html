@@ -404,6 +404,83 @@ html.light .module input,
     padding: 0.75rem 1rem;
   }
 }
+/* 1. Always-visible borders in light mode */
+html.light .module input,
+html.light .module select,
+html.light .module textarea {
+  border-color: #bbb !important;
+}
+
+/* 2. Force header to stick above everything */
+header {
+  position: sticky !important;
+  top: 0 !important;
+  z-index: 2000 !important;
+}
+
+/* 3. Make the shrink button prettier */
+.shrink-btn {
+  background: var(--accent);
+  color: var(--card);
+  border: none;
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  box-shadow: 0 3px 8px rgba(0,0,0,0.2);
+}
+.shrink-btn i {
+  transition: transform var(--trans);
+}
+.shrink-btn:hover {
+  transform: scale(1.1);
+}
+
+/* 4. Ensure hints sit on their own line */
+.module form .hint {
+  /* already block, but force clear floats & margin */
+  clear: both;
+  width: 100%;
+  margin-top: 0.5rem;
+}
+
+/* 5. Mobile sidebar improvements */
+@media (max-width: 768px) {
+  /* full-screen overlay nav */
+  aside {
+    width: 100%;
+    background: var(--card) !important;
+    box-shadow: none !important;
+    transform: translateX(-100%) !important;
+  }
+  aside.open {
+    transform: translateX(0) !important;
+  }
+  nav a {
+    padding: 1rem 2rem !important;
+    font-size: 1.1rem;
+  }
+}
+
+/* 6. Tidy up close-buttons inside responses */
+.response .close-btn {
+  background: transparent;
+  color: var(--muted);
+  border: none;
+  font-size: 1.2rem;
+  width: auto;
+  height: auto;
+  line-height: 1;
+  padding: 0.2rem;
+  top: 0.75rem;
+  right: 0.75rem;
+  box-shadow: none;
+}
+.response .close-btn:hover {
+  color: var(--accent);
+}
 
 </style>
 
