@@ -328,6 +328,92 @@ button:hover {
     flex-direction: column;
   }
 }
+:root {
+  --sidebar-w: 280px;
+  --sidebar-collapsed-w: 80px;
+  /* light theme */
+  --bg: #f5f8fa;
+  --surface: #fff;
+  --text: #333;
+  --muted: #7a8a93;
+  /* dark theme overrides */
+  --bg-dark: #1e1e1e;
+  --surface-dark: #2a2a2a;
+  --text-dark: #ececec;
+  --muted-dark: #888;
+}
+
+/* 1. & 3. Shrink sidebar: only icons, clean collapse */
+aside {
+  width: var(--sidebar-w);
+  transition: width var(--transition);
+}
+aside.collapsed {
+  width: var(--sidebar-collapsed-w);
+}
+aside.collapsed .brand span,
+aside.collapsed nav a span {
+  display: none;
+}
+aside nav a {
+  text-decoration: none;              /* 4. no underlines */
+}
+
+/* 2. Header full-width; main under header beside sidebar */
+header {
+  position: fixed;
+  top: 0; right: 0;
+  left: var(--sidebar-w);
+  height: var(--header-h);
+  transition: left var(--transition);
+  z-index: 1000;
+}
+aside.collapsed ~ header {
+  left: var(--sidebar-collapsed-w);
+}
+main {
+  margin-top: var(--header-h);
+  margin-left: var(--sidebar-w);
+  transition: margin-left var(--transition);
+}
+aside.collapsed ~ main {
+  margin-left: var(--sidebar-collapsed-w);
+}
+
+/* 5. Dark mode via html.dark */
+html.dark {
+  --bg: var(--bg-dark);
+  --surface: var(--surface-dark);
+  --text: var(--text-dark);
+  --muted: var(--muted-dark);
+}
+body {
+  background: var(--bg);
+  color: var(--text);
+}
+/* override cards, inputs, etc */
+.module,
+.chart-card,
+aside,
+header {
+  background: var(--surface);
+  color: var(--text);
+}
+
+/* 6. Hamburger only on phones */
+.hamburger {
+  display: none;
+}
+@media (max-width: 1024px) {
+  .hamburger {
+    display: inline-block;
+  }
+}
+@media (min-width: 1025px) {
+  aside {
+    transform: translateX(0) !important;
+  }
+}
 
 </style>
 
