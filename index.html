@@ -148,6 +148,7 @@ html.dark aside {
 
   /*──────────────── HEADER ─────────────────*/
   header {
+    position: fixed;
    position: sticky;
    top: 0;
    left: 0;
@@ -481,6 +482,17 @@ header {
 .response .close-btn:hover {
   color: var(--accent);
 }
+@media (max-width: 960px) {
+  aside { transform: translateX(-100%); }
+  aside.open { transform: translateX(0); }
+}
+html.light .module input,
+html.light .module select,
+html.light .module textarea {
+  border: 2px solid #999 !important;
+  background: #fff !important;
+  color: #000 !important; /* ensure typed text is visible */
+}
 
 </style>
 
@@ -494,14 +506,14 @@ header {
       <i class="fas fa-leaf"></i><span>Vitra AI</span>
     </div>
     <nav role="navigation" aria-label="Main menu">
-      <a href="#" class="active"><i class="fas fa-seedling"></i>Herbal Medicine</a>
-      <a href="#"><i class="fas fa-brain"></i>Psychology &amp; Mental Health</a>
-      <a href="#"><i class="fas fa-utensils"></i>Dietetics</a>
-      <a href="#"><i class="fas fa-pills"></i>E-Pharmacy</a>
-      <a href="#"><i class="fas fa-calendar-check"></i>Consultation Booking</a>
+      <a href="#" class="active"><i class="fas fa-seedling"></i><span>Herbal Medicine</span></a>
+      <a href="#"><i class="fas fa-brain"></i><span>Psychology &amp; Mental Health</span></a>
+      <a href="#"><i class="fas fa-utensils"></i><span>Dietetics</span></a>
+      <a href="#"><i class="fas fa-pills"></i><span>E-Pharmacy</span></a>
+      <a href="#"><i class="fas fa-calendar-check"></i><span>ultation Booking</span></a>
       <hr/>
-      <a href="#"><i class="fas fa-user"></i>Profile</a>
-      <a href="#"><i class="fas fa-cog"></i>Settings</a>
+      <a href="#"><i class="fas fa-user"></i><span>Profile</span></a>
+      <a href="#"><i class="fas fa-cog"></i><span>Settings</span></a>
     </nav>
     <button id="shrinkBtn" class="shrink-btn" aria-label="Toggle sidebar">
   <i class="fas fa-angle-double-left"></i>
@@ -509,15 +521,17 @@ header {
 
   </aside>
 
-  <!-- MAIN CONTENT -->
-  <main role="main">
-    <header>
+   <header>
       <div>
         <i id="hamburger" class="fas fa-bars hamburger" aria-label="Toggle navigation"></i>
         <h1 style="display:inline; margin-left:0.5rem;">Herbal Medicine</h1>
       </div>
       <i id="themeToggle" class="fas fa-moon theme-toggle" aria-label="Toggle dark mode"></i>
     </header>
+  
+  <!-- MAIN CONTENT -->
+  <main role="main">
+   
 
     <!-- Example Module: Diagnostics -->
     <section class="module" id="module-dx">
@@ -725,6 +739,7 @@ header {
   function toggleSidebar() {
     sidebar.classList.toggle('closed');
   }
+hamburger.onclick = () => sidebar.classList.toggle('open');
 
 // inside DOMContentLoaded:
 const shrinkBtn = document.getElementById('shrinkBtn');
