@@ -15,8 +15,9 @@
         href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"/>
   <!-- Chart.js -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  <style>
-/*──────────────── RESET & THEME ─────────────────*/
+
+<style>
+/*────────────────── RESET & THEME ──────────────────*/
 * {
   margin: 0;
   padding: 0;
@@ -36,8 +37,9 @@
   --radius:      12px;
   --trans:       0.25s;
   --sidebar-w:   260px;
+  --header-h:    60px;
 }
-/* Default to light mode */
+/* light ↔ dark switch */
 html.light, html:not(.dark) {
   --bg:    var(--bg-light);
   --fg:    var(--fg-light);
@@ -56,44 +58,38 @@ body {
   min-height: 100vh;
   background: var(--bg);
   color: var(--fg);
-  transition: background var(--trans), color var(--trans);
   overflow-x: hidden;
+  transition: background var(--trans), color var(--trans);
 }
-a {
-  color: inherit;
-  text-decoration: none;
-}
+a { text-decoration: none; color: inherit; }
 
-/*──────────────── SIDEBAR & NAV ─────────────────*/
+/*───────────────── SIDEBAR ─────────────────*/
 aside {
   position: sticky;
   top: 0;
+  left: 0;
   width: var(--sidebar-w);
   height: 100vh;
   background: var(--card);
   box-shadow: 2px 0 12px rgba(0,0,0,0.1);
-  transition: width var(--trans), background var(--trans);
+  transition: width var(--trans);
   z-index: 1000;
 }
-aside.collapsed {
-  width: 80px;
-}
+aside.collapsed { width: 80px; }
 aside.collapsed .brand span,
-aside.collapsed nav a span {
-  display: none;
-}
-aside.collapsed nav a {
-  justify-content: center;
-}
+aside.collapsed nav a span { display: none; }
+aside.collapsed nav a { justify-content: center; }
+
 .brand {
   display: flex;
   align-items: center;
-  gap: 0.75rem;
   padding: 1.5rem 1rem;
+  gap: 0.75rem;
   font-size: 1.35rem;
   font-weight: 700;
   color: var(--accent);
 }
+
 nav[role="navigation"] {
   margin-top: 1rem;
 }
@@ -107,12 +103,14 @@ nav a {
   font-size: 0.95rem;
   transition: background var(--trans), padding-left var(--trans);
 }
-nav a:hover,
-nav a.active {
-  background: var(--accent)20;
-}
 nav a:hover {
+  background: var(--accent)20;
   padding-left: 1.5rem;
+}
+/* full-row highlight for the active item */
+nav a.active {
+  background: var(--accent)10;
+  color: var(--accent);
 }
 nav a i {
   width: 1rem;
@@ -121,93 +119,67 @@ nav a i {
   color: var(--accent);
 }
 
-/*──────────────── SHRINK-SIDEBAR BUTTON ─────────────────*/
+/*───────────────── SHRINK BTN ─────────────────*/
 .shrink-btn {
   position: absolute;
   bottom: 1rem;
   right: -12px;
-  background: var(--accent);
-  color: var(--card);
   width: 36px;
   height: 36px;
+  background: var(--accent);
+  color: var(--card);
   border: none;
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
   box-shadow: 0 3px 8px rgba(0,0,0,0.2);
-  transition: transform var(--trans);
   cursor: pointer;
+  transition: transform var(--trans);
   z-index: 1001;
 }
-.shrink-btn:hover {
-  transform: scale(1.1);
-}
-.shrink-btn i {
-  transition: transform var(--trans);
-}
-nav a.active {
-  background: var(--accent)10;  /* light tint behind the whole link */
-  color: var(--accent);         /* icon & text */
-}
+.shrink-btn:hover { transform: scale(1.1); }
+.shrink-btn i { transition: transform var(--trans); }
 
-
-/* 1) Make header sticky across the whole top */
-header {
-  position: sticky;
-  top: 0;
-  left: var(--sidebar-w);
-  width: calc(100% - var(--sidebar-w));
-  z-index: 1100;
-}
-
-
-main[role="main"] {
-  margin-top: 0;        /* no push down */
-  padding-top: 1rem;    /* a little breathing room under the header */
-  margin-left: var(--sidebar-w);
-}
-
-/*──────────────── HEADER ─────────────────*/
+/*───────────────── HEADER ─────────────────*/
 header {
   position: sticky;
   top: 0;
   left: var(--sidebar-w);
   right: 0;
-  height: 60px;
-  padding: 0 1.5rem;
+  height: var(--header-h);
   background: var(--card);
   border-bottom: 1px solid var(--muted);
   display: flex;
   align-items: center;
   justify-content: space-between;
-  z-index: 1100;
+  padding: 0 1.5rem;
+  z-index: 1001;
   transition: background var(--trans), border-color var(--trans);
 }
 header h1 {
   font-size: 1.5rem;
   font-weight: 700;
 }
-.hamburger,
-.theme-toggle {
+.hamburger, .theme-toggle {
   font-size: 1.4rem;
   cursor: pointer;
-  padding: 0.3rem;
   color: var(--accent);
 }
 .hamburger { display: none; }
 
- /*──────────────── MAIN CONTENT ─────────────────*/
-  main[role="main"] {
-    flex: 1;
-    margin-left: var(--sidebar-w);
-    /* pad the top by the header height + a little */
-    padding: calc(60px + 1rem) 2rem 2rem;
-    display: flex;
-    flex-direction: column;
-    gap: 1.5rem;
-  }
-/*──────────────── MODULES ─────────────────*/
+/*───────────────── MAIN ─────────────────*/
+main[role="main"] {
+  flex: 1;
+  margin-left: var(--sidebar-w);
+  /* header height + 1rem breathing room */
+  padding: calc(var(--header-h) + 1rem) 2rem 2rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+/*───────────────── MODULES ─────────────────*/
 .module {
   background: var(--card);
   border-radius: var(--radius);
@@ -215,9 +187,7 @@ header h1 {
   box-shadow: 0 2px 8px rgba(0,0,0,0.05);
   transition: transform var(--trans);
 }
-.module:hover {
-  transform: translateY(-2px);
-}
+.module:hover { transform: translateY(-2px); }
 .module h2 {
   display: flex;
   align-items: center;
@@ -238,7 +208,7 @@ header h1 {
   align-items: flex-end;
 }
 
-/*──────────────── INPUTS ─────────────────*/
+/*───────────────── INPUTS & SELECTS ─────────────────*/
 .module input,
 .module select,
 .module textarea {
@@ -258,23 +228,22 @@ header h1 {
   border-color: var(--accent);
   box-shadow: 0 0 5px var(--accent);
 }
-/* always-visible border in light mode */
+/* always-visible borders in light mode */
 html.light .module input,
 html.light .module select,
 html.light .module textarea {
   border-color: #bbb;
 }
 
-/*──────────────── HINT TEXT ─────────────────*/
+/*───────────────── HINT TEXT ─────────────────*/
 .module .hint {
-  display: block;
   width: 100%;
   margin-top: 0.5rem;
   color: var(--muted);
   font-size: 0.85rem;
 }
 
-/*──────────────── BUTTONS ─────────────────*/
+/*───────────────── BUTTONS ─────────────────*/
 button {
   background: var(--accent);
   color: var(--card);
@@ -292,14 +261,14 @@ button:hover {
   box-shadow: 0 6px 14px rgba(0,0,0,0.15);
 }
 
-/*──────────────── RESPONSE PANELS ─────────────────*/
+/*───────────────── RESPONSE PANEL ─────────────────*/
 .response {
-  position: relative;
   background: var(--accent)15;
   border-left: 5px solid var(--accent);
   padding: 1.25rem;
   margin-top: 1rem;
   border-radius: var(--radius);
+  position: relative;
 }
 .response .close-btn {
   position: absolute;
@@ -309,7 +278,6 @@ button:hover {
   color: var(--muted);
   border: none;
   font-size: 1.2rem;
-  padding: 0.2rem;
   cursor: pointer;
   transition: color var(--trans);
 }
@@ -317,22 +285,21 @@ button:hover {
   color: var(--accent);
 }
 
-/*──────────────── CHAT & CHARTS ─────────────────*/
+/*───────────────── CHAT & CHARTS ─────────────────*/
 #chatBox {
   min-height: 180px;
   max-height: 240px;
-  overflow-y: auto;
   padding: 0.75rem;
   background: var(--bg);
   border: 1px solid var(--muted);
   border-radius: var(--radius);
+  overflow-y: auto;
   margin-bottom: 0.5rem;
 }
 .charts {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 1.5rem;
-  margin-top: 1rem;
 }
 .chart-card {
   background: var(--card);
@@ -340,29 +307,24 @@ button:hover {
   border-radius: var(--radius);
   box-shadow: 0 2px 8px rgba(0,0,0,0.05);
 }
-canvas {
-  max-height: 220px !important;
-}
+canvas { max-height: 220px !important; }
 
-/*──────────────── RESPONSIVE & MOBILE ─────────────────*/
+/*───────────────── RESPONSIVE ─────────────────*/
 @media (max-width: 960px) {
-  aside { transform: translateX(-100%); position: fixed; }
-  aside.open { transform: translateX(0); }
-  .hamburger { display: block; }
-  header { left: 0; width: 100%; }
-  main {
-    margin-left: 0;
-    padding: 1.5rem;
-  }
-  .shrink-btn { display: none; }
+  aside            { transform: translateX(-100%); position: fixed; }
+  aside.open       { transform: translateX(0); }
+  .hamburger       { display: block; }
+  header           { left: 0; width: 100%; }
+  main[role="main"]{ margin-left: 0; padding: calc(var(--header-h) + 1rem) 1.5rem 1.5rem; }
+  .shrink-btn      { display: none; }
 }
 @media (max-width: 768px) {
-  aside { width: 100%; }
-  nav a { padding: 1rem 2rem; font-size: 1.1rem; }
+  aside            { width: 100%; }
+  nav a            { padding: 1rem 2rem; font-size: 1.1rem; }
 }
-
-
 </style>
+
+  
 </head>
 
 <body>
