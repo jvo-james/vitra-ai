@@ -1,212 +1,154 @@
 <!DOCTYPE html>
-<html lang="en" class="light">
+<html lang="en">
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
   <title>Vitra AI – Herbal Medicine Hub</title>
-
-  <!-- Montserrat -->
+  <!-- Montserrat + FontAwesome -->
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;600;700&display=swap" rel="stylesheet"/>
-
-  <!-- Font Awesome -->
-  <script defer src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
- <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"/>
+  <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;600;700&display=swap" rel="stylesheet"/>
+  <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;600;700&display=swap" rel="stylesheet"/>
+  <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
+  <link rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"/>
   <!-- Chart.js -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+ <style>
+  /*──────────────── RESET & THEME ─────────────────*/
+  * { margin:0; padding:0; box-sizing:border-box; font-family:'Montserrat',sans-serif; }
+  :root {
+    --accent:      #4A90E2;
+    --bg-light:    #F0F4F8; --fg-light:    #1A1A1A; --card-light:  #FFFFFF; --muted-light:  #6C7A89;
+    --bg-dark:     #1E1E1E; --fg-dark:     #ECECEC; --card-dark:   #2A2A2A; --muted-dark:   #888888;
+    --radius:      12px; --trans: .25s; --sidebar-w: 260px;
+  }
+  html.light { --bg:var(--bg-light); --fg:var(--fg-light); --card:var(--card-light); --muted:var(--muted-light); }
+  html.dark  { --bg:var(--bg-dark);  --fg:var(--fg-dark);  --card:var(--card-dark);  --muted:var(--muted-dark); }
 
-  <style>
-    /*──────────────── RESET ─────────────────*/
-    *, *::before, *::after {
-      margin: 0; padding: 0; box-sizing: border-box;
-      font-family: 'Montserrat', sans-serif;
-    }
-    html { font-size: 16px; }
-    body {
-      display: flex; min-height: 100vh;
-      background: #F0F4F8; color: #1A1A1A;
-      transition: background .25s, color .25s;
-      overflow-x: hidden;
-    }
+  body {
+    display:flex; min-height:100vh; background:var(--bg); color:var(--fg);
+    transition: background var(--trans), color var(--trans);
+    overflow-x:hidden;
+  }
+  a { color:inherit; text-decoration:none; }
 
-    /*──────────────── VARIABLES ─────────────────*/
-    :root {
-      --accent:       #4A90E2;
-      --accent-dark:  #357ABD;
-      --bg:           #F0F4F8;
-      --fg:           #1A1A1A;
-      --card:         #FFFFFF;
-      --muted:        #6C7A89;
-      --radius:       8px;
-      --trans:        .2s;
-      --sidebar-w:    240px;
-      --sidebar-collapsed: 64px;
-      --header-h:     56px;
-    }
+  /*──────────────── SIDEBAR & NAV ─────────────────*/
+  aside {
+    width:var(--sidebar-w); background:var(--card); box-shadow:2px 0 12px rgba(0,0,0,0.1);
+    transition: transform var(--trans); z-index:1000;
+  }
+  aside.closed { transform: translateX(-100%); }
+  .brand {
+    display:flex; align-items:center; gap:0.75rem; padding:1.5rem 1rem;
+    font-size:1.35rem; font-weight:700; color:var(--accent);
+  }
+  nav[role="navigation"] { margin-top:1rem; }
+  nav a {
+    display:flex; align-items:center; gap:0.75rem; padding:0.8rem 1.25rem;
+    border-radius:var(--radius); font-weight:500; font-size:0.95rem;
+    transition: background var(--trans);
+  }
+  nav a:hover, nav a.active { background: var(--accent)20; }
+  nav a i { width:1rem; text-align:center; font-size:1.1rem; color:var(--accent); }
 
-    /* dark mode toggle (if you add .dark to <html>) */
-    html.dark {
-      --bg:   #1E1E1E; --fg: #ECECEC;
-      --card: #2A2A2A; --muted: #888888;
-    }
+  /*──────────────── HEADER ─────────────────*/
+  header {
+    position:sticky; top:0; width:100%; background:var(--card);
+    padding:1rem 2rem; display:flex; justify-content:space-between; align-items:center;
+    box-shadow:0 2px 8px rgba(0,0,0,0.1); z-index:500;
+  }
+  .hamburger, .theme-toggle {
+    font-size:1.4rem; cursor:pointer; padding:0.3rem; color:var(--accent);
+  }
+  .hamburger { display:none; }
 
-    /*──────────────── SIDEBAR ─────────────────*/
-    aside {
-      width: var(--sidebar-w);
-      background: var(--card);
-      box-shadow: 2px 0 12px rgba(0,0,0,0.1);
-      position: sticky; top: 0; height: 100vh;
-      transition: width var(--trans);
-      overflow: hidden;
-    }
-    body.sidebar-shrunk aside {
-      width: var(--sidebar-collapsed);
-    }
-    .brand {
-      display: flex; align-items: center; gap: .5rem;
-      padding: 1rem; font-weight: 700; font-size: 1.25rem;
-      color: var(--accent);
-    }
-    body.sidebar-shrunk .brand span { display: none; }
-    nav {
-      display: flex; flex-direction: column; padding: .5rem 0;
-    }
-    nav a {
-      display: flex; align-items: center; gap: .75rem;
-      padding: .6rem 1rem; font-weight: 500; font-size: .95rem;
-      color: var(--fg); transition: background var(--trans);
-    }
-    nav a i { width: 1.1rem; text-align: center; }
-    nav a:hover, nav a.active {
-      background: rgba(74,144,226,.1); color: var(--accent);
-    }
-    body.sidebar-shrunk nav a span { display: none; justify-content: center; }
+  /*──────────────── MAIN CONTENT ─────────────────*/
+  main[role="main"] {
+    flex:1; overflow-y:auto; padding:2rem; display:flex; flex-direction:column; gap:1.5rem;
+  }
+  .module {
+    background:var(--card); border-radius:var(--radius);
+    padding:1.75rem; box-shadow:0 2px 8px rgba(0,0,0,0.05);
+    transition: transform var(--trans);
+  }
+  .module:hover { transform: translateY(-2px); }
+  .module h2 {
+    display:flex; align-items:center; gap:0.75rem; margin-bottom:1rem;
+    font-size:1.3rem; font-weight:600;
+  }
+  .module p.desc { color:var(--muted); margin-bottom:1rem; font-size:0.95rem; }
+  .module form { display:flex; flex-wrap:wrap; gap:1rem; align-items:flex-end; }
+  .module input, .module select, .module textarea {
+    flex:1 1 220px; padding:0.75rem; border:1px solid var(--muted);
+    border-radius:var(--radius); transition: border-color var(--trans);
+    background:var(--bg); color:var(--fg); font-size:0.95rem;
+  }
+  .module input:focus, .module select:focus, .module textarea:focus {
+    outline:none; border-color:var(--accent);
+  }
+  .module button {
+    background:var(--accent); color:var(--card); border:none;
+    padding:0.7rem 1.4rem; border-radius:var(--radius);
+    cursor:pointer; font-size:0.95rem;
+    transition: background var(--trans), transform var(--trans);
+  }
+  .module button:hover {
+    background:var(--accent)CC; transform: translateY(-1px);
+  }
+  .hint { font-size:0.85rem; color:var(--muted); margin-top:0.25rem; }
 
-    /* shrink button */
-    .shrink-btn {
-      position: absolute; top: 1rem; right: -1.2rem;
-      background: var(--card); border: none; border-radius: 50%;
-      width: 32px; height: 32px; display: flex;
-      align-items: center; justify-content: center;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.2);
-      cursor: pointer; transition: transform var(--trans);
-      z-index: 1001;
-    }
+  /*──────────────── RESPONSE PANEL ─────────────────*/
+  .response {
+    position:relative; background:var(--accent)15;
+    border-left:5px solid var(--accent); padding:1.25rem;
+    margin-top:1rem; border-radius:var(--radius);
+  }
+  .response .close-btn {
+    position:absolute; top:0.5rem; right:0.75rem;
+    background:var(--accent); color:var(--card);
+    border:none; border-radius:50%; width:24px; height:24px;
+    font-size:1.1rem; line-height:1; cursor:pointer;
+    box-shadow:0 2px 6px rgba(0,0,0,0.2);
+  }
 
-    /*──────────────── HEADER ─────────────────*/
-    header {
-      position: sticky; top: 0; left: 0; right: 0;
-      height: var(--header-h); background: var(--card);
-      display: flex; align-items: center; justify-content: space-between;
-      padding: 0 1.5rem; box-shadow: 0 2px 6px rgba(0,0,0,0.1);
-      z-index: 1000; transition: background var(--trans);
-    }
-    .hamburger, .theme-toggle {
-      font-size: 1.2rem; color: var(--accent);
-      background: none; border: none; cursor: pointer;
-    }
+  /*──────────────── LOADING SPINNER ─────────────────*/
+  .spinner {
+    width:20px; height:20px; border:3px solid var(--muted);
+    border-top:3px solid var(--accent); border-radius:50%;
+    animation:spin 1s linear infinite; display:inline-block;
+    vertical-align:middle; margin-left:0.5rem;
+  }
+  @keyframes spin { to { transform:rotate(360deg); } }
 
-    /*──────────────── MAIN / GRID ─────────────────*/
-    main[role="main"] {
-      flex: 1; padding: 1.5rem; overflow-y: auto;
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-      gap: 1rem;
-      margin-top: calc(var(--header-h) - 1rem);
-    }
+  /*──────────────── CHAT & CHARTS ─────────────────*/
+  #chatBox {
+    min-height:180px; max-height:240px; overflow-y:auto; padding:0.75rem;
+    background:var(--bg); border:1px solid var(--muted);
+    border-radius:var(--radius); margin-bottom:0.5rem;
+  }
+  .charts { display:grid; grid-template-columns:1fr 1fr; gap:1.5rem; margin-top:1rem;}
+  .chart-card {
+    padding:1rem; border-radius:var(--radius); background:var(--card);
+    box-shadow:0 2px 8px rgba(0,0,0,0.05);
+  }
+  canvas { max-height:220px !important; }
 
-    /*──────────────── MODULES ─────────────────*/
-    .module {
-      background: var(--card); border-radius: var(--radius);
-      padding: 1rem; box-shadow: 0 2px 6px rgba(0,0,0,0.05);
-      max-height: 400px; overflow-y: auto; transition: transform var(--trans);
-    }
-    .module:hover {
-      transform: translateY(-2px);
-    }
-    .module h2 {
-      display: flex; align-items: center; gap: .5rem;
-      font-size: 1.2rem; margin-bottom: .75rem;
-    }
-    .module p.desc {
-      color: var(--muted); font-size: .9rem; margin-bottom: .75rem;
-    }
+  /*──────────────── RESPONSIVE ─────────────────*/
+  @media (max-width: 960px) {
+    aside { position:fixed; top:0; left:0; bottom:0; transform: translateX(-100%); }
+    .hamburger { display:block; }
+    header { padding:1rem; }
+    main { padding:1.5rem; }
+  }
+</style>
 
-    /*──────────────── FORMS ─────────────────*/
-    .module form {
-      display: flex; flex-wrap: wrap; gap: .75rem; align-items: flex-end;
-    }
-    .module input,
-    .module select,
-    .module textarea {
-      flex: 1 1 180px; padding: .6rem;
-      border: 1px solid var(--muted); border-radius: var(--radius);
-      background: var(--bg); color: var(--fg); font-size: .9rem;
-      transition: border-color var(--trans);
-    }
-    .module input:focus,
-    .module select:focus,
-    .module textarea:focus {
-      outline: none; border-color: var(--accent);
-    }
-
-    /*──────────────── BUTTONS ─────────────────*/
-    .module button {
-      display: inline-flex; align-items: center; gap: .4rem;
-      padding: .5rem 1rem; font-size: .9rem; font-weight: 600;
-      background: var(--accent); color: var(--card); border: none;
-      border-radius: 999px; cursor: pointer;
-      transition: background var(--trans), transform var(--trans);
-    }
-    .module button:hover {
-      background: var(--accent-dark); transform: translateY(-1px);
-    }
-
-    /*──────────────── RESPONSE ─────────────────*/
-    .response {
-      position: relative; background: rgba(74,144,226, .1);
-      border-left: 4px solid var(--accent);
-      padding: 1rem; margin-top: 1rem; border-radius: var(--radius);
-    }
-    .response .close-btn {
-      position: absolute; top: .5rem; right: .5rem;
-      width: 24px; height: 24px; background: var(--accent);
-      color: var(--card); border: none; border-radius: 50%;
-      font-size: 1rem; cursor: pointer;
-    }
-
-    /*──────────────── CHAT & CHARTS ─────────────────*/
-    #chatBox {
-      min-height: 140px; max-height: 200px; overflow-y: auto;
-      padding: .6rem; border: 1px solid var(--muted);
-      border-radius: var(--radius); background: var(--bg);
-    }
-    .charts {
-      grid-column: 1 / -1;
-      display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;
-    }
-    .chart-card {
-      background: var(--card); padding: .8rem;
-      border-radius: var(--radius); box-shadow: 0 2px 6px rgba(0,0,0,0.05);
-    }
-    canvas { max-height: 180px !important; }
-
-    /*──────────────── RESPONSIVE ─────────────────*/
-    @media (max-width: 768px) {
-      main { display: block; }
-      .charts { display: block; }
-    }
-  </style>
 </head>
-
 
 <body>
   <!-- SIDEBAR / NAVIGATION -->
   <aside id="sidebar">
-    <!-- + In sidebar, at top: -->
-<button id="shrinkBtn" class="shrink-btn" aria-label="Toggle sidebar width">
-  <i class="fas fa-angle-double-left"></i>
-</button>
-
     <div class="brand" aria-label="Vitra AI Home">
       <i class="fas fa-leaf"></i><span>Vitra AI</span>
     </div>
@@ -239,7 +181,7 @@
       <form id="dx-form">
         <textarea id="dxInput" rows="2" placeholder="e.g. Persistent headaches & fatigue…" required></textarea>
         <button type="submit">Analyze</button>
-        <div class="hint">Be specific: mention duration & intensity.</div>
+        <br><div class="hint">Be specific: mention duration & intensity.</div>
       </form>
       <div id="dxResult" class="response" hidden>
         <button class="close-btn" aria-label="Close result">×</button>
@@ -266,7 +208,7 @@
         <input id="pfAge" type="number" min="1" max="120" placeholder="Age (years)"/>
         <input id="pfWeight" type="number" min="10" max="300" placeholder="Weight (kg)"/>
         <button type="submit">Generate</button>
-        <div class="hint">Hold Ctrl/Cmd to select multiple herbs.</div>
+       <br> <div class="hint">Hold Ctrl/Cmd to select multiple herbs.</div>
       </form>
       <div id="pfResult" class="response" hidden>
         <button class="close-btn" aria-label="Close result">×</button>
@@ -281,7 +223,7 @@
       <form id="ing-form">
         <input id="ingUpload" type="file" accept="image/*"/>
         <button type="submit">Identify</button>
-        <div class="hint">Use a clear, close-up photo of a leaf or flower.</div>
+       <br> <div class="hint">Use a clear, close-up photo of a leaf or flower.</div>
       </form>
       <div id="ingResult" class="response" hidden>
         <button class="close-btn" aria-label="Close result">×</button>
@@ -296,7 +238,7 @@
       <form id="pred-form">
         <input id="predInput" placeholder="e.g. Turmeric for arthritis"/>
         <button type="submit">Predict</button>
-        <div class="hint">Format: “Herb for condition”.</div>
+        <br><div class="hint">Format: “Herb for condition”.</div>
       </form>
       <div id="predResult" class="response" hidden>
         <button class="close-btn" aria-label="Close result">×</button>
@@ -323,7 +265,7 @@
       <form id="research-form">
         <input id="researchQuery" placeholder="e.g. ‘Ashwagandha anxiety RCT’"/>
         <button type="submit">Summarize</button>
-      <div class="hint">Be specific: include herb and focus (e.g. stress, sleep)</div>
+        <br><div class="hint">Be specific: include herb and focus (e.g. stress, sleep)</div>
       </form>
       <div id="researchResults" class="response" hidden>
         <button class="close-btn" aria-label="Close result">×</button>
@@ -346,7 +288,7 @@
         </select>
         <input id="forecastPeriod" type="number" min="1" max="52" value="4" placeholder="Weeks ahead"/>
         <button type="submit">Forecast</button>
-       <div class="hint">Choose 1–52 weeks into the future.</div>
+      <br>  <div class="hint">Choose 1–52 weeks into the future.</div>
       </form>
       <div id="inventoryResult" class="response" hidden>
         <button class="close-btn" aria-label="Close result">×</button>
@@ -361,7 +303,7 @@
       <form id="genetics-form">
         <input id="geneticUpload" type="file" accept=".csv,.json"/>
         <button type="submit">Analyze</button>
-        <div class="hint">CSV or JSON with SNPs is ideal.</div>
+       <br> <div class="hint">CSV or JSON with SNPs is ideal.</div>
       </form>
       <div id="geneticResult" class="response" hidden>
         <button class="close-btn" aria-label="Close result">×</button>
@@ -377,7 +319,7 @@
         <input id="weight" type="number" min="10" max="300" placeholder="Weight (kg)"/>
         <input id="symptom" placeholder="Symptom (e.g. headache)"/>
         <button type="submit">Calculate</button>
-       <div class="hint">Weight 10–300 kg. Describe symptom briefly.</div>
+       <br> <div class="hint">Weight 10–300 kg. Describe symptom briefly.</div>
       </form>
       <div id="dosageResult" class="response" hidden>
         <button class="close-btn" aria-label="Close result">×</button>
@@ -407,7 +349,7 @@
           <option>Skullcap</option><option>Yarrow</option><option>Gotu Kola</option><option>Licorice</option>
         </select>
         <button type="submit">Check</button>
-     <div class="hint">Pick two distinct herbs.</div>
+       <br> <div class="hint">Pick two distinct herbs.</div>
       </form>
       <div id="interactionResult" class="response" hidden>
         <button class="close-btn" aria-label="Close result">×</button>
@@ -438,29 +380,12 @@
   function toggleSidebar() {
     sidebar.classList.toggle('closed');
   }
-hamburger.addEventListener('click', () => {
-  sidebar.classList.toggle('closed');
-});
+
   function toggleTheme() {
     document.documentElement.classList.toggle('dark');
     document.documentElement.classList.toggle('light');
     themeBtn.classList.toggle('fa-sun');
   }
-   // + Shrink/expand logic
-const shrinkBtn = document.getElementById('shrinkBtn');
-shrinkBtn.addEventListener('click', () => {
-  document.body.classList.toggle('sidebar-shrunk');
-  shrinkBtn.querySelector('i').classList.toggle('fa-angle-double-left');
-  shrinkBtn.querySelector('i').classList.toggle('fa-angle-double-right');
-});
-
-// Only once, in initialization
-themeBtn.addEventListener('click', () => {
-  document.documentElement.classList.toggle('dark');
-  document.documentElement.classList.toggle('light');
-  themeBtn.classList.toggle('fa-moon');
-  themeBtn.classList.toggle('fa-sun');
-});
 
   // Attach “close” handlers to any response panels
   function attachCloseButtons() {
