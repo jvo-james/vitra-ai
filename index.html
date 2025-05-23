@@ -49,6 +49,7 @@
     --card:  var(--card-dark);
     --muted: var(--muted-dark);
   }
+
   body {
     display: flex;
     min-height: 100vh;
@@ -64,11 +65,13 @@
 
   /*──────────────── SIDEBAR & NAV ─────────────────*/
   aside {
+    position: sticky;
+    top: 0;
+    height: 100vh;
     width: var(--sidebar-w);
     background: linear-gradient(180deg, #ffffff 0%, #f0f4f8 100%);
     box-shadow: 2px 0 12px rgba(0,0,0,0.1);
     transition: width var(--trans), transform var(--trans), background var(--trans);
-    position: relative;
     z-index: 1000;
   }
   aside.closed {
@@ -121,7 +124,7 @@
     color: var(--accent);
   }
 
-  /*──────────────── SHRINK SIDEBAR BUTTON ─────────────────*/
+  /*──────────────── SHRINK-SIDEBAR BUTTON ─────────────────*/
   .shrink-btn {
     position: absolute;
     bottom: 1rem;
@@ -143,7 +146,8 @@
   header {
     position: sticky;
     top: 0;
-    width: 100%;
+    width: calc(100% - var(--sidebar-w));
+    margin-left: var(--sidebar-w);
     padding: 1rem 2rem;
     background: linear-gradient(135deg, #4A90E2, #50E3C2);
     color: #fff;
@@ -190,6 +194,7 @@
     flex: 1;
     overflow-y: auto;
     padding: 2rem;
+    margin-left: var(--sidebar-w);
     display: flex;
     flex-direction: column;
     gap: 1.5rem;
@@ -341,11 +346,9 @@
   /*──────────────── RESPONSIVE & MOBILE SIDEBAR ─────────────────*/
   @media (max-width: 960px) {
     aside {
-      position: fixed;
-      top: 0;
-      left: 0;
-      height: 100%;
       transform: translateX(-100%);
+      position: fixed;
+      left: 0;
     }
     aside:not(.closed) {
       transform: translateX(0);
@@ -356,9 +359,12 @@
       z-index: 1002;
     }
     header {
+      width: 100%;
+      margin-left: 0;
       padding: 1rem;
     }
     main {
+      margin-left: 0;
       padding: 1.5rem;
     }
     .shrink-btn {
