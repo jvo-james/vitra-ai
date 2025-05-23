@@ -146,11 +146,26 @@ nav a i {
 .shrink-btn i {
   transition: transform var(--trans);
 }
-nav a.active,
-nav a.active i,
-nav a.active span {
-  color: var(--accent);
-  background: var(--accent)10;   /* or whatever subtle tint you like */
+nav a.active {
+  background: var(--accent)10;  /* light tint behind the whole link */
+  color: var(--accent);         /* icon & text */
+}
+
+
+/* 1) Make header sticky across the whole top */
+header {
+  position: sticky;
+  top: 0;
+  left: var(--sidebar-w);
+  width: calc(100% - var(--sidebar-w));
+  z-index: 1100;
+}
+
+
+main[role="main"] {
+  margin-top: 0;        /* no push down */
+  padding-top: 1rem;    /* a little breathing room under the header */
+  margin-left: var(--sidebar-w);
 }
 
 /*──────────────── HEADER ─────────────────*/
@@ -383,7 +398,7 @@ canvas {
     </header>
   
   <!-- MAIN CONTENT -->
-  <main role="main" style="margin-top:60px;">
+  <main role="main">
    
 
     <!-- Example Module: Diagnostics -->
