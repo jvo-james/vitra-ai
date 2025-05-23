@@ -285,20 +285,7 @@ button:hover {
   position: relative;
   margin-top: 1rem;
 }
-.response .close-btn {
-  position: absolute;
-  top: 0.5rem;
-  right: 0.5rem;
-  background: transparent;
-  border: none;
-  font-size: 1.2rem;
-  color: var(--muted);
-  cursor: pointer;
-  transition: color var(--transition);
-}
-.response .close-btn:hover {
-  color: var(--primary);
-}
+
 
 /*────────────────── CHATBOX ──────────────────*/
 #chatBox {
@@ -354,6 +341,105 @@ button:hover {
 @media (max-width: 640px) {
   .module form {
     flex-direction: column;
+  }
+}
+/*──────────────────────────────────────────────────*/
+/* 1. Shrink-button: always sits just outside sidebar */
+/*──────────────────────────────────────────────────*/
+#shrinkBtn {
+  /* move it to the left side of the sidebar */
+  right: auto;
+  left: -18px;
+  z-index: 1001;                /* above everything */
+}
+
+/*──────────────────────────────────────────────────*/
+/* 2. Pie-chart: constrain height & center */
+/*──────────────────────────────────────────────────*/
+.chart-card canvas {
+  max-height: 200px;            /* pull it in */
+  margin: 0 auto !important;    /* center horizontally */
+  display: block;
+}
+
+/*──────────────────────────────────────────────────*/
+/* 3. Loading spinner: animated circle */
+/*──────────────────────────────────────────────────*/
+.spinner {
+  display: inline-block;
+  width: 1em;
+  height: 1em;
+  border: 2px solid var(--primary);
+  border-top-color: transparent;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+  vertical-align: middle;
+  margin-left: 0.25em;
+}
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/*──────────────────────────────────────────────────*/
+/* 4. Response-close button: bold circular pill */
+/*──────────────────────────────────────────────────*/
+.response .close-btn {
+  width: 24px;
+  height: 24px;
+  background: var(--primary);
+  color: #fff;
+  font-size: 0.9rem;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+  position: absolute;
+  top: 0.5rem;
+  right: 0.5rem;
+  transition: background var(--transition), transform var(--transition);
+}
+.response .close-btn:hover {
+  background: darken(var(--primary),10%);
+  transform: scale(1.1);
+}
+
+/*──────────────────────────────────────────────────*/
+/* 5. & 6. Mobile sidebar & responsive tweaks */
+/*──────────────────────────────────────────────────*/
+@media (max-width: 1024px) {
+  aside {
+    position: fixed;
+    top: 0; left: 0;
+    height: 100vh;
+    transform: translateX(-100%);
+    width: var(--sidebar-w);
+    transition: transform var(--transition);
+    z-index: 1000;
+  }
+  aside.open {
+    transform: translateX(0);
+  }
+  /* hamburger shows automatically, header spans full */
+  header {
+    left: 0 !important;
+  }
+  main {
+    padding: calc(var(--header-h) + var(--padding)) var(--padding);
+  }
+}
+@media (max-width: 640px) {
+  /* stack modules full width to avoid squishing */
+  .module {
+    padding: 0.75rem;
+  }
+  .module form {
+    flex-direction: column;
+  }
+  /* slightly larger touch areas */
+  header .hamburger,
+  header .theme-toggle {
+    font-size: 1.6rem;
   }
 }
 
