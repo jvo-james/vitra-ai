@@ -4,254 +4,200 @@
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
   <title>Vitra AI – Herbal Medicine Hub</title>
-  <!-- Montserrat + FontAwesome -->
+
+  <!-- Montserrat -->
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;600;700&display=swap" rel="stylesheet"/>
-  <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
-  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;600;700&display=swap" rel="stylesheet"/>
-  <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
-  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;600;700&display=swap" rel="stylesheet"/>
-  <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
-  <link rel="stylesheet"
-        href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"/>
+
+  <!-- Font Awesome -->
+  <script defer src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
+ <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"/>
   <!-- Chart.js -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<style>
-  /*──────────────────── RESET ────────────────────*/
-  *, *::before, *::after {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-    font-family: 'Montserrat', sans-serif;
-  }
 
-  html {
-    font-size: 16px;
-  }
+  <style>
+    /*──────────────── RESET ─────────────────*/
+    *, *::before, *::after {
+      margin: 0; padding: 0; box-sizing: border-box;
+      font-family: 'Montserrat', sans-serif;
+    }
+    html { font-size: 16px; }
+    body {
+      display: flex; min-height: 100vh;
+      background: #F0F4F8; color: #1A1A1A;
+      transition: background .25s, color .25s;
+      overflow-x: hidden;
+    }
 
-  /*────────────────── THEME VARIABLES ──────────────────*/
-  :root {
-    --accent:        #4A90E2;
-    --accent-dark:   #357ABD;
-    --bg-light:      #F0F4F8;
-    --fg-light:      #1A1A1A;
-    --card-light:    #FFFFFF;
-    --muted-light:   #6C7A89;
+    /*──────────────── VARIABLES ─────────────────*/
+    :root {
+      --accent:       #4A90E2;
+      --accent-dark:  #357ABD;
+      --bg:           #F0F4F8;
+      --fg:           #1A1A1A;
+      --card:         #FFFFFF;
+      --muted:        #6C7A89;
+      --radius:       8px;
+      --trans:        .2s;
+      --sidebar-w:    240px;
+      --sidebar-collapsed: 64px;
+      --header-h:     56px;
+    }
 
-    --bg-dark:       #1E1E1E;
-    --fg-dark:       #ECECEC;
-    --card-dark:     #2A2A2A;
-    --muted-dark:    #888888;
+    /* dark mode toggle (if you add .dark to <html>) */
+    html.dark {
+      --bg:   #1E1E1E; --fg: #ECECEC;
+      --card: #2A2A2A; --muted: #888888;
+    }
 
-    --radius:        12px;
-    --trans:         .25s;
-    --sidebar-w:     260px;
-  }
-  html.light {
-    --bg:    var(--bg-light);
-    --fg:    var(--fg-light);
-    --card:  var(--card-light);
-    --muted: var(--muted-light);
-  }
-  html.dark {
-    --bg:    var(--bg-dark);
-    --fg:    var(--fg-dark);
-    --card:  var(--card-dark);
-    --muted: var(--muted-dark);
-  }
+    /*──────────────── SIDEBAR ─────────────────*/
+    aside {
+      width: var(--sidebar-w);
+      background: var(--card);
+      box-shadow: 2px 0 12px rgba(0,0,0,0.1);
+      position: sticky; top: 0; height: 100vh;
+      transition: width var(--trans);
+      overflow: hidden;
+    }
+    body.sidebar-shrunk aside {
+      width: var(--sidebar-collapsed);
+    }
+    .brand {
+      display: flex; align-items: center; gap: .5rem;
+      padding: 1rem; font-weight: 700; font-size: 1.25rem;
+      color: var(--accent);
+    }
+    body.sidebar-shrunk .brand span { display: none; }
+    nav {
+      display: flex; flex-direction: column; padding: .5rem 0;
+    }
+    nav a {
+      display: flex; align-items: center; gap: .75rem;
+      padding: .6rem 1rem; font-weight: 500; font-size: .95rem;
+      color: var(--fg); transition: background var(--trans);
+    }
+    nav a i { width: 1.1rem; text-align: center; }
+    nav a:hover, nav a.active {
+      background: rgba(74,144,226,.1); color: var(--accent);
+    }
+    body.sidebar-shrunk nav a span { display: none; justify-content: center; }
 
-  /*──────────────────── BODY & LAYOUT ────────────────────*/
-  body {
-    display: flex;
-    min-height: 100vh;
-    background: var(--bg);
-    color: var(--fg);
-    transition: background var(--trans), color var(--trans);
-    overflow-x: hidden;
-  }
+    /* shrink button */
+    .shrink-btn {
+      position: absolute; top: 1rem; right: -1.2rem;
+      background: var(--card); border: none; border-radius: 50%;
+      width: 32px; height: 32px; display: flex;
+      align-items: center; justify-content: center;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+      cursor: pointer; transition: transform var(--trans);
+      z-index: 1001;
+    }
 
-  aside {
-    width: var(--sidebar-w);
-    background: var(--card);
-    box-shadow: 2px 0 12px rgba(0,0,0,0.1);
-    transition: transform var(--trans);
-    position: sticky;
-    top: 0;
-    height: 100vh;
-    z-index: 1000;
-  }
-  aside.closed {
-    transform: translateX(-100%);
-  }
+    /*──────────────── HEADER ─────────────────*/
+    header {
+      position: sticky; top: 0; left: 0; right: 0;
+      height: var(--header-h); background: var(--card);
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0 1.5rem; box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+      z-index: 1000; transition: background var(--trans);
+    }
+    .hamburger, .theme-toggle {
+      font-size: 1.2rem; color: var(--accent);
+      background: none; border: none; cursor: pointer;
+    }
 
-  main[role="main"] {
-    flex: 1;
-    padding: 2rem;
-    overflow-y: auto;
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-    gap: 1.5rem;
-  }
-/* Sidebar shrink button */
-.shrink-btn {
-  position: absolute; top: 1rem; right: -1.2rem;
-  background: var(--card); border: none; border-radius: 50%;
-  padding: 0.4rem; box-shadow: 0 2px 6px rgba(0,0,0,0.2);
-  cursor: pointer; transition: transform var(--trans);
-  z-index: 1100;
-}
+    /*──────────────── MAIN / GRID ─────────────────*/
+    main[role="main"] {
+      flex: 1; padding: 1.5rem; overflow-y: auto;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 1rem;
+      margin-top: calc(var(--header-h) - 1rem);
+    }
 
-/* Hamburger & theme icons in the header */
-.hamburger, .theme-toggle {
-  font-size: 1.4rem; cursor: pointer; color: var(--accent);
-  background: none; border: none;
-}
+    /*──────────────── MODULES ─────────────────*/
+    .module {
+      background: var(--card); border-radius: var(--radius);
+      padding: 1rem; box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+      max-height: 400px; overflow-y: auto; transition: transform var(--trans);
+    }
+    .module:hover {
+      transform: translateY(-2px);
+    }
+    .module h2 {
+      display: flex; align-items: center; gap: .5rem;
+      font-size: 1.2rem; margin-bottom: .75rem;
+    }
+    .module p.desc {
+      color: var(--muted); font-size: .9rem; margin-bottom: .75rem;
+    }
 
-  /*──────────────────── HEADER ────────────────────*/
-  header {
-    position: sticky;
-    top: 0;
-    width: 100%;
-    background: var(--card);
-    padding: 1rem 2rem;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-    z-index: 900;
-    transition: background var(--trans);
-  }
+    /*──────────────── FORMS ─────────────────*/
+    .module form {
+      display: flex; flex-wrap: wrap; gap: .75rem; align-items: flex-end;
+    }
+    .module input,
+    .module select,
+    .module textarea {
+      flex: 1 1 180px; padding: .6rem;
+      border: 1px solid var(--muted); border-radius: var(--radius);
+      background: var(--bg); color: var(--fg); font-size: .9rem;
+      transition: border-color var(--trans);
+    }
+    .module input:focus,
+    .module select:focus,
+    .module textarea:focus {
+      outline: none; border-color: var(--accent);
+    }
 
-  /*──────────────────── MODULES ────────────────────*/
-  .module {
-    background: var(--card);
-    border-radius: var(--radius);
-    padding: 1.75rem;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
-    transition: transform var(--trans);
-  }
-  .module:hover {
-    transform: translateY(-2px);
-  }
-  .module h2 {
-    display: flex;
-    align-items: center;
-    gap: 0.75rem;
-    font-size: 1.3rem;
-    margin-bottom: 1rem;
-  }
-  .module p.desc {
-    color: var(--muted);
-    margin-bottom: 1rem;
-    font-size: 0.95rem;
-  }
+    /*──────────────── BUTTONS ─────────────────*/
+    .module button {
+      display: inline-flex; align-items: center; gap: .4rem;
+      padding: .5rem 1rem; font-size: .9rem; font-weight: 600;
+      background: var(--accent); color: var(--card); border: none;
+      border-radius: 999px; cursor: pointer;
+      transition: background var(--trans), transform var(--trans);
+    }
+    .module button:hover {
+      background: var(--accent-dark); transform: translateY(-1px);
+    }
 
-  /*───────────────── FORMS & INPUTS ─────────────────*/
-  .module form {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 1rem;
-    align-items: flex-end;
-  }
-  .module input,
-  .module select,
-  .module textarea {
-    flex: 1 1 220px;
-    padding: 0.75rem;
-    border: 1px solid var(--muted);
-    border-radius: var(--radius);
-    background: var(--bg);
-    color: var(--fg);
-    font-size: 0.95rem;
-    transition: border-color var(--trans);
-  }
-  .module input:focus,
-  .module select:focus,
-  .module textarea:focus {
-    outline: none;
-    border-color: var(--accent);
-  }
+    /*──────────────── RESPONSE ─────────────────*/
+    .response {
+      position: relative; background: rgba(74,144,226, .1);
+      border-left: 4px solid var(--accent);
+      padding: 1rem; margin-top: 1rem; border-radius: var(--radius);
+    }
+    .response .close-btn {
+      position: absolute; top: .5rem; right: .5rem;
+      width: 24px; height: 24px; background: var(--accent);
+      color: var(--card); border: none; border-radius: 50%;
+      font-size: 1rem; cursor: pointer;
+    }
 
-  /*──────────────────── BUTTONS ────────────────────*/
-  .module button {
-    background: var(--accent);
-    color: var(--card);
-    border: none;
-    border-radius: 999px;
-    padding: 0.6rem 1.2rem;
-    font-size: 0.95rem;
-    font-weight: 600;
-    display: inline-flex;
-    align-items: center;
-    gap: 0.5rem;
-    box-shadow: 0 2px 6px rgba(0,0,0,0.1);
-    transition: background var(--trans), transform var(--trans);
-  }
-  .module button:hover {
-    background: var(--accent-dark);
-    transform: translateY(-1px);
-  }
+    /*──────────────── CHAT & CHARTS ─────────────────*/
+    #chatBox {
+      min-height: 140px; max-height: 200px; overflow-y: auto;
+      padding: .6rem; border: 1px solid var(--muted);
+      border-radius: var(--radius); background: var(--bg);
+    }
+    .charts {
+      grid-column: 1 / -1;
+      display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;
+    }
+    .chart-card {
+      background: var(--card); padding: .8rem;
+      border-radius: var(--radius); box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+    }
+    canvas { max-height: 180px !important; }
 
-  /*──────────────── RESPONSE PANELS ─────────────────*/
-  .response {
-    position: relative;
-    background: var(--accent)15;
-    border-left: 5px solid var(--accent);
-    padding: 1.25rem;
-    margin-top: 1rem;
-    border-radius: var(--radius);
-  }
-  .response .close-btn {
-    position: absolute;
-    top: 0.5rem;
-    right: 0.75rem;
-    background: var(--accent);
-    color: var(--card);
-    border: none;
-    border-radius: 50%;
-    width: 24px;
-    height: 24px;
-    font-size: 1.1rem;
-    cursor: pointer;
-    box-shadow: 0 2px 6px rgba(0,0,0,0.2);
-  }
-
-  /*──────────────── CHAT & CHARTS ─────────────────*/
-  #chatBox {
-    min-height: 180px;
-    max-height: 240px;
-    overflow-y: auto;
-    padding: 0.75rem;
-    background: var(--bg);
-    border: 1px solid var(--muted);
-    border-radius: var(--radius);
-  }
-  .charts {
-    grid-column: 1 / -1;
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 1.5rem;
-  }
-  .chart-card {
-    background: var(--card);
-    padding: 1rem;
-    border-radius: var(--radius);
-    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
-  }
-  canvas {
-    max-height: 220px !important;
-  }
-
-  /*────────────────── RESPONSIVE ──────────────────*/
-  @media (max-width: 960px) {
-    aside { position: fixed; left: 0; top: 0; z-index: 1000; }
-    header { padding: 1rem; }
-    main { padding: 1.5rem; display: block; }
-    .charts { display: block; }
-  }
-</style>
-
-
+    /*──────────────── RESPONSIVE ─────────────────*/
+    @media (max-width: 768px) {
+      main { display: block; }
+      .charts { display: block; }
+    }
+  </style>
 </head>
+
 
 <body>
   <!-- SIDEBAR / NAVIGATION -->
