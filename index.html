@@ -53,7 +53,15 @@ body.sidebar-shrunk nav a span {
 body.sidebar-shrunk .brand span {
   display: none;
 }
-
+body.sidebar-shrunk nav a {
+  justify-content: center;
+}
+body.sidebar-shrunk nav a i {
+  margin: 0;
+}
+body.sidebar-shrunk nav a span {
+  display: none;
+}
   /*──────────────── SIDEBAR & NAV ─────────────────*/
   aside {
     width:var(--sidebar-w); background:var(--card); box-shadow:2px 0 12px rgba(0,0,0,0.1);
@@ -73,16 +81,7 @@ body.sidebar-shrunk .brand span {
   nav a:hover, nav a.active { background: var(--accent)20; }
   nav a i { width:1rem; text-align:center; font-size:1.1rem; color:var(--accent); }
 /* + Sidebar gradient & icon hover */
-aside {
-  background: linear-gradient(180deg, #4A90E2, #357ABD);
-}
-nav a {
-  color: white;
-  transition: background var(--trans), color var(--trans);
-}
-nav a:hover {
-  background: rgba(255,255,255,0.1);
-}
+
 nav a.active {
   background: rgba(255,255,255,0.2);
 }
@@ -96,7 +95,8 @@ nav a.active {
 
   /*──────────────── HEADER ─────────────────*/
   header {
-    position:sticky; top:0; width:100%; background:var(--card);
+    position: sticky;
+ top: 0; width:100%; background:var(--card);
     padding:1rem 2rem; display:flex; justify-content:space-between; align-items:center;
     box-shadow:0 2px 8px rgba(0,0,0,0.1); z-index:500;
   }
@@ -122,26 +122,26 @@ nav a.active {
   .module p.desc { color:var(--muted); margin-bottom:1rem; font-size:0.95rem; }
   .module form { display:flex; flex-wrap:wrap; gap:1rem; align-items:flex-end; }
   .module input, .module select, .module textarea {
-    flex:1 1 220px; padding:0.75rem; border:1px solid var(--muted);
+    flex:1 1 220px; padding:0.75rem; border:2px solid var(--muted);
     border-radius:var(--radius); transition: border-color var(--trans);
     background:var(--bg); color:var(--fg); font-size:0.95rem;
   }
   .module input:focus, .module select:focus, .module textarea:focus {
     outline:none; border-color:var(--accent);
   }
- .module button {
-  background: linear-gradient(135deg, var(--accent), #357ABD);
-  color: var(--card);
-  padding: 0.8rem 1.6rem;
-  border-radius: var(--radius);
-  display: inline-flex;
-  align-items: center;
-  gap: 0.5rem;
-  transition: transform var(--trans), box-shadow var(--trans);
+.module button {
+  background: var(--accent);
+  border: none;
+  border-radius: 999px;
+  padding: 0.6rem 1.2rem;
+  font-weight: 600;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+  transition: background var(--trans), transform var(--trans);
 }
 .module button:hover {
   transform: translateY(-2px);
-  box-shadow: 0 6px 12px rgba(0,0,0,0.15);
+  background: #357ABD;
+  transform: translateY(-1px);
 }
   .hint { font-size:0.85rem; color:var(--muted); margin-top:0.25rem; }
 .module input,
@@ -199,6 +199,9 @@ nav a.active {
    @media (max-width: 960px) {
   aside.closed { transform: translateX(-100%); }
 }
+   @media (max-width: 600px) {
+  .shrink-btn { display: none; }
+}
 </style>
 
 </head>
@@ -243,7 +246,7 @@ nav a.active {
       <form id="dx-form">
         <textarea id="dxInput" rows="2" placeholder="e.g. Persistent headaches & fatigue…" required></textarea>
         <button type="submit">Analyze</button>
-        <br><div class="hint">Be specific: mention duration & intensity.</div>
+        <div class="hint">Be specific: mention duration & intensity.</div>
       </form>
       <div id="dxResult" class="response" hidden>
         <button class="close-btn" aria-label="Close result">×</button>
@@ -270,7 +273,7 @@ nav a.active {
         <input id="pfAge" type="number" min="1" max="120" placeholder="Age (years)"/>
         <input id="pfWeight" type="number" min="10" max="300" placeholder="Weight (kg)"/>
         <button type="submit">Generate</button>
-       <br> <div class="hint">Hold Ctrl/Cmd to select multiple herbs.</div>
+        <div class="hint">Hold Ctrl/Cmd to select multiple herbs.</div>
       </form>
       <div id="pfResult" class="response" hidden>
         <button class="close-btn" aria-label="Close result">×</button>
@@ -285,7 +288,7 @@ nav a.active {
       <form id="ing-form">
         <input id="ingUpload" type="file" accept="image/*"/>
         <button type="submit">Identify</button>
-       <br> <div class="hint">Use a clear, close-up photo of a leaf or flower.</div>
+        <div class="hint">Use a clear, close-up photo of a leaf or flower.</div>
       </form>
       <div id="ingResult" class="response" hidden>
         <button class="close-btn" aria-label="Close result">×</button>
@@ -300,7 +303,7 @@ nav a.active {
       <form id="pred-form">
         <input id="predInput" placeholder="e.g. Turmeric for arthritis"/>
         <button type="submit">Predict</button>
-        <br><div class="hint">Format: “Herb for condition”.</div>
+        <div class="hint">Format: “Herb for condition”.</div>
       </form>
       <div id="predResult" class="response" hidden>
         <button class="close-btn" aria-label="Close result">×</button>
@@ -327,7 +330,7 @@ nav a.active {
       <form id="research-form">
         <input id="researchQuery" placeholder="e.g. ‘Ashwagandha anxiety RCT’"/>
         <button type="submit">Summarize</button>
-        <br><div class="hint">Be specific: include herb and focus (e.g. stress, sleep)</div>
+      <div class="hint">Be specific: include herb and focus (e.g. stress, sleep)</div>
       </form>
       <div id="researchResults" class="response" hidden>
         <button class="close-btn" aria-label="Close result">×</button>
@@ -350,7 +353,7 @@ nav a.active {
         </select>
         <input id="forecastPeriod" type="number" min="1" max="52" value="4" placeholder="Weeks ahead"/>
         <button type="submit">Forecast</button>
-      <br>  <div class="hint">Choose 1–52 weeks into the future.</div>
+       <div class="hint">Choose 1–52 weeks into the future.</div>
       </form>
       <div id="inventoryResult" class="response" hidden>
         <button class="close-btn" aria-label="Close result">×</button>
@@ -365,7 +368,7 @@ nav a.active {
       <form id="genetics-form">
         <input id="geneticUpload" type="file" accept=".csv,.json"/>
         <button type="submit">Analyze</button>
-       <br> <div class="hint">CSV or JSON with SNPs is ideal.</div>
+        <div class="hint">CSV or JSON with SNPs is ideal.</div>
       </form>
       <div id="geneticResult" class="response" hidden>
         <button class="close-btn" aria-label="Close result">×</button>
@@ -381,7 +384,7 @@ nav a.active {
         <input id="weight" type="number" min="10" max="300" placeholder="Weight (kg)"/>
         <input id="symptom" placeholder="Symptom (e.g. headache)"/>
         <button type="submit">Calculate</button>
-       <br> <div class="hint">Weight 10–300 kg. Describe symptom briefly.</div>
+       <div class="hint">Weight 10–300 kg. Describe symptom briefly.</div>
       </form>
       <div id="dosageResult" class="response" hidden>
         <button class="close-btn" aria-label="Close result">×</button>
@@ -411,7 +414,7 @@ nav a.active {
           <option>Skullcap</option><option>Yarrow</option><option>Gotu Kola</option><option>Licorice</option>
         </select>
         <button type="submit">Check</button>
-       <br> <div class="hint">Pick two distinct herbs.</div>
+     <div class="hint">Pick two distinct herbs.</div>
       </form>
       <div id="interactionResult" class="response" hidden>
         <button class="close-btn" aria-label="Close result">×</button>
@@ -458,12 +461,14 @@ shrinkBtn.addEventListener('click', () => {
   shrinkBtn.querySelector('i').classList.toggle('fa-angle-double-right');
 });
 
-themeBtn.onclick = () => {
+// Only once, in initialization
+themeBtn.addEventListener('click', () => {
   document.documentElement.classList.toggle('dark');
   document.documentElement.classList.toggle('light');
   themeBtn.classList.toggle('fa-moon');
   themeBtn.classList.toggle('fa-sun');
-};
+});
+
   // Attach “close” handlers to any response panels
   function attachCloseButtons() {
     document.querySelectorAll('.response .close-btn').forEach(btn => {
