@@ -53,12 +53,68 @@
   nav a:hover, nav a.active { background: var(--accent)20; }
   nav a i { width:1rem; text-align:center; font-size:1.1rem; color:var(--accent); }
 
+   /*──────────────── SIDEBAR ENHANCEMENTS ─────────────────*/
+aside {
+  transition: width var(--trans), background var(--trans);
+  background: linear-gradient(180deg, #fff 0%, #f0f4f8 100%);
+  width: var(--sidebar-w);
+}
+aside.collapsed {
+  width: 80px;
+}
+aside.collapsed .brand span,
+aside.collapsed nav a span {
+  display: none;            /* hide text, show only icons */
+}
+aside.collapsed nav a {
+  justify-content: center;
+}
+aside nav a {
+  transition: background var(--trans), padding var(--trans);
+}
+aside nav a:hover {
+  background: var(--accent)30;
+  padding-left: 1.5rem;
+}
+
   /*──────────────── HEADER ─────────────────*/
-  header {
-    position:sticky; top:0; width:100%; background:var(--card);
-    padding:1rem 2rem; display:flex; justify-content:space-between; align-items:center;
-    box-shadow:0 2px 8px rgba(0,0,0,0.1); z-index:500;
-  }
+
+header {
+  position: sticky;
+  top: 0;
+  width: 100%;
+  padding: 1rem 2rem;
+  background: linear-gradient(135deg, #4A90E2, #50E3C2);
+  color: #fff;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+/* Add a subtle underline animation on hover for the title */
+header h1 {
+  font-size: 1.5rem;
+  font-weight: 700;
+  position: relative;
+}
+header h1::after {
+  content: '';
+  position: absolute;
+  bottom: -4px;
+  left: 0;
+  width: 100%;
+  height: 3px;
+  background: rgba(255,255,255,0.5);
+  transform-origin: left;
+  transform: scaleX(0);
+  transition: transform 0.3s ease;
+}
+header h1:hover::after {
+  transform: scaleX(1);
+}
+
   .hamburger, .theme-toggle {
     font-size:1.4rem; cursor:pointer; padding:0.3rem; color:var(--accent);
   }
@@ -99,6 +155,49 @@
   }
   .hint { font-size:0.85rem; color:var(--muted); margin-top:0.25rem; }
 
+/*──────────────── INPUT STYLING ─────────────────*/
+.module input,
+.module select,
+.module textarea {
+  border: 2px solid var(--muted);
+  padding: 0.75rem;
+  border-radius: var(--radius);
+  background: var(--bg);
+  color: var(--fg);
+  transition: border-color var(--trans), box-shadow var(--trans);
+}
+
+.module input:focus,
+.module select:focus,
+.module textarea:focus {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 5px var(--accent);
+}
+/*──────────────── HINTS ─────────────────*/
+.module form .hint {
+  display: block;    /* full width */
+  margin-top: 0.5rem;
+  clear: both;
+}
+/*──────────────── BUTTONS ─────────────────*/
+button {
+  background: var(--accent);
+  color: var(--card);
+  padding: 0.7rem 1.4rem;
+  border: none;
+  border-radius: var(--radius);
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+  transition: transform var(--trans), box-shadow var(--trans);
+}
+button:hover {
+  transform: scale(1.05);
+  box-shadow: 0 6px 14px rgba(0,0,0,0.15);
+}
+
   /*──────────────── RESPONSE PANEL ─────────────────*/
   .response {
     position:relative; background:var(--accent)15;
@@ -134,6 +233,27 @@
     box-shadow:0 2px 8px rgba(0,0,0,0.05);
   }
   canvas { max-height:220px !important; }
+/*──────────────── SHRINK BTN ─────────────────*/
+.shrink-btn {
+  position: absolute;
+  bottom: 1rem;
+  right: -12px;
+  background: var(--card);
+  border: 2px solid var(--accent);
+  border-radius: 50%;
+  padding: 0.4rem;
+  cursor: pointer;
+  display: block;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+  transition: transform var(--trans);
+  z-index: 1001;
+}
+.shrink-btn:hover {
+  transform: rotate(180deg);
+}
+@media (max-width: 960px) {
+  .shrink-btn { display: none; }
+}
 
   /*──────────────── RESPONSIVE ─────────────────*/
   @media (max-width: 960px) {
@@ -142,6 +262,28 @@
     header { padding:1rem; }
     main { padding:1.5rem; }
   }
+   /*──────────────── MOBILE SIDEBAR ─────────────────*/
+@media (max-width: 960px) {
+  aside {
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 100%;
+    transform: translateX(-100%);
+  }
+  aside.closed {
+    transform: translateX(-100%);
+  }
+  aside:not(.closed) {
+    transform: translateX(0);
+    box-shadow: 2px 0 12px rgba(0,0,0,0.3);
+  }
+  .hamburger {
+    display: block;
+    z-index: 1002;
+  }
+}
+
 </style>
 
 </head>
@@ -162,6 +304,10 @@
       <a href="#"><i class="fas fa-user"></i>Profile</a>
       <a href="#"><i class="fas fa-cog"></i>Settings</a>
     </nav>
+    <button id="shrinkBtn" class="shrink-btn" aria-label="Toggle sidebar">
+  <i class="fas fa-angle-double-left"></i>
+</button>
+
   </aside>
 
   <!-- MAIN CONTENT -->
@@ -381,11 +527,22 @@
     sidebar.classList.toggle('closed');
   }
 
-  function toggleTheme() {
-    document.documentElement.classList.toggle('dark');
-    document.documentElement.classList.toggle('light');
-    themeBtn.classList.toggle('fa-sun');
-  }
+// inside DOMContentLoaded:
+const shrinkBtn = document.getElementById('shrinkBtn');
+shrinkBtn.onclick = () => {
+  sidebar.classList.toggle('collapsed');
+  // optionally flip the arrow:
+  shrinkBtn.querySelector('i').classList.toggle('fa-angle-double-left');
+  shrinkBtn.querySelector('i').classList.toggle('fa-angle-double-right');
+};
+
+function toggleTheme() {
+  document.documentElement.classList.toggle('dark');
+  document.documentElement.classList.toggle('light');
+  // swap both icon classes
+  themeBtn.classList.toggle('fa-moon');
+  themeBtn.classList.toggle('fa-sun');
+}
 
   // Attach “close” handlers to any response panels
   function attachCloseButtons() {
