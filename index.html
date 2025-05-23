@@ -15,276 +15,358 @@
         href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"/>
   <!-- Chart.js -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
- <style>
+<style>
   /*──────────────── RESET & THEME ─────────────────*/
-  * { margin:0; padding:0; box-sizing:border-box; font-family:'Montserrat',sans-serif; }
+  * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Montserrat', sans-serif;
+  }
   :root {
     --accent:      #4A90E2;
-    --bg-light:    #F0F4F8; --fg-light:    #1A1A1A; --card-light:  #FFFFFF; --muted-light:  #6C7A89;
-    --bg-dark:     #1E1E1E; --fg-dark:     #ECECEC; --card-dark:   #2A2A2A; --muted-dark:   #888888;
-    --radius:      12px; --trans: .25s; --sidebar-w: 260px;
+    --bg-light:    #F0F4F8;
+    --fg-light:    #1A1A1A;
+    --card-light:  #FFFFFF;
+    --muted-light: #6C7A89;
+    --bg-dark:     #1E1E1E;
+    --fg-dark:     #ECECEC;
+    --card-dark:   #2A2A2A;
+    --muted-dark:  #888888;
+    --radius:      12px;
+    --trans:       0.25s;
+    --sidebar-w:   260px;
   }
-  html.light { --bg:var(--bg-light); --fg:var(--fg-light); --card:var(--card-light); --muted:var(--muted-light); }
-  html.dark  { --bg:var(--bg-dark);  --fg:var(--fg-dark);  --card:var(--card-dark);  --muted:var(--muted-dark); }
-
+  html.light {
+    --bg:    var(--bg-light);
+    --fg:    var(--fg-light);
+    --card:  var(--card-light);
+    --muted: var(--muted-light);
+  }
+  html.dark {
+    --bg:    var(--bg-dark);
+    --fg:    var(--fg-dark);
+    --card:  var(--card-dark);
+    --muted: var(--muted-dark);
+  }
   body {
-    display:flex; min-height:100vh; background:var(--bg); color:var(--fg);
+    display: flex;
+    min-height: 100vh;
+    background: var(--bg);
+    color: var(--fg);
     transition: background var(--trans), color var(--trans);
-    overflow-x:hidden;
+    overflow-x: hidden;
   }
-  a { color:inherit; text-decoration:none; }
+  a {
+    color: inherit;
+    text-decoration: none;
+  }
 
   /*──────────────── SIDEBAR & NAV ─────────────────*/
   aside {
-    width:var(--sidebar-w); background:var(--card); box-shadow:2px 0 12px rgba(0,0,0,0.1);
-    transition: transform var(--trans); z-index:1000;
-  }
-  aside.closed { transform: translateX(-100%); }
-  .brand {
-    display:flex; align-items:center; gap:0.75rem; padding:1.5rem 1rem;
-    font-size:1.35rem; font-weight:700; color:var(--accent);
-  }
-  nav[role="navigation"] { margin-top:1rem; }
-  nav a {
-    display:flex; align-items:center; gap:0.75rem; padding:0.8rem 1.25rem;
-    border-radius:var(--radius); font-weight:500; font-size:0.95rem;
-    transition: background var(--trans);
-  }
-  nav a:hover, nav a.active { background: var(--accent)20; }
-  nav a i { width:1rem; text-align:center; font-size:1.1rem; color:var(--accent); }
-
-   /*──────────────── SIDEBAR ENHANCEMENTS ─────────────────*/
-aside {
-  transition: width var(--trans), background var(--trans);
-  background: linear-gradient(180deg, #fff 0%, #f0f4f8 100%);
-  width: var(--sidebar-w);
-}
-aside.collapsed {
-  width: 80px;
-}
-aside.collapsed .brand span,
-aside.collapsed nav a span {
-  display: none;            /* hide text, show only icons */
-}
-aside.collapsed nav a {
-  justify-content: center;
-}
-aside nav a {
-  transition: background var(--trans), padding var(--trans);
-}
-aside nav a:hover {
-  background: var(--accent)30;
-  padding-left: 1.5rem;
-}
-
-  /*──────────────── HEADER ─────────────────*/
-
-header {
-  position: sticky;
-  top: 0;
-  width: 100%;
-  padding: 1rem 2rem;
-  background: linear-gradient(135deg, #4A90E2, #50E3C2);
-  color: #fff;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.2);
-  z-index: 1000;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-}
-
-/* Add a subtle underline animation on hover for the title */
-header h1 {
-  font-size: 1.5rem;
-  font-weight: 700;
-  position: relative;
-}
-header h1::after {
-  content: '';
-  position: absolute;
-  bottom: -4px;
-  left: 0;
-  width: 100%;
-  height: 3px;
-  background: rgba(255,255,255,0.5);
-  transform-origin: left;
-  transform: scaleX(0);
-  transition: transform 0.3s ease;
-}
-header h1:hover::after {
-  transform: scaleX(1);
-}
-
-  .hamburger, .theme-toggle {
-    font-size:1.4rem; cursor:pointer; padding:0.3rem; color:var(--accent);
-  }
-  .hamburger { display:none; }
-
-  /*──────────────── MAIN CONTENT ─────────────────*/
-  main[role="main"] {
-    flex:1; overflow-y:auto; padding:2rem; display:flex; flex-direction:column; gap:1.5rem;
-  }
-  .module {
-    background:var(--card); border-radius:var(--radius);
-    padding:1.75rem; box-shadow:0 2px 8px rgba(0,0,0,0.05);
-    transition: transform var(--trans);
-  }
-  .module:hover { transform: translateY(-2px); }
-  .module h2 {
-    display:flex; align-items:center; gap:0.75rem; margin-bottom:1rem;
-    font-size:1.3rem; font-weight:600;
-  }
-  .module p.desc { color:var(--muted); margin-bottom:1rem; font-size:0.95rem; }
-  .module form { display:flex; flex-wrap:wrap; gap:1rem; align-items:flex-end; }
-  .module input, .module select, .module textarea {
-    flex:1 1 220px; padding:0.75rem; border:1px solid var(--muted);
-    border-radius:var(--radius); transition: border-color var(--trans);
-    background:var(--bg); color:var(--fg); font-size:0.95rem;
-  }
-  .module input:focus, .module select:focus, .module textarea:focus {
-    outline:none; border-color:var(--accent);
-  }
-  .module button {
-    background:var(--accent); color:var(--card); border:none;
-    padding:0.7rem 1.4rem; border-radius:var(--radius);
-    cursor:pointer; font-size:0.95rem;
-    transition: background var(--trans), transform var(--trans);
-  }
-  .module button:hover {
-    background:var(--accent)CC; transform: translateY(-1px);
-  }
-  .hint { font-size:0.85rem; color:var(--muted); margin-top:0.25rem; }
-
-/*──────────────── INPUT STYLING ─────────────────*/
-.module input,
-.module select,
-.module textarea {
-  border: 2px solid var(--muted);
-  padding: 0.75rem;
-  border-radius: var(--radius);
-  background: var(--bg);
-  color: var(--fg);
-  transition: border-color var(--trans), box-shadow var(--trans);
-}
-
-.module input:focus,
-.module select:focus,
-.module textarea:focus {
-  outline: none;
-  border-color: var(--accent);
-  box-shadow: 0 0 5px var(--accent);
-}
-/*──────────────── HINTS ─────────────────*/
-.module form .hint {
-  display: block;    /* full width */
-  margin-top: 0.5rem;
-  clear: both;
-}
-/*──────────────── BUTTONS ─────────────────*/
-button {
-  background: var(--accent);
-  color: var(--card);
-  padding: 0.7rem 1.4rem;
-  border: none;
-  border-radius: var(--radius);
-  font-size: 0.95rem;
-  font-weight: 600;
-  cursor: pointer;
-  box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-  transition: transform var(--trans), box-shadow var(--trans);
-}
-button:hover {
-  transform: scale(1.05);
-  box-shadow: 0 6px 14px rgba(0,0,0,0.15);
-}
-
-  /*──────────────── RESPONSE PANEL ─────────────────*/
-  .response {
-    position:relative; background:var(--accent)15;
-    border-left:5px solid var(--accent); padding:1.25rem;
-    margin-top:1rem; border-radius:var(--radius);
-  }
-  .response .close-btn {
-    position:absolute; top:0.5rem; right:0.75rem;
-    background:var(--accent); color:var(--card);
-    border:none; border-radius:50%; width:24px; height:24px;
-    font-size:1.1rem; line-height:1; cursor:pointer;
-    box-shadow:0 2px 6px rgba(0,0,0,0.2);
-  }
-
-  /*──────────────── LOADING SPINNER ─────────────────*/
-  .spinner {
-    width:20px; height:20px; border:3px solid var(--muted);
-    border-top:3px solid var(--accent); border-radius:50%;
-    animation:spin 1s linear infinite; display:inline-block;
-    vertical-align:middle; margin-left:0.5rem;
-  }
-  @keyframes spin { to { transform:rotate(360deg); } }
-
-  /*──────────────── CHAT & CHARTS ─────────────────*/
-  #chatBox {
-    min-height:180px; max-height:240px; overflow-y:auto; padding:0.75rem;
-    background:var(--bg); border:1px solid var(--muted);
-    border-radius:var(--radius); margin-bottom:0.5rem;
-  }
-  .charts { display:grid; grid-template-columns:1fr 1fr; gap:1.5rem; margin-top:1rem;}
-  .chart-card {
-    padding:1rem; border-radius:var(--radius); background:var(--card);
-    box-shadow:0 2px 8px rgba(0,0,0,0.05);
-  }
-  canvas { max-height:220px !important; }
-/*──────────────── SHRINK BTN ─────────────────*/
-.shrink-btn {
-  position: absolute;
-  bottom: 1rem;
-  right: -12px;
-  background: var(--card);
-  border: 2px solid var(--accent);
-  border-radius: 50%;
-  padding: 0.4rem;
-  cursor: pointer;
-  display: block;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
-  transition: transform var(--trans);
-  z-index: 1001;
-}
-.shrink-btn:hover {
-  transform: rotate(180deg);
-}
-@media (max-width: 960px) {
-  .shrink-btn { display: none; }
-}
-
-  /*──────────────── RESPONSIVE ─────────────────*/
-  @media (max-width: 960px) {
-    aside { position:fixed; top:0; left:0; bottom:0; transform: translateX(-100%); }
-    .hamburger { display:block; }
-    header { padding:1rem; }
-    main { padding:1.5rem; }
-  }
-   /*──────────────── MOBILE SIDEBAR ─────────────────*/
-@media (max-width: 960px) {
-  aside {
-    position: fixed;
-    top: 0;
-    left: 0;
-    height: 100%;
-    transform: translateX(-100%);
+    width: var(--sidebar-w);
+    background: linear-gradient(180deg, #ffffff 0%, #f0f4f8 100%);
+    box-shadow: 2px 0 12px rgba(0,0,0,0.1);
+    transition: width var(--trans), transform var(--trans), background var(--trans);
+    position: relative;
+    z-index: 1000;
   }
   aside.closed {
     transform: translateX(-100%);
   }
-  aside:not(.closed) {
-    transform: translateX(0);
-    box-shadow: 2px 0 12px rgba(0,0,0,0.3);
+  aside.collapsed {
+    width: 80px;
+  }
+  aside.collapsed .brand span,
+  aside.collapsed nav a span {
+    display: none;
+  }
+  aside.collapsed nav a {
+    justify-content: center;
+  }
+  .brand {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 1.5rem 1rem;
+    font-size: 1.35rem;
+    font-weight: 700;
+    color: var(--accent);
+  }
+  nav[role="navigation"] {
+    margin-top: 1rem;
+  }
+  nav a {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.8rem 1.25rem;
+    border-radius: var(--radius);
+    font-weight: 500;
+    font-size: 0.95rem;
+    transition: background var(--trans), padding-left var(--trans);
+  }
+  nav a:hover,
+  nav a.active {
+    background: var(--accent)20;
+  }
+  nav a:hover {
+    background: var(--accent)30;
+    padding-left: 1.5rem;
+  }
+  nav a i {
+    width: 1rem;
+    text-align: center;
+    font-size: 1.1rem;
+    color: var(--accent);
+  }
+
+  /*──────────────── SHRINK SIDEBAR BUTTON ─────────────────*/
+  .shrink-btn {
+    position: absolute;
+    bottom: 1rem;
+    right: -12px;
+    background: var(--card);
+    border: 2px solid var(--accent);
+    border-radius: 50%;
+    padding: 0.4rem;
+    cursor: pointer;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+    transition: transform var(--trans);
+    z-index: 1001;
+  }
+  .shrink-btn:hover {
+    transform: rotate(180deg);
+  }
+
+  /*──────────────── HEADER ─────────────────*/
+  header {
+    position: sticky;
+    top: 0;
+    width: 100%;
+    padding: 1rem 2rem;
+    background: linear-gradient(135deg, #4A90E2, #50E3C2);
+    color: #fff;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  header h1 {
+    font-size: 1.5rem;
+    font-weight: 700;
+    position: relative;
+    margin-left: 0.5rem;
+  }
+  header h1::after {
+    content: '';
+    position: absolute;
+    bottom: -4px;
+    left: 0;
+    width: 100%;
+    height: 3px;
+    background: rgba(255,255,255,0.5);
+    transform-origin: left;
+    transform: scaleX(0);
+    transition: transform 0.3s ease;
+  }
+  header h1:hover::after {
+    transform: scaleX(1);
+  }
+  .hamburger,
+  .theme-toggle {
+    font-size: 1.4rem;
+    cursor: pointer;
+    padding: 0.3rem;
+    color: var(--accent);
   }
   .hamburger {
-    display: block;
-    z-index: 1002;
+    display: none;
   }
-}
 
+  /*──────────────── MAIN CONTENT ─────────────────*/
+  main[role="main"] {
+    flex: 1;
+    overflow-y: auto;
+    padding: 2rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+  }
+  .module {
+    background: var(--card);
+    border-radius: var(--radius);
+    padding: 1.75rem;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    transition: transform var(--trans);
+  }
+  .module:hover {
+    transform: translateY(-2px);
+  }
+  .module h2 {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-bottom: 1rem;
+    font-size: 1.3rem;
+    font-weight: 600;
+  }
+  .module p.desc {
+    color: var(--muted);
+    margin-bottom: 1rem;
+    font-size: 0.95rem;
+  }
+  .module form {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+    align-items: flex-end;
+  }
+
+  /*──────────────── INPUT + TEXTAREA STYLING ─────────────────*/
+  .module input,
+  .module select,
+  .module textarea {
+    flex: 1 1 220px;
+    padding: 0.75rem;
+    border: 2px solid var(--muted);
+    border-radius: var(--radius);
+    background: var(--bg);
+    color: var(--fg);
+    font-size: 0.95rem;
+    transition: border-color var(--trans), box-shadow var(--trans);
+  }
+  .module input:focus,
+  .module select:focus,
+  .module textarea:focus {
+    outline: none;
+    border-color: var(--accent);
+    box-shadow: 0 0 5px var(--accent);
+  }
+
+  /*──────────────── HINT TEXT ─────────────────*/
+  .module form .hint {
+    display: block;
+    margin-top: 0.5rem;
+    color: var(--muted);
+    font-size: 0.85rem;
+    clear: both;
+  }
+
+  /*──────────────── BUTTON STYLING ─────────────────*/
+  button {
+    background: var(--accent);
+    color: var(--card);
+    padding: 0.7rem 1.4rem;
+    border: none;
+    border-radius: var(--radius);
+    font-size: 0.95rem;
+    font-weight: 600;
+    cursor: pointer;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    transition: transform var(--trans), box-shadow var(--trans);
+  }
+  button:hover {
+    transform: scale(1.05);
+    box-shadow: 0 6px 14px rgba(0,0,0,0.15);
+  }
+
+  /*──────────────── RESPONSE PANEL & SPINNER ─────────────────*/
+  .response {
+    position: relative;
+    background: var(--accent)15;
+    border-left: 5px solid var(--accent);
+    padding: 1.25rem;
+    margin-top: 1rem;
+    border-radius: var(--radius);
+  }
+  .response .close-btn {
+    position: absolute;
+    top: 0.5rem;
+    right: 0.75rem;
+    background: var(--accent);
+    color: var(--card);
+    border: none;
+    border-radius: 50%;
+    width: 24px;
+    height: 24px;
+    font-size: 1.1rem;
+    line-height: 1;
+    cursor: pointer;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+  }
+  .spinner {
+    width: 20px;
+    height: 20px;
+    border: 3px solid var(--muted);
+    border-top: 3px solid var(--accent);
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    display: inline-block;
+    vertical-align: middle;
+    margin-left: 0.5rem;
+  }
+  @keyframes spin {
+    to { transform: rotate(360deg); }
+  }
+
+  /*──────────────── CHAT & CHARTS ─────────────────*/
+  #chatBox {
+    min-height: 180px;
+    max-height: 240px;
+    overflow-y: auto;
+    padding: 0.75rem;
+    background: var(--bg);
+    border: 1px solid var(--muted);
+    border-radius: var(--radius);
+    margin-bottom: 0.5rem;
+  }
+  .charts {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.5rem;
+    margin-top: 1rem;
+  }
+  .chart-card {
+    padding: 1rem;
+    border-radius: var(--radius);
+    background: var(--card);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+  }
+  canvas {
+    max-height: 220px !important;
+  }
+
+  /*──────────────── RESPONSIVE & MOBILE SIDEBAR ─────────────────*/
+  @media (max-width: 960px) {
+    aside {
+      position: fixed;
+      top: 0;
+      left: 0;
+      height: 100%;
+      transform: translateX(-100%);
+    }
+    aside:not(.closed) {
+      transform: translateX(0);
+      box-shadow: 2px 0 12px rgba(0,0,0,0.3);
+    }
+    .hamburger {
+      display: block;
+      z-index: 1002;
+    }
+    header {
+      padding: 1rem;
+    }
+    main {
+      padding: 1.5rem;
+    }
+    .shrink-btn {
+      display: none;
+    }
+  }
 </style>
+
 
 </head>
 
