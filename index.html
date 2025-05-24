@@ -684,16 +684,51 @@ document.addEventListener('DOMContentLoaded', () => {
   // ───────────── WIRE ALL AI MODULES ─────────────
 
   // 1. Herb Identification
-  wireModule({
-    formId: 'iden-form',
-    systemPrompt: 'You are an accurate plant species identifier.',
-    getUserInput: () => {
-      const file = document.getElementById('iden-form').querySelector('input[type=file]').files[0];
-      return file ? file.name : '';
-    },
-    resultPanelId: 'idenResult'
-  });
+  // Replace your current herb‐identifier wiring with this:
+document.getElementById('iden-form').addEventListener('submit', async e => {
+  e.preventDefault();
+  const panel = document.getElementById('idenResult');
+  const fileInput = document.querySelector('#iden-form input[type=file]');
+  const file = fileInput.files[0];
+  if (!file) {
+    alert('Please choose an image first.');
+    return;
+  }
 
+  // Show loading
+  panel.querySelector('.result-content').innerHTML = 'Identifying… <span class="spinner"></span>';
+  panel.hidden = false;
+
+  try {
+    // Build multipart form data
+    const formData = new FormData();
+    formData.append('image', file);
+
+    // Send to your vision microservice
+    const res = await fetch('/.netlify/functions/image-vision', {
+      method: 'POST',
+      body: formData
+    });
+    if (!res.ok) throw new Error(`Server error: ${res.statusText}`);
+
+    const { name, uses, cautions, regions } = await res.json();
+    // Render the info card
+    panel.querySelector('.result-content').innerHTML = `
+      <strong>Scientific Name:</strong> ${name}<br/>
+      <strong>Uses:</strong> ${uses}<br/>
+      <strong>Cautions:</strong> ${cautions}<br/>
+      <strong>Regions Found:</strong> ${regions.join(', ')}<br/>
+      <button onclick="addToShelf('${name}')">Add to My Herb Shelf</button>
+    `;
+    panel.classList.add('show-close');
+
+  } catch (err) {
+    panel.querySelector('.result-content').textContent = '⚠️ ' + err.message;
+    panel.classList.add('show-close');
+    console.error(err);
+  }
+});
+  
   // 2. Symptom Checker
   wireModule({
     formId: 'sym-form',
