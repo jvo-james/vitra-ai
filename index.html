@@ -284,6 +284,22 @@
   right: 0.5rem;
   z-index: 10;
 }
+
+    .user-msg, .bot-msg {
+  max-width:80%; margin:0.5rem; padding:0.7rem 1rem; border-radius:1rem; position:relative;
+}
+.user-msg { background:var(--primary); color:#fff; align-self:flex-end; }
+.bot-msg  { background:var(--surface); color:var(--text); align-self:flex-start; }
+.timestamp {
+  font-size:0.7rem; position:absolute; bottom:-1.2rem;
+  right:0.8rem; color:var(--muted);
+}
+    @media (max-width:640px) {
+  .module { display:flex; flex-direction:column; }
+  .charts { grid-template-columns:1fr !important; }
+  form { flex-direction:column; }
+  #chatBox { max-height:200px; }
+}
   </style>
 </head>
 
@@ -381,16 +397,12 @@
    <!-- ENHANCED SYMPTOM CHECKER -->
 <section id="hero-symptom" class="module symptom-module">
   <h2><i class="fas fa-notes-medical"></i> Symptom Checker</h2>
-  <p class="desc">Tell us what’s bothering you, choose severity, and get AI-powered herbal recommendations—with confidence scores and evidence levels.</p>
-
+  <p class="desc">Describe your symptoms, set severity and duration, and get herbal recommendations.</p>
   <form id="sym-form" class="sym-form">
-    <!-- 1. Symptom Keywords -->
     <div class="field">
       <label for="symInput">Describe your symptoms</label>
       <textarea id="symInput" rows="2" placeholder="e.g. pounding headache, nausea…" required></textarea>
     </div>
-
-    <!-- 2. Category Tags -->
     <div class="field">
       <label>Symptom Category</label>
       <div class="tags">
@@ -400,30 +412,24 @@
         <button type="button" class="tag" data-cat="stress">Stress</button>
       </div>
     </div>
-
-    <!-- 3. Severity Slider -->
     <div class="field severity-field">
       <label for="severity">How intense?</label>
       <input type="range" id="severity" min="1" max="10" value="5"/>
       <span id="sevValue">5</span>/10
     </div>
-
-    <!-- 4. Date of Onset -->
     <div class="field">
-      <label for="onsetDate">When did it start?</label>
-      <input type="date" id="onsetDate"/>
+      <label for="symDuration">Duration (days)</label>
+      <input type="number" id="symDuration" min="0" placeholder="Days…"/>
     </div>
-
     <button type="submit" class="btn-primary">Get Recommendations</button>
   </form>
-
-  <!-- Enhanced Response Panel -->
   <div id="symResult" class="response sym-response" role="status" aria-live="polite" hidden>
-    <button class="close-btn" aria-label="Close result">×</button>
+    <button class="close-btn">×</button>
     <div class="result-header">
       <h3><i class="fas fa-seedling"></i> Recommended Herbs</h3>
       <div class="confidence">
-        Confidence: <div class="conf-bar"><div class="conf-fill" style="width:0%"></div></div>
+        Confidence:
+        <div class="conf-bar"><div class="conf-fill"></div></div>
         <span class="conf-percent">0%</span>
       </div>
     </div>
@@ -666,8 +672,8 @@
 
   async function callOpenAI(messages) {
     const res = await fetch('/.netlify/functions/openai-proxy', {
-      method:'POST',
-      headers:{ 'Content-Type':'application/json' },
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ messages })
     });
     if (!res.ok) throw new Error(await res.text() || 'Server error');
@@ -679,7 +685,8 @@
     const fd = new FormData();
     fd.append('file', file);
     const res = await fetch('/.netlify/functions/openai-proxy', {
-      method:'POST', body: fd
+      method: 'POST',
+      body: fd
     });
     if (!res.ok) throw new Error(await res.text() || 'Vision API error');
     return res.json();
@@ -690,44 +697,92 @@
   }
 
   function renderAI(text, container) {
-    text = stripMarkdown(text)
+    container.innerHTML = stripMarkdown(text)
       .replace(/```([\s\S]+?)```/g, '<pre><code>$1</code></pre>')
       .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
       .replace(/\*(.+?)\*/g, '<em>$1</em>');
-    container.innerHTML = text;
   }
 
   function showError(panel, msg) {
     panel.querySelector('.result-content').textContent = '⚠️ ' + msg;
   }
 
-  //───────────────── CHARTS ──────────────────
+  //───────────────── CHARTS & EXPORT ──────────────────
 
   function initCharts() {
-    const dummy = { labels:['Jan','Feb','Mar'], datasets:[{ label:'%', data:[50,75,100] }] };
-    const cfg = opts => ({ type:'line', data:dummy, options:{ responsive:true, plugins:{ legend:{ display:false } } } });
-    new Chart(document.getElementById('chartAdoption').getContext('2d'), cfg());
-    new Chart(document.getElementById('chartEfficacy').getContext('2d'), cfg());
-    new Chart(document.getElementById('chartSupply').getContext('2d'), cfg());
-    new Chart(document.getElementById('chartROI').getContext('2d'), cfg());
+    const dataAdopt = { labels:['Jan','Feb','Mar'], datasets:[{ data:[50,75,100] }] };
+    const dataEff   = { labels:['Mild','Moderate','High'], datasets:[{ data:[30,45,25] }] };
+    const dataSupp  = { labels:['Herb A','Herb B','Herb C'], datasets:[{ data:[200,150,300] }] };
+    const dataROI   = { labels:['Q1','Q2','Q3','Q4'], datasets:[{ data:[5,7,6,8] }] };
+
+    new Chart('chartAdoption', { type:'line', data:dataAdopt, options:{ responsive:true } });
+    new Chart('chartEfficacy',  { type:'bar',  data:dataEff,   options:{ responsive:true } });
+    new Chart('chartSupply',    { type:'pie',  data:dataSupp,  options:{ responsive:true } });
+    new Chart('chartROI',       { type:'radar',data:dataROI,  options:{ responsive:true } });
+  }
+
+  function exportAnalytics() {
+    const charts = [
+      { id:'chartAdoption', name:'Adoption Metrics' },
+      { id:'chartEfficacy',  name:'Efficacy Outcomes' },
+      { id:'chartSupply',    name:'Supply Impact' },
+      { id:'chartROI',       name:'Financial ROI' }
+    ];
+    let lines = [];
+    charts.forEach(({id,name}) => {
+      const ch = Chart.getChart(id);
+      ch.data.datasets.forEach(ds => {
+        lines.push([name, ds.label||'', ...ds.data].join(','));
+      });
+      lines.push('');
+    });
+    const blob = new Blob([lines.join('\n')], { type:'text/csv' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url; a.download = 'full_analytics.csv';
+    a.click(); URL.revokeObjectURL(url);
   }
 
   //───────────────── PLANT SCANNER ──────────────────
+
+  function previewImage(input) {
+    const img = document.getElementById('idenPreview');
+    let btn = document.getElementById('removePreview');
+    if (input.files[0]) {
+      const reader = new FileReader();
+      reader.onload = e => {
+        img.src = e.target.result;
+        img.style.display = 'block';
+        if (!btn) {
+          btn = document.createElement('button');
+          btn.id = 'removePreview';
+          btn.type = 'button';
+          btn.textContent = 'Remove Image';
+          btn.onclick = () => {
+            img.style.display = 'none';
+            input.value = '';
+            btn.remove();
+          };
+          input.after(btn);
+        }
+      };
+      reader.readAsDataURL(input.files[0]);
+    }
+  }
 
   document.getElementById('iden-form').onsubmit = async e => {
     e.preventDefault();
     const panel = document.getElementById('idenResult');
     panel.hidden = false;
-    panel.innerHTML = '<button class="close-btn" aria-label="Close">×</button>'
-                    + '<div class="result-content">Processing… <span class="spinner"></span></div>';
-    panel.querySelector('.close-btn').onclick = ()=> panel.hidden = true;
+    panel.innerHTML = '<button class="close-btn">×</button><div class="result-content">Processing… <span class="spinner"></span></div>';
+    panel.querySelector('.close-btn').onclick = () => panel.hidden = true;
 
     const file = e.target.querySelector('input[type=file]').files[0];
     const desc = document.getElementById('idenDesc').value.trim();
     if (!file && !desc) return showError(panel, 'Please upload an image or enter a description.');
 
+    let reply = '';
     try {
-      let reply = '';
       if (file) {
         const data = await callVision(file);
         if (data.name) {
@@ -735,12 +790,10 @@
             <strong>Scientific Name:</strong> ${data.name}<br/>
             <strong>Uses:</strong> ${data.uses}<br/>
             <strong>Cautions:</strong> ${data.cautions}<br/>
-            <strong>Regions:</strong> ${data.regions.join(', ')}
+            <strong>Regions:</strong> ${data.regions.join(', ')}<br/><hr/>
           `;
-        } else if (data.description) {
-          reply += data.description;
         } else {
-          reply += 'No vision output.';
+          reply += (data.description || 'No vision output.') + '<hr/>';
         }
       }
       if (desc) {
@@ -748,9 +801,10 @@
           { role:'system', content:'You are a plant expert.' },
           { role:'user', content:`Describe plant from text: ${desc}` }
         ]);
-        reply += (reply? '<hr/>' : '') + textReply;
+        reply += textReply;
       }
       panel.querySelector('.result-content').innerHTML = reply;
+      addResponseTools(panel);
     } catch(err) {
       showError(panel, err.message);
     }
@@ -758,13 +812,12 @@
 
   //───────────────── SYMPTOM CHECKER ──────────────────
 
-  document.querySelectorAll('#sym-form .tag').forEach(btn => {
-    btn.addEventListener('click', () => btn.classList.toggle('selected'));
-  });
-  const sev = document.getElementById('severity');
+  document.querySelectorAll('#sym-form .tag').forEach(btn =>
+    btn.addEventListener('click', ()=> btn.classList.toggle('selected'))
+  );
+  const severity = document.getElementById('severity');
   const sevVal = document.getElementById('sevValue');
-  sev.addEventListener('input', () => sevVal.textContent = sev.value);
-  document.getElementById('onsetDate').valueAsDate = new Date();
+  severity.addEventListener('input', ()=> sevVal.textContent = severity.value);
 
   document.getElementById('sym-form').onsubmit = async e => {
     e.preventDefault();
@@ -775,18 +828,14 @@
     panel.querySelector('.herb-cards').innerHTML = '';
 
     const text = document.getElementById('symInput').value;
-    const cats = [...document.querySelectorAll('#sym-form .tag.selected')]
-                  .map(t=>t.dataset.cat);
-    const severity = sev.value;
-    const onset = document.getElementById('onsetDate').value;
+    const cats = [...document.querySelectorAll('#sym-form .tag.selected')].map(t=>t.dataset.cat);
+    const dur = document.getElementById('symDuration')?.value || 'unknown';
+    const confPrompt = `Symptoms: ${text}; Categories: ${cats.join(',')}; Duration: ${dur} days; Severity: ${severity.value}`;
 
     try {
       const reply = await callOpenAI([
-        { role:'system', content:
-          `You are a herbal diagnostician. Output a JSON array:
-           [{"name":"", "evidence":"", "conf":0, "uses":""}, …]` },
-        { role:'user', content:
-          `Symptoms: ${text}; Categories: ${cats.join(',')}; Severity: ${severity}; Onset: ${onset}` }
+        { role:'system', content: `You are a herbal diagnostician. Output JSON: [{"name":"","evidence":"","conf":0,"uses":""},…]` },
+        { role:'user', content: confPrompt }
       ]);
       const recs = JSON.parse(reply);
       recs.forEach((h,i) => {
@@ -805,6 +854,7 @@
         `;
         panel.querySelector('.herb-cards').append(card);
       });
+      addResponseTools(panel);
     } catch(err) {
       panel.querySelector('.herb-cards').textContent = '⚠️ ' + err.message;
     }
@@ -816,138 +866,161 @@
     const q = document.getElementById('cultureQuery').value.trim();
     const panel = document.getElementById('cultureResult');
     panel.hidden = false;
-    panel.innerHTML = '<button class="close-btn" aria-label="Close">×</button>'
-                    + '<div class="result-content">Loading…</div>';
-    panel.querySelector('.close-btn').onclick = ()=> panel.hidden = true;
+    panel.innerHTML = '<button class="close-btn">×</button><div class="result-content">Loading…</div>';
+    panel.querySelector('.close-btn').onclick = () => panel.hidden = true;
     try {
       const reply = await callOpenAI([
         { role:'system', content:'You are a cultural herbalist.' },
         { role:'user', content:`Region query: ${q}` }
       ]);
       renderAI(reply, panel.querySelector('.result-content'));
+      addResponseTools(panel);
     } catch(err) {
       showError(panel, err.message);
     }
   }
-  document.getElementById('cultureResult')?.classList.add('response');
-  document.getElementById('cultureQuery').insertAdjacentHTML('beforebegin',
-    '<p class="desc">Enter a region, tradition or herb (e.g. “West African uses of moringa”) to get practices & folklore.</p>'
-  );
 
   //───────────────── CHATBOT ──────────────────
 
-  document.getElementById('sendChat').addEventListener('click', async () => {
+  function appendChat(who, html) {
+    const box = document.getElementById('chatBox');
+    const div = document.createElement('div');
+    div.className = who === 'user' ? 'user-msg' : 'bot-msg';
+    div.innerHTML = html + `<div class="timestamp">${new Date().toLocaleTimeString()}</div>`;
+    box.append(div);
+    box.scrollTop = box.scrollHeight;
+  }
+
+  document.getElementById('sendChat').onclick = async () => {
     const input = document.getElementById('chatInput');
-    const box   = document.getElementById('chatBox');
-    const txt   = input.value.trim();
+    const txt = input.value.trim();
     if (!txt) return;
-    const userDiv = document.createElement('div');
-    userDiv.className = 'user-msg';
-    userDiv.textContent = txt;
-    box.append(userDiv);
+    appendChat('user', txt);
     input.value = '';
-    document.getElementById('chatHint').hidden = false;
+    const hint = document.getElementById('chatHint');
+    hint.hidden = false;
+
     try {
       const reply = await callOpenAI([
         { role:'system', content:'You are a friendly herbalist.' },
         { role:'user', content: txt }
       ]);
-      const botDiv = document.createElement('div');
-      botDiv.className = 'bot-msg';
-      botDiv.innerHTML = stripMarkdown(reply).replace(/\n/g,'<br/>');
-      box.append(botDiv);
+      appendChat('bot', stripMarkdown(reply).replace(/\n/g,'<br/>'));
     } catch(err) {
-      box.append(`⚠️ ${err.message}`);
+      appendChat('bot', '⚠️ ' + err.message);
     } finally {
       document.getElementById('chatHint').hidden = true;
-      box.scrollTop = box.scrollHeight;
     }
-  });
+  };
 
-  //───────────────── GENETICS MATCH ──────────────────
+  //───────────────── GENETICS & ROI ──────────────────
 
   document.getElementById('genetics-form').onsubmit = async e => {
     e.preventDefault();
-    const file = document.getElementById('geneticUpload').files[0];
     const panel = document.getElementById('geneticResult');
+    const file = document.getElementById('geneticUpload').files[0];
     if (!file) {
       panel.hidden = false;
-      showError(panel, 'Upload a CSV or JSON.');
-      return;
+      return showError(panel, 'Please upload a CSV or JSON.');
     }
     panel.hidden = false;
     panel.querySelector('.result-content').textContent = 'Processing…';
     try {
       const text = await file.text();
       const reply = await callOpenAI([
-        {role:'system', content:'You interpret genetic SNP data for herb recommendations.'},
-        {role:'user', content: text }
+        { role:'system', content:'You interpret genetic SNP data for herb recommendations.' },
+        { role:'user', content: text }
       ]);
       renderAI(reply, panel.querySelector('.result-content'));
+      addResponseTools(panel);
     } catch(err) {
       showError(panel, err.message);
     }
   };
 
-  //───────────────── ROI CALCULATOR ──────────────────
-
   document.getElementById('roi-form').onsubmit = e => {
     e.preventDefault();
+    const panel = document.getElementById('roiResult');
     const rx   = +document.getElementById('roiRx').value;
     const cost = +document.getElementById('roiCost').value;
-    const incomePer = +prompt('Income per prescription?','100');
-    const totalIncome = rx * incomePer;
-    const totalCost   = rx * cost;
-    const netProfit   = totalIncome - totalCost;
-    const roiPercent  = ((netProfit / totalCost) * 100).toFixed(2);
-    const panel = document.getElementById('roiResult');
+    const inc  = +prompt('Income per prescription?','100');
+    const totalInc  = rx * inc;
+    const totalCost = rx * cost;
+    const net       = totalInc - totalCost;
+    const roiPct    = ((net / totalCost) * 100).toFixed(2);
+
     panel.hidden = false;
     panel.querySelector('.result-content').innerHTML = `
-      <p><strong>Monthly prescriptions:</strong> ${rx}</p>
-      <p><strong>Income per Rx:</strong> $${incomePer}</p>
-      <p><strong>Total income:</strong> $${totalIncome}</p>
-      <p><strong>Total herb cost:</strong> $${totalCost}</p>
-      <p><strong>Net profit:</strong> $${netProfit}</p>
-      <p><strong>ROI:</strong> ${roiPercent}%</p>
+      <p><strong>Prescriptions:</strong> ${rx}</p>
+      <p><strong>Income per Rx:</strong> $${inc}</p>
+      <p><strong>Total Income:</strong> $${totalInc}</p>
+      <p><strong>Total Cost:</strong> $${totalCost}</p>
+      <p><strong>Net Profit:</strong> $${net}</p>
+      <p><strong>ROI:</strong> ${roiPct}%</p>
     `;
+    addResponseTools(panel);
   };
+
+  //───────────────── COPY & DOWNLOAD TOOLBAR ──────────────────
+
+  function addResponseTools(panel) {
+    if (panel.querySelector('.copy-btn')) return;
+    const toolbar = document.createElement('div');
+    toolbar.style.position = 'absolute';
+    toolbar.style.top = '0.5rem';
+    toolbar.style.right = '2.5rem';
+    toolbar.innerHTML = `
+      <button class="copy-btn" title="Copy"><i class="fas fa-copy"></i></button>
+      <button class="dl-btn"   title="Download"><i class="fas fa-download"></i></button>
+    `;
+    panel.append(toolbar);
+    toolbar.querySelector('.copy-btn').onclick = () => {
+      navigator.clipboard.writeText(panel.querySelector('.result-content').innerText);
+    };
+    toolbar.querySelector('.dl-btn').onclick = () => {
+      const text = panel.querySelector('.result-content').innerText;
+      const blob = new Blob([text], { type:'text/plain' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url; a.download = 'response.txt';
+      a.click(); URL.revokeObjectURL(url);
+    };
+  }
 
   //───────────────── DARK MODE & SIDEBAR ──────────────────
 
-  document.getElementById('themeToggle').addEventListener('click', () => {
+  document.getElementById('themeToggle').onclick = () => {
     document.documentElement.classList.toggle('dark');
-    document.getElementById('themeToggle').classList.toggle('fa-sun');
-    document.getElementById('themeToggle').classList.toggle('fa-moon');
-  });
+    const ico = document.getElementById('themeToggle');
+    ico.classList.toggle('fa-moon'); ico.classList.toggle('fa-sun');
+  };
 
-  const sidebar = document.getElementById('sidebar');
-  document.getElementById('shrinkBtn').addEventListener('click', () => {
-    sidebar.classList.toggle('collapsed');
-    const icon = document.getElementById('shrinkBtn').querySelector('i');
-    icon.classList.toggle('fa-angle-double-left');
-    icon.classList.toggle('fa-angle-double-right');
-  });
-  document.getElementById('hamburger').addEventListener('click', () => {
-    sidebar.classList.toggle('open');
-  });
+  document.getElementById('shrinkBtn').onclick = () => {
+    document.getElementById('sidebar').classList.toggle('collapsed');
+    const i = document.querySelector('#shrinkBtn i');
+    i.classList.toggle('fa-angle-double-left'); i.classList.toggle('fa-angle-double-right');
+  };
+
+  document.getElementById('hamburger').onclick = () => {
+    document.getElementById('sidebar').classList.toggle('open');
+  };
 
   //───────────────── GENERIC FORM WIRING & STARTUP ──────────────────
 
-  function wireForm(formId, prompt, extract, outputId) {
-    const form = document.getElementById(formId);
-    form.onsubmit = async e => {
+  function wireForm(id, prompt, extract, outId) {
+    document.getElementById(id).onsubmit = async e => {
       e.preventDefault();
-      const panel = document.getElementById(outputId);
+      const panel = document.getElementById(outId);
       panel.hidden = false;
-      panel.innerHTML = '<button class="close-btn" aria-label="Close">×</button>'
-                      + '<div class="result-content">Processing… <span class="spinner"></span></div>';
-      panel.querySelector('.close-btn').onclick = ()=> panel.hidden = true;
+      panel.innerHTML = '<button class="close-btn">×</button><div class="result-content">Processing…</div>';
+      panel.querySelector('.close-btn').onclick = () => panel.hidden = true;
       try {
-        const reply = await callOpenAI([
+        const rep = await callOpenAI([
           { role:'system', content: prompt },
           { role:'user',   content: extract() }
         ]);
-        renderAI(reply, panel.querySelector('.result-content'));
+        renderAI(rep, panel.querySelector('.result-content'));
+        addResponseTools(panel);
       } catch(err) {
         showError(panel, err.message);
       }
@@ -956,6 +1029,7 @@
 
   document.addEventListener('DOMContentLoaded', () => {
     initCharts();
+    document.querySelector('button[onclick="exportAnalytics()"]').onclick = exportAnalytics;
     wireForm('pf-form',
       'You are an expert at formulating personalized herbal blends with dosage safety.',
       () => {
@@ -963,53 +1037,38 @@
         const a = document.getElementById('pfAge').value;
         const w = document.getElementById('pfWeight').value;
         return `Herbs: ${h}; Age: ${a}; Weight: ${w}kg`;
-      },
-      'pfResult'
+      }, 'pfResult'
     );
     wireForm('research-form',
       'You summarize clinical research findings with citations.',
-      () => document.getElementById('researchQuery').value,
-      'researchResults'
+      () => document.getElementById('researchQuery').value, 'researchResults'
     );
     wireForm('inventory-form',
       'You forecast weekly herb demand with trends & buffer stock.',
-      () => {
-        const h = document.getElementById('forecastHerb').value;
-        const p = document.getElementById('forecastPeriod').value;
-        return `Herb: ${h}; Weeks ahead: ${p}`;
-      },
-      'inventoryResult'
+      () => `Herb: ${document.getElementById('forecastHerb').value}; Weeks ahead: ${document.getElementById('forecastPeriod').value}`, 'inventoryResult'
     );
     wireForm('int-form',
       'You check interactions between two herbs with severity descriptions.',
       () => {
-        const a = document.getElementById('herbA').value;
-        const b = document.getElementById('herbB').value;
-        if (a===b) throw new Error('Pick two distinct herbs.');
+        const a=document.getElementById('herbA').value, b=document.getElementById('herbB').value;
+        if(a===b) throw new Error('Pick two distinct herbs.');
         return `${a} & ${b}`;
-      },
-      'interactionResult'
+      }, 'interactionResult'
     );
     wireForm('safety-form',
       'You warn of dangerous combinations between herbs & meds, color-coded.',
       () => {
-        const a = document.getElementById('safetyA').value;
-        const b = document.getElementById('safetyB').value;
-        if (a===b) throw new Error('Pick two distinct items.');
+        const a=document.getElementById('safetyA').value, b=document.getElementById('safetyB').value;
+        if(a===b) throw new Error('Pick two distinct items.');
         return `${a} & ${b}`;
-      },
-      'safetyResult'
+      }, 'safetyResult'
     );
     wireForm('dose-form',
       'You calculate daily herbal dosages based on weight, symptom, extract.',
-      () => {
-        const w = document.getElementById('weight').value;
-        const s = document.getElementById('symptom').value;
-        const f = document.getElementById('formType').value;
-        return `Weight: ${w}kg; Symptom: ${s}; Form: ${f}`;
-      },
-      'dosageResult'
+      () => `Weight:${document.getElementById('weight').value}kg; Symptom:${document.getElementById('symptom').value}; Form:${document.getElementById('formType').value}`, 'dosageResult'
     );
+    // Culture button
+    document.querySelector('#hero–cultural button').onclick = getCulture;
   });
 </script>
 </body>
