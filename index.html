@@ -154,6 +154,56 @@
     display:flex; align-items:center; justify-content:center; cursor:pointer;
   }
 
+    /* Symptom Checker Enhancements */
+.symptom-module { background:linear-gradient(135deg, #e8f5f1 0%, #fbfcfb 100%); }
+.sym-form .field { margin-bottom:1rem; display:flex; flex-direction:column; }
+.sym-form label { font-weight:600; margin-bottom:.5rem; color:var(--secondary); }
+.sym-form textarea, .sym-form input[type="date"], .sym-form input[type="range"] {
+  width:100%; padding:.75rem; border:1px solid #d1dce5; border-radius:var(--radius);
+}
+.tags { display:flex; gap:.5rem; flex-wrap:wrap; }
+.tag {
+  background:var(--accent); border:1px solid var(--secondary);
+  border-radius:var(--radius); padding:.4rem .8rem; cursor:pointer;
+  transition:background var(--transition), color var(--transition);
+}
+.tag.selected { background:var(--secondary); color:#fff; }
+.severity-field { align-items:center; }
+#sevValue { font-weight:600; margin-left:.5rem; color:var(--secondary); }
+
+.response.sym-response {
+  border-left-color:var(--secondary);
+  background:rgba(47,169,161,0.075);
+}
+.sym-response .result-header {
+  display:flex; justify-content:space-between; align-items:center;
+  margin-bottom:1rem;
+}
+.confidence { display:flex; align-items:center; gap:.5rem; font-size:.95rem; }
+.conf-bar {
+  width:100px; height:8px; background:#e1e8ed; border-radius:4px; overflow:hidden;
+}
+.conf-fill {
+  height:100%; background:var(--secondary); width:0%;
+  transition:width 0.6s ease;
+}
+.herb-cards {
+  display:grid; grid-template-columns:repeat(auto-fill,minmax(200px,1fr));
+  gap:1rem; margin-bottom:1rem;
+}
+.herb-card {
+  background:var(--surface); border-radius:var(--radius); padding:.75rem;
+  box-shadow:0 2px 8px rgba(0,0,0,0.05);
+  display:flex; flex-direction:column; gap:.5rem;
+}
+.herb-card h4 { margin:0; color:var(--primary); }
+.evidence-badge {
+  align-self:flex-start; padding:.25rem .5rem; border-radius:var(--radius);
+  font-size:.8rem; font-weight:600; color:#fff;
+}
+.evidence-badge.well { background:#2fa9a1; }
+.evidence-badge.anecdotal { background:#8e6c4b; }
+.disclaimer { font-size:.85rem; color:var(--muted); margin-top:.5rem; }
   /*────────────────── HERO ──────────────────*/
   #hero {
     display:flex; flex-direction:column; align-items:center; text-align:center;
@@ -293,20 +343,59 @@
       </div>
     </section>
 
-    <!-- 2. Symptom Checker (AI Diagnostics) -->
-    <section id="hero–symptom" class="module">
-      <h2><i class="fas fa-notes-medical"></i> Symptom Checker</h2>
-      <p class="desc">What symptoms are you experiencing?</p>
-      <form id="sym-form">
-        <textarea id="symInput" rows="2" aria-label="Describe symptoms" placeholder="e.g. headache, nausea" required></textarea>
-        <button type="submit">Analyze</button>
-      </form>
-      <div id="symResult" class="response" role="status" aria-live="polite" hidden>
-        <button class="close-btn" aria-label="Close result">×</button>
-        <div class="result-content"></div>
-        <p class="hint"><em>See a professional if symptoms are severe or persistent.</em></p>
+   <!-- ENHANCED SYMPTOM CHECKER -->
+<section id="hero–symptom" class="module symptom-module">
+  <h2><i class="fas fa-notes-medical"></i> Symptom Checker</h2>
+  <p class="desc">Tell us what’s bothering you, choose severity, and get AI-powered herbal recommendations—with confidence scores and evidence levels.</p>
+
+  <form id="sym-form" class="sym-form">
+    <!-- 1. Symptom Keywords -->
+    <div class="field">
+      <label for="symInput">Describe your symptoms</label>
+      <textarea id="symInput" rows="2" placeholder="e.g. pounding headache, nausea…" required></textarea>
+    </div>
+
+    <!-- 2. Category Tags -->
+    <div class="field">
+      <label>Symptom Category</label>
+      <div class="tags">
+        <button type="button" class="tag" data-cat="pain">Pain</button>
+        <button type="button" class="tag" data-cat="digestive">Digestive</button>
+        <button type="button" class="tag" data-cat="respiratory">Respiratory</button>
+        <button type="button" class="tag" data-cat="stress">Stress</button>
       </div>
-    </section>
+    </div>
+
+    <!-- 3. Severity Slider -->
+    <div class="field severity-field">
+      <label for="severity">How intense?</label>
+      <input type="range" id="severity" min="1" max="10" value="5"/>
+      <span id="sevValue">5</span>/10
+    </div>
+
+    <!-- 4. Date of Onset -->
+    <div class="field">
+      <label for="onsetDate">When did it start?</label>
+      <input type="date" id="onsetDate"/>
+    </div>
+
+    <button type="submit" class="btn-primary">Get Recommendations</button>
+  </form>
+
+  <!-- Enhanced Response Panel -->
+  <div id="symResult" class="response sym-response" role="status" aria-live="polite" hidden>
+    <button class="close-btn" aria-label="Close result">×</button>
+    <div class="result-header">
+      <h3><i class="fas fa-seedling"></i> Recommended Herbs</h3>
+      <div class="confidence">
+        Confidence: <div class="conf-bar"><div class="conf-fill" style="width:0%"></div></div>
+        <span class="conf-percent">0%</span>
+      </div>
+    </div>
+    <div class="herb-cards"></div>
+    <p class="disclaimer"><em>Not a substitute for professional care. See a healthcare provider if severe.</em></p>
+  </div>
+</section>
 
     <!-- 3. Cultural Knowledge -->
     <section id="hero–cultural" class="module">
@@ -677,6 +766,58 @@
     });
 
     // 2–11. Wire remaining modules
+    // Symptom Checker Script Enhancements
+document.addEventListener('DOMContentLoaded', () => {
+  // Tag selection
+  document.querySelectorAll('.tag').forEach(btn => {
+    btn.addEventListener('click', () => btn.classList.toggle('selected'));
+  });
+  // Severity slider
+  const sev = document.getElementById('severity'),
+        sevVal = document.getElementById('sevValue');
+  sev.addEventListener('input', () => sevVal.textContent = sev.value);
+
+  // Handle submit
+  document.getElementById('sym-form').addEventListener('submit', async e => {
+    e.preventDefault();
+    const panel = document.getElementById('symResult');
+    panel.hidden = false;
+    panel.querySelector('.conf-fill').style.width = '0%';
+    panel.querySelector('.conf-percent').textContent = '0%';
+    panel.querySelector('.herb-cards').innerHTML = '';
+
+    // Gather inputs
+    const text = document.getElementById('symInput').value,
+          cats = [...document.querySelectorAll('.tag.selected')].map(t=>t.dataset.cat),
+          severity = sev.value,
+          onset = document.getElementById('onsetDate').value;
+
+    // Mock AI call (replace with real proxy)
+    const mockReply = [
+      { name:'Feverfew', evidence:'well', conf:85, uses:'Headache relief' },
+      { name:'Ginger', evidence:'anecdotal', conf:65, uses:'Nausea soothing' }
+    ];
+    // Animate confidence
+    setTimeout(() => {
+      panel.querySelector('.conf-fill').style.width = '85%';
+      panel.querySelector('.conf-percent').textContent = '85%';
+    }, 200);
+
+    // Build cards
+    const container = panel.querySelector('.herb-cards');
+    mockReply.forEach(h => {
+      const card = document.createElement('div');
+      card.className = 'herb-card';
+      card.innerHTML = `
+        <h4>${h.name}</h4>
+        <span class="evidence-badge ${h.evidence}">${h.evidence === 'well' ? 'Well-studied' : 'Anecdotal'}</span>
+        <p>${h.uses}</p>
+        <button onclick="addToShelf('${h.name}')">Add to Shelf</button>
+      `;
+      container.appendChild(card);
+    });
+  });
+});
     wireModule({ formId:'sym-form', systemPrompt:'You are a top-tier herbal diagnostic AI.', getUserInput:()=>document.getElementById('symInput').value, resultPanelId:'symResult' });
     wireModule({ formId:'pf-form', systemPrompt:'You are an expert at formulating personalized herbal blends with dosage safety.', getUserInput:()=>{
       const herbs = Array.from(document.getElementById('pfHerbs').selectedOptions).map(o=>o.value).join(', ');
