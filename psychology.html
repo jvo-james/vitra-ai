@@ -302,6 +302,84 @@
     grid-template-columns: 1fr;
   }
 }
+    /* ─── Dream & Subconscious Explorer ───────────────────────────────────── */
+.dream-block {
+  margin-bottom: 1.5rem;
+  padding: 1rem;
+  background: var(--accent);
+  border-radius: var(--radius);
+}
+.dream-block h3 {
+  display: flex;
+  align-items: center;
+  gap: .5rem;
+  font-size: 1.1rem;
+  color: var(--secondary);
+  margin-bottom: .25rem;
+}
+.dream-block .mini-desc {
+  font-size: .9rem;
+  color: var(--muted);
+  margin-bottom: .5rem;
+}
+.dream-block textarea,
+.dream-block input[type="text"],
+.dream-block select {
+  width: 100%;
+  padding: .75rem;
+  border: 1px solid #d1dce5;
+  border-radius: var(--radius);
+  font-size: .95rem;
+  margin-bottom: .5rem;
+  background: var(--surface);
+  color: var(--text);
+}
+.dream-block input[type="file"] {
+  display: block;
+  margin-bottom: .5rem;
+}
+.checkbox-group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: .75rem;
+}
+.checkbox-group label {
+  display: inline-flex;
+  align-items: center;
+  gap: .25rem;
+  font-size: .9rem;
+  color: var(--text);
+}
+.checkbox-group input[type="checkbox"] {
+  transform: scale(1.1);
+}
+#otherSymbol {
+  flex: 1;
+  padding: .5rem;
+}
+.dream-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  justify-content: center;
+  margin-top: 1rem;
+}
+.dream-actions .btn {
+  font-size: .95rem;
+}
+#dreamPanel {
+  margin-top: 1.5rem;
+}
+#dreamPanel .close-btn {
+  position: absolute;
+  top: .5rem;
+  right: .5rem;
+}
+#dreamPanel .tool-row {
+  position: absolute;
+  bottom: .5rem;
+  right: .5rem;
+}
   </style>
 </head>
 <body>
@@ -364,7 +442,6 @@
       <div id="insightPanel"></div>
     </section>
 
-    <!-- 3. Daily Mood Tracker -->
  <!-- 3. Daily Mood Tracker -->
 <section class="module" id="moodTracker">
   <h2><i class="fas fa-sliders-h"></i> 3. Daily Mood Tracker</h2>
@@ -435,13 +512,104 @@
 
 
     <!-- 4. Dream & Subconscious Explorer -->
-    <section class="module" id="dream">
-      <h2><i class="fas fa-bed"></i> 4. Dream &amp; Subconscious Explorer</h2>
-      <p class="desc">Describe your dreams or record nighttime audio for AI-driven interpretation.</p>
-      <button class="btn btn-primary" id="dreamRecall"><i class="fas fa-question-circle"></i> Guided Dream Recall</button>
-      <button class="btn btn-secondary" id="voiceDiary"><i class="fas fa-microphone"></i> Night Voice Diary</button>
-      <div id="dreamPanel"></div>
-    </section>
+ <section class="module" id="dream">
+  <h2><i class="fas fa-bed"></i> 4. Dream &amp; Subconscious Explorer</h2>
+  <p class="desc">
+    Dive into the depths of your nightly mind—capture narratives, symbols, emotions, and ambient sounds.
+    Our AI weaves them together to surface hidden patterns, archetypes, and personalized insights.
+  </p>
+
+  <!-- 1. Dream Narrative -->
+  <div class="dream-block">
+    <h3><i class="fas fa-feather-alt"></i> Dream Narrative</h3>
+    <p class="mini-desc">Write down every detail you remember—characters, colors, emotions, settings.</p>
+    <textarea id="dreamText" rows="4" placeholder="“I found myself… ”"></textarea>
+  </div>
+
+  <!-- 2. Audio Capture -->
+  <div class="dream-block">
+    <h3><i class="fas fa-microphone-alt"></i> Nighttime Audio (Optional)</h3>
+    <p class="mini-desc">Upload or record sounds (breathing, ambient noise) to enrich context.</p>
+    <input type="file" id="dreamAudio" accept="audio/*"/>
+    <button class="btn btn-secondary" onclick="startRecording()">
+      <i class="fas fa-record-vinyl"></i> Record 30s
+    </button>
+  </div>
+
+  <!-- 3. Symbol & Theme Selector -->
+  <div class="dream-block">
+    <h3><i class="fas fa-swatchbook"></i> Symbols &amp; Themes</h3>
+    <p class="mini-desc">Tick any motifs you noticed; add your own too.</p>
+    <fieldset>
+      <legend>Common Symbols</legend>
+      <div class="checkbox-group">
+        <label><input type="checkbox" value="water"/> <i class="fas fa-water"></i> Water</label>
+        <label><input type="checkbox" value="flight"/> <i class="fas fa-wind"></i> Flight</label>
+        <label><input type="checkbox" value="teeth"/> <i class="fas fa-tooth"></i> Teeth</label>
+        <label><input type="checkbox" value="chase"/> <i class="fas fa-running"></i> Being Chased</label>
+        <label><input type="checkbox" value="falling"/> <i class="fas fa-arrow-down"></i> Falling</label>
+        <label>
+          <input type="checkbox" id="otherSymbolChk"/> <i class="fas fa-plus"></i> Other:
+          <input type="text" id="otherSymbol" placeholder="Your symbol"/>
+        </label>
+      </div>
+    </fieldset>
+  </div>
+
+  <!-- 4. Pre-Sleep & Wake Mood -->
+  <div class="dream-block">
+    <h3><i class="fas fa-smile-beam"></i> Mood Before Sleep</h3>
+    <p class="mini-desc">How did you feel drifting off?</p>
+    <select id="preMood">
+      <option disabled selected>Select mood…</option>
+      <option>Calm</option><option>Anxious</option><option>Neutral</option><option>Excited</option><option>Sad</option><option>Other…</option>
+    </select>
+
+    <h3 style="margin-top:1rem;"><i class="fas fa-sun"></i> Mood On Waking</h3>
+    <p class="mini-desc">How did you feel upon awakening?</p>
+    <select id="postMood">
+      <option disabled selected>Select mood…</option>
+      <option>Refreshed</option><option>Tired</option><option>Confused</option><option>Inspired</option><option>Anxious</option><option>Other…</option>
+    </select>
+  </div>
+
+  <!-- 5. Contextual Tags -->
+  <div class="dream-block">
+    <h3><i class="fas fa-tags"></i> Contextual Tags</h3>
+    <p class="mini-desc">Add keywords: stressors, events, people, places.</p>
+    <input type="text" id="dreamTags" placeholder="e.g. exam, hometown, graduation"/>
+  </div>
+
+  <!-- 6. Free-form Reflection -->
+  <div class="dream-block">
+    <h3><i class="fas fa-lightbulb"></i> Reflection &amp; Intentions</h3>
+    <p class="mini-desc">What do you think this dream means? Set intentions for tomorrow.</p>
+    <textarea id="dreamReflect" rows="3" placeholder="My reflection…"></textarea>
+  </div>
+
+  <!-- Action Buttons -->
+  <div class="dream-actions">
+    <button class="btn btn-primary" onclick="analyzeDream()">
+      <i class="fas fa-brain"></i> Analyze Dream
+    </button>
+    <button class="btn btn-secondary" onclick="interpretSymbols()">
+      <i class="fas fa-search"></i> Interpret Symbols
+    </button>
+    <button class="btn btn-secondary" onclick="generatePrompts()">
+      <i class="fas fa-pen-nib"></i> Generate Writing Prompts
+    </button>
+  </div>
+
+  <!-- AI Response Panel -->
+  <div id="dreamPanel" class="response" hidden>
+    <button class="close-btn" aria-label="Close dream insights">&times;</button>
+    <div class="tool-row">
+      <button title="Copy"><i class="fas fa-copy"></i></button>
+      <button title="Download"><i class="fas fa-download"></i></button>
+    </div>
+    <div class="result-content"></div>
+  </div>
+</section>
 
     <!-- 5. AI-Curated Creative Therapies -->
     <section class="module" id="creative">
@@ -674,7 +842,44 @@
     document.getElementById('startVideo').onclick        = ()=>alert('Integrate video+Whisper here');
     document.getElementById('typingAnalysis').onclick    = ()=>handleModule('insight','Analyze typing for stress','Type a few sentences:');
     document.getElementById('submitMood').onclick        = ()=>handleModule('moodTracker','Analyze these mood scores','Enter mood values comma-separated (1–10):');
-    document.getElementById('dreamRecall').onclick       = ()=>handleModule('dream','Interpret this dream','Describe your dream:');
+   
+    // ── Replace your existing dreamRecall handler with this ──
+document.getElementById('dreamRecall').onclick = async () => {
+  const panel = getPanel('dream');  // exactly like handleModule, but custom
+  panel.innerHTML = `<div class="result-content">Analyzing… <span class="spinner"></span></div>`;
+
+  // 1) Grab all of your new inputs:
+  const narrative = document.getElementById('dreamNarrative').value.trim();
+  const emotions  = document.getElementById('dreamEmotions').value.trim();
+  const symbols   = Array.from(
+    document.querySelectorAll('.dream-symbol:checked')
+  ).map(cb => cb.value).join(', ');
+  const intensity = document.getElementById('dreamIntensity').value;
+  const themes    = document.getElementById('dreamThemes').value.trim();
+
+  // 2) Build a system+user prompt that includes each:
+  const sys  = 'You are a dream interpreter. Use all the data provided.';
+  const usr  = 
+    `Dream description: ${narrative}\n` +
+    `Primary emotions felt: ${emotions}\n` +
+    `Key symbols noticed: ${symbols}\n` +
+    `Vividness (1–10): ${intensity}\n` +
+    `Recurring themes: ${themes}`;
+
+  try {
+    const reply = await callOpenAI([
+      { role: 'system',  content: sys },
+      { role: 'user',    content: usr }
+    ]);
+    panel.innerHTML = `<div class="result-content">${formatHTML(reply)}</div>`;
+  } catch (err) {
+    panel.innerHTML = `<div class="result-content">😕 Oops! Something went wrong.</div>`;
+  }
+}; 
+    // right after DOMContentLoaded
+const intensity = document.getElementById('dreamIntensity');
+const display   = document.getElementById('dreamIntensityValue');
+intensity.oninput = () => display.textContent = intensity.value;
     document.getElementById('voiceDiary').onclick        = ()=>alert('Integrate voice diary');
     document.getElementById('artEmotion').onclick        = ()=>handleModule('creative','Generate DALL·E art prompt','Enter an emotion:');
     document.getElementById('musicMixer').onclick        = ()=>handleModule('creative','Compose a soundscape','Describe your current mood:');
