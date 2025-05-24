@@ -175,6 +175,27 @@ main {
   background: var(--bg);
 }
 
+    /* Force exactly 2 columns, fixed height for each card */
+.charts {
+  display: grid !important;
+  grid-template-columns: repeat(2, 1fr) !important;
+  gap: 1rem !important;
+}
+
+.chart-card {
+  /* total card height including caption */
+  height: 250px; 
+  display: flex;
+  flex-direction: column;
+}
+
+.chart-card canvas {
+  /* fill the remaining space in the card */
+  flex: 1 1 auto !important;
+  width: 100% !important;
+  height: auto !important;
+}
+
 /*────────────────── MODULES ──────────────────*/
 .module {
   background: var(--surface);
@@ -1129,7 +1150,7 @@ footer a {
   function initCharts() {
     const cfg = (type, data) => ({
       type, data,
-      options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } }
+      options: { responsive: true, maintainAspectRatio: true, aspectRatio: 1.8, plugins: { legend: { display: false } } }
     });
     new Chart('chartAdoption', cfg('line', { labels:['Jan','Feb','Mar'], datasets:[{data:[50,75,100]}] }));
     new Chart('chartEfficacy',  cfg('bar',  { labels:['Mild','Mod','High'],   datasets:[{data:[30,45,25]}] }));
