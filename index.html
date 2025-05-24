@@ -717,6 +717,39 @@
     initContactForm();
   });
 
+  // Herb Identifier (image) handler
+document.getElementById('iden-form').addEventListener('submit', async e => {
+  e.preventDefault();
+  const panel = document.getElementById('idenResult');
+  const fileInput = e.currentTarget.querySelector('input[type=file]');
+  const file = fileInput.files[0];
+  if (!file) {
+    alert('Please select an image first.');
+    return;
+  }
+
+  // Show spinner
+  panel.hidden = false;
+  panel.querySelector('.result-content').innerHTML =
+    'Identifying… <span class="spinner"></span>';
+
+  try {
+    const formData = new FormData();
+    formData.append('file', file);
+
+    const res = await fetch('/.netlify/functions/openai-proxy', {
+      method: 'POST',
+      body: formData
+    });
+    if (!res.ok) {
+      throw new Error(await res.text());
+    }
+    const { description } = await res.json();
+    panel.querySelector('.result-content').textContent = description;
+  } catch (err) {
+    panel.querySelector('.result-content').textContent = '⚠️ ' + err.message;
+  }
+});
   // ───── CORE UI ─────
   function initUI() {
     const sidebar   = document.getElementById('sidebar');
@@ -775,16 +808,23 @@
 
   // ───── OpenAI proxy ─────
   async function callOpenAI(messages) {
-    const res = await fetch('/.netlify/functions/openai-proxy', {
-      method:'POST',
-      headers:{ 'Content-Type':'application/json' },
-      body: JSON.stringify({ messages })
-    });
-    if (!res.ok) throw new Error(await res.text());
-    const { choices } = await res.json();
-    return choices[0].message.content.trim();
+  const res = await fetch('/.netlify/functions/openai-proxy', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ messages })
+  });
+  if (!res.ok) {
+    const errText = await res.text();
+    throw new Error(errText || 'Server error');
   }
-
+  const data = await res.json();
+  // proxy returns { reply } on chat
+  if (data.reply !== undefined) return data.reply;
+  // proxy returns { description } on image
+  if (data.description !== undefined) return data.description;
+  throw new Error('Unexpected response shape');
+}
+  
   // ───── Generic form wiring ─────
   function wireForm({ formId, prompt, extract, outputId }) {
     const form  = document.getElementById(formId);
