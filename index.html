@@ -331,7 +331,7 @@ button[disabled] {
 }
  /* HERO MODULE */
   .hero-module {
-    background: var(--accent);
+   background: var(--surface);
     color: var(--text);
     border-radius: var(--radius);
     padding: 3rem 1rem;
@@ -422,11 +422,16 @@ button[disabled] {
     align-items: center;
     gap: 0.5rem;
     padding: 0.75rem 1rem;
-    background: var(--surface);
+    transition: transform var(--transition), box-shadow var(--transition);
     border-radius: var(--radius);
-    box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
     font-size: 0.95rem;
+    background: var(--bg);
   }
+    .hero-features li:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+ }
   html.dark .hero-features li {
     background: var(--surface-dark);
     box-shadow: 0 2px 6px rgba(0,0,0,0.2);
@@ -1306,7 +1311,26 @@ footer a {
   function initCharts() {
     const cfg = (type, data) => ({
       type, data,
-      options: { responsive: true, maintainAspectRatio: false, aspectRatio: 1.8, plugins: { legend: { display: false } } }
+      options: { responsive: true,
+      maintainAspectRatio: false,
+      aspectRatio: 1.8,
+      color: getComputedStyle(document.documentElement).getPropertyValue('--text').trim(),
+      scales: {
+        x: { 
+          ticks: { color: getComputedStyle(document.documentElement).getPropertyValue('--text').trim() },
+          grid:  { color: getComputedStyle(document.documentElement).getPropertyValue('--muted').trim() }
+        },
+        y: {
+          ticks: { color: getComputedStyle(document.documentElement).getPropertyValue('--text').trim() },
+          grid:  { color: getComputedStyle(document.documentElement).getPropertyValue('--muted').trim() }
+        }
+      },
+      plugins: {
+       legend: {
+          display: false,
+          labels: { color: getComputedStyle(document.documentElement).getPropertyValue('--text').trim() }
+        }
+      } }
     });
     new Chart('chartAdoption', cfg('line', { labels:['Jan','Feb','Mar'], datasets:[{data:[50,75,100]}] }));
     new Chart('chartEfficacy',  cfg('bar',  { labels:['Mild','Mod','High'],   datasets:[{data:[30,45,25]}] }));
