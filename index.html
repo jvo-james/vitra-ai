@@ -635,262 +635,265 @@
 
   <!-- JAVASCRIPT LOGIC -->
 
-  <script>
-document.addEventListener('DOMContentLoaded', () => {
-  // ───── SIDEBAR & THEME ─────
-  const sidebar     = document.getElementById('sidebar');
-  const shrinkBtn   = document.getElementById('shrinkBtn');
-  const hamburger   = document.getElementById('hamburger');
-  const themeToggle = document.getElementById('themeToggle');
-  const onboardModal= document.getElementById('onboardModal');
-
-  shrinkBtn.addEventListener('click', () => {
-    sidebar.classList.toggle('collapsed');
-    shrinkBtn.querySelector('i').classList.toggle('fa-angle-double-right');
-  });
-  hamburger.addEventListener('click', () => {
-    sidebar.classList.toggle('open');
-  });
-  themeToggle.addEventListener('click', () => {
-    document.documentElement.classList.toggle('dark');
-    const isDark = document.documentElement.classList.contains('dark');
-    document.documentElement.setAttribute('aria-theme', isDark ? 'dark' : 'light');
-    themeToggle.classList.toggle('fa-sun', isDark);
-  });
-
-  // ───── ONBOARDING MODAL ─────
-  window.onboardClose = () => onboardModal.style.display = 'none';
-  onboardModal.style.display = 'flex';
-
-  // ───── SCROLL HELPER ─────
-  window.scrollToSection = id => {
-    const el = document.getElementById(id);
-    if (el) el.scrollIntoView({ behavior:'smooth', block:'start' });
-  };
-
-  // ───── IMAGE PREVIEW ─────
-  window.previewImage = input => {
-    const img = document.getElementById('idenPreview');
-    if (!input.files || !input.files[0]) return;
-    img.src = URL.createObjectURL(input.files[0]);
-    img.alt = input.files[0].name;
-    img.style.display = 'block';
-  };
-
-  // ───── CLOSE BUTTONS ─────
-  document.querySelectorAll('.response .close-btn').forEach(btn => {
-    btn.addEventListener('click', () => btn.parentElement.hidden = true);
-  });
-
-  // ───── CHART.JS INIT ─────
-  function initChart(id, labels, data, label, type='bar') {
-    new Chart(document.getElementById(id), {
-      type, data: { labels, datasets:[{ label, data }] },
-      options:{ plugins:{ legend:{ display:false } }, scales:{ y:{ beginAtZero:true } } }
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    initUI();
+    initCharts();
+    initSymptomChecker();
+    wireForm({
+      formId:       'pf-form',
+      prompt:       'You are an expert at formulating personalized herbal blends with dosage safety.',
+      extract:      () => {
+                      const herbs = Array.from(document.getElementById('pfHerbs').selectedOptions)
+                                         .map(o=>o.value).join(', ');
+                      return `Herbs: ${herbs}; Age: ${document.getElementById('pfAge').value}; Weight: ${document.getElementById('pfWeight').value}`;
+                    },
+      outputId:     'pfResult'
     });
+    wireForm({
+      formId:    'research-form',
+      prompt:    'You summarize clinical research findings concisely, with citations and links.',
+      extract:   () => document.getElementById('researchQuery').value,
+      outputId:  'researchResults'
+    });
+    wireForm({
+      formId:    'inventory-form',
+      prompt:    'You forecast weekly herb demand based on trends, seasonality, and buffer stock recommendations.',
+      extract:   () => `Herb: ${document.getElementById('forecastHerb').value}; Weeks ahead: ${document.getElementById('forecastPeriod').value}`,
+      outputId:  'inventoryResult'
+    });
+    wireForm({
+      formId:    'genetics-form',
+      prompt:    'You interpret genetic reports to recommend suitable herbs, noting evidence tiers and privacy disclaimers.',
+      extract:   () => {
+                    const f = document.getElementById('geneticUpload').files[0];
+                    return f ? f.name : '';
+                  },
+      outputId:  'geneticResult'
+    });
+    wireForm({
+      formId:    'dose-form',
+      prompt:    'You calculate daily herbal dosages based on weight, symptom, and extract form, accounting for non-linear pharmacokinetics.',
+      extract:   () => `Weight: ${document.getElementById('weight').value}kg; Symptom: ${document.getElementById('symptom').value}; Form: ${document.getElementById('formType').value}`,
+      outputId:  'dosageResult'
+    });
+    wireForm({
+      formId:    'int-form',
+      prompt:    'You check for interactions between two herbs, grading severity mild/moderate/severe with descriptions.',
+      extract:   () => {
+                    const a = document.getElementById('herbA').value;
+                    const b = document.getElementById('herbB').value;
+                    if (a === b) throw new Error('Please select two distinct herbs.');
+                    return `${a} & ${b}`;
+                  },
+      outputId:  'interactionResult'
+    });
+    wireForm({
+      formId:    'safety-form',
+      prompt:    'You warn of dangerous combinations between herbs and medications, with severity color-coding.',
+      extract:   () => {
+                    const a = document.getElementById('safetyA').value;
+                    const b = document.getElementById('safetyB').value;
+                    if (a === b) throw new Error('Please pick two distinct items.');
+                    return `${a} & ${b}`;
+                  },
+      outputId:  'safetyResult'
+    });
+    initChat();
+    initContactForm();
+  });
+
+  // ───── CORE UI ─────
+  function initUI() {
+    const sidebar   = document.getElementById('sidebar');
+    document.getElementById('shrinkBtn')
+      .addEventListener('click', () => sidebar.classList.toggle('collapsed'));
+    document.getElementById('hamburger')
+      .addEventListener('click', () => sidebar.classList.toggle('open'));
+    document.getElementById('themeToggle')
+      .addEventListener('click', () => {
+        const root = document.documentElement;
+        root.classList.toggle('dark');
+        root.setAttribute('aria-theme', root.classList.contains('dark') ? 'dark' : 'light');
+      });
+
+    // Onboarding modal
+    const modal = document.getElementById('onboardModal');
+    modal.style.display = 'flex';
+    window.onboardClose = () => modal.style.display = 'none';
+
+    // Image preview
+    document.querySelector('#iden-form input[type=file]')
+      .addEventListener('change', e => {
+        const img = document.getElementById('idenPreview');
+        img.src = URL.createObjectURL(e.target.files[0]);
+        img.alt = e.target.files[0].name;
+        img.style.display = 'block';
+      });
+
+    // Close buttons
+    document.querySelectorAll('.close-btn')
+      .forEach(btn => btn.addEventListener('click', () => {
+        btn.closest('.response').hidden = true;
+      }));
+
+    // Smooth scroll helper
+    window.scrollToSection = id => {
+      const el = document.getElementById(id);
+      if (el) el.scrollIntoView({ behavior:'smooth', block:'start' });
+    };
   }
-  initChart('chartAdoption',['Wk1','Wk2','Wk3'],[50,75,100],'Scans');
-  initChart('chartEfficacy',['Herb A','Herb B'],[80,60],'Efficacy');
-  initChart('chartSupply',['Turmeric','Ginkgo'],[200,150],'Stock');
-  initChart('chartROI',['Jan','Feb','Mar'],[5,7,6],'ROI','line');
 
-  // ───── EXPORT ANALYTICS (MOCK) ─────
-  window.exportAnalytics = () => alert('Analytics data exported!');
+  // ───── Charts ─────
+  function initCharts() {
+    function cfg(id, labels, data, label, type='bar') {
+      new Chart(document.getElementById(id), {
+        type,
+        data: { labels, datasets:[{ label, data }] },
+        options: { plugins:{ legend:{ display:false } }, scales:{ y:{ beginAtZero:true } } }
+      });
+    }
+    cfg('chartAdoption', ['Wk1','Wk2','Wk3'], [50,75,100], 'Scans');
+    cfg('chartEfficacy', ['Herb A','Herb B'], [80,60], 'Efficacy');
+    cfg('chartSupply', ['Turmeric','Ginkgo'], [200,150], 'Stock');
+    cfg('chartROI', ['Jan','Feb','Mar'], [5,7,6], 'ROI', 'line');
+  }
 
-  // ───── OPENAI PROXY HELPERS ─────
+  // ───── OpenAI proxy ─────
   async function callOpenAI(messages) {
     const res = await fetch('/.netlify/functions/openai-proxy', {
-      method:'POST', headers:{ 'Content-Type':'application/json' },
+      method:'POST',
+      headers:{ 'Content-Type':'application/json' },
       body: JSON.stringify({ messages })
     });
     if (!res.ok) throw new Error(await res.text());
     const { choices } = await res.json();
     return choices[0].message.content.trim();
   }
-  async function callVision(file) {
-    const form = new FormData();
-    form.append('image', file);
-    const res = await fetch('/.netlify/functions/openai-proxy', { method:'POST', body: form });
-    if (!res.ok) throw new Error(await res.text());
-    return res.json();
-  }
 
-  // ───── GENERIC MODULE WIRING ─────
-  function wireModule({ formId, systemPrompt, getUserInput, resultPanelId }) {
+  // ───── Generic form wiring ─────
+  function wireForm({ formId, prompt, extract, outputId }) {
     const form  = document.getElementById(formId);
-    const panel = document.getElementById(resultPanelId);
+    const panel = document.getElementById(outputId);
     form.addEventListener('submit', async e => {
       e.preventDefault();
-      const btn = form.querySelector('button[type="submit"]');
+      const btn = form.querySelector('button[type=submit]');
       btn.disabled = true;
       panel.hidden = false;
       panel.innerHTML = `<div class="response-content">Processing… <span class="spinner"></span></div>`;
       try {
         const reply = await callOpenAI([
-          { role:'system', content: systemPrompt },
-          { role:'user', content: getUserInput() }
+          { role:'system',  content: prompt },
+          { role:'user',    content: extract() }
         ]);
-        panel.innerHTML = `<div>${reply}</div><button class="close-btn" aria-label="Close result">×</button>`;
-        panel.querySelector('.close-btn').addEventListener('click', () => panel.hidden = true);
+        panel.innerHTML = `<div>${reply}</div><button class="close-btn">×</button>`;
+        panel.querySelector('.close-btn')
+             .addEventListener('click', () => panel.hidden = true);
       } catch(err) {
-        panel.innerHTML = `<div>⚠️ ${err.message}</div><button class="close-btn" aria-label="Close result">×</button>`;
-        panel.querySelector('.close-btn').addEventListener('click', () => panel.hidden = true);
-        console.error(err);
+        panel.innerHTML = `<div>⚠️ ${err.message}</div><button class="close-btn">×</button>`;
+        panel.querySelector('.close-btn')
+             .addEventListener('click', () => panel.hidden = true);
       }
       btn.disabled = false;
     });
   }
 
-  // ───── 1. HERB IDENTIFIER ─────
-  document.getElementById('iden-form').addEventListener('submit', async e => {
-    e.preventDefault();
-    const btn   = e.target.querySelector('button[type="submit"]');
-    const panel = document.getElementById('idenResult');
-    btn.disabled = true;
-    panel.hidden = false;
-    panel.innerHTML = `<div class="result-content">Identifying… <span class="spinner"></span></div>`;
-    try {
-      const file = e.target.querySelector('input[type=file]').files[0];
-      const { name, uses, cautions, regions } = await callVision(file);
-      panel.innerHTML = `
-        <div class="result-content">
-          <strong>Scientific Name:</strong> ${name}<br/>
-          <strong>Uses:</strong> ${uses}<br/>
-          <strong>Cautions:</strong> ${cautions}<br/>
-          <strong>Regions Found:</strong> ${regions.join(', ')}<br/>
-          <button onclick="addToShelf('${name}')">Add to My Herb Shelf</button>
-        </div>
-        <button class="close-btn" aria-label="Close result">×</button>`;
-      panel.querySelector('.close-btn').addEventListener('click', () => panel.hidden = true);
-    } catch(err) {
-      panel.innerHTML = `<div>⚠️ ${err.message}</div><button class="close-btn" aria-label="Close result">×</button>`;
-      panel.querySelector('.close-btn').addEventListener('click', () => panel.hidden = true);
-      console.error(err);
-    }
-    btn.disabled = false;
-  });
+  // ───── Symptom Checker ─────
+  function initSymptomChecker() {
+    const tags     = document.querySelectorAll('#sym-form .tag');
+    const slider   = document.getElementById('severity');
+    const sevValue = document.getElementById('sevValue');
+    tags.forEach(t => t.addEventListener('click', ()=> t.classList.toggle('selected')));
+    slider.addEventListener('input', ()=> sevValue.textContent = slider.value);
 
-  // ───── 2. ENHANCED SYMPTOM CHECKER ─────
-  const tags      = document.querySelectorAll('#sym-form .tag');
-  const severity  = document.getElementById('severity');
-  const sevValue  = document.getElementById('sevValue');
-  tags.forEach(btn => btn.addEventListener('click', () => btn.classList.toggle('selected')));
-  severity.addEventListener('input', () => sevValue.textContent = severity.value);
+    document.getElementById('sym-form')
+      .addEventListener('submit', async e => {
+        e.preventDefault();
+        const panel = document.getElementById('symResult');
+        panel.hidden = false;
+        panel.querySelector('.conf-fill').style.width    = '0%';
+        panel.querySelector('.conf-percent').textContent = '0%';
+        panel.querySelector('.herb-cards').innerHTML     = '';
 
-  document.getElementById('sym-form').addEventListener('submit', async e => {
-    e.preventDefault();
-    const panel = document.getElementById('symResult');
-    panel.hidden = false;
+        // Gather
+        const text   = document.getElementById('symInput').value;
+        const cats   = Array.from(tags).filter(t=>t.classList.contains('selected')).map(t=>t.dataset.cat);
+        const sev    = slider.value;
+        const onset  = document.getElementById('onsetDate').value;
 
-    // reset
-    panel.querySelector('.conf-fill').style.width    = '0%';
-    panel.querySelector('.conf-percent').textContent = '0%';
-    panel.querySelector('.herb-cards').innerHTML     = '';
+        // Mock AI (replace with real callOpenAI if desired)
+        const mock = [
+          { name:'Feverfew', evidence:'well', conf:85, uses:'Headache relief' },
+          { name:'Ginger',   evidence:'anecdotal', conf:65, uses:'Nausea soothing' }
+        ];
 
-    // gather
-    const text   = document.getElementById('symInput').value;
-    const cats   = Array.from(tags).filter(t=>t.classList.contains('selected')).map(t=>t.dataset.cat);
-    const sev    = severity.value;
-    const onset  = document.getElementById('onsetDate').value;
+        // Animate confidence
+        setTimeout(() => {
+          panel.querySelector('.conf-fill').style.width    = mock[0].conf + '%';
+          panel.querySelector('.conf-percent').textContent = mock[0].conf + '%';
+        }, 200);
 
-    // MOCK AI (swap with callOpenAI for real)
-    const mock   = [
-      { name:'Feverfew',   evidence:'well',      conf:85, uses:'Headache relief' },
-      { name:'Ginger',      evidence:'anecdotal', conf:65, uses:'Nausea soothing' }
-    ];
-    // animate confidence to top herb
-    setTimeout(() => {
-      panel.querySelector('.conf-fill').style.width    = mock[0].conf + '%';
-      panel.querySelector('.conf-percent').textContent = mock[0].conf + '%';
-    }, 200);
+        // Build cards
+        const container = panel.querySelector('.herb-cards');
+        mock.forEach(h => {
+          const card = document.createElement('div');
+          card.className = 'herb-card';
+          card.innerHTML = `
+            <h4>${h.name}</h4>
+            <span class="evidence-badge ${h.evidence}">${
+              h.evidence==='well' ? 'Well-studied' : 'Anecdotal'
+            }</span>
+            <p>${h.uses}</p>
+            <button onclick="addToShelf('${h.name}')">Add to Shelf</button>
+          `;
+          container.appendChild(card);
+        });
+      });
+  }
 
-    const container = panel.querySelector('.herb-cards');
-    mock.forEach(h => {
-      const card = document.createElement('div');
-      card.className = 'herb-card';
-      card.innerHTML = `
-        <h4>${h.name}</h4>
-        <span class="evidence-badge ${h.evidence}">${h.evidence==='well'?'Well-studied':'Anecdotal'}</span>
-        <p>${h.uses}</p>
-        <button onclick="addToShelf('${h.name}')">Add to Shelf</button>
-      `;
-      container.appendChild(card);
-    });
-  });
-
-  // ───── 3–11. WIRE OTHER MODULES ─────
-  wireModule({ formId:'pf-form',        systemPrompt:'You are an expert at personalized herbal blends with dosage safety.', getUserInput:()=>{
-    const herbs = Array.from(document.getElementById('pfHerbs').selectedOptions).map(o=>o.value).join(', ');
-    return `Herbs: ${herbs}; Age: ${document.getElementById('pfAge').value}; Weight: ${document.getElementById('pfWeight').value}`;
-  }, resultPanelId:'pfResult' });
-
-  wireModule({ formId:'research-form',  systemPrompt:'Summarize clinical research with citations.', getUserInput:()=>document.getElementById('researchQuery').value, resultPanelId:'researchResults' });
-  wireModule({ formId:'inventory-form', systemPrompt:'Forecast weekly herb demand with seasonality.', getUserInput:()=>{
-    return `Herb: ${document.getElementById('forecastHerb').value}; Weeks: ${document.getElementById('forecastPeriod').value}`;
-  }, resultPanelId:'inventoryResult' });
-
-  wireModule({ formId:'genetics-form',  systemPrompt:'Interpret genetic data to recommend herbs, noting evidence tiers.', getUserInput:()=>{
-    const f = document.getElementById('geneticUpload').files[0];
-    return f?f.name:'';
-  }, resultPanelId:'geneticResult' });
-
-  wireModule({ formId:'dose-form',      systemPrompt:'Calculate herbal dosage given weight, symptom, extract.', getUserInput:()=>{
-    return `Weight:${document.getElementById('weight').value}kg; Symptom:${document.getElementById('symptom').value}; Form:${document.getElementById('formType').value}`;
-  }, resultPanelId:'dosageResult' });
-
-  wireModule({ formId:'int-form',       systemPrompt:'Check interactions between two herbs, grade severity.', getUserInput:()=>{
-    const a = document.getElementById('herbA').value, b = document.getElementById('herbB').value;
-    if (a===b) throw new Error('Select two distinct herbs.');
-    return `${a} & ${b}`;
-  }, resultPanelId:'interactionResult' });
-
-  wireModule({ formId:'safety-form',    systemPrompt:'Warn of dangerous herb/med combos.', getUserInput:()=>{
-    const a = document.getElementById('safetyA').value, b = document.getElementById('safetyB').value;
-    if (a===b) throw new Error('Pick two distinct items.');
-    return `${a} & ${b}`;
-  }, resultPanelId:'safetyResult' });
-
-  // ───── AI HERBALIST CHAT ─────
-  (function(){
-    const chatBox   = document.getElementById('chatBox');
-    const chatHint  = document.getElementById('chatHint');
-    const chatInput = document.getElementById('chatInput');
-    const sendBtn   = document.getElementById('sendChat');
-    let history = [{ role:'system', content:'You are a friendly herbalist; escalate emergencies.' }];
+  // ───── Chat module ─────
+  function initChat() {
+    const box     = document.getElementById('chatBox');
+    const hint    = document.getElementById('chatHint');
+    const input   = document.getElementById('chatInput');
+    const sendBtn = document.getElementById('sendChat');
+    let history   = [{ role:'system', content:'You are a friendly, safe herbal medicine tutor. Escalate urgent cases.' }];
 
     sendBtn.addEventListener('click', async () => {
-      const msg = chatInput.value.trim();
+      const msg = input.value.trim();
       if (!msg) return;
-      chatBox.innerHTML += `<p><strong>You:</strong> ${msg}</p>`;
-      chatInput.value = '';
+      box.innerHTML += `<p><strong>You:</strong> ${msg}</p>`;
+      input.value = '';
       history.push({ role:'user', content: msg });
-      chatHint.hidden = false;
+      hint.hidden = false;
       sendBtn.disabled = true;
       try {
         const reply = await callOpenAI(history);
-        history.push({ role:'assistant', content:reply });
-        chatBox.innerHTML += `<p><strong>Vitra AI:</strong> ${reply}</p>`;
+        history.push({ role:'assistant', content: reply });
+        box.innerHTML += `<p><strong>Vitra AI:</strong> ${reply}</p>`;
       } catch {
-        chatBox.innerHTML += `<p><strong>Vitra AI:</strong> Error—please try again.</p>`;
+        box.innerHTML += `<p><strong>Vitra AI:</strong> Sorry, something went wrong.</p>`;
       }
-      chatHint.hidden = true;
+      hint.hidden = true;
       sendBtn.disabled = false;
-      chatBox.scrollTop = chatBox.scrollHeight;
+      box.scrollTop = box.scrollHeight;
     });
-  })();
+  }
 
-  // ───── CONTACT FORM ─────
-  document.getElementById('contact-form').addEventListener('submit', e => {
-    e.preventDefault();
-    alert('Thank you—message received!');
-    e.target.reset();
-  });
-});
+  // ───── Contact form ─────
+  function initContactForm() {
+    document.getElementById('contact-form')
+      .addEventListener('submit', e => {
+        e.preventDefault();
+        alert('Thank you! We will get back to you shortly.');
+        e.target.reset();
+      });
+  }
 
-// ───── ADD TO SHELF HELPER ─────
-function addToShelf(name) {
-  alert(`"${name}" added to your herb shelf.`);
-}
+  // ───── Utility ─────
+  function addToShelf(name) {
+    alert(`“${name}” added to your herb shelf.`);
+  }
 </script>
 </body>
 </html>
