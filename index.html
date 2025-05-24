@@ -18,311 +18,257 @@
   <!-- Chart.js -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
-  <style>
-  /*────────────────── RESET & BASE ──────────────────*/
-  *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
-  html { font-family:'Montserrat',sans-serif; font-size:16px; scroll-behavior:smooth; }
-  body { display:flex; min-height:100vh; background:var(--bg); color:var(--text); overflow-x:hidden; }
-
-  /*────────────────── THEME VARIABLES ──────────────────*/
-  :root {
-    --primary: #2a6f4e;            /* deep green */
-    --secondary: #8e6c4b;          /* earthy brown */
-    --accent: #d4c5a2;             /* light gold/ivory */
-    --bg: #f8f6f0;                 /* ivory */
-    --surface: #ffffff;
-    --text: #333333;
-    --muted: #6b6b6b;
-    --bg-dark: #1f1f1f;
-    --surface-dark: #2a2a2a;
-    --text-dark: #ececec;
-    --muted-dark: #888888;
-    --radius: 0.75rem;
-    --padding: 1rem;
-    --transition: 0.3s ease;
-    --sidebar-w: 280px;
-    --sidebar-collapsed-w: 80px;
-    --header-h: 64px;
-  }
-  html.dark {
-    --bg: var(--bg-dark);
-    --surface: var(--surface-dark);
-    --text: var(--text-dark);
-    --muted: var(--muted-dark);
-  }
-
-  /*────────────────── LAYOUT ──────────────────*/
-  aside {
-    flex: 0 0 var(--sidebar-w);
-    position:sticky; top:0; height:100vh;
-    background:var(--surface); box-shadow:2px 0 12px rgba(0,0,0,0.05);
-    transition:flex var(--transition);
-    overflow:hidden;
-    z-index:1000;
-  }
-  aside.collapsed { flex:0 0 var(--sidebar-collapsed-w); }
-  aside .brand {
-    display:flex; align-items:center; gap:.75rem;
-    padding:var(--padding); font-size:1.4rem; font-weight:700; color:var(--primary);
-  }
-  aside nav { margin-top:2rem; }
-  aside nav a {
-    display:flex; align-items:center; gap:1rem;
-    padding:.75rem var(--padding); border-radius:var(--radius);
-    color:var(--text); font-weight:500; text-decoration:none;
-    transition: background var(--transition), padding-left var(--transition);
-  }
-  aside nav a i { font-size:1.2rem; }
-  aside nav a:hover, aside nav a.active {
-    background:var(--primary); color:#fff;
-    padding-left:calc(var(--padding)+0.5rem);
-  }
-  aside.collapsed nav a span { display:none; }
-  #shrinkBtn {
-    position:absolute; bottom:var(--padding); left:-18px;
-    width:36px; height:36px; background:var(--primary);
-    color:#fff; border:none; border-radius:50%; cursor:pointer;
-    box-shadow:0 3px 8px rgba(0,0,0,0.15);
-    transition:transform var(--transition);
-  }
-  #shrinkBtn:hover { transform:scale(1.1); }
-
-  header {
-    position:fixed; top:0; left:var(--sidebar-w); right:0;
-    height:var(--header-h); background:var(--surface);
-    border-bottom:1px solid #e1e8ed; display:flex;
-    align-items:center; justify-content:space-between;
-    padding:0 var(--padding); z-index:999; transition:left var(--transition);
-  }
-  aside.collapsed ~ header { left:var(--sidebar-collapsed-w); }
-  header h1 { font-size:1.5rem; font-weight:600; color:var(--text); }
-  header .hamburger, header .theme-toggle {
-    font-size:1.4rem; color:var(--primary); cursor:pointer;
-    transition:transform var(--transition);
-  }
-  header .hamburger:hover, header .theme-toggle:hover { transform:scale(1.1); }
-
-  main {
-    flex:1; padding:calc(var(--header-h)+var(--padding)) var(--padding) var(--padding);
-    background:var(--bg);
-  }
-
-  /*────────────────── MODULES ──────────────────*/
-  .module {
-    background:var(--surface); border-radius:var(--radius);
-    padding:var(--padding); box-shadow:0 2px 8px rgba(0,0,0,0.03);
-    margin-bottom:1.5rem; transition:transform var(--transition), box-shadow var(--transition);
-  }
-  .module:hover { transform:translateY(-4px); box-shadow:0 4px 16px rgba(0,0,0,0.06); }
-  .module h2 {
-    display:flex; align-items:center; gap:.75rem; margin-bottom:.75rem;
-    font-size:1.25rem; color:var(--primary);
-  }
-  .module p.desc { font-size:.95rem; color:var(--muted); margin-bottom:1rem; }
-
-  form { display:flex; flex-wrap:wrap; gap:1rem; align-items:flex-end; }
-  input, select, textarea, button {
-    border-radius:var(--radius); transition:border-color var(--transition), box-shadow var(--transition);
-  }
-  input, select, textarea {
-    flex:1 1 200px; padding:.75rem; border:1.5px solid #d1dce5;
-    background:var(--bg); color:var(--text); font-size:.95rem;
-  }
-  input:focus, select:focus, textarea:focus {
-    outline:none; border-color:var(--primary); box-shadow:0 0 8px var(--primary);
-  }
-  button {
-    background:var(--primary); color:#fff; padding:.7rem 1.4rem;
-    border:none; font-size:.95rem; font-weight:600; cursor:pointer;
-    box-shadow:0 3px 10px rgba(0,0,0,0.1);
-  }
-  button[disabled] { opacity:0.6; cursor:not-allowed; }
-  button:hover:not([disabled]) { transform:scale(1.03); box-shadow:0 5px 14px rgba(0,0,0,0.12); }
-
-  .hint { width:100%; font-size:.85rem; color:var(--muted); }
-
-  .response {
-    background:var(--secondary); background:rgba(142,108,75,0.1);
-    border-left:4px solid var(--secondary);
-    padding:var(--padding); border-radius:var(--radius);
-    margin-top:1rem; position:relative;
-  }
-  .response[aria-live] { padding-right:2.5rem; }
-  .close-btn {
-    position:absolute; top:.5rem; right:.5rem; width:24px; height:24px;
-    background:var(--secondary); color:#fff; border-radius:50%;
-    display:flex; align-items:center; justify-content:center; cursor:pointer;
-  }
-
-    /* Symptom Checker Enhancements */
-.symptom-module { background:linear-gradient(135deg, #e8f5f1 0%, #fbfcfb 100%); }
-.sym-form .field { margin-bottom:1rem; display:flex; flex-direction:column; }
-.sym-form label { font-weight:600; margin-bottom:.5rem; color:var(--secondary); }
-.sym-form textarea, .sym-form input[type="date"], .sym-form input[type="range"] {
-  width:100%; padding:.75rem; border:1px solid #d1dce5; border-radius:var(--radius);
-}
-.tags { display:flex; gap:.5rem; flex-wrap:wrap; }
-.tag {
-  background:var(--accent); border:1px solid var(--secondary);
-  border-radius:var(--radius); padding:.4rem .8rem; cursor:pointer;
-  transition:background var(--transition), color var(--transition);
-}
-.tag.selected { background:var(--secondary); color:#fff; }
-.severity-field { align-items:center; }
-#sevValue { font-weight:600; margin-left:.5rem; color:var(--secondary); }
-
-.response.sym-response {
-  border-left-color:var(--secondary);
-  background:rgba(47,169,161,0.075);
-}
-.sym-response .result-header {
-  display:flex; justify-content:space-between; align-items:center;
-  margin-bottom:1rem;
-}
-.confidence { display:flex; align-items:center; gap:.5rem; font-size:.95rem; }
-.conf-bar {
-  width:100px; height:8px; background:#e1e8ed; border-radius:4px; overflow:hidden;
-}
-.conf-fill {
-  height:100%; background:var(--secondary); width:0%;
-  transition:width 0.6s ease;
-}
-.herb-cards {
-  display:grid; grid-template-columns:repeat(auto-fill,minmax(200px,1fr));
-  gap:1rem; margin-bottom:1rem;
-}
-.herb-card {
-  background:var(--surface); border-radius:var(--radius); padding:.75rem;
-  box-shadow:0 2px 8px rgba(0,0,0,0.05);
-  display:flex; flex-direction:column; gap:.5rem;
-}
-.herb-card h4 { margin:0; color:var(--primary); }
-.evidence-badge {
-  align-self:flex-start; padding:.25rem .5rem; border-radius:var(--radius);
-  font-size:.8rem; font-weight:600; color:#fff;
-}
-.evidence-badge.well { background:#2fa9a1; }
-.evidence-badge.anecdotal { background:#8e6c4b; }
-.disclaimer { font-size:.85rem; color:var(--muted); margin-top:.5rem; }
-  /*────────────────── HERO ──────────────────*/
-  #hero {
-    display:flex; flex-direction:column; align-items:center; text-align:center;
-    padding:4rem 1rem; background:linear-gradient(135deg,#e8f5f1 0%,#f5fafb 100%);
-    margin-bottom:2rem; border-radius:var(--radius);
-  }
-  #hero h1 { font-size:2.5rem; color:var(--primary); margin-bottom:1rem; }
-  #hero p { font-size:1.1rem; color:var(--text); margin-bottom:1.5rem; }
-  #hero .cta { display:flex; gap:1rem; flex-wrap:wrap; justify-content:center; }
-  #hero .cta button { min-width:160px; }
-  #hero video { margin-top:2rem; max-width:600px; width:100%; border-radius:var(--radius); }
-
-  /*────────────────── FOOTER ──────────────────*/
-  footer {
-    background:var(--surface); padding:var(--padding);
-    text-align:center; font-size:.85rem; color:var(--muted);
-    margin-top:2rem; border-top:1px solid #e1e8ed;
-  }
-  footer a { color:var(--primary); text-decoration:none; margin:0 .5rem; }
-
-  /*────────────────── SPINNER ──────────────────*/
-  .spinner {
-    display:inline-block; width:1em; height:1em; border:2px solid var(--primary);
-    border-top-color:transparent; border-radius:50%;
-    animation:spin .8s linear infinite; vertical-align:middle; margin-left:.25em;
-  }
-  @keyframes spin { to { transform:rotate(360deg); } }
-
-  /*────────────────── RESPONSIVE ──────────────────*/
-  @media (max-width:1024px) {
-    aside { position:fixed; transform:translateX(-100%); z-index:900; }
-    aside.open { transform:translateX(0); }
-    header { left:0!important; }
-    #hero { padding:3rem 1rem; }
-  }
-  @media (max-width:640px) {
-    form { flex-direction:column; }
-    input, select, textarea, button { width:100% !important; }
-    .module select[multiple] { max-height:200px; overflow-y:auto; }
-    #hero { padding:2rem 0.5rem; }
-    #shrinkBtn { bottom:0.5rem; }
-     .sym-form textarea,
-   .sym-form input[type="date"],
-   .sym-form input[type="range"] {
-     width: auto;
-     max-width: 280px;
-     padding: 0.5rem;
-     font-size: 0.9rem;
-   }
-   .sym-form .tags {
-     gap: 0.25rem;
-   }
   
-  }
-  @media (max-width:480px) {
-    input, select, textarea, button { font-size:0.9rem; }
-    #hero h1 { font-size:2rem; }
-  }
-
-      button:hover:not([disabled]) { transform:scale(1.03); box-shadow:0 5px 14px rgba(0,0,0,0.12); }
-
- /* Enhanced Symptom Checker button */
- .btn-primary {
-   background: var(--secondary);
-  color: #fff;
- }
-  .btn-primary:hover {
-  /* example slightly darker brown */
-  background: #79573d;
+  <style>
+/*────────────────── RESET & BASE ──────────────────*/
+*, *::before, *::after {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
 }
-
-    .response {
-  position: relative;
-  padding-top: 2rem; /* make room for the × */
+html {
+  font-family: 'Montserrat', sans-serif;
+  font-size: 16px;
+  scroll-behavior: smooth;
 }
-.response .close-btn {
-  top: 0.5rem;
-  right: 0.5rem;
-  z-index: 10;
-}
-
-    .user-msg, .bot-msg {
-  max-width:80%; margin:0.5rem; padding:0.7rem 1rem; border-radius:1rem; position:relative;
-}
-.user-msg { background:var(--primary); color:#fff; align-self:flex-end; }
-.bot-msg  { background:var(--surface); color:var(--text); align-self:flex-start; }
-.timestamp {
-  font-size:0.7rem; position:absolute; bottom:-1.2rem;
-  right:0.8rem; color:var(--muted);
-}
-    @media (max-width:640px) {
-  .module { display:flex; flex-direction:column; }
-  .charts { grid-template-columns:1fr !important; }
-  form { flex-direction:column; }
-  #chatBox { max-height:200px; }
-}
-    .chat-controls button { background:none; border:none; font-size:1.1rem; margin-left:0.5rem; }
-.chat-box { background:var(--bg); border:1px solid #d1dce5; border-radius:var(--radius);
-            padding:var(--padding); min-height:200px; max-height:300px; overflow-y:auto; }
-.chat-input-row { display:flex; gap:0.5rem; margin-top:0.5rem; }
-.tool-row {
+body {
   display: flex;
-  gap: 0.5rem;
-  margin-top: 0.5rem;
+  min-height: 100vh;
+  background: var(--bg);
+  color: var(--text);
+  overflow-x: hidden;
 }
-.tool-row button {
-  background: none;
-  border: none;
-  font-size: 1rem;       /* smaller icons */
-  color: var(--muted);
-  cursor: pointer;
+
+/*────────────────── THEME VARIABLES ──────────────────*/
+:root {
+  --primary: #2a6f4e;            /* deep green */
+  --secondary: #8e6c4b;          /* earthy brown */
+  --accent: #d4c5a2;             /* light gold/ivory */
+  --bg: #f8f6f0;                 /* ivory */
+  --surface: #ffffff;
+  --text: #333333;
+  --muted: #6b6b6b;
+  --bg-dark: #1f1f1f;
+  --surface-dark: #2a2a2a;
+  --text-dark: #ececec;
+  --muted-dark: #888888;
+  --radius: 0.75rem;
+  --padding: 1rem;
+  --transition: 0.3s ease;
+  --sidebar-w: 280px;
+  --sidebar-collapsed-w: 80px;
+  --header-h: 64px;
 }
-.tool-row button:hover {
+html.dark {
+  --bg: var(--bg-dark);
+  --surface: var(--surface-dark);
+  --text: var(--text-dark);
+  --muted: var(--muted-dark);
+}
+
+/*────────────────── LAYOUT ──────────────────*/
+aside {
+  flex: 0 0 var(--sidebar-w);
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  background: var(--surface);
+  box-shadow: 2px 0 12px rgba(0,0,0,0.05);
+  transition: flex var(--transition);
+  overflow: hidden;
+  z-index: 1000;
+}
+aside.collapsed {
+  flex: 0 0 var(--sidebar-collapsed-w);
+}
+aside .brand {
+  display: flex;
+  align-items: center;
+  gap: .75rem;
+  padding: var(--padding);
+  font-size: 1.4rem;
+  font-weight: 700;
   color: var(--primary);
 }
-    .close-btn {
+aside nav {
+  margin-top: 2rem;
+}
+aside nav a {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: .75rem var(--padding);
+  border-radius: var(--radius);
+  color: var(--text);
+  font-weight: 500;
+  text-decoration: none;
+  transition: background var(--transition), padding-left var(--transition);
+}
+aside nav a i {
+  font-size: 1.2rem;
+}
+aside nav a:hover,
+aside nav a.active {
+  background: var(--primary);
+  color: #fff;
+  padding-left: calc(var(--padding) + 0.5rem);
+}
+aside.collapsed nav a span {
+  display: none;
+}
+#shrinkBtn {
   position: absolute;
-  top: 0.5rem;
-  right: 0.5rem;
+  bottom: var(--padding);
+  left: -18px;
+  width: 36px;
+  height: 36px;
+  background: var(--primary);
+  color: #fff;
+  border: none;
+  border-radius: 50%;
+  cursor: pointer;
+  box-shadow: 0 3px 8px rgba(0,0,0,0.15);
+  transition: transform var(--transition);
+}
+#shrinkBtn:hover {
+  transform: scale(1.1);
+}
+
+header {
+  position: fixed;
+  top: 0;
+  left: var(--sidebar-w);
+  right: 0;
+  height: var(--header-h);
+  background: var(--surface);
+  border-bottom: 1px solid #e1e8ed;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 var(--padding);
+  z-index: 999;
+  transition: left var(--transition);
+}
+aside.collapsed ~ header {
+  left: var(--sidebar-collapsed-w);
+}
+header h1 {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: var(--text);
+}
+header .hamburger,
+header .theme-toggle {
+  font-size: 1.4rem;
+  color: var(--primary);
+  cursor: pointer;
+  transition: transform var(--transition);
+}
+header .hamburger:hover,
+header .theme-toggle:hover {
+  transform: scale(1.1);
+}
+
+main {
+  flex: 1;
+  padding: calc(var(--header-h) + var(--padding)) var(--padding) var(--padding);
+  background: var(--bg);
+}
+
+/*────────────────── MODULES ──────────────────*/
+.module {
+  background: var(--surface);
+  border-radius: var(--radius);
+  padding: var(--padding);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.03);
+  margin-bottom: 1.5rem;
+  transition: transform var(--transition), box-shadow var(--transition);
+}
+.module:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 4px 16px rgba(0,0,0,0.06);
+}
+.module-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.module h2 {
+  display: flex;
+  align-items: center;
+  gap: .75rem;
+  margin-bottom: .75rem;
+  font-size: 1.25rem;
+  color: var(--primary);
+}
+.module p.desc {
+  font-size: .95rem;
+  color: var(--muted);
+  margin-bottom: 1rem;
+}
+
+/*────────────────── FORMS & BUTTONS ──────────────────*/
+form {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  align-items: flex-end;
+}
+input, select, textarea {
+  flex: 1 1 200px;
+  padding: .75rem;
+  border: 1.5px solid #d1dce5;
+  background: var(--bg);
+  color: var(--text);
+  font-size: .95rem;
+  border-radius: var(--radius);
+  transition: border-color var(--transition), box-shadow var(--transition);
+}
+input:focus, select:focus, textarea:focus {
+  outline: none;
+  border-color: var(--primary);
+  box-shadow: 0 0 8px var(--primary);
+}
+button {
+  background: var(--primary);
+  color: #fff;
+  padding: .7rem 1.4rem;
+  border: none;
+  font-size: .95rem;
+  font-weight: 600;
+  cursor: pointer;
+  border-radius: var(--radius);
+  box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+  transition: transform var(--transition), box-shadow var(--transition);
+}
+button:hover:not([disabled]) {
+  transform: scale(1.03);
+  box-shadow: 0 5px 14px rgba(0,0,0,0.12);
+}
+button[disabled] {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.hint {
+  width: 100%;
+  font-size: .85rem;
+  color: var(--muted);
+}
+
+/*────────────────── RESPONSES ──────────────────*/
+.response {
+  background: rgba(142,108,75,0.1);
+  border-left: 4px solid var(--secondary);
+  padding: var(--padding);
+  border-radius: var(--radius);
+  margin-top: 1rem;
+  position: relative;
+}
+.response .close-btn {
+  position: absolute;
+  top: .5rem;
+  right: .5rem;
   width: 1.5rem;
   height: 1.5rem;
   background: var(--secondary);
@@ -334,148 +280,272 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  opacity: 0;
-  transform: scale(0.8);
-  transition: opacity 0.2s, transform 0.2s;
+  cursor: pointer;
 }
 .response:hover .close-btn {
   opacity: 1;
   transform: scale(1);
 }
-@media (max-width:640px) {
-  .close-btn {
-    width: 2rem; height: 2rem; font-size: 1.2rem;
-  }
-}
-    /* ── 2×2 Grid & Chart Sizing ── */
-.charts {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 1rem;
-}
-.chart-card {
-  background: var(--surface);
-  border-radius: var(--radius);
-  padding: 0.5rem;
-  box-shadow: 0 1px 6px rgba(0,0,0,0.1);
+
+/*────────────────── HERO ──────────────────*/
+#hero {
   display: flex;
   flex-direction: column;
   align-items: center;
+  text-align: center;
+  padding: 4rem 1rem;
+  background: linear-gradient(135deg,#e8f5f1 0%,#f5fafb 100%);
+  margin-bottom: 2rem;
+  border-radius: var(--radius);
 }
-.chart-card canvas {
-  width: 100% !important;
-  height: 200px !important;
-  margin-bottom: 0.5rem;
+#hero h1 {
+  font-size: 2.5rem;
+  color: var(--primary);
+  margin-bottom: 1rem;
+}
+#hero p {
+  font-size: 1.1rem;
+  color: var(--text);
+  margin-bottom: 1.5rem;
+}
+#hero .cta {
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+#hero .cta button {
+  min-width: 160px;
+}
+#hero video {
+  margin-top: 2rem;
+  max-width: 600px;
+  width: 100%;
+  border-radius: var(--radius);
 }
 
-/* ── History Modal ── */
-.history-modal {
-  position: fixed;
-  inset: 0;
-  background: rgba(0,0,0,0.4);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 2000;
+/*────────────────── SYMPTOM CHECKER ──────────────────*/
+.symptom-module {
+  background: linear-gradient(135deg, #e8f5f1 0%, #fbfcfb 100%);
 }
-.history-modal .history-content {
-  background: var(--surface);
+#hero-symptom .sym-form {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+}
+#hero-symptom .field {
+  margin-bottom: 1rem;
+}
+#hero-symptom textarea,
+#hero-symptom select,
+#hero-symptom input[type="number"],
+#hero-symptom input[type="range"] {
+  max-width: 180px;
+  padding: .6rem;
+  font-size: .9rem;
+}
+#hero-symptom button.btn-primary {
+  grid-column: span 2;
+  justify-self: center;
+  background: #2a6f4e !important;
+  color: #fff !important;
+  padding: .75rem 1.5rem;
+}
+#hero-symptom .response.sym-response {
+  margin-top: 1.5rem;
+}
+
+/*────────────────── CULTURAL KNOWLEDGE ──────────────────*/
+.culture-input-wrapper {
+  display: flex;
+  gap: .5rem;
+  align-items: flex-end;
+}
+#hero–cultural .culture-input-wrapper input {
+  flex: 1 1 250px;
+  padding: .6rem;
+  border: 1px solid #d1dce5;
   border-radius: var(--radius);
-  width: 90%;
-  max-width: 400px;
-  max-height: 70%;
-  overflow-y: auto;
-  padding: 1rem 1.5rem;
-  box-shadow: 0 4px 16px rgba(0,0,0,0.2);
 }
-.history-modal .history-content h3 {
-  margin-bottom: 0.75rem;
-  color: var(--primary);
-}
-.history-modal .history-content ul {
-  list-style: none;
-}
-.history-modal .history-content li {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 0.4rem 0;
-  border-bottom: 1px solid var(--muted);
-}
-.history-modal .history-content .del-msg {
-  background: none;
-  border: none;
-  color: var(--secondary);
-  font-size: 1.1rem;
-  cursor: pointer;
-}
-.history-modal .history-content .del-msg:hover {
-  color: var(--primary);
-}
-.history-modal .history-content .close-history {
-  margin-top: 1rem;
+#hero–cultural .btn-culture {
   background: var(--primary);
   color: #fff;
+  padding: .7rem 1.2rem;
   border: none;
-  padding: 0.5rem 1rem;
   border-radius: var(--radius);
-  cursor: pointer;
-}
-.history-modal .history-content .close-history:hover {
-  background: var(--secondary);
+  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
 }
 
-/* ── Chat Header Controls ── */
-.chat-controls {
+/*────────────────── AI HERBALIST CHAT ──────────────────*/
+#hero–chat .chat-controls {
   display: flex;
   justify-content: flex-end;
-  gap: 0.5rem;
-  margin-bottom: 0.5rem;
+  gap: .5rem;
+  margin-bottom: .5rem;
 }
-.chat-controls button {
+#hero–chat .chat-controls button {
   background: var(--surface);
   border: 1px solid var(--muted);
   border-radius: 50%;
-  width: 32px;
-  height: 32px;
+  width: 36px;
+  height: 36px;
   display: flex;
   align-items: center;
   justify-content: center;
-  cursor: pointer;
+  color: var(--secondary);
   transition: background var(--transition), color var(--transition);
 }
-.chat-controls button:hover {
+#hero–chat .chat-controls button:hover {
   background: var(--primary);
   color: #fff;
 }
-
-/* ── ROI & Response Tool Row Adjustments ── */
-.tool-row {
+.chat-box {
+  background: var(--bg);
+  border: 1px solid #d1dce5;
+  border-radius: var(--radius);
+  padding: var(--padding);
+  min-height: 200px;
+  max-height: 300px;
+  overflow-y: auto;
   display: flex;
-  gap: 0.5rem;
-  margin-top: 0.5rem;
-  justify-content: flex-end;
+  flex-direction: column;
 }
-.tool-row button {
-  background: none;
-  border: none;
-  font-size: 1rem;
+.user-msg, .bot-msg {
+  max-width: 80%;
+  margin: .5rem 0;
+  padding: .8rem 1rem;
+  border-radius: 1.2rem;
+  position: relative;
+}
+.user-msg {
+  background: var(--primary);
+  color: #fff;
+  align-self: flex-end;
+  border-bottom-right-radius: .2rem;
+}
+.bot-msg {
+  background: #e8f5f1;
+  color: var(--text);
+  align-self: flex-start;
+  border-bottom-left-radius: .2rem;
+}
+.timestamp {
+  font-size: .7rem;
+  position: absolute;
+  bottom: -1.2rem;
+  right: .8rem;
   color: var(--muted);
-  cursor: pointer;
-  transition: color var(--transition);
 }
-.tool-row button:hover {
+
+/*────────────────── PERSONALIZED FORMULATIONS & INVENTORY ──────────────────*/
+#formulations select,
+#inventory select {
+  max-width: 200px;
+}
+#formulations select option,
+#inventory select option {
+  padding: .4rem;
+}
+
+/*────────────────── INTERACTION CHECKER ──────────────────*/
+#interaction select {
+  max-width: 180px;
+}
+#interaction select option {
+  padding: .4rem;
+}
+
+/*────────────────── ROI CALCULATOR ──────────────────*/
+#roi-form .field {
+  display: flex;
+  flex-direction: column;
+  gap: .25rem;
+}
+#roi-form .field input,
+#roi-form .field select {
+  max-width: 180px;
+  padding: .6rem;
+  border: 1px solid #d1dce5;
+}
+#roi-form button {
+  background: var(--secondary);
+  color: #fff;
+  padding: .7rem 1.3rem;
+  border-radius: var(--radius);
+  margin-top: .5rem;
+}
+#roiResult .result-content {
+  margin-top: 1rem;
+  padding: 1rem;
+  background: #fff;
+  border-radius: var(--radius);
+  box-shadow: 0 1px 6px rgba(0,0,0,0.05);
+}
+
+/*────────────────── FOOTER ──────────────────*/
+footer {
+  background: var(--surface);
+  padding: var(--padding);
+  text-align: center;
+  font-size: .85rem;
+  color: var(--muted);
+  margin-top: 2rem;
+  border-top: 1px solid #e1e8ed;
+}
+footer a {
   color: var(--primary);
+  text-decoration: none;
+  margin: 0 .5rem;
 }
 
-/* ── Close Button Always Visible ── */
-.response .close-btn {
-  opacity: 1 !important;
-  transform: scale(1) !important;
+/*────────────────── SPINNER ──────────────────*/
+.spinner {
+  display: inline-block;
+  width: 1em;
+  height: 1em;
+  border: 2px solid var(--primary);
+  border-top-color: transparent;
+  border-radius: 50%;
+  animation: spin .8s linear infinite;
+  vertical-align: middle;
+  margin-left: .25em;
+}
+@keyframes spin {
+  to { transform: rotate(360deg); }
 }
 
-/* ── Mobile Adjustments ── */
+/*────────────────── RESPONSIVE ──────────────────*/
+@media (max-width: 1024px) {
+  aside {
+    position: fixed;
+    transform: translateX(-100%);
+    z-index: 900;
+  }
+  aside.open {
+    transform: translateX(0);
+  }
+  header {
+    left: 0 !important;
+  }
+}
+@media (max-width: 768px) {
+  #hero-symptom .sym-form {
+    grid-template-columns: 1fr;
+  }
+}
 @media (max-width: 640px) {
+  form {
+    flex-direction: column;
+  }
+  input, select, textarea, button {
+    width: 100% !important;
+  }
+  #hero {
+    padding: 3rem 1rem;
+  }
+  #shrinkBtn {
+    bottom: .5rem;
+  }
   .charts {
     grid-template-columns: 1fr;
   }
@@ -483,121 +553,22 @@
     height: 180px !important;
   }
 }
-    /*────────────────── GENERAL RESPONSE FORMATTING ──────────────────*/
-/* Ensure paragraphs, bold & italics render nicely */
-.response .result-content p {
-  margin-bottom: 1rem;
-  line-height: 1.5;
-  font-size: .95rem;
-}
-.response .result-content strong { font-weight: 600; }
-.response .result-content em    { font-style: italic; }
-
-/* Replace any leftover “\[ … \]” with a block style */
-.response .result-content code {
-  display: block;
-  background: rgba(0,0,0,0.02);
-  padding: .5rem;
-  margin: .75rem 0;
-  border-left: 3px solid var(--primary);
-  font-family: monospace;
-  white-space: pre-wrap;
-}
-
-/*────────────────── SYMPTOM CHECKER STYLING ──────────────────*/
-#hero-symptom .sym-form {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 1rem;
-}
-#hero-symptom .field { width: 100%; }
-#hero-symptom .range-field {
-  grid-column: span 2;
-  display: flex;
-  align-items: center;
-}
-#hero-symptom textarea,
-#hero-symptom select,
-#hero-symptom input[type="number"],
-#hero-symptom input[type="range"] {
-  font-size: .9rem;
-  padding: .6rem;
-}
-#hero-symptom button.btn-primary {
-  grid-column: span 2;
-  justify-self: center;
-  padding: .75rem 1.5rem;
-}
-#hero-symptom .response.sym-response {
-  margin-top: 1.5rem;
-}
-
-/*────────────────── CHATBOT PROFESSIONAL LOOK ──────────────────*/
-#hero-chat {
-  background: var(--surface);
-  padding: 1rem;
-  border-radius: var(--radius);
-}
-.chat-controls {
-  background: var(--bg);
-  padding: .5rem;
-  border-bottom: 1px solid var(--muted);
-  border-radius: var(--radius) var(--radius) 0 0;
-}
-.chat-controls button {
-  width: 36px;
-  height: 36px;
-  font-size: 1.1rem;
-}
-#chatBox {
-  padding: 1rem;
-  background: #fff;
-  border-radius: 0 0 var(--radius) var(--radius);
-  box-shadow: inset 0 1px 4px rgba(0,0,0,0.05);
-}
-.user-msg, .bot-msg {
-  margin: .5rem 0;
-  padding: .75rem 1rem;
-  border-radius: var(--radius);
-}
-.user-msg { background: var(--primary); color: #fff; }
-.bot-msg { background: var(--accent); color: var(--text); }
-
-/*────────────────── ROI CALCULATOR FORMATTING ──────────────────*/
-#roi-form .field {
-  display: flex;
-  flex-direction: column;
-  gap: .25rem;
-}
-#roi-form .field input {
-  max-width: 200px;
-}
-#roiResult .result-content {
-  padding: 1rem;
-  background: #fff;
-  border-radius: var(--radius);
-  box-shadow: 0 1px 6px rgba(0,0,0,0.05);
-}
-#roiResult .result-content p {
-  margin: .5rem 0;
-}
-
-/*────────────────── RESPONSIVE ADJUSTMENTS ──────────────────*/
-@media (max-width: 768px) {
-  #hero-symptom .sym-form {
-    grid-template-columns: 1fr;
+@media (max-width: 480px) {
+  input, select, textarea, button {
+    font-size: .9rem;
   }
-  .chat-controls, #chatBox {
-    border-radius: var(--radius);
+  #hero h1 {
+    font-size: 2rem;
   }
 }
-  </style>
+</style>
+
 </head>
 
 <body>
 
   <!-- ONBOARDING MODAL -->
-  <div id="onboardModal" role="dialog" aria-modal="true" aria-labelledby="onboardTitle" style="position:fixed;inset:0;background:rgba(0,0,0,0.5);display:flex;align-items:center;justify-content:center;">
+  <div id="onboardModal" role="dialog" aria-modal="true" aria-labelledby="onboardTitle" style="position:fixed;inset:0;background:rgba(0,0,0,0.5);display:flex;align-items:center;justify-content:center;z-index:3000;">
     <div style="background:var(--surface);padding:2rem;border-radius:var(--radius);max-width:400px;text-align:center;">
       <h2 id="onboardTitle" style="color:var(--primary)">Welcome to Vitra AI Herbal Hub</h2>
       <p>Empowering Traditional Healing with Artificial Intelligence.<br/>Explore plant IDs, custom blends, and more.</p>
@@ -609,7 +580,6 @@
   <aside id="sidebar">
     <div class="brand"><i class="fas fa-leaf"></i><span>Vitra AI</span></div>
     <nav role="navigation">
-      <!-- Links to every section -->
       <a href="#hero" class="active"><i class="fas fa-home"></i><span>Home</span></a>
       <a href="#hero–identifier"><i class="fas fa-camera"></i><span>Herb Identifier</span></a>
       <a href="#hero-symptom"><i class="fas fa-notes-medical"></i><span>Symptom Checker</span></a>
@@ -633,7 +603,7 @@
 
   <!-- HEADER -->
   <header>
-    <div>
+    <div style="display:flex; align-items:center; gap:1rem;">
       <i id="hamburger" class="fas fa-bars hamburger" aria-label="Toggle navigation"></i>
       <h1>Herbal Medicine Hub</h1>
     </div>
@@ -644,7 +614,7 @@
 
   <!-- MAIN CONTENT -->
   <main role="main">
-    <!-- HERO -->
+    <!--  Hero -->
     <section id="hero">
       <h1>Empowering Traditional Healing with Artificial Intelligence</h1>
       <p>Discover, personalize, and manage herbal remedies with AI-powered tools—designed for practitioners and enthusiasts alike.</p>
@@ -655,30 +625,18 @@
       <video src="path/to/intro.mp4" controls aria-label="Intro demonstration video"></video>
     </section>
 
-    <!-- EXECUTIVE ANALYTICS DASHBOARD -->
+    <!-- Executive Analytics Dashboard -->
     <section id="analytics" class="module">
-  <h2><i class="fas fa-chart-line"></i> Executive Analytics & KPIs</h2>
-  <p class="desc">Real‐time metrics to track adoption, efficacy, supply and ROI at a glance.</p>
-  <div class="charts">
-    <figure class="chart-card">
-      <canvas id="chartAdoption"></canvas>
-      <figcaption><strong>Adoption Over Time:</strong> How quickly new users adopt herbal AI tools each month.</figcaption>
-    </figure>
-    <figure class="chart-card">
-      <canvas id="chartEfficacy"></canvas>
-      <figcaption><strong>Efficacy Outcomes:</strong> Percentage of positive feedback per symptom category.</figcaption>
-    </figure>
-    <figure class="chart-card">
-      <canvas id="chartSupply"></canvas>
-      <figcaption><strong>Supply Impact:</strong> Inventory usage for top three herbs this quarter.</figcaption>
-    </figure>
-    <figure class="chart-card">
-      <canvas id="chartROI"></canvas>
-      <figcaption><strong>Financial ROI:</strong> Quarterly return on investment from AI automation.</figcaption>
-    </figure>
-  </div>
-  <button onclick="exportAnalytics()">Export Full CSV</button>
-</section>
+      <h2><i class="fas fa-chart-line"></i> Executive Analytics & KPIs</h2>
+      <p class="desc">Real‐time metrics to track adoption, efficacy, supply and ROI at a glance.</p>
+      <div class="charts">
+        <figure class="chart-card"><canvas id="chartAdoption"></canvas><figcaption><strong>Adoption Over Time:</strong> Monthly new users.</figcaption></figure>
+        <figure class="chart-card"><canvas id="chartEfficacy"></canvas><figcaption><strong>Efficacy Outcomes:</strong> Positive feedback rates.</figcaption></figure>
+        <figure class="chart-card"><canvas id="chartSupply"></canvas><figcaption><strong>Supply Impact:</strong> Inventory usage.</figcaption></figure>
+        <figure class="chart-card"><canvas id="chartROI"></canvas><figcaption><strong>Financial ROI:</strong> Quarterly returns.</figcaption></figure>
+      </div>
+      <button onclick="exportAnalytics()">Export Full CSV</button>
+    </section>
 
     <!-- 1. Herb Identifier -->
     <section id="hero–identifier" class="module">
@@ -697,56 +655,57 @@
       </div>
     </section>
 
-   <!-- ENHANCED SYMPTOM CHECKER -->
-<section id="hero-symptom" class="module symptom-module">
-  <h2><i class="fas fa-notes-medical"></i> Symptom Checker</h2>
-  <p class="desc">Tell us your symptoms and duration, choose severity, then get AI‐powered herb recommendations.</p>
-  <form id="sym-form" class="sym-form">
-    <div class="field">
-      <label for="symInput">Your Symptoms</label>
-      <textarea id="symInput" required placeholder="e.g. headache, nausea…"></textarea>
-    </div>
-    <div class="field">
-      <label for="symCategories">Category</label>
-      <select id="symCategories" multiple>
-        <option value="pain">Pain</option>
-        <option value="digestive">Digestive</option>
-        <option value="respiratory">Respiratory</option>
-        <option value="stress">Stress</option>
-      </select>
-    </div>
-    <div class="field range-field">
-      <label for="severity">Severity</label>
-      <input type="range" id="severity" min="1" max="10" value="5"/>
-      <span id="sevValue">5</span>/10
-    </div>
-    <div class="field">
-      <label for="symDuration">Duration (days)</label>
-      <input type="number" id="symDuration" min="0" placeholder="e.g. 3"/>
-    </div>
-    <button type="submit" class="btn-primary">Get Recommendations</button>
-  </form>
-
-  <div id="symResult" class="response sym-response" hidden>
-    <div class="response-header">
-      <button class="close-btn">×</button>
-      <h3><i class="fas fa-seedling"></i> Your Herb Recommendations</h3>
-    </div>
-    <div class="result-content"></div>
-  </div>
-</section>
+    <!-- 2. Symptom Checker -->
+    <section id="hero-symptom" class="module symptom-module">
+      <h2><i class="fas fa-notes-medical"></i> Symptom Checker</h2>
+      <p class="desc">Tell us your symptoms and duration, choose severity, then get AI‐powered herb recommendations.</p>
+      <form id="sym-form" class="sym-form">
+        <div class="field">
+          <label for="symInput">Your Symptoms</label>
+          <textarea id="symInput" required placeholder="e.g. headache, nausea…"></textarea>
+        </div>
+        <div class="field">
+          <label for="symCategories">Category</label>
+          <select id="symCategories" required>
+            <option disabled selected>Select category…</option>
+            <option value="pain">Pain</option>
+            <option value="digestive">Digestive</option>
+            <option value="respiratory">Respiratory</option>
+            <option value="stress">Stress</option>
+          </select>
+        </div>
+        <div class="field range-field">
+          <label for="severity">Severity</label>
+          <input type="range" id="severity" min="1" max="10" value="5"/>
+          <span id="sevValue">5</span>/10
+        </div>
+        <div class="field">
+          <label for="symDuration">Duration (days)</label>
+          <input type="number" id="symDuration" min="0" placeholder="e.g. 3"/>
+        </div>
+        <button type="submit" class="btn-primary">Get Recommendations</button>
+      </form>
+      <div id="symResult" class="response sym-response" hidden>
+        <button class="close-btn">×</button>
+        <div class="result-content"></div>
+      </div>
+    </section>
 
     <!-- 3. Cultural Knowledge -->
- <section id="hero–cultural" class="module">
-  <h2>🌍 Cultural Knowledge</h2>
-  <p class="desc">Enter a region, tradition or herb name (e.g. “West African uses of moringa”) to get practices, rituals & folklore.</p>
-   <textarea id="cultureQuery" rows="2" placeholder="e.g. West African herbal uses…" ></textarea>
-  <button onclick="getCulture()">Get Insights</button>
-  <div id="cultureResult" class="response" hidden>
-    <button class="close-btn"></button>
-    <div class="result-content"></div>
-  </div>
-</section>
+    <section id="hero–cultural" class="module">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem;">
+        <h2>🌍 Cultural Knowledge</h2>
+      </div>
+      <p class="desc">Enter a region, tradition or herb name to get practices, rituals & folklore.</p>
+      <div class="culture-input-wrapper" style="display:flex; gap:0.5rem; align-items:flex-end; margin-bottom:1rem;">
+        <input id="cultureQuery" type="text" placeholder="e.g. West African herbal uses…" />
+        <button onclick="getCulture()" class="btn-culture">Get Insights</button>
+      </div>
+      <div id="cultureResult" class="response" hidden>
+        <button class="close-btn">×</button>
+        <div class="result-content"></div>
+      </div>
+    </section>
 
     <!-- 4. Safety Checker -->
     <section id="hero–safety" class="module">
@@ -760,20 +719,22 @@
       </form>
       <div id="safetyResult" class="response" role="status" hidden>
         <button class="close-btn" aria-label="Close result">×</button>
-        <p><strong>Moderate Interaction:</strong> Turmeric may potentiate anticoagulants.</p>
+        <div class="result-content"></div>
       </div>
     </section>
 
     <!-- 5. AI Herbalist Chat -->
     <section id="hero–chat" class="module">
-      <h2><i class="fas fa-comments"></i> AI Herbalist Chat</h2>
-         <div class="chat-controls">
-    <button id="viewHistory" title="View History"><i class="fas fa-history"></i></button>
-    <button id="clearChat"  title="Clear Chat" ><i class="fas fa-trash-alt"></i></button>
-  </div>
+      <div style="display:flex; justify-content:space-between; align-items:center;">
+        <h2><i class="fas fa-comments"></i> AI Herbalist Chat</h2>
+        <div class="chat-controls">
+          <button id="viewHistory" title="View History"><i class="fas fa-history"></i></button>
+          <button id="clearChat" title="Clear Chat"><i class="fas fa-trash-alt"></i></button>
+        </div>
+      </div>
       <p class="desc">Ask about herbal remedies:</p>
-      <div id="chatBox" role="log" aria-live="polite" style="background:var(--bg);border:1px solid #d1dce5;border-radius:var(--radius);padding:var(--padding);min-height:150px;max-height:300px;overflow-y:auto;"></div>
-      <div style="display:flex;gap:.5rem;margin-top:.5rem;">
+      <div id="chatBox" class="chat-box" role="log" aria-live="polite"></div>
+      <div class="chat-input-row">
         <input id="chatInput" placeholder="Ask about herbal remedies…" aria-label="Type your question"/>
         <button id="sendChat" aria-label="Send message"><i class="fas fa-paper-plane"></i></button>
       </div>
@@ -783,19 +744,40 @@
     <!-- 6. Personalized Formulations -->
     <section id="formulations" class="module">
       <h2><i class="fas fa-user-shield"></i> Personalized Formulations</h2>
-      <p class="desc">Pick herbs, age & weight for a custom blend.</p>
+      <p class="desc">Pick one herb, age & weight for a custom blend.</p>
       <form id="pf-form">
-        <select id="pfHerbs" multiple size="5" aria-label="Select herbs">
-          <option>Ashwagandha</option><option>Astragalus</option><option>Basil</option><option>Chamomile</option>
-          <option>Echinacea</option><option>Ginkgo Biloba</option><option>Ginseng</option><option>Lavender</option>
-          <option>Licorice</option><option>Milk Thistle</option><option>Neem</option><option>Oregano</option>
-          <option>Peppermint</option><option>Rosemary</option><option>St. John’s Wort</option><option>Turmeric</option>
-          <option>Valerian</option><option>Holy Basil</option><option>Green Tea</option><option>Aloe Vera</option>
+        <select id="pfHerbs" aria-label="Select herb" required>
+          <option disabled selected>Select herb…</option>
+          <option>Ashwagandha</option>
+          <option>Astragalus</option>
+          <option>Basil</option>
+          <option>Chamomile</option>
+          <option>Echinacea</option>
+          <option>Ginkgo Biloba</option>
+          <option>Ginseng</option>
+          <option>Lavender</option>
+          <option>Licorice</option>
+          <option>Milk Thistle</option>
+          <option>Neem</option>
+          <option>Oregano</option>
+          <option>Peppermint</option>
+          <option>Rosemary</option>
+          <option>St. John’s Wort</option>
+          <option>Turmeric</option>
+          <option>Valerian</option>
+          <!-- 7 Ghanaian local herbs -->
+          <option>Roselle</option>
+          <option>Soursop</option>
+          <option>Baobab</option>
+          <option>Moringa</option>
+          <option>Ginger</option>
+          <option>Hibiscus</option>
+          <option>Holy Basil</option>
         </select>
-        <input id="pfAge" type="number" min="1" max="120" placeholder="Age (years)" aria-label="Age" required/>
-        <input id="pfWeight" type="number" min="10" max="300" placeholder="Weight (kg)" aria-label="Weight" required/>
+        <input id="pfAge" type="number" min="1" max="120" placeholder="Age (years)" required/>
+        <input id="pfWeight" type="number" min="10" max="300" placeholder="Weight (kg)" required/>
         <button type="submit">Generate</button>
-        <div class="hint">Hold Ctrl/Cmd to select multiple herbs.</div>
+        <div class="hint">Use dropdown to pick a single herb.</div>
       </form>
       <div id="pfResult" class="response" role="status" hidden>
         <button class="close-btn" aria-label="Close result">×</button>
@@ -825,11 +807,35 @@
       <h2><i class="fas fa-warehouse"></i> Inventory Forecast</h2>
       <p class="desc">Predict stock needs weeks ahead.</p>
       <form id="inventory-form">
-        <select id="forecastHerb" aria-label="Select herb for forecast">
-          <option>Turmeric</option><option>Ginkgo Biloba</option><option>Ashwagandha</option><option>Echinacea</option>
-          <option>Valerian</option><option>Chamomile</option><option>Lavender</option><option>Basil</option>
+        <select id="forecastHerb" aria-label="Select herb for forecast" required>
+          <option disabled selected>Select herb…</option>
+          <!-- same options as PF -->
+          <option>Ashwagandha</option>
+          <option>Astragalus</option>
+          <option>Basil</option>
+          <option>Chamomile</option>
+          <option>Echinacea</option>
+          <option>Ginkgo Biloba</option>
+          <option>Ginseng</option>
+          <option>Lavender</option>
+          <option>Licorice</option>
+          <option>Milk Thistle</option>
+          <option>Neem</option>
+          <option>Oregano</option>
+          <option>Peppermint</option>
+          <option>Rosemary</option>
+          <option>St. John’s Wort</option>
+          <option>Turmeric</option>
+          <option>Valerian</option>
+          <option>Roselle</option>
+          <option>Soursop</option>
+          <option>Baobab</option>
+          <option>Moringa</option>
+          <option>Ginger</option>
+          <option>Hibiscus</option>
+          <option>Holy Basil</option>
         </select>
-        <input id="forecastPeriod" type="number" min="1" max="52" value="4" placeholder="Weeks ahead" aria-label="Forecast period"/>
+        <input id="forecastPeriod" type="number" min="1" max="52" value="4" placeholder="Weeks ahead" required/>
         <button type="submit">Forecast</button>
         <div class="hint">Choose 1–52 weeks into the future.</div>
       </form>
@@ -860,8 +866,8 @@
       <h2><i class="fas fa-calculator"></i> Dosage Calculator</h2>
       <p class="desc">Get daily dosage advice based on weight, symptom, and extract form.</p>
       <form id="dose-form">
-        <input id="weight" type="number" min="10" max="300" placeholder="Weight (kg)" aria-label="Weight" required/>
-        <input id="symptom" placeholder="Symptom (e.g. headache)" aria-label="Symptom" required/>
+        <input id="weight" type="number" min="10" max="300" placeholder="Weight (kg)" required/>
+        <input id="symptom" placeholder="Symptom (e.g. headache)" required/>
         <select id="formType" aria-label="Select extract type">
           <option value="powder">Powder</option>
           <option value="tincture">Tincture</option>
@@ -870,7 +876,7 @@
         <button type="submit">Calculate</button>
         <div class="hint">Specify extract form for accuracy.</div>
       </form>
-      <div id="dosageResult" class="response" role="status" hidden>
+      <div id="dosageResult" class="response" hidden>
         <button class="close-btn" aria-label="Close result">×</button>
         <div class="result-content"></div>
       </div>
@@ -881,18 +887,60 @@
       <h2><i class="fas fa-exchange-alt"></i> Interaction Checker</h2>
       <p class="desc">Select two herbs to check for interactions.</p>
       <form id="int-form">
-        <select id="herbA" aria-label="Herb A">
-          <option>Turmeric</option><option>Ashwagandha</option><option>Ginkgo Biloba</option><option>St. John’s Wort</option>
+        <select id="herbA" aria-label="Herb A" required>
+          <option disabled selected>Herb A…</option>
+          <option>Ashwagandha</option>
+          <option>Baobab</option>
+          <option>Basil</option>
+          <option>Chamomile</option>
+          <option>Echinacea</option>
+          <option>Ginger</option>
+          <option>Ginkgo Biloba</option>
+          <option>Ginseng</option>
+          <option>Hibiscus</option>
+          <option>Holy Basil</option>
+          <option>Lavender</option>
+          <option>Licorice</option>
+          <option>Milk Thistle</option>
+          <option>Neem</option>
+          <option>Moringa</option>
+          <option>Oregano</option>
+          <option>Peppermint</option>
+          <option>Rosemary</option>
+          <option>St. John’s Wort</option>
+          <option>Turmeric</option>
+          <option>Valerian</option>
         </select>
-        <select id="herbB" aria-label="Herb B">
-          <option>Turmeric</option><option>Ashwagandha</option><option>Ginkgo Biloba</option><option>St. John’s Wort</option>
+        <select id="herbB" aria-label="Herb B" required>
+          <option disabled selected>Herb B…</option>
+          <option>Ashwagandha</option>
+          <option>Baobab</option>
+          <option>Basil</option>
+          <option>Chamomile</option>
+          <option>Echinacea</option>
+          <option>Ginger</option>
+          <option>Ginkgo Biloba</option>
+          <option>Ginseng</option>
+          <option>Hibiscus</option>
+          <option>Holy Basil</option>
+          <option>Lavender</option>
+          <option>Licorice</option>
+          <option>Milk Thistle</option>
+          <option>Neem</option>
+          <option>Moringa</option>
+          <option>Oregano</option>
+          <option>Peppermint</option>
+          <option>Rosemary</option>
+          <option>St. John’s Wort</option>
+          <option>Turmeric</option>
+          <option>Valerian</option>
         </select>
         <button type="submit">Check</button>
         <div class="hint">Pick two distinct herbs.</div>
       </form>
       <div id="interactionResult" class="response" role="status" hidden>
         <button class="close-btn" aria-label="Close result">×</button>
-        <p><strong>Mild Interaction:</strong> St. John’s Wort may reduce efficacy of certain drugs.</p>
+        <div class="result-content"></div>
       </div>
     </section>
 
@@ -906,38 +954,39 @@
       </ul>
     </section>
 
-    <!-- ROI CALCULATOR -->
-   <section id="roi" class="module">
-  <h2><i class="fas fa-dollar-sign"></i> Business Insights & ROI Calculator</h2>
-  <p class="desc">
-    Estimate your practice’s return on investment from AI-driven herbal prescription automation.
-    Select your currency, enter your monthly prescription volume and herb costs, then calculate ROI.
-  </p>
-  <form id="roi-form">
-    <div class="field">
-      <label for="currency">Currency</label>
-      <select id="currency">
-        <option value="GHS" selected>Ghanaian Cedi (GHS)</option>
-        <option value="USD">US Dollar (USD)</option>
-        <option value="EUR">Euro (EUR)</option>
-      </select>
-    </div>
-    <div class="field">
-      <label for="roiRx">Monthly Prescriptions</label>
-      <input type="number" id="roiRx" required placeholder="e.g. 100"/>
-    </div>
-    <div class="field">
-      <label for="roiCost">Avg. Herb Cost (<span id="curSym">₵</span>)</label>
-      <input type="number" id="roiCost" required placeholder="e.g. 25"/>
-    </div>
-    <button type="submit">Calculate ROI</button>
-  </form>
-  <div id="roiResult" class="response" hidden>
-    <button class="close-btn">×</button>
-    <div class="result-content"></div>
-  </div>
-</section>
-    <!-- ARCHITECTURE / TECH -->
+    <!-- 12. ROI Calculator -->
+    <section id="roi" class="module">
+      <h2><i class="fas fa-dollar-sign"></i> Business Insights & ROI Calculator</h2>
+      <p class="desc">
+        Estimate your practice’s return on investment from AI-driven herbal prescription automation.
+        Select your currency, enter your monthly prescription volume and herb costs, then calculate ROI.
+      </p>
+      <form id="roi-form">
+        <div class="field">
+          <label for="currency">Currency</label>
+          <select id="currency">
+            <option value="GHS" selected>Ghanaian Cedi (GHS)</option>
+            <option value="USD">US Dollar (USD)</option>
+            <option value="EUR">Euro (EUR)</option>
+          </select>
+        </div>
+        <div class="field">
+          <label for="roiRx">Monthly Prescriptions</label>
+          <input type="number" id="roiRx" required placeholder="e.g. 100"/>
+        </div>
+        <div class="field">
+          <label for="roiCost">Avg. Herb Cost (<span id="curSym">₵</span>)</label>
+          <input type="number" id="roiCost" required placeholder="e.g. 25"/>
+        </div>
+        <button type="submit">Calculate ROI</button>
+      </form>
+      <div id="roiResult" class="response" hidden>
+        <button class="close-btn" aria-label="Close result">×</button>
+        <div class="result-content"></div>
+      </div>
+    </section>
+
+    <!-- ARCHITECTURE & TECH -->
     <section id="about" class="module">
       <h2><i class="fas fa-cogs"></i> Architecture & Data Flow</h2>
       <p class="desc">High-level overview of our AI platform components.</p>
@@ -969,12 +1018,16 @@
     </section>
 
     <!-- FOOTER -->
-  <footer>
-    <p>&copy; 2025 Vitra AI. <a href="#privacy">Privacy Policy</a> | <a href="#terms">Terms & Conditions</a></p>
-  </footer>
-    
+    <footer>
+      <p>&copy; 2025 Vitra AI. <a href="#privacy">Privacy Policy</a> | <a href="#terms">Terms & Conditions</a></p>
+    </footer>
+
   </main>
 
+
+
+
+ 
   
 
   <!-- JAVASCRIPT LOGIC -->
@@ -983,213 +1036,226 @@
   function onboardClose() {
     document.getElementById('onboardModal').style.display = 'none';
   }
+
 </script>
-
 <script>
-  //── HELPER FUNCTIONS ─────────────────────────────────────────────────────────
+  //──────────────────────────────────────────────────────────────────────────────
+  // ONBOARDING MODAL
+  //──────────────────────────────────────────────────────────────────────────────
+  function onboardClose() {
+    document.getElementById('onboardModal').style.display = 'none';
+  }
 
-  // Call OpenAI
+  //──────────────────────────────────────────────────────────────────────────────
+  // UTILITY FUNCTIONS
+  //──────────────────────────────────────────────────────────────────────────────
+
+  // Call OpenAI proxy
   async function callOpenAI(messages) {
     const res = await fetch('/.netlify/functions/openai-proxy', {
       method: 'POST',
-      headers: { 'Content-Type':'application/json' },
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ messages })
     });
-    if (!res.ok) throw new Error(await res.text()||'Server error');
+    if (!res.ok) throw new Error('Server error');
     const j = await res.json();
     return j.choices[0].message.content;
   }
 
-  // Call Vision API
+  // Call Vision API proxy
   async function callVision(file) {
-    const fd = new FormData(); fd.append('file', file);
+    const fd = new FormData();
+    fd.append('file', file);
     const res = await fetch('/.netlify/functions/vision-proxy', {
-      method:'POST', body:fd
+      method: 'POST',
+      body: fd
     });
-    if (!res.ok) throw new Error(await res.text()||'Vision error');
+    if (!res.ok) throw new Error('Vision error');
     return res.json();
   }
 
-  // Convert plain text with **bold**, *italic*, and blank lines → HTML
+  // Simple markdown → HTML formatter
   function formatHTML(txt) {
     return txt
-      // bold & italics
       .replace(/\*\*(.+?)\*\*/g,'<strong>$1</strong>')
       .replace(/\*(.+?)\*/g,'<em>$1</em>')
-      // code blocks / equations in [ ... ]
       .replace(/\[([^\]]+)\]/g,'<code>$1</code>')
-      // paragraphs
       .split(/\n{2,}/).map(p=>`<p>${p.trim()}</p>`).join('');
   }
 
-  // Add a fixed close-“×” button
+  // Show a friendly error message in a panel
+  function showFriendlyError(panel) {
+    panel.innerHTML = '<div class="result-content">😕 Oops! Something went wrong. Please try again.</div>';
+    addClose(panel);
+  }
+
+  // Add close-“×” button to a response panel
   function addClose(panel) {
-    if(panel.querySelector('.close-btn')) return;
-    const btn=document.createElement('button');
-    btn.className='close-btn';
-    btn.textContent='×';
-    btn.onclick=()=>panel.hidden=true;
+    if (panel.querySelector('.close-btn')) return;
+    const btn = document.createElement('button');
+    btn.className = 'close-btn';
+    btn.textContent = '×';
+    btn.onclick = () => panel.hidden = true;
     panel.prepend(btn);
   }
 
-  // Add copy/download tools under the text
+  // Add copy/download tools under the result-content
   function addTools(panel) {
-    if(panel.querySelector('.tool-row')) return;
-    const tools=document.createElement('div');
-    tools.className='tool-row';
-    tools.innerHTML=`
+    if (panel.querySelector('.tool-row')) return;
+    const tools = document.createElement('div');
+    tools.className = 'tool-row';
+    tools.innerHTML = `
       <button class="copy-btn" title="Copy"><i class="fas fa-copy"></i></button>
       <button class="dl-btn"   title="Download"><i class="fas fa-download"></i></button>`;
     panel.append(tools);
 
-    tools.querySelector('.copy-btn')
-      .onclick=()=>navigator.clipboard.writeText(panel.querySelector('.result-content').innerText);
+    tools.querySelector('.copy-btn').onclick = () =>
+      navigator.clipboard.writeText(panel.querySelector('.result-content').innerText);
 
-    tools.querySelector('.dl-btn').onclick=()=>{
-      const text=panel.querySelector('.result-content').innerText;
-      const blob=new Blob([text],{type:'text/plain'});
-      const url=URL.createObjectURL(blob);
-      const a=document.createElement('a');
-      a.href=url; a.download='response.txt'; a.click();
+    tools.querySelector('.dl-btn').onclick = () => {
+      const text = panel.querySelector('.result-content').innerText;
+      const blob = new Blob([text], { type: 'text/plain' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url; a.download = 'response.txt'; a.click();
       URL.revokeObjectURL(url);
     };
   }
 
-  //── CHARTS ────────────────────────────────────────────────────────────────────
+  //──────────────────────────────────────────────────────────────────────────────
+  // CHARTS
+  //──────────────────────────────────────────────────────────────────────────────
 
-  function initCharts(){
-    const cfg=(type,data)=>({
+  function initCharts() {
+    const cfg = (type, data) => ({
       type, data,
-      options:{ responsive:true, maintainAspectRatio:false, plugins:{ legend:{display:false} } }
+      options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } }
     });
-    new Chart('chartAdoption', cfg('line',{ labels:['Jan','Feb','Mar'], datasets:[{data:[50,75,100]}] }));
-    new Chart('chartEfficacy',  cfg('bar', { labels:['Mild','Mod','High'],   datasets:[{data:[30,45,25]}] }));
-    new Chart('chartSupply',    cfg('pie', { labels:['A','B','C'],       datasets:[{data:[200,150,300]}] }));
+    new Chart('chartAdoption', cfg('line', { labels:['Jan','Feb','Mar'], datasets:[{data:[50,75,100]}] }));
+    new Chart('chartEfficacy',  cfg('bar',  { labels:['Mild','Mod','High'],   datasets:[{data:[30,45,25]}] }));
+    new Chart('chartSupply',    cfg('pie',  { labels:['A','B','C'],         datasets:[{data:[200,150,300]}] }));
     new Chart('chartROI',       cfg('radar',{ labels:['Q1','Q2','Q3','Q4'],datasets:[{data:[5,7,6,8]}] }));
   }
 
-  document.addEventListener('DOMContentLoaded',()=> {
-    initCharts();
-    document.querySelector('button[onclick="exportAnalytics()"]')
-      .onclick=exportAnalytics;
-  });
-
-  function exportAnalytics(){
-    const ids=['Adoption','Efficacy','Supply','ROI'];
-    let csv='';
-    ids.forEach(id=>{
-      const ch=Chart.getChart('chart'+id);
-      ch.data.labels.forEach((lab,i)=>{
-        csv+=`${id},${lab},${ch.data.datasets[0].data[i]}\n`;
+  function exportAnalytics() {
+    const ids = ['Adoption','Efficacy','Supply','ROI'];
+    let csv = '';
+    ids.forEach(id => {
+      const ch = Chart.getChart('chart' + id);
+      ch.data.labels.forEach((lab,i) => {
+        csv += `${id},${lab},${ch.data.datasets[0].data[i]}\n`;
       });
     });
-    const blob=new Blob([csv],{type:'text/csv'});
-    const url=URL.createObjectURL(blob);
-    const a=document.createElement('a');
-    a.href=url; a.download='analytics.csv'; a.click();
+    const blob = new Blob([csv], { type: 'text/csv' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url; a.download = 'analytics.csv'; a.click();
     URL.revokeObjectURL(url);
   }
 
-  //── PLANT SCANNER ────────────────────────────────────────────────────────────
-
-  document.getElementById('iden-form').onsubmit=async e=>{
-    e.preventDefault();
-    const panel=document.getElementById('idenResult');
-    panel.hidden=false;
-    panel.innerHTML=`<div class="result-content">Processing… <span class="spinner"></span></div>`;
-    const file=e.target.querySelector('input[type=file]').files[0];
-    const desc=document.getElementById('idenDesc').value.trim();
-    if(!file&&!desc){
-      panel.querySelector('.result-content').innerText='⚠️ Please upload an image or description.';
-      addClose(panel); return;
-    }
-    try{
-      let html='';
-      if(file){
-        const data=await callVision(file);
-        html+=`<strong>Name:</strong> ${data.name}<br/>
-               <strong>Uses:</strong> ${data.uses}<br/>
-               <strong>Cautions:</strong> ${data.cautions}<br/>
-               <strong>Regions:</strong> ${data.regions.join(', ')}<hr/>`;
-      }
-      if(desc){
-        const txt=await callOpenAI([
-          {role:'system',content:'You are a plant expert. Reply plainly.'},
-          {role:'user',content:`Describe plant: ${desc}`}
-        ]);
-        html+=formatHTML(txt);
-      }
-      panel.querySelector('.result-content').innerHTML=html;
-      addClose(panel); addTools(panel);
-    }catch(err){
-      panel.querySelector('.result-content').innerText='⚠️ '+err.message;
-      addClose(panel);
-    }
-  };
-
-  //── SYMPTOM CHECKER ───────────────────────────────────────────────────────────
-
-  document.getElementById('severity').oninput=e=>{
-    document.getElementById('sevValue').textContent=e.target.value;
-  };
-
-  document.getElementById('sym-form').onsubmit=async e=>{
-    e.preventDefault();
-    const panel=document.getElementById('symResult');
-    panel.hidden=false;
-    panel.innerHTML=`<div class="result-content">Processing… <span class="spinner"></span></div>`;
-    const text=document.getElementById('symInput').value.trim();
-    const cats=[...document.getElementById('symCategories').selectedOptions].map(o=>o.value);
-    const sev=document.getElementById('severity').value;
-    const dur=document.getElementById('symDuration').value||0;
-    try{
-      const txt=await callOpenAI([
-        {role:'system',content:'You are a herbal diagnostician. Answer with a plain-text list.'},
-        {role:'user',content:`Symptoms:${text}; Categories:${cats.join(',')}; Severity:${sev}; Duration:${dur}d.`}
-      ]);
-      panel.innerHTML=`<div class="result-content">${formatHTML(txt)}</div>`;
-      addClose(panel); addTools(panel);
-    }catch(err){
-      panel.innerHTML=`<div class="result-content">⚠️ ${err.message}</div>`;
-      addClose(panel);
-    }
-  };
-
-  //── GENERIC FORM HANDLER ──────────────────────────────────────────────────────
-
-  function wireForm(formId, sysPrompt, extract, outId){
-    document.getElementById(formId).onsubmit=async e=>{
+  //──────────────────────────────────────────────────────────────────────────────
+  // GENERIC FORM HANDLER
+  //──────────────────────────────────────────────────────────────────────────────
+  function wireForm(formId, sysPrompt, extract, outId) {
+    document.getElementById(formId).onsubmit = async e => {
       e.preventDefault();
-      const panel=document.getElementById(outId);
-      panel.hidden=false;
-      panel.innerHTML=`<div class="result-content">Processing… <span class="spinner"></span></div>`;
-      try{
-        const reply=await callOpenAI([
-          {role:'system',content:sysPrompt},
-          {role:'user',content:extract()}
+      const panel = document.getElementById(outId);
+      panel.hidden = false;
+      panel.innerHTML = '<div class="result-content">Processing… <span class="spinner"></span></div>';
+      try {
+        const reply = await callOpenAI([
+          { role: 'system', content: sysPrompt },
+          { role: 'user',   content: extract() }
         ]);
-        panel.innerHTML=`<div class="result-content">${formatHTML(reply)}</div>`;
+        panel.innerHTML = `<div class="result-content">${formatHTML(reply)}</div>`;
         addClose(panel); addTools(panel);
-      }catch(err){
-        panel.innerHTML=`<div class="result-content">⚠️ ${err.message}</div>`;
-        addClose(panel);
+      } catch (err) {
+        showFriendlyError(panel);
       }
     };
   }
 
-  // Cultural
+  //──────────────────────────────────────────────────────────────────────────────
+  // SYMPTOM CHECKER
+  //──────────────────────────────────────────────────────────────────────────────
+  document.getElementById('severity').oninput = e => {
+    document.getElementById('sevValue').textContent = e.target.value;
+  };
+
+  document.getElementById('sym-form').onsubmit = async e => {
+    e.preventDefault();
+    const panel = document.getElementById('symResult');
+    panel.hidden = false;
+    panel.innerHTML = '<div class="result-content">Processing… <span class="spinner"></span></div>';
+    const text = document.getElementById('symInput').value.trim();
+    const cat  = document.getElementById('symCategories').value;
+    const sev  = document.getElementById('severity').value;
+    const dur  = document.getElementById('symDuration').value || 0;
+    try {
+      const txt = await callOpenAI([
+        { role: 'system', content: 'You are a herbal diagnostician. Answer with a plain-text list.' },
+        { role: 'user',   content: `Symptoms: ${text}; Category: ${cat}; Severity: ${sev}; Duration: ${dur}d.` }
+      ]);
+      panel.innerHTML = `<div class="result-content">${formatHTML(txt)}</div>`;
+      addClose(panel); addTools(panel);
+    } catch (err) {
+      showFriendlyError(panel);
+    }
+  };
+
+  //──────────────────────────────────────────────────────────────────────────────
+  // INDIVIDUAL FORM WIRINGS
+  //──────────────────────────────────────────────────────────────────────────────
+
+  // Plant Identifier
+  document.getElementById('iden-form').onsubmit = async e => {
+    e.preventDefault();
+    const panel = document.getElementById('idenResult');
+    panel.hidden = false;
+    panel.innerHTML = '<div class="result-content">Processing… <span class="spinner"></span></div>';
+    const file = e.target.querySelector('input[type=file]').files[0];
+    const desc = document.getElementById('idenDesc').value.trim();
+    if (!file && !desc) {
+      panel.innerHTML = '<div class="result-content">⚠️ Please upload an image or description.</div>';
+      addClose(panel);
+      return;
+    }
+    try {
+      let html = '';
+      if (file) {
+        const data = await callVision(file);
+        html += `<strong>Name:</strong> ${data.name}<br/>
+                 <strong>Uses:</strong> ${data.uses}<br/>
+                 <strong>Cautions:</strong> ${data.cautions}<br/>
+                 <strong>Regions:</strong> ${data.regions.join(', ')}<hr/>`;
+      }
+      if (desc) {
+        const txt = await callOpenAI([
+          { role: 'system', content: 'You are a plant expert. Reply plainly.' },
+          { role: 'user',   content: `Describe plant: ${desc}` }
+        ]);
+        html += formatHTML(txt);
+      }
+      panel.innerHTML = `<div class="result-content">${html}</div>`;
+      addClose(panel); addTools(panel);
+    } catch (err) {
+      showFriendlyError(panel);
+    }
+  };
+
+  // Cultural Knowledge
   wireForm(
-    'cultureQuery', 
+    'cultureQuery',
     'You are a cultural herbalist. Respond concisely.',
-    ()=>document.getElementById('cultureQuery').value.trim(),
+    () => document.getElementById('cultureQuery').value.trim(),
     'cultureResult'
   );
 
-  // Safety
+  // Safety Checker
   wireForm(
     'safety-form',
     'You warn of dangerous herb/med combos.',
-    ()=>`${document.getElementById('safetyA').value}&${document.getElementById('safetyB').value}`,
+    () => `${document.getElementById('safetyA').value}&${document.getElementById('safetyB').value}`,
     'safetyResult'
   );
 
@@ -1197,7 +1263,7 @@
   wireForm(
     'pf-form',
     'You create safe herbal formulations.',
-    ()=>`Herbs:${[...document.getElementById('pfHerbs').selectedOptions].map(o=>o.value).join(',')}; Age:${document.getElementById('pfAge').value}; Weight:${document.getElementById('pfWeight').value}kg`,
+    () => `Herbs: ${document.getElementById('pfHerbs').value}; Age: ${document.getElementById('pfAge').value}; Weight: ${document.getElementById('pfWeight').value}kg`,
     'pfResult'
   );
 
@@ -1205,7 +1271,7 @@
   wireForm(
     'research-form',
     'You summarize clinical research with citations.',
-    ()=>document.getElementById('researchQuery').value,
+    () => document.getElementById('researchQuery').value.trim(),
     'researchResults'
   );
 
@@ -1213,32 +1279,32 @@
   wireForm(
     'inventory-form',
     'You forecast weekly herb demand with buffer stock.',
-    ()=>`Herb:${document.getElementById('forecastHerb').value}; Weeks:${document.getElementById('forecastPeriod').value}`,
+    () => `Herb: ${document.getElementById('forecastHerb').value}; Weeks: ${document.getElementById('forecastPeriod').value}`,
     'inventoryResult'
   );
 
   // Genetics Match
-  document.getElementById('genetics-form').onsubmit=async e=>{
+  document.getElementById('genetics-form').onsubmit = async e => {
     e.preventDefault();
-    const panel=document.getElementById('geneticResult');
-    panel.hidden=false;
-    panel.innerHTML=`<div class="result-content">Processing… <span class="spinner"></span></div>`;
-    const file=document.getElementById('geneticUpload').files[0];
-    if(!file){
-      panel.innerHTML=`<div class="result-content">⚠️ Please upload CSV/JSON.</div>`;
-      addClose(panel); return;
-    }
-    try{
-      const text=await file.text();
-      const reply=await callOpenAI([
-        {role:'system',content:'You interpret genetic SNP data for herb recommendations.'},
-        {role:'user',content:text}
-      ]);
-      panel.innerHTML=`<div class="result-content">${formatHTML(reply)}</div>`;
-      addClose(panel); addTools(panel);
-    }catch(err){
-      panel.innerHTML=`<div class="result-content">⚠️ ${err.message}</div>`;
+    const panel = document.getElementById('geneticResult');
+    panel.hidden = false;
+    panel.innerHTML = '<div class="result-content">Processing… <span class="spinner"></span></div>';
+    const file = document.getElementById('geneticUpload').files[0];
+    if (!file) {
+      panel.innerHTML = '<div class="result-content">⚠️ Please upload CSV/JSON.</div>';
       addClose(panel);
+      return;
+    }
+    try {
+      const text = await file.text();
+      const reply = await callOpenAI([
+        { role: 'system', content: 'You interpret genetic SNP data for herb recommendations.' },
+        { role: 'user',   content: text }
+      ]);
+      panel.innerHTML = `<div class="result-content">${formatHTML(reply)}</div>`;
+      addClose(panel); addTools(panel);
+    } catch (err) {
+      showFriendlyError(panel);
     }
   };
 
@@ -1246,7 +1312,7 @@
   wireForm(
     'dose-form',
     'You calculate daily herbal dosages by weight, symptom, form.',
-    ()=>`Weight:${document.getElementById('weight').value}kg; Symptom:${document.getElementById('symptom').value}; Form:${document.getElementById('formType').value}`,
+    () => `Weight: ${document.getElementById('weight').value}kg; Symptom: ${document.getElementById('symptom').value}; Form: ${document.getElementById('formType').value}`,
     'dosageResult'
   );
 
@@ -1254,104 +1320,139 @@
   wireForm(
     'int-form',
     'You check interactions between two herbs.',
-    ()=>{
-      const a=document.getElementById('herbA').value,
-            b=document.getElementById('herbB').value;
-      if(a===b) throw new Error('Pick two distinct herbs.');
+    () => {
+      const a = document.getElementById('herbA').value;
+      const b = document.getElementById('herbB').value;
+      if (a === b) throw new Error('Pick two distinct herbs.');
       return `${a}&${b}`;
     },
     'interactionResult'
   );
 
-  //── ROI CALCULATOR ────────────────────────────────────────────────────────────
-
-  document.getElementById('currency').onchange=e=>{
-    const sym={GHS:'₵',USD:'$',EUR:'€'}[e.target.value];
-    document.getElementById('curSym').textContent=sym;
+  // ROI Calculator
+  document.getElementById('currency').onchange = e => {
+    const sym = { GHS:'₵', USD:'$', EUR:'€' }[e.target.value];
+    document.getElementById('curSym').textContent = sym;
   };
 
-  document.getElementById('roi-form').onsubmit=async e=>{
+  document.getElementById('roi-form').onsubmit = async e => {
     e.preventDefault();
-    const panel=document.getElementById('roiResult');
-    panel.hidden=false;
-    panel.innerHTML=`<div class="result-content">Calculating… <span class="spinner"></span></div>`;
-    const rx=+document.getElementById('roiRx').value;
-    const cost=+document.getElementById('roiCost').value;
-    try{
-      const reply=await callOpenAI([
-        {role:'system',content:'You are a finance expert. Show equations and explain ROI step by step in plain HTML.'},
-        {role:'user',content:`Volume: ${rx}; Unit cost: ${cost}; Currency: ${document.getElementById('currency').value}`}
+    const panel = document.getElementById('roiResult');
+    panel.hidden = false;
+    panel.innerHTML = '<div class="result-content">Calculating… <span class="spinner"></span></div>';
+    const rx   = +document.getElementById('roiRx').value;
+    const cost = +document.getElementById('roiCost').value;
+    try {
+      const reply = await callOpenAI([
+        { role: 'system', content: 'You are a finance expert. Show equations and explain ROI step by step in plain HTML.' },
+        { role: 'user',   content: `Volume: ${rx}; Unit cost: ${cost}; Currency: ${document.getElementById('currency').value}` }
       ]);
-      panel.innerHTML=`<div class="result-content">${formatHTML(reply)}</div>`;
+      panel.innerHTML = `<div class="result-content">${formatHTML(reply)}</div>`;
       addClose(panel); addTools(panel);
-    }catch(err){
-      panel.innerHTML=`<div class="result-content">⚠️ ${err.message}</div>`;
-      addClose(panel);
+    } catch (err) {
+      showFriendlyError(panel);
     }
   };
 
-  //── CHATBOT + HISTORY ─────────────────────────────────────────────────────────
+  //──────────────────────────────────────────────────────────────────────────────
+  // INIT & EVENT LISTENERS
+  //──────────────────────────────────────────────────────────────────────────────
+  document.addEventListener('DOMContentLoaded', () => {
+    // Charts & export
+    initCharts();
+    document.querySelector('button[onclick="exportAnalytics()"]').onclick = exportAnalytics;
 
-  const chatBox=document.getElementById('chatBox');
-  let history=[];
-
-  document.getElementById('sendChat').onclick=async()=>{
-    const inp=document.getElementById('chatInput');
-    const txt=inp.value.trim(); if(!txt)return;
-    chatBox.insertAdjacentHTML('beforeend',`<div class="user-msg">${txt}</div>`);
-    history.push({who:'You',text:txt});
-    inp.value=''; document.getElementById('chatHint').hidden=false;
-
-    try{
-      const reply=await callOpenAI([
-        {role:'system',content:'You are a friendly herbalist. Reply plainly.'},
-        {role:'user',content:txt}
-      ]);
-      chatBox.insertAdjacentHTML('beforeend',`<div class="bot-msg">${formatHTML(reply)}</div>`);
-      history.push({who:'Herbalist',text:reply});
-      chatBox.scrollTop=chatBox.scrollHeight;
-    }catch(err){
-      chatBox.insertAdjacentHTML('beforeend',`<div class="bot-msg">⚠️ ${err.message}</div>`);
-    }finally{
-      document.getElementById('chatHint').hidden=true;
-    }
-  };
-
-  // Only two header buttons now
-  document.getElementById('closeChat').onclick=()=>{
-    document.getElementById('hero-chat').hidden=true;
-  };
-
-  document.getElementById('clearChat').onclick=()=>{
-    chatBox.innerHTML='';
-  };
-
-  document.getElementById('viewHistory').onclick=()=>{
-    const modal=document.createElement('div');
-    modal.className='history-modal';
-    modal.innerHTML=`
-      <div class="history-content">
-        <h3>Chat History</h3>
-        <ul>
-          ${history.map((m,i)=>`
-            <li>
-              <strong>${m.who}:</strong> ${m.text}
-              <button data-i="${i}" class="del-msg">🗑</button>
-            </li>`).join('')}
-        </ul>
-        <button class="close-history">Close</button>
-      </div>`;
-    document.body.append(modal);
-
-    modal.querySelectorAll('.del-msg').forEach(btn=>{
-      btn.onclick=()=>{
-        history.splice(+btn.dataset.i,1);
-        modal.remove();
-        document.getElementById('viewHistory').onclick();
-      };
+    // Sidebar shrink
+    const sidebar     = document.getElementById('sidebar');
+    const shrinkBtn   = document.getElementById('shrinkBtn');
+    shrinkBtn.addEventListener('click', () => {
+      sidebar.classList.toggle('collapsed');
+      shrinkBtn.querySelector('i').classList.toggle('fa-angle-double-right');
     });
-    modal.querySelector('.close-history').onclick=()=>modal.remove();
-  };
+
+    // Hamburger (mobile nav)
+    const hamburger   = document.getElementById('hamburger');
+    hamburger.addEventListener('click', () => {
+      sidebar.classList.toggle('open');
+    });
+
+    // Theme toggle
+    const themeToggle = document.getElementById('themeToggle');
+    themeToggle.addEventListener('click', () => {
+      document.documentElement.classList.toggle('dark');
+      themeToggle.classList.toggle('fa-sun');
+      themeToggle.classList.toggle('fa-moon');
+    });
+
+    // AI Herbalist Chat enhancements
+    const chatBox   = document.getElementById('chatBox');
+    const history   = [];
+    const sendChat  = document.getElementById('sendChat');
+    const chatHint  = document.getElementById('chatHint');
+    const chatInput = document.getElementById('chatInput');
+
+    function addMessage(who, text) {
+      const msg = document.createElement('div');
+      msg.className = who === 'You' ? 'user-msg' : 'bot-msg';
+      msg.innerHTML = `${formatHTML(text)}<div class="timestamp">${new Date().toLocaleTimeString()}</div>`;
+      chatBox.append(msg);
+      chatBox.scrollTop = chatBox.scrollHeight;
+    }
+
+    sendChat.onclick = async () => {
+      const txt = chatInput.value.trim();
+      if (!txt) return;
+      addMessage('You', txt);
+      history.push({ who: 'You', text: txt });
+      chatInput.value = '';
+      chatHint.hidden = false;
+      try {
+        const reply = await callOpenAI([
+          { role: 'system', content: 'You are a friendly herbalist. Reply plainly.' },
+          { role: 'user',   content: txt }
+        ]);
+        addMessage('Herbalist', reply);
+        history.push({ who: 'Herbalist', text: reply });
+      } catch (err) {
+        addMessage('Herbalist', '⚠️ Oops! Something went wrong. Please try again.');
+      } finally {
+        chatHint.hidden = true;
+      }
+    };
+
+    // Clear chat (does NOT erase history)
+    document.getElementById('clearChat').onclick = () => {
+      chatBox.innerHTML = '';
+    };
+
+    // View history modal
+    document.getElementById('viewHistory').onclick = () => {
+      const modal = document.createElement('div');
+      modal.className = 'history-modal';
+      modal.innerHTML = `
+        <div class="history-content">
+          <h3>Chat History</h3>
+          <ul>
+            ${history.map((m,i) => `
+              <li>
+                <strong>${m.who}:</strong> ${m.text}
+                <button data-i="${i}" class="del-msg">🗑</button>
+              </li>`).join('')}
+          </ul>
+          <button class="close-history">Close</button>
+        </div>`;
+      document.body.append(modal);
+      modal.querySelectorAll('.del-msg').forEach(btn => {
+        btn.onclick = () => {
+          history.splice(+btn.dataset.i,1);
+          modal.remove();
+          document.getElementById('viewHistory').click();
+        };
+      });
+      modal.querySelector('.close-history').onclick = () => modal.remove();
+    };
+  });
 </script>
+
 </body>
 </html>
