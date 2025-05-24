@@ -568,55 +568,51 @@
   </footer>
 
   <!-- JAVASCRIPT LOGIC -->
+
   <script>
 document.addEventListener('DOMContentLoaded', () => {
-  // ───────────── SIDEBAR & THEME TOGGLES ─────────────
+  // ───────────────── SIDEBAR & THEME ─────────────────
   const sidebar = document.getElementById('sidebar');
   document.getElementById('shrinkBtn').onclick = () => {
     sidebar.classList.toggle('collapsed');
     document.querySelector('#shrinkBtn i').classList.toggle('fa-angle-double-right');
   };
   document.getElementById('hamburger').onclick = () => sidebar.classList.toggle('open');
-
   const themeBtn = document.getElementById('themeToggle');
   themeBtn.onclick = () => {
     document.documentElement.classList.toggle('dark');
-    const newTheme = document.documentElement.classList.contains('dark') ? 'dark' : 'light';
-    document.documentElement.setAttribute('aria-theme', newTheme);
+    document.documentElement.setAttribute(
+      'aria-theme',
+      document.documentElement.classList.contains('dark') ? 'dark' : 'light'
+    );
     themeBtn.classList.toggle('fa-sun');
   };
 
-  // ───────────── ONBOARDING MODAL ─────────────
-  const onboard = document.getElementById('onboardModal');
-  onboard.style.display = 'flex';
-  // (Dismiss handled inline on button)
+  // ───────────────── ONBOARDING ─────────────────
+  document.getElementById('onboardModal').style.display = 'flex'; // dismiss inline
 
-  // ───────────── SMOOTH SCROLL HELPER ─────────────
+  // ───────────────── HELPERS ─────────────────
   window.scrollToSection = id => {
     const el = document.getElementById(id);
-    if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    if (el) el.scrollIntoView({ behavior:'smooth', block:'start' });
   };
-
-  // ───────────── PREVIEW IMAGE UPLOAD ─────────────
   window.previewImage = input => {
     const img = document.getElementById('idenPreview');
-    if (!input.files || !input.files[0]) return;
+    if (!input.files?.[0]) return;
     img.src = URL.createObjectURL(input.files[0]);
     img.alt = input.files[0].name;
     img.style.display = 'block';
   };
+  document.querySelectorAll('.response .close-btn').forEach(btn =>
+    btn.onclick = () => btn.parentElement.hidden = true
+  );
 
-  // ───────────── CLOSE BUTTONS FOR RESPONSES ─────────────
-  document.querySelectorAll('.response .close-btn').forEach(btn => {
-    btn.onclick = () => btn.parentElement.hidden = true;
-  });
-
-  // ───────────── ROI CALCULATOR ─────────────
+  // ───────────────── ROI CALCULATOR ─────────────────
   document.getElementById('roi-form').addEventListener('submit', e => {
     e.preventDefault();
     const rx = +document.getElementById('roiRx').value;
     const cost = +document.getElementById('roiCost').value;
-    const savings = rx * cost * 0.10; // example 10% savings
+    const savings = rx * cost * 0.10;
     const panel = document.getElementById('roiResult');
     panel.querySelector('.result-content').textContent =
       `Estimated monthly savings: $${savings.toFixed(2)}`;
@@ -624,24 +620,24 @@ document.addEventListener('DOMContentLoaded', () => {
     panel.classList.add('show-close');
   });
 
-  // ───────────── CHART.JS INITIALIZATION ─────────────
+  // ───────────────── CHART.JS INIT ─────────────────
   function initChart(id, labels, data, label) {
     new Chart(document.getElementById(id), {
       type: 'bar',
       data: { labels, datasets: [{ label, data }] },
-      options: { plugins: { legend: { display: false } } }
+      options: { plugins:{ legend:{ display:false } }, scales:{ y:{ beginAtZero:true }} }
     });
   }
   initChart('chartAdoption', ['Wk1','Wk2','Wk3'], [50,75,100], 'Scans');
   initChart('chartEfficacy', ['HerbA','HerbB'], [80,60], 'Efficacy');
   initChart('chartSupply', ['Turmeric','Ginkgo'], [200,150], 'Stock');
-  initChart('chartROI', ['Jan','Feb','Mar'], [5,7,6], 'ROI ($k)');
+  initChart('chartROI', ['Jan','Feb','Mar'], [5,7,6], 'ROI');
 
-  // ───────────── OPENAI HELPERS ─────────────
+  // ───────────────── OPENAI PROXY HELPERS ─────────────────
   async function callOpenAI(messages) {
     const res = await fetch('/.netlify/functions/openai-proxy', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: {'Content-Type':'application/json'},
       body: JSON.stringify({ messages })
     });
     if (!res.ok) throw new Error(await res.text());
@@ -657,10 +653,10 @@ document.addEventListener('DOMContentLoaded', () => {
       body: formData
     });
     if (!res.ok) throw new Error(await res.text());
-    return res.json(); // expects { name, uses, cautions, regions }
+    return res.json();
   }
 
-  // ───────────── GENERIC MODULE WIRING ─────────────
+  // ───────────────── GENERIC MODULE WIRING ─────────────────
   function wireModule({ formId, systemPrompt, getUserInput, resultPanelId }) {
     const form = document.getElementById(formId);
     const panel = document.getElementById(resultPanelId);
@@ -671,10 +667,9 @@ document.addEventListener('DOMContentLoaded', () => {
       panel.hidden = false;
       panel.classList.remove('show-close');
       try {
-        const userContent = getUserInput();
         const reply = await callOpenAI([
-          { role: 'system', content: systemPrompt },
-          { role: 'user', content: userContent }
+          { role:'system', content:systemPrompt },
+          { role:'user',   content:getUserInput() }
         ]);
         panel.querySelector('.result-content').textContent = reply;
         panel.classList.add('show-close');
@@ -686,18 +681,14 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // ───────────── WIRE ALL MODULES ─────────────
+  // ───────────────── WIRE ALL MODULES ─────────────────
 
   // 1. Herb Identifier
   document.getElementById('iden-form').addEventListener('submit', async e => {
     e.preventDefault();
     const panel = document.getElementById('idenResult');
-    const fileInput = document.querySelector('#iden-form input[type=file]');
-    const file = fileInput.files[0];
-    if (!file) {
-      alert('Please choose an image first.');
-      return;
-    }
+    const file = document.querySelector('#iden-form input[type=file]').files[0];
+    if (!file) { alert('Please choose an image.'); return; }
     panel.querySelector('.result-content').innerHTML =
       'Identifying… <span class="spinner"></span>';
     panel.hidden = false;
@@ -720,125 +711,115 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // 2. Symptom Checker
   wireModule({
-    formId: 'sym-form',
-    systemPrompt: 'You are a top-tier herbal diagnostic AI.',
-    getUserInput: () => document.getElementById('symInput').value,
-    resultPanelId: 'symResult'
+    formId:'sym-form',
+    systemPrompt:'You are a top-tier herbal diagnostic AI.',
+    getUserInput:()=>document.getElementById('symInput').value,
+    resultPanelId:'symResult'
   });
 
   // 3. Personalized Formulations
   wireModule({
-    formId: 'pf-form',
-    systemPrompt: 'You are an expert at formulating personalized herbal blends.',
-    getUserInput: () => {
+    formId:'pf-form',
+    systemPrompt:'You are an expert at formulating personalized herbal blends.',
+    getUserInput:()=>{
       const herbs = Array.from(document.getElementById('pfHerbs').selectedOptions)
-        .map(o => o.value).join(', ');
-      const age = document.getElementById('pfAge').value;
-      const weight = document.getElementById('pfWeight').value;
-      return `Herbs: ${herbs}; Age: ${age}; Weight: ${weight}kg`;
+        .map(o=>o.value).join(', ');
+      return `Herbs: ${herbs}; Age: ${document.getElementById('pfAge').value}kg; Weight: ${document.getElementById('pfWeight').value}kg`;
     },
-    resultPanelId: 'pfResult'
+    resultPanelId:'pfResult'
   });
 
   // 4. Research Summaries
   wireModule({
-    formId: 'research-form',
-    systemPrompt: 'You summarize clinical research findings concisely, with citations.',
-    getUserInput: () => document.getElementById('researchQuery').value,
-    resultPanelId: 'researchResults'
+    formId:'research-form',
+    systemPrompt:'You summarize clinical research findings concisely, with citations.',
+    getUserInput:()=>document.getElementById('researchQuery').value,
+    resultPanelId:'researchResults'
   });
 
   // 5. Inventory Forecast
   wireModule({
-    formId: 'inventory-form',
-    systemPrompt: 'You forecast weekly herb demand based on trends and seasonality.',
-    getUserInput: () => {
-      const herb = document.getElementById('forecastHerb').value;
-      const weeks = document.getElementById('forecastPeriod').value;
-      return `Herb: ${herb}; Weeks ahead: ${weeks}`;
+    formId:'inventory-form',
+    systemPrompt:'You forecast weekly herb demand based on trends and seasonality.',
+    getUserInput:()=>{
+      return `Herb: ${document.getElementById('forecastHerb').value}; Weeks ahead: ${document.getElementById('forecastPeriod').value}`;
     },
-    resultPanelId: 'inventoryResult'
+    resultPanelId:'inventoryResult'
   });
 
   // 6. Genetics Match
   wireModule({
-    formId: 'genetics-form',
-    systemPrompt: 'You interpret genetic reports to recommend suitable herbs, noting evidence tiers.',
-    getUserInput: () => {
-      const file = document.getElementById('geneticUpload').files[0];
-      return file ? file.name : '';
+    formId:'genetics-form',
+    systemPrompt:'You interpret genetic reports to recommend suitable herbs, noting evidence tiers.',
+    getUserInput:()=>{
+      const f=document.getElementById('geneticUpload').files[0];
+      return f?f.name:'';
     },
-    resultPanelId: 'geneticResult'
+    resultPanelId:'geneticResult'
   });
 
   // 7. Dosage Calculator
   wireModule({
-    formId: 'dose-form',
-    systemPrompt: 'You calculate daily herbal dosages based on weight, symptom, and extract form.',
-    getUserInput: () => {
-      const w = document.getElementById('weight').value;
-      const s = document.getElementById('symptom').value;
-      const form = document.getElementById('formType').value;
-      return `Weight: ${w}kg; Symptom: ${s}; Form: ${form}`;
+    formId:'dose-form',
+    systemPrompt:'You calculate daily herbal dosages based on weight, symptom, and extract form.',
+    getUserInput:()=>{
+      return `Weight: ${document.getElementById('weight').value}kg; Symptom: ${document.getElementById('symptom').value}; Form: ${document.getElementById('formType').value}`;
     },
-    resultPanelId: 'dosageResult'
+    resultPanelId:'dosageResult'
   });
 
   // 8. Interaction Checker
   wireModule({
-    formId: 'int-form',
-    systemPrompt: 'You check for interactions between two herbs and grade severity.',
-    getUserInput: () => {
-      const a = document.getElementById('herbA').value;
-      const b = document.getElementById('herbB').value;
-      if (a === b) throw new Error('Please select two distinct herbs.');
+    formId:'int-form',
+    systemPrompt:'You check for interactions between two herbs and grade severity.',
+    getUserInput:()=>{
+      const a=document.getElementById('herbA').value, b=document.getElementById('herbB').value;
+      if(a===b) throw new Error('Please select two distinct herbs.');
       return `${a} & ${b}`;
     },
-    resultPanelId: 'interactionResult'
+    resultPanelId:'interactionResult'
   });
 
   // 9. Safety Checker
   wireModule({
-    formId: 'safety-form',
-    systemPrompt: 'You warn of dangerous combinations between herbs/medications.',
-    getUserInput: () => {
-      const a = document.getElementById('safetyA').value;
-      const b = document.getElementById('safetyB').value;
-      if (a === b) throw new Error('Please pick two distinct items.');
+    formId:'safety-form',
+    systemPrompt:'You warn of dangerous combinations between herbs/medications.',
+    getUserInput:()=>{
+      const a=document.getElementById('safetyA').value, b=document.getElementById('safetyB').value;
+      if(a===b) throw new Error('Please pick two distinct items.');
       return `${a} & ${b}`;
     },
-    resultPanelId: 'safetyResult'
+    resultPanelId:'safetyResult'
   });
 
   // 10. AI Herbalist Chat
-  (function() {
-    const chatBox = document.getElementById('chatBox');
-    const chatHint = document.getElementById('chatHint');
-    const chatInput = document.getElementById('chatInput');
-    const sendBtn = document.getElementById('sendChat');
-    let history = [{ role: 'system', content: 'You are a friendly herbal medicine tutor.' }];
-
-    sendBtn.onclick = async () => {
-      const msg = chatInput.value.trim();
-      if (!msg) return;
-      chatBox.innerHTML += `<p><strong>You:</strong> ${msg}</p>`;
-      chatInput.value = '';
-      history.push({ role: 'user', content: msg });
-      chatHint.hidden = false;
-      try {
-        const reply = await callOpenAI(history);
-        history.push({ role: 'assistant', content: reply });
-        chatBox.innerHTML += `<p><strong>Vitra AI:</strong> ${reply}</p>`;
-      } catch {
-        chatBox.innerHTML += `<p><strong>Vitra AI:</strong> Sorry, something went wrong.</p>`;
+  (function(){
+    const chatBox=document.getElementById('chatBox');
+    const chatHint=document.getElementById('chatHint');
+    const chatInput=document.getElementById('chatInput');
+    const sendBtn=document.getElementById('sendChat');
+    let history=[{role:'system',content:'You are a friendly herbal medicine tutor.'}];
+    sendBtn.onclick=async()=>{
+      const msg=chatInput.value.trim();
+      if(!msg) return;
+      chatBox.innerHTML+=`<p><strong>You:</strong> ${msg}</p>`;
+      chatInput.value='';
+      history.push({role:'user',content:msg});
+      chatHint.hidden=false;
+      try{
+        const reply=await callOpenAI(history);
+        history.push({role:'assistant',content:reply});
+        chatBox.innerHTML+=`<p><strong>Vitra AI:</strong> ${reply}</p>`;
+      }catch{
+        chatBox.innerHTML+=`<p><strong>Vitra AI:</strong> Sorry, something went wrong.</p>`;
       }
-      chatHint.hidden = true;
-      chatBox.scrollTop = chatBox.scrollHeight;
+      chatHint.hidden=true;
+      chatBox.scrollTop=chatBox.scrollHeight;
     };
   })();
 
   // 11. Contact Form
-  document.getElementById('contact-form').addEventListener('submit', e => {
+  document.getElementById('contact-form').addEventListener('submit', e=>{
     e.preventDefault();
     alert('Thank you! We will get back to you shortly.');
   });
