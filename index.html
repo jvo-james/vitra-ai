@@ -300,6 +300,53 @@
   form { flex-direction:column; }
   #chatBox { max-height:200px; }
 }
+    .chat-controls button { background:none; border:none; font-size:1.1rem; margin-left:0.5rem; }
+.chat-box { background:var(--bg); border:1px solid #d1dce5; border-radius:var(--radius);
+            padding:var(--padding); min-height:200px; max-height:300px; overflow-y:auto; }
+.chat-input-row { display:flex; gap:0.5rem; margin-top:0.5rem; }
+.tool-row {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+}
+.tool-row button {
+  background: none;
+  border: none;
+  font-size: 1rem;       /* smaller icons */
+  color: var(--muted);
+  cursor: pointer;
+}
+.tool-row button:hover {
+  color: var(--primary);
+}
+    .close-btn {
+  position: absolute;
+  top: 0.5rem;
+  right: 0.5rem;
+  width: 1.5rem;
+  height: 1.5rem;
+  background: var(--secondary);
+  color: #fff;
+  border: none;
+  border-radius: 50%;
+  font-size: 1.1rem;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transform: scale(0.8);
+  transition: opacity 0.2s, transform 0.2s;
+}
+.response:hover .close-btn {
+  opacity: 1;
+  transform: scale(1);
+}
+@media (max-width:640px) {
+  .close-btn {
+    width: 2rem; height: 2rem; font-size: 1.2rem;
+  }
+}
   </style>
 </head>
 
@@ -366,16 +413,28 @@
 
     <!-- EXECUTIVE ANALYTICS DASHBOARD -->
     <section id="analytics" class="module">
-      <h2><i class="fas fa-chart-line"></i> Executive Analytics & KPIs</h2>
-      <p class="desc">Real-time adoption, efficacy, supply impact, and financial ROI metrics.</p>
-      <div class="charts" style="display:grid;gap:1rem;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));">
-        <div><h3>Adoption Metrics</h3><canvas id="chartAdoption"></canvas></div>
-        <div><h3>Efficacy Outcomes</h3><canvas id="chartEfficacy"></canvas></div>
-        <div><h3>Supply Impact</h3><canvas id="chartSupply"></canvas></div>
-        <div><h3>Financial ROI</h3><canvas id="chartROI"></canvas></div>
-      </div>
-      <button onclick="exportAnalytics()">Export Data</button>
-    </section>
+  <h2><i class="fas fa-chart-line"></i> Executive Analytics & KPIs</h2>
+  <p class="desc">Real‐time metrics to track adoption, efficacy, supply and ROI at a glance.</p>
+  <div class="charts">
+    <figure class="chart-card">
+      <canvas id="chartAdoption"></canvas>
+      <figcaption><strong>Adoption Over Time:</strong> How quickly new users adopt herbal AI tools each month.</figcaption>
+    </figure>
+    <figure class="chart-card">
+      <canvas id="chartEfficacy"></canvas>
+      <figcaption><strong>Efficacy Outcomes:</strong> Percentage of positive feedback per symptom category.</figcaption>
+    </figure>
+    <figure class="chart-card">
+      <canvas id="chartSupply"></canvas>
+      <figcaption><strong>Supply Impact:</strong> Inventory usage for top three herbs this quarter.</figcaption>
+    </figure>
+    <figure class="chart-card">
+      <canvas id="chartROI"></canvas>
+      <figcaption><strong>Financial ROI:</strong> Quarterly return on investment from AI automation.</figcaption>
+    </figure>
+  </div>
+  <button onclick="exportAnalytics()">Export Full CSV</button>
+</section>
 
     <!-- 1. Herb Identifier -->
     <section id="hero–identifier" class="module">
@@ -397,44 +456,39 @@
    <!-- ENHANCED SYMPTOM CHECKER -->
 <section id="hero-symptom" class="module symptom-module">
   <h2><i class="fas fa-notes-medical"></i> Symptom Checker</h2>
-  <p class="desc">Describe your symptoms, set severity and duration, and get herbal recommendations.</p>
+  <p class="desc">Tell us your symptoms and duration, choose severity, then get AI‐powered herb recommendations.</p>
   <form id="sym-form" class="sym-form">
     <div class="field">
-      <label for="symInput">Describe your symptoms</label>
-      <textarea id="symInput" rows="2" placeholder="e.g. pounding headache, nausea…" required></textarea>
+      <label for="symInput">Your Symptoms</label>
+      <textarea id="symInput" required placeholder="e.g. headache, nausea…"></textarea>
     </div>
     <div class="field">
-      <label>Symptom Category</label>
-      <div class="tags">
-        <button type="button" class="tag" data-cat="pain">Pain</button>
-        <button type="button" class="tag" data-cat="digestive">Digestive</button>
-        <button type="button" class="tag" data-cat="respiratory">Respiratory</button>
-        <button type="button" class="tag" data-cat="stress">Stress</button>
-      </div>
+      <label for="symCategories">Category</label>
+      <select id="symCategories" multiple>
+        <option value="pain">Pain</option>
+        <option value="digestive">Digestive</option>
+        <option value="respiratory">Respiratory</option>
+        <option value="stress">Stress</option>
+      </select>
     </div>
-    <div class="field severity-field">
-      <label for="severity">How intense?</label>
+    <div class="field range-field">
+      <label for="severity">Severity</label>
       <input type="range" id="severity" min="1" max="10" value="5"/>
       <span id="sevValue">5</span>/10
     </div>
     <div class="field">
       <label for="symDuration">Duration (days)</label>
-      <input type="number" id="symDuration" min="0" placeholder="Days…"/>
+      <input type="number" id="symDuration" min="0" placeholder="e.g. 3"/>
     </div>
     <button type="submit" class="btn-primary">Get Recommendations</button>
   </form>
-  <div id="symResult" class="response sym-response" role="status" aria-live="polite" hidden>
-    <button class="close-btn">×</button>
-    <div class="result-header">
-      <h3><i class="fas fa-seedling"></i> Recommended Herbs</h3>
-      <div class="confidence">
-        Confidence:
-        <div class="conf-bar"><div class="conf-fill"></div></div>
-        <span class="conf-percent">0%</span>
-      </div>
+
+  <div id="symResult" class="response sym-response" hidden>
+    <div class="response-header">
+      <button class="close-btn">×</button>
+      <h3><i class="fas fa-seedling"></i> Your Herb Recommendations</h3>
     </div>
-    <div class="herb-cards"></div>
-    <p class="disclaimer"><em>Not a substitute for professional care. See a healthcare provider if severe.</em></p>
+    <div class="result-content"></div>
   </div>
 </section>
 
@@ -469,6 +523,11 @@
     <!-- 5. AI Herbalist Chat -->
     <section id="hero–chat" class="module">
       <h2><i class="fas fa-comments"></i> AI Herbalist Chat</h2>
+         <div class="chat-controls">
+      <button id="closeChat" title="Close Chat"><i class="fas fa-times"></i></button>
+      <button id="viewHistory" title="View History"><i class="fas fa-history"></i></button>
+      <button id="clearChat" title="Clear Chat"><i class="fas fa-trash-alt"></i></button>
+    </div>
       <p class="desc">Ask about herbal remedies:</p>
       <div id="chatBox" role="log" aria-live="polite" style="background:var(--bg);border:1px solid #d1dce5;border-radius:var(--radius);padding:var(--padding);min-height:150px;max-height:300px;overflow-y:auto;"></div>
       <div style="display:flex;gap:.5rem;margin-top:.5rem;">
@@ -605,20 +664,36 @@
     </section>
 
     <!-- ROI CALCULATOR -->
-    <section id="roi" class="module">
-      <h2><i class="fas fa-dollar-sign"></i> Business Insights & ROI Calculator</h2>
-      <p class="desc">Estimate cost savings and revenue uplift from AI adoption.</p>
-      <form id="roi-form">
-        <input id="roiRx" type="number" placeholder="Avg. monthly prescriptions" required aria-label="Monthly prescriptions"/>
-        <input id="roiCost" type="number" placeholder="Avg. herb cost ($)" required aria-label="Average herb cost"/>
-        <button type="submit">Calculate</button>
-      </form>
-      <div id="roiResult" class="response" role="status" hidden>
-        <button class="close-btn" aria-label="Close result">×</button>
-        <div class="result-content"></div>
-      </div>
-    </section>
-
+   <section id="roi" class="module">
+  <h2><i class="fas fa-dollar-sign"></i> Business Insights & ROI Calculator</h2>
+  <p class="desc">
+    Estimate your practice’s return on investment from AI-driven herbal prescription automation.
+    Select your currency, enter your monthly prescription volume and herb costs, then calculate ROI.
+  </p>
+  <form id="roi-form">
+    <div class="field">
+      <label for="currency">Currency</label>
+      <select id="currency">
+        <option value="GHS" selected>Ghanaian Cedi (GHS)</option>
+        <option value="USD">US Dollar (USD)</option>
+        <option value="EUR">Euro (EUR)</option>
+      </select>
+    </div>
+    <div class="field">
+      <label for="roiRx">Monthly Prescriptions</label>
+      <input type="number" id="roiRx" required placeholder="e.g. 100"/>
+    </div>
+    <div class="field">
+      <label for="roiCost">Avg. Herb Cost (<span id="curSym">₵</span>)</label>
+      <input type="number" id="roiCost" required placeholder="e.g. 25"/>
+    </div>
+    <button type="submit">Calculate ROI</button>
+  </form>
+  <div id="roiResult" class="response" hidden>
+    <button class="close-btn">×</button>
+    <div class="result-content"></div>
+  </div>
+</section>
     <!-- ARCHITECTURE / TECH -->
     <section id="about" class="module">
       <h2><i class="fas fa-cogs"></i> Architecture & Data Flow</h2>
@@ -912,7 +987,11 @@
       document.getElementById('chatHint').hidden = true;
     }
   };
-
+document.getElementById('closeChat').onclick = () => document.getElementById('hero-chat').hidden = true;
+document.getElementById('viewHistory').onclick = () => showHistory();    // implement modal or side-panel
+document.getElementById('clearChat').onclick = () => {
+  document.getElementById('chatBox').innerHTML = '';
+};
   //───────────────── GENETICS & ROI ──────────────────
 
   document.getElementById('genetics-form').onsubmit = async e => {
@@ -960,7 +1039,10 @@
     `;
     addResponseTools(panel);
   };
-
+document.getElementById('currency').onchange = e => {
+  const sym = { GHS: '₵', USD: '$', EUR: '€' }[e.target.value];
+  document.getElementById('curSym').textContent = sym;
+};
   //───────────────── COPY & DOWNLOAD TOOLBAR ──────────────────
 
   function addResponseTools(panel) {
