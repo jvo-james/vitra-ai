@@ -569,7 +569,6 @@
 
   <!-- JAVASCRIPT LOGIC -->
   <script>
-// Wrap everything to run after DOM is ready
 document.addEventListener('DOMContentLoaded', () => {
   // ───────────── SIDEBAR & THEME TOGGLES ─────────────
   const sidebar = document.getElementById('sidebar');
@@ -588,12 +587,11 @@ document.addEventListener('DOMContentLoaded', () => {
   };
 
   // ───────────── ONBOARDING MODAL ─────────────
-  // Show onboarding once (could be tied to localStorage)
   const onboard = document.getElementById('onboardModal');
   onboard.style.display = 'flex';
-  // Dismiss handled inline on button
+  // (Dismiss handled inline on button)
 
-  // ───────────── SMOOTH SCROLL HELPERS ─────────────
+  // ───────────── SMOOTH SCROLL HELPER ─────────────
   window.scrollToSection = id => {
     const el = document.getElementById(id);
     if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -618,7 +616,7 @@ document.addEventListener('DOMContentLoaded', () => {
     e.preventDefault();
     const rx = +document.getElementById('roiRx').value;
     const cost = +document.getElementById('roiCost').value;
-    const savings = rx * cost * 0.10; // assume 10% savings
+    const savings = rx * cost * 0.10; // example 10% savings
     const panel = document.getElementById('roiResult');
     panel.querySelector('.result-content').textContent =
       `Estimated monthly savings: $${savings.toFixed(2)}`;
@@ -630,32 +628,39 @@ document.addEventListener('DOMContentLoaded', () => {
   function initChart(id, labels, data, label) {
     new Chart(document.getElementById(id), {
       type: 'bar',
-      data: {
-        labels,
-        datasets: [{ label, data }]
-      },
+      data: { labels, datasets: [{ label, data }] },
       options: { plugins: { legend: { display: false } } }
     });
   }
-  initChart('chartAdoption', ['Wk1', 'Wk2', 'Wk3'], [50, 75, 100], 'Scans');
-  initChart('chartEfficacy', ['HerbA', 'HerbB'], [80, 60], 'Efficacy');
-  initChart('chartSupply', ['Turmeric', 'Ginkgo'], [200, 150], 'Stock');
-  initChart('chartROI', ['Jan', 'Feb', 'Mar'], [5, 7, 6], 'ROI ($k)');
+  initChart('chartAdoption', ['Wk1','Wk2','Wk3'], [50,75,100], 'Scans');
+  initChart('chartEfficacy', ['HerbA','HerbB'], [80,60], 'Efficacy');
+  initChart('chartSupply', ['Turmeric','Ginkgo'], [200,150], 'Stock');
+  initChart('chartROI', ['Jan','Feb','Mar'], [5,7,6], 'ROI ($k)');
 
-  // ───────────── GENERIC WIRE MODULE FUNCTION ─────────────
+  // ───────────── OPENAI HELPERS ─────────────
   async function callOpenAI(messages) {
     const res = await fetch('/.netlify/functions/openai-proxy', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ messages })
     });
-    if (!res.ok) {
-      throw new Error(await res.text() || 'Network error');
-    }
+    if (!res.ok) throw new Error(await res.text());
     const { choices } = await res.json();
     return choices[0].message.content.trim();
   }
 
+  async function callVision(file) {
+    const formData = new FormData();
+    formData.append('image', file);
+    const res = await fetch('/.netlify/functions/openai-proxy', {
+      method: 'POST',
+      body: formData
+    });
+    if (!res.ok) throw new Error(await res.text());
+    return res.json(); // expects { name, uses, cautions, regions }
+  }
+
+  // ───────────── GENERIC MODULE WIRING ─────────────
   function wireModule({ formId, systemPrompt, getUserInput, resultPanelId }) {
     const form = document.getElementById(formId);
     const panel = document.getElementById(resultPanelId);
@@ -681,54 +686,38 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // ───────────── WIRE ALL AI MODULES ─────────────
+  // ───────────── WIRE ALL MODULES ─────────────
 
-  // 1. Herb Identification
-  // Replace your current herb‐identifier wiring with this:
-document.getElementById('iden-form').addEventListener('submit', async e => {
-  e.preventDefault();
-  const panel = document.getElementById('idenResult');
-  const fileInput = document.querySelector('#iden-form input[type=file]');
-  const file = fileInput.files[0];
-  if (!file) {
-    alert('Please choose an image first.');
-    return;
-  }
+  // 1. Herb Identifier
+  document.getElementById('iden-form').addEventListener('submit', async e => {
+    e.preventDefault();
+    const panel = document.getElementById('idenResult');
+    const fileInput = document.querySelector('#iden-form input[type=file]');
+    const file = fileInput.files[0];
+    if (!file) {
+      alert('Please choose an image first.');
+      return;
+    }
+    panel.querySelector('.result-content').innerHTML =
+      'Identifying… <span class="spinner"></span>';
+    panel.hidden = false;
+    try {
+      const { name, uses, cautions, regions } = await callVision(file);
+      panel.querySelector('.result-content').innerHTML = `
+        <strong>Scientific Name:</strong> ${name}<br/>
+        <strong>Uses:</strong> ${uses}<br/>
+        <strong>Cautions:</strong> ${cautions}<br/>
+        <strong>Regions Found:</strong> ${regions.join(', ')}<br/>
+        <button onclick="addToShelf('${name}')">Add to My Herb Shelf</button>
+      `;
+      panel.classList.add('show-close');
+    } catch (err) {
+      panel.querySelector('.result-content').textContent = '⚠️ ' + err.message;
+      panel.classList.add('show-close');
+      console.error(err);
+    }
+  });
 
-  // Show loading
-  panel.querySelector('.result-content').innerHTML = 'Identifying… <span class="spinner"></span>';
-  panel.hidden = false;
-
-  try {
-    // Build multipart form data
-    const formData = new FormData();
-    formData.append('image', file);
-
-    // Send to your vision microservice
-    const res = await fetch('/.netlify/functions/image-vision', {
-      method: 'POST',
-      body: formData
-    });
-    if (!res.ok) throw new Error(`Server error: ${res.statusText}`);
-
-    const { name, uses, cautions, regions } = await res.json();
-    // Render the info card
-    panel.querySelector('.result-content').innerHTML = `
-      <strong>Scientific Name:</strong> ${name}<br/>
-      <strong>Uses:</strong> ${uses}<br/>
-      <strong>Cautions:</strong> ${cautions}<br/>
-      <strong>Regions Found:</strong> ${regions.join(', ')}<br/>
-      <button onclick="addToShelf('${name}')">Add to My Herb Shelf</button>
-    `;
-    panel.classList.add('show-close');
-
-  } catch (err) {
-    panel.querySelector('.result-content').textContent = '⚠️ ' + err.message;
-    panel.classList.add('show-close');
-    console.error(err);
-  }
-});
-  
   // 2. Symptom Checker
   wireModule({
     formId: 'sym-form',
@@ -808,7 +797,7 @@ document.getElementById('iden-form').addEventListener('submit', async e => {
     resultPanelId: 'interactionResult'
   });
 
-  // 9. Safety Checker (meds + herbs)
+  // 9. Safety Checker
   wireModule({
     formId: 'safety-form',
     systemPrompt: 'You warn of dangerous combinations between herbs/medications.',
@@ -836,7 +825,6 @@ document.getElementById('iden-form').addEventListener('submit', async e => {
       chatInput.value = '';
       history.push({ role: 'user', content: msg });
       chatHint.hidden = false;
-
       try {
         const reply = await callOpenAI(history);
         history.push({ role: 'assistant', content: reply });
@@ -849,13 +837,12 @@ document.getElementById('iden-form').addEventListener('submit', async e => {
     };
   })();
 
-  // 11. Contact Form (no AI, just stub)
+  // 11. Contact Form
   document.getElementById('contact-form').addEventListener('submit', e => {
     e.preventDefault();
     alert('Thank you! We will get back to you shortly.');
   });
 });
-    
-  </script>
+</script>
 </body>
 </html>
