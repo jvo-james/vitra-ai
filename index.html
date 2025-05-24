@@ -250,6 +250,17 @@
     input, select, textarea, button { font-size:0.9rem; }
     #hero h1 { font-size:2rem; }
   }
+
+      button:hover:not([disabled]) { transform:scale(1.03); box-shadow:0 5px 14px rgba(0,0,0,0.12); }
+
+ /* Enhanced Symptom Checker button */
+ .btn-primary {
+   background: var(--secondary);
+  color: #fff;
+ }
+  .btn-primary:hover {
+   background: darken(var(--secondary),10%);
+ }
   </style>
 </head>
 
@@ -766,12 +777,7 @@
     });
 
     // 2–11. Wire remaining modules
-    // Symptom Checker Script Enhancements
-document.addEventListener('DOMContentLoaded', () => {
-  // Tag selection
-  document.querySelectorAll('.tag').forEach(btn => {
-    btn.addEventListener('click', () => btn.classList.toggle('selected'));
-  });
+    
   // Severity slider
   const sev = document.getElementById('severity'),
         sevVal = document.getElementById('sevValue');
@@ -818,8 +824,8 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   });
 });
-    wireModule({ formId:'sym-form', systemPrompt:'You are a top-tier herbal diagnostic AI.', getUserInput:()=>document.getElementById('symInput').value, resultPanelId:'symResult' });
-    wireModule({ formId:'pf-form', systemPrompt:'You are an expert at formulating personalized herbal blends with dosage safety.', getUserInput:()=>{
+    
+       wireModule({ formId:'pf-form', systemPrompt:'You are an expert at formulating personalized herbal blends with dosage safety.', getUserInput:()=>{
       const herbs = Array.from(document.getElementById('pfHerbs').selectedOptions).map(o=>o.value).join(', ');
       return `Herbs: ${herbs}; Age: ${document.getElementById('pfAge').value}; Weight: ${document.getElementById('pfWeight').value}`;
     }, resultPanelId:'pfResult' });
