@@ -650,304 +650,332 @@
   <!-- JAVASCRIPT LOGIC -->
 
 <script>
-  document.addEventListener('DOMContentLoaded', () => {
-    initUI();
-    initCharts();
-    initSymptomChecker();
-    wireForm({
-      formId:       'pf-form',
-      prompt:       'You are an expert at formulating personalized herbal blends with dosage safety.',
-      extract:      () => {
-                      const herbs = Array.from(document.getElementById('pfHerbs').selectedOptions)
-                                         .map(o=>o.value).join(', ');
-                      return `Herbs: ${herbs}; Age: ${document.getElementById('pfAge').value}; Weight: ${document.getElementById('pfWeight').value}`;
-                    },
-      outputId:     'pfResult'
-    });
-    wireForm({
-      formId:    'research-form',
-      prompt:    'You summarize clinical research findings concisely, with citations and links.',
-      extract:   () => document.getElementById('researchQuery').value,
-      outputId:  'researchResults'
-    });
-    wireForm({
-      formId:    'inventory-form',
-      prompt:    'You forecast weekly herb demand based on trends, seasonality, and buffer stock recommendations.',
-      extract:   () => `Herb: ${document.getElementById('forecastHerb').value}; Weeks ahead: ${document.getElementById('forecastPeriod').value}`,
-      outputId:  'inventoryResult'
-    });
-    wireForm({
-      formId:    'genetics-form',
-      prompt:    'You interpret genetic reports to recommend suitable herbs, noting evidence tiers and privacy disclaimers.',
-      extract:   () => {
-                    const f = document.getElementById('geneticUpload').files[0];
-                    return f ? f.name : '';
-                  },
-      outputId:  'geneticResult'
-    });
-    wireForm({
-      formId:    'dose-form',
-      prompt:    'You calculate daily herbal dosages based on weight, symptom, and extract form, accounting for non-linear pharmacokinetics.',
-      extract:   () => `Weight: ${document.getElementById('weight').value}kg; Symptom: ${document.getElementById('symptom').value}; Form: ${document.getElementById('formType').value}`,
-      outputId:  'dosageResult'
-    });
-    wireForm({
-      formId:    'int-form',
-      prompt:    'You check for interactions between two herbs, grading severity mild/moderate/severe with descriptions.',
-      extract:   () => {
-                    const a = document.getElementById('herbA').value;
-                    const b = document.getElementById('herbB').value;
-                    if (a === b) throw new Error('Please select two distinct herbs.');
-                    return `${a} & ${b}`;
-                  },
-      outputId:  'interactionResult'
-    });
-    wireForm({
-      formId:    'safety-form',
-      prompt:    'You warn of dangerous combinations between herbs and medications, with severity color-coding.',
-      extract:   () => {
-                    const a = document.getElementById('safetyA').value;
-                    const b = document.getElementById('safetyB').value;
-                    if (a === b) throw new Error('Please pick two distinct items.');
-                    return `${a} & ${b}`;
-                  },
-      outputId:  'safetyResult'
-    });
-    initChat();
-    initContactForm();
-  });
-
-  // Herb Identifier (image) handler
-document.getElementById('iden-form').addEventListener('submit', async e => {
-  e.preventDefault();
-  const panel = document.getElementById('idenResult');
-  const fileInput = e.currentTarget.querySelector('input[type=file]');
-  const file = fileInput.files[0];
-  if (!file) {
-    alert('Please select an image first.');
-    return;
-  }
-
-  // Show spinner
-  panel.hidden = false;
-  panel.querySelector('.result-content').innerHTML =
-    'Identifying… <span class="spinner"></span>';
-
-  try {
-    const formData = new FormData();
-    formData.append('file', file);
-
-    const res = await fetch('/.netlify/functions/openai-proxy', {
-      method: 'POST',
-      body: formData
-    });
-    if (!res.ok) {
-      throw new Error(await res.text());
-    }
-    const { description } = await res.json();
-    panel.querySelector('.result-content').textContent = description;
-  } catch (err) {
-    panel.querySelector('.result-content').textContent = '⚠️ ' + err.message;
-  }
-});
-  // ───── CORE UI ─────
-  function initUI() {
-    const sidebar   = document.getElementById('sidebar');
-    document.getElementById('shrinkBtn')
-      .addEventListener('click', () => sidebar.classList.toggle('collapsed'));
-    document.getElementById('hamburger')
-      .addEventListener('click', () => sidebar.classList.toggle('open'));
-    document.getElementById('themeToggle')
-      .addEventListener('click', () => {
-        const root = document.documentElement;
-        root.classList.toggle('dark');
-        root.setAttribute('aria-theme', root.classList.contains('dark') ? 'dark' : 'light');
-      });
-
-    // Onboarding modal
-    const modal = document.getElementById('onboardModal');
-    modal.style.display = 'flex';
-    window.onboardClose = () => modal.style.display = 'none';
-
-    // Image preview
-    document.querySelector('#iden-form input[type=file]')
-      .addEventListener('change', e => {
-        const img = document.getElementById('idenPreview');
-        img.src = URL.createObjectURL(e.target.files[0]);
-        img.alt = e.target.files[0].name;
-        img.style.display = 'block';
-      });
-
-    // Close buttons
-    document.querySelectorAll('.close-btn')
-      .forEach(btn => btn.addEventListener('click', () => {
-        btn.closest('.response').hidden = true;
-      }));
-
-    // Smooth scroll helper
-    window.scrollToSection = id => {
-      const el = document.getElementById(id);
-      if (el) el.scrollIntoView({ behavior:'smooth', block:'start' });
-    };
-  }
-
-  // ───── Charts ─────
-  function initCharts() {
-    function cfg(id, labels, data, label, type='bar') {
-      new Chart(document.getElementById(id), {
-        type,
-        data: { labels, datasets:[{ label, data }] },
-        options: { plugins:{ legend:{ display:false } }, scales:{ y:{ beginAtZero:true } } }
-      });
-    }
-    cfg('chartAdoption', ['Wk1','Wk2','Wk3'], [50,75,100], 'Scans');
-    cfg('chartEfficacy', ['Herb A','Herb B'], [80,60], 'Efficacy');
-    cfg('chartSupply', ['Turmeric','Ginkgo'], [200,150], 'Stock');
-    cfg('chartROI', ['Jan','Feb','Mar'], [5,7,6], 'ROI', 'line');
-  }
-
-  // ───── OpenAI proxy ─────
-  async function callOpenAI(messages) {
+// ─────────────── OPENAI & VISION HELPERS ───────────────
+async function callOpenAI(messages) {
   const res = await fetch('/.netlify/functions/openai-proxy', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ messages })
   });
   if (!res.ok) {
-    const errText = await res.text();
-    throw new Error(errText || 'Server error');
+    const txt = await res.text();
+    throw new Error(txt || 'Server error');
   }
   const data = await res.json();
-  // proxy returns { reply } on chat
-  if (data.reply !== undefined) return data.reply;
-  // proxy returns { description } on image
-  if (data.description !== undefined) return data.description;
-  throw new Error('Unexpected response shape');
+  // Chat path: return first choice
+  if (data.choices && data.choices[0]?.message?.content) {
+    return data.choices[0].message.content.trim();
+  }
+  // Fallback
+  throw new Error('Unexpected response from chat API');
 }
-  
-  // ───── Generic form wiring ─────
-  function wireForm({ formId, prompt, extract, outputId }) {
-    const form  = document.getElementById(formId);
-    const panel = document.getElementById(outputId);
-    form.addEventListener('submit', async e => {
-      e.preventDefault();
-      const btn = form.querySelector('button[type=submit]');
-      btn.disabled = true;
-      panel.hidden = false;
-      panel.innerHTML = `<div class="response-content">Processing… <span class="spinner"></span></div>`;
-      try {
-        const reply = await callOpenAI([
-          { role:'system',  content: prompt },
-          { role:'user',    content: extract() }
-        ]);
-        panel.innerHTML = `<div>${reply}</div><button class="close-btn">×</button>`;
-        panel.querySelector('.close-btn')
-             .addEventListener('click', () => panel.hidden = true);
-      } catch(err) {
-        panel.innerHTML = `<div>⚠️ ${err.message}</div><button class="close-btn">×</button>`;
-        panel.querySelector('.close-btn')
-             .addEventListener('click', () => panel.hidden = true);
-      }
-      btn.disabled = false;
+
+async function callVision(file) {
+  const formData = new FormData();
+  formData.append('file', file);
+  const res = await fetch('/.netlify/functions/openai-proxy', {
+    method: 'POST',
+    body: formData
+  });
+  if (!res.ok) {
+    const txt = await res.text();
+    throw new Error(txt || 'Vision API error');
+  }
+  return res.json(); // expects { name, uses, cautions, regions } or { description }
+}
+
+// ─────────────── FORM‐WIRING HELPER ───────────────
+function wireForm({ formId, prompt, extract, outputId }) {
+  const form = document.getElementById(formId);
+  const panel = document.getElementById(outputId);
+  form.addEventListener('submit', async e => {
+    e.preventDefault();
+    const btn = form.querySelector('button[type=submit]');
+    btn.disabled = true;
+    panel.hidden = false;
+    panel.innerHTML = `<div class="result-content">Processing… <span class="spinner"></span></div>`;
+    try {
+      const userInput = extract();
+      const reply = await callOpenAI([
+        { role: 'system', content: prompt },
+        { role: 'user', content: userInput }
+      ]);
+      panel.innerHTML = `<div class="result-content">${reply}</div>
+                         <button class="close-btn" aria-label="Close">×</button>`;
+      panel.querySelector('.close-btn').onclick = () => panel.hidden = true;
+    } catch (err) {
+      panel.innerHTML = `<div class="result-content">⚠️ ${err.message}</div>
+                         <button class="close-btn" aria-label="Close">×</button>`;
+      panel.querySelector('.close-btn').onclick = () => panel.hidden = true;
+    }
+    btn.disabled = false;
+  });
+}
+
+// ─────────────── GLOBAL HELPERS ───────────────
+window.previewImage = input => {
+  const img = document.getElementById('idenPreview');
+  if (!input.files?.[0]) return;
+  img.src = URL.createObjectURL(input.files[0]);
+  img.alt = input.files[0].name;
+  img.style.display = 'block';
+};
+
+window.scrollToSection = id => {
+  const el = document.getElementById(id);
+  if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+};
+
+function addToShelf(name) {
+  alert(`"${name}" added to your herb shelf.`);
+}
+
+// ─────────────── INIT FUNCTIONS ───────────────
+function initUI() {
+  const sidebar = document.getElementById('sidebar');
+  document.getElementById('shrinkBtn').onclick = () => {
+    sidebar.classList.toggle('collapsed');
+    document.querySelector('#shrinkBtn i').classList.toggle('fa-angle-double-right');
+  };
+  document.getElementById('hamburger').onclick = () => sidebar.classList.toggle('open');
+  document.getElementById('themeToggle').onclick = () => {
+    document.documentElement.classList.toggle('dark');
+    document.getElementById('themeToggle').classList.toggle('fa-sun');
+  };
+  // close buttons
+  document.querySelectorAll('.close-btn').forEach(btn => {
+    btn.onclick = () => btn.closest('.response').hidden = true;
+  });
+}
+
+function initCharts() {
+  function make(id, labels, data, label, type = 'bar') {
+    new Chart(document.getElementById(id), {
+      type,
+      data: { labels, datasets: [{ label, data }] },
+      options: { plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true } } }
     });
   }
+  make('chartAdoption', ['Wk1','Wk2','Wk3'], [50,75,100], 'Scans');
+  make('chartEfficacy', ['Herb A','Herb B'], [80,60], 'Efficacy');
+  make('chartSupply', ['Turmeric','Ginkgo'], [200,150], 'Stock');
+  make('chartROI', ['Jan','Feb','Mar'], [5,7,6], 'ROI', 'line');
+}
 
-  // ───── Symptom Checker ─────
-  function initSymptomChecker() {
-    const tags     = document.querySelectorAll('#sym-form .tag');
-    const slider   = document.getElementById('severity');
-    const sevValue = document.getElementById('sevValue');
-    tags.forEach(t => t.addEventListener('click', ()=> t.classList.toggle('selected')));
-    slider.addEventListener('input', ()=> sevValue.textContent = slider.value);
+function initSymptomChecker() {
+  const tags = document.querySelectorAll('#sym-form .tag');
+  const slider = document.getElementById('severity');
+  const sevValue = document.getElementById('sevValue');
+  tags.forEach(t => t.onclick = () => t.classList.toggle('selected'));
+  slider.oninput = () => sevValue.textContent = slider.value;
 
-    document.getElementById('sym-form')
-      .addEventListener('submit', async e => {
-        e.preventDefault();
-        const panel = document.getElementById('symResult');
-        panel.hidden = false;
-        panel.querySelector('.conf-fill').style.width    = '0%';
-        panel.querySelector('.conf-percent').textContent = '0%';
-        panel.querySelector('.herb-cards').innerHTML     = '';
+  document.getElementById('sym-form').onsubmit = async e => {
+    e.preventDefault();
+    const panel = document.getElementById('symResult');
+    panel.hidden = false;
+    panel.querySelector('.conf-fill').style.width = '0%';
+    panel.querySelector('.conf-percent').textContent = '0%';
+    panel.querySelector('.herb-cards').innerHTML = '';
 
-        // Gather
-        const text   = document.getElementById('symInput').value;
-        const cats   = Array.from(tags).filter(t=>t.classList.contains('selected')).map(t=>t.dataset.cat);
-        const sev    = slider.value;
-        const onset  = document.getElementById('onsetDate').value;
+    // gather inputs
+    const text = document.getElementById('symInput').value;
+    const cats = [...tags].filter(t => t.classList.contains('selected')).map(t => t.dataset.cat);
+    const sev = slider.value;
+    const onset = document.getElementById('onsetDate').value;
 
-        // Mock AI (replace with real callOpenAI if desired)
-        const mock = [
-          { name:'Feverfew', evidence:'well', conf:85, uses:'Headache relief' },
-          { name:'Ginger',   evidence:'anecdotal', conf:65, uses:'Nausea soothing' }
-        ];
-
-        // Animate confidence
-        setTimeout(() => {
-          panel.querySelector('.conf-fill').style.width    = mock[0].conf + '%';
-          panel.querySelector('.conf-percent').textContent = mock[0].conf + '%';
-        }, 200);
-
-        // Build cards
-        const container = panel.querySelector('.herb-cards');
-        mock.forEach(h => {
-          const card = document.createElement('div');
-          card.className = 'herb-card';
-          card.innerHTML = `
-            <h4>${h.name}</h4>
-            <span class="evidence-badge ${h.evidence}">${
-              h.evidence==='well' ? 'Well-studied' : 'Anecdotal'
-            }</span>
-            <p>${h.uses}</p>
-            <button onclick="addToShelf('${h.name}')">Add to Shelf</button>
-          `;
-          container.appendChild(card);
-        });
+    // call AI
+    try {
+      const prompt = `Symptoms: ${text}; Categories: ${cats.join(',')}; Severity: ${sev}; Onset: ${onset}`;
+      const reply = await callOpenAI([{ role:'system', content:'You are a herbal diagnostic AI.' },{ role:'user', content:prompt }]);
+      // parse AI back into structured JSON? For demo, assume it returns JSON array:
+      const recs = JSON.parse(reply);
+      // animate and render
+      recs.forEach((h,i) => {
+        if (i===0) {
+          setTimeout(()=> {
+            panel.querySelector('.conf-fill').style.width = h.conf + '%';
+            panel.querySelector('.conf-percent').textContent = h.conf + '%';
+          },200);
+        }
+        const card = document.createElement('div');
+        card.className = 'herb-card';
+        card.innerHTML = `
+          <h4>${h.name}</h4>
+          <span class="evidence-badge ${h.evidence}">${h.evidence==='well'?'Well-studied':'Anecdotal'}</span>
+          <p>${h.uses}</p>
+          <button onclick="addToShelf('${h.name}')">Add to Shelf</button>
+        `;
+        panel.querySelector('.herb-cards').append(card);
       });
-  }
+    } catch (err) {
+      panel.querySelector('.herb-cards').innerHTML = `<p>⚠️ ${err.message}</p>`;
+    }
+  };
+}
 
-  // ───── Chat module ─────
-  function initChat() {
-    const box     = document.getElementById('chatBox');
-    const hint    = document.getElementById('chatHint');
-    const input   = document.getElementById('chatInput');
-    const sendBtn = document.getElementById('sendChat');
-    let history   = [{ role:'system', content:'You are a friendly, safe herbal medicine tutor. Escalate urgent cases.' }];
+function initChat() {
+  const box = document.getElementById('chatBox');
+  const hint = document.getElementById('chatHint');
+  const input = document.getElementById('chatInput');
+  const sendBtn = document.getElementById('sendChat');
+  let history = [{ role:'system', content:'You are a friendly herbal tutor.' }];
 
-    sendBtn.addEventListener('click', async () => {
-      const msg = input.value.trim();
-      if (!msg) return;
-      box.innerHTML += `<p><strong>You:</strong> ${msg}</p>`;
-      input.value = '';
-      history.push({ role:'user', content: msg });
-      hint.hidden = false;
-      sendBtn.disabled = true;
-      try {
-        const reply = await callOpenAI(history);
-        history.push({ role:'assistant', content: reply });
-        box.innerHTML += `<p><strong>Vitra AI:</strong> ${reply}</p>`;
-      } catch {
-        box.innerHTML += `<p><strong>Vitra AI:</strong> Sorry, something went wrong.</p>`;
+  sendBtn.onclick = async () => {
+    const msg = input.value.trim();
+    if (!msg) return;
+    box.innerHTML += `<p><strong>You:</strong> ${msg}</p>`;
+    input.value = '';
+    history.push({ role:'user', content: msg });
+    hint.hidden = false;
+    sendBtn.disabled = true;
+    try {
+      const reply = await callOpenAI(history);
+      history.push({ role:'assistant', content: reply });
+      box.innerHTML += `<p><strong>Vitra AI:</strong> ${reply}</p>`;
+    } catch {
+      box.innerHTML += `<p><strong>Vitra AI:</strong> Sorry, something went wrong.</p>`;
+    }
+    hint.hidden = true;
+    sendBtn.disabled = false;
+    box.scrollTop = box.scrollHeight;
+  };
+}
+
+function initContactForm() {
+  document.getElementById('contact-form').onsubmit = e => {
+    e.preventDefault();
+    alert('Thank you! We will get back to you shortly.');
+    e.target.reset();
+  };
+}
+
+// ─────────────── BOOTSTRAP ALL ───────────────
+document.addEventListener('DOMContentLoaded', () => {
+  initUI();
+  initCharts();
+  initSymptomChecker();
+
+  // wire all AI‐powered JSON forms
+  wireForm({
+    formId: 'pf-form',
+    prompt: 'You are an expert at formulating personalized herbal blends with dosage safety.',
+    extract: () => {
+      const herbs = [...document.getElementById('pfHerbs').selectedOptions].map(o => o.value).join(', ');
+      const age = document.getElementById('pfAge').value;
+      const weight = document.getElementById('pfWeight').value;
+      return `Herbs: ${herbs}; Age: ${age}; Weight: ${weight}kg`;
+    },
+    outputId: 'pfResult'
+  });
+
+  wireForm({
+    formId: 'research-form',
+    prompt: 'You summarize clinical research findings concisely, with citations and links.',
+    extract: () => document.getElementById('researchQuery').value,
+    outputId: 'researchResults'
+  });
+
+  wireForm({
+    formId: 'inventory-form',
+    prompt: 'You forecast weekly herb demand based on trends, seasonality, and buffer stock recommendations.',
+    extract: () => {
+      const h = document.getElementById('forecastHerb').value;
+      const w = document.getElementById('forecastPeriod').value;
+      return `Herb: ${h}; Weeks ahead: ${w}`;
+    },
+    outputId: 'inventoryResult'
+  });
+
+  wireForm({
+    formId: 'genetics-form',
+    prompt: 'You interpret genetic reports to recommend suitable herbs, noting evidence tiers and privacy disclaimers.',
+    extract: () => document.getElementById('geneticUpload').files[0]?.name || '',
+    outputId: 'geneticResult'
+  });
+
+  wireForm({
+    formId: 'dose-form',
+    prompt: 'You calculate daily herbal dosages based on weight, symptom, and extract form, accounting for non-linear pharmacokinetics.',
+    extract: () => {
+      const w = document.getElementById('weight').value;
+      const s = document.getElementById('symptom').value;
+      const f = document.getElementById('formType').value;
+      return `Weight: ${w}kg; Symptom: ${s}; Form: ${f}`;
+    },
+    outputId: 'dosageResult'
+  });
+
+  wireForm({
+    formId: 'int-form',
+    prompt: 'You check for interactions between two herbs, grading severity mild/moderate/severe with descriptions.',
+    extract: () => {
+      const a = document.getElementById('herbA').value;
+      const b = document.getElementById('herbB').value;
+      if (a === b) throw new Error('Please select two distinct herbs.');
+      return `${a} & ${b}`;
+    },
+    outputId: 'interactionResult'
+  });
+
+  wireForm({
+    formId: 'safety-form',
+    prompt: 'You warn of dangerous combinations between herbs and medications, with severity color-coding.',
+    extract: () => {
+      const a = document.getElementById('safetyA').value;
+      const b = document.getElementById('safetyB').value;
+      if (a === b) throw new Error('Please choose two distinct items.');
+      return `${a} & ${b}`;
+    },
+    outputId: 'safetyResult'
+  });
+
+  wireForm({
+    formId: 'roi-form',
+    prompt: 'You calculate business ROI from average prescriptions and herb cost.',
+    extract: () => {
+      const rx = document.getElementById('roiRx').value;
+      const cost = document.getElementById('roiCost').value;
+      return `Prescriptions: ${rx}; Cost per herb: $${cost}`;
+    },
+    outputId: 'roiResult'
+  });
+
+  initChat();
+  initContactForm();
+
+  // herb‐identifier (vision) form
+  document.getElementById('iden-form').onsubmit = async e => {
+    e.preventDefault();
+    const panel = document.getElementById('idenResult');
+    const file = e.target.querySelector('input[type=file]').files[0];
+    if (!file) {
+      alert('Please select an image.');
+      return;
+    }
+    panel.hidden = false;
+    panel.querySelector('.result-content').innerHTML = 'Identifying… <span class="spinner"></span>';
+    try {
+      const data = await callVision(file);
+      // if vision returned structured fields:
+      if (data.name) {
+        panel.querySelector('.result-content').innerHTML = `
+          <strong>Scientific Name:</strong> ${data.name}<br/>
+          <strong>Uses:</strong> ${data.uses}<br/>
+          <strong>Cautions:</strong> ${data.cautions}<br/>
+          <strong>Regions:</strong> ${data.regions.join(', ')}<br/>
+          <button onclick="addToShelf('${data.name}')">Add to My Herb Shelf</button>
+        `;
+      } else if (data.description) {
+        panel.querySelector('.result-content').textContent = data.description;
+      } else {
+        panel.querySelector('.result-content').textContent = 'No valid vision output.';
       }
-      hint.hidden = true;
-      sendBtn.disabled = false;
-      box.scrollTop = box.scrollHeight;
-    });
-  }
-
-  // ───── Contact form ─────
-  function initContactForm() {
-    document.getElementById('contact-form')
-      .addEventListener('submit', e => {
-        e.preventDefault();
-        alert('Thank you! We will get back to you shortly.');
-        e.target.reset();
-      });
-  }
-
-  // ───── Utility ─────
-  function addToShelf(name) {
-    alert(`“${name}” added to your herb shelf.`);
-  }
+      panel.querySelector('.close-btn').onclick = () => panel.hidden = true;
+    } catch (err) {
+      panel.querySelector('.result-content').textContent = '⚠️ ' + err.message;
+    }
+  };
+});
 </script>
 </body>
 </html>
