@@ -329,43 +329,108 @@ button[disabled] {
   display: flex;
   gap: 0.5rem;
 }
-/*────────────────── HERO ──────────────────*/
-#hero {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  text-align: center;
-  padding: 4rem 1rem;
-  background: linear-gradient(135deg,#e8f5f1 0%,#f5fafb 100%);
-  margin-bottom: 2rem;
-  border-radius: var(--radius);
-}
-#hero h1 {
-  font-size: 2.5rem;
-  color: var(--primary);
-  margin-bottom: 1rem;
-}
-#hero p {
-  font-size: 1.1rem;
-  color: var(--text);
-  margin-bottom: 1.5rem;
-}
-#hero .cta {
-  display: flex;
-  gap: 1rem;
-  flex-wrap: wrap;
-  justify-content: center;
-}
-#hero .cta button {
-  min-width: 160px;
-}
-#hero video {
-  margin-top: 2rem;
-  max-width: 600px;
-  width: 100%;
-  border-radius: var(--radius);
-}
+ /* HERO MODULE */
+  .hero-module {
+    background: var(--accent);
+    color: var(--text);
+    border-radius: var(--radius);
+    padding: 3rem 1rem;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+  .hero-module::before {
+    content: "\f06d";
+    font-family: "FontAwesome";
+    font-size: 10rem;
+    color: rgba(42,111,78,0.05);
+    position: absolute;
+    top: -2rem; right: -2rem;
+    transform: rotate(30deg);
+  }
+  html.dark .hero-module {
+    background: var(--surface);
+    color: var(--text);
+  }
+  html.dark .hero-module::before {
+    color: rgba(255,255,255,0.05);
+  }
 
+  .hero-content h1 {
+    font-size: 2.5rem;
+    margin-bottom: 0.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+  }
+  .hero-subtitle {
+    font-size: 1.1rem;
+    margin-bottom: 2rem;
+    color: var(--muted);
+  }
+
+  .hero-actions {
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+    justify-content: center;
+    margin-bottom: 2rem;
+  }
+  .hero-actions .btn-primary,
+  .hero-actions .btn-secondary,
+  .hero-actions .btn-tertiary {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    border-radius: var(--radius);
+    padding: 0.75rem 1.5rem;
+    font-weight: 600;
+    cursor: pointer;
+    border: none;
+    transition: transform var(--transition), box-shadow var(--transition);
+  }
+  .hero-actions .btn-primary {
+    background: var(--primary);
+    color: #fff;
+  }
+  .hero-actions .btn-secondary {
+    background: var(--secondary);
+    color: #fff;
+  }
+  .hero-actions .btn-tertiary {
+    background: var(--bg);
+    color: var(--primary);
+    border: 2px solid var(--primary);
+  }
+  .hero-actions button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  }
+
+  .hero-features {
+    list-style: none;
+    display: grid;
+    grid-template-columns: repeat(auto-fit,minmax(160px,1fr));
+    gap: 1rem;
+    padding: 0;
+    margin: 0 auto;
+    max-width: 800px;
+  }
+  .hero-features li {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.75rem 1rem;
+    background: var(--surface);
+    border-radius: var(--radius);
+    box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+    font-size: 0.95rem;
+  }
+  html.dark .hero-features li {
+    background: var(--surface-dark);
+    box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+  }
 /*────────────────── SYMPTOM CHECKER ──────────────────*/
 
 #hero-symptom .sym-form {
@@ -707,15 +772,35 @@ footer a {
   <!-- MAIN CONTENT -->
   <main role="main">
     <!--  Hero -->
-    <section id="hero">
-      <h1>Empowering Traditional Healing with Artificial Intelligence</h1>
-      <p>Discover, personalize, and manage herbal remedies with AI-powered tools—designed for practitioners and enthusiasts alike.</p>
-      <div class="cta">
-        <button onclick="scrollToSection('hero–identifier')">Try Herb Identifier</button>
-        <button onclick="scrollToSection('hero–chat')">Chat with Herbalist</button>
-      </div>
-      <video src="path/to/intro.mp4" controls aria-label="Intro demonstration video"></video>
-    </section>
+   <section id="hero" class="module hero-module">
+  <div class="hero-content">
+    <h1><i class="fas fa-leaf"></i> Empower Your Herbal Journey</h1>
+    <p class="hero-subtitle">
+      Discover AI-powered tools for plant ID, symptom analysis, custom blends, and real-time analytics—all in one place.
+    </p>
+
+    <div class="hero-actions">
+      <button class="btn-primary">
+        <i class="fas fa-camera"></i> Scan a Plant
+      </button>
+      <button class="btn-secondary">
+        <i class="fas fa-notes-medical"></i> Check Symptoms
+      </button>
+      <button class="btn-tertiary">
+        <i class="fas fa-comments"></i> Chat with Herbalist
+      </button>
+    </div>
+
+    <ul class="hero-features">
+      <li><i class="fas fa-seedling"></i> AI-Based Plant ID</li>
+      <li><i class="fas fa-stethoscope"></i> Symptom Diagnostics</li>
+      <li><i class="fas fa-flask"></i> Personalized Formulations</li>
+      <li><i class="fas fa-chart-line"></i> Live Analytics</li>
+      <li><i class="fas fa-shield-alt"></i> Safety Checker</li>
+      <li><i class="fas fa-globe"></i> Cultural Insights</li>
+    </ul>
+  </div>
+</section>
 
     <!-- Executive Analytics Dashboard -->
     <section id="analytics" class="module">
