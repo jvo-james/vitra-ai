@@ -7,16 +7,26 @@
   
 <!-- Montserrat + FontAwesome -->
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;600;700&display=swap" rel="stylesheet"/>
-  <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
-  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;600;700&display=swap" rel="stylesheet"/>
-  <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
-  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;600;700&display=swap" rel="stylesheet"/>
-  <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
+<script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
   <link rel="stylesheet"
         href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"/>
   
   <!-- Chart.js -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+  const links = document.querySelectorAll("aside nav a[href^='#']");
+  const sections = [...links].map(link => document.querySelector(link.getAttribute("href")));
+
+  window.addEventListener("scroll", () => {
+    let index = sections.findIndex(section => section.offsetTop > window.scrollY + 100);
+    if (index === -1) index = sections.length;
+    document.querySelectorAll("aside nav a").forEach(a => a.classList.remove("active"));
+    if (sections[index - 1])
+      document.querySelector(`aside nav a[href="#${sections[index - 1].id}"]`)?.classList.add("active");
+  });
+});
+</script>
 
   
   <style>
@@ -716,8 +726,8 @@ footer a {
 .history-content .del-msg { background:none; border:none; color:var(--secondary); font-size:1.2rem; }
 
      .chat-input-row input {
-  flex: 1 1 600px;
-  padding: 0.8rem;
+ flex: 1 1 100%;
+  padding: 0.8rem 1rem;
   border: 1px solid var(--muted);
   border-radius: var(--radius);
  }
@@ -725,6 +735,56 @@ footer a {
 #roi-form input,
 #roi-form select {
   flex: none;       /* cancel the generic flex:1 rule */
+}
+/* iPhone 11–level responsiveness and up */
+@media (max-width: 414px) {
+  .hero-content h1 {
+    font-size: 1.8rem;
+    flex-direction: column;
+  }
+
+  .hero-subtitle,
+  .module p.desc {
+    font-size: 0.95rem;
+  }
+
+  .hero-actions {
+    flex-direction: column;
+  }
+
+  .hero-actions a {
+    width: 100%;
+    justify-content: center;
+  }
+
+  form, .chat-input-row {
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+
+  input, select, textarea, button {
+    font-size: 0.9rem;
+    width: 100% !important;
+  }
+
+  .chat-box {
+    max-height: 220px;
+  }
+
+  .chart-card {
+    height: auto;
+  }
+
+  .charts {
+    grid-template-columns: 1fr !important;
+  }
+
+  aside:not(.open) {
+    display: none;
+  }
+}
+#sidebar.shrunk .brand span {
+  display: none;
 }
 
 </style>
@@ -746,23 +806,11 @@ footer a {
   <aside id="sidebar">
     <div class="brand"><i class="fas fa-leaf"></i><span>Vitra AI</span></div>
     <nav role="navigation">
-      <a href="#hero" class="active"><i class="fas fa-home"></i><span>Home</span></a>
-      <a href="#hero–identifier"><i class="fas fa-camera"></i><span>Herb Identifier</span></a>
-      <a href="#hero-symptom"><i class="fas fa-notes-medical"></i><span>Symptom Checker</span></a>
-      <a href="#hero–cultural"><i class="fas fa-globe"></i><span>Cultural Knowledge</span></a>
-      <a href="#hero–safety"><i class="fas fa-shield-alt"></i><span>Safety Checker</span></a>
-      <a href="#hero–chat"><i class="fas fa-comments"></i><span>AI Herbalist Chat</span></a>
-      <a href="#formulations"><i class="fas fa-user-shield"></i><span>Personalized Formulations</span></a>
-      <a href="#research"><i class="fas fa-book-reader"></i><span>Research Summaries</span></a>
-      <a href="#inventory"><i class="fas fa-warehouse"></i><span>Inventory Forecast</span></a>
-      <a href="#genetics"><i class="fas fa-dna"></i><span>Genetics Match</span></a>
-      <a href="#dosage"><i class="fas fa-calculator"></i><span>Dosage Calculator</span></a>
-      <a href="#interaction"><i class="fas fa-exchange-alt"></i><span>Interaction Checker</span></a>
-      <a href="#addons"><i class="fas fa-plus-circle"></i><span>Add-Ons</span></a>
-      <a href="#analytics"><i class="fas fa-chart-line"></i><span>Analytics</span></a>
-      <a href="#roi"><i class="fas fa-dollar-sign"></i><span>ROI Calculator</span></a>
-      <a href="#about"><i class="fas fa-cogs"></i><span>About & Tech</span></a>
-      <a href="#contact"><i class="fas fa-envelope"></i><span>Contact</span></a>
+     <a href="https://vitra-ai.netlify.app/" class="active"><i class="fas fa-seedling"></i><span>Herbal Medicine</span></a>
+    <a href="mental.html"><i class="fas fa-brain"></i><span>Psychology & Mental Health</span></a>
+    <a href="dietetics.html"><i class="fas fa-utensils"></i><span>Dietetics</span></a>
+    <a href="pharmacy.html"><i class="fas fa-prescription-bottle-alt"></i><span>E-Pharmacy</span></a>
+    <a href="consult.html"><i class="fas fa-calendar-check"></i><span>Consultation Booking</span></a>
       <button id="shrinkBtn" aria-label="Toggle sidebar"><i class="fas fa-angle-double-left"></i></button>
     </nav>
   </aside>
@@ -795,15 +843,10 @@ footer a {
     </p>
 
     <div class="hero-actions">
-      <button class="btn-primary">
-        <i class="fas fa-camera"></i> Scan a Plant
-      </button>
-      <button class="btn-secondary">
-        <i class="fas fa-notes-medical"></i> Check Symptoms
-      </button>
-      <button class="btn-tertiary">
-        <i class="fas fa-comments"></i> Chat with Herbalist
-      </button>
+      <a href="#hero–identifier" class="btn-primary"><i class="fas fa-camera"></i> Scan a Plant</a>
+<a href="#hero-symptom" class="btn-secondary"><i class="fas fa-notes-medical"></i> Check Symptoms</a>
+  <a href="#hero–chat" class="btn-tertiary"><i class="fas fa-comments"></i> Chat with Herbalist</a>
+
     </div>
 
     <ul class="hero-features">
@@ -859,8 +902,7 @@ footer a {
   <option value="skin">Skin</option>
   <option value="mental">Mental</option>
   <option value="cardio">Cardio</option>
-  <option value="respiratory">Respiratory</option>
-  <option value="digestive">Digestive</option>
+ 
           </select>
         </div>
         <div class="field range-field">
@@ -981,7 +1023,7 @@ footer a {
       <p class="desc">Paste study titles or keywords for a concise summary.</p>
       <form id="research-form">
         <input id="researchQuery" placeholder="e.g. ‘Ashwagandha anxiety RCT’" aria-label="Research query" required/>
-        <button type="submit">Summarize</button>
+        <button type="submit">Generate Summary</button>
         <div class="hint">Include herb and focus area.</div>
       </form>
       <div id="researchResults" class="response" role="status" hidden>
@@ -996,7 +1038,7 @@ footer a {
       <h2><i class="fas fa-warehouse"></i> Inventory Forecast</h2>
       <p class="desc">Predict stock needs weeks ahead.</p>
       <form id="inventory-form">
-        <select id="forecastHerb" aria-label="Select herb for forecast" required>
+        <select id="forecastHerb" aria-label="Select one herb for inventory forecast" required>
           <option disabled selected>Select herb…</option>
           <!-- same options as PF -->
           <option>Ashwagandha</option>
@@ -1225,16 +1267,10 @@ footer a {
 
 </script>
 <script>
-  //──────────────────────────────────────────────────────────────────────────────
-  // ONBOARDING MODAL
-  //──────────────────────────────────────────────────────────────────────────────
+ 
   function onboardClose() {
     document.getElementById('onboardModal').style.display = 'none';
   }
-
-  //──────────────────────────────────────────────────────────────────────────────
-  // UTILITY FUNCTIONS
-  //──────────────────────────────────────────────────────────────────────────────
 
   // Call OpenAI proxy
   async function callOpenAI(messages) {
@@ -1506,6 +1542,13 @@ footer a {
       addClose(panel);
       return;
     }
+    // New file-type validation
+ const allowed = ['application/json','text/csv'];
+ if (!allowed.includes(file.type)) {
+   panel.innerHTML = '<div class="result-content">⚠️ Invalid file type. Upload a .csv or .json.</div>';
+   addClose(panel);
+   return;
+ }
     try {
       const text = await file.text();
       const reply = await callOpenAI([
