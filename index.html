@@ -483,6 +483,114 @@
     height: 180px !important;
   }
 }
+    /*────────────────── GENERAL RESPONSE FORMATTING ──────────────────*/
+/* Ensure paragraphs, bold & italics render nicely */
+.response .result-content p {
+  margin-bottom: 1rem;
+  line-height: 1.5;
+  font-size: .95rem;
+}
+.response .result-content strong { font-weight: 600; }
+.response .result-content em    { font-style: italic; }
+
+/* Replace any leftover “\[ … \]” with a block style */
+.response .result-content code {
+  display: block;
+  background: rgba(0,0,0,0.02);
+  padding: .5rem;
+  margin: .75rem 0;
+  border-left: 3px solid var(--primary);
+  font-family: monospace;
+  white-space: pre-wrap;
+}
+
+/*────────────────── SYMPTOM CHECKER STYLING ──────────────────*/
+#hero-symptom .sym-form {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+}
+#hero-symptom .field { width: 100%; }
+#hero-symptom .range-field {
+  grid-column: span 2;
+  display: flex;
+  align-items: center;
+}
+#hero-symptom textarea,
+#hero-symptom select,
+#hero-symptom input[type="number"],
+#hero-symptom input[type="range"] {
+  font-size: .9rem;
+  padding: .6rem;
+}
+#hero-symptom button.btn-primary {
+  grid-column: span 2;
+  justify-self: center;
+  padding: .75rem 1.5rem;
+}
+#hero-symptom .response.sym-response {
+  margin-top: 1.5rem;
+}
+
+/*────────────────── CHATBOT PROFESSIONAL LOOK ──────────────────*/
+#hero-chat {
+  background: var(--surface);
+  padding: 1rem;
+  border-radius: var(--radius);
+}
+.chat-controls {
+  background: var(--bg);
+  padding: .5rem;
+  border-bottom: 1px solid var(--muted);
+  border-radius: var(--radius) var(--radius) 0 0;
+}
+.chat-controls button {
+  width: 36px;
+  height: 36px;
+  font-size: 1.1rem;
+}
+#chatBox {
+  padding: 1rem;
+  background: #fff;
+  border-radius: 0 0 var(--radius) var(--radius);
+  box-shadow: inset 0 1px 4px rgba(0,0,0,0.05);
+}
+.user-msg, .bot-msg {
+  margin: .5rem 0;
+  padding: .75rem 1rem;
+  border-radius: var(--radius);
+}
+.user-msg { background: var(--primary); color: #fff; }
+.bot-msg { background: var(--accent); color: var(--text); }
+
+/*────────────────── ROI CALCULATOR FORMATTING ──────────────────*/
+#roi-form .field {
+  display: flex;
+  flex-direction: column;
+  gap: .25rem;
+}
+#roi-form .field input {
+  max-width: 200px;
+}
+#roiResult .result-content {
+  padding: 1rem;
+  background: #fff;
+  border-radius: var(--radius);
+  box-shadow: 0 1px 6px rgba(0,0,0,0.05);
+}
+#roiResult .result-content p {
+  margin: .5rem 0;
+}
+
+/*────────────────── RESPONSIVE ADJUSTMENTS ──────────────────*/
+@media (max-width: 768px) {
+  #hero-symptom .sym-form {
+    grid-template-columns: 1fr;
+  }
+  .chat-controls, #chatBox {
+    border-radius: var(--radius);
+  }
+}
   </style>
 </head>
 
@@ -660,14 +768,13 @@
     <section id="hero–chat" class="module">
       <h2><i class="fas fa-comments"></i> AI Herbalist Chat</h2>
          <div class="chat-controls">
-      <button id="closeChat" title="Close Chat"><i class="fas fa-times"></i></button>
-      <button id="viewHistory" title="View History"><i class="fas fa-history"></i></button>
-      <button id="clearChat" title="Clear Chat"><i class="fas fa-trash-alt"></i></button>
-    </div>
+    <button id="viewHistory" title="View History"><i class="fas fa-history"></i></button>
+    <button id="clearChat"  title="Clear Chat" ><i class="fas fa-trash-alt"></i></button>
+  </div>
       <p class="desc">Ask about herbal remedies:</p>
       <div id="chatBox" role="log" aria-live="polite" style="background:var(--bg);border:1px solid #d1dce5;border-radius:var(--radius);padding:var(--padding);min-height:150px;max-height:300px;overflow-y:auto;"></div>
       <div style="display:flex;gap:.5rem;margin-top:.5rem;">
-        <input id="chatInput" placeholder="What’s good for menstrual cramps?" aria-label="Type your question"/>
+        <input id="chatInput" placeholder="Ask about herbal remedies…" aria-label="Type your question"/>
         <button id="sendChat" aria-label="Send message"><i class="fas fa-paper-plane"></i></button>
       </div>
       <div id="chatHint" class="hint" hidden>Bot is thinking… <span class="spinner"></span></div>
@@ -878,295 +985,373 @@
   }
 </script>
 
-  <script>
-  //───────────────── HELPERS ──────────────────
+<script>
+  //── HELPER FUNCTIONS ─────────────────────────────────────────────────────────
+
+  // Call OpenAI
   async function callOpenAI(messages) {
     const res = await fetch('/.netlify/functions/openai-proxy', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: { 'Content-Type':'application/json' },
       body: JSON.stringify({ messages })
     });
-    if (!res.ok) throw new Error(await res.text() || 'Server error');
-    const data = await res.json();
-    return data.choices[0].message.content;
+    if (!res.ok) throw new Error(await res.text()||'Server error');
+    const j = await res.json();
+    return j.choices[0].message.content;
   }
 
+  // Call Vision API
   async function callVision(file) {
-    // ensure we send as multipart/form-data
-    const fd = new FormData();
-    fd.append('file', file);
+    const fd = new FormData(); fd.append('file', file);
     const res = await fetch('/.netlify/functions/vision-proxy', {
-      method: 'POST',
-      body: fd
+      method:'POST', body:fd
     });
-    if (!res.ok) throw new Error(await res.text() || 'Vision error');
+    if (!res.ok) throw new Error(await res.text()||'Vision error');
     return res.json();
   }
 
-  function formatHTML(text) {
-    // remove markdown asterisks and wrap paragraphs
-    return text
-      .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
-      .replace(/\*(.+?)\*/g, '<em>$1</em>')
-      .split(/\n{2,}/).map(p => `<p>${p.trim()}</p>`).join('');
+  // Convert plain text with **bold**, *italic*, and blank lines → HTML
+  function formatHTML(txt) {
+    return txt
+      // bold & italics
+      .replace(/\*\*(.+?)\*\*/g,'<strong>$1</strong>')
+      .replace(/\*(.+?)\*/g,'<em>$1</em>')
+      // code blocks / equations in [ ... ]
+      .replace(/\[([^\]]+)\]/g,'<code>$1</code>')
+      // paragraphs
+      .split(/\n{2,}/).map(p=>`<p>${p.trim()}</p>`).join('');
   }
 
+  // Add a fixed close-“×” button
   function addClose(panel) {
-    if (panel.querySelector('.close-btn')) return;
-    const btn = document.createElement('button');
-    btn.className = 'close-btn';
-    btn.textContent = '×';
-    btn.onclick = () => panel.hidden = true;
+    if(panel.querySelector('.close-btn')) return;
+    const btn=document.createElement('button');
+    btn.className='close-btn';
+    btn.textContent='×';
+    btn.onclick=()=>panel.hidden=true;
     panel.prepend(btn);
   }
 
+  // Add copy/download tools under the text
   function addTools(panel) {
-    if (panel.querySelector('.tool-row')) return;
-    const tools = document.createElement('div');
-    tools.className = 'tool-row';
-    tools.innerHTML = `
+    if(panel.querySelector('.tool-row')) return;
+    const tools=document.createElement('div');
+    tools.className='tool-row';
+    tools.innerHTML=`
       <button class="copy-btn" title="Copy"><i class="fas fa-copy"></i></button>
-      <button class="dl-btn"   title="Download"><i class="fas fa-download"></i></button>
-    `;
+      <button class="dl-btn"   title="Download"><i class="fas fa-download"></i></button>`;
     panel.append(tools);
-    tools.querySelector('.copy-btn').onclick = () =>
-      navigator.clipboard.writeText(panel.querySelector('.result-content').innerText);
-    tools.querySelector('.dl-btn').onclick = () => {
-      const text = panel.querySelector('.result-content').innerText;
-      const blob = new Blob([text], { type:'text/plain' });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url; a.download = 'response.txt';
-      a.click(); URL.revokeObjectURL(url);
+
+    tools.querySelector('.copy-btn')
+      .onclick=()=>navigator.clipboard.writeText(panel.querySelector('.result-content').innerText);
+
+    tools.querySelector('.dl-btn').onclick=()=>{
+      const text=panel.querySelector('.result-content').innerText;
+      const blob=new Blob([text],{type:'text/plain'});
+      const url=URL.createObjectURL(blob);
+      const a=document.createElement('a');
+      a.href=url; a.download='response.txt'; a.click();
+      URL.revokeObjectURL(url);
     };
   }
 
+  //── CHARTS ────────────────────────────────────────────────────────────────────
 
-  //───────────────── CHARTS ──────────────────
-  function initCharts() {
-    const cfg = (type,data) => ({
-      type, data, options:{ responsive:true, maintainAspectRatio:false, plugins:{ legend:{ display:false } } }
+  function initCharts(){
+    const cfg=(type,data)=>({
+      type, data,
+      options:{ responsive:true, maintainAspectRatio:false, plugins:{ legend:{display:false} } }
     });
-    new Chart('chartAdoption', cfg('line',{
-      labels:['Jan','Feb','Mar'], datasets:[{ data:[50,75,100] }]
-    }));
-    new Chart('chartEfficacy', cfg('bar',{
-      labels:['Mild','Mod','High'], datasets:[{ data:[30,45,25] }]
-    }));
-    new Chart('chartSupply', cfg('pie',{
-      labels:['A','B','C'], datasets:[{ data:[200,150,300] }]
-    }));
-    new Chart('chartROI', cfg('radar',{
-      labels:['Q1','Q2','Q3','Q4'], datasets:[{ data:[5,7,6,8] }]
-    }));
+    new Chart('chartAdoption', cfg('line',{ labels:['Jan','Feb','Mar'], datasets:[{data:[50,75,100]}] }));
+    new Chart('chartEfficacy',  cfg('bar', { labels:['Mild','Mod','High'],   datasets:[{data:[30,45,25]}] }));
+    new Chart('chartSupply',    cfg('pie', { labels:['A','B','C'],       datasets:[{data:[200,150,300]}] }));
+    new Chart('chartROI',       cfg('radar',{ labels:['Q1','Q2','Q3','Q4'],datasets:[{data:[5,7,6,8]}] }));
   }
 
-  function exportAnalytics() {
-    const ids = ['Adoption','Efficacy','Supply','ROI'];
-    let csv = '';
-    ids.forEach(id => {
-      const ch = Chart.getChart('chart'+id);
-      ch.data.datasets[0].data.forEach((v,i) => {
-        csv += `${id},${ch.data.labels[i]},${v}\n`;
+  document.addEventListener('DOMContentLoaded',()=> {
+    initCharts();
+    document.querySelector('button[onclick="exportAnalytics()"]')
+      .onclick=exportAnalytics;
+  });
+
+  function exportAnalytics(){
+    const ids=['Adoption','Efficacy','Supply','ROI'];
+    let csv='';
+    ids.forEach(id=>{
+      const ch=Chart.getChart('chart'+id);
+      ch.data.labels.forEach((lab,i)=>{
+        csv+=`${id},${lab},${ch.data.datasets[0].data[i]}\n`;
       });
     });
-    const blob = new Blob([csv],{type:'text/csv'});
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href=url; a.download='analytics.csv';
-    a.click(); URL.revokeObjectURL(url);
+    const blob=new Blob([csv],{type:'text/csv'});
+    const url=URL.createObjectURL(blob);
+    const a=document.createElement('a');
+    a.href=url; a.download='analytics.csv'; a.click();
+    URL.revokeObjectURL(url);
   }
 
+  //── PLANT SCANNER ────────────────────────────────────────────────────────────
 
-  //───────────────── PLANT SCANNER ──────────────────
-  function previewImage(input) {
-    const img = document.getElementById('idenPreview');
-    let btn = document.getElementById('removePreview');
-    if (input.files[0]) {
-      const reader = new FileReader();
-      reader.onload = e => {
-        img.src = e.target.result;
-        img.style.display = 'block';
-        if (!btn) {
-          btn = document.createElement('button');
-          btn.id = 'removePreview'; btn.type = 'button';
-          btn.textContent = 'Remove Image';
-          btn.onclick = () => { img.style.display='none'; input.value=''; btn.remove(); };
-          input.after(btn);
-        }
-      };
-      reader.readAsDataURL(input.files[0]);
-    }
-  }
-
-  document.getElementById('iden-form').onsubmit = async e => {
+  document.getElementById('iden-form').onsubmit=async e=>{
     e.preventDefault();
-    const panel = document.getElementById('idenResult');
-    panel.hidden = false;
-    panel.innerHTML = '<div class="result-content">Processing… <span class="spinner"></span></div>';
-    const file = e.target.querySelector('input[type=file]').files[0];
-    const desc = document.getElementById('idenDesc').value.trim();
-    if (!file && !desc) {
-      panel.querySelector('.result-content').innerText = '⚠️ Please upload an image or description.';
-      addClose(panel);
-      return;
+    const panel=document.getElementById('idenResult');
+    panel.hidden=false;
+    panel.innerHTML=`<div class="result-content">Processing… <span class="spinner"></span></div>`;
+    const file=e.target.querySelector('input[type=file]').files[0];
+    const desc=document.getElementById('idenDesc').value.trim();
+    if(!file&&!desc){
+      panel.querySelector('.result-content').innerText='⚠️ Please upload an image or description.';
+      addClose(panel); return;
     }
-    try {
-      let html = '';
-      if (file) {
-        const data = await callVision(file);
-        html += `<strong>Name:</strong> ${data.name}<br/>
-                 <strong>Uses:</strong> ${data.uses}<br/>
-                 <strong>Cautions:</strong> ${data.cautions}<br/>
-                 <strong>Regions:</strong> ${data.regions.join(', ')}<hr/>`;
+    try{
+      let html='';
+      if(file){
+        const data=await callVision(file);
+        html+=`<strong>Name:</strong> ${data.name}<br/>
+               <strong>Uses:</strong> ${data.uses}<br/>
+               <strong>Cautions:</strong> ${data.cautions}<br/>
+               <strong>Regions:</strong> ${data.regions.join(', ')}<hr/>`;
       }
-      if (desc) {
-        const txt = await callOpenAI([
-          { role:'system', content:'You are a plant expert. Respond in plain text without backticks.' },
-          { role:'user', content:`Describe plant: ${desc}` }
+      if(desc){
+        const txt=await callOpenAI([
+          {role:'system',content:'You are a plant expert. Reply plainly.'},
+          {role:'user',content:`Describe plant: ${desc}`}
         ]);
-        html += formatHTML(txt);
+        html+=formatHTML(txt);
       }
-      const content = panel.querySelector('.result-content');
-      content.innerHTML = html;
-      addClose(panel);
-      addTools(panel);
-    } catch(err) {
-      panel.querySelector('.result-content').innerText = '⚠️ ' + err.message;
+      panel.querySelector('.result-content').innerHTML=html;
+      addClose(panel); addTools(panel);
+    }catch(err){
+      panel.querySelector('.result-content').innerText='⚠️ '+err.message;
       addClose(panel);
     }
   };
 
+  //── SYMPTOM CHECKER ───────────────────────────────────────────────────────────
 
-  //───────────────── SYMPTOM CHECKER ──────────────────
-  document.getElementById('severity').oninput = e =>
-    document.getElementById('sevValue').textContent = e.target.value;
+  document.getElementById('severity').oninput=e=>{
+    document.getElementById('sevValue').textContent=e.target.value;
+  };
 
-  document.getElementById('sym-form').onsubmit = async e => {
+  document.getElementById('sym-form').onsubmit=async e=>{
     e.preventDefault();
-    const panel = document.getElementById('symResult');
-    panel.hidden = false;
-    panel.innerHTML = '<div class="result-content">Processing… <span class="spinner"></span></div>';
-
-    const text = document.getElementById('symInput').value;
-    const cats = [...document.getElementById('symCategories').selectedOptions].map(o=>o.value);
-    const sev = document.getElementById('severity').value;
-    const dur = document.getElementById('symDuration').value || '0';
-
-    try {
-      const txt = await callOpenAI([
-        { role:'system', content:
-          'You are a herbal diagnostician. Give me back a plain-text list of recommendations; no JSON, no backticks.' },
-        { role:'user', content:`Symptoms: ${text}; Categories: ${cats.join(',')}; Severity: ${sev}; Duration: ${dur}d.` }
+    const panel=document.getElementById('symResult');
+    panel.hidden=false;
+    panel.innerHTML=`<div class="result-content">Processing… <span class="spinner"></span></div>`;
+    const text=document.getElementById('symInput').value.trim();
+    const cats=[...document.getElementById('symCategories').selectedOptions].map(o=>o.value);
+    const sev=document.getElementById('severity').value;
+    const dur=document.getElementById('symDuration').value||0;
+    try{
+      const txt=await callOpenAI([
+        {role:'system',content:'You are a herbal diagnostician. Answer with a plain-text list.'},
+        {role:'user',content:`Symptoms:${text}; Categories:${cats.join(',')}; Severity:${sev}; Duration:${dur}d.`}
       ]);
-      const html = formatHTML(txt);
-      panel.innerHTML = `<div class="result-content">${html}</div>`;
-      addClose(panel);
-      addTools(panel);
-    } catch(err) {
-      panel.innerHTML = `<div class="result-content">⚠️ ${err.message}</div>`;
+      panel.innerHTML=`<div class="result-content">${formatHTML(txt)}</div>`;
+      addClose(panel); addTools(panel);
+    }catch(err){
+      panel.innerHTML=`<div class="result-content">⚠️ ${err.message}</div>`;
       addClose(panel);
     }
   };
 
+  //── GENERIC FORM HANDLER ──────────────────────────────────────────────────────
 
-  //───────────────── CHATBOT & HISTORY MODAL ──────────────────
-  const chatBox = document.getElementById('chatBox');
-  const history = [];
+  function wireForm(formId, sysPrompt, extract, outId){
+    document.getElementById(formId).onsubmit=async e=>{
+      e.preventDefault();
+      const panel=document.getElementById(outId);
+      panel.hidden=false;
+      panel.innerHTML=`<div class="result-content">Processing… <span class="spinner"></span></div>`;
+      try{
+        const reply=await callOpenAI([
+          {role:'system',content:sysPrompt},
+          {role:'user',content:extract()}
+        ]);
+        panel.innerHTML=`<div class="result-content">${formatHTML(reply)}</div>`;
+        addClose(panel); addTools(panel);
+      }catch(err){
+        panel.innerHTML=`<div class="result-content">⚠️ ${err.message}</div>`;
+        addClose(panel);
+      }
+    };
+  }
 
-  document.getElementById('sendChat').onclick = async () => {
-    const inp = document.getElementById('chatInput');
-    const txt = inp.value.trim();
-    if (!txt) return;
-    chatBox.insertAdjacentHTML('beforeend', `<div class="user-msg">${txt}</div>`);
-    history.push({ who:'You', text:txt });
-    inp.value = '';
-    document.getElementById('chatHint').hidden = false;
-    try {
-      const reply = await callOpenAI([
-        { role:'system', content:'You are a friendly herbalist. Answer plainly.' },
-        { role:'user', content:txt }
+  // Cultural
+  wireForm(
+    'cultureQuery', 
+    'You are a cultural herbalist. Respond concisely.',
+    ()=>document.getElementById('cultureQuery').value.trim(),
+    'cultureResult'
+  );
+
+  // Safety
+  wireForm(
+    'safety-form',
+    'You warn of dangerous herb/med combos.',
+    ()=>`${document.getElementById('safetyA').value}&${document.getElementById('safetyB').value}`,
+    'safetyResult'
+  );
+
+  // Personalized Formulations
+  wireForm(
+    'pf-form',
+    'You create safe herbal formulations.',
+    ()=>`Herbs:${[...document.getElementById('pfHerbs').selectedOptions].map(o=>o.value).join(',')}; Age:${document.getElementById('pfAge').value}; Weight:${document.getElementById('pfWeight').value}kg`,
+    'pfResult'
+  );
+
+  // Research Summaries
+  wireForm(
+    'research-form',
+    'You summarize clinical research with citations.',
+    ()=>document.getElementById('researchQuery').value,
+    'researchResults'
+  );
+
+  // Inventory Forecast
+  wireForm(
+    'inventory-form',
+    'You forecast weekly herb demand with buffer stock.',
+    ()=>`Herb:${document.getElementById('forecastHerb').value}; Weeks:${document.getElementById('forecastPeriod').value}`,
+    'inventoryResult'
+  );
+
+  // Genetics Match
+  document.getElementById('genetics-form').onsubmit=async e=>{
+    e.preventDefault();
+    const panel=document.getElementById('geneticResult');
+    panel.hidden=false;
+    panel.innerHTML=`<div class="result-content">Processing… <span class="spinner"></span></div>`;
+    const file=document.getElementById('geneticUpload').files[0];
+    if(!file){
+      panel.innerHTML=`<div class="result-content">⚠️ Please upload CSV/JSON.</div>`;
+      addClose(panel); return;
+    }
+    try{
+      const text=await file.text();
+      const reply=await callOpenAI([
+        {role:'system',content:'You interpret genetic SNP data for herb recommendations.'},
+        {role:'user',content:text}
       ]);
-      chatBox.insertAdjacentHTML('beforeend', `<div class="bot-msg">${formatHTML(reply)}</div>`);
-      history.push({ who:'Herbalist', text:reply });
-      chatBox.scrollTop = chatBox.scrollHeight;
-    } catch(e) {
-      chatBox.insertAdjacentHTML('beforeend', `<div class="bot-msg">⚠️ ${e.message}</div>`);
-    } finally {
-      document.getElementById('chatHint').hidden = true;
+      panel.innerHTML=`<div class="result-content">${formatHTML(reply)}</div>`;
+      addClose(panel); addTools(panel);
+    }catch(err){
+      panel.innerHTML=`<div class="result-content">⚠️ ${err.message}</div>`;
+      addClose(panel);
     }
   };
 
-  // header styling done purely in CSS; here we wire history modal:
-  document.getElementById('viewHistory').onclick = () => {
-    const modal = document.createElement('div');
-    modal.className = 'history-modal';
-    modal.innerHTML = `
+  // Dosage Calculator
+  wireForm(
+    'dose-form',
+    'You calculate daily herbal dosages by weight, symptom, form.',
+    ()=>`Weight:${document.getElementById('weight').value}kg; Symptom:${document.getElementById('symptom').value}; Form:${document.getElementById('formType').value}`,
+    'dosageResult'
+  );
+
+  // Interaction Checker
+  wireForm(
+    'int-form',
+    'You check interactions between two herbs.',
+    ()=>{
+      const a=document.getElementById('herbA').value,
+            b=document.getElementById('herbB').value;
+      if(a===b) throw new Error('Pick two distinct herbs.');
+      return `${a}&${b}`;
+    },
+    'interactionResult'
+  );
+
+  //── ROI CALCULATOR ────────────────────────────────────────────────────────────
+
+  document.getElementById('currency').onchange=e=>{
+    const sym={GHS:'₵',USD:'$',EUR:'€'}[e.target.value];
+    document.getElementById('curSym').textContent=sym;
+  };
+
+  document.getElementById('roi-form').onsubmit=async e=>{
+    e.preventDefault();
+    const panel=document.getElementById('roiResult');
+    panel.hidden=false;
+    panel.innerHTML=`<div class="result-content">Calculating… <span class="spinner"></span></div>`;
+    const rx=+document.getElementById('roiRx').value;
+    const cost=+document.getElementById('roiCost').value;
+    try{
+      const reply=await callOpenAI([
+        {role:'system',content:'You are a finance expert. Show equations and explain ROI step by step in plain HTML.'},
+        {role:'user',content:`Volume: ${rx}; Unit cost: ${cost}; Currency: ${document.getElementById('currency').value}`}
+      ]);
+      panel.innerHTML=`<div class="result-content">${formatHTML(reply)}</div>`;
+      addClose(panel); addTools(panel);
+    }catch(err){
+      panel.innerHTML=`<div class="result-content">⚠️ ${err.message}</div>`;
+      addClose(panel);
+    }
+  };
+
+  //── CHATBOT + HISTORY ─────────────────────────────────────────────────────────
+
+  const chatBox=document.getElementById('chatBox');
+  let history=[];
+
+  document.getElementById('sendChat').onclick=async()=>{
+    const inp=document.getElementById('chatInput');
+    const txt=inp.value.trim(); if(!txt)return;
+    chatBox.insertAdjacentHTML('beforeend',`<div class="user-msg">${txt}</div>`);
+    history.push({who:'You',text:txt});
+    inp.value=''; document.getElementById('chatHint').hidden=false;
+
+    try{
+      const reply=await callOpenAI([
+        {role:'system',content:'You are a friendly herbalist. Reply plainly.'},
+        {role:'user',content:txt}
+      ]);
+      chatBox.insertAdjacentHTML('beforeend',`<div class="bot-msg">${formatHTML(reply)}</div>`);
+      history.push({who:'Herbalist',text:reply});
+      chatBox.scrollTop=chatBox.scrollHeight;
+    }catch(err){
+      chatBox.insertAdjacentHTML('beforeend',`<div class="bot-msg">⚠️ ${err.message}</div>`);
+    }finally{
+      document.getElementById('chatHint').hidden=true;
+    }
+  };
+
+  // Only two header buttons now
+  document.getElementById('closeChat').onclick=()=>{
+    document.getElementById('hero-chat').hidden=true;
+  };
+
+  document.getElementById('clearChat').onclick=()=>{
+    chatBox.innerHTML='';
+  };
+
+  document.getElementById('viewHistory').onclick=()=>{
+    const modal=document.createElement('div');
+    modal.className='history-modal';
+    modal.innerHTML=`
       <div class="history-content">
         <h3>Chat History</h3>
-        <ul>${history.map((m,i)=>`
-          <li>
-            <strong>${m.who}:</strong> ${m.text}
-            <button data-i="${i}" class="del-msg">🗑</button>
-          </li>`).join('')}
+        <ul>
+          ${history.map((m,i)=>`
+            <li>
+              <strong>${m.who}:</strong> ${m.text}
+              <button data-i="${i}" class="del-msg">🗑</button>
+            </li>`).join('')}
         </ul>
         <button class="close-history">Close</button>
       </div>`;
     document.body.append(modal);
-    modal.querySelectorAll('.del-msg').forEach(b=>{
-      b.onclick = () => {
-        history.splice(+b.dataset.i,1);
+
+    modal.querySelectorAll('.del-msg').forEach(btn=>{
+      btn.onclick=()=>{
+        history.splice(+btn.dataset.i,1);
         modal.remove();
         document.getElementById('viewHistory').onclick();
       };
     });
-    modal.querySelector('.close-history').onclick = () => modal.remove();
+    modal.querySelector('.close-history').onclick=()=>modal.remove();
   };
-
-  document.getElementById('clearChat').onclick = () => {
-    chatBox.innerHTML = '';
-    history.length = 0;
-  };
-  document.getElementById('closeChat').onclick = () => {
-    document.getElementById('hero-chat').hidden = true;
-  };
-
-
-  //───────────────── ROI CALCULATOR ──────────────────
-  document.getElementById('currency').onchange = e => {
-    const sym = {GHS:'₵',USD:'$',EUR:'€'}[e.target.value];
-    document.getElementById('curSym').textContent = sym;
-  };
-
-  document.getElementById('roi-form').onsubmit = async e => {
-    e.preventDefault();
-    const panel = document.getElementById('roiResult');
-    panel.hidden = false;
-    panel.innerHTML = '<div class="result-content">Calculating… <span class="spinner"></span></div>';
-    const rx = +document.getElementById('roiRx').value;
-    const cost = +document.getElementById('roiCost').value;
-    try {
-      const txt = await callOpenAI([
-        { role:'system', content:
-          'You are a finance expert. Given volume and unit cost, explain ROI plainly.' },
-        { role:'user', content:
-          `Volume: ${rx} prescriptions; Unit cost: ${cost}. Currency: ${document.getElementById('currency').value}` }
-      ]);
-      panel.innerHTML = `<div class="result-content">${formatHTML(txt)}</div>`;
-      addClose(panel);
-      addTools(panel);
-    } catch(err) {
-      panel.innerHTML = `<div class="result-content">⚠️ ${err.message}</div>`;
-      addClose(panel);
-    }
-  };
-
-
-  //───────────────── INIT ON LOAD ──────────────────
-  document.addEventListener('DOMContentLoaded', () => {
-    initCharts();
-    document.querySelector('button[onclick="exportAnalytics()"]').onclick = exportAnalytics;
-  });
 </script>
 </body>
 </html>
