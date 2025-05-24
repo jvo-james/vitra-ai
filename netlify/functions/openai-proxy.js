@@ -1,34 +1,23 @@
 // netlify/functions/openai-proxy.js
 
 const { Configuration, OpenAIApi } = require("openai");
+const fetch = require("node-fetch");
 const Busboy = require("busboy");
 
 exports.handler = async (event) => {
   const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
-  if (!OPENAI_API_KEY) {
-    return {
-      statusCode: 500,
-      body: JSON.stringify({ error: "Missing OpenAI API key in environment." }),
-    };
-  }
-
   const config = new Configuration({ apiKey: OPENAI_API_KEY });
   const openai = new OpenAIApi(config);
 
-  const headers = {
-    "Access-Control-Allow-Origin": "*",
-    "Access-Control-Allow-Headers": "Content-Type",
-  };
-
-  // === IMAGE PATH ===
+  // Handle image uploads
   if (
     event.httpMethod === "POST" &&
     event.headers["content-type"]?.startsWith("multipart/form-data")
   ) {
-    const busboy = Busboy({ headers: event.headers });
+    const bb = Busboy({ headers: event.headers });
     let fileBuffer = null;
 
-    busboy.on("file", (_fieldname, fileStream) => {
+    bb.on("file", (_fieldname, fileStream) => {
       const chunks = [];
       fileStream.on("data", (chunk) => chunks.push(chunk));
       fileStream.on("end", () => {
@@ -37,104 +26,76 @@ exports.handler = async (event) => {
     });
 
     await new Promise((resolve, reject) =>
-      busboy.on("finish", resolve).on("error", reject).end(
-        event.isBase64Encoded ? Buffer.from(event.body, "base64") : event.body
-      )
+      bb.on("finish", resolve)
+        .on("error", reject)
+        .end(
+          event.isBase64Encoded
+            ? Buffer.from(event.body, "base64")
+            : event.body
+        )
     );
 
     if (!fileBuffer) {
       return {
         statusCode: 400,
-        headers,
-        body: JSON.stringify({ error: "No file uploaded." }),
+        body: JSON.stringify({ error: "No file received." }),
       };
     }
 
-    const base64Image = fileBuffer.toString("base64");
+    // Replace with actual OpenAI image classification call
+    const visionRes = await openai.createImageClassification({
+      model: "vision-alpha",
+      file: fileBuffer,
+    });
 
-    try {
-      const visionRes = await openai.createChatCompletion({
-        model: "gpt-4o",
-        messages: [
-          {
-            role: "user",
-            content: [
-              { type: "text", text: "Describe this image in detail." },
-              {
-                type: "image_url",
-                image_url: {
-                  url: `data:image/jpeg;base64,${base64Image}`,
-                },
-              },
-            ],
-          },
-        ],
-      });
-
-      return {
-        statusCode: 200,
-        headers,
-        body: JSON.stringify({
-          response: visionRes.data.choices[0].message.content,
-        }),
-      };
-    } catch (err) {
-      return {
-        statusCode: 500,
-        headers,
-        body: JSON.stringify({ error: "Vision API error", details: err.message }),
-      };
-    }
+    return {
+      statusCode: 200,
+      body: JSON.stringify({
+        name: visionRes.data.name,
+        uses: visionRes.data.uses,
+        cautions: visionRes.data.cautions,
+        regions: visionRes.data.regions,
+      }),
+    };
   }
 
-  // === CHAT COMPLETION PATH ===
+  // Handle chat completions
   if (event.httpMethod === "POST") {
     let body;
     try {
       body = JSON.parse(event.body);
     } catch {
-      return {
-        statusCode: 400,
-        headers,
-        body: JSON.stringify({ error: "Invalid JSON" }),
-      };
+      return { statusCode: 400, body: "Invalid JSON" };
     }
 
     const { messages } = body;
     if (!Array.isArray(messages)) {
-      return {
-        statusCode: 400,
-        headers,
-        body: JSON.stringify({ error: "`messages` array is required." }),
-      };
+      return { statusCode: 400, body: "Missing `messages` array." };
     }
 
-    try {
-      const chatRes = await openai.createChatCompletion({
-        model: "gpt-4o",
+    const resp = await fetch("https://api.openai.com/v1/chat/completions", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${OPENAI_API_KEY}`,
+      },
+      body: JSON.stringify({
+        model: "gpt-4o-mini",
         messages,
-      });
+      }),
+    });
 
-      return {
-        statusCode: 200,
-        headers,
-        body: JSON.stringify({
-          response: chatRes.data.choices[0].message.content,
-        }),
-      };
-    } catch (err) {
-      return {
-        statusCode: 500,
-        headers,
-        body: JSON.stringify({ error: "Chat API error", details: err.message }),
-      };
-    }
+    const data = await resp.json();
+    return {
+      statusCode: resp.ok ? 200 : resp.status,
+      body: JSON.stringify(data),
+    };
   }
 
-  // === METHOD NOT ALLOWED ===
+  // Method not allowed
   return {
     statusCode: 405,
-    headers: { ...headers, Allow: "POST" },
-    body: JSON.stringify({ error: "Method Not Allowed" }),
+    headers: { Allow: "POST" },
+    body: "Method Not Allowed",
   };
 };
