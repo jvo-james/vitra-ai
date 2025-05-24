@@ -1,101 +1,139 @@
 // netlify/functions/openai-proxy.js
 
 const { Configuration, OpenAIApi } = require("openai");
-const fetch = require("node-fetch");
 const Busboy = require("busboy");
 
 exports.handler = async (event) => {
   const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
+  if (!OPENAI_API_KEY) {
+    return {
+      statusCode: 500,
+      headers: { "Access-Control-Allow-Origin": "*" },
+      body: JSON.stringify({ error: "Missing OPENAI_API_KEY env var" }),
+    };
+  }
+
   const config = new Configuration({ apiKey: OPENAI_API_KEY });
   const openai = new OpenAIApi(config);
 
-  // Handle image uploads
+  // Always allow POST from browser
+  const CORS_HEADERS = {
+    "Access-Control-Allow-Origin": "*",
+    "Access-Control-Allow-Headers": "Content-Type",
+  };
+
+  // ─── IMAGE UPLOAD PATH ─────────────────────
   if (
     event.httpMethod === "POST" &&
     event.headers["content-type"]?.startsWith("multipart/form-data")
   ) {
-    const bb = Busboy({ headers: event.headers });
+    // parse multipart body
+    const busboy = Busboy({ headers: event.headers });
     let fileBuffer = null;
 
-    bb.on("file", (_fieldname, fileStream) => {
+    busboy.on("file", (_fieldname, stream) => {
       const chunks = [];
-      fileStream.on("data", (chunk) => chunks.push(chunk));
-      fileStream.on("end", () => {
-        fileBuffer = Buffer.concat(chunks);
-      });
+      stream.on("data", (c) => chunks.push(c));
+      stream.on("end", () => fileBuffer = Buffer.concat(chunks));
     });
 
     await new Promise((resolve, reject) =>
-      bb.on("finish", resolve)
-        .on("error", reject)
-        .end(
-          event.isBase64Encoded
-            ? Buffer.from(event.body, "base64")
-            : event.body
-        )
+      busboy.on("finish", resolve)
+            .on("error", reject)
+            .end(
+              event.isBase64Encoded
+                ? Buffer.from(event.body, "base64")
+                : event.body
+            )
     );
 
     if (!fileBuffer) {
       return {
         statusCode: 400,
-        body: JSON.stringify({ error: "No file received." }),
+        headers: CORS_HEADERS,
+        body: JSON.stringify({ error: "No image file received." }),
       };
     }
 
-    // Replace with actual OpenAI image classification call
-    const visionRes = await openai.createImageClassification({
-      model: "vision-alpha",
-      file: fileBuffer,
-    });
+    // Convert to base64 data URL
+    const dataUrl = `data:image/jpeg;base64,${fileBuffer.toString("base64")}`;
 
-    return {
-      statusCode: 200,
-      body: JSON.stringify({
-        name: visionRes.data.name,
-        uses: visionRes.data.uses,
-        cautions: visionRes.data.cautions,
-        regions: visionRes.data.regions,
-      }),
-    };
+    try {
+      // Use GPT-4o vision in Chat API
+      const visionRes = await openai.chat.completions.create({
+        model: "gpt-4o",
+        messages: [
+          { role: "user",
+            content: [
+              { type: "text", text: "Please identify and describe this herb image." },
+              { type: "image_url", image_url: { url: dataUrl } }
+            ]
+          }
+        ],
+      });
+
+      const description = visionRes.choices[0].message.content;
+      return {
+        statusCode: 200,
+        headers: CORS_HEADERS,
+        body: JSON.stringify({ description }),
+      };
+
+    } catch (err) {
+      return {
+        statusCode: 500,
+        headers: CORS_HEADERS,
+        body: JSON.stringify({ error: "Vision request failed", details: err.message }),
+      };
+    }
   }
 
-  // Handle chat completions
+  // ─── CHAT COMPLETION PATH ────────────────────
   if (event.httpMethod === "POST") {
     let body;
     try {
       body = JSON.parse(event.body);
     } catch {
-      return { statusCode: 400, body: "Invalid JSON" };
+      return {
+        statusCode: 400,
+        headers: CORS_HEADERS,
+        body: JSON.stringify({ error: "Invalid JSON payload" }),
+      };
     }
 
     const { messages } = body;
     if (!Array.isArray(messages)) {
-      return { statusCode: 400, body: "Missing `messages` array." };
+      return {
+        statusCode: 400,
+        headers: CORS_HEADERS,
+        body: JSON.stringify({ error: "`messages` must be an array" }),
+      };
     }
 
-    const resp = await fetch("https://api.openai.com/v1/chat/completions", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${OPENAI_API_KEY}`,
-      },
-      body: JSON.stringify({
+    try {
+      const chatRes = await openai.chat.completions.create({
         model: "gpt-4o-mini",
         messages,
-      }),
-    });
-
-    const data = await resp.json();
-    return {
-      statusCode: resp.ok ? 200 : resp.status,
-      body: JSON.stringify(data),
-    };
+      });
+      const reply = chatRes.choices[0].message.content;
+      return {
+        statusCode: 200,
+        headers: CORS_HEADERS,
+        body: JSON.stringify({ reply }),
+      };
+    } catch (err) {
+      return {
+        statusCode: 500,
+        headers: CORS_HEADERS,
+        body: JSON.stringify({ error: "Chat request failed", details: err.message }),
+      };
+    }
   }
 
-  // Method not allowed
+  // ─── METHOD NOT ALLOWED ─────────────────────
   return {
     statusCode: 405,
-    headers: { Allow: "POST" },
-    body: "Method Not Allowed",
+    headers: CORS_HEADERS,
+    body: JSON.stringify({ error: "Method Not Allowed" }),
   };
 };
