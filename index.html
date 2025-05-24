@@ -367,7 +367,7 @@
       <p class="desc">Upload a photo; our AI will identify the plant (e.g. <em>Moringa oleifera</em> placeholder).</p>
       <form id="iden-form">
         <textarea id="idenDesc" rows="2" placeholder="Or describe your plant here…"></textarea>
-        <input type="file" accept="image/*" aria-label="Upload plant image" required onchange="previewImage(this)"/>
+        <input type="file" accept="image/*" aria-label="Upload plant image" onchange="previewImage(this)"/>
         <button type="submit">Identify</button>
         <div class="hint">Use a clear close-up of a leaf or flower.</div>
       </form>
@@ -435,7 +435,8 @@
     <!-- 3. Cultural Knowledge -->
  <section id="hero–cultural" class="module">
   <h2>🌍 Cultural Knowledge</h2>
-  <textarea id="cultureQuery" rows="2" placeholder="e.g. West African herbal uses…" ></textarea>
+  <p class="desc">Enter a region, tradition or herb name (e.g. “West African uses of moringa”) to get practices, rituals & folklore.</p>
+   <textarea id="cultureQuery" rows="2" placeholder="e.g. West African herbal uses…" ></textarea>
   <button onclick="getCulture()">Get Insights</button>
   <div id="cultureResult" class="response" hidden>
     <button class="close-btn"></button>
@@ -661,369 +662,355 @@
 </script>
   
 <script>
-;(function(){
+  //───────────────── CONFIG & HELPERS ──────────────────
 
-  // ───────── HELPERS ─────────
-  async function callOpenAI(payload) {
+  async function callOpenAI(messages) {
     const res = await fetch('/.netlify/functions/openai-proxy', {
       method:'POST',
-      headers: payload.messages ? {'Content-Type':'application/json'} : {},
-      body: payload.messages ? JSON.stringify(payload) : payload.formData
+      headers:{ 'Content-Type':'application/json' },
+      body: JSON.stringify({ messages })
     });
-    if (!res.ok) throw new Error(await res.text());
-    return await res.json();
+    if (!res.ok) throw new Error(await res.text() || 'Server error');
+    const data = await res.json();
+    return data.choices[0].message.content.trim();
   }
 
-  function stripAndRender(raw, container){
-    // code fences
-    raw = raw.replace(/```([\s\S]+?)```/g, (_,c)=>`<pre><code>${c.trim()}</code></pre>`);
-    // bold/italic
-    raw = raw.replace(/\*\*(.+?)\*\*/g,'<strong>$1</strong>')
-             .replace(/\*(.+?)\*/g,'<em>$1</em>');
-    container.innerHTML = raw;
-  }
-
-  function downloadCSV(lines, name='analytics.csv'){
-    const blob = new Blob([lines.join('\n')],{type:'text/csv'});
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url; a.download = name; a.click();
-    URL.revokeObjectURL(url);
-  }
-
-
-  // ───────── INIT UI ─────────
-  function initUI(){
-    // sidebar toggle
-    document.getElementById('shrinkBtn').onclick = ()=> 
-      document.getElementById('sidebar').classList.toggle('collapsed');
-    // hamburger
-    document.getElementById('hamburger').onclick = ()=> 
-      document.getElementById('sidebar').classList.toggle('open');
-    // theme toggle
-    document.getElementById('themeToggle').onclick = ()=>{
-      document.documentElement.classList.toggle('dark');
-      document.getElementById('themeToggle').classList.toggle('fa-sun');
-    };
-    // onboard
-    document.querySelector('#onboardModal button').onclick = ()=>{
-      document.getElementById('onboardModal').style.display='none';
-    };
-    // global close buttons
-    document.querySelectorAll('.response .close-btn').forEach(btn=>
-      btn.onclick = ()=> btn.closest('.response').hidden = true
-    );
-  }
-
-
-  // ───────── CHARTS ─────────
-  function initCharts(){
-    const cfg = (id, labels, data, type='bar')=>{
-      new Chart(document.getElementById(id), {
-        type, data:{labels,datasets:[{label:id,data}]},
-        options:{plugins:{legend:{display:false}},scales:{y:{beginAtZero:true}}}
-      });
-    };
-    cfg('chartAdoption',['Week 1','Week 2','Week 3'],[50,75,100]);
-    cfg('chartEfficacy',['Herb A','Herb B'],[80,60]);
-    cfg('chartSupply',['Turmeric','Ginkgo'],[200,150]);
-    cfg('chartROI',['Jan','Feb','Mar'],[5,7,6],'line');
-    // add creative captions
-    document.querySelectorAll('#analytics .charts > div').forEach((col,i)=>{
-      const p = document.createElement('p');
-      p.style.fontStyle='italic';
-      const texts = [
-        'Adoption is steadily climbing as new users scan herbs each week.',
-        'Efficacy rates show Herb A leads, but Herb B holds strong.',
-        'Supply levels remain robust, with Turmeric in highest stock.',
-        'ROI trends reflect seasonal upticks in January and March.'
-      ];
-      p.textContent = texts[i];
-      col.appendChild(p);
+  async function callVision(file) {
+    const fd = new FormData();
+    fd.append('file', file);
+    const res = await fetch('/.netlify/functions/openai-proxy', {
+      method:'POST', body: fd
     });
-    window.exportAnalytics = ()=> downloadCSV([
-      'Metric,Val1,Val2,Val3',
-      'Adoption,50,75,100',
-      'Efficacy,80,60,0',
-      'Supply,200,150,0',
-      'ROI,5,7,6'
-    ]);
+    if (!res.ok) throw new Error(await res.text() || 'Vision API error');
+    return res.json();
   }
 
+  function stripMarkdown(text) {
+    return text.replace(/^###\s+/gm, '');
+  }
 
-  // ───────── PLANT SCANNER ─────────
-  document.getElementById('iden-form').onsubmit = async e=>{
+  function renderAI(text, container) {
+    text = stripMarkdown(text)
+      .replace(/```([\s\S]+?)```/g, '<pre><code>$1</code></pre>')
+      .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+      .replace(/\*(.+?)\*/g, '<em>$1</em>');
+    container.innerHTML = text;
+  }
+
+  function showError(panel, msg) {
+    panel.querySelector('.result-content').textContent = '⚠️ ' + msg;
+  }
+
+  //───────────────── CHARTS ──────────────────
+
+  function initCharts() {
+    const dummy = { labels:['Jan','Feb','Mar'], datasets:[{ label:'%', data:[50,75,100] }] };
+    const cfg = opts => ({ type:'line', data:dummy, options:{ responsive:true, plugins:{ legend:{ display:false } } } });
+    new Chart(document.getElementById('chartAdoption').getContext('2d'), cfg());
+    new Chart(document.getElementById('chartEfficacy').getContext('2d'), cfg());
+    new Chart(document.getElementById('chartSupply').getContext('2d'), cfg());
+    new Chart(document.getElementById('chartROI').getContext('2d'), cfg());
+  }
+
+  //───────────────── PLANT SCANNER ──────────────────
+
+  document.getElementById('iden-form').onsubmit = async e => {
     e.preventDefault();
     const panel = document.getElementById('idenResult');
-    panel.hidden=false;
-    const rc = panel.querySelector('.result-content');
-    rc.innerHTML = 'Processing… <span class="spinner"></span>';
+    panel.hidden = false;
+    panel.innerHTML = '<button class="close-btn" aria-label="Close">×</button>'
+                    + '<div class="result-content">Processing… <span class="spinner"></span></div>';
+    panel.querySelector('.close-btn').onclick = ()=> panel.hidden = true;
+
+    const file = e.target.querySelector('input[type=file]').files[0];
+    const desc = document.getElementById('idenDesc').value.trim();
+    if (!file && !desc) return showError(panel, 'Please upload an image or enter a description.');
+
     try {
-      const desc = document.getElementById('idenDesc').value.trim();
-      const file = e.target.querySelector('input[type=file]').files[0];
-      let data;
-      if (file){
-        const fd = new FormData(); fd.append('file',file);
-        data = await callOpenAI({ formData:fd });
-      } else {
-        data = await callOpenAI({ messages:[
-          {role:'system',content:'You are an expert plant identifier.'},
-          {role:'user',content:`Describe plant: ${desc}`}
-        ]});
+      let reply = '';
+      if (file) {
+        const data = await callVision(file);
+        if (data.name) {
+          reply += `
+            <strong>Scientific Name:</strong> ${data.name}<br/>
+            <strong>Uses:</strong> ${data.uses}<br/>
+            <strong>Cautions:</strong> ${data.cautions}<br/>
+            <strong>Regions:</strong> ${data.regions.join(', ')}
+          `;
+        } else if (data.description) {
+          reply += data.description;
+        } else {
+          reply += 'No vision output.';
+        }
       }
-      if (data.name){
-        rc.innerHTML = `
-          <strong>Name:</strong> ${data.name}<br/>
-          <strong>Uses:</strong> ${data.uses}<br/>
-          <strong>Cautions:</strong> ${data.cautions}<br/>
-          <strong>Regions:</strong> ${data.regions.join(', ')}
-        `;
-      } else {
-        stripAndRender(data.description||data.reply||'', rc);
+      if (desc) {
+        const textReply = await callOpenAI([
+          { role:'system', content:'You are a plant expert.' },
+          { role:'user', content:`Describe plant from text: ${desc}` }
+        ]);
+        reply += (reply? '<hr/>' : '') + textReply;
       }
-    } catch(err){
-      rc.textContent = '⚠️ ' + err.message;
+      panel.querySelector('.result-content').innerHTML = reply;
+    } catch(err) {
+      showError(panel, err.message);
     }
   };
 
+  //───────────────── SYMPTOM CHECKER ──────────────────
 
-  // ───────── SYMPTOM CHECKER ─────────
-  document.getElementById('sym-form').onsubmit = async e=>{
+  document.querySelectorAll('#sym-form .tag').forEach(btn => {
+    btn.addEventListener('click', () => btn.classList.toggle('selected'));
+  });
+  const sev = document.getElementById('severity');
+  const sevVal = document.getElementById('sevValue');
+  sev.addEventListener('input', () => sevVal.textContent = sev.value);
+  document.getElementById('onsetDate').valueAsDate = new Date();
+
+  document.getElementById('sym-form').onsubmit = async e => {
     e.preventDefault();
     const panel = document.getElementById('symResult');
-    panel.hidden=false;
-    panel.querySelector('.herb-cards').innerHTML='';
-    panel.querySelector('.conf-fill').style.width='0%';
-    panel.querySelector('.conf-percent').textContent='0%';
+    panel.hidden = false;
+    panel.querySelector('.conf-fill').style.width = '0%';
+    panel.querySelector('.conf-percent').textContent = '0%';
+    panel.querySelector('.herb-cards').innerHTML = '';
 
     const text = document.getElementById('symInput').value;
-    const cats = [...document.querySelectorAll('#sym-form .tag.selected')].map(t=>t.dataset.cat);
-    const sev  = document.getElementById('severity').value;
-    const on   = document.getElementById('onsetDate').value;
+    const cats = [...document.querySelectorAll('#sym-form .tag.selected')]
+                  .map(t=>t.dataset.cat);
+    const severity = sev.value;
+    const onset = document.getElementById('onsetDate').value;
 
     try {
-      const ai = await callOpenAI({
-        messages:[
-          {role:'system',content:
-            `You are a herbal diagnostician. Return JSON list of
-             {"name","evidence","conf","uses"}.`},
-          {role:'user',content:
-            `Symptoms:${text};Categories:${cats};Severity:${sev};Onset:${on}` }
-        ]
-      });
-      const recs = JSON.parse(ai);
-      recs.forEach((h,i)=>{
-        if(i===0) setTimeout(()=>{
-          panel.querySelector('.conf-fill').style.width=h.conf+'%';
-          panel.querySelector('.conf-percent').textContent=h.conf+'%';
-        },200);
+      const reply = await callOpenAI([
+        { role:'system', content:
+          `You are a herbal diagnostician. Output a JSON array:
+           [{"name":"", "evidence":"", "conf":0, "uses":""}, …]` },
+        { role:'user', content:
+          `Symptoms: ${text}; Categories: ${cats.join(',')}; Severity: ${severity}; Onset: ${onset}` }
+      ]);
+      const recs = JSON.parse(reply);
+      recs.forEach((h,i) => {
+        if (i===0) setTimeout(() => {
+          panel.querySelector('.conf-fill').style.width = h.conf+'%';
+          panel.querySelector('.conf-percent').textContent = h.conf+'%';
+        }, 200);
         const card = document.createElement('div');
-        card.className='herb-card';
-        card.innerHTML=`
+        card.className = 'herb-card';
+        card.innerHTML = `
           <h4>${h.name}</h4>
           <span class="evidence-badge ${h.evidence}">
             ${h.evidence==='well'?'Well-studied':'Anecdotal'}
           </span>
           <p>${h.uses}</p>
         `;
-        panel.querySelector('.herb-cards').appendChild(card);
+        panel.querySelector('.herb-cards').append(card);
       });
-    } catch(err){
-      panel.querySelector('.herb-cards').textContent='⚠️ '+err.message;
+    } catch(err) {
+      panel.querySelector('.herb-cards').textContent = '⚠️ ' + err.message;
     }
   };
-  // tag toggles
-  document.querySelectorAll('#sym-form .tag').forEach(t=>
-    t.onclick=()=> t.classList.toggle('selected'));
 
+  //───────────────── CULTURAL KNOWLEDGE ──────────────────
 
-  // ───────── CULTURAL KNOWLEDGE ─────────
-  document.getElementById('cultureQuery').insertAdjacentHTML('beforebegin',
-    '<p class="desc">Enter a region or tradition to see AI-powered cultural herb wisdom.</p>'
-  );
-  document.getElementById('cultureQuery').insertAdjacentHTML('afterend',
-    '<button id="cultureButton">Get Cultural Insights</button>'
-  );
-  document.getElementById('cultureButton').onclick=async ()=>{
+  async function getCulture() {
+    const q = document.getElementById('cultureQuery').value.trim();
     const panel = document.getElementById('cultureResult');
-    panel.hidden=false;
-    const rc = panel.querySelector('.result-content');
-    rc.textContent='Loading…';
+    panel.hidden = false;
+    panel.innerHTML = '<button class="close-btn" aria-label="Close">×</button>'
+                    + '<div class="result-content">Loading…</div>';
+    panel.querySelector('.close-btn').onclick = ()=> panel.hidden = true;
     try {
-      const ai = await callOpenAI({
-        messages:[
-          {role:'system',content:'You are a cultural herbalist.'},
-          {role:'user',content:`Region: ${document.getElementById('cultureQuery').value}`}
-        ]
-      });
-      stripAndRender(ai, rc);
-    } catch(err){
-      rc.textContent='⚠️ '+err.message;
+      const reply = await callOpenAI([
+        { role:'system', content:'You are a cultural herbalist.' },
+        { role:'user', content:`Region query: ${q}` }
+      ]);
+      renderAI(reply, panel.querySelector('.result-content'));
+    } catch(err) {
+      showError(panel, err.message);
     }
-  };
+  }
+  document.getElementById('cultureResult')?.classList.add('response');
+  document.getElementById('cultureQuery').insertAdjacentHTML('beforebegin',
+    '<p class="desc">Enter a region, tradition or herb (e.g. “West African uses of moringa”) to get practices & folklore.</p>'
+  );
 
+  //───────────────── CHATBOT ──────────────────
 
-  // ───────── CHATBOT ─────────
-  (()=>{
-    const box = document.getElementById('chatBox');
-    const hint= document.getElementById('chatHint');
-    const inp = document.getElementById('chatInput');
-    const btn = document.getElementById('sendChat');
-    let history = [{role:'system',content:'You are a friendly herbal tutor.'}];
-    btn.onclick=async ()=>{
-      const u=inp.value.trim(); if(!u)return;
-      box.innerHTML+=`<p><strong>You:</strong> ${u}</p>`;
-      inp.value=''; history.push({role:'user',content:u});
-      hint.hidden=false; btn.disabled=true;
-      try {
-        const data = await callOpenAI({messages:history});
-        history.push({role:'assistant',content:data});
-        box.innerHTML+=`<p><strong>Vitra AI:</strong> ${data}</p>`;
-      } catch {
-        box.innerHTML+=`<p><strong>Vitra AI:</strong> Sorry, something went wrong.</p>`;
-      }
-      hint.hidden=true; btn.disabled=false;
-      box.scrollTop=box.scrollHeight;
-    };
-  })();
+  document.getElementById('sendChat').addEventListener('click', async () => {
+    const input = document.getElementById('chatInput');
+    const box   = document.getElementById('chatBox');
+    const txt   = input.value.trim();
+    if (!txt) return;
+    const userDiv = document.createElement('div');
+    userDiv.className = 'user-msg';
+    userDiv.textContent = txt;
+    box.append(userDiv);
+    input.value = '';
+    document.getElementById('chatHint').hidden = false;
+    try {
+      const reply = await callOpenAI([
+        { role:'system', content:'You are a friendly herbalist.' },
+        { role:'user', content: txt }
+      ]);
+      const botDiv = document.createElement('div');
+      botDiv.className = 'bot-msg';
+      botDiv.innerHTML = stripMarkdown(reply).replace(/\n/g,'<br/>');
+      box.append(botDiv);
+    } catch(err) {
+      box.append(`⚠️ ${err.message}`);
+    } finally {
+      document.getElementById('chatHint').hidden = true;
+      box.scrollTop = box.scrollHeight;
+    }
+  });
 
+  //───────────────── GENETICS MATCH ──────────────────
 
-  // ───────── GENETICS MATCH ─────────
-  document.getElementById('genetics-form').onsubmit=async e=>{
+  document.getElementById('genetics-form').onsubmit = async e => {
     e.preventDefault();
+    const file = document.getElementById('geneticUpload').files[0];
     const panel = document.getElementById('geneticResult');
-    panel.hidden=false;
-    const rc = panel.querySelector('.result-content');
-    rc.innerHTML = 'Processing… <span class="spinner"></span>';
+    if (!file) {
+      panel.hidden = false;
+      showError(panel, 'Upload a CSV or JSON.');
+      return;
+    }
+    panel.hidden = false;
+    panel.querySelector('.result-content').textContent = 'Processing…';
     try {
-      const file = e.target.querySelector('input').files[0];
-      let payload;
-      if(file){
-        const txt = await new Promise(r=>{
-          const fr=new FileReader();
-          fr.onload=()=>r(fr.result); fr.readAsText(file);
-        });
-        payload = { messages:[
-          {role:'system',content:'You are a genetic herb recommender.'},
-          {role:'user',content:`Report data:\n${txt}`}
-        ]};
-      } else {
-        throw new Error('Please upload your genetic CSV/JSON.');
-      }
-      const ai = await callOpenAI(payload);
-      stripAndRender(ai, rc);
-    } catch(err){
-      rc.textContent='⚠️ '+err.message;
+      const text = await file.text();
+      const reply = await callOpenAI([
+        {role:'system', content:'You interpret genetic SNP data for herb recommendations.'},
+        {role:'user', content: text }
+      ]);
+      renderAI(reply, panel.querySelector('.result-content'));
+    } catch(err) {
+      showError(panel, err.message);
     }
   };
 
+  //───────────────── ROI CALCULATOR ──────────────────
 
-  // ───────── ROI CALCULATOR ─────────
-  document.getElementById('roi-form').onsubmit=async e=>{
+  document.getElementById('roi-form').onsubmit = e => {
     e.preventDefault();
-    const rx = +document.getElementById('roiRx').value;
+    const rx   = +document.getElementById('roiRx').value;
     const cost = +document.getElementById('roiCost').value;
-    const incomePer = +prompt('Enter income per prescription:','100');
+    const incomePer = +prompt('Income per prescription?','100');
     const totalIncome = rx * incomePer;
-    const totalCost = rx * cost;
-    const profit = totalIncome - totalCost;
-    const roi = (profit/totalCost)*100;
+    const totalCost   = rx * cost;
+    const netProfit   = totalIncome - totalCost;
+    const roiPercent  = ((netProfit / totalCost) * 100).toFixed(2);
     const panel = document.getElementById('roiResult');
-    panel.hidden=false;
-    panel.querySelector('.result-content').innerHTML=`
-      <p>You prescribed <strong>${rx}</strong> items.</p>
-      <p>Income per prescription: $${incomePer.toFixed(2)}</p>
-      <p><strong>Total Income</strong> = ${rx} × $${incomePer.toFixed(2)} = $${totalIncome.toFixed(2)}</p>
-      <p><strong>Total Cost</strong> = ${rx} × $${cost.toFixed(2)} = $${totalCost.toFixed(2)}</p>
-      <p><strong>Net Profit</strong> = $${totalIncome.toFixed(2)} − $${totalCost.toFixed(2)} = $${profit.toFixed(2)}</p>
-      <p><strong>ROI</strong> = (${profit.toFixed(2)} ÷ ${totalCost.toFixed(2)}) × 100 = ${roi.toFixed(2)}%</p>
+    panel.hidden = false;
+    panel.querySelector('.result-content').innerHTML = `
+      <p><strong>Monthly prescriptions:</strong> ${rx}</p>
+      <p><strong>Income per Rx:</strong> $${incomePer}</p>
+      <p><strong>Total income:</strong> $${totalIncome}</p>
+      <p><strong>Total herb cost:</strong> $${totalCost}</p>
+      <p><strong>Net profit:</strong> $${netProfit}</p>
+      <p><strong>ROI:</strong> ${roiPercent}%</p>
     `;
   };
 
+  //───────────────── DARK MODE & SIDEBAR ──────────────────
 
-  // ───────── OTHER FORMS ─────────
-  function wire(formId,prompt,extract,outputId){
-    const f=document.getElementById(formId);
-    const p=document.getElementById(outputId);
-    f.onsubmit=async e=>{
+  document.getElementById('themeToggle').addEventListener('click', () => {
+    document.documentElement.classList.toggle('dark');
+    document.getElementById('themeToggle').classList.toggle('fa-sun');
+    document.getElementById('themeToggle').classList.toggle('fa-moon');
+  });
+
+  const sidebar = document.getElementById('sidebar');
+  document.getElementById('shrinkBtn').addEventListener('click', () => {
+    sidebar.classList.toggle('collapsed');
+    const icon = document.getElementById('shrinkBtn').querySelector('i');
+    icon.classList.toggle('fa-angle-double-left');
+    icon.classList.toggle('fa-angle-double-right');
+  });
+  document.getElementById('hamburger').addEventListener('click', () => {
+    sidebar.classList.toggle('open');
+  });
+
+  //───────────────── GENERIC FORM WIRING & STARTUP ──────────────────
+
+  function wireForm(formId, prompt, extract, outputId) {
+    const form = document.getElementById(formId);
+    form.onsubmit = async e => {
       e.preventDefault();
-      p.hidden=false; p.querySelector('.result-content').innerHTML='Processing… <span class="spinner"></span>';
+      const panel = document.getElementById(outputId);
+      panel.hidden = false;
+      panel.innerHTML = '<button class="close-btn" aria-label="Close">×</button>'
+                      + '<div class="result-content">Processing… <span class="spinner"></span></div>';
+      panel.querySelector('.close-btn').onclick = ()=> panel.hidden = true;
       try {
-        const ai = await callOpenAI({
-          messages:[
-            {role:'system',content:prompt},
-            {role:'user',content:extract()}
-          ]
-        });
-        stripAndRender(ai,p.querySelector('.result-content'));
-      } catch(err){
-        p.querySelector('.result-content').textContent='⚠️ '+err.message;
+        const reply = await callOpenAI([
+          { role:'system', content: prompt },
+          { role:'user',   content: extract() }
+        ]);
+        renderAI(reply, panel.querySelector('.result-content'));
+      } catch(err) {
+        showError(panel, err.message);
       }
     };
   }
-  // formulations
-  wire('pf-form',
-    'You are an expert formulator ensuring safe dosages.',
-    ()=>`Herbs:${[...pfHerbs.selectedOptions].map(o=>o.value).join(', ')};Age:${pfAge.value};Weight:${pfWeight.value}kg`,
-    'pfResult'
-  );
-  // research
-  wire('research-form',
-    'You summarize clinical research with citations.',
-    ()=>researchQuery.value,
-    'researchResults'
-  );
-  // inventory
-  wire('inventory-form',
-    'You forecast herb demand with trends and buffers.',
-    ()=>`Herb:${forecastHerb.value};Weeks:${forecastPeriod.value}`,
-    'inventoryResult'
-  );
-  // dosage
-  wire('dose-form',
-    'You calculate herbal dosage nonlinear pharmacokinetics.',
-    ()=>`Weight:${weight.value}kg;Symptom:${symptom.value};Form:${formType.value}`,
-    'dosageResult'
-  );
-  // interaction
-  wire('int-form',
-    'You grade herb-herb interactions severity mild/moderate/severe.',
-    ()=>{ if(herbA.value===herbB.value)throw new Error('Select two distinct'); return `${herbA.value}&${herbB.value}`; },
-    'interactionResult'
-  );
-  // safety
-  wire('safety-form',
-    'You warn of dangerous herb/drug combos color-coded.',
-    ()=>{ if(safetyA.value===safetyB.value)throw new Error('Distinct required'); return `${safetyA.value}&${safetyB.value}`; },
-    'safetyResult'
-  );
 
-  // contact
-  document.getElementById('contact-form').onsubmit=e=>{
-    e.preventDefault(); alert('Thanks—we’ll be in touch!');
-    e.target.reset();
-  };
-
-  // preview image
-  window.previewImage=inp=>{
-    const img = document.getElementById('idenPreview');
-    if(!inp.files[0])return;
-    img.src=URL.createObjectURL(inp.files[0]);
-    img.style.display='block';
-  };
-
-  // smooth scroll
-  window.scrollToSection=id=>{
-    document.getElementById(id)?.scrollIntoView({behavior:'smooth',block:'start'});
-  };
-
-  // finally bootstrap everything
-  document.addEventListener('DOMContentLoaded',()=>{
-    initUI();
+  document.addEventListener('DOMContentLoaded', () => {
     initCharts();
+    wireForm('pf-form',
+      'You are an expert at formulating personalized herbal blends with dosage safety.',
+      () => {
+        const h = [...document.getElementById('pfHerbs').selectedOptions].map(o=>o.value).join(', ');
+        const a = document.getElementById('pfAge').value;
+        const w = document.getElementById('pfWeight').value;
+        return `Herbs: ${h}; Age: ${a}; Weight: ${w}kg`;
+      },
+      'pfResult'
+    );
+    wireForm('research-form',
+      'You summarize clinical research findings with citations.',
+      () => document.getElementById('researchQuery').value,
+      'researchResults'
+    );
+    wireForm('inventory-form',
+      'You forecast weekly herb demand with trends & buffer stock.',
+      () => {
+        const h = document.getElementById('forecastHerb').value;
+        const p = document.getElementById('forecastPeriod').value;
+        return `Herb: ${h}; Weeks ahead: ${p}`;
+      },
+      'inventoryResult'
+    );
+    wireForm('int-form',
+      'You check interactions between two herbs with severity descriptions.',
+      () => {
+        const a = document.getElementById('herbA').value;
+        const b = document.getElementById('herbB').value;
+        if (a===b) throw new Error('Pick two distinct herbs.');
+        return `${a} & ${b}`;
+      },
+      'interactionResult'
+    );
+    wireForm('safety-form',
+      'You warn of dangerous combinations between herbs & meds, color-coded.',
+      () => {
+        const a = document.getElementById('safetyA').value;
+        const b = document.getElementById('safetyB').value;
+        if (a===b) throw new Error('Pick two distinct items.');
+        return `${a} & ${b}`;
+      },
+      'safetyResult'
+    );
+    wireForm('dose-form',
+      'You calculate daily herbal dosages based on weight, symptom, extract.',
+      () => {
+        const w = document.getElementById('weight').value;
+        const s = document.getElementById('symptom').value;
+        const f = document.getElementById('formType').value;
+        return `Weight: ${w}kg; Symptom: ${s}; Form: ${f}`;
+      },
+      'dosageResult'
+    );
   });
-
-})();  
 </script>
 </body>
 </html>
