@@ -741,8 +741,8 @@
     document.getElementById('onboardModal').style.display = 'none';
   }
 </script>
-  
-<script>
+
+  <script>
   //───────────────── HELPERS ──────────────────
   async function callOpenAI(messages) {
     const res = await fetch('/.netlify/functions/openai-proxy', {
@@ -752,50 +752,39 @@
     });
     if (!res.ok) throw new Error(await res.text() || 'Server error');
     const data = await res.json();
-    return data.choices[0].message.content.trim();
+    return data.choices[0].message.content;
   }
 
   async function callVision(file) {
+    // ensure we send as multipart/form-data
     const fd = new FormData();
     fd.append('file', file);
-    const res = await fetch('/.netlify/functions/openai-proxy', { method: 'POST', body: fd });
-    if (!res.ok) throw new Error(await res.text() || 'Vision API error');
+    const res = await fetch('/.netlify/functions/vision-proxy', {
+      method: 'POST',
+      body: fd
+    });
+    if (!res.ok) throw new Error(await res.text() || 'Vision error');
     return res.json();
   }
 
-  function stripMarkdown(text) {
-    return text.replace(/^###\s+/gm, '');
-  }
-
-  function formatParagraphs(text) {
+  function formatHTML(text) {
+    // remove markdown asterisks and wrap paragraphs
     return text
-      .split(/\n{2,}/g)
-      .map(p => `<p>${p.trim()}</p>`)
-      .join('');
-  }
-
-  function renderAI(html, container) {
-    container.innerHTML = stripMarkdown(html)
-      .replace(/```([\s\S]+?)```/g, '<pre><code>$1</code></pre>')
       .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
-      .replace(/\*(.+?)\*/g, '<em>$1</em>');
+      .replace(/\*(.+?)\*/g, '<em>$1</em>')
+      .split(/\n{2,}/).map(p => `<p>${p.trim()}</p>`).join('');
   }
 
-  function showError(panel, msg) {
-    panel.querySelector('.result-content').innerText = '⚠️ ' + msg;
-    addCloseButton(panel);
-  }
-
-  function addCloseButton(panel) {
+  function addClose(panel) {
     if (panel.querySelector('.close-btn')) return;
     const btn = document.createElement('button');
     btn.className = 'close-btn';
-    btn.innerText = '×';
+    btn.textContent = '×';
     btn.onclick = () => panel.hidden = true;
     panel.prepend(btn);
   }
 
-  function addResponseTools(panel) {
+  function addTools(panel) {
     if (panel.querySelector('.tool-row')) return;
     const tools = document.createElement('div');
     tools.className = 'tool-row';
@@ -803,10 +792,9 @@
       <button class="copy-btn" title="Copy"><i class="fas fa-copy"></i></button>
       <button class="dl-btn"   title="Download"><i class="fas fa-download"></i></button>
     `;
-    panel.querySelector('.result-content').after(tools);
-    tools.querySelector('.copy-btn').onclick = () => {
+    panel.append(tools);
+    tools.querySelector('.copy-btn').onclick = () =>
       navigator.clipboard.writeText(panel.querySelector('.result-content').innerText);
-    };
     tools.querySelector('.dl-btn').onclick = () => {
       const text = panel.querySelector('.result-content').innerText;
       const blob = new Blob([text], { type:'text/plain' });
@@ -818,36 +806,38 @@
   }
 
 
-  //───────────────── CHARTS & EXPORT ──────────────────
+  //───────────────── CHARTS ──────────────────
   function initCharts() {
-    const data = {
-      adoption: { labels:['Jan','Feb','Mar'], datasets:[{ data:[50,75,100] }] },
-      efficacy: { labels:['Mild','Mod','High'],   datasets:[{ data:[30,45,25] }] },
-      supply:   { labels:['A','B','C'],           datasets:[{ data:[200,150,300] }] },
-      roi:      { labels:['Q1','Q2','Q3','Q4'],   datasets:[{ data:[5,7,6,8] }] }
-    };
-    new Chart('chartAdoption',{type:'line',data:data.adoption,options:{responsive:true}});
-    new Chart('chartEfficacy', {type:'bar', data:data.efficacy, options:{responsive:true}});
-    new Chart('chartSupply',   {type:'pie', data:data.supply,   options:{responsive:true}});
-    new Chart('chartROI',      {type:'radar',data:data.roi,      options:{responsive:true}});
+    const cfg = (type,data) => ({
+      type, data, options:{ responsive:true, maintainAspectRatio:false, plugins:{ legend:{ display:false } } }
+    });
+    new Chart('chartAdoption', cfg('line',{
+      labels:['Jan','Feb','Mar'], datasets:[{ data:[50,75,100] }]
+    }));
+    new Chart('chartEfficacy', cfg('bar',{
+      labels:['Mild','Mod','High'], datasets:[{ data:[30,45,25] }]
+    }));
+    new Chart('chartSupply', cfg('pie',{
+      labels:['A','B','C'], datasets:[{ data:[200,150,300] }]
+    }));
+    new Chart('chartROI', cfg('radar',{
+      labels:['Q1','Q2','Q3','Q4'], datasets:[{ data:[5,7,6,8] }]
+    }));
   }
 
   function exportAnalytics() {
-    const charts = ['Adoption','Efficacy','Supply','ROI'].map(id => ({
-      id: 'chart'+id, name: id
-    }));
-    let lines = [];
-    charts.forEach(c => {
-      const ch = Chart.getChart(c.id);
-      ch.data.datasets.forEach(ds => {
-        lines.push([c.name, ...(ds.data)].join(','));
+    const ids = ['Adoption','Efficacy','Supply','ROI'];
+    let csv = '';
+    ids.forEach(id => {
+      const ch = Chart.getChart('chart'+id);
+      ch.data.datasets[0].data.forEach((v,i) => {
+        csv += `${id},${ch.data.labels[i]},${v}\n`;
       });
-      lines.push('');
     });
-    const blob = new Blob([lines.join('\n')],{type:'text/csv'});
+    const blob = new Blob([csv],{type:'text/csv'});
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
-    a.href = url; a.download = 'analytics.csv';
+    a.href=url; a.download='analytics.csv';
     a.click(); URL.revokeObjectURL(url);
   }
 
@@ -880,232 +870,166 @@
     panel.innerHTML = '<div class="result-content">Processing… <span class="spinner"></span></div>';
     const file = e.target.querySelector('input[type=file]').files[0];
     const desc = document.getElementById('idenDesc').value.trim();
-    if (!file && !desc) return showError(panel,'Please upload an image or description.');
-
+    if (!file && !desc) {
+      panel.querySelector('.result-content').innerText = '⚠️ Please upload an image or description.';
+      addClose(panel);
+      return;
+    }
     try {
-      let replyHTML = '';
+      let html = '';
       if (file) {
         const data = await callVision(file);
-        if (data.name) {
-          replyHTML += `<strong>Name:</strong> ${data.name}<br/>
-                        <strong>Uses:</strong> ${data.uses}<br/>
-                        <strong>Cautions:</strong> ${data.cautions}<br/>
-                        <strong>Regions:</strong> ${data.regions.join(', ')}<hr/>`;
-        } else {
-          replyHTML += (data.description||'No vision output.') + '<hr/>';
-        }
+        html += `<strong>Name:</strong> ${data.name}<br/>
+                 <strong>Uses:</strong> ${data.uses}<br/>
+                 <strong>Cautions:</strong> ${data.cautions}<br/>
+                 <strong>Regions:</strong> ${data.regions.join(', ')}<hr/>`;
       }
       if (desc) {
-        const text = await callOpenAI([
-          {role:'system',content:'You are a plant expert.'},
-          {role:'user',content:`Describe plant: ${desc}`}
+        const txt = await callOpenAI([
+          { role:'system', content:'You are a plant expert. Respond in plain text without backticks.' },
+          { role:'user', content:`Describe plant: ${desc}` }
         ]);
-        replyHTML += formatParagraphs(text);
+        html += formatHTML(txt);
       }
       const content = panel.querySelector('.result-content');
-      content.innerHTML = replyHTML;
-      addCloseButton(panel);
-      addResponseTools(panel);
+      content.innerHTML = html;
+      addClose(panel);
+      addTools(panel);
     } catch(err) {
-      showError(panel, err.message);
+      panel.querySelector('.result-content').innerText = '⚠️ ' + err.message;
+      addClose(panel);
     }
   };
 
 
   //───────────────── SYMPTOM CHECKER ──────────────────
-  document.getElementById('severity').addEventListener('input', e => {
+  document.getElementById('severity').oninput = e =>
     document.getElementById('sevValue').textContent = e.target.value;
-  });
 
   document.getElementById('sym-form').onsubmit = async e => {
     e.preventDefault();
     const panel = document.getElementById('symResult');
     panel.hidden = false;
-    panel.querySelector('.result-content')?.remove();
     panel.innerHTML = '<div class="result-content">Processing… <span class="spinner"></span></div>';
 
     const text = document.getElementById('symInput').value;
     const cats = [...document.getElementById('symCategories').selectedOptions].map(o=>o.value);
     const sev = document.getElementById('severity').value;
-    const dur = document.getElementById('symDuration').value || 0;
+    const dur = document.getElementById('symDuration').value || '0';
 
     try {
-      const json = await callOpenAI([
-        {role:'system',content:'You are a herbal diagnostician. Output JSON array of {name,evidence,conf,uses}.'},
-        {role:'user',content:`Symptoms:${text};Categories:${cats.join(',')};Severity:${sev};Duration:${dur}`}
+      const txt = await callOpenAI([
+        { role:'system', content:
+          'You are a herbal diagnostician. Give me back a plain-text list of recommendations; no JSON, no backticks.' },
+        { role:'user', content:`Symptoms: ${text}; Categories: ${cats.join(',')}; Severity: ${sev}; Duration: ${dur}d.` }
       ]);
-      const recs = JSON.parse(json);
-      let html = '';
-      recs.forEach((h,i) => {
-        if (i===0) {
-          panel.querySelector('.conf-fill').style.width = h.conf+'%';
-          panel.querySelector('.conf-percent').textContent = h.conf+'%';
-        }
-        html += `<div class="herb-card">
-                   <h4>${h.name}</h4>
-                   <span class="evidence-badge ${h.evidence}">
-                     ${h.evidence==='well'?'Well-studied':'Anecdotal'}
-                   </span>
-                   <p>${h.uses}</p>
-                 </div>`;
-      });
-      const content = panel.querySelector('.result-content');
-      content.outerHTML = `<div class="result-content">${html}</div>`;
-      addCloseButton(panel);
-      addResponseTools(panel);
+      const html = formatHTML(txt);
+      panel.innerHTML = `<div class="result-content">${html}</div>`;
+      addClose(panel);
+      addTools(panel);
     } catch(err) {
-      showError(panel, err.message);
+      panel.innerHTML = `<div class="result-content">⚠️ ${err.message}</div>`;
+      addClose(panel);
     }
   };
 
 
-  //───────────────── CULTURAL KNOWLEDGE ──────────────────
-  document.getElementById('cultureQuery').insertAdjacentHTML('beforebegin',
-    '<p class="desc">Enter region/tradition (e.g. “West African uses of moringa”).</p>'
-  );
+  //───────────────── CHATBOT & HISTORY MODAL ──────────────────
+  const chatBox = document.getElementById('chatBox');
+  const history = [];
 
-  window.getCulture = async () => {
-    const panel = document.getElementById('cultureResult');
-    panel.hidden = false;
-    panel.innerHTML = '<div class="result-content">Loading…</div>';
-    try {
-      const text = await callOpenAI([
-        {role:'system',content:'You are a cultural herbalist.'},
-        {role:'user',content:document.getElementById('cultureQuery').value}
-      ]);
-      const content = panel.querySelector('.result-content');
-      content.innerHTML = formatParagraphs(text);
-      addCloseButton(panel);
-      addResponseTools(panel);
-    } catch(err) {
-      showError(panel, err.message);
-    }
-  };
-
-
-  //───────────────── CHATBOT ──────────────────
   document.getElementById('sendChat').onclick = async () => {
-    const box = document.getElementById('chatBox');
-    const input = document.getElementById('chatInput');
-    const txt = input.value.trim();
+    const inp = document.getElementById('chatInput');
+    const txt = inp.value.trim();
     if (!txt) return;
-    box.insertAdjacentHTML('beforeend', `<div class="user-msg">${txt}</div>`);
-    input.value = '';
+    chatBox.insertAdjacentHTML('beforeend', `<div class="user-msg">${txt}</div>`);
+    history.push({ who:'You', text:txt });
+    inp.value = '';
     document.getElementById('chatHint').hidden = false;
-
     try {
       const reply = await callOpenAI([
-        {role:'system',content:'You are a friendly herbalist.'},
-        {role:'user',content:txt}
+        { role:'system', content:'You are a friendly herbalist. Answer plainly.' },
+        { role:'user', content:txt }
       ]);
-      box.insertAdjacentHTML('beforeend',
-        `<div class="bot-msg">${stripMarkdown(reply).replace(/\n/g,'<br/>')}</div>`
-      );
-      box.scrollTop = box.scrollHeight;
-    } catch(err) {
-      box.insertAdjacentHTML('beforeend', `<div class="bot-msg">⚠️ ${err.message}</div>`);
+      chatBox.insertAdjacentHTML('beforeend', `<div class="bot-msg">${formatHTML(reply)}</div>`);
+      history.push({ who:'Herbalist', text:reply });
+      chatBox.scrollTop = chatBox.scrollHeight;
+    } catch(e) {
+      chatBox.insertAdjacentHTML('beforeend', `<div class="bot-msg">⚠️ ${e.message}</div>`);
     } finally {
       document.getElementById('chatHint').hidden = true;
     }
   };
-  document.getElementById('closeChat').onclick   = () => document.getElementById('hero-chat').hidden = true;
-  document.getElementById('viewHistory').onclick = () => alert('History feature coming soon');
-  document.getElementById('clearChat').onclick   = () => document.getElementById('chatBox').innerHTML = '';
+
+  // header styling done purely in CSS; here we wire history modal:
+  document.getElementById('viewHistory').onclick = () => {
+    const modal = document.createElement('div');
+    modal.className = 'history-modal';
+    modal.innerHTML = `
+      <div class="history-content">
+        <h3>Chat History</h3>
+        <ul>${history.map((m,i)=>`
+          <li>
+            <strong>${m.who}:</strong> ${m.text}
+            <button data-i="${i}" class="del-msg">🗑</button>
+          </li>`).join('')}
+        </ul>
+        <button class="close-history">Close</button>
+      </div>`;
+    document.body.append(modal);
+    modal.querySelectorAll('.del-msg').forEach(b=>{
+      b.onclick = () => {
+        history.splice(+b.dataset.i,1);
+        modal.remove();
+        document.getElementById('viewHistory').onclick();
+      };
+    });
+    modal.querySelector('.close-history').onclick = () => modal.remove();
+  };
+
+  document.getElementById('clearChat').onclick = () => {
+    chatBox.innerHTML = '';
+    history.length = 0;
+  };
+  document.getElementById('closeChat').onclick = () => {
+    document.getElementById('hero-chat').hidden = true;
+  };
 
 
-  //───────────────── ROI & CURRENCY ──────────────────
+  //───────────────── ROI CALCULATOR ──────────────────
   document.getElementById('currency').onchange = e => {
     const sym = {GHS:'₵',USD:'$',EUR:'€'}[e.target.value];
     document.getElementById('curSym').textContent = sym;
   };
 
-  document.getElementById('roi-form').onsubmit = e => {
+  document.getElementById('roi-form').onsubmit = async e => {
     e.preventDefault();
     const panel = document.getElementById('roiResult');
-    const rx   = +document.getElementById('roiRx').value;
-    const cost = +document.getElementById('roiCost').value;
-    const inc  = +prompt('Income per prescription?','100');
-    const totalInc  = rx * inc;
-    const totalCost = rx * cost;
-    const net       = totalInc - totalCost;
-    const roiPct    = ((net/totalCost)*100).toFixed(2);
     panel.hidden = false;
-    panel.innerHTML = `
-      <div class="result-content">
-        <p><strong>Prescriptions:</strong> ${rx}</p>
-        <p><strong>Income/Rx:</strong> ${document.getElementById('curSym').textContent}${inc}</p>
-        <p><strong>Total Income:</strong> ${document.getElementById('curSym').textContent}${totalInc}</p>
-        <p><strong>Total Cost:</strong> ${document.getElementById('curSym').textContent}${totalCost}</p>
-        <p><strong>Net Profit:</strong> ${document.getElementById('curSym').textContent}${net}</p>
-        <p><strong>ROI:</strong> ${roiPct}%</p>
-      </div>`;
-    addCloseButton(panel);
-    addResponseTools(panel);
+    panel.innerHTML = '<div class="result-content">Calculating… <span class="spinner"></span></div>';
+    const rx = +document.getElementById('roiRx').value;
+    const cost = +document.getElementById('roiCost').value;
+    try {
+      const txt = await callOpenAI([
+        { role:'system', content:
+          'You are a finance expert. Given volume and unit cost, explain ROI plainly.' },
+        { role:'user', content:
+          `Volume: ${rx} prescriptions; Unit cost: ${cost}. Currency: ${document.getElementById('currency').value}` }
+      ]);
+      panel.innerHTML = `<div class="result-content">${formatHTML(txt)}</div>`;
+      addClose(panel);
+      addTools(panel);
+    } catch(err) {
+      panel.innerHTML = `<div class="result-content">⚠️ ${err.message}</div>`;
+      addClose(panel);
+    }
   };
 
 
-  //───────────────── GENERIC WIRING ──────────────────
-  function wireForm(id, sysPrompt, extractor, outId) {
-    document.getElementById(id).onsubmit = async e => {
-      e.preventDefault();
-      const panel = document.getElementById(outId);
-      panel.hidden = false;
-      panel.innerHTML = '<div class="result-content">Processing… <span class="spinner"></span></div>';
-      try {
-        const txt = await callOpenAI([
-          {role:'system',content:sysPrompt},
-          {role:'user',content:extractor()}
-        ]);
-        const content = panel.querySelector('.result-content');
-        content.innerHTML = formatParagraphs(txt);
-        addCloseButton(panel);
-        addResponseTools(panel);
-      } catch(err) {
-        showError(panel, err.message);
-      }
-    };
-  }
-
+  //───────────────── INIT ON LOAD ──────────────────
   document.addEventListener('DOMContentLoaded', () => {
     initCharts();
     document.querySelector('button[onclick="exportAnalytics()"]').onclick = exportAnalytics;
-    previewImage; // ensure it's defined
-    wireForm('pf-form',
-      'You are an expert formulator of herbal blends.',
-      () => {
-        const h = [...document.getElementById('pfHerbs').selectedOptions].map(o=>o.value).join(', ');
-        return `Herbs:${h};Age:${document.getElementById('pfAge').value};Weight:${document.getElementById('pfWeight').value}kg`;
-      }, 'pfResult'
-    );
-    wireForm('research-form',
-      'You summarize clinical research with citations.',
-      () => document.getElementById('researchQuery').value, 'researchResults'
-    );
-    wireForm('inventory-form',
-      'You forecast weekly herb demand with buffer stock.',
-      () => `Herb:${document.getElementById('forecastHerb').value};Weeks:${document.getElementById('forecastPeriod').value}`, 'inventoryResult'
-    );
-    wireForm('int-form',
-      'You check interactions between two herbs.',
-      () => {
-        const a=document.getElementById('herbA').value, b=document.getElementById('herbB').value;
-        if(a===b) throw new Error('Pick two distinct herbs.');
-        return `${a}&${b}`;
-      }, 'interactionResult'
-    );
-    wireForm('safety-form',
-      'You warn of dangerous combinations.',
-      () => {
-        const a=document.getElementById('safetyA').value, b=document.getElementById('safetyB').value;
-        if(a===b) throw new Error('Pick two distinct items.');
-        return `${a}&${b}`;
-      }, 'safetyResult'
-    );
-    wireForm('dose-form',
-      'You calculate herbal dosages by weight and symptom.',
-      () => `Weight:${document.getElementById('weight').value}kg;Symptom:${document.getElementById('symptom').value};Form:${document.getElementById('formType').value}`,
-      'dosageResult'
-    );
   });
 </script>
 </body>
