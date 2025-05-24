@@ -1,9 +1,10 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" aria-theme="light">
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
   <title>Vitra AI – Herbal Medicine Hub</title>
+
   <!-- Montserrat + FontAwesome -->
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;600;700&display=swap" rel="stylesheet"/>
   <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
@@ -13,254 +14,244 @@
   <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
   <link rel="stylesheet"
         href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"/>
+
   <!-- Chart.js -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
   <style>
-  /*──────────────── RESET & BASE ────────────────*/
-  *,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
-  html{font-family:'Montserrat',sans-serif;font-size:16px;scroll-behavior:smooth}
-  body{display:flex;min-height:100vh;background:var(--bg);color:var(--text);overflow-x:hidden}
-  :root{
-    --primary:#2fa9a1;--primary-20:rgba(47,169,161,0.2);
-    --bg:#f5f8fa;--surface:#fff;--text:#333;--muted:#7a8a93;
-    --bg-dark:#1e1e1e;--surface-dark:#2a2a2a;--text-dark:#ececec;--muted-dark:#888;
-    --radius:0.75rem;--padding:1rem;--transition:.3s;
-    --sidebar-w:280px;--sidebar-collapsed-w:80px;--header-h:64px;
+  /*────────────────── RESET & BASE ──────────────────*/
+  *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+  html { font-family:'Montserrat',sans-serif; font-size:16px; scroll-behavior:smooth; }
+  body { display:flex; min-height:100vh; background:var(--bg); color:var(--text); overflow-x:hidden; }
+
+  /*────────────────── VARIABLES ──────────────────*/
+  :root {
+    --primary: #2fa9a1; --primary-20: rgba(47,169,161,0.2);
+    --bg: #f5f8fa; --surface: #ffffff; --text: #333333; --muted: #7a8a93;
+    --bg-dark: #1e1e1e; --surface-dark: #2a2a2a; --text-dark: #ececec; --muted-dark: #888888;
+    --radius: 0.75rem; --padding: 1rem; --transition: 0.3s ease;
+    --sidebar-w: 280px; --sidebar-collapsed-w: 80px; --header-h: 64px;
   }
-  html.dark{--bg:var(--bg-dark);--surface:var(--surface-dark);--text:var(--text-dark);--muted:var(--muted-dark)}
-  /*──────────────── SIDEBAR ─────────────────*/
-  aside{flex:0 0 var(--sidebar-w);position:sticky;top:0;height:100vh;background:var(--surface);box-shadow:2px 0 12px rgba(0,0,0,0.05);transition:flex var(--transition);overflow:hidden}
-  aside.collapsed{flex:0 0 var(--sidebar-collapsed-w)}
-  aside .brand{display:flex;align-items:center;gap:.75rem;padding:var(--padding);font-size:1.4rem;font-weight:700;color:var(--primary)}
-  aside.collapsed .brand span{display:none}
-  aside nav{margin-top:2rem}
-  aside nav a{display:flex;align-items:center;gap:1rem;padding:.75rem var(--padding);border-radius:var(--radius);color:var(--text);font-weight:500;text-decoration:none;transition:background var(--transition),padding-left var(--transition)}
-  aside nav a i{font-size:1.2rem}
-  aside nav a:hover,aside nav a.active{background:var(--primary-20);color:var(--primary);padding-left:calc(var(--padding)+.5rem)}
-  aside.collapsed nav a span{display:none}
-  #shrinkBtn{position:absolute;bottom:var(--padding);left:-18px;width:36px;height:36px;background:var(--primary);color:#fff;border:none;border-radius:50%;box-shadow:0 3px 8px rgba(0,0,0,0.15);cursor:pointer;transition:transform var(--transition)}
-  #shrinkBtn:hover{transform:scale(1.1)}
-  /*──────────────── HEADER ─────────────────*/
-  header{position:fixed;top:0;left:var(--sidebar-w);right:0;height:var(--header-h);background:var(--surface);border-bottom:1px solid #e1e8ed;display:flex;align-items:center;justify-content:space-between;padding:0 var(--padding);z-index:1000;transition:left var(--transition)}
-  aside.collapsed~header{left:var(--sidebar-collapsed-w)}
-  header h1{font-size:1.5rem;font-weight:600;color:var(--text);margin-left:.5rem}
-  header .hamburger,header .theme-toggle{font-size:1.4rem;color:var(--primary);cursor:pointer;transition:transform var(--transition);margin-left:1rem}
-  header .hamburger:hover,header .theme-toggle:hover{transform:scale(1.1)}
-  @media(max-width:1024px){header .hamburger{display:inline-block;z-index:1001}}
-  /*──────────────── MAIN CONTENT ──────────────*/
-  main{flex:1;padding:calc(var(--header-h)+var(--padding)) var(--padding) var(--padding);background:var(--bg)}
-  /*──────────────── MODULE CARDS ──────────────*/
-  .module{background:var(--surface);border-radius:var(--radius);padding:var(--padding);box-shadow:0 2px 8px rgba(0,0,0,0.03);margin-bottom:1.5rem;transition:transform var(--transition),box-shadow var(--transition)}
-  .module:hover{transform:translateY(-4px);box-shadow:0 4px 16px rgba(0,0,0,0.06)}
-  .module h2{display:flex;align-items:center;gap:.75rem;margin-bottom:.75rem;font-size:1.25rem;color:var(--primary)}
-  .module p.desc{font-size:.95rem;color:var(--muted);margin-bottom:1rem}
-  /*──────────────── FORMS & INPUTS ───────────*/
-  .module form{display:flex;flex-wrap:wrap;gap:1rem;align-items:flex-end}
-  .module label{display:none}
-  .module input,.module select,.module textarea{flex:1 1 200px;padding:.75rem;border:1.5px solid #d1dce5;border-radius:var(--radius);background:var(--bg);color:var(--text);font-size:.95rem;transition:border-color var(--transition),box-shadow var(--transition)}
-  .module input:focus,.module select:focus,.module textarea:focus{outline:none;border-color:var(--primary);box-shadow:0 0 8px var(--primary-20)}
-  .module .hint{width:100%;font-size:.85rem;color:var(--muted);margin-top:.25rem}
-  /*──────────────── BUTTONS ─────────────────*/
-  button,button[type="submit"]{background:var(--primary);color:#fff;padding:.7rem 1.4rem;border:none;border-radius:var(--radius);font-size:.95rem;font-weight:600;cursor:pointer;box-shadow:0 3px 10px rgba(0,0,0,0.1);transition:transform var(--transition),box-shadow var(--transition)}
-  button:disabled{opacity:.6;cursor:not-allowed}
-  button:hover:not(:disabled){transform:scale(1.03);box-shadow:0 5px 14px rgba(0,0,0,0.12)}
-  /*──────────────── RESPONSE PANELS ───────────*/
-  .response{background:var(--primary-20);border-left:4px solid var(--primary);padding:var(--padding);border-radius:var(--radius);position:relative;margin-top:1rem}
-  .response[aria-live]{outline:none}
-  .response .close-btn{position:absolute;top:.5rem;right:.5rem;width:24px;height:24px;background:var(--primary);color:#fff;border-radius:50%;display:none;align-items:center;justify-content:center;cursor:pointer}
-  .response.show-close .close-btn{display:flex}
-  /*──────────────── SPINNER ─────────────────*/
-  .spinner{display:inline-block;width:1em;height:1em;border:2px solid var(--primary);border-top-color:transparent;border-radius:50%;animation:spin .8s linear infinite;vertical-align:middle;margin-left:.25em}
-  @keyframes spin{to{transform:rotate(360deg)}}  
-  /*──────────────── CHATBOX ─────────────────*/
-  #chatBox{width:100%;min-height:200px;max-height:300px;padding:var(--padding);background:var(--bg);border:1px solid #d1dce5;border-radius:var(--radius);overflow-y:auto;margin-bottom:.5rem;outline:none}
-  /*──────────────── CHARTS GRID ─────────────*/
-  .charts{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:1.5rem}
-  .chart-card{background:var(--surface);border-radius:var(--radius);padding:var(--padding);box-shadow:0 2px 8px rgba(0,0,0,0.03)}
-  .chart-card h2{font-size:1.1rem;margin-bottom:.75rem;color:var(--primary)}
-  .chart-card canvas{width:100%!important;min-height:250px!important;margin:0 auto!important;display:block}
-  /*──────────────── RESPONSIVE ───────────────*/
-  @media(max-width:1024px){
-    aside{position:fixed;transform:translateX(-100%);z-index:900}
-    aside.open{transform:translateX(0)}
-    header{left:0!important}
-    main{padding:calc(var(--header-h)+var(--padding)) var(--padding)}
-    #shrinkBtn{display:none}
+  html.dark {
+    --bg: var(--bg-dark);
+    --surface: var(--surface-dark);
+    --text: var(--text-dark);
+    --muted: var(--muted-dark);
   }
-  @media(max-width:640px){
-    .module form{flex-direction:column}
-    .module input,.module select,.module textarea{flex:1 1 100%;font-size:.9rem;padding:.5rem .75rem;margin-bottom:.5rem}
-    header .hamburger,header .theme-toggle{font-size:1.6rem}
+
+  /*────────────────── SIDEBAR ──────────────────*/
+  aside {
+    flex: 0 0 var(--sidebar-w);
+    position: sticky; top: 0; height: 100vh;
+    background: var(--surface);
+    box-shadow: 2px 0 12px rgba(0,0,0,0.05);
+    transition: flex var(--transition);
+    overflow: hidden;
   }
+  aside.collapsed { flex: 0 0 var(--sidebar-collapsed-w); }
+  aside .brand {
+    display:flex; align-items:center; gap:.75rem;
+    padding:var(--padding); font-size:1.4rem; font-weight:700; color:var(--primary);
+  }
+  aside nav { margin-top:2rem; }
+  aside nav a {
+    display:flex; align-items:center; gap:1rem; padding:.75rem var(--padding);
+    border-radius:var(--radius); color:var(--text); font-weight:500;
+    text-decoration:none; transition:background var(--transition),padding-left var(--transition);
+  }
+  aside nav a i { font-size:1.2rem; }
+  aside nav a:hover, aside nav a.active {
+    background:var(--primary-20); color:var(--primary);
+    padding-left:calc(var(--padding)+.5rem);
+  }
+  aside.collapsed nav a span { display:none; }
+  #shrinkBtn {
+    position:absolute; bottom:var(--padding); left:-18px; width:36px; height:36px;
+    background:var(--primary); color:#fff; border:none; border-radius:50%;
+    box-shadow:0 3px 8px rgba(0,0,0,0.15); cursor:pointer; transition:transform var(--transition);
+  }
+  #shrinkBtn:hover { transform:scale(1.1); }
+
+  /*────────────────── HEADER ──────────────────*/
+  header {
+    position:fixed; top:0; left:var(--sidebar-w); right:0; height:var(--header-h);
+    background:var(--surface); border-bottom:1px solid #e1e8ed;
+    display:flex; align-items:center; justify-content:space-between;
+    padding:0 var(--padding); z-index:1000; transition:left var(--transition);
+  }
+  aside.collapsed ~ header { left:var(--sidebar-collapsed-w); }
+  header h1 { font-size:1.5rem; font-weight:600; color:var(--text); }
+  header .hamburger, header .theme-toggle {
+    font-size:1.4rem; color:var(--primary); cursor:pointer; transition:transform var(--transition);
+  }
+  header .hamburger:hover, header .theme-toggle:hover { transform:scale(1.1); }
+  @media (max-width:1024px) {
+    header .hamburger { display:inline-block; z-index:1001; }
+  }
+
+  /*────────────────── MAIN ──────────────────*/
+  main {
+    flex:1; padding:calc(var(--header-h)+var(--padding)) var(--padding) var(--padding);
+    background:var(--bg);
+  }
+
+  /*────────────────── MODULES ──────────────────*/
+  .module {
+    background:var(--surface); border-radius:var(--radius);
+    padding:var(--padding); box-shadow:0 2px 8px rgba(0,0,0,0.03);
+    margin-bottom:1.5rem; transition:transform var(--transition),box-shadow var(--transition);
+  }
+  .module:hover { transform:translateY(-4px); box-shadow:0 4px 16px rgba(0,0,0,0.06); }
+  .module h2 {
+    display:flex; align-items:center; gap:.75rem; margin-bottom:.75rem;
+    font-size:1.25rem; color:var(--primary);
+  }
+  .module p.desc { font-size:.95rem; color:var(--muted); margin-bottom:1rem; }
+
+  /*────────────────── FORMS & INPUTS ──────────────────*/
+  .module form { display:flex; flex-wrap:wrap; gap:1rem; align-items:flex-end; }
+  .module input, .module select, .module textarea {
+    flex:1 1 200px; padding:.75rem; border:1.5px solid #d1dce5;
+    border-radius:var(--radius); background:var(--bg); color:var(--text);
+    font-size:.95rem; transition:border-color var(--transition),box-shadow var(--transition);
+  }
+  .module input:focus, .module select:focus, .module textarea:focus {
+    outline:none; border-color:var(--primary); box-shadow:0 0 8px var(--primary-20);
+  }
+  .hint { width:100%; font-size:.85rem; color:var(--muted); margin-top:.25rem; }
+
+  /*────────────────── BUTTONS ──────────────────*/
+  button {
+    background:var(--primary); color:#fff; padding:.7rem 1.4rem; border:none;
+    border-radius:var(--radius); font-size:.95rem; font-weight:600;
+    cursor:pointer; box-shadow:0 3px 10px rgba(0,0,0,0.1);
+    transition:transform var(--transition),box-shadow var(--transition);
+  }
+  button:hover { transform:scale(1.03); box-shadow:0 5px 14px rgba(0,0,0,0.12); }
+
+  /*────────────────── RESPONSE PANELS ──────────────────*/
+  .response {
+    background:var(--primary-20); border-left:4px solid var(--primary);
+    padding:var(--padding); border-radius:var(--radius); margin-top:1rem;
+    position:relative; aria-live:polite;
+  }
+  .response .close-btn {
+    position:absolute; top:.5rem; right:.5rem; width:24px; height:24px;
+    background:var(--primary); color:#fff; border-radius:50%; display:flex;
+    align-items:center; justify-content:center; cursor:pointer;
+  }
+  .response.show-close .close-btn { display:flex; }
+
+  /*────────────────── HERO ──────────────────*/
+  #hero {
+    display:flex; flex-direction:column; align-items:center; text-align:center;
+    padding:4rem 1rem; background:linear-gradient(135deg,#e8f5f1 0%,#f5fafb 100%);
+    margin-bottom:2rem; border-radius:var(--radius);
+  }
+  #hero h1 { font-size:2.5rem; color:var(--primary); margin-bottom:1rem; }
+  #hero p { font-size:1.1rem; color:var(--text); margin-bottom:1.5rem; }
+  #hero .cta { display:flex; gap:1rem; flex-wrap:wrap; justify-content:center; }
+  #hero .cta button { min-width:160px; }
+  #hero video { margin-top:2rem; max-width:600px; width:100%; border-radius:var(--radius); }
+
+  /*────────────────── FOOTER ──────────────────*/
+  footer {
+    background:var(--surface); padding:var(--padding);
+    text-align:center; font-size:.85rem; color:var(--muted);
+    margin-top:2rem; border-top:1px solid #e1e8ed;
+  }
+  footer a { color:var(--primary); text-decoration:none; margin:0 .5rem; }
+
+  /*────────────────── RESPONSIVE ──────────────────*/
+  @media (max-width:1024px) {
+    aside { position:fixed; transform:translateX(-100%); z-index:900; }
+    aside.open { transform:translateX(0); }
+    header { left:0!important; }
+    #hero { padding:3rem 1rem; }
+  }
+  @media (max-width:640px) {
+    .module form { flex-direction:column; }
+    header .hamburger, header .theme-toggle { font-size:1.6rem; }
+  }
+
+  /*────────────────── SPINNER ──────────────────*/
+  .spinner {
+    display:inline-block; width:1em; height:1em; border:2px solid var(--primary);
+    border-top-color:transparent; border-radius:50%; animation:spin .8s linear infinite;
+    vertical-align:middle; margin-left:.25em;
+  }
+  @keyframes spin { to{transform:rotate(360deg);} }
+
   </style>
 </head>
+
 <body>
-  <!-- SIDEBAR / NAV -->
+
+  <!-- ONBOARDING MODAL -->
+  <div id="onboardModal" role="dialog" aria-modal="true" style="position:fixed;inset:0;background:rgba(0,0,0,0.5);display:flex;align-items:center;justify-content:center;">
+    <div style="background:var(--surface);padding:2rem;border-radius:var(--radius);max-width:400px;text-align:center;">
+      <h2>Welcome to Vitra AI Herbal Hub</h2>
+      <p>Empowering Traditional Healing with Artificial Intelligence.<br/>Explore plant IDs, custom blends, and more.</p>
+      <button onclick="document.getElementById('onboardModal').style.display='none'">Get Started</button>
+    </div>
+  </div>
+
+  <!-- SIDEBAR -->
   <aside id="sidebar">
     <div class="brand"><i class="fas fa-leaf"></i><span>Vitra AI</span></div>
-    <nav aria-label="Main menu">
-      <a href="#" class="active"><i class="fas fa-seedling"></i><span>Herbal Medicine</span></a>
-      <a href="#"><i class="fas fa-brain"></i><span>Psych & Mental</span></a>
-      <a href="#"><i class="fas fa-utensils"></i><span>Dietetics</span></a>
-      <a href="#"><i class="fas fa-pills"></i><span>E-Pharmacy</span></a>
-      <a href="#"><i class="fas fa-calendar-check"></i><span>Consult Booking</span></a>
-      <a href="#"><i class="fas fa-chart-line"></i><span>Analytics</span></a>
-      <hr/>
-      <a href="#" id="loginLink"><i class="fas fa-user"></i><span>Login</span></a>
-      <a href="#"><i class="fas fa-cog"></i><span>Settings</span></a>
+    <nav role="navigation">
+      <a href="#hero" class="active"><i class="fas fa-home"></i><span>Home</span></a>
+      <a href="#hero–identifier"><i class="fas fa-camera"></i><span>Herb Identifier</span></a>
+      <a href="#hero–symptom"><i class="fas fa-notes-medical"></i><span>Symptom Checker</span></a>
+      <a href="#hero–cultural"><i class="fas fa-globe"></i><span>Cultural Knowledge</span></a>
+      <a href="#hero–safety"><i class="fas fa-shield-alt"></i><span>Safety Checker</span></a>
+      <a href="#hero–chat"><i class="fas fa-comments"></i><span>AI Herbalist Chat</span></a>
+      <a href="#research"><i class="fas fa-book-reader"></i><span>Research Summaries</span></a>
+      <a href="#inventory"><i class="fas fa-warehouse"></i><span>Inventory Forecast</span></a>
+      <a href="#genetics"><i class="fas fa-dna"></i><span>Genetics Match</span></a>
+      <a href="#dosage"><i class="fas fa-calculator"></i><span>Dosage Calculator</span></a>
+      <a href="#interaction"><i class="fas fa-exchange-alt"></i><span>Interaction Checker</span></a>
+      <a href="#addons"><i class="fas fa-plus-circle"></i><span>Add-Ons</span></a>
+      <a href="#analytics"><i class="fas fa-chart-line"></i><span>Analytics</span></a>
+      <a href="#roi"><i class="fas fa-dollar-sign"></i><span>ROI Calculator</span></a>
+      <a href="#about"><i class="fas fa-cogs"></i><span>About / Tech</span></a>
+      <a href="#contact"><i class="fas fa-envelope"></i><span>Contact</span></a>
+      <div style="position:absolute;bottom:1rem;width:100%;text-align:center;">
+        <button id="shrinkBtn"><i class="fas fa-angle-double-left"></i></button>
+      </div>
     </nav>
-    <button id="shrinkBtn"><i class="fas fa-angle-double-left"></i></button>
   </aside>
 
-  <!-- HEADER & GLOBAL SEARCH -->
+  <!-- HEADER -->
   <header>
-    <div style="display:flex;align-items:center">
-      <i id="hamburger" class="fas fa-bars hamburger" aria-label="Toggle nav"></i>
+    <div>
+      <i id="hamburger" class="fas fa-bars hamburger" aria-label="Toggle navigation"></i>
       <h1>Herbal Medicine Hub</h1>
     </div>
-    <div style="display:flex;align-items:center">
-      <input id="globalSearch" type="search" placeholder="Search…"
-             style="padding:.5rem;border:1px solid #ccc;border-radius:var(--radius)"
-             aria-label="Global search"/>
+    <div>
       <i id="themeToggle" class="fas fa-moon theme-toggle" aria-label="Toggle theme"></i>
     </div>
   </header>
 
   <!-- MAIN CONTENT -->
   <main role="main">
-    <!-- Onboarding Modal -->
-    <div id="onboardModal" style="position:fixed;top:0;left:0;width:100%;height:100%;
-         background:rgba(0,0,0,0.6);display:flex;align-items:center;justify-content:center;
-         z-index:2000;">
-      <div style="background:#fff;padding:2rem;border-radius:var(--radius);max-width:400px;
-           text-align:center;position:relative;">
-        <h2>Welcome to Herbal Medicine Hub</h2>
-        <p>Your gateway to AI-powered traditional healing. Get started by exploring our tools below.</p>
-        <button id="closeOnboard">Get Started</button>
-      </div>
-    </div>
-
     <!-- HERO -->
-    <section class="module" style="text-align:center;background:var(--primary-20);
-            border-radius:var(--radius);padding:2rem;margin-bottom:2rem;">
-      <h2 style="font-size:2rem;color:var(--primary)">Empowering Traditional Healing with AI</h2>
-      <div style="margin:1rem 0;">
-        <!-- video/animation placeholder -->
-        <div style="width:100%;max-width:600px;height:300px;background:#ddd;margin:0 auto;
-                    display:flex;align-items:center;justify-content:center;border-radius:var(--radius)">
-          <p>Intro Animation / Video</p>
-        </div>
+    <section id="hero">
+      <h1>Empowering Traditional Healing with Artificial Intelligence</h1>
+      <p>Discover, personalize, and manage herbal remedies with AI-powered tools—designed for practitioners and enthusiasts alike.</p>
+      <div class="cta">
+        <button onclick="scrollToSection('hero–identifier')">Try Herb Identifier</button>
+        <button onclick="scrollToSection('hero–chat')">Chat with Herbalist</button>
       </div>
-      <button onclick="scrollToSection('herbIdentifier')">Try Herb Identifier</button>
-      <button onclick="scrollToSection('chatModule')">Chat with Herbalist</button>
+      <video src="path/to/intro.mp4" controls></video>
     </section>
 
-    <!-- 1. Herb Identifier -->
-    <section id="herbIdentifier" class="module">
-      <h2><i class="fas fa-camera"></i> Herb Identifier</h2>
-      <p class="desc">Upload a photo of a plant and let AI identify it.</p>
-      <form id="identifyForm">
-        <input type="file" id="identifyUpload" accept="image/*" required/>
-        <div id="identifyPreview" style="margin:1rem 0;"></div>
-        <button type="submit">Identify</button>
-      </form>
-      <div id="identifyResult" class="response" aria-live="polite" hidden>
-        <button class="close-btn">×</button>
-        <h3 id="identifiedName">Our AI thinks this is…</h3>
-        <p><strong>Scientific name:</strong> <span id="sciName"></span></p>
-        <p><strong>Uses:</strong> <span id="uses"></span></p>
-        <p><strong>Cautions:</strong> <span id="cautions"></span></p>
-        <p><strong>Regions found:</strong> <span id="regions"></span></p>
-        <button id="addShelf">Add to My Herb Shelf</button>
-      </div>
-    </section>
-
-    <!-- 2. Symptom Checker -->
-    <section id="symptomChecker" class="module">
-      <h2><i class="fas fa-notes-medical"></i> Symptom Checker</h2>
-      <p class="desc">Enter your symptoms and get herbal recommendations.</p>
-      <form id="symptomForm">
-        <textarea id="symptomInput" rows="2" placeholder="What symptoms are you experiencing?" required></textarea>
-        <button type="submit">Check</button>
-      </form>
-      <div id="symptomResult" class="response" aria-live="polite" hidden>
-        <button class="close-btn">×</button>
-        <p id="symptomOutput"></p>
-        <p class="disclaimer"><em>See a professional if symptoms are severe.</em></p>
-      </div>
-    </section>
-
-    <!-- 3. Cultural Knowledge -->
-    <section id="culturalKnowledge" class="module">
-      <h2><i class="fas fa-globe-africa"></i> Cultural Knowledge</h2>
-      <p class="desc">Browse indigenous herbal wisdom by region.</p>
-      <div style="display:flex;gap:1rem;flex-wrap:wrap;">
-        <button data-region="ghana">Ghanaian Herbal Wisdom</button>
-        <button data-region="southafrica">South African Remedies</button>
-        <button data-region="eastafrica">East African Medicinal Plants</button>
-      </div>
-      <div id="cultureCards" style="margin-top:1rem;"></div>
-    </section>
-
-    <!-- 4. Safety Checker -->
-    <section id="safetyChecker" class="module">
-      <h2><i class="fas fa-shield-alt"></i> Safety Checker</h2>
-      <p class="desc">Check for dangerous herb or herb-drug interactions.</p>
-      <form id="safetyForm">
-        <select id="safetyA" required> <!-- herb list --> </select>
-        <select id="safetyB" required> <!-- herb list --> </select>
-        <button type="submit">Check</button>
-      </form>
-      <div id="safetyResult" class="response" aria-live="polite" hidden>
-        <button class="close-btn">×</button>
-        <p id="safetyOutput"></p>
-      </div>
-    </section>
-
-    <!-- 5. AI Herbalist Chat -->
-    <section id="chatModule" class="module">
-      <h2><i class="fas fa-comments"></i> AI Herbalist Chat</h2>
-      <p class="desc">Ask our AI herbalist anything about remedies.</p>
-      <div id="chatBox" tabindex="0" aria-live="polite"></div>
-      <div style="display:flex;gap:.5rem;margin-top:.5rem;">
-        <input id="chatInput" placeholder="Type your question…" aria-label="Chat input"/>
-        <button id="sendChat"><i class="fas fa-paper-plane"></i></button>
-      </div>
-      <div id="chatHint" class="hint" hidden>Bot is thinking… <span class="spinner"></span></div>
-    </section>
-
-    <!-- 6. Add-On: Login -->
-    <section id="loginSection" class="module">
-      <h2><i class="fas fa-user-lock"></i> Login / Role Access</h2>
-      <p class="desc">Secure portal for patients, pharmacists, admins.</p>
-      <form id="loginForm">
-        <input type="email" id="loginEmail" placeholder="Email" required/>
-        <input type="password" id="loginPass" placeholder="Password" required/>
-        <button type="submit">Login</button>
-      </form>
-      <div id="loginError" class="response" hidden><button class="close-btn">×</button><p>Invalid credentials.</p></div>
-    </section>
-
-    <!-- 7. Add-On: Blog -->
-    <section id="blogSection" class="module">
-      <h2><i class="fas fa-blog"></i> AI-Generated Blog</h2>
-      <p class="desc">Weekly herbal health articles.</p>
-      <div id="blogPosts"></div>
-    </section>
-
-    <!-- 8. Add-On: Voice Assistant -->
-    <section id="voiceAssistant" class="module">
-      <h2><i class="fas fa-microphone"></i> Voice Assistant</h2>
-      <p class="desc">Click-to-talk for hands-free use.</p>
-      <button id="voiceBtn"><i class="fas fa-microphone"></i> Speak</button>
-      <p id="voiceTranscription"></p>
-    </section>
-
-    <!-- 9. Executive Analytics & KPI Dashboard -->
+    <!-- EXECUTIVE ANALYTICS DASHBOARD -->
     <section id="analytics" class="module">
-      <h2><i class="fas fa-chart-pie"></i> Executive Dashboard</h2>
+      <h2><i class="fas fa-chart-line"></i> Executive Analytics & KPIs</h2>
+      <p class="desc">Real-time adoption, efficacy, supply impact, and financial ROI metrics.</p>
       <div class="charts">
-        <div class="chart-card"><h2>Adoption Metrics</h2><canvas id="chartAdopt"></canvas></div>
+        <div class="chart-card"><h2>Adoption Metrics</h2><canvas id="chartAdoption"></canvas></div>
         <div class="chart-card"><h2>Efficacy Outcomes</h2><canvas id="chartEfficacy"></canvas></div>
         <div class="chart-card"><h2>Supply Impact</h2><canvas id="chartSupply"></canvas></div>
         <div class="chart-card"><h2>Financial ROI</h2><canvas id="chartROI"></canvas></div>
@@ -268,329 +259,514 @@
       <button onclick="exportAnalytics()">Export CSV</button>
     </section>
 
-    <!-- 10. Business Case & ROI Calculator -->
-    <section id="roiCalc" class="module">
-      <h2><i class="fas fa-calculator"></i> ROI Calculator</h2>
-      <form id="roiForm">
-        <input type="number" id="avgScripts" placeholder="Avg monthly scripts" required/>
-        <input type="number" id="avgHerbCost" placeholder="Avg herb cost ($)" required/>
+    <!-- 1. Herb Identifier -->
+    <section id="hero–identifier" class="module">
+      <h2><i class="fas fa-camera"></i> AI Plant Scanner</h2>
+      <p class="desc">Upload a photo; our AI thinks this is <strong>Moringa oleifera</strong> (placeholder).</p>
+      <form id="iden-form">
+        <input aria-label="Upload plant image" type="file" accept="image/*" required onchange="previewImage(this)"/>
+        <button type="submit">Identify</button>
+        <div class="hint">Use a clear close-up of a leaf or flower.</div>
+      </form>
+      <img id="idenPreview" alt="" style="max-width:200px;margin-top:1rem;display:none;"/>
+      <div id="idenResult" class="response" hidden>
+        <button class="close-btn" aria-label="Close result">×</button>
+        <div class="result-content">
+          <strong>Scientific Name:</strong> Moringa oleifera<br/>
+          <strong>Uses:</strong> Anti-inflammatory, antioxidant<br/>
+          <strong>Cautions:</strong> May lower blood pressure<br/>
+          <strong>Regions Found:</strong> West Africa, Asia<br/>
+          <button onclick="addToShelf('Moringa oleifera')">Add to My Herb Shelf</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- 2. Symptom Checker (AI Diagnostics) -->
+    <section id="hero–symptom" class="module">
+      <h2><i class="fas fa-notes-medical"></i> Symptom Checker</h2>
+      <p class="desc">What symptoms are you experiencing?</p>
+      <form id="sym-form">
+        <textarea aria-label="Describe symptoms" id="symInput" rows="2" placeholder="e.g. headache, nausea" required></textarea>
+        <button type="submit">Analyze</button>
+      </form>
+      <div id="symResult" class="response" hidden>
+        <button class="close-btn" aria-label="Close result">×</button>
+        <div class="result-content"></div>
+        <p style="font-size:.85rem;color:var(--muted);"><em>See a professional if symptoms are severe or persistent.</em></p>
+      </div>
+    </section>
+
+    <!-- 3. Cultural Knowledge -->
+    <section id="hero–cultural" class="module">
+      <h2><i class="fas fa-globe"></i> Cultural Knowledge</h2>
+      <p class="desc">Browse traditional herbal wisdom by region.</p>
+      <div style="display:flex;gap:1rem;flex-wrap:wrap">
+        <div style="flex:1;min-width:200px;border:1px solid #d1dce5;border-radius:var(--radius);padding:var(--padding)">
+          <h3>Ghanaian Remedies</h3><p>Neem, Moringa, Hibiscus...</p>
+        </div>
+        <div style="flex:1;min-width:200px;border:1px solid #d1dce5;border-radius:var(--radius);padding:var(--padding)">
+          <h3>South African Wisdom</h3><p>Rooibos, Buchu, African Potato...</p>
+        </div>
+        <div style="flex:1;min-width:200px;border:1px solid #d1dce5;border-radius:var(--radius);padding:var(--padding)">
+          <h3>East African Plants</h3><p>Devil’s Claw, Aloe Vera, etc.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- 4. Safety Checker -->
+    <section id="hero–safety" class="module">
+      <h2><i class="fas fa-shield-alt"></i> Safety Checker</h2>
+      <p class="desc">Enter two items (herbs or medications) to check for dangerous interactions.</p>
+      <form id="safety-form">
+        <input aria-label="Item A" id="safetyA" placeholder="e.g. Turmeric" required/>
+        <input aria-label="Item B" id="safetyB" placeholder="e.g. Warfarin" required/>
+        <button type="submit">Check</button>
+        <div class="hint">Pick two distinct items.</div>
+      </form>
+      <div id="safetyResult" class="response" hidden>
+        <button class="close-btn" aria-label="Close result">×</button>
+        <p><strong style="color:red">Moderate Interaction:</strong> Turmeric may potentiate anticoagulants.</p>
+      </div>
+    </section>
+
+    <!-- 5. AI Herbalist Chat -->
+    <section id="hero–chat" class="module">
+      <h2><i class="fas fa-comments"></i> AI Herbalist Chat</h2>
+      <p class="desc">Ask about herbal remedies:</p>
+      <div id="chatBox" aria-live="polite" style="background:var(--bg);border:1px solid #d1dce5;border-radius:var(--radius);padding:var(--padding);min-height:150px;max-height:300px;overflow-y:auto;"></div>
+      <div style="display:flex;gap:.5rem;margin-top:.5rem;">
+        <input aria-label="Type your question" id="chatInput" placeholder="What’s good for menstrual cramps?" />
+        <button id="sendChat"><i class="fas fa-paper-plane"></i></button>
+      </div>
+      <div id="chatHint" class="hint" hidden>Bot is thinking… <span class="spinner"></span></div>
+    </section>
+
+    <!-- 6. Personalized Formulations -->
+    <section id="formulations" class="module">
+      <h2><i class="fas fa-user-shield"></i> Personalized Formulations</h2>
+      <p class="desc">Pick herbs, age & weight for a custom blend.</p>
+      <form id="pf-form">
+        <select id="pfHerbs" multiple size="5" aria-label="Select herbs">
+          <option>Ashwagandha</option><option>Astragalus</option><option>Basil</option><option>Chamomile</option>
+          <option>Echinacea</option><option>Ginkgo Biloba</option><option>Ginseng</option><option>Lavender</option>
+          <option>Licorice</option><option>Milk Thistle</option><option>Neem</option><option>Oregano</option>
+          <option>Peppermint</option><option>Rosemary</option><option>St. John’s Wort</option><option>Turmeric</option>
+          <option>Valerian</option><option>Holy Basil</option><option>Green Tea</option><option>Aloe Vera</option>
+        </select>
+        <input id="pfAge" type="number" min="1" max="120" placeholder="Age (years)" aria-label="Age"/>
+        <input id="pfWeight" type="number" min="10" max="300" placeholder="Weight (kg)" aria-label="Weight"/>
+        <button type="submit">Generate</button>
+        <div class="hint">Hold Ctrl/Cmd to select multiple herbs.</div>
+      </form>
+      <div id="pfResult" class="response" hidden>
+        <button class="close-btn" aria-label="Close result">×</button>
+        <div class="result-content"></div>
+        <p style="font-size:.85rem;color:var(--muted);"><em>Formulation meets dosage safety limits.</em></p>
+      </div>
+    </section>
+
+    <!-- 7. Research Summaries -->
+    <section id="research" class="module">
+      <h2><i class="fas fa-book-reader"></i> Research Summaries</h2>
+      <p class="desc">Paste study titles or keywords for a concise summary.</p>
+      <form id="research-form">
+        <input id="researchQuery" placeholder="e.g. ‘Ashwagandha anxiety RCT’" aria-label="Research query"/>
+        <button type="submit">Summarize</button>
+        <div class="hint">Include herb and focus area.</div>
+      </form>
+      <div id="researchResults" class="response" hidden>
+        <button class="close-btn" aria-label="Close result">×</button>
+        <div class="result-content"></div>
+        <a href="#" target="_blank">Read Original Study</a>
+      </div>
+    </section>
+
+    <!-- 8. Inventory Forecast -->
+    <section id="inventory" class="module">
+      <h2><i class="fas fa-warehouse"></i> Inventory Forecast</h2>
+      <p class="desc">Predict stock needs weeks ahead.</p>
+      <form id="inventory-form">
+        <select id="forecastHerb" aria-label="Select herb for forecast">
+          <option>Turmeric</option><option>Ginkgo Biloba</option><option>Ashwagandha</option><option>Echinacea</option>
+          <option>Valerian</option><option>Chamomile</option><option>Lavender</option><option>Basil</option>
+        </select>
+        <input id="forecastPeriod" type="number" min="1" max="52" value="4" placeholder="Weeks ahead" aria-label="Forecast period"/>
+        <button type="submit">Forecast</button>
+        <div class="hint">Choose 1–52 weeks into the future.</div>
+      </form>
+      <div id="inventoryResult" class="response" hidden>
+        <button class="close-btn" aria-label="Close result">×</button>
+        <div class="result-content"></div>
+      </div>
+    </section>
+
+    <!-- 9. Genetics Match -->
+    <section id="genetics" class="module">
+      <h2><i class="fas fa-dna"></i> Genetics Match</h2>
+      <p class="desc">Upload your genetic report for tailored herb recommendations.</p>
+      <form id="genetics-form">
+        <input id="geneticUpload" type="file" accept=".csv,.json" aria-label="Upload genetic report"/>
+        <button type="submit">Analyze</button>
+        <div class="hint">CSV or JSON with SNP data is ideal.</div>
+      </form>
+      <div id="geneticResult" class="response" hidden>
+        <button class="close-btn" aria-label="Close result">×</button>
+        <div class="result-content"></div>
+        <p style="font-size:.85rem;color:var(--muted);"><em>Tier 1: evidence-based, Tier 2: emerging science.</em></p>
+      </div>
+    </section>
+
+    <!-- 10. Dosage Calculator -->
+    <section id="dosage" class="module">
+      <h2><i class="fas fa-calculator"></i> Dosage Calculator</h2>
+      <p class="desc">Get daily dosage advice based on weight, symptom, and extract form.</p>
+      <form id="dose-form">
+        <input id="weight" type="number" min="10" max="300" placeholder="Weight (kg)" aria-label="Weight"/>
+        <input id="symptom" placeholder="Symptom (e.g. headache)" aria-label="Symptom"/>
+        <select id="formType" aria-label="Select extract type">
+          <option value="powder">Powder</option>
+          <option value="tincture">Tincture</option>
+          <option value="capsule">Capsule</option>
+        </select>
+        <button type="submit">Calculate</button>
+        <div class="hint">Specify extract form for accuracy.</div>
+      </form>
+      <div id="dosageResult" class="response" hidden>
+        <button class="close-btn" aria-label="Close result">×</button>
+        <div class="result-content"></div>
+      </div>
+    </section>
+
+    <!-- 11. Interaction Checker -->
+    <section id="interaction" class="module">
+      <h2><i class="fas fa-exchange-alt"></i> Interaction Checker</h2>
+      <p class="desc">Select two herbs to check for interactions.</p>
+      <form id="int-form">
+        <select id="herbA" aria-label="Herb A">
+          <option>Turmeric</option><option>Ashwagandha</option><option>Ginkgo Biloba</option><option>St. John’s Wort</option>
+        </select>
+        <select id="herbB" aria-label="Herb B">
+          <option>Turmeric</option><option>Ashwagandha</option><option>Ginkgo Biloba</option><option>St. John’s Wort</option>
+        </select>
+        <button type="submit">Check</button>
+        <div class="hint">Pick two distinct herbs.</div>
+      </form>
+      <div id="interactionResult" class="response" hidden>
+        <button class="close-btn" aria-label="Close result">×</button>
+        <p><strong style="color:orange">Mild Interaction:</strong> St. John’s Wort may reduce efficacy of certain drugs.</p>
+      </div>
+    </section>
+
+    <!-- ADD-ONS -->
+    <section id="addons" class="module">
+      <h2><i class="fas fa-plus-circle"></i> Additional Features</h2>
+      <ul>
+        <li><strong>User Login/Signup</strong> to save herb history & personalized plans.</li>
+        <li><strong>Weekly AI-Generated Blog</strong> on herbal insights.</li>
+        <li><strong>Voice Assistant</strong> for elderly users (click-to-talk).</li>
+      </ul>
+    </section>
+
+    <!-- ROI CALCULATOR -->
+    <section id="roi" class="module">
+      <h2><i class="fas fa-dollar-sign"></i> Business Insights & ROI Calculator</h2>
+      <p class="desc">Estimate cost savings and revenue uplift from AI adoption.</p>
+      <form id="roi-form">
+        <input id="roiRx" type="number" placeholder="Avg. monthly prescriptions" required aria-label="Monthly prescriptions"/>
+        <input id="roiCost" type="number" placeholder="Avg. herb cost ($)" required aria-label="Average herb cost"/>
         <button type="submit">Calculate</button>
       </form>
-      <div id="roiResult" class="response" aria-live="polite" hidden>
-        <button class="close-btn">×</button>
-        <p id="roiOutput"></p>
+      <div id="roiResult" class="response" hidden>
+        <button class="close-btn" aria-label="Close result">×</button>
+        <div class="result-content"></div>
       </div>
     </section>
 
-    <!-- 11. API & EHR Integration -->
-    <section id="ehrIntegration" class="module">
-      <h2><i class="fas fa-plug"></i> EHR & API Integration</h2>
-      <button id="importEHR">Import from HospitalX</button>
-      <button id="sendToPharmacy">Add to E-Pharmacy Cart</button>
-      <div style="margin-top:1rem;">
-        <label>Webhook URL <input id="webhookUrl" type="url"/></label>
-        <button id="saveWebhook">Save</button>
-      </div>
+    <!-- ARCHITECTURE / TECH -->
+    <section id="about" class="module">
+      <h2><i class="fas fa-cogs"></i> Architecture & Data Flow</h2>
+      <p class="desc">High-level overview of our AI platform components.</p>
+      <img src="path/to/architecture.svg" alt="System Architecture Diagram" style="width:100%;border-radius:var(--radius);"/>
+      <p>1. Client → 2. API Gateway → 3. AI Microservices → 4. Data Lake → 5. Analytics → 6. Admin Dashboard</p>
+      <p><a href="#privacy">Privacy Policy</a> | <a href="#terms">Terms of Use</a></p>
     </section>
 
-    <!-- 12. Architecture & Data-Flow Diagram -->
-    <section id="architecture" class="module">
-      <h2><i class="fas fa-project-diagram"></i> Tech Architecture</h2>
-      <!-- placeholder SVG or image -->
-      <div style="background:#eee;text-align:center;padding:2rem;border-radius:var(--radius)">
-        <p>Client → API Gateway → AI Microservices → Data Lake → Analytics → Admin Dashboard</p>
-      </div>
+    <!-- CONTACT & DISCLAIMER -->
+    <section id="contact" class="module">
+      <h2><i class="fas fa-envelope"></i> Contact & Compliance</h2>
+      <p class="desc">For partnerships, audits, or support.</p>
+      <form id="contact-form">
+        <input type="email" placeholder="Your email" required aria-label="Email"/>
+        <textarea placeholder="Message" rows="3" required aria-label="Message"></textarea>
+        <button type="submit">Send</button>
+      </form>
+      <p style="font-size:.85rem;color:var(--muted);margin-top:1rem;">
+        <strong>Disclaimer:</strong> For informational purposes only; consult a professional.  
+        Genetic data is handled per our <a href="#privacy">Privacy Policy</a>.
+      </p>
     </section>
 
-    <!-- 13. Footer & Disclaimers -->
-    <footer style="padding:2rem;text-align:center;background:var(--surface);border-top:1px solid #e1e8ed">
-      <p><em>For informational purposes only; consult a professional.</em></p>
-      <a href="#">Privacy Policy</a> · <a href="#">Terms of Service</a> · <a href="#">Compliance</a>
-    </footer>
   </main>
 
+  <!-- FOOTER -->
+  <footer>
+    <p>&copy; 2025 Vitra AI. <a href="#privacy">Privacy Policy</a> | <a href="#terms">Terms & Conditions</a></p>
+  </footer>
+
+  <!-- JAVASCRIPT LOGIC -->
   <script>
-  //──────────────────── UTILITIES ────────────────────//
-
-  // Smooth scroll to section
-  function scrollToSection(id) {
-    const el = document.getElementById(id);
-    if (el) el.scrollIntoView({ behavior: 'smooth' });
-  }
-
-  // Simulated AI call (replace with real fetch to your AI proxy)
-  async function callAI(systemPrompt, userInput) {
-    // simulate network latency
-    await new Promise(res => setTimeout(res, 800));
-    // stub reply
-    return `🔮 AI (${systemPrompt}) says: “Simulated response for '${userInput}'.”`;
-  }
-
-  // Attach a close handler to any panel
-  function attachCloseButtons() {
-    document.querySelectorAll('.response .close-btn').forEach(btn => {
-      btn.addEventListener('click', () => {
-        btn.closest('.response').hidden = true;
-      });
-    });
-  }
-
-  // Disable a button and show spinner
-  function setLoading(button, panel) {
-    button.disabled = true;
-    panel.hidden = false;
-    panel.classList.remove('show-close');
-    const content = panel.querySelector('.result-content');
-    if (content) {
-      content.innerHTML = 'Processing… <span class="spinner"></span>';
-    } else {
-      panel.insertAdjacentHTML('beforeend', '<div class="result-content">Processing… <span class="spinner"></span></div>');
-    }
-  }
-
-  // Show AI result
-  function showResult(button, panel, text) {
-    const content = panel.querySelector('.result-content');
-    if (content) content.textContent = text;
-    panel.classList.add('show-close');
-    button.disabled = false;
-  }
-
-  //──────────────────── SIDEBAR & THEME ────────────────────//
-
+// Wrap everything to run after DOM is ready
+document.addEventListener('DOMContentLoaded', () => {
+  // ───────────── SIDEBAR & THEME TOGGLES ─────────────
   const sidebar = document.getElementById('sidebar');
-  document.getElementById('hamburger').addEventListener('click', () => {
-    sidebar.classList.toggle('open');
-  });
-  document.getElementById('shrinkBtn').addEventListener('click', () => {
+  document.getElementById('shrinkBtn').onclick = () => {
     sidebar.classList.toggle('collapsed');
-    const icon = document.querySelector('#shrinkBtn i');
-    icon.classList.toggle('fa-angle-double-left');
-    icon.classList.toggle('fa-angle-double-right');
-  });
+    document.querySelector('#shrinkBtn i').classList.toggle('fa-angle-double-right');
+  };
+  document.getElementById('hamburger').onclick = () => sidebar.classList.toggle('open');
 
   const themeBtn = document.getElementById('themeToggle');
-  themeBtn.addEventListener('click', () => {
+  themeBtn.onclick = () => {
     document.documentElement.classList.toggle('dark');
+    const newTheme = document.documentElement.classList.contains('dark') ? 'dark' : 'light';
+    document.documentElement.setAttribute('aria-theme', newTheme);
     themeBtn.classList.toggle('fa-sun');
-    themeBtn.classList.toggle('fa-moon');
+  };
+
+  // ───────────── ONBOARDING MODAL ─────────────
+  // Show onboarding once (could be tied to localStorage)
+  const onboard = document.getElementById('onboardModal');
+  onboard.style.display = 'flex';
+  // Dismiss handled inline on button
+
+  // ───────────── SMOOTH SCROLL HELPERS ─────────────
+  window.scrollToSection = id => {
+    const el = document.getElementById(id);
+    if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  };
+
+  // ───────────── PREVIEW IMAGE UPLOAD ─────────────
+  window.previewImage = input => {
+    const img = document.getElementById('idenPreview');
+    if (!input.files || !input.files[0]) return;
+    img.src = URL.createObjectURL(input.files[0]);
+    img.alt = input.files[0].name;
+    img.style.display = 'block';
+  };
+
+  // ───────────── CLOSE BUTTONS FOR RESPONSES ─────────────
+  document.querySelectorAll('.response .close-btn').forEach(btn => {
+    btn.onclick = () => btn.parentElement.hidden = true;
   });
 
-  //──────────────────── ONBOARDING ────────────────────//
-
-  document.getElementById('closeOnboard').addEventListener('click', () => {
-    document.getElementById('onboardModal').remove();
+  // ───────────── ROI CALCULATOR ─────────────
+  document.getElementById('roi-form').addEventListener('submit', e => {
+    e.preventDefault();
+    const rx = +document.getElementById('roiRx').value;
+    const cost = +document.getElementById('roiCost').value;
+    const savings = rx * cost * 0.10; // assume 10% savings
+    const panel = document.getElementById('roiResult');
+    panel.querySelector('.result-content').textContent =
+      `Estimated monthly savings: $${savings.toFixed(2)}`;
+    panel.hidden = false;
+    panel.classList.add('show-close');
   });
 
-  //──────────────────── FILE PREVIEW: Herb Identifier ────────────────────//
+  // ───────────── CHART.JS INITIALIZATION ─────────────
+  function initChart(id, labels, data, label) {
+    new Chart(document.getElementById(id), {
+      type: 'bar',
+      data: {
+        labels,
+        datasets: [{ label, data }]
+      },
+      options: { plugins: { legend: { display: false } } }
+    });
+  }
+  initChart('chartAdoption', ['Wk1', 'Wk2', 'Wk3'], [50, 75, 100], 'Scans');
+  initChart('chartEfficacy', ['HerbA', 'HerbB'], [80, 60], 'Efficacy');
+  initChart('chartSupply', ['Turmeric', 'Ginkgo'], [200, 150], 'Stock');
+  initChart('chartROI', ['Jan', 'Feb', 'Mar'], [5, 7, 6], 'ROI ($k)');
 
-  document.getElementById('identifyUpload').addEventListener('change', e => {
-    const preview = document.getElementById('identifyPreview');
-    preview.innerHTML = '';
-    const file = e.target.files[0];
-    if (file) {
-      const img = document.createElement('img');
-      img.src = URL.createObjectURL(file);
-      img.style.maxWidth = '200px';
-      img.style.borderRadius = 'var(--radius)';
-      preview.appendChild(img);
+  // ───────────── GENERIC WIRE MODULE FUNCTION ─────────────
+  async function callOpenAI(messages) {
+    const res = await fetch('/.netlify/functions/openai-proxy', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ messages })
+    });
+    if (!res.ok) {
+      throw new Error(await res.text() || 'Network error');
     }
-  });
+    const { choices } = await res.json();
+    return choices[0].message.content.trim();
+  }
 
-  //──────────────────── WIRE MODULE HELPER ────────────────────//
-
-  function wireModule({ formId, inputGetter, resultPanelId, systemPrompt, extraValidate }) {
+  function wireModule({ formId, systemPrompt, getUserInput, resultPanelId }) {
     const form = document.getElementById(formId);
     const panel = document.getElementById(resultPanelId);
-    const submitBtn = form.querySelector('button[type="submit"]');
-
     form.addEventListener('submit', async e => {
       e.preventDefault();
-      // custom validation
-      if (extraValidate && !extraValidate()) return;
-      setLoading(submitBtn, panel);
-      let userInput = inputGetter();
-      let reply;
+      panel.querySelector('.result-content').innerHTML =
+        'Processing… <span class="spinner"></span>';
+      panel.hidden = false;
+      panel.classList.remove('show-close');
       try {
-        reply = await callAI(systemPrompt, userInput);
+        const userContent = getUserInput();
+        const reply = await callOpenAI([
+          { role: 'system', content: systemPrompt },
+          { role: 'user', content: userContent }
+        ]);
+        panel.querySelector('.result-content').textContent = reply;
+        panel.classList.add('show-close');
       } catch (err) {
-        reply = '⚠️ Network error. Please try again.';
+        panel.querySelector('.result-content').textContent = '⚠️ ' + err.message;
+        panel.classList.add('show-close');
+        console.error(err);
       }
-      showResult(submitBtn, panel, reply);
     });
   }
 
-  //──────────────────── WIRE ALL MODULES ────────────────────//
+  // ───────────── WIRE ALL AI MODULES ─────────────
 
-  document.addEventListener('DOMContentLoaded', () => {
-    attachCloseButtons();
-
-    // 1. Herb Identifier
-    wireModule({
-      formId: 'identifyForm',
-      inputGetter: () => {
-        const file = document.getElementById('identifyUpload').files[0];
-        return file ? file.name : '';
-      },
-      resultPanelId: 'identifyResult',
-      systemPrompt: 'Herb Identifier AI'
-    });
-
-    // 2. Symptom Checker
-    wireModule({
-      formId: 'symptomForm',
-      inputGetter: () => document.getElementById('symptomInput').value,
-      resultPanelId: 'symptomResult',
-      systemPrompt: 'Symptom-to-Herb AI'
-    });
-
-    // 3. Cultural Knowledge
-    document.querySelectorAll('#culturalKnowledge button[data-region]').forEach(btn => {
-      btn.addEventListener('click', () => {
-        const region = btn.getAttribute('data-region');
-        const container = document.getElementById('cultureCards');
-        container.innerHTML = `<p>Loading ${region} remedies… <span class="spinner"></span></p>`;
-        setTimeout(() => {
-          container.innerHTML = `
-            <div class="module">
-              <h3>${region.replace(/([A-Z])/g,' $1')}</h3>
-              <p>Sample traditional uses + modern research summary.</p>
-            </div>`;
-        }, 600);
-      });
-    });
-
-    // 4. Safety Checker
-    wireModule({
-      formId: 'safetyForm',
-      inputGetter: () => {
-        const a = document.getElementById('safetyA').value;
-        const b = document.getElementById('safetyB').value;
-        return `${a} & ${b}`;
-      },
-      extraValidate: () => {
-        if (document.getElementById('safetyA').value === document.getElementById('safetyB').value) {
-          alert('Please select two distinct herbs to check interactions.');
-          return false;
-        }
-        return true;
-      },
-      resultPanelId: 'safetyResult',
-      systemPrompt: 'Herb Interaction Checker AI'
-    });
-
-    // 5. AI Herbalist Chat
-    (function wireChat() {
-      const chatBox = document.getElementById('chatBox');
-      const chatHint = document.getElementById('chatHint');
-      const chatInput = document.getElementById('chatInput');
-      const sendBtn = document.getElementById('sendChat');
-      let history = [{ role: 'system', content: 'You are a friendly herbalist AI.' }];
-
-      sendBtn.addEventListener('click', async () => {
-        const msg = chatInput.value.trim();
-        if (!msg) return;
-        chatBox.innerHTML += `<p><strong>You:</strong> ${msg}</p>`;
-        chatInput.value = '';
-        history.push({ role: 'user', content: msg });
-        chatHint.hidden = false;
-        let reply;
-        try {
-          reply = await callAI('Herbalist Chatbot AI', msg);
-          history.push({ role: 'assistant', content: reply });
-        } catch {
-          reply = '⚠️ Something went wrong.';
-        }
-        chatHint.hidden = true;
-        chatBox.innerHTML += `<p><strong>Vitra AI:</strong> ${reply}</p>`;
-        chatBox.scrollTop = chatBox.scrollHeight;
-      });
-    })();
-
-    // 6. Login / Role-Based Access
-    document.getElementById('loginForm').addEventListener('submit', e => {
-      e.preventDefault();
-      const email = document.getElementById('loginEmail').value;
-      const pass  = document.getElementById('loginPass').value;
-      const error = document.getElementById('loginError');
-      // stub validation
-      if (email === 'admin@vitra.ai' && pass === 'password') {
-        error.hidden = true;
-        alert('Login successful as Pharmacist.');
-        // show/hide modules based on role...
-      } else {
-        error.hidden = false;
-      }
-    });
-
-    // 7. Blog Posts (AI-generated)
-    const blogContainer = document.getElementById('blogPosts');
-    ['Herb Spotlight','Seasonal Remedies','Wellness Tips'].forEach(title => {
-      blogContainer.insertAdjacentHTML('beforeend', `
-        <article class="module">
-          <h3>${title}</h3>
-          <p>${title} content generated weekly by AI.</p>
-        </article>`);
-    });
-
-    // 8. Voice Assistant (stub)
-    document.getElementById('voiceBtn').addEventListener('click', () => {
-      document.getElementById('voiceTranscription').textContent =
-        '🎤 Listening… (stub)';
-      setTimeout(() => {
-        document.getElementById('voiceTranscription').textContent =
-          'You said: "Show me turmeric benefits."';
-      }, 1500);
-    });
-
-    // 9. ROI Calculator
-    document.getElementById('roiForm').addEventListener('submit', e => {
-      e.preventDefault();
-      const scripts = +document.getElementById('avgScripts').value;
-      const cost    = +document.getElementById('avgHerbCost').value;
-      const savings = scripts * cost * 0.1; // stub 10% savings
-      const revenue = scripts * cost * 0.2; // stub 20% upsell
-      const out = `Estimated Savings: $${savings.toFixed(2)}, Revenue Uplift: $${revenue.toFixed(2)}`;
-      const panel = document.getElementById('roiResult');
-      panel.querySelector('#roiOutput').textContent = out;
-      panel.hidden = false;
-      panel.classList.add('show-close');
-    });
-
-    // 10. EHR & API Integration (stubs)
-    document.getElementById('importEHR').addEventListener('click', () => {
-      alert('Imported patient data from HospitalX (stub).');
-    });
-    document.getElementById('sendToPharmacy').addEventListener('click', () => {
-      alert('Sent diagnosis to E-Pharmacy cart (stub).');
-    });
-    document.getElementById('saveWebhook').addEventListener('click', () => {
-      const url = document.getElementById('webhookUrl').value;
-      alert(`Saved webhook URL: ${url}`);
-    });
-
-    // 11. Executive Analytics & KPI Charts
-    function initChart(id, labels, data) {
-      new Chart(document.getElementById(id), {
-        type: 'bar',
-        data: { labels, datasets: [{ data, backgroundColor: labels.map(() => 'rgba(47,169,161,0.6)') }] },
-        options: { plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true } } }
-      });
-    }
-    initChart('chartAdopt',    ['HerbID','Chat','Forms'], [120, 85, 45]);
-    initChart('chartEfficacy', ['Used','Improved'],      [200,160]);
-    initChart('chartSupply',   ['Stocked','Used'],       [300,280]);
-    initChart('chartROI',      ['Savings','Revenue'],    [5000,7200]);
-
-    // Export analytics stub
-    window.exportAnalytics = function() {
-      alert('Exporting analytics CSV (stub).');
-    };
-
-    // Final attach
-    attachCloseButtons();
+  // 1. Herb Identification
+  wireModule({
+    formId: 'iden-form',
+    systemPrompt: 'You are an accurate plant species identifier.',
+    getUserInput: () => {
+      const file = document.getElementById('iden-form').querySelector('input[type=file]').files[0];
+      return file ? file.name : '';
+    },
+    resultPanelId: 'idenResult'
   });
-</script>
-  
+
+  // 2. Symptom Checker
+  wireModule({
+    formId: 'sym-form',
+    systemPrompt: 'You are a top-tier herbal diagnostic AI.',
+    getUserInput: () => document.getElementById('symInput').value,
+    resultPanelId: 'symResult'
+  });
+
+  // 3. Personalized Formulations
+  wireModule({
+    formId: 'pf-form',
+    systemPrompt: 'You are an expert at formulating personalized herbal blends.',
+    getUserInput: () => {
+      const herbs = Array.from(document.getElementById('pfHerbs').selectedOptions)
+        .map(o => o.value).join(', ');
+      const age = document.getElementById('pfAge').value;
+      const weight = document.getElementById('pfWeight').value;
+      return `Herbs: ${herbs}; Age: ${age}; Weight: ${weight}kg`;
+    },
+    resultPanelId: 'pfResult'
+  });
+
+  // 4. Research Summaries
+  wireModule({
+    formId: 'research-form',
+    systemPrompt: 'You summarize clinical research findings concisely, with citations.',
+    getUserInput: () => document.getElementById('researchQuery').value,
+    resultPanelId: 'researchResults'
+  });
+
+  // 5. Inventory Forecast
+  wireModule({
+    formId: 'inventory-form',
+    systemPrompt: 'You forecast weekly herb demand based on trends and seasonality.',
+    getUserInput: () => {
+      const herb = document.getElementById('forecastHerb').value;
+      const weeks = document.getElementById('forecastPeriod').value;
+      return `Herb: ${herb}; Weeks ahead: ${weeks}`;
+    },
+    resultPanelId: 'inventoryResult'
+  });
+
+  // 6. Genetics Match
+  wireModule({
+    formId: 'genetics-form',
+    systemPrompt: 'You interpret genetic reports to recommend suitable herbs, noting evidence tiers.',
+    getUserInput: () => {
+      const file = document.getElementById('geneticUpload').files[0];
+      return file ? file.name : '';
+    },
+    resultPanelId: 'geneticResult'
+  });
+
+  // 7. Dosage Calculator
+  wireModule({
+    formId: 'dose-form',
+    systemPrompt: 'You calculate daily herbal dosages based on weight, symptom, and extract form.',
+    getUserInput: () => {
+      const w = document.getElementById('weight').value;
+      const s = document.getElementById('symptom').value;
+      const form = document.getElementById('formType').value;
+      return `Weight: ${w}kg; Symptom: ${s}; Form: ${form}`;
+    },
+    resultPanelId: 'dosageResult'
+  });
+
+  // 8. Interaction Checker
+  wireModule({
+    formId: 'int-form',
+    systemPrompt: 'You check for interactions between two herbs and grade severity.',
+    getUserInput: () => {
+      const a = document.getElementById('herbA').value;
+      const b = document.getElementById('herbB').value;
+      if (a === b) throw new Error('Please select two distinct herbs.');
+      return `${a} & ${b}`;
+    },
+    resultPanelId: 'interactionResult'
+  });
+
+  // 9. Safety Checker (meds + herbs)
+  wireModule({
+    formId: 'safety-form',
+    systemPrompt: 'You warn of dangerous combinations between herbs/medications.',
+    getUserInput: () => {
+      const a = document.getElementById('safetyA').value;
+      const b = document.getElementById('safetyB').value;
+      if (a === b) throw new Error('Please pick two distinct items.');
+      return `${a} & ${b}`;
+    },
+    resultPanelId: 'safetyResult'
+  });
+
+  // 10. AI Herbalist Chat
+  (function() {
+    const chatBox = document.getElementById('chatBox');
+    const chatHint = document.getElementById('chatHint');
+    const chatInput = document.getElementById('chatInput');
+    const sendBtn = document.getElementById('sendChat');
+    let history = [{ role: 'system', content: 'You are a friendly herbal medicine tutor.' }];
+
+    sendBtn.onclick = async () => {
+      const msg = chatInput.value.trim();
+      if (!msg) return;
+      chatBox.innerHTML += `<p><strong>You:</strong> ${msg}</p>`;
+      chatInput.value = '';
+      history.push({ role: 'user', content: msg });
+      chatHint.hidden = false;
+
+      try {
+        const reply = await callOpenAI(history);
+        history.push({ role: 'assistant', content: reply });
+        chatBox.innerHTML += `<p><strong>Vitra AI:</strong> ${reply}</p>`;
+      } catch {
+        chatBox.innerHTML += `<p><strong>Vitra AI:</strong> Sorry, something went wrong.</p>`;
+      }
+      chatHint.hidden = true;
+      chatBox.scrollTop = chatBox.scrollHeight;
+    };
+  })();
+
+  // 11. Contact Form (no AI, just stub)
+  document.getElementById('contact-form').addEventListener('submit', e => {
+    e.preventDefault();
+    alert('Thank you! We will get back to you shortly.');
+  });
+});
+    
+  </script>
 </body>
 </html>
