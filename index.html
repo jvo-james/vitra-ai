@@ -305,12 +305,14 @@ button[disabled] {
   transform: scale(1);
 }
 .response .close-btn {
-  display: block;                /* put on its own line */
-  margin: 0 auto 0.5rem;         /* center above content + space */
-  width: 2rem; height: 2rem;     /* perfect circle */
-  border-radius: 50%;
-  position: static;              /* remove absolute overlap */
-  font-size:1.2rem;
+ position: absolute;
+  top: 0.5rem;
+  right: 0.5rem;
+  background: none;
+  color: var(--secondary);
+  font-size: 1.2rem;
+  width: auto; height: auto;
+  padding: 0;
 }
 .response .result-content {
   margin-top: 0.5rem;            /* avoid collision */
@@ -320,6 +322,13 @@ button[disabled] {
   width:1.6rem; height:1.6rem;
   padding:0.2rem;
  }
+    .tool-row {
+ position: absolute;
+  bottom: 0.5rem;
+  right: 0.5rem;
+  display: flex;
+  gap: 0.5rem;
+}
 /*────────────────── HERO ──────────────────*/
 #hero {
   display: flex;
@@ -368,7 +377,7 @@ button[disabled] {
   gap: 0.75rem 1rem;
   gap: 1rem;
 }
-    #hero-symptom .field:nth-child(1) { grid-area: labels1; }
+ #hero-symptom .field:nth-child(1) { grid-area: labels1; }
  #hero-symptom .field:nth-child(2) { grid-area: inputs1; }
  #hero-symptom .range-field       { grid-area: labels2 / inputs2; display:flex; }
  #hero-symptom button.btn-primary { grid-area: actions; justify-self:center; }
@@ -380,7 +389,8 @@ button[disabled] {
 #hero-symptom select,
 #hero-symptom input[type="number"],
 #hero-symptom input[type="range"] {
-  max-width: 180px;
+  min-width: 280px;
+  width: 100%;
   padding: .6rem;
   font-size: .9rem;
 }
@@ -504,7 +514,7 @@ button[disabled] {
 #roi-form .field input,
 #roi-form .field select {
   max-width: 180px;
-  padding: .6rem;
+    padding: .7rem 1.3rem;
   border: 1px solid #d1dce5;
 }
 #roi-form button {
@@ -521,9 +531,7 @@ button[disabled] {
   border-radius: var(--radius);
   box-shadow: 0 1px 6px rgba(0,0,0,0.05);
 }
-.history-modal {
-  display:flex; align-items:flex-start; padding-top:5rem;
- }
+
 /*────────────────── FOOTER ──────────────────*/
 footer {
   background: var(--surface);
@@ -616,13 +624,25 @@ footer a {
   border-radius: var(--radius);
   box-shadow: 0 2px 6px rgba(0,0,0,0.2);
 }
-.history-modal { background: rgba(0,0,0,0.6); }
-.history-content { position: relative; padding:1.5rem; }
+.history-modal { position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem; }
+.history-content { background: var(--surface);
+  border-radius: var(--radius);
+  width: 100%;
+  max-width: 360px;
+  max-height: 80vh;
+  overflow-y: auto;
+  padding: 1.5rem; }
 .history-content h3::before { content:'\f017'; font-family:'FontAwesome'; margin-right:.5rem; }
 .history-content .del-msg { background:none; border:none; color:var(--secondary); font-size:1.2rem; }
 
      .chat-input-row input {
-  flex: 1 1 400px;     
+  flex: 1 1 600px;
   padding: 0.8rem;
   border: 1px solid var(--muted);
   border-radius: var(--radius);
@@ -804,7 +824,7 @@ footer a {
         <h2><i class="fas fa-comments"></i> AI Herbalist Chat</h2>
         <div class="chat-controls">
           <button id="viewHistory" title="View History"><i class="fas fa-history"></i></button>
-          <button id="clearChat" title="Clear Chat"><i class="fas fa-eraser"></i></button>
+          <button id="clearChat" title="Clear Chat"><i>clear</i></button>
         </div>
       </div>
       <p class="desc">Ask about herbal remedies:</p>
@@ -1061,21 +1081,7 @@ footer a {
       </div>
     </section>
 
-    <!-- ARCHITECTURE & TECH -->
-    <section id="about" class="module">
-      <h2><i class="fas fa-cogs"></i> Architecture & Data Flow</h2>
-      <p class="desc">High-level overview of our AI platform components.</p>
-      <img src="flow.jpg" alt="System Architecture Diagram" style="width:100%;border-radius:var(--radius);margin-bottom:1rem;"/>
-      <ol>
-        <li>Client (Browser/Mobile)</li>
-        <li>API Gateway</li>
-        <li>AI Microservices (Diagnostics, ID, Chat)</li>
-        <li>Data Lake (Herb DB, Clinical Studies, Genetics)</li>
-        <li>Analytics Engine</li>
-        <li>Admin Dashboard</li>
-      </ol>
-      <p><a href="#privacy">Privacy Policy</a> | <a href="#terms">Terms of Use</a></p>
-    </section>
+   
 
     <!-- CONTACT & DISCLAIMER -->
     <section id="contact" class="module">
