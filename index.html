@@ -187,6 +187,8 @@ main {
   height: 250px; 
   display: flex;
   flex-direction: column;
+  border: 1px solid var(--muted);
+  padding: 0.5rem;
 }
 
 .chart-card canvas {
@@ -287,11 +289,6 @@ button[disabled] {
   position: relative;
 }
 .response .close-btn {
-  position: absolute;
-  top: .5rem;
-  right: .5rem;
-  width: 1.5rem;
-  height: 1.5rem;
   background: var(--secondary);
   color: #fff;
   border: none;
@@ -307,7 +304,22 @@ button[disabled] {
   opacity: 1;
   transform: scale(1);
 }
-
+.response .close-btn {
+  display: block;                /* put on its own line */
+  margin: 0 auto 0.5rem;         /* center above content + space */
+  width: 2rem; height: 2rem;     /* perfect circle */
+  border-radius: 50%;
+  position: static;              /* remove absolute overlap */
+  font-size:1.2rem;
+}
+.response .result-content {
+  margin-top: 0.5rem;            /* avoid collision */
+}
+    .tool-row button {
+  font-size:0.85rem;
+  width:1.6rem; height:1.6rem;
+  padding:0.2rem;
+ }
 /*────────────────── HERO ──────────────────*/
 #hero {
   display: flex;
@@ -346,14 +358,21 @@ button[disabled] {
 }
 
 /*────────────────── SYMPTOM CHECKER ──────────────────*/
-.symptom-module {
-  background: linear-gradient(135deg, #e8f5f1 0%, #fbfcfb 100%);
-}
+
 #hero-symptom .sym-form {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template:
+    "labels1 inputs1" auto
+    "labels2 inputs2" auto
+    "actions actions" auto / 1fr 1fr;
+  gap: 0.75rem 1rem;
   gap: 1rem;
 }
+    #hero-symptom .field:nth-child(1) { grid-area: labels1; }
+ #hero-symptom .field:nth-child(2) { grid-area: inputs1; }
+ #hero-symptom .range-field       { grid-area: labels2 / inputs2; display:flex; }
+ #hero-symptom button.btn-primary { grid-area: actions; justify-self:center; }
+
 #hero-symptom .field {
   margin-bottom: 1rem;
 }
@@ -502,7 +521,9 @@ button[disabled] {
   border-radius: var(--radius);
   box-shadow: 0 1px 6px rgba(0,0,0,0.05);
 }
-
+.history-modal {
+  display:flex; align-items:flex-start; padding-top:5rem;
+ }
 /*────────────────── FOOTER ──────────────────*/
 footer {
   background: var(--surface);
@@ -585,6 +606,27 @@ footer a {
     .chart-card canvas {
   max-height: 180px !important;
 }
+    
+.copy-toast {
+  position: fixed;
+  bottom: 1rem; right: 1rem;
+  background: var(--primary);
+  color: #fff;
+  padding: 0.5rem 1rem;
+  border-radius: var(--radius);
+  box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+}
+.history-modal { background: rgba(0,0,0,0.6); }
+.history-content { position: relative; padding:1.5rem; }
+.history-content h3::before { content:'\f017'; font-family:'FontAwesome'; margin-right:.5rem; }
+.history-content .del-msg { background:none; border:none; color:var(--secondary); font-size:1.2rem; }
+
+     .chat-input-row input {
+  flex: 1 1 400px;     
+  padding: 0.8rem;
+  border: 1px solid var(--muted);
+  border-radius: var(--radius);
+ }
 
 </style>
 
@@ -681,7 +723,7 @@ footer a {
     </section>
 
     <!-- 2. Symptom Checker -->
-    <section id="hero-symptom" class="module symptom-module">
+    <section id="hero-symptom" class="module">
       <h2><i class="fas fa-notes-medical"></i> Symptom Checker</h2>
       <p class="desc">Tell us your symptoms and duration, choose severity, then get AI‐powered herb recommendations.</p>
       <form id="sym-form" class="sym-form">
@@ -691,12 +733,20 @@ footer a {
         </div>
         <div class="field">
           <label for="symCategories">Category</label>
-          <select id="symCategories" required>
+          <select id="symCategories" multiple size="4" required>
             <option disabled selected>Select category…</option>
             <option value="pain">Pain</option>
             <option value="digestive">Digestive</option>
             <option value="respiratory">Respiratory</option>
             <option value="stress">Stress</option>
+  <option value="sleep">Sleep</option>
+  <option value="energy">Energy</option>
+  <option value="immune">Immune</option>
+  <option value="skin">Skin</option>
+  <option value="mental">Mental</option>
+  <option value="cardio">Cardio</option>
+  <option value="respiratory">Respiratory</option>
+  <option value="digestive">Digestive</option>
           </select>
         </div>
         <div class="field range-field">
@@ -754,7 +804,7 @@ footer a {
         <h2><i class="fas fa-comments"></i> AI Herbalist Chat</h2>
         <div class="chat-controls">
           <button id="viewHistory" title="View History"><i class="fas fa-history"></i></button>
-          <button id="clearChat" title="Clear Chat"><i class="fas fa-trash-alt"></i></button>
+          <button id="clearChat" title="Clear Chat"><i class="fas fa-eraser"></i></button>
         </div>
       </div>
       <p class="desc">Ask about herbal remedies:</p>
@@ -1134,8 +1184,14 @@ footer a {
       <button class="dl-btn"   title="Download"><i class="fas fa-download"></i></button>`;
     panel.append(tools);
 
-    tools.querySelector('.copy-btn').onclick = () =>
-      navigator.clipboard.writeText(panel.querySelector('.result-content').innerText);
+    tools.querySelector('.copy-btn').onclick = () => {
+   navigator.clipboard.writeText(panel.querySelector('.result-content').innerText);
+  const toast = document.createElement('div');
+  toast.textContent = 'Copied!';
+  toast.className = 'copy-toast';
+  document.body.append(toast);
+  setTimeout(()=>toast.remove(), 1500);
+ };
 
     tools.querySelector('.dl-btn').onclick = () => {
       const text = panel.querySelector('.result-content').innerText;
@@ -1461,7 +1517,7 @@ footer a {
             ${history.map((m,i) => `
               <li>
                 <strong>${m.who}:</strong> ${m.text}
-                <button data-i="${i}" class="del-msg">🗑</button>
+                <button data-i="${i}" class="del-msg"><i class="fas fa-trash"></i></button>
               </li>`).join('')}
           </ul>
           <button class="close-history">Close</button>
