@@ -1643,10 +1643,13 @@ footer a {
 
     // AI Herbalist Chat enhancements
     const chatBox   = document.getElementById('chatBox');
-    const history   = [];
+    const savedChat = localStorage.getItem('chatHistory');
+    const history   = savedChat ? JSON.parse(savedChat) : [];
     const sendChat  = document.getElementById('sendChat');
     const chatHint  = document.getElementById('chatHint');
     const chatInput = document.getElementById('chatInput');
+
+    history.forEach(m => addMessage(m.who, m.text));
 
     function addMessage(who, text) {
       const msg = document.createElement('div');
@@ -1661,6 +1664,7 @@ footer a {
       if (!txt) return;
       addMessage('You', txt);
       history.push({ who: 'You', text: txt });
+      localStorage.setItem('chatHistory', JSON.stringify(history));  // ← persist after user message
       chatInput.value = '';
       chatHint.hidden = false;
       try {
@@ -1670,7 +1674,8 @@ footer a {
         ]);
         addMessage('Herbalist', reply);
         history.push({ who: 'Herbalist', text: reply });
-      } catch (err) {
+        localStorage.setItem('chatHistory', JSON.stringify(history));  // ← persist after bot response
+       } catch (err) {
         addMessage('Herbalist', '⚠️ Oops! Something went wrong. Please try again.');
       } finally {
         chatHint.hidden = true;
@@ -1679,7 +1684,10 @@ footer a {
 
     // Clear chat (does NOT erase history)
     document.getElementById('clearChat').onclick = () => {
-      chatBox.innerHTML = '';
+    chatBox.innerHTML = '';
+    history.length = 0;
+    localStorage.removeItem('chatHistory');  // ← also clear persisted history
+  
     };
 
     // View history modal
