@@ -79,7 +79,19 @@ aside {
     .hamburger:hover,.theme-toggle:hover{transform:scale(1.1);}
 
     /*──────────────────────── Main & Hero ─────────────────────────────────*/
-    main{flex:1;margin-top:60px;padding:var(--padding);overflow-x:hidden;}
+    main{
+    flex:1;
+    /* slide in under the header & sidebar */
+    margin-top:60px;
+    margin-left: var(--sidebar-width);
+    padding:var(--padding);
+    overflow-x:hidden;
+   transition: margin-left var(--transition);
+  }
+  /* when sidebar is hidden, remove that left margin */
+ body.sidebar-hidden main {
+   margin-left: 0;
+  }
     .hero{position:relative;background:var(--surface);backdrop-filter:blur(12px);border-radius:var(--radius);
           padding:3rem var(--padding);text-align:center;box-shadow:0 8px 40px rgba(0,0,0,.1);margin-bottom:2rem;}
     .hero h1{font-size:2.75rem;color:var(--primary);margin-bottom:1rem;}
@@ -911,420 +923,426 @@ aside {
 
   </main>
 
-  <!-- Chart.js + AI Proxy Scripts -->
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+ <!-- Chart.js + OpenAI Proxy + App Logic -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
-// ── OpenAI Proxy + Markdown→HTML Helper ─────────────────────────────────
-async function callOpenAI(messages) {
-  const res = await fetch('/.netlify/functions/openai-proxy', {
-    method: 'POST',
-    headers: {'Content-Type':'application/json'},
-    body: JSON.stringify({ messages })
-  });
-  if (!res.ok) throw new Error('OpenAI error');
-  const j = await res.json();
-  return j.choices[0].message.content;
-}
-
-function formatHTML(txt) {
-  return txt
-    .replace(/\*\*(.+?)\*\*/g,'<strong>$1</strong>')
-    .replace(/\*(.+?)\*/g,'<em>$1</em>')
-    .split(/\n{2,}/).map(p=>`<p>${p.trim()}</p>`).join('');
-}
-
-document.addEventListener('DOMContentLoaded', () => {
-  const body = document.body;
-
-  // ── PANEL UTILITY ──────────────────────────────────────────────
-  function getPanel(sectionId) {
-    const sec = document.getElementById(sectionId);
-    let panel = sec.querySelector('.response');
-    if (!panel) {
-      panel = document.createElement('div');
-      panel.className = 'response';
-      // insert after the form/buttons area
-      sec.append(panel);
-    }
-    panel.hidden = false;
-    return panel;
-  }
-
-  // ── SIDEBAR & HEADER FIXES ─────────────────────────────────────
-  document.getElementById('shrinkBtn').onclick = () =>
-    document.getElementById('sidebar').classList.toggle('collapsed');
-
-  document.getElementById('hamburger').onclick = () =>
-    body.classList.toggle('sidebar-hidden');
-
-  // ensure header moves left when sidebar-hidden
-  const observer = new MutationObserver(() => {
-    document.querySelector('header').classList.toggle(
-      'sidebar-collapsed',
-      body.classList.contains('sidebar-hidden')
-    );
-  });
-  observer.observe(body, { attributes: true, attributeFilter: ['class'] });
-
-  document.getElementById('themeToggle').onclick = () => {
-    document.documentElement.classList.toggle('dark');
-    document.getElementById('themeToggle').classList.toggle('fa-sun');
-  };
-
-  // ── THERAPY BOT ────────────────────────────────────────────────
-  const chatBox   = document.getElementById('chatBox'),
-        chatHint  = document.getElementById('chatHint'),
-        chatInput = document.getElementById('therapyInput'),
-        history   = [];
-
-  function addMessage(who, txt) {
-    const msg = document.createElement('div');
-    msg.className = who === 'You' ? 'user-msg' : 'bot-msg';
-    msg.innerHTML = `${formatHTML(txt)}<div class="timestamp">${new Date().toLocaleTimeString()}</div>`;
-    chatBox.append(msg);
-    chatBox.scrollTop = chatBox.scrollHeight;
-  }
-
-  document.getElementById('sendChat').onclick = async e => {
-    e.preventDefault();
-    const txt = chatInput.value.trim();
-    if (!txt) return;
-    addMessage('You', txt);
-    history.push({ who:'You', text: txt });
-    chatInput.value = '';
-    chatHint.style.display = 'block';
-
-    const sys = `You are a therapist. Modality=${document.getElementById('therapyModality').value};` +
-                `Length=${document.getElementById('therapyLength').value};` +
-                `Language=${document.getElementById('therapyLang').value}.`;
-    try {
-      const reply = await callOpenAI([
-        { role:'system', content: sys },
-        { role:'user',   content: txt }
-      ]);
-      addMessage('Therapist', reply);
-      history.push({ who:'Therapist', text: reply });
-    } catch {
-      addMessage('Therapist', '⚠️ Something went wrong.');
-    } finally {
-      chatHint.style.display = 'none';
-    }
-  };
-
-  document.getElementById('clearChat').onclick = () => {
-    chatBox.innerHTML = '';
-    history.length = 0;
-  };
-  document.getElementById('viewHistory').onclick = () => {
-    const modal = document.createElement('div');
-    modal.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.6);display:flex;align-items:center;justify-content:center;z-index:2000';
-    modal.innerHTML = `
-      <div style="background:var(--surface);padding:1rem;border-radius:var(--radius);max-width:400px;width:90%;">
-        <h3>Chat History</h3>
-        <ul style="list-style:none;padding:0;max-height:300px;overflow:auto;">
-          ${history.map((m,i)=>`
-            <li style="margin:.5rem 0;">
-              <strong>${m.who}:</strong> ${m.text}
-              <button data-i="${i}" style="float:right;border:none;background:none;color:var(--secondary);cursor:pointer;">
-                <i class="fas fa-trash"></i>
-              </button>
-            </li>`).join('')}
-        </ul>
-        <button onclick="this.closest('div').remove()">Close</button>
-      </div>`;
-    document.body.append(modal);
-    modal.querySelectorAll('button[data-i]').forEach(btn=>{
-      btn.onclick = () => { history.splice(+btn.dataset.i,1); modal.remove(); };
+  // ── OpenAI Proxy + Markdown→HTML Helper ─────────────────────────────────
+  async function callOpenAI(messages) {
+    const res = await fetch('/.netlify/functions/openai-proxy', {
+      method: 'POST',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({ messages })
     });
-  };
+    if (!res.ok) throw new Error('OpenAI error');
+    const j = await res.json();
+    return j.choices[0].message.content;
+  }
+  function formatHTML(txt) {
+    return txt
+      .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+      .replace(/\*(.+?)\*/g, '<em>$1</em>')
+      .split(/\n{2,}/).map(p => `<p>${p.trim()}</p>`).join('');
+  }
 
-  // ── MOOD TRACKER ───────────────────────────────────────────────
-  const moodR = document.getElementById('moodRange'),
-        moodV = document.getElementById('moodValue');
-  moodR.oninput = () => moodV.textContent = moodR.value;
+  document.addEventListener('DOMContentLoaded', () => {
+    const body = document.body;
 
-  document.getElementById('mood-form').onsubmit = async e => {
-    e.preventDefault();
-    const panel = getPanel('moodTracker');
-    panel.innerHTML = `<div class="result-content">Analyzing…<span class="spinner"></span></div>`;
-    const data = {
-      mood: moodR.value,
-      emotions: [...document.querySelectorAll('#moodTracker input[name="emotions"]:checked')].map(c=>c.value),
-      triggers: [...document.querySelectorAll('#moodTracker input[name="triggers"]:checked')].map(c=>c.value),
-      note: document.getElementById('moodNote').value.trim(),
-      selfCare: document.getElementById('selfCare').value
-    };
-    try {
-      const reply = await callOpenAI([
-        { role:'system', content:'You are a mental health assistant.' },
-        { role:'user',   content:`Daily Mood Entry:\n${JSON.stringify(data)}` }
-      ]);
-      panel.innerHTML = `<div class="result-content">${formatHTML(reply)}</div>`;
-    } catch {
-      panel.innerHTML = `<div class="result-content">😕 Something went wrong.</div>`;
+    // ── PANEL UTILITY ─────────────────────────────────────────────────────
+    function getPanel(sectionId) {
+      const sec = document.getElementById(sectionId);
+      let panel = sec.querySelector('.response');
+      if (!panel) {
+        panel = document.createElement('div');
+        panel.className = 'response';
+        sec.append(panel);
+      }
+      panel.hidden = false;
+      return panel;
     }
-  };
 
-  // ── DREAM EXPLORER ─────────────────────────────────────────────
-  function wireDream(btnId, sysPrompt, buildContent) {
-    document.getElementById(btnId).onclick = async () => {
-      const panel = getPanel('dream');
-      panel.innerHTML = `<div class="result-content">Processing…<span class="spinner"></span></div>`;
+    // ── SIDEBAR & HEADER / MAIN TOGGLE ────────────────────────────────────
+    document.getElementById('shrinkBtn').onclick = () =>
+      document.getElementById('sidebar').classList.toggle('collapsed');
+
+    document.getElementById('hamburger').onclick = () => {
+      body.classList.toggle('sidebar-hidden');
+      document.getElementById('sidebar').classList.toggle('collapsed');
+    };
+
+    // ensure header & main shift when .sidebar-hidden
+    const obs = new MutationObserver(() => {
+      document.querySelector('header').classList.toggle(
+        'sidebar-collapsed',
+        body.classList.contains('sidebar-hidden')
+      );
+      document.querySelector('main').classList.toggle(
+        'sidebar-collapsed',
+        body.classList.contains('sidebar-hidden')
+      );
+    });
+    obs.observe(body, { attributes: true, attributeFilter: ['class'] });
+
+    document.getElementById('themeToggle').onclick = () => {
+      document.documentElement.classList.toggle('dark');
+      document.getElementById('themeToggle').classList.toggle('fa-sun');
+    };
+
+    // ── THERAPY BOT ────────────────────────────────────────────────────────
+    const chatBox   = document.getElementById('chatBox'),
+          chatHint  = document.getElementById('chatHint'),
+          chatInput = document.getElementById('therapyInput'),
+          history   = [];
+
+    function addMessage(who, txt) {
+      const msg = document.createElement('div');
+      msg.className = who === 'You' ? 'user-msg' : 'bot-msg';
+      msg.innerHTML = `${formatHTML(txt)}<div class="timestamp">${new Date().toLocaleTimeString()}</div>`;
+      chatBox.append(msg);
+      chatBox.scrollTop = chatBox.scrollHeight;
+    }
+
+    document.getElementById('sendChat').onclick = async e => {
+      e.preventDefault();
+      const txt = chatInput.value.trim();
+      if (!txt) return;
+      addMessage('You', txt);
+      history.push({ who:'You', text:txt });
+      chatInput.value = '';
+      chatHint.style.display = 'block';
+
+      const sys = `You are a therapist. Modality=${document.getElementById('therapyModality').value};` +
+                  `Length=${document.getElementById('therapyLength').value};` +
+                  `Language=${document.getElementById('therapyLang').value}.`;
       try {
         const reply = await callOpenAI([
-          { role:'system', content: sysPrompt },
-          { role:'user',   content: buildContent() }
+          { role:'system', content: sys },
+          { role:'user',   content: txt }
+        ]);
+        addMessage('Therapist', reply);
+        history.push({ who:'Therapist', text:reply });
+      } catch {
+        addMessage('Therapist', '⚠️ Something went wrong.');
+      } finally {
+        chatHint.style.display = 'none';
+      }
+    };
+
+    document.getElementById('clearChat').onclick = () => {
+      chatBox.innerHTML = '';
+      history.length = 0;
+    };
+    document.getElementById('viewHistory').onclick = () => {
+      const modal = document.createElement('div');
+      modal.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.6);display:flex;align-items:center;justify-content:center;z-index:2000';
+      modal.innerHTML = `
+        <div style="background:var(--surface);padding:1rem;border-radius:var(--radius);max-width:400px;width:90%;">
+          <h3>Chat History</h3>
+          <ul style="list-style:none;padding:0;max-height:300px;overflow:auto;">
+            ${history.map((m,i) => `
+              <li style="margin:.5rem 0;">
+                <strong>${m.who}:</strong> ${m.text}
+                <button data-i="${i}" style="float:right;border:none;background:none;color:var(--secondary);cursor:pointer;">
+                  <i class="fas fa-trash"></i>
+                </button>
+              </li>`).join('')}
+          </ul>
+          <button onclick="this.closest('div').remove()">Close</button>
+        </div>`;
+      document.body.append(modal);
+      modal.querySelectorAll('button[data-i]').forEach(btn => {
+        btn.onclick = () => {
+          history.splice(+btn.dataset.i,1);
+          modal.remove();
+        };
+      });
+    };
+
+    // ── MOOD TRACKER ───────────────────────────────────────────────────────
+    const moodR = document.getElementById('moodRange'),
+          moodV = document.getElementById('moodValue');
+    moodR.oninput = () => moodV.textContent = moodR.value;
+
+    document.getElementById('mood-form').onsubmit = async e => {
+      e.preventDefault();
+      const panel = getPanel('moodTracker');
+      panel.innerHTML = `<div class="result-content">Analyzing…<span class="spinner"></span></div>`;
+      const data = {
+        mood:    moodR.value,
+        emotions:[...document.querySelectorAll('#moodTracker input[name="emotions"]:checked')].map(c=>c.value),
+        triggers:[...document.querySelectorAll('#moodTracker input[name="triggers"]:checked')].map(c=>c.value),
+        note:    document.getElementById('moodNote').value.trim(),
+        selfCare:document.getElementById('selfCare').value
+      };
+      try {
+        const reply = await callOpenAI([
+          { role:'system', content:'You are a mental health assistant.' },
+          { role:'user',   content:`Daily Mood Entry:\n${JSON.stringify(data)}` }
         ]);
         panel.innerHTML = `<div class="result-content">${formatHTML(reply)}</div>`;
       } catch {
-        panel.innerHTML = `<div class="result-content">😕 Oops! Something went wrong.</div>`;
+        panel.innerHTML = `<div class="result-content">😕 Something went wrong.</div>`;
       }
     };
-  }
 
-  wireDream('analyzeDream',
-            'You are a dream interpreter. Use all details.',
-            () => {
-              const narrative = document.getElementById('dreamText').value.trim();
-              const symbols   = [...document.querySelectorAll('#dream input[type="checkbox"]:checked')].map(cb=>cb.value).join(', ');
-              const pre       = document.getElementById('preMood').value;
-              const post      = document.getElementById('postMood').value;
-              const tags      = document.getElementById('dreamTags').value.trim();
-              const refl      = document.getElementById('dreamReflect').value.trim();
-              return `Narrative: ${narrative}\nSymbols: ${symbols}\nBefore sleep: ${pre}\nOn waking: ${post}\nTags: ${tags}\nReflection: ${refl}`;
-            });
-
-  wireDream('interpretSymbols',
-            'You are a dream symbol interpreter.',
-            () => `Symbols: ${[...document.querySelectorAll('#dream input[type="checkbox"]:checked')].map(cb=>cb.value).join(', ')}`);
-
-  wireDream('generatePrompts',
-            'You are a creative writing assistant.',
-            () => `Generate 3 journaling prompts based on: ${document.getElementById('dreamText').value.trim()}`);
-
-  // ── CREATIVE THERAPIES ─────────────────────────────────────────
-  document.getElementById('artEmotion').onclick = async e => {
-    e.preventDefault();
-    const panel = getPanel('creative');
-    panel.innerHTML = `<div class="result-content">Generating…<span class="spinner"></span></div>`;
-    const type   = document.getElementById('creativeType').value;
-    const style  = document.getElementById('creativeStyle').value;
-    const detail = document.getElementById('creativeDetail').value;
-    try {
-      const reply = await callOpenAI([
-        { role:'system', content:`You are a creative AI generating ${type} in a ${style} style with detail level ${detail}.` },
-        { role:'user',   content:'Please produce one creative piece.' }
-      ]);
-      panel.innerHTML = `<div class="result-content">${formatHTML(reply)}</div>`;
-    } catch {
-      panel.innerHTML = `<div class="result-content">⚠️ Something went wrong.</div>`;
+    // ── DREAM EXPLORER ────────────────────────────────────────────────────
+    function wireDream(btnId, sysPrompt, buildContent) {
+      document.getElementById(btnId).onclick = async () => {
+        const panel = getPanel('dream');
+        panel.innerHTML = `<div class="result-content">Processing…<span class="spinner"></span></div>`;
+        try {
+          const reply = await callOpenAI([
+            { role:'system', content: sysPrompt },
+            { role:'user',   content: buildContent() }
+          ]);
+          panel.innerHTML = `<div class="result-content">${formatHTML(reply)}</div>`;
+        } catch {
+          panel.innerHTML = `<div class="result-content">😕 Oops! Something went wrong.</div>`;
+        }
+      };
     }
-  };
+    wireDream('analyzeDream',
+              'You are a dream interpreter. Use all details.',
+              () => {
+                const narrative = document.getElementById('dreamText').value.trim();
+                const symbols   = [...document.querySelectorAll('#dream input[type="checkbox"]:checked')].map(cb=>cb.value).join(', ');
+                const pre       = document.getElementById('preMood').value;
+                const post      = document.getElementById('postMood').value;
+                const tags      = document.getElementById('dreamTags').value.trim();
+                const refl      = document.getElementById('dreamReflect').value.trim();
+                return `Narrative: ${narrative}\nSymbols: ${symbols}\nBefore sleep: ${pre}\nOn waking: ${post}\nTags: ${tags}\nReflection: ${refl}`;
+              });
+    wireDream('interpretSymbols',
+              'You are a dream symbol interpreter.',
+              () => [...document.querySelectorAll('#dream input[type="checkbox"]:checked')].map(cb=>cb.value).join(', '));
+    wireDream('generatePrompts',
+              'You are a creative writing assistant.',
+              () => `Generate 3 journaling prompts based on: ${document.getElementById('dreamText').value.trim()}`);
 
-  // ── COGNITIVE GAMES ───────────────────────────────────────────
-  document.getElementById('puzzles').onclick = async e => {
-    e.preventDefault();
-    const panel = getPanel('games');
-    panel.innerHTML = `<div class="result-content">Starting…<span class="spinner"></span></div>`;
-    const game = document.getElementById('gameType').value;
-    const diff = document.getElementById('gameDifficulty').value;
-    try {
-      const reply = await callOpenAI([
-        { role:'system', content:`You are a games master creating a ${diff} ${game}.` },
-        { role:'user',   content:'Please generate one challenge.' }
-      ]);
-      panel.innerHTML = `<div class="result-content">${formatHTML(reply)}</div>`;
-    } catch {
-      panel.innerHTML = `<div class="result-content">⚠️ Something went wrong.</div>`;
-    }
-  };
-
-  // ── MEDICATION SAFETY ─────────────────────────────────────────
-  document.getElementById('medInteraction').onclick = async e => {
-    e.preventDefault();
-    const panel = getPanel('medsafety');
-    panel.innerHTML = `<div class="result-content">Checking…<span class="spinner"></span></div>`;
-    const meds = document.getElementById('medList').value.trim();
-    if (!meds) { panel.innerHTML = ''; return; }
-    try {
-      const reply = await callOpenAI([
-        { role:'system', content:'You are a drug interaction checker.' },
-        { role:'user',   content:`Medications: ${meds}` }
-      ]);
-      panel.innerHTML = `<div class="result-content">${formatHTML(reply)}</div>`;
-    } catch {
-      panel.innerHTML = `<div class="result-content">😕 Something went wrong.</div>`;
-    }
-  };
-  document.getElementById('adherence').onclick = async e => {
-    e.preventDefault();
-    const panel = getPanel('medsafety');
-    panel.innerHTML = `<div class="result-content">Generating reminders…<span class="spinner"></span></div>`;
-    const meds = document.getElementById('medList').value.trim();
-    try {
-      const reply = await callOpenAI([
-        { role:'system', content:'You are a medication adherence coach.' },
-        { role:'user',   content:`Create a daily schedule for: ${meds}` }
-      ]);
-      panel.innerHTML = `<div class="result-content">${formatHTML(reply)}</div>`;
-    } catch {
-      panel.innerHTML = `<div class="result-content">😕 Something went wrong.</div>`;
-    }
-  };
-
-  // ── SYMPTOM QUIZ ─────────────────────────────────────────────
-  document.getElementById('launchQuiz').onclick = async e => {
-    e.preventDefault();
-    const panel = getPanel('symptomQuiz');
-    panel.innerHTML = `<div class="result-content">Scoring…<span class="spinner"></span></div>`;
-    const s = document.querySelector('select[name="sleep"]').value;
-    const a = document.querySelector('select[name="appetite"]').value;
-    const c = document.querySelector('select[name="concentration"]').value;
-    try {
-      const reply = await callOpenAI([
-        { role:'system', content:'You are a clinical symptom scoring assistant.' },
-        { role:'user',   content:`Sleep:${s},Appetite:${a},Concentration:${c}` }
-      ]);
-      panel.innerHTML = `<div class="result-content">${formatHTML(reply)}</div>`;
-    } catch {
-      panel.innerHTML = `<div class="result-content">😕 Something went wrong.</div>`;
-    }
-  };
-
-  // ── DATA ANALYTICS & EXPORT ─────────────────────────────────
-  const engCtx = document.getElementById('engagementChart').getContext('2d'),
-        outCtx = document.getElementById('outcomeChart').getContext('2d');
-
-  const engChart = new Chart(engCtx, {
-    type: 'line',
-    data: {
-      labels: ['Mon','Tue','Wed','Thu','Fri'],
-      datasets: [{ label:'Sessions', data:[12,9,14,11,13],
-                   borderColor: getComputedStyle(document.documentElement).getPropertyValue('--primary').trim(),
-                   fill:false }]
-    }
-  });
-  const outChart = new Chart(outCtx, {
-    type: 'bar',
-    data: {
-      labels: ['Week 1','Week 2','Week 3'],
-      datasets: [{ label:'Outcome', data:[3.2,4.1,4.5],
-                   backgroundColor: getComputedStyle(document.documentElement).getPropertyValue('--secondary').trim() }]
-    }
-  });
-
-  document.getElementById('exportCharts').onclick = () => {
-    let csv = 'Chart,Label,Value\n';
-    [['Sessions',engChart],['Outcome',outChart]].forEach(([name,ch]) => {
-      ch.data.labels.forEach((lab,i) => {
-        csv += `${name},${lab},${ch.data.datasets[0].data[i]}\n`;
-      });
-    });
-    const blob = new Blob([csv], { type:'text/csv' }),
-          url  = URL.createObjectURL(blob),
-          a    = document.createElement('a');
-    a.href = url; a.download = 'analytics.csv'; a.click();
-    URL.revokeObjectURL(url);
-  };
-
-  // ── NEUROTRANSMITTER BALANCE ──────────────────────────────
-  document.getElementById('analyzeNeuro').onclick = async e => {
-    e.preventDefault();
-    const panel = getPanel('neurotransmitter');
-    panel.innerHTML = `<div class="result-content">Analyzing…<span class="spinner"></span></div>`;
-    const data = {
-      mood:       document.getElementById('ntMood').value,
-      sleep:      document.getElementById('ntSleep').value,
-      appetite:   document.getElementById('ntAppetite').value,
-      adherence:  document.getElementById('ntAdherence').value,
-      focus20:    document.getElementById('ntFocus').value
+    // ── CREATIVE THERAPIES ────────────────────────────────────────────────
+    document.getElementById('artEmotion').onclick = async e => {
+      e.preventDefault();
+      const panel = getPanel('creative');
+      panel.innerHTML = `<div class="result-content">Generating…<span class="spinner"></span></div>`;
+      const type   = document.getElementById('creativeType').value;
+      const style  = document.getElementById('creativeStyle').value;
+      const detail = document.getElementById('creativeDetail').value;
+      try {
+        const reply = await callOpenAI([
+          { role:'system', content:`You are a creative AI generating ${type} in a ${style} style with detail level ${detail}.` },
+          { role:'user',   content:'Please produce one creative piece.' }
+        ]);
+        panel.innerHTML = `<div class="result-content">${formatHTML(reply)}</div>`;
+      } catch {
+        panel.innerHTML = `<div class="result-content">⚠️ Something went wrong.</div>`;
+      }
     };
-    try {
-      const reply = await callOpenAI([
-        { role:'system', content:'You are a neurotransmitter balance specialist.' },
-        { role:'user',   content:`Profile Data:\n${JSON.stringify(data)}` }
-      ]);
-      panel.innerHTML = `<div class="result-content">${formatHTML(reply)}</div>`;
-    } catch {
-      panel.innerHTML = `<div class="result-content">😕 Something went wrong.</div>`;
-    }
-  };
 
-  // ── PHARMACOGENOMICS & DOSING ─────────────────────────────
-  document.getElementById('runPGx').onclick = async e => {
-    e.preventDefault();
-    const panel = getPanel('pharmacogenomics');
-    panel.innerHTML = `<div class="result-content">Processing…<span class="spinner"></span></div>`;
-    const drug   = document.getElementById('pgxDrug').value;
-    const gene   = document.getElementById('pgxGene').value;
-    const fileOK = document.getElementById('pgxUpload').files.length;
-    if (!drug || !gene || !fileOK) { panel.innerHTML=''; return; }
-    try {
-      const reply = await callOpenAI([
-        { role:'system', content:'You are a pharmacogenomics expert.' },
-        { role:'user',   content:`Drug:${drug}, Gene:${gene}, GenotypeFile:uploaded` }
-      ]);
-      panel.innerHTML = `<div class="result-content">${formatHTML(reply)}</div>`;
-    } catch {
-      panel.innerHTML = `<div class="result-content">😕 Something went wrong.</div>`;
-    }
-  };
+    // ── COGNITIVE GAMES ───────────────────────────────────────────────────
+    document.getElementById('puzzles').onclick = async e => {
+      e.preventDefault();
+      const panel = getPanel('games');
+      panel.innerHTML = `<div class="result-content">Starting…<span class="spinner"></span></div>`;
+      const game = document.getElementById('gameType').value;
+      const diff = document.getElementById('gameDifficulty').value;
+      try {
+        const reply = await callOpenAI([
+          { role:'system', content:`You are a games master creating a ${diff} ${game}.` },
+          { role:'user',   content:'Please generate one challenge.' }
+        ]);
+        panel.innerHTML = `<div class="result-content">${formatHTML(reply)}</div>`;
+      } catch {
+        panel.innerHTML = `<div class="result-content">⚠️ Something went wrong.</div>`;
+      }
+    };
 
-  // ── DRUG INTERACTION PROFILER ────────────────────────────
-  document.getElementById('checkInt').onclick = async e => {
-    e.preventDefault();
-    const panel = getPanel('interactions');
-    panel.innerHTML = `<div class="result-content">Checking…<span class="spinner"></span></div>`;
-    const meds = document.getElementById('intList').value.trim();
-    if (!meds) { panel.innerHTML = ''; return; }
-    try {
-      const reply = await callOpenAI([
-        { role:'system', content:'You are a drug interaction profiler.' },
-        { role:'user',   content:`Medications: ${meds}` }
-      ]);
-      panel.innerHTML = `<div class="result-content">${formatHTML(reply)}</div>`;
-    } catch {
-      panel.innerHTML = `<div class="result-content">😕 Something went wrong.</div>`;
-    }
-  };
+    // ── MEDICATION SAFETY ─────────────────────────────────────────────────
+    document.getElementById('medInteraction').onclick = async e => {
+      e.preventDefault();
+      const panel = getPanel('medsafety');
+      panel.innerHTML = `<div class="result-content">Checking…<span class="spinner"></span></div>`;
+      const meds = document.getElementById('medList').value.trim();
+      if (!meds) { panel.innerHTML = ''; return; }
+      try {
+        const reply = await callOpenAI([
+          { role:'system', content:'You are a drug interaction checker.' },
+          { role:'user',   content:`Medications: ${meds}` }
+        ]);
+        panel.innerHTML = `<div class="result-content">${formatHTML(reply)}</div>`;
+      } catch {
+        panel.innerHTML = `<div class="result-content">😕 Something went wrong.</div>`;
+      }
+    };
+    document.getElementById('adherence').onclick = async e => {
+      e.preventDefault();
+      const panel = getPanel('medsafety');
+      panel.innerHTML = `<div class="result-content">Generating reminders…<span class="spinner"></span></div>`;
+      const meds = document.getElementById('medList').value.trim();
+      try {
+        const reply = await callOpenAI([
+          { role:'system', content:'You are a medication adherence coach.' },
+          { role:'user',   content:`Create a daily schedule for: ${meds}` }
+        ]);
+        panel.innerHTML = `<div class="result-content">${formatHTML(reply)}</div>`;
+      } catch {
+        panel.innerHTML = `<div class="result-content">😕 Something went wrong.</div>`;
+      }
+    };
 
-  // ── EEG & BRAINWAVE INTERPRETER ──────────────────────────
-  document.getElementById('analyzeEEG').onclick = async e => {
-    e.preventDefault();
-    const panel = getPanel('eeg');
-    panel.innerHTML = `<div class="result-content">Analyzing…<span class="spinner"></span></div>`;
-    if (!document.getElementById('eegFile').files.length) { panel.innerHTML=''; return; }
-    try {
-      const reply = await callOpenAI([
-        { role:'system', content:'You are an EEG & brainwave interpreter.' },
-        { role:'user',   content:'EEG file uploaded.' }
-      ]);
-      panel.innerHTML = `<div class="result-content">${formatHTML(reply)}</div>`;
-    } catch {
-      panel.innerHTML = `<div class="result-content">😕 Something went wrong.</div>`;
-    }
-  };
+    // ── SYMPTOM QUIZ ───────────────────────────────────────────────────────
+    document.getElementById('launchQuiz').onclick = async e => {
+      e.preventDefault();
+      const panel = getPanel('symptomQuiz');
+      panel.innerHTML = `<div class="result-content">Scoring…<span class="spinner"></span></div>`;
+      const s = document.querySelector('select[name="sleep"]').value;
+      const a = document.querySelector('select[name="appetite"]').value;
+      const c = document.querySelector('select[name="concentration"]').value;
+      try {
+        const reply = await callOpenAI([
+          { role:'system', content:'You are a clinical symptom scoring assistant.' },
+          { role:'user',   content:`Sleep:${s},Appetite:${a},Concentration:${c}` }
+        ]);
+        panel.innerHTML = `<div class="result-content">${formatHTML(reply)}</div>`;
+      } catch {
+        panel.innerHTML = `<div class="result-content">😕 Something went wrong.</div>`;
+      }
+    };
 
-  // ── CLINICAL TRIAL MATCHING ENGINE ───────────────────────
-  document.getElementById('findTrials').onclick = async e => {
-    e.preventDefault();
-    const panel = getPanel('trialmatch');
-    panel.innerHTML = `<div class="result-content">Searching…<span class="spinner"></span></div>`;
-    const dx  = document.getElementById('trialDx').value.trim();
-    const loc = document.getElementById('trialLoc').value.trim();
-    if (!dx || !loc) { panel.innerHTML=''; return; }
-    try {
-      const reply = await callOpenAI([
-        { role:'system', content:'You are a clinical trial matching engine.' },
-        { role:'user',   content:`Diagnosis: ${dx}\nLocation: ${loc}` }
-      ]);
-      panel.innerHTML = `<div class="result-content">${formatHTML(reply)}</div>`;
-    } catch {
-      panel.innerHTML = `<div class="result-content">😕 Something went wrong.</div>`;
-    }
-  };
+    // ── DATA ANALYTICS & CSV EXPORT ────────────────────────────────────────
+    const engCtx = document.getElementById('engagementChart').getContext('2d'),
+          outCtx = document.getElementById('outcomeChart').getContext('2d');
 
-});
+    const engChart = new Chart(engCtx, {
+      type: 'line',
+      data: {
+        labels: ['Mon','Tue','Wed','Thu','Fri'],
+        datasets: [{ label:'Sessions', data:[12,9,14,11,13],
+                    borderColor: getComputedStyle(document.documentElement).getPropertyValue('--primary').trim(),
+                    fill:false }]
+      }
+    });
+    const outChart = new Chart(outCtx, {
+      type: 'bar',
+      data: {
+        labels: ['Week 1','Week 2','Week 3'],
+        datasets: [{ label:'Outcome', data:[3.2,4.1,4.5],
+                    backgroundColor: getComputedStyle(document.documentElement).getPropertyValue('--secondary').trim() }]
+      }
+    });
+    document.getElementById('exportCharts').onclick = () => {
+      let csv = 'Chart,Label,Value\n';
+      [['Sessions',engChart],['Outcome',outChart]].forEach(([name,ch]) => {
+        ch.data.labels.forEach((lab,i) => {
+          csv += `${name},${lab},${ch.data.datasets[0].data[i]}\n`;
+        });
+      });
+      const blob = new Blob([csv], { type:'text/csv' }),
+            url  = URL.createObjectURL(blob),
+            a    = document.createElement('a');
+      a.href = url; a.download = 'analytics.csv'; a.click();
+      URL.revokeObjectURL(url);
+    };
+
+    // ── NEUROTRANSMITTER BALANCE ─────────────────────────────────────────
+    document.getElementById('analyzeNeuro').onclick = async e => {
+      e.preventDefault();
+      const panel = getPanel('neurotransmitter');
+      panel.innerHTML = `<div class="result-content">Analyzing…<span class="spinner"></span></div>`;
+      const data = {
+        mood:      document.getElementById('ntMood').value,
+        sleep:     document.getElementById('ntSleep').value,
+        appetite:  document.getElementById('ntAppetite').value,
+        adherence: document.getElementById('ntAdherence').value,
+        focus:     document.getElementById('ntFocus').value
+      };
+      try {
+        const reply = await callOpenAI([
+          { role:'system', content:'You are a neurotransmitter balance specialist.' },
+          { role:'user',   content:`Profile Data:\n${JSON.stringify(data)}` }
+        ]);
+        panel.innerHTML = `<div class="result-content">${formatHTML(reply)}</div>`;
+      } catch {
+        panel.innerHTML = `<div class="result-content">😕 Something went wrong.</div>`;
+      }
+    };
+
+    // ── PHARMACOGENOMICS & DOSING ────────────────────────────────────────
+    document.getElementById('runPGx').onclick = async e => {
+      e.preventDefault();
+      const panel = getPanel('pharmacogenomics');
+      panel.innerHTML = `<div class="result-content">Processing…<span class="spinner"></span></div>`;
+      const drug = document.getElementById('pgxDrug').value;
+      const gene = document.getElementById('pgxGene').value;
+      if (!drug || !gene || !document.getElementById('pgxUpload').files.length) {
+        panel.innerHTML = '';
+        return;
+      }
+      try {
+        const reply = await callOpenAI([
+          { role:'system', content:'You are a pharmacogenomics expert.' },
+          { role:'user',   content:`Drug:${drug}, Gene:${gene}, GenotypeFile:uploaded` }
+        ]);
+        panel.innerHTML = `<div class="result-content">${formatHTML(reply)}</div>`;
+      } catch {
+        panel.innerHTML = `<div class="result-content">😕 Something went wrong.</div>`;
+      }
+    };
+
+    // ── DRUG INTERACTIONS PROFILER ───────────────────────────────────────
+    document.getElementById('checkInt').onclick = async e => {
+      e.preventDefault();
+      const panel = getPanel('interactions');
+      panel.innerHTML = `<div class="result-content">Checking…<span class="spinner"></span></div>`;
+      const meds = document.getElementById('intList').value.trim();
+      if (!meds) { panel.innerHTML = ''; return; }
+      try {
+        const reply = await callOpenAI([
+          { role:'system', content:'You are a drug interaction profiler.' },
+          { role:'user',   content:`Medications: ${meds}` }
+        ]);
+        panel.innerHTML = `<div class="result-content">${formatHTML(reply)}</div>`;
+      } catch {
+        panel.innerHTML = `<div class="result-content">😕 Something went wrong.</div>`;
+      }
+    };
+
+    // ── EEG & BRAINWAVE INTERPRETER ─────────────────────────────────────
+    document.getElementById('analyzeEEG').onclick = async e => {
+      e.preventDefault();
+      const panel = getPanel('eeg');
+      panel.innerHTML = `<div class="result-content">Analyzing…<span class="spinner"></span></div>`;
+      if (!document.getElementById('eegFile').files.length) { panel.innerHTML = ''; return; }
+      try {
+        const reply = await callOpenAI([
+          { role:'system', content:'You are an EEG & brainwave interpreter.' },
+          { role:'user',   content:'EEG file uploaded.' }
+        ]);
+        panel.innerHTML = `<div class="result-content">${formatHTML(reply)}</div>`;
+      } catch {
+        panel.innerHTML = `<div class="result-content">😕 Something went wrong.</div>`;
+      }
+    };
+
+    // ── CLINICAL TRIAL MATCHING ENGINE ─────────────────────────────────
+    document.getElementById('findTrials').onclick = async e => {
+      e.preventDefault();
+      const panel = getPanel('trialmatch');
+      panel.innerHTML = `<div class="result-content">Searching…<span class="spinner"></span></div>`;
+      const dx  = document.getElementById('trialDx').value.trim();
+      const loc = document.getElementById('trialLoc').value.trim();
+      if (!dx || !loc) { panel.innerHTML = ''; return; }
+      try {
+        const reply = await callOpenAI([
+          { role:'system', content:'You are a clinical trial matching engine.' },
+          { role:'user',   content:`Diagnosis: ${dx}\nLocation: ${loc}` }
+        ]);
+        panel.innerHTML = `<div class="result-content">${formatHTML(reply)}</div>`;
+      } catch {
+        panel.innerHTML = `<div class="result-content">😕 Something went wrong.</div>`;
+      }
+    };
+
+  });
 </script>
+  
 </body>
 </html>
