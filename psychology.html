@@ -83,7 +83,7 @@ aside {
     flex:1;
     /* slide in under the header & sidebar */
     margin-top:60px;
-    margin-left: var(--sidebar-width);
+    margin-left: 220px;
     padding:var(--padding);
     overflow-x:hidden;
    transition: margin-left var(--transition);
@@ -114,7 +114,7 @@ aside {
     /*──────────────────────── Inputs & Buttons ─────────────────────────────────*/
     input[type="text"],input[type="number"],textarea,select{width:100%;padding:.75rem;border:1px solid var(--muted);
       border-radius:var(--radius);background:var(--accent);color:var(--text);}
-    input:focus,textarea:focus,select:focus{border-color:var(--primary);box-shadow:0 0 8px var(--primary);}
+    input:focus,textarea:focus,select:focus{box-shadow:0 0 8px var(--primary);}
     input[type="range"]{width:100%;accent-color:var(--primary);}
     .checkbox-group{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:.5rem;}
     fieldset{border:1px solid var(--muted);border-radius:var(--radius);padding:.75rem;}
@@ -127,16 +127,16 @@ aside {
     button.btn-secondary:hover{background:var(--primary-alt);}
 
     /*──────────────────────── Response Panels ─────────────────────────────────*/
-    .response{background:var(--surface);backdrop-filter:blur(8px);border-left:4px solid var(--secondary);
-              padding:var(--padding);border-radius:var(--radius);margin-top:1rem;position:relative;box-shadow:var(--shadow-light);}
+      .response{background:var(--surface);backdrop-filter:blur(8px);border-left:4px solid var(--secondary);
+              padding:var(--padding);border-radius:var(--radius);margin-top:1rem;position:relative;box-shadow:var(--shadow-light);
+              transition:all var(--transition);}
     .response .result-content{white-space:pre-wrap;line-height:1.5;}
-    .close-btn{position:absolute;top:var(--padding);right:var(--padding);background:none;border:none;
-               font-size:1.2rem;color:var(--secondary);cursor:pointer;}
-    .tool-row{position:absolute;bottom:var(--padding);right:var(--padding);display:flex;gap:.5rem;}
-    .tool-row button{background:var(--accent);border:none;border-radius:50%;width:1.6rem;height:1.6rem;
-                     display:flex;align-items:center;justify-content:center;cursor:pointer;transition:transform var(--transition);}
-    .tool-row button:hover{transform:scale(1.2);}
-
+    .tool-row{position:absolute;bottom:var(--padding);left:auto;right:var(--padding);display:flex;gap:.5rem;}
+    .close-btn,.copy-btn,.dl-btn{background:none;border:none;cursor:pointer;}
+    .copy-btn,.dl-btn{border:1px solid var(--muted);border-radius:50%;width:1.6rem;height:1.6rem;
+                      display:flex;align-items:center;justify-content:center;}
+    .copy-btn:focus,.dl-btn:focus{outline:none;}
+    
     /*──────────────────────── Chat UI ─────────────────────────────────*/
     .chat-box{background:var(--bg);border:1px solid var(--muted);border-radius:var(--radius);
               padding:var(--padding);max-height:300px;overflow-y:auto;display:flex;flex-direction:column;}
@@ -144,7 +144,12 @@ aside {
     .user-msg{background:var(--primary);color:#fff;align-self:flex-end;}
     .bot-msg{background:var(--accent);color:var(--text);align-self:flex-start;}
     .timestamp{font-size:.65rem;color:var(--muted);position:absolute;bottom:-1.2rem;right:1rem;}
-
+       #therapybot .tool-row{top:var(--padding);right:var(--padding);left:auto!important;} /* push to right */
+    .chat-box{background:var(--bg);border:1px solid var(--muted);border-radius:var(--radius);
+              padding:var(--padding);max-height:300px;overflow-y:auto;display:flex;flex-direction:column;}
+    .bot-msg{background:var(--accent);color:var(--text);align-self:flex-start;padding:.75rem 1rem;border-radius:1rem;}
+    .user-msg{background:var(--primary);color:#fff;align-self:flex-end;padding:.75rem 1rem;border-radius:1rem;}
+    .timestamp{font-size:.65rem;color:var(--muted);position:absolute;bottom:-1.2rem;right:1rem;}
     /*────────────────── NEUROTRANSMITTER BALANCE ──────────────────*/
 #neurotransmitter {
   background: linear-gradient(135deg, rgba(90,142,238,0.15), rgba(255,117,140,0.1));
@@ -331,6 +336,13 @@ aside {
   background: var(--accent);
   transform: scale(1.2);
 }
+       #creativeDetail + #rangeVal {margin-left:.5rem;font-weight:600;}
+
+    /*──────────────────────── Clinical Trial, Drug Profiler & PGx ─────────────────────────────────*/
+    select, input[type="text"], input[type="number"], textarea{width:100%;padding:.75rem;border:1px solid var(--muted);
+      border-radius:var(--radius);background:var(--accent);color:var(--text);}
+    fieldset{border:1px solid var(--muted);padding:.75rem;border-radius:var(--radius);}
+    legend{padding:0 .5rem;font-weight:600;color:var(--secondary);}
     
     /*──────────────────────── Charts ─────────────────────────────────*/
     .charts{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:1.5rem;}
@@ -584,39 +596,45 @@ aside {
       </div>
     </section>
 
+   
+    <!-- Pharmacogenomics & Dosing – extra fields & options -->
     <section class="module" id="pharmacogenomics">
-  <h2><i class="fas fa-dna"></i> Pharmacogenomics & Dosing</h2>
-  <p class="desc">Upload your genotype to get AI-optimized drug recommendations and dosing guidelines.</p>
-  <form id="pgx-form">
-    <label>Upload Genotype (VCF):
-      <input type="file" id="pgxUpload" accept=".vcf,.txt">
-    </label>
-    <label>Drug:
-      <select id="pgxDrug">
-        <option>Clopidogrel</option>
-        <option>Warfarin</option>
-        <option>Codeine</option>
-        <option>Citalopram</option>
-      </select>
-    </label>
-
-    <!-- NEW: Select Relevant Gene Variant -->
-    <label>Gene Variant:
-      <select id="pgxGene">
-        <option>CYP2C19*1</option><option>CYP2C19*2</option><option>CYP2C19*3</option>
-        <option>CYP2D6*1</option><option>CYP2D6*4</option><option>CYP2D6*5</option>
-        <option>TPMT*1</option><option>TPMT*2</option><option>TPMT*3</option>
-        <option>UGT1A1*28</option><option>VKORC1</option><option>MTHFR C677T</option>
-        <option>HLA-B*57:01</option><option>SLCO1B1*5</option><option>CFTR ΔF508</option>
-        <option>G6PD A−</option><option>HFE C282Y</option><option>NAT2 Slow</option>
-        <option>COMT Val158Met</option><option>Other…</option>
-      </select>
-    </label>
-
-    <button id="runPGx" class="btn"><i class="fas fa-flask"></i> Run PGx Analysis</button>
-  </form>
-  <div id="pharmacogenomicsPanel" class="response" hidden> … </div>
-</section>
+      <h2><i class="fas fa-dna"></i> Pharmacogenomics & Dosing</h2>
+      <p class="desc">Upload genotype & clinical info for AI-optimized dosing.</p>
+      <form id="pgx-form">
+        <label>Upload Genotype (VCF):
+          <input type="file" id="pgxUpload" accept=".vcf,.txt">
+        </label>
+        <label style="margin-top:1rem;">Sex:
+          <select id="pgxSex" required><option>Male</option><option>Female</option><option>Other</option></select>
+        </label>
+        <label>Age:
+          <input type="number" id="pgxAge" min="0" required>
+        </label>
+        <label>Weight (kg):
+          <input type="number" id="pgxWeight" min="1">
+        </label>
+        <label>Drug:
+          <select id="pgxDrug">
+            <option>Clopidogrel</option><option>Warfarin</option><option>Codeine</option>
+            <option>Citalopram</option><option>Sertraline</option><option>Fluoxetine</option>
+            <option>Risperidone</option><option>Lithium</option><option>Valproate</option>
+            <option>Lamotrigine</option><option>Other</option>
+          </select>
+        </label>
+        <input id="pgxDrugOther" type="text" placeholder="Enter drug…" style="display:none;margin-top:.5rem;"/>
+        <label>Gene Variant:
+          <select id="pgxGene">
+            <option>CYP2C19*1</option><option>CYP2C19*2</option><option>CYP2C19*3</option>
+            <option>CYP2D6*1</option><option>CYP2D6*4</option><option>TPMT*1</option>
+            <option>UGT1A1*28</option><option>VKORC1</option><option>MTHFR C677T</option>
+            <option>HLA-B*57:01</option><option>SLCO1B1*5</option><option>Other</option>
+          </select>
+        </label>
+        <button id="runPGx" class="btn" style="margin-top:1rem;"><i class="fas fa-flask"></i> Run PGx Analysis</button>
+      </form>
+      <div id="pharmacogenomicsPanel" class="response" hidden></div>
+    </section>
     
     <!-- 3. Dream & Subconscious Explorer -->
     <section class="module" id="dream">
@@ -699,29 +717,40 @@ aside {
       </div>
     </section>
 
-     <section class="module" id="interactions">
-  <h2><i class="fas fa-exchange-alt"></i> Drug Interaction Profiler</h2>
-  <p class="desc">Enter all your medications to get an AI-powered interaction risk report.</p>
-  <form id="int-form">
-    <label>Med List (comma-sep):
-      <input type="text" id="intList" placeholder="e.g. Metformin, Ibuprofen, ...">
-    </label>
 
-    <!-- NEW: Select Comorbid Conditions -->
-    <label>Comorbid Conditions:
-      <select id="intComorbid">
-        <option>Hypertension</option><option>Diabetes</option><option>Asthma</option><option>Depression</option>
-        <option>Anxiety</option><option>Insomnia</option><option>Obesity</option><option>Hyperlipidemia</option>
-        <option>Arthritis</option><option>GERD</option><option>Migraine</option><option>ADHD</option>
-        <option>Parkinson’s</option><option>Alzheimer’s</option><option>Epilepsy</option><option>COPD</option>
-        <option>CKD</option><option>CHF</option><option>HIV</option><option>Cancer</option>
-      </select>
-    </label>
+    <!--  Drug Interaction Profiler & Comorbid Conditions -->
+    <section class="module" id="interactions">
+      <h2><i class="fas fa-exchange-alt"></i> Drug Interaction Profiler</h2>
+      <p class="desc">Enter meds & conditions to get interaction risk report.</p>
+      <form id="int-form">
+        <label>Med List:
+          <select id="intListSelect">
+            <option>Sertraline</option><option>Fluoxetine</option><option>Paroxetine</option>
+            <option>Escitalopram</option><option>Venlafaxine</option><option>Duloxetine</option>
+            <option>Risperidone</option><option>Quetiapine</option><option>Lithium</option>
+            <option>Valproate</option><option>Lamotrigine</option><option>Carbamazepine</option>
+            <option>Topiramate</option><option>Gabapentin</option><option>Pregabalin</option>
+            <option>Clonazepam</option><option>Diazepam</option><option>Alprazolam</option>
+            <option>Buspirone</option><option>Other</option>
+          </select>
+        </label>
+        <input id="intListOther" type="text" placeholder="Enter drug…" style="display:none;margin-top:.5rem;"/>
 
-    <button id="checkInt" class="btn"><i class="fas fa-pills"></i> Check Interactions</button>
-  </form>
-  <div id="interactionsPanel" class="response" hidden> … </div>
-</section>
+        <label style="margin-top:1rem;">Comorbid Conditions:
+          <select id="intComorbid">
+            <option>Schizophrenia</option><option>Bipolar Disorder</option><option>Depression</option>
+            <option>OCD</option><option>Anxiety</option><option>Autism</option>
+            <option>ADHD</option><option>Dementia</option><option>Alzheimer’s</option>
+            <option>Parkinson’s</option><option>PTSD</option><option>Epilepsy</option>
+            <option>Insomnia</option><option>Substance Use</option><option>Anorexia</option>
+            <option>Bulimia</option><option>Phobia</option><option>Psychosis</option>
+            <option>Other</option>
+          </select>
+        </label>
+        <button id="checkInt" class="btn" style="margin-top:1rem;"><i class="fas fa-pills"></i> Check Interactions</button>
+      </form>
+      <div id="interactionsPanel" class="response" hidden></div>
+    </section>
     
     <!-- 4. AI-Curated Creative Therapies -->
     <section class="module" id="creative">
@@ -756,31 +785,28 @@ aside {
       </div>
     </section>
 
+     <!-- 7. EEG & Brainwave Interpreter: require file before submit -->
     <section class="module" id="eeg">
-  <h2><i class="fas fa-wave-square"></i> EEG & Brainwave Interpreter</h2>
-  <p class="desc">Upload your EEG data—AI decodes patterns in alpha, beta, theta, and delta bands.</p>
-  <form id="eeg-form">
-    <label>Upload EEG File (EDF/CSV):
-      <input type="file" id="eegFile" accept=".edf,.csv">
-    </label>
+      <h2><i class="fas fa-wave-square"></i> EEG & Brainwave Interpreter</h2>
+      <p class="desc">Upload EEG data—AI decodes patterns.</p>
+      <form id="eeg-form">
+        <label>Upload EEG File (EDF/CSV):
+          <input type="file" id="eegFile" accept=".edf,.csv">
+        </label>
+        <label style="margin-top:1rem;">Condition:
+          <select id="eegCondition">
+            <!-- 20 conditions + Other… -->
+            <option>Resting Eyes Closed</option><option>Resting Eyes Open</option>
+            <option>Sleep Stage 1</option><option>Sleep Stage 2</option><option>REM Sleep</option>
+            <option>Meditation</option><option>Reading</option><option>Stress Task</option>
+            <option>Typing</option><option>Video Watching</option><option>Other</option>
+          </select>
+        </label>
+        <button id="analyzeEEG" class="btn" style="margin-top:1rem;"><i class="fas fa-microchip"></i> Analyze EEG</button>
+      </form>
+      <div id="eegPanel" class="response" hidden></div>
+    </section>
 
-    <!-- NEW: Recording Condition -->
-    <label>Recording Condition:
-      <select id="eegCondition">
-        <option>Resting Eyes Closed</option><option>Resting Eyes Open</option><option>Sleep Stage 1</option>
-        <option>Sleep Stage 2</option><option>Sleep Stage 3</option><option>REM Sleep</option>
-        <option>Meditation</option><option>Reading</option><option>Math Task</option>
-        <option>Visual Stimuli</option><option>Auditory Stimuli</option><option>Hyperventilation</option>
-        <option>Photostimulation</option><option>Stress Task</option><option>Relaxation</option>
-        <option>Walking in Place</option><option>Typing</option><option>Conversation</option>
-        <option>Video Watching</option><option>Other…</option>
-      </select>
-    </label>
-
-    <button id="analyzeEEG" class="btn"><i class="fas fa-microchip"></i> Analyze EEG</button>
-  </form>
-  <div id="eegPanel" class="response" hidden> … </div>
-</section>
     
     <!-- 5. Dynamic Cognitive Games -->
     <section class="module" id="games">
@@ -864,58 +890,62 @@ aside {
       </div>
     </section>
 
+
+     <!-- 6. Clinical Trial Matcher (with 20 options + Other) -->
     <section class="module" id="trialmatch">
-  <h2><i class="fas fa-handshake"></i> Clinical Trial Matcher</h2>
-  <p class="desc">Describe your condition and location—AI will suggest matching neuro-psych trials.</p>
-  <form id="trial-form">
-    <label>Diagnosis:
-      <input type="text" id="trialDx" placeholder="e.g. Major Depressive Disorder">
-    </label>
-    <label>Location:
-      <input type="text" id="trialLoc" placeholder="City, Country">
-    </label>
+      <h2><i class="fas fa-handshake"></i> Clinical Trial Matcher</h2>
+      <p class="desc">Describe your diagnosis & location—AI suggests trials.</p>
+      <form id="trial-form">
+        <label>Diagnosis:
+          <select id="trialDx">
+            <option>Anxiety</option><option>Depression</option><option>Schizophrenia</option>
+            <option>Bipolar Disorder</option><option>ADHD</option><option>PTSD</option>
+            <option>OCD</option><option>Insomnia</option><option>Autism</option>
+            <option>Parkinson’s</option><option>Alzheimer’s</option><option>Epilepsy</option>
+            <option>Migraine</option><option>Dementia</option><option>Substance Use</option>
+            <option>Phobia</option><option>Anorexia</option><option>Bulimia</option>
+            <option>Borderline Personality</option><option value="other">Other</option>
+          </select>
+        </label>
+        <input id="trialDxOther" type="text" placeholder="Enter diagnosis…" style="display:none;margin-top:.5rem;"/>
 
-    <!-- NEW: Desired Trial Phase -->
-    <label>Trial Phase:
-      <select id="trialPhase">
-        <option>Phase I</option><option>Phase II</option><option>Phase III</option><option>Phase IV</option>
-        <option>First-in-Human</option><option>Proof-of-Concept</option><option>Open-Label</option>
-        <option>Randomized</option><option>Double-Blind</option><option>Placebo-Controlled</option>
-        <option>Adaptive Design</option><option>Dose-Escalation</option><option>Biomarker Study</option>
-        <option>Observational</option><option>Longitudinal</option><option>Cross-Over</option>
-        <option>Basket Trial</option><option>Umbrella Trial</option><option>N-of-1 Trial</option>
-        <option>Other…</option>
-      </select>
-    </label>
+        <label style="margin-top:1rem;">Location:
+          <input id="trialLoc" type="text" placeholder="City, Country">
+        </label>
 
-    <button id="findTrials" class="btn"><i class="fas fa-search"></i> Find Trials</button>
-  </form>
-  <div id="trialmatchPanel" class="response" hidden> … </div>
-</section>
+        <label style="margin-top:1rem;">Trial Phase:
+          <select id="trialPhase">
+            <option>Phase I</option><option>Phase II</option><option>Phase III</option><option>Phase IV</option>
+            <option>First-in-Human</option><option>Proof-of-Concept</option><option>Open-Label</option>
+            <option>Randomized</option><option>Double-Blind</option><option>Placebo-Controlled</option>
+            <option>Adaptive Design</option><option>Dose-Escalation</option><option>Biomarker Study</option>
+            <option>Observational</option><option>Longitudinal</option><option>Cross-Over</option>
+            <option>Basket Trial</option><option>Umbrella Trial</option><option>N-of-1 Trial</option>
+            <option value="other">Other</option>
+          </select>
+        </label>
+        <button id="findTrials" class="btn" style="margin-top:1rem;"><i class="fas fa-search"></i> Find Trials</button>
+      </form>
+      <div id="trialmatchPanel" class="response" hidden></div>
+    </section>
     
-    <!-- 8. Data Analytics & ROI -->
+    <!-- 8. Data Analytics & ROI with Date-Range filtering -->
     <section class="module" id="analytics">
       <h2><i class="fas fa-chart-pie"></i> Data Analytics & ROI</h2>
-      <p class="desc">Visualize sessions, outcome metrics, and export CSV reports.</p>
-      <div class="charts">
-        <div class="chart-card">
-          <canvas id="engagementChart" height="200"></canvas>
-          <figcaption>Sessions Over Time</figcaption>
-        </div>
-        <div class="chart-card">
-          <canvas id="outcomeChart" height="200"></canvas>
-          <figcaption>Outcome Metrics</figcaption>
-        </div>
-      </div>
-      <div style="display:flex;gap:1rem;margin-top:1rem;">
+      <p class="desc">Visualize metrics & export CSV reports.</p>
+      <div style="display:flex;gap:1rem;flex-wrap:wrap;">
         <label>Date Range:
           <input type="date" id="analyticsFrom"> –
           <input type="date" id="analyticsTo">
         </label>
         <button id="exportCharts" class="btn"><i class="fas fa-file-export"></i> Export CSV</button>
       </div>
+      <div class="charts" style="margin-top:1rem;">
+        <div class="chart-card"><canvas id="engagementChart" height="200"></canvas><figcaption>Sessions Over Time</figcaption></div>
+        <div class="chart-card"><canvas id="outcomeChart" height="200"></canvas><figcaption>Outcome Metrics</figcaption></div>
+      </div>
     </section>
-
+    
     <!-- FOOTER -->
     <footer style="text-align:center;padding:1rem;background:var(--surface);color:var(--muted)">
       &copy; 2025 Vitra AI – Neuropharma Command Center
@@ -937,11 +967,34 @@ aside {
     const j = await res.json();
     return j.choices[0].message.content;
   }
+
   function formatHTML(txt) {
     return txt
-      .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
-      .replace(/\*(.+?)\*/g, '<em>$1</em>')
-      .split(/\n{2,}/).map(p => `<p>${p.trim()}</p>`).join('');
+      .replace(/^### (.*$)/gim, '<h3>$1</h3>')                   // convert ### headings
+      .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')          // bold
+      .replace(/\*(.+?)\*/g, '<em>$1</em>')                      // italics
+      .split(/\n{2,}/).map(p => `<p>${p.trim()}</p>`).join(''); // paragraphs
+  }
+
+  // ── Global “Other”-input handler ─────────────────────────────────────
+  document.addEventListener('DOMContentLoaded', () => {
+    document.querySelectorAll('select').forEach(select => {
+      select.addEventListener('change', () => {
+        const otherInput = select.parentElement.querySelector('.other-input');
+        if (!otherInput) return;
+        otherInput.style.display =
+          select.value.toLowerCase() === 'other' ? 'block' : 'none';
+      });
+    });
+  });
+
+  // Returns the select’s choice or, if “Other”, the custom input’s value
+  function getSelectValue(select) {
+    const otherInput = select.parentElement.querySelector('.other-input');
+    if (otherInput && select.value.toLowerCase() === 'other') {
+      return otherInput.value.trim();
+    }
+    return select.value;
   }
 
   document.addEventListener('DOMContentLoaded', () => {
@@ -951,43 +1004,47 @@ aside {
     function getPanel(sectionId) {
       const sec = document.getElementById(sectionId);
       let panel = sec.querySelector('.response');
-      if (!panel) {
-        panel = document.createElement('div');
-        panel.className = 'response';
-        sec.append(panel);
-      }
       panel.hidden = false;
       return panel;
     }
 
-    // ── SIDEBAR & HEADER / MAIN TOGGLE ────────────────────────────────────
+    // ── Sidebar & Theme Toggles ───────────────────────────────────────────
     document.getElementById('shrinkBtn').onclick = () =>
-      document.getElementById('sidebar').classList.toggle('collapsed');
-
-    document.getElementById('hamburger').onclick = () => {
       body.classList.toggle('sidebar-hidden');
-      document.getElementById('sidebar').classList.toggle('collapsed');
-    };
-
-    // ensure header & main shift when .sidebar-hidden
-    const obs = new MutationObserver(() => {
-      document.querySelector('header').classList.toggle(
-        'sidebar-collapsed',
-        body.classList.contains('sidebar-hidden')
-      );
-      document.querySelector('main').classList.toggle(
-        'sidebar-collapsed',
-        body.classList.contains('sidebar-hidden')
-      );
-    });
-    obs.observe(body, { attributes: true, attributeFilter: ['class'] });
-
+    document.getElementById('hamburger').onclick = () =>
+      body.classList.toggle('sidebar-hidden');
     document.getElementById('themeToggle').onclick = () => {
       document.documentElement.classList.toggle('dark');
       document.getElementById('themeToggle').classList.toggle('fa-sun');
     };
 
-    // ── THERAPY BOT ────────────────────────────────────────────────────────
+    // ── Delegated Response Buttons (copy, download, close) ────────────────
+    body.addEventListener('click', e => {
+      // Copy
+      if (e.target.closest('.copy-btn')) {
+        const btn = e.target.closest('.copy-btn');
+        const text = btn.closest('.response').querySelector('.result-content').innerText;
+        navigator.clipboard.writeText(text).then(() => {
+          btn.innerHTML = '<i class="fas fa-check"></i>';
+          setTimeout(() => btn.innerHTML = '<i class="fas fa-copy"></i>', 1000);
+        });
+      }
+      // Download
+      if (e.target.closest('.dl-btn')) {
+        const text = e.target.closest('.response').querySelector('.result-content').innerText;
+        const blob = new Blob([text], { type: 'text/plain' });
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = 'response.txt';
+        a.click();
+      }
+      // Close panel
+      if (e.target.closest('.close-btn')) {
+        e.target.closest('.response').hidden = true;
+      }
+    });
+
+    // ── Therapy Bot ────────────────────────────────────────────────────────
     const chatBox   = document.getElementById('chatBox'),
           chatHint  = document.getElementById('chatHint'),
           chatInput = document.getElementById('therapyInput'),
@@ -1006,20 +1063,19 @@ aside {
       const txt = chatInput.value.trim();
       if (!txt) return;
       addMessage('You', txt);
-      history.push({ who:'You', text:txt });
+      history.push({ who: 'You', text: txt });
       chatInput.value = '';
       chatHint.style.display = 'block';
 
-      const sys = `You are a therapist. Modality=${document.getElementById('therapyModality').value};` +
-                  `Length=${document.getElementById('therapyLength').value};` +
-                  `Language=${document.getElementById('therapyLang').value}.`;
+      const sys = `You are a therapist. Modality=${getSelectValue(therapyModality)};` +
+                  `Length=${getSelectValue(therapyLength)};Language=${getSelectValue(therapyLang)}.`;
       try {
         const reply = await callOpenAI([
-          { role:'system', content: sys },
-          { role:'user',   content: txt }
+          { role: 'system', content: sys },
+          { role: 'user', content: txt }
         ]);
         addMessage('Therapist', reply);
-        history.push({ who:'Therapist', text:reply });
+        history.push({ who: 'Therapist', text: reply });
       } catch {
         addMessage('Therapist', '⚠️ Something went wrong.');
       } finally {
@@ -1031,52 +1087,53 @@ aside {
       chatBox.innerHTML = '';
       history.length = 0;
     };
+
     document.getElementById('viewHistory').onclick = () => {
       const modal = document.createElement('div');
       modal.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.6);display:flex;align-items:center;justify-content:center;z-index:2000';
       modal.innerHTML = `
-        <div style="background:var(--surface);padding:1rem;border-radius:var(--radius);max-width:400px;width:90%;">
+        <div style="background:var(--surface);padding:1rem;border-radius:var(--radius);max-width:400px;width:90%;position:relative;">
           <h3>Chat History</h3>
+          <button style="position:absolute;top:.5rem;right:.5rem;border:none;background:none;font-size:1.2rem;cursor:pointer;"
+                  onclick="this.closest('div').parentElement.remove()">
+            <i class="fas fa-times"></i>
+          </button>
           <ul style="list-style:none;padding:0;max-height:300px;overflow:auto;">
-            ${history.map((m,i) => `
-              <li style="margin:.5rem 0;">
-                <strong>${m.who}:</strong> ${m.text}
-                <button data-i="${i}" style="float:right;border:none;background:none;color:var(--secondary);cursor:pointer;">
-                  <i class="fas fa-trash"></i>
-                </button>
-              </li>`).join('')}
+            ${history.map((m, i) => `
+            <li style="margin:.5rem 0;">
+              <strong>${m.who}:</strong> ${m.text}
+              <button data-i="${i}" style="float:right;border:none;background:none;color:var(--secondary);cursor:pointer;">
+                <i class="fas fa-trash"></i>
+              </button>
+            </li>`).join('')}
           </ul>
-          <button onclick="this.closest('div').remove()">Close</button>
         </div>`;
       document.body.append(modal);
       modal.querySelectorAll('button[data-i]').forEach(btn => {
         btn.onclick = () => {
-          history.splice(+btn.dataset.i,1);
+          history.splice(+btn.dataset.i, 1);
           modal.remove();
         };
       });
     };
 
-    // ── MOOD TRACKER ───────────────────────────────────────────────────────
-    const moodR = document.getElementById('moodRange'),
-          moodV = document.getElementById('moodValue');
-    moodR.oninput = () => moodV.textContent = moodR.value;
-
+    // ── Mood Tracker ──────────────────────────────────────────────────────
+    moodRange.oninput = () => moodValue.textContent = moodRange.value;
     document.getElementById('mood-form').onsubmit = async e => {
       e.preventDefault();
       const panel = getPanel('moodTracker');
       panel.innerHTML = `<div class="result-content">Analyzing…<span class="spinner"></span></div>`;
       const data = {
-        mood:    moodR.value,
-        emotions:[...document.querySelectorAll('#moodTracker input[name="emotions"]:checked')].map(c=>c.value),
-        triggers:[...document.querySelectorAll('#moodTracker input[name="triggers"]:checked')].map(c=>c.value),
-        note:    document.getElementById('moodNote').value.trim(),
-        selfCare:document.getElementById('selfCare').value
+        mood: moodRange.value,
+        emotions: [...document.querySelectorAll('#moodTracker input[name="emotions"]:checked')].map(c=>c.value),
+        triggers: [...document.querySelectorAll('#moodTracker input[name="triggers"]:checked')].map(c=>c.value),
+        note: document.getElementById('moodNote').value.trim(),
+        selfCare: getSelectValue(selfCare)
       };
       try {
         const reply = await callOpenAI([
-          { role:'system', content:'You are a mental health assistant.' },
-          { role:'user',   content:`Daily Mood Entry:\n${JSON.stringify(data)}` }
+          { role: 'system', content: 'You are a mental health assistant.' },
+          { role: 'user', content: `Daily Mood Entry:\n${JSON.stringify(data)}` }
         ]);
         panel.innerHTML = `<div class="result-content">${formatHTML(reply)}</div>`;
       } catch {
@@ -1084,15 +1141,15 @@ aside {
       }
     };
 
-    // ── DREAM EXPLORER ────────────────────────────────────────────────────
+    // ── Dream Explorer ────────────────────────────────────────────────────
     function wireDream(btnId, sysPrompt, buildContent) {
       document.getElementById(btnId).onclick = async () => {
         const panel = getPanel('dream');
         panel.innerHTML = `<div class="result-content">Processing…<span class="spinner"></span></div>`;
         try {
           const reply = await callOpenAI([
-            { role:'system', content: sysPrompt },
-            { role:'user',   content: buildContent() }
+            { role: 'system', content: sysPrompt },
+            { role: 'user', content: buildContent() }
           ]);
           panel.innerHTML = `<div class="result-content">${formatHTML(reply)}</div>`;
         } catch {
@@ -1101,35 +1158,39 @@ aside {
       };
     }
     wireDream('analyzeDream',
-              'You are a dream interpreter. Use all details.',
-              () => {
-                const narrative = document.getElementById('dreamText').value.trim();
-                const symbols   = [...document.querySelectorAll('#dream input[type="checkbox"]:checked')].map(cb=>cb.value).join(', ');
-                const pre       = document.getElementById('preMood').value;
-                const post      = document.getElementById('postMood').value;
-                const tags      = document.getElementById('dreamTags').value.trim();
-                const refl      = document.getElementById('dreamReflect').value.trim();
-                return `Narrative: ${narrative}\nSymbols: ${symbols}\nBefore sleep: ${pre}\nOn waking: ${post}\nTags: ${tags}\nReflection: ${refl}`;
-              });
+      'You are a dream interpreter. Use all details.',
+      () => {
+        const narrative = document.getElementById('dreamText').value.trim();
+        const symbols   = [...document.querySelectorAll('#dream input[type="checkbox"]:checked')].map(cb=>cb.value).join(', ');
+        const pre       = getSelectValue(preMood);
+        const post      = getSelectValue(postMood);
+        const tags      = document.getElementById('dreamTags').value.trim();
+        const refl      = document.getElementById('dreamReflect').value.trim();
+        return `Narrative: ${narrative}\nSymbols: ${symbols}\nBefore sleep: ${pre}\nOn waking: ${post}\nTags: ${tags}\nReflection: ${refl}`;
+      });
     wireDream('interpretSymbols',
-              'You are a dream symbol interpreter.',
-              () => [...document.querySelectorAll('#dream input[type="checkbox"]:checked')].map(cb=>cb.value).join(', '));
+      'You are a dream symbol interpreter.',
+      () => [...document.querySelectorAll('#dream input[type="checkbox"]:checked')].map(cb=>cb.value).join(', '));
     wireDream('generatePrompts',
-              'You are a creative writing assistant.',
-              () => `Generate 3 journaling prompts based on: ${document.getElementById('dreamText').value.trim()}`);
+      'You are a creative writing assistant.',
+      () => `Generate 3 journaling prompts based on: ${document.getElementById('dreamText').value.trim()}`);
 
-    // ── CREATIVE THERAPIES ────────────────────────────────────────────────
+    // ── Creative Therapies ────────────────────────────────────────────────
+    const rd = creativeDetail, rv = document.createElement('span');
+    rv.className = 'range-display'; rd.after(rv);
+    rd.oninput = () => rv.textContent = ` (${rd.value})`;
+    rd.oninput();
     document.getElementById('artEmotion').onclick = async e => {
       e.preventDefault();
       const panel = getPanel('creative');
       panel.innerHTML = `<div class="result-content">Generating…<span class="spinner"></span></div>`;
-      const type   = document.getElementById('creativeType').value;
-      const style  = document.getElementById('creativeStyle').value;
-      const detail = document.getElementById('creativeDetail').value;
+      const type   = getSelectValue(creativeType);
+      const style  = getSelectValue(creativeStyle);
+      const detail = rd.value;
       try {
         const reply = await callOpenAI([
-          { role:'system', content:`You are a creative AI generating ${type} in a ${style} style with detail level ${detail}.` },
-          { role:'user',   content:'Please produce one creative piece.' }
+          { role: 'system', content: `You are a creative AI generating ${type} in a ${style} style with detail level ${detail}.` },
+          { role: 'user', content: 'Please produce one creative piece.' }
         ]);
         panel.innerHTML = `<div class="result-content">${formatHTML(reply)}</div>`;
       } catch {
@@ -1137,17 +1198,17 @@ aside {
       }
     };
 
-    // ── COGNITIVE GAMES ───────────────────────────────────────────────────
+    // ── Cognitive Games ──────────────────────────────────────────────────
     document.getElementById('puzzles').onclick = async e => {
       e.preventDefault();
       const panel = getPanel('games');
       panel.innerHTML = `<div class="result-content">Starting…<span class="spinner"></span></div>`;
-      const game = document.getElementById('gameType').value;
-      const diff = document.getElementById('gameDifficulty').value;
+      const game = getSelectValue(gameType);
+      const diff = getSelectValue(gameDifficulty);
       try {
         const reply = await callOpenAI([
-          { role:'system', content:`You are a games master creating a ${diff} ${game}.` },
-          { role:'user',   content:'Please generate one challenge.' }
+          { role: 'system', content: `You are a games master creating a ${diff} ${game}.` },
+          { role: 'user', content: 'Please generate one challenge.' }
         ]);
         panel.innerHTML = `<div class="result-content">${formatHTML(reply)}</div>`;
       } catch {
@@ -1155,7 +1216,7 @@ aside {
       }
     };
 
-    // ── MEDICATION SAFETY ─────────────────────────────────────────────────
+    // ── Medication Safety ────────────────────────────────────────────────
     document.getElementById('medInteraction').onclick = async e => {
       e.preventDefault();
       const panel = getPanel('medsafety');
@@ -1164,8 +1225,8 @@ aside {
       if (!meds) { panel.innerHTML = ''; return; }
       try {
         const reply = await callOpenAI([
-          { role:'system', content:'You are a drug interaction checker.' },
-          { role:'user',   content:`Medications: ${meds}` }
+          { role: 'system', content: 'You are a drug interaction checker.' },
+          { role: 'user', content: `Medications: ${meds}` }
         ]);
         panel.innerHTML = `<div class="result-content">${formatHTML(reply)}</div>`;
       } catch {
@@ -1179,8 +1240,8 @@ aside {
       const meds = document.getElementById('medList').value.trim();
       try {
         const reply = await callOpenAI([
-          { role:'system', content:'You are a medication adherence coach.' },
-          { role:'user',   content:`Create a daily schedule for: ${meds}` }
+          { role: 'system', content: 'You are a medication adherence coach.' },
+          { role: 'user', content: `Create a daily schedule for: ${meds}` }
         ]);
         panel.innerHTML = `<div class="result-content">${formatHTML(reply)}</div>`;
       } catch {
@@ -1188,18 +1249,18 @@ aside {
       }
     };
 
-    // ── SYMPTOM QUIZ ───────────────────────────────────────────────────────
+    // ── Symptom Quiz ──────────────────────────────────────────────────────
     document.getElementById('launchQuiz').onclick = async e => {
       e.preventDefault();
       const panel = getPanel('symptomQuiz');
       panel.innerHTML = `<div class="result-content">Scoring…<span class="spinner"></span></div>`;
-      const s = document.querySelector('select[name="sleep"]').value;
-      const a = document.querySelector('select[name="appetite"]').value;
-      const c = document.querySelector('select[name="concentration"]').value;
+      const s = getSelectValue(document.querySelector('select[name="sleep"]'));
+      const a = getSelectValue(document.querySelector('select[name="appetite"]'));
+      const c = getSelectValue(document.querySelector('select[name="concentration"]'));
       try {
         const reply = await callOpenAI([
-          { role:'system', content:'You are a clinical symptom scoring assistant.' },
-          { role:'user',   content:`Sleep:${s},Appetite:${a},Concentration:${c}` }
+          { role: 'system', content: 'You are a clinical symptom scoring assistant.' },
+          { role: 'user', content: `Sleep:${s},Appetite:${a},Concentration:${c}` }
         ]);
         panel.innerHTML = `<div class="result-content">${formatHTML(reply)}</div>`;
       } catch {
@@ -1207,57 +1268,68 @@ aside {
       }
     };
 
-    // ── DATA ANALYTICS & CSV EXPORT ────────────────────────────────────────
+    // ── Data Analytics & CSV Export ───────────────────────────────────────
     const engCtx = document.getElementById('engagementChart').getContext('2d'),
           outCtx = document.getElementById('outcomeChart').getContext('2d');
-
     const engChart = new Chart(engCtx, {
       type: 'line',
       data: {
         labels: ['Mon','Tue','Wed','Thu','Fri'],
-        datasets: [{ label:'Sessions', data:[12,9,14,11,13],
-                    borderColor: getComputedStyle(document.documentElement).getPropertyValue('--primary').trim(),
-                    fill:false }]
+        datasets: [{
+          label: 'Sessions',
+          data: [12,9,14,11,13],
+          borderColor: getComputedStyle(document.documentElement).getPropertyValue('--primary').trim(),
+          fill: false
+        }]
       }
     });
     const outChart = new Chart(outCtx, {
       type: 'bar',
       data: {
         labels: ['Week 1','Week 2','Week 3'],
-        datasets: [{ label:'Outcome', data:[3.2,4.1,4.5],
-                    backgroundColor: getComputedStyle(document.documentElement).getPropertyValue('--secondary').trim() }]
+        datasets: [{
+          label: 'Outcome',
+          data: [3.2,4.1,4.5],
+          backgroundColor: getComputedStyle(document.documentElement).getPropertyValue('--secondary').trim()
+        }]
       }
     });
+
+    analyticsFrom.onchange = analyticsTo.onchange = () => {
+      // TODO: apply real date-range filter logic here, then:
+      engChart.update();
+      outChart.update();
+    };
     document.getElementById('exportCharts').onclick = () => {
       let csv = 'Chart,Label,Value\n';
-      [['Sessions',engChart],['Outcome',outChart]].forEach(([name,ch]) => {
-        ch.data.labels.forEach((lab,i) => {
+      [['Sessions', engChart], ['Outcome', outChart]].forEach(([name, ch]) => {
+        ch.data.labels.forEach((lab, i) => {
           csv += `${name},${lab},${ch.data.datasets[0].data[i]}\n`;
         });
       });
-      const blob = new Blob([csv], { type:'text/csv' }),
-            url  = URL.createObjectURL(blob),
-            a    = document.createElement('a');
+      const blob = new Blob([csv], { type: 'text/csv' });
+      const url  = URL.createObjectURL(blob);
+      const a    = document.createElement('a');
       a.href = url; a.download = 'analytics.csv'; a.click();
       URL.revokeObjectURL(url);
     };
 
-    // ── NEUROTRANSMITTER BALANCE ─────────────────────────────────────────
+    // ── Neurotransmitter Balance ─────────────────────────────────────────
     document.getElementById('analyzeNeuro').onclick = async e => {
       e.preventDefault();
       const panel = getPanel('neurotransmitter');
       panel.innerHTML = `<div class="result-content">Analyzing…<span class="spinner"></span></div>`;
       const data = {
         mood:      document.getElementById('ntMood').value,
-        sleep:     document.getElementById('ntSleep').value,
-        appetite:  document.getElementById('ntAppetite').value,
-        adherence: document.getElementById('ntAdherence').value,
-        focus:     document.getElementById('ntFocus').value
+        sleep:     getSelectValue(ntSleep),
+        appetite:  getSelectValue(ntAppetite),
+        adherence: getSelectValue(ntAdherence),
+        focus:     getSelectValue(ntFocus)
       };
       try {
         const reply = await callOpenAI([
-          { role:'system', content:'You are a neurotransmitter balance specialist.' },
-          { role:'user',   content:`Profile Data:\n${JSON.stringify(data)}` }
+          { role: 'system', content: 'You are a neurotransmitter balance specialist.' },
+          { role: 'user', content: `Profile Data:\n${JSON.stringify(data)}` }
         ]);
         panel.innerHTML = `<div class="result-content">${formatHTML(reply)}</div>`;
       } catch {
@@ -1265,21 +1337,29 @@ aside {
       }
     };
 
-    // ── PHARMACOGENOMICS & DOSING ────────────────────────────────────────
+    // ── Pharmacogenomics & Dosing ────────────────────────────────────────
+    pgxDrug.onchange = () => pgxDrug.parentElement.querySelector('.other-input').style.display =
+      pgxDrug.value.toLowerCase() === 'other' ? 'block' : 'none';
+
     document.getElementById('runPGx').onclick = async e => {
       e.preventDefault();
       const panel = getPanel('pharmacogenomics');
       panel.innerHTML = `<div class="result-content">Processing…<span class="spinner"></span></div>`;
-      const drug = document.getElementById('pgxDrug').value;
-      const gene = document.getElementById('pgxGene').value;
-      if (!drug || !gene || !document.getElementById('pgxUpload').files.length) {
-        panel.innerHTML = '';
+
+      const drug   = getSelectValue(pgxDrug);
+      const gene   = getSelectValue(pgxGene);
+      const sex    = getSelectValue(pgxSex);
+      const age    = document.getElementById('pgxAge').value.trim();
+
+      if (!pgxUpload.files.length || !drug || !gene || !sex || !age) {
+        panel.innerHTML = `<div class="result-content">❗ Please fill in all required fields.</div>`;
         return;
       }
+
       try {
         const reply = await callOpenAI([
-          { role:'system', content:'You are a pharmacogenomics expert.' },
-          { role:'user',   content:`Drug:${drug}, Gene:${gene}, GenotypeFile:uploaded` }
+          { role: 'system', content: 'You are a pharmacogenomics expert.' },
+          { role: 'user', content: `Sex:${sex},Age:${age},Weight:${document.getElementById('pgxWeight').value},Drug:${drug},Gene:${gene}` }
         ]);
         panel.innerHTML = `<div class="result-content">${formatHTML(reply)}</div>`;
       } catch {
@@ -1287,17 +1367,24 @@ aside {
       }
     };
 
-    // ── DRUG INTERACTIONS PROFILER ───────────────────────────────────────
+    // ── Drug Interaction Profiler ───────────────────────────────────────
+    intListSelect.onchange = () => intListSelect.parentElement.querySelector('.other-input').style.display =
+      intListSelect.value.toLowerCase() === 'other' ? 'block' : 'none';
+
     document.getElementById('checkInt').onclick = async e => {
       e.preventDefault();
       const panel = getPanel('interactions');
       panel.innerHTML = `<div class="result-content">Checking…<span class="spinner"></span></div>`;
-      const meds = document.getElementById('intList').value.trim();
+
+      const meds = getSelectValue(intListSelect);
+      const cond = getSelectValue(intComorbid);
+
       if (!meds) { panel.innerHTML = ''; return; }
+
       try {
         const reply = await callOpenAI([
-          { role:'system', content:'You are a drug interaction profiler.' },
-          { role:'user',   content:`Medications: ${meds}` }
+          { role: 'system', content: 'You are a drug interaction profiler.' },
+          { role: 'user', content: `Medications: ${meds}\nComorbid: ${cond}` }
         ]);
         panel.innerHTML = `<div class="result-content">${formatHTML(reply)}</div>`;
       } catch {
@@ -1305,16 +1392,23 @@ aside {
       }
     };
 
-    // ── EEG & BRAINWAVE INTERPRETER ─────────────────────────────────────
+    // ── EEG & Brainwave Interpreter ─────────────────────────────────────
+    eegCondition.onchange = () => eegCondition.parentElement.querySelector('.other-input').style.display =
+      eegCondition.value.toLowerCase() === 'other' ? 'block' : 'none';
+
     document.getElementById('analyzeEEG').onclick = async e => {
       e.preventDefault();
       const panel = getPanel('eeg');
+      if (!eegFile.files.length) {
+        panel.innerHTML = `<div class="result-content">❗ Please upload a file.</div>`;
+        return;
+      }
       panel.innerHTML = `<div class="result-content">Analyzing…<span class="spinner"></span></div>`;
-      if (!document.getElementById('eegFile').files.length) { panel.innerHTML = ''; return; }
+
       try {
         const reply = await callOpenAI([
-          { role:'system', content:'You are an EEG & brainwave interpreter.' },
-          { role:'user',   content:'EEG file uploaded.' }
+          { role: 'system', content: 'You are an EEG & brainwave interpreter.' },
+          { role: 'user', content: `EEG Uploaded. Condition: ${getSelectValue(eegCondition)}` }
         ]);
         panel.innerHTML = `<div class="result-content">${formatHTML(reply)}</div>`;
       } catch {
@@ -1322,25 +1416,33 @@ aside {
       }
     };
 
-    // ── CLINICAL TRIAL MATCHING ENGINE ─────────────────────────────────
+    // ── Clinical Trial Finder ────────────────────────────────────────────
+    trialDx.onchange = () => trialDx.parentElement.querySelector('.other-input').style.display =
+      trialDx.value.toLowerCase() === 'other' ? 'block' : 'none';
+    trialPhase.onchange = () => trialPhase.parentElement.querySelector('.other-input').style.display =
+      trialPhase.value.toLowerCase() === 'other' ? 'block' : 'none';
+
     document.getElementById('findTrials').onclick = async e => {
       e.preventDefault();
       const panel = getPanel('trialmatch');
       panel.innerHTML = `<div class="result-content">Searching…<span class="spinner"></span></div>`;
-      const dx  = document.getElementById('trialDx').value.trim();
+
+      const dx  = getSelectValue(trialDx);
       const loc = document.getElementById('trialLoc').value.trim();
+      const ph  = getSelectValue(trialPhase);
+
       if (!dx || !loc) { panel.innerHTML = ''; return; }
+
       try {
         const reply = await callOpenAI([
-          { role:'system', content:'You are a clinical trial matching engine.' },
-          { role:'user',   content:`Diagnosis: ${dx}\nLocation: ${loc}` }
+          { role: 'system', content: 'You are a clinical trial matching engine.' },
+          { role: 'user', content: `Diagnosis: ${dx}\nLocation: ${loc}\nPhase: ${ph}` }
         ]);
         panel.innerHTML = `<div class="result-content">${formatHTML(reply)}</div>`;
       } catch {
         panel.innerHTML = `<div class="result-content">😕 Something went wrong.</div>`;
       }
     };
-
   });
 </script>
   
