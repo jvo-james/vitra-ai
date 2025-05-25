@@ -419,176 +419,201 @@
 
   </main>
 
-  <!-- Chart.js & App Logic -->
+   <!-- Chart.js & App Logic -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script>
   // ── OpenAI + Helpers ─────────────────────────────────────────
   async function callOpenAI(messages) {
-    const res = await fetch('/.netlify/functions/openai-proxy',{method:'POST',
-      headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({messages})});
-    if(!res.ok) throw new Error('OpenAI error');
-    const j=await res.json(); return j.choices[0].message.content;
+    const res = await fetch('/.netlify/functions/openai-proxy', {
+      method: 'POST',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({ messages })
+    });
+    if (!res.ok) throw new Error('OpenAI error');
+    const j = await res.json();
+    return j.choices[0].message.content;
   }
+
   function formatHTML(txt) {
-    return txt.replace(/^### (.*$)/gim,'<h3>$1</h3>')
-      .replace(/\*\*(.+?)\*\*/g,'<strong>$1</strong>')
-      .replace(/\*(.+?)\*/g,'<em>$1</em>')
-      .split(/\n{2,}/).map(p=>`<p>${p.trim()}</p>`).join('');
+    return txt
+      .replace(/^### (.*$)/gm, '<h3>$1</h3>')
+      .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+      .replace(/\*(.+?)\*/g, '<em>$1</em>')
+      .split(/\n{2,}/).map(p => `<p>${p.trim()}</p>`).join('');
   }
+
   function getSelectValue(sel) {
     const oi = sel.parentElement.querySelector('.other-input');
-    return oi && sel.value==='Other'? oi.value.trim() : sel.value;
+    return oi && sel.value === 'Other' ? oi.value.trim() : sel.value;
   }
 
   document.addEventListener('DOMContentLoaded', () => {
     const body = document.body;
 
-    // Sidebar toggle (mobile)
-    document.getElementById('hamburger').onclick = () => body.classList.toggle('sidebar-open');
-    // Dark mode
+    // ── SIDEBAR (mobile) & DARKMODE TOGGLES ────────────────────────
+    document.getElementById('hamburger').onclick = () => {
+      body.classList.toggle('sidebar-open');
+    };
     document.getElementById('themeToggle').onclick = () => {
       document.documentElement.classList.toggle('dark');
       document.getElementById('themeToggle').classList.toggle('fa-sun');
     };
 
-    // Show/hide all "Other" inputs
+    // ── SHOW/HIDE "Other" INPUTS ────────────────────────────────────
     document.querySelectorAll('select').forEach(sel => {
       sel.addEventListener('change', () => {
         const oi = sel.parentElement.querySelector('.other-input');
-        if(oi) oi.style.display = sel.value==='Other'? 'block':'none';
+        if (oi) oi.style.display = sel.value === 'Other' ? 'block' : 'none';
       });
     });
 
-    // Delegate response panel buttons
+    // ── DELEGATE RESPONSE PANEL CONTROLS ────────────────────────────
     document.body.addEventListener('click', e => {
-      if(e.target.closest('.copy-btn')){
-        const panel=e.target.closest('.response');
-        const txt=panel.querySelector('.result-content').innerText;
+      if (e.target.closest('.copy-btn')) {
+        const panel = e.target.closest('.response');
+        const txt = panel.querySelector('.result-content').innerText;
         navigator.clipboard.writeText(txt);
       }
-      if(e.target.closest('.dl-btn')){
-        const panel=e.target.closest('.response');
-        const txt=panel.querySelector('.result-content').innerText;
-        const blob=new Blob([txt],{type:'text/plain'});
-        const a=document.createElement('a');
-        a.href=URL.createObjectURL(blob);
-        a.download='response.txt'; a.click();
+      if (e.target.closest('.dl-btn')) {
+        const panel = e.target.closest('.response');
+        const txt = panel.querySelector('.result-content').innerText;
+        const blob = new Blob([txt], { type: 'text/plain' });
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = 'response.txt';
+        a.click();
       }
-      if(e.target.closest('.close-btn')){
-        e.target.closest('.response').hidden=true;
+      if (e.target.closest('.close-btn')) {
+        e.target.closest('.response').hidden = true;
       }
     });
 
-    // --- Sections wiring ---
-    // generic helper
-    async function wireSection(btnId, formIds, sysPromptCallback) {
+    // ── GENERIC SECTION WIRING HELPER ───────────────────────────────
+    function wireSection(btnId, fields, systemPrompt) {
       document.getElementById(btnId).onclick = async e => {
         e.preventDefault();
-        const panel = document.getElementById(btnId.replace(/Btn|Start|Gen|Get|Scan|Run/,'') + 'Panel');
+        const panel = document.getElementById(
+          btnId.replace(/^(send|gen|analyze|get|scan|start|run)/, '') + 'Panel'
+        );
         panel.hidden = false;
         panel.querySelector('.result-content').innerText = 'Processing…';
-        // build messages
-        let userContent = '';
-        for(const id of formIds) {
+        let content = '';
+        for (const id of fields) {
           const el = document.getElementById(id);
-          if(!el) continue;
-          if(el.tagName==='SELECT') userContent += `${id}:${getSelectValue(el)}\n`;
-          else if(el.type==='file') userContent += `${id}:uploaded\n`;
-          else userContent += `${id}:${el.value}\n`;
+          if (!el) continue;
+          if (el.tagName === 'SELECT') {
+            content += `${id}: ${getSelectValue(el)}\n`;
+          } else if (el.type === 'file') {
+            content += `${id}: [uploaded]\n`;
+          } else {
+            content += `${id}: ${el.value}\n`;
+          }
         }
         try {
           const reply = await callOpenAI([
-            {role:'system',content:typeof sysPromptCallback==='function'? sysPromptCallback() : sysPromptCallback},
-            {role:'user',content:userContent}
+            { role: 'system', content: systemPrompt },
+            { role: 'user', content }
           ]);
           panel.querySelector('.result-content').innerHTML = formatHTML(reply);
         } catch {
-          panel.querySelector('.result-content').innerText='⚠️ Something went wrong.';
+          panel.querySelector('.result-content').innerText = '⚠️ Something went wrong.';
         }
       };
     }
 
-    // 1. Chatbot
-    (()=>{
-      const dietBox = document.getElementById('dietChatBox'),
-            dietHint= document.getElementById('dietHint');
-      let history = [];
-      function addMsg(who,txt){
-        const m=document.createElement('div');
-        m.className = who==='You'?'user-msg':'bot-msg';
+    // ── 1. Chatbot ────────────────────────────────────────────────────
+    (function() {
+      const box = document.getElementById('dietChatBox');
+      const hint = document.getElementById('dietHint');
+      let hist = [];
+      function add(who, txt) {
+        const m = document.createElement('div');
+        m.className = who === 'You' ? 'user-msg' : 'bot-msg';
         m.innerHTML = `${formatHTML(txt)}<div class="timestamp">${new Date().toLocaleTimeString()}</div>`;
-        dietBox.append(m); dietBox.scrollTop=dietBox.scrollHeight;
+        box.append(m);
+        box.scrollTop = box.scrollHeight;
       }
-      document.getElementById('sendDiet').onclick=async e=>{
+      document.getElementById('sendDiet').onclick = async e => {
         e.preventDefault();
-        const txt=document.getElementById('dietInput').value.trim();
-        if(!txt) return;
-        addMsg('You',txt); history.push({who:'You',text:txt});
-        document.getElementById('dietInput').value=''; dietHint.style.display='block';
+        const inp = document.getElementById('dietInput');
+        const txt = inp.value.trim();
+        if (!txt) return;
+        add('You', txt);
+        hist.push({ who: 'You', text: txt });
+        inp.value = '';
+        hint.style.display = 'block';
         try {
           const reply = await callOpenAI([
-            {role:'system',content:'You are a dietetics assistant.'},
-            {role:'user',content:txt}
+            { role: 'system', content: 'You are a dietetics assistant.' },
+            { role: 'user', content: txt }
           ]);
-          addMsg('AI',reply); history.push({who:'AI',text:reply});
+          add('AI', reply);
+          hist.push({ who: 'AI', text: reply });
         } catch {
-          addMsg('AI','⚠️ Something went wrong.');
+          add('AI', '⚠️ Something went wrong.');
         } finally {
-          dietHint.style.display='none';
+          hint.style.display = 'none';
         }
       };
-      document.getElementById('clearDiet').onclick = ()=>{
-        dietBox.innerHTML=''; history=[];
+      document.getElementById('clearDiet').onclick = () => {
+        box.innerHTML = '';
+        hist = [];
       };
-      document.getElementById('viewDietHistory').onclick = ()=>{
-        alert(history.length? history.map(m=>`${m.who}: ${m.text}`).join('\n\n') : 'No history');
+      document.getElementById('viewDietHistory').onclick = () => {
+        alert(hist.length ? hist.map(m => `${m.who}: ${m.text}`).join('\n\n') : 'No history');
       };
     })();
 
-    // 2. Meal Plan
-    wireSection('genPlan',['calories','dietType','allergies'],'You are a meal planning AI.');
+    // ── 2. Meal Plan Generator ─────────────────────────────────────────
+    wireSection('genPlan', ['calories','dietType','allergies'], 'You are a meal planning AI.');
 
-    // 3. Nutrient Analyzer
-    wireSection('analyzeNutri',['foodLog'],'You are a nutrient analysis AI.');
+    // ── 3. Nutrient Analyzer ──────────────────────────────────────────
+    wireSection('analyzeNutri', ['foodLog'], 'You are a nutrient analysis AI.');
 
-    // 4. Recipe Recommender
-    wireSection('getRecipes',['pantry','recipeGoal'],'You are a recipe recommendation AI.');
+    // ── 4. Recipe Recommender ─────────────────────────────────────────
+    wireSection('getRecipes', ['pantry','recipeGoal'], 'You are a recipe recommendation AI.');
 
-    // 5. Deficiency Scanner
-    wireSection('scanDef',['symptoms','dietOverview'],'You are a deficiency risk AI.');
+    // ── 5. Deficiency Scanner ─────────────────────────────────────────
+    wireSection('scanDef', ['symptoms','dietOverview'], 'You are a deficiency risk AI.');
 
-    // 6. Progress Charts - static for now
-    const intakeChart = new Chart(document.getElementById('intakeChart').getContext('2d'), {
-      type:'line',
-      data:{labels:['Mon','Tue','Wed','Thu','Fri'],datasets:[{label:'Calories',data:[2000,1800,2100,1900,2050],borderColor:var('--secondary'),fill:false}]}
+    // ── 6. Progress Charts ────────────────────────────────────────────
+    const ctx1 = document.getElementById('intakeChart').getContext('2d');
+    new Chart(ctx1, {
+      type: 'line',
+      data: {
+        labels: ['Mon','Tue','Wed','Thu','Fri'],
+        datasets: [{ label: 'Calories In', data: [2000,1800,2100,1900,2050], borderColor: getComputedStyle(document.documentElement).getPropertyValue('--secondary').trim(), fill: false }]
+      }
     });
-    const macroChart = new Chart(document.getElementById('macroChart').getContext('2d'), {
-      type:'pie',
-      data:{labels:['Carbs','Protein','Fat'],datasets:[{data:[50,25,25],backgroundColor:[var('--primary'),var('--primary-alt'),var('--secondary')]}]}
+    const ctx2 = document.getElementById('macroChart').getContext('2d');
+    new Chart(ctx2, {
+      type: 'pie',
+      data: {
+        labels: ['Carbs','Protein','Fat'],
+        datasets: [{ data: [50,25,25], backgroundColor: [getComputedStyle(document.documentElement).getPropertyValue('--primary').trim(), getComputedStyle(document.documentElement).getPropertyValue('--primary-alt').trim(), getComputedStyle(document.documentElement).getPropertyValue('--secondary').trim()] }]
+      }
     });
 
-    // 7. Genomic Portrait
-    wireSection('runGeno',['genoUpload','microbiomeUpload'],'You are an omics profiling AI.');
+    // ── 7. Genomic Portrait ────────────────────────────────────────────
+    wireSection('runGeno', ['genoUpload','microbiomeUpload'], 'You are an omics profiling AI.');
 
-    // 8. Chef’s Assistant
-    wireSection('startCook',['cameraUrl','mainIng'],'You are a live cooking assistant AI.');
+    // ── 8. Chef’s Assistant ────────────────────────────────────────────
+    wireSection('startCook', ['cameraUrl','mainIng'], 'You are a live cooking assistant AI.');
 
-    // 9. AR Grocery
-    wireSection('startAR',['arModel'],'You are an AR produce analysis AI.');
+    // ── 9. AR Grocery ─────────────────────────────────────────────────
+    wireSection('startAR', ['arModel'], 'You are an AR produce analysis AI.');
 
-    // 10. Risk Radar
-    wireSection('runRisk',['wearableKey','labCsv'],'You are a metabolomic risk AI.');
+    // ── 10. Risk Radar ────────────────────────────────────────────────
+    wireSection('runRisk', ['wearableKey','labCsv'], 'You are a metabolomic risk AI.');
 
-    // 11. Behavioral Coach
-    wireSection('runBehavior',['journal','currentMood'],'You are an emotional eating coach.');
+    // ── 11. Behavioral Coach ──────────────────────────────────────────
+    wireSection('runBehavior', ['journal','currentMood'], 'You are an emotional eating coach.');
 
-    // 12. Fitness Coach
-    wireSection('runFitness',['workoutType','weeklySessions','fitApiKey'],'You are a fitness nutrition AI.');
+    // ── 12. Fitness Coach ─────────────────────────────────────────────
+    wireSection('runFitness', ['workoutType','weeklySessions','fitApiKey'], 'You are a fitness nutrition AI.');
 
-    // 13. Pharma Suite
-    wireSection('runPharma',['medList','suppList','compoundReq'],'You are a drug-nutrient interaction AI.');
-
+    // ── 13. Pharma Suite ──────────────────────────────────────────────
+    wireSection('runPharma', ['medList','suppList','compoundReq'], 'You are a drug-nutrient interaction AI.');
   });
   </script>
 </body>
