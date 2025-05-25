@@ -1,0 +1,417 @@
+<!DOCTYPE html>
+<html lang="en" aria-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1.0">
+  <title>Vitra AI – Dietetics</title>
+  <!-- Montserrat + FontAwesome -->
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;600;700&display=swap" rel="stylesheet">
+  <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
+  <link rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    /*────────────────────── Pale Yellow Theme & Reset ─────────────────────*/
+    :root {
+      --primary: #F9E79F;
+      --primary-alt: #F7DC6F;
+      --secondary: #D4AC0D;
+      --accent: rgba(255,255,224,0.6);
+      --bg: #FEF9E7;
+      --surface: rgba(255,255,240,0.9);
+      --text: #3E3E3E;
+      --muted: #7D6608;
+      --radius: .75rem;
+      --padding: 1rem;
+      --transition: .3s ease;
+      --shadow-light: 0 4px 20px rgba(0,0,0,.05);
+      --sidebar-width: 220px;
+    }
+    *,*::before,*::after { margin:0; padding:0; box-sizing:border-box;}
+    body { display:flex; min-height:100vh; background:var(--bg); color:var(--text); font-family:'Montserrat',sans-serif;}
+    a{color:inherit;text-decoration:none;}button,input,textarea,select{font:inherit;transition:all var(--transition);}
+    :focus{outline:none!important;box-shadow:none!important;}
+
+    /*────────────────────── Sidebar & Header ──────────────────────────────*/
+    aside{flex:0 0 var(--sidebar-width);background:var(--surface);backdrop-filter:blur(12px);
+      box-shadow:var(--shadow-light);position:fixed;top:0;left:0;height:100vh;display:flex;flex-direction:column;}
+    main{flex:1;margin-left:var(--sidebar-width);padding:var(--padding);margin-top:60px;transition:margin-left var(--transition);}
+    header{position:fixed;top:0;left:var(--sidebar-width);right:0;height:60px;
+      background:var(--surface);backdrop-filter:blur(12px);display:flex;align-items:center;
+      justify-content:space-between;padding:0 var(--padding);box-shadow:var(--shadow-light);z-index:1000;}
+    #hamburger{display:none;} /* only mobile would show */
+    @media(max-width:768px){
+      #hamburger{display:block;}
+      aside{transform:translateX(-100%);}
+      body.sidebar-open aside{transform:translateX(0);}
+      main{margin-left:0;}
+      header{left:0;}
+    }
+
+    /*────────────────────── Modules ──────────────────────────────*/
+    section.module{background:var(--surface);border-radius:var(--radius);
+      padding:var(--padding);margin-bottom:1.5rem;box-shadow:var(--shadow-light);}
+    h2{font-size:1.6rem;color:var(--primary);margin-bottom:.75rem;display:flex;align-items:center;gap:.5rem;}
+    .desc{color:var(--muted);margin-bottom:1rem;}
+
+    /*────────────────────── Inputs & Buttons ──────────────────────────────*/
+    input,textarea,select{width:100%;padding:.75rem;border:1px solid var(--muted);
+      border-radius:var(--radius);background:var(--accent);}
+    button.btn{display:inline-flex;align-items:center;gap:.5rem;padding:.75rem 1.25rem;
+      border:none;border-radius:var(--radius);background:var(--primary);color:#000;font-weight:600;
+      box-shadow:var(--shadow-light);cursor:pointer;transition:transform var(--transition);}
+    button.btn:hover{transform:translateY(-2px);}
+
+    /*────────────────────── Response Panels ──────────────────────────────*/
+    .response{background:var(--surface);padding:var(--padding);border-left:4px solid var(--secondary);
+      border-radius:var(--radius);position:relative;margin-top:1rem;box-shadow:var(--shadow-light);
+      transition:all var(--transition);}
+    .response .result-content{white-space:pre-wrap;line-height:1.5;}
+    .tool-row{position:absolute;bottom:var(--padding);right:var(--padding);display:flex;gap:.5rem;}
+    .close-btn,.copy-btn,.dl-btn{background:none;border:none;cursor:pointer;}
+    .copy-btn,.dl-btn{border:1px solid var(--muted);border-radius:50%;width:1.6rem;height:1.6rem;
+      display:flex;align-items:center;justify-content:center;}
+
+    /*────────────────────── Chatbot Specific ──────────────────────────────*/
+    #dietBot .tool-row{top:var(--padding);bottom:auto;right:var(--padding);}
+    .chat-box{background:var(--bg);border:1px solid var(--muted);border-radius:var(--radius);
+      padding:var(--padding);max-height:300px;overflow-y:auto;display:flex;flex-direction:column;}
+    .user-msg{background:var(--primary-alt);align-self:flex-end;color:#000;padding:.75rem;border-radius:1rem;position:relative;}
+    .bot-msg{background:var(--accent);align-self:flex-start;color:#000;padding:.75rem;border-radius:1rem;position:relative;}
+    .timestamp{font-size:.65rem;color:var(--muted);position:absolute;bottom:-1.2rem;right:1rem;}
+
+    /*────────────────────── Charts ──────────────────────────────*/
+    .charts{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:1.5rem;margin-top:1rem;}
+    .chart-card{background:var(--surface);padding:var(--padding);border-radius:var(--radius);
+      box-shadow:var(--shadow-light);display:flex;flex-direction:column;}
+    .chart-card canvas{flex:1;}
+  </style>
+</head>
+<body>
+
+  <!-- Sidebar -->
+  <aside>
+    <div class="brand"><i class="fas fa-utensils"></i> Vitra AI</div>
+    <nav>
+      <a href="herbal.html"><i class="fas fa-seedling"></i> Herbal</a>
+      <a href="psych.html"><i class="fas fa-brain"></i> Psych</a>
+      <a href="#" class="active"><i class="fas fa-apple-alt"></i> Dietetics</a>
+      <a href="pharmacy.html"><i class="fas fa-prescription-bottle-alt"></i> E-pharmacy</a>
+      <a href="consult.html"><i class="fas fa-calendar-check"></i> Booking</a>
+    </nav>
+  </aside>
+
+  <!-- Header -->
+  <header>
+    <i id="hamburger" class="fas fa-bars"></i>
+    <h1>Dietetics & Nutrition</h1>
+  </header>
+
+  <!-- Main -->
+  <main>
+
+    <!-- Hero -->
+    <section class="module hero">
+      <h2><i class="fas fa-apple-alt"></i> Empower Your Patients’ Nutrition</h2>
+      <p class="desc">AI-driven meal plans, nutrient analysis, recipe recommendations, deficiency risk alerts & more.</p>
+    </section>
+
+    <!-- 1. Diet Chat Bot -->
+    <section class="module" id="dietBot">
+      <h2><i class="fas fa-comments"></i> Nutrition Chatbot</h2>
+      <p class="desc">Ask personalized diet & nutrition questions—AI tailors answers to age, goals, allergies.</p>
+      <form id="diet-form" style="display:grid;grid-template-columns:1fr auto;gap:.5rem;">
+        <input id="dietInput" type="text" placeholder="e.g. 'Low-carb dinner ideas?'" required>
+        <button id="sendDiet" class="btn"><i class="fas fa-paper-plane"></i></button>
+      </form>
+      <div class="tool-row">
+        <button id="clearDiet" title="Clear Chat"><i class="fas fa-trash"></i></button>
+        <button id="viewDietHistory" title="History"><i class="fas fa-history"></i></button>
+      </div>
+      <div id="dietChatBox" class="chat-box"></div>
+      <div id="dietHint" class="desc" style="display:none;">AI is thinking…</div>
+    </section>
+
+    <!-- 2. Meal Plan Generator -->
+    <section class="module" id="mealPlanner">
+      <h2><i class="fas fa-calendar-alt"></i> Meal Plan Generator</h2>
+      <p class="desc">Create a 7-day meal plan based on calories, diet type, and allergies.</p>
+      <form id="planner-form">
+        <label>Daily Calories:
+          <input type="number" id="calories" min="800" max="4000" value="2000" required>
+        </label>
+        <label>Diet Type:
+          <select id="dietType">
+            <option>Balanced</option>
+            <option>Low-Carb</option>
+            <option>Vegan</option>
+            <option>Ketogenic</option>
+            <option>Other</option>
+          </select>
+          <input class="other-input" placeholder="Specify…" style="display:none;margin-top:.5rem;">
+        </label>
+        <label>Allergies:
+          <input type="text" id="allergies" placeholder="e.g. Gluten, Nuts">
+        </label>
+        <button id="genPlan" class="btn"><i class="fas fa-utensils"></i> Generate Plan</button>
+      </form>
+      <div id="planPanel" class="response" hidden>
+        <button class="close-btn"><i class="fas fa-times"></i></button>
+        <div class="tool-row">
+          <button class="copy-btn"><i class="fas fa-copy"></i></button>
+          <button class="dl-btn"><i class="fas fa-download"></i></button>
+        </div>
+        <div class="result-content"></div>
+      </div>
+    </section>
+
+    <!-- 3. Nutrient Analyzer -->
+    <section class="module" id="nutriAnalyzer">
+      <h2><i class="fas fa-vial"></i> Nutrient Analyzer</h2>
+      <p class="desc">Paste a recipe or food log; get macros and micronutrient breakdown.</p>
+      <form id="analyze-form">
+        <label>Ingredients/Log:
+          <textarea id="foodLog" rows="4" placeholder="List ingredients or foods..."></textarea>
+        </label>
+        <button id="analyzeNutri" class="btn"><i class="fas fa-chart-bar"></i> Analyze</button>
+      </form>
+      <div id="nutriPanel" class="response" hidden>
+        <button class="close-btn"><i class="fas fa-times"></i></button>
+        <div class="tool-row">
+          <button class="copy-btn"><i class="fas fa-copy"></i></button>
+          <button class="dl-btn"><i class="fas fa-download"></i></button>
+        </div>
+        <div class="result-content"></div>
+      </div>
+    </section>
+
+    <!-- 4. Recipe Recommender -->
+    <section class="module" id="recipeRec">
+      <h2><i class="fas fa-book-open"></i> Recipe Recommender</h2>
+      <p class="desc">Get personalized recipes based on pantry items & dietary goals.</p>
+      <form id="recipe-form">
+        <label>Pantry Items:
+          <input id="pantry" type="text" placeholder="e.g. Chicken, Spinach, Eggs">
+        </label>
+        <label>Goal:
+          <select id="recipeGoal">
+            <option>Muscle Gain</option>
+            <option>Weight Loss</option>
+            <option>Maintenance</option>
+            <option>Other</option>
+          </select>
+          <input class="other-input" placeholder="Specify…" style="display:none;margin-top:.5rem;">
+        </label>
+        <button id="getRecipes" class="btn"><i class="fas fa-hamburger"></i> Show Recipes</button>
+      </form>
+      <div id="recipePanel" class="response" hidden>
+        <button class="close-btn"><i class="fas fa-times"></i></button>
+        <div class="tool-row">
+          <button class="copy-btn"><i class="fas fa-copy"></i></button>
+          <button class="dl-btn"><i class="fas fa-download"></i></button>
+        </div>
+        <div class="result-content"></div>
+      </div>
+    </section>
+
+    <!-- 5. Deficiency Risk Scanner -->
+    <section class="module" id="deficiency">
+      <h2><i class="fas fa-exclamation-triangle"></i> Deficiency Risk Scanner</h2>
+      <p class="desc">Assess risk of common nutrient deficiencies from diet & symptoms.</p>
+      <form id="def-form">
+        <label>Symptoms:
+          <input id="symptoms" type="text" placeholder="e.g. Fatigue, Hair loss">
+        </label>
+        <label>Diet Overview:
+          <textarea id="dietOverview" rows="3" placeholder="Describe your regular diet..."></textarea>
+        </label>
+        <button id="scanDef" class="btn"><i class="fas fa-stethoscope"></i> Scan Risk</button>
+      </form>
+      <div id="defPanel" class="response" hidden>
+        <button class="close-btn"><i class="fas fa-times"></i></button>
+        <div class="tool-row">
+          <button class="copy-btn"><i class="fas fa-copy"></i></button>
+          <button class="dl-btn"><i class="fas fa-download"></i></button>
+        </div>
+        <div class="result-content"></div>
+      </div>
+    </section>
+
+    <!-- 6. Progress Charts -->
+    <section class="module" id="progress">
+      <h2><i class="fas fa-chart-line"></i> Progress Charts</h2>
+      <p class="desc">Visualize calorie intake vs. burn, macros over time.</p>
+      <div class="charts">
+        <div class="chart-card">
+          <canvas id="intakeChart" height="200"></canvas>
+          <figcaption>Calories Intake</figcaption>
+        </div>
+        <div class="chart-card">
+          <canvas id="macroChart" height="200"></canvas>
+          <figcaption>Macro Ratio</figcaption>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Chart.js & App Logic -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script>
+  // ── OpenAI Proxy + Markdown→HTML Helper ───────────────────────────────
+  async function callOpenAI(messages){
+    const res = await fetch('/.netlify/functions/openai-proxy',{method:'POST',
+      headers:{'Content-Type':'application/json'},body:JSON.stringify({messages})});
+    const j=await res.json(); return j.choices[0].message.content;
+  }
+  function formatHTML(txt){
+    return txt.replace(/\*\*(.+?)\*\*/g,'<strong>$1</strong>')
+      .replace(/\*(.+?)\*/g,'<em>$1</em>')
+      .split(/\n{2,}/).map(p=>`<p>${p.trim()}</p>`).join('');
+  }
+  function getSelectValue(sel){
+    const oi=sel.parentElement.querySelector('.other-input');
+    return oi && sel.value==='Other'? oi.value.trim(): sel.value;
+  }
+
+  document.addEventListener('DOMContentLoaded',()=>{
+    /* Show/hide all “Other” inputs */
+    document.querySelectorAll('select').forEach(sel=>{
+      sel.addEventListener('change',()=> {
+        const oi=sel.parentElement.querySelector('.other-input');
+        if(oi) oi.style.display = sel.value==='Other'? 'block':'none';
+      });
+    });
+
+    /* Delegated response panel controls */
+    document.body.addEventListener('click',e=>{
+      if(e.target.closest('.copy-btn')){
+        const panel=e.target.closest('.response');
+        const txt=panel.querySelector('.result-content').innerText;
+        navigator.clipboard.writeText(txt);
+      }
+      if(e.target.closest('.dl-btn')){
+        const panel=e.target.closest('.response');
+        const txt=panel.querySelector('.result-content').innerText;
+        const blob=new Blob([txt],{type:'text/plain'});
+        const a=document.createElement('a');
+        a.href=URL.createObjectURL(blob);
+        a.download='response.txt';a.click();
+      }
+      if(e.target.closest('.close-btn')){
+        e.target.closest('.response').hidden=true;
+      }
+    });
+
+    // ── Diet Chatbot ──────────────────────────────────────────
+    const dietBox=document.getElementById('dietChatBox'),
+          dietHint=document.getElementById('dietHint');
+    let dietHistory=[];
+    function addDiet(who,txt){
+      const m=document.createElement('div');
+      m.className = who==='You'? 'user-msg':'bot-msg';
+      m.innerHTML = `${formatHTML(txt)}<div class="timestamp">${new Date().toLocaleTimeString()}</div>`;
+      dietBox.append(m); dietBox.scrollTop=dietBox.scrollHeight;
+    }
+    document.getElementById('sendDiet').onclick=async e=>{
+      e.preventDefault();
+      const txt=document.getElementById('dietInput').value.trim();
+      if(!txt) return;
+      addDiet('You',txt); dietHistory.push({who:'You',text:txt});
+      document.getElementById('dietInput').value=''; dietHint.style.display='block';
+      try{
+        const reply=await callOpenAI([
+          {role:'system',content:'You are a dietetics assistant.'},
+          {role:'user',content:txt}
+        ]);
+        addDiet('AI',reply); dietHistory.push({who:'AI',text:reply});
+      }catch{
+        addDiet('AI','⚠️ Something went wrong.');
+      }finally{dietHint.style.display='none';}
+    };
+    document.getElementById('clearDiet').onclick=()=>{
+      dietBox.innerHTML=''; dietHistory=[];
+    };
+    document.getElementById('viewDietHistory').onclick=()=>{
+      alert(dietHistory.map(m=>`${m.who}: ${m.text}`).join('\n\n')||'No history');
+    };
+
+    // ── Meal Plan Generator ────────────────────────────────────
+    document.getElementById('genPlan').onclick=async e=>{
+      e.preventDefault();
+      const panel=document.getElementById('planPanel'); panel.hidden=false;
+      panel.querySelector('.result-content').innerText='Generating…';
+      const data={
+        calories:document.getElementById('calories').value,
+        diet:getSelectValue(document.getElementById('dietType')),
+        allergies:document.getElementById('allergies').value.trim()
+      };
+      try{
+        const r=await callOpenAI([
+          {role:'system',content:'You are a meal planning AI.'},
+          {role:'user',content:`Meal Plan JSON:\n${JSON.stringify(data)}`}
+        ]);
+        panel.querySelector('.result-content').innerHTML=formatHTML(r);
+      }catch{
+        panel.querySelector('.result-content').innerText='Error.';
+      }
+    };
+
+    // ── Nutrient Analyzer ─────────────────────────────────────
+    document.getElementById('analyzeNutri').onclick=async e=>{
+      e.preventDefault();const pan=document.getElementById('nutriPanel');pan.hidden=false;
+      pan.querySelector('.result-content').innerText='Analyzing…';
+      try{
+        const r=await callOpenAI([
+          {role:'system',content:'You are a nutrient analysis AI.'},
+          {role:'user',content:document.getElementById('foodLog').value}
+        ]);
+        pan.querySelector('.result-content').innerHTML=formatHTML(r);
+      }catch{pan.querySelector('.result-content').innerText='Error.';}
+    };
+
+    // ── Recipe Recommender ────────────────────────────────────
+    document.getElementById('getRecipes').onclick=async e=>{
+      e.preventDefault();const pan=document.getElementById('recipePanel');pan.hidden=false;
+      pan.querySelector('.result-content').innerText='Finding recipes…';
+      const data={
+        pantry:document.getElementById('pantry').value,
+        goal:getSelectValue(document.getElementById('recipeGoal'))
+      };
+      try{
+        const r=await callOpenAI([
+          {role:'system',content:'You are a recipe recommendation AI.'},
+          {role:'user',content:`Pantry & Goal JSON:\n${JSON.stringify(data)}`}
+        ]);
+        pan.querySelector('.result-content').innerHTML=formatHTML(r);
+      }catch{pan.querySelector('.result-content').innerText='Error.';}
+    };
+
+    // ── Deficiency Risk Scanner ───────────────────────────────
+    document.getElementById('scanDef').onclick=async e=>{
+      e.preventDefault();const pan=document.getElementById('defPanel');pan.hidden=false;
+      pan.querySelector('.result-content').innerText='Scanning…';
+      const data={
+        symptoms:document.getElementById('symptoms').value,
+        diet:document.getElementById('dietOverview').value
+      };
+      try{
+        const r=await callOpenAI([
+          {role:'system',content:'You are a deficiency risk AI.'},
+          {role:'user',content:`Deficiency JSON:\n${JSON.stringify(data)}`}
+        ]);
+        pan.querySelector('.result-content').innerHTML=formatHTML(r);
+      }catch{pan.querySelector('.result-content').innerText='Error.';}
+    };
+
+    // ── Progress Charts ───────────────────────────────────────
+    const ic=new Chart(document.getElementById('intakeChart').getContext('2d'),{
+      type:'line',data:{labels:['Mon','Tue','Wed','Thu','Fri'],datasets:[{label:'Calories In',data:[2000,1800,2100,1900,2050],borderColor:var('--secondary'),fill:false}]}
+    });
+    const mc=new Chart(document.getElementById('macroChart').getContext('2d'),{
+      type:'pie',data:{labels:['Carbs','Protein','Fat'],datasets:[{data:[50,25,25],backgroundColor:[var('--primary'),var('--primary-alt'),var('--secondary')]}]}
+    });
+  });
+  </script>
+
+</body>
+</html>
