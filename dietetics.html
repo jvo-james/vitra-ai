@@ -10,144 +10,428 @@
   <link rel="stylesheet"
         href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <style>
-    /*────────────────────── Theme & Reset ──────────────────────*/
-    :root {
-      --primary: #D4AC0D;           /* darker gold */
-      --primary-alt: #B7950B;       /* deeper accent */
-      --secondary: #884EA0;
-      --accent: rgba(255,255,224,0.6);
-      --bg: #FEF9E7;
-      --surface: rgba(255,255,240,0.9);
-      --text: #3E3E3E;
-      --muted: #7D6608;
-      --radius: .75rem;
-      --padding: 1rem;
-      --transition: .3s ease;
-      --shadow-light: 0 4px 20px rgba(0,0,0,.05);
-      --sidebar-width: 220px;
-    }
-    *,*::before,*::after{margin:0;padding:0;box-sizing:border-box;}
-    body{display:flex;min-height:100vh;background:var(--bg);color:var(--text);font-family:'Montserrat',sans-serif;overflow-x:hidden;}
-    a{color:inherit;text-decoration:none;}button,input,textarea,select{font:inherit;transition:all var(--transition);}
-    :focus{outline:none!important;box-shadow:none!important;}
 
-    /*────────────────────── Sidebar & Header ──────────────────────*/
-    aside{flex:0 0 var(--sidebar-width);background:var(--surface);backdrop-filter:blur(12px);
-      box-shadow:var(--shadow-light);position:fixed;top:0;left:0;height:100vh;display:flex;flex-direction:column;z-index:1000;}
-    main{flex:1;margin-left:var(--sidebar-width);padding:var(--padding);margin-top:60px;transition:margin-left var(--transition);}
-    header{position:fixed;top:0;left:var(--sidebar-width);right:0;height:60px;background:var(--surface);
-      backdrop-filter:blur(12px);display:flex;align-items:center;justify-content:space-between;
-      padding:0 var(--padding);box-shadow:var(--shadow-light);z-index:1001;}
-    #hamburger{font-size:1.5rem;color:var(--primary);cursor:pointer;display:none;}
-    #hamburger:hover{transform:scale(1.1);}
-    @media(max-width:768px){
-      #hamburger{display:block;}
-      aside{transform:translateX(-100%);}
-      body.sidebar-open aside{transform:translateX(0);}
-      main,header{margin-left:0;left:0;}
-    }
+/*────────────────────── Theme & Reset ──────────────────────*/
+:root {
+  --color-primary: #D4AC0D;
+  --color-primary-alt: #B7950B;
+  --color-secondary: #884EA0;
+  --color-accent: rgba(255,255,224,0.8);
+  --color-bg: #FEF9E7;
+  --color-surface: rgba(255,255,240,0.9);
+  --color-text: #3E3E3E;
+  --color-muted: #7D6608;
+  --radius: 1rem;
+  --padding: 1rem;
+  --transition: 0.3s ease;
+  --shadow: 0 6px 20px rgba(0,0,0,0.1);
+  --sidebar-width: 220px;
+}
+html.dark {
+  --color-bg: #1A1A1A;
+  --color-surface: rgba(30,30,30,0.9);
+  --color-text: #ECECEC;
+  --color-muted: #AAA;
+}
+* {
+  margin: 0; padding: 0; box-sizing: border-box;
+  font-family: 'Montserrat', sans-serif;
+}
+body {
+  display: flex; min-height: 100vh;
+  background: var(--color-bg);
+  color: var(--color-text);
+  overflow-x: hidden;
+  transition: background var(--transition), color var(--transition);
+}
+a { color: inherit; text-decoration: none; }
+button, input, textarea, select { font: inherit; transition: var(--transition); }
+:focus { outline: none; }
 
-    /*────────────────────── Modules ──────────────────────*/
-    section.module{background:var(--surface);border-radius:var(--radius);
-      padding:var(--padding);margin-bottom:1.5rem;box-shadow:var(--shadow-light);position:relative;}
-    h2{font-size:1.6rem;color:var(--primary);margin-bottom:.75rem;display:flex;align-items:center;gap:.5rem;}
-    .desc{color:var(--muted);margin-bottom:1rem;}
+/*────────────────────── Sidebar ──────────────────────*/
+aside#sidebar {
+  position: fixed; top: 0; left: 0; bottom: 0;
+  width: var(--sidebar-width);
+  background: var(--color-surface);
+  box-shadow: var(--shadow);
+  display: flex; flex-direction: column;
+  z-index: 1000;
+}
+aside#sidebar .brand {
+  display: flex; align-items: center; gap: .75rem;
+  padding: var(--padding);
+  font-size: 1.25rem; font-weight: 700;
+  color: var(--color-primary);
+}
+aside#sidebar nav ul {
+  list-style: none; flex: 1; overflow-y: auto;
+}
+aside#sidebar nav li { }
+aside#sidebar nav a {
+  display: flex; align-items: center; gap: .75rem;
+  padding: .75rem var(--padding);
+  border-radius: var(--radius);
+  color: var(--color-text);
+  transition: background var(--transition), transform var(--transition);
+}
+aside#sidebar nav a:hover,
+aside#sidebar nav .active a {
+  background: var(--color-primary-alt);
+  color: #fff;
+  transform: translateX(4px);
+}
+#shrinkSidebar {
+  margin: var(--padding); align-self: center;
+  background: var(--color-primary);
+  border: none; border-radius: 50%;
+  width: 36px; height: 36px;
+  color: #fff; box-shadow: var(--shadow);
+  cursor: pointer;
+}
 
-    /*────────────────────── Inputs & Buttons ──────────────────────*/
-    input,textarea,select{width:100%;padding:.75rem;border:1px solid var(--muted);
-      border-radius:var(--radius);background:var(--accent);color:var(--text);}
-    select + .other-input{margin-top:.5rem;}
-    button.btn{display:inline-flex;align-items:center;gap:.5rem;padding:.75rem 1.25rem;
-      border:none;border-radius:var(--radius);background:var(--primary);color:#000;font-weight:600;
-      box-shadow:var(--shadow-light);cursor:pointer;}
-    button.btn:hover{transform:translateY(-2px);}
+/*────────────────────── Header ──────────────────────*/
+header {
+  position: fixed; top: 0; left: var(--sidebar-width); right: 0;
+  height: 60px;
+  background: var(--color-surface);
+  box-shadow: var(--shadow);
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0 var(--padding);
+  z-index: 1001;
+  transition: left var(--transition), background var(--transition);
+}
+header #hamburger {
+  display: none; font-size: 1.5rem; color: var(--color-primary);
+  cursor: pointer;
+}
+header #themeToggle {
+  font-size: 1.5rem; color: var(--color-primary);
+  cursor: pointer;
+}
+@media(max-width: 768px) {
+  header #hamburger { display: block; }
+  body.sidebar-open aside#sidebar { transform: translateX(0); }
+  aside#sidebar { transform: translateX(-100%); transition: transform var(--transition); }
+  header, main { left: 0 !important; }
+}
 
-    /*────────────────────── Response Panels ──────────────────────*/
-    .response{background:var(--surface);padding:var(--padding);border-left:4px solid var(--secondary);
-      border-radius:var(--radius);position:relative;margin-top:1rem;box-shadow:var(--shadow-light);
-      transition:all var(--transition);}
-    .response .result-content{white-space:pre-wrap;line-height:1.5;}
-    .tool-row{position:absolute;bottom:var(--padding);right:var(--padding);display:flex;gap:.5rem;z-index:2;}
-    .close-btn,.copy-btn,.dl-btn{background:none;border:none;cursor:pointer;}
-    .copy-btn,.dl-btn{border:1px solid var(--muted);border-radius:50%;width:1.6rem;height:1.6rem;
-      display:flex;align-items:center;justify-content:center;}
+/*────────────────────── Main & Modules ──────────────────────*/
+main {
+  flex: 1;
+  margin-top: 60px;
+  margin-left: var(--sidebar-width);
+  padding: var(--padding);
+  transition: margin-left var(--transition);
+}
+section.module {
+  background: var(--color-surface);
+  border-radius: var(--radius);
+  padding: var(--padding);
+  margin-bottom: 1.5rem;
+  box-shadow: var(--shadow);
+  transition: transform var(--transition);
+}
+section.module:hover {
+  transform: translateY(-4px);
+}
+h2 {
+  display: flex; align-items: center; gap: .5rem;
+  font-size: 1.6rem; color: var(--color-primary);
+  margin-bottom: .75rem;
+}
+.desc {
+  color: var(--color-muted);
+  margin-bottom: 1rem;
+}
 
-    /*────────────────────── Chatbot ──────────────────────*/
-    .chat-box{background:var(--bg);border:1px solid var(--muted);border-radius:var(--radius);
-      padding:var(--padding);max-height:300px;overflow-y:auto;display:flex;flex-direction:column;}
-    .user-msg{background:var(--primary-alt);align-self:flex-end;color:#000;padding:.75rem;border-radius:1rem;position:relative;}
-    .bot-msg{background:var(--accent);align-self:flex-start;color:#000;padding:.75rem;border-radius:1rem;position:relative;}
-    .timestamp{font-size:.65rem;color:var(--muted);position:absolute;bottom:-1.2rem;right:1rem;}
+/*────────────────────── Hero ──────────────────────*/
+#hero .hero-features {
+  display: grid;
+  grid-template-columns: repeat(auto-fit,minmax(240px,1fr));
+  gap: 1rem;
+  margin-top: 1rem;
+}
+.feature-card {
+  background: var(--color-bg);
+  border-radius: var(--radius);
+  padding: var(--padding);
+  box-shadow: var(--shadow);
+  display: flex; flex-direction: column; align-items: flex-start;
+  transition: transform var(--transition), box-shadow var(--transition);
+}
+.feature-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 30px rgba(0,0,0,0.15);
+}
+.feature-card i {
+  font-size: 2rem; color: var(--color-primary-alt);
+  margin-bottom: .5rem;
+}
+.feature-card h3 {
+  margin-bottom: .75rem;
+  font-size: 1.2rem;
+}
+.feature-card input,
+.feature-card select {
+  width: 100%; margin-bottom: .5rem;
+}
+.feature-card button {
+  align-self: flex-end;
+}
 
-    /*────────────────────── Charts ──────────────────────*/
-    .charts{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:1.5rem;margin-top:1rem;}
-    .chart-card{background:var(--surface);padding:var(--padding);border-radius:var(--radius);
-      box-shadow:var(--shadow-light);display:flex;flex-direction:column;}
-    .chart-card canvas{flex:1;}
+/*────────────────────── Chatbot ──────────────────────*/
+.chat-controls {
+  display: flex; gap: .5rem; margin-bottom: .5rem;
+}
+.chat-box {
+  background: var(--color-bg);
+  border: 1px solid var(--color-muted);
+  border-radius: var(--radius);
+  padding: var(--padding);
+  max-height: 300px; overflow-y: auto;
+  display: flex; flex-direction: column; gap: .5rem;
+}
+.chat-input {
+  display: flex; gap: .5rem; margin-top: .5rem;
+}
+.chat-input input {
+  flex: 1;
+}
+.user-msg, .bot-msg {
+  max-width: 80%;
+  padding: .75rem 1rem;
+  border-radius: var(--radius);
+  position: relative;
+}
+.user-msg {
+  background: var(--color-primary-alt);
+  color: #000; align-self: flex-end;
+}
+.bot-msg {
+  background: var(--color-accent);
+  color: var(--color-text); align-self: flex-start;
+}
+.timestamp {
+  font-size: .65rem;
+  color: var(--color-muted);
+  position: absolute;
+  bottom: -1.2rem; right: 1rem;
+}
+
+/*────────────────────── Forms & Inputs ──────────────────────*/
+input, textarea, select {
+  width: 100%;
+  padding: .75rem;
+  border: 1px solid var(--color-muted);
+  border-radius: var(--radius);
+  background: var(--color-accent);
+  color: var(--color-text);
+  box-shadow: inset 0 2px 4px rgba(0,0,0,0.05);
+}
+select + .other-input {
+  margin-top: .5rem;
+  display: none;
+}
+button.btn {
+  display: inline-flex; align-items: center; gap: .5rem;
+  padding: .75rem 1.25rem;
+  border: none; border-radius: var(--radius);
+  background: var(--color-primary); color: #000; font-weight: 600;
+  box-shadow: var(--shadow);
+  cursor: pointer;
+  transition: background var(--transition), transform var(--transition);
+}
+button.btn:hover {
+  background: var(--color-primary-alt);
+  transform: translateY(-2px);
+}
+button.btn-secondary {
+  background: var(--color-secondary); color: #fff;
+}
+button.btn-secondary:hover {
+  background: var(--color-secondary-alt, #733d91);
+}
+
+/*────────────────────── Response Panels ──────────────────────*/
+.response {
+  background: var(--color-surface);
+  border-left: 4px solid var(--color-secondary);
+  border-radius: var(--radius);
+  padding: var(--padding);
+  margin-top: 1rem;
+  position: relative;
+  box-shadow: var(--shadow);
+}
+.response .result-content {
+  white-space: pre-wrap;
+  line-height: 1.5;
+}
+.tool-row {
+  position: absolute; bottom: var(--padding); right: var(--padding);
+  display: flex; gap: .5rem;
+}
+.close-btn, .copy-btn, .dl-btn {
+  background: none; border: none; cursor: pointer;
+}
+.copy-btn, .dl-btn {
+  width: 1.6rem; height: 1.6rem;
+  display: flex; align-items: center; justify-content: center;
+  border: 1px solid var(--color-muted);
+  border-radius: 50%;
+  background: var(--color-accent);
+}
+.copy-btn:hover, .dl-btn:hover {
+  background: var(--color-primary-alt);
+}
+
+/*────────────────────── Fieldsets & Checkbox Groups ──────────────────────*/
+fieldset {
+  border: 1px solid var(--color-muted);
+  border-radius: var(--radius);
+  padding: .75rem;
+  margin-bottom: 1rem;
+}
+legend {
+  padding: 0 .5rem; font-weight: 600; color: var(--color-secondary);
+}
+.checkbox-group {
+  display: flex; flex-wrap: wrap; gap: .5rem;
+}
+.checkbox-group label {
+  display: flex; align-items: center; gap: .25rem;
+}
+
+/*────────────────────── Metabolomic & Fitness Sections ──────────────────────*/
+#risk-form label, #fitness-form fieldset label {
+  margin-bottom: .75rem;
+}
+#risk-form input[type="date"],
+#fitness-form input[type="date"],
+#fitness-form input[type="time"] {
+  width: auto; display: inline-block; margin-left: .5rem;
+}
+
+/*────────────────────── Responsive Adjustments ──────────────────────*/
+@media(max-width: 1024px) {
+  main { padding: .5rem; }
+  .hero-features { grid-template-columns: 1fr; }
+}
+@media(max-width: 640px) {
+  section.module { padding: .75rem; }
+  .chat-input, .chat-controls { flex-direction: column; }
+  .tool-row { position: static; margin-top: .5rem; }
+}
+    
   </style>
 </head>
 
 <body>
-<!-- Sidebar -->
-  <aside>
-    <div class="brand"><i class="fas fa-utensils"></i> Vitra AI</div>
+  <!-- Sidebar -->
+  <aside id="sidebar">
+    <div class="brand">
+      <i class="fas fa-utensils"></i>
+      <span>Vitra AI Dietetics</span>
+    </div>
     <nav>
-      <a href="herbal.html"><i class="fas fa-seedling"></i> Herbal</a>
-      <a href="psych.html"><i class="fas fa-brain"></i> Psych</a>
-      <a href="#" class="active"><i class="fas fa-apple-alt"></i> Dietetics</a>
-      <a href="pharmacy.html"><i class="fas fa-prescription-bottle-alt"></i> E-pharmacy</a>
-      <a href="consult.html"><i class="fas fa-calendar-check"></i> Booking</a>
+      <ul>
+        <li><a href="herbal.html"><i class="fas fa-seedling"></i> Herbal Medicine</a></li>
+        <li><a href="psych.html"><i class="fas fa-brain"></i> Psychology & MH</a></li>
+        <li class="active"><a href="#"><i class="fas fa-apple-alt"></i> Dietetics</a></li>
+        <li><a href="pharmacy.html"><i class="fas fa-prescription-bottle-alt"></i> E-Pharmacy</a></li>
+        <li><a href="consult.html"><i class="fas fa-calendar-check"></i> Consult Booking</a></li>
+      </ul>
     </nav>
+    <button id="shrinkSidebar" aria-label="Toggle sidebar">
+      <i class="fas fa-angle-double-left"></i>
+    </button>
   </aside>
 
   <!-- Header -->
   <header>
-    <i id="hamburger" class="fas fa-bars"></i>
+    <i id="hamburger" class="fas fa-bars" aria-label="Open menu"></i>
     <h1>Dietetics & Nutrition</h1>
-    <i id="themeToggle" class="fas fa-moon" style="font-size:1.5rem;color:var(--primary);cursor:pointer;"></i>
+    <i id="themeToggle" class="fas fa-moon" aria-label="Toggle dark mode"></i>
   </header>
 
   <!-- Main Content -->
   <main>
-    <!-- Hero -->
-    <section class="module hero">
-      <h2><i class="fas fa-apple-alt"></i> Empower Your Patients’ Nutrition</h2>
-      <p class="desc">AI-driven meal plans, nutrient analysis, recipe recommendations, deficiency risk alerts & more.</p>
+    <!-- Hero Section -->
+    <section id="hero" class="module">
+      <h2><i class="fas fa-apple-alt"></i> Empower Your Nutrition</h2>
+      <p class="desc">AI-driven tools for meal planning, nutrient insights, recipe inspiration & more.</p>
+      <div class="hero-features">
+        <!-- Recipe Search -->
+        <div class="feature-card">
+          <i class="fas fa-search"></i>
+          <h3>Recipe Search</h3>
+          <input type="text" id="heroRecipeSearch" placeholder="e.g. Jollof rice with chicken">
+          <button id="heroSearchBtn" class="btn">Search</button>
+        </div>
+        <!-- Today's Tip -->
+        <div class="feature-card">
+          <i class="fas fa-lightbulb"></i>
+          <h3>Today's Nutrition Tip</h3>
+          <p id="dailyTip">Loading tip…</p>
+          <button id="refreshTip" class="btn-secondary">Refresh Tip</button>
+        </div>
+        <!-- Quick Macro Snapshot -->
+        <div class="feature-card">
+          <i class="fas fa-chart-pie"></i>
+          <h3>Macro Snapshot</h3>
+          <div id="macroSnapshot">Protein: – g / Carbs: – g / Fat: – g</div>
+          <button id="refreshMacro" class="btn-secondary">Update</button>
+        </div>
+      </div>
     </section>
 
     <!-- 1. Nutrition Chatbot -->
-    <section class="module" id="dietBot">
+    <section id="dietBot" class="module">
       <h2><i class="fas fa-comments"></i> Nutrition Chatbot</h2>
-      <p class="desc">Ask personalized diet & nutrition questions—AI tailors answers to age, goals, allergies.</p>
-      <form id="diet-form" style="display:grid;grid-template-columns:1fr auto;gap:.5rem;">
-        <input id="dietInput" type="text" placeholder="e.g. 'Low-carb dinner ideas?'" required>
-        <button id="sendDiet" class="btn"><i class="fas fa-paper-plane"></i></button>
-      </form>
-      <div class="tool-row">
-        <button id="clearDiet" title="Clear Chat"><i class="fas fa-trash"></i></button>
-        <button id="viewDietHistory" title="History"><i class="fas fa-history"></i></button>
+      <p class="desc">Ask any diet or nutrition question and get instant, tailored advice.</p>
+      <div class="chat-controls">
+        <button id="clearDiet" class="btn-secondary"><i class="fas fa-trash"></i> Clear Chat</button>
+        <button id="viewDietHistory" class="btn-secondary"><i class="fas fa-history"></i> Chat History</button>
       </div>
       <div id="dietChatBox" class="chat-box"></div>
+      <form id="diet-form" class="chat-input">
+        <input id="dietInput" type="text" placeholder="Type your question…" required>
+        <button id="sendDiet" class="btn"><i class="fas fa-paper-plane"></i></button>
+      </form>
       <div id="dietHint" class="desc" style="display:none;">AI is thinking…</div>
     </section>
 
     <!-- 2. Meal Plan Generator -->
-    <section class="module" id="mealPlanner">
+    <section id="mealPlanner" class="module">
       <h2><i class="fas fa-calendar-alt"></i> Meal Plan Generator</h2>
-      <p class="desc">Create a 7-day meal plan based on calories, diet type, and allergies.</p>
+      <p class="desc">Create a 7-day meal plan that fits your calories, style, and restrictions.</p>
       <form id="planner-form">
         <label>Daily Calories:
           <input type="number" id="calories" min="800" max="4000" value="2000" required>
         </label>
         <label>Diet Type:
           <select id="dietType">
-            <option>Balanced</option><option>Low-Carb</option><option>Vegan</option>
-            <option>Ketogenic</option><option value="Other">Other</option>
+            <option>Balanced</option>
+            <option>Low-Carb</option>
+            <option>Vegan</option>
+            <option>Ketogenic</option>
+            <option>Mediterranean</option>
+            <option>Plant-Based</option>
+            <option value="Other">Other</option>
           </select>
           <input class="other-input" placeholder="Specify diet…" style="display:none;">
         </label>
-        <label>Allergies:
-          <input type="text" id="allergies" placeholder="e.g. Gluten, Nuts">
+        <label>Allergies & Intolerances:
+          <select id="allergyList" multiple>
+            <option>Gluten</option><option>Dairy</option><option>Nuts</option>
+            <option>Shellfish</option><option>Soy</option><option>Eggs</option>
+            <option>Sesame</option><option>Other</option>
+          </select>
+          <input class="other-input" placeholder="Specify others…" style="display:none;">
+        </label>
+        <label>Budget:
+          <select id="budget">
+            <option>Low</option><option>Medium</option><option>High</option>
+          </select>
         </label>
         <button id="genPlan" class="btn"><i class="fas fa-utensils"></i> Generate Plan</button>
       </form>
@@ -162,12 +446,18 @@
     </section>
 
     <!-- 3. Nutrient Analyzer -->
-    <section class="module" id="nutriAnalyzer">
+    <section id="nutriAnalyzer" class="module">
       <h2><i class="fas fa-vial"></i> Nutrient Analyzer</h2>
-      <p class="desc">Paste a recipe or food log; get macros and micronutrient breakdown.</p>
+      <p class="desc">Get a complete macro and micronutrient breakdown of any recipe or meal log.</p>
       <form id="analyze-form">
-        <label>Ingredients/Log:
-          <textarea id="foodLog" rows="4" placeholder="List ingredients or foods..."></textarea>
+        <label>Ingredients / Food Log:
+          <textarea id="foodLog" rows="4" placeholder="e.g. 200g yam, 1 egg, spinach…"></textarea>
+        </label>
+        <label>Portion Size Units:
+          <select id="unitSelect">
+            <option>grams</option><option>pieces</option><option>cups</option>
+            <option>tablespoons</option><option>servings</option>
+          </select>
         </label>
         <button id="analyzeNutri" class="btn"><i class="fas fa-chart-bar"></i> Analyze</button>
       </form>
@@ -182,21 +472,29 @@
     </section>
 
     <!-- 4. Recipe Recommender -->
-    <section class="module" id="recipeRec">
+    <section id="recipeRec" class="module">
       <h2><i class="fas fa-book-open"></i> Recipe Recommender</h2>
-      <p class="desc">Get personalized recipes based on pantry items & dietary goals.</p>
+      <p class="desc">Transform your pantry into delicious meals across global cuisines.</p>
       <form id="recipe-form">
         <label>Pantry Items:
-          <input id="pantry" type="text" placeholder="e.g. Chicken, Spinach, Eggs">
+          <input id="pantry" type="text" placeholder="e.g. Rice, Beans, Plantain">
         </label>
-        <label>Goal:
-          <select id="recipeGoal">
-            <option>Muscle Gain</option><option>Weight Loss</option>
-            <option>Maintenance</option><option value="Other">Other</option>
+        <label>Cuisine Style:
+          <select id="cuisineType">
+            <option>West African</option><option>Italian</option><option>Asian Fusion</option>
+            <option>Mexican</option><option>Middle Eastern</option><option value="Other">Other</option>
           </select>
-          <input class="other-input" placeholder="Specify goal…" style="display:none;">
+          <input class="other-input" placeholder="Specify cuisine…" style="display:none;">
         </label>
-        <button id="getRecipes" class="btn"><i class="fas fa-hamburger"></i> Show Recipes</button>
+        <label>Difficulty:
+          <select id="recipeDifficulty">
+            <option>Easy</option><option>Medium</option><option>Advanced</option>
+          </select>
+        </label>
+        <label>Max Prep Time:
+          <input type="number" id="maxTime" min="5" max="180" value="30"> minutes
+        </label>
+        <button id="getRecipes" class="btn"><i class="fas fa-hamburger"></i> Get Recipes</button>
       </form>
       <div id="recipePanel" class="response" hidden>
         <button class="close-btn"><i class="fas fa-times"></i></button>
@@ -209,17 +507,26 @@
     </section>
 
     <!-- 5. Deficiency Risk Scanner -->
-    <section class="module" id="deficiency">
+    <section id="deficiency" class="module">
       <h2><i class="fas fa-exclamation-triangle"></i> Deficiency Risk Scanner</h2>
-      <p class="desc">Assess risk of common nutrient deficiencies from diet & symptoms.</p>
+      <p class="desc">Identify potential nutrient shortfalls based on symptoms and diet.</p>
       <form id="def-form">
-        <label>Symptoms:
-          <input id="symptoms" type="text" placeholder="e.g. Fatigue, Hair loss">
+        <label>Select Symptoms (up to 5):
+          <div class="checkbox-group">
+            <label><input type="checkbox" name="symptom" value="Fatigue"> Fatigue</label>
+            <label><input type="checkbox" name="symptom" value="Hair Loss"> Hair Loss</label>
+            <label><input type="checkbox" name="symptom" value="Muscle Cramps"> Muscle Cramps</label>
+            <label><input type="checkbox" name="symptom" value="Pale Skin"> Pale Skin</label>
+            <label><input type="checkbox" name="symptom" value="Bleeding Gums"> Bleeding Gums</label>
+            <label><input type="checkbox" name="symptom" value="Bone Pain"> Bone Pain</label>
+            <label><input type="checkbox" name="symptom" value="Bruising"> Bruising</label>
+            <label><input type="checkbox" name="symptom" value="Other"> Other</label>
+          </div>
         </label>
-        <label>Diet Overview:
-          <textarea id="dietOverview" rows="3" placeholder="Describe your regular diet..."></textarea>
+        <label>Brief Diet Overview:
+          <textarea id="dietOverview" rows="3" placeholder="e.g. Mostly rice, occasional vegetables…"></textarea>
         </label>
-        <button id="scanDef" class="btn"><i class="fas fa-stethoscope"></i> Scan Risk</button>
+        <button id="scanDef" class="btn"><i class="fas fa-stethoscope"></i> Scan Deficiency</button>
       </form>
       <div id="defPanel" class="response" hidden>
         <button class="close-btn"><i class="fas fa-times"></i></button>
@@ -231,99 +538,15 @@
       </div>
     </section>
 
-    <!-- 6. Progress Charts -->
-    <section class="module" id="progress">
-      <h2><i class="fas fa-chart-line"></i> Progress Charts</h2>
-      <p class="desc">Visualize calorie intake vs. burn, macros over time.</p>
-      <div class="charts">
-        <div class="chart-card">
-          <canvas id="intakeChart" height="200"></canvas>
-          <figcaption>Calories Intake</figcaption>
-        </div>
-        <div class="chart-card">
-          <canvas id="macroChart" height="200"></canvas>
-          <figcaption>Macro Ratio</figcaption>
-        </div>
-      </div>
-    </section>
-
-    <!-- 7. Nutrigenomic & Microbiome Portrait -->
-    <section class="module" id="nutriGenomic">
-      <h2><i class="fas fa-dna"></i> Nutrigenomic & Microbiome Portrait</h2>
-      <p class="desc">Upload DNA & gut-sample for AI-driven metabolic profiling.</p>
-      <form id="geno-form">
-        <label>Upload DNA Data (.txt/.vcf):
-          <input type="file" id="genoUpload" accept=".txt,.vcf" required>
-        </label>
-        <label>Upload Microbiome CSV:
-          <input type="file" id="microbiomeUpload" accept=".csv" required>
-        </label>
-        <button id="runGeno" class="btn"><i class="fas fa-microscope"></i> Analyze Profile</button>
-      </form>
-      <div id="genoPanel" class="response" hidden>
-        <button class="close-btn"><i class="fas fa-times"></i></button>
-        <div class="tool-row">
-          <button class="copy-btn"><i class="fas fa-copy"></i></button>
-          <button class="dl-btn"><i class="fas fa-download"></i></button>
-        </div>
-        <div class="result-content"></div>
-      </div>
-    </section>
-
-    <!-- 8. Chef’s Assistant Live Cooking -->
-    <section class="module" id="chefAssistant">
-      <h2><i class="fas fa-video"></i> Chef’s Assistant Live Cooking</h2>
-      <p class="desc">Use your camera & voice to let AI guide you step-by-step in the kitchen.</p>
-      <form id="chef-form">
-        <label>Camera Feed URL:
-          <input type="text" id="cameraUrl" placeholder="e.g. ws://camera.local/stream" required>
-        </label>
-        <label>Main Ingredients:
-          <input type="text" id="mainIng" placeholder="e.g. Chicken, Broccoli">
-        </label>
-        <button id="startCook" class="btn"><i class="fas fa-play-circle"></i> Start Session</button>
-      </form>
-      <div id="chefPanel" class="response" hidden>
-        <button class="close-btn"><i class="fas fa-times"></i></button>
-        <div class="tool-row">
-          <button class="copy-btn"><i class="fas fa-copy"></i></button>
-          <button class="dl-btn"><i class="fas fa-download"></i></button>
-        </div>
-        <div class="result-content"></div>
-      </div>
-    </section>
-
-    <!-- 9. AR Grocery Shopping Companion -->
-    <section class="module" id="argrocery">
-      <h2><i class="fas fa-shopping-basket"></i> AR Grocery Shopping Companion</h2>
-      <p class="desc">Point your phone at produce; AI judges ripeness, nutrition, waste reduction tips.</p>
-      <form id="ar-form">
-        <label>AR Model URL:
-          <input type="text" id="arModel" placeholder="e.g. https://models.local/produce.tflite" required>
-        </label>
-        <button id="startAR" class="btn"><i class="fas fa-camera"></i> Launch AR</button>
-      </form>
-      <div id="arPanel" class="response" hidden>
-        <button class="close-btn"><i class="fas fa-times"></i></button>
-        <div class="tool-row">
-          <button class="copy-btn"><i class="fas fa-copy"></i></button>
-          <button class="dl-btn"><i class="fas fa-download"></i></button>
-        </div>
-        <div class="result-content"></div>
-      </div>
-    </section>
-
-    <!-- 10. Metabolomic Risk Radar -->
-    <section class="module" id="riskRadar">
+    <!-- 6. Metabolomic Risk Radar -->
+    <section id="riskRadar" class="module">
       <h2><i class="fas fa-chart-pie"></i> Metabolomic Risk Radar</h2>
-      <p class="desc">Sync your wearables & home lab to predict future diet-related health risks.</p>
+      <p class="desc">Continuous biomarker tracking and predictive health alerts.</p>
       <form id="risk-form">
-        <label>Wearable API Key:
-          <input type="text" id="wearableKey" placeholder="API Key" required>
+        <label>Date Range:
+          <input type="date" id="riskFrom"> – <input type="date" id="riskTo">
         </label>
-        <label>Home Lab CSV:
-          <input type="file" id="labCsv" accept=".csv" required>
-        </label>
+        <label><input type="checkbox" id="syncBiomarkers"> Enable Continuous Biomarker Sync</label>
         <button id="runRisk" class="btn"><i class="fas fa-biohazard"></i> Run Radar</button>
       </form>
       <div id="riskPanel" class="response" hidden>
@@ -336,50 +559,72 @@
       </div>
     </section>
 
-    <!-- 11. Behavioral & Emotional Eating Coach -->
-    <section class="module" id="behaviorCoach">
-      <h2><i class="fas fa-brain"></i> Behavioral & Emotional Eating Coach</h2>
-      <p class="desc">AI monitors your mood & journaling to curb cravings with mindfulness exercises.</p>
-      <form id="behavior-form">
-        <label>Daily Journal:
-          <textarea id="journal" rows="3" placeholder="How do you feel today..."></textarea>
-        </label>
-        <label>Current Mood:
-          <select id="currentMood">
-            <option>Happy</option><option>Stressed</option><option>Anxious</option><option>Other</option>
-          </select>
-          <input class="other-input" placeholder="Specify mood…" style="display:none;">
-        </label>
-        <button id="runBehavior" class="btn"><i class="fas fa-heart"></i> Get Coach Tips</button>
-      </form>
-      <div id="behaviorPanel" class="response" hidden>
-        <button class="close-btn"><i class="fas fa-times"></i></button>
-        <div class="tool-row">
-          <button class="copy-btn"><i class="fas fa-copy"></i></button>
-          <button class="dl-btn"><i class="fas fa-download"></i></button>
-        </div>
-        <div class="result-content"></div>
-      </div>
-    </section>
-
-    <!-- 12. Fitness Nutrition Coach -->
-    <section class="module" id="fitnessCoach">
+    <!-- 7. AI-Driven Fitness Nutrition Coach -->
+    <section id="fitnessCoach" class="module">
       <h2><i class="fas fa-dumbbell"></i> Fitness Nutrition Coach</h2>
-      <p class="desc">AI tailors macros & supplements to your training logs and wearables.</p>
+      <p class="desc">Tailor your macros, pre/post-workout blends, and recovery support.</p>
       <form id="fitness-form">
-        <label>Workout Type:
-          <select id="workoutType">
-            <option>Endurance</option><option>Strength</option><option>Hybrid</option><option>Other</option>
-          </select>
-          <input class="other-input" placeholder="Specify workout…" style="display:none;">
-        </label>
-        <label>Weekly Sessions:
-          <input type="number" id="weeklySessions" min="1" max="14" value="3">
-        </label>
-        <label>Wearable API Key:
-          <input type="text" id="fitApiKey" placeholder="API Key">
-        </label>
-        <button id="runFitness" class="btn"><i class="fas fa-running"></i> Optimize Nutrition</button>
+        <!-- 1. Performance Profiling -->
+        <fieldset>
+          <legend>1. Performance Profiling</legend>
+          <label>Workout Goal:
+            <select id="fitGoal">
+              <option>Endurance</option>
+              <option>Strength</option>
+              <option>Hybrid</option>
+              <option>Weight Loss</option>
+              <option>General Health</option>
+              <option value="Other">Other</option>
+            </select>
+            <input class="other-input" placeholder="Specify goal…" style="display:none;">
+          </label>
+          <label>Weekly Workouts:
+            <select id="fitFreq">
+              <option>1–2</option><option>3–4</option><option>5–7</option>
+            </select>
+          </label>
+        </fieldset>
+        <!-- 2. Pre/Post-Workout -->
+        <fieldset>
+          <legend>2. Pre/Post-Workout Micro-Blends</legend>
+          <label>Available Ingredients:
+            <select id="blendIngredients" multiple>
+              <option>Pea Protein</option><option>Beetroot Powder</option>
+              <option>Taurine</option><option>Banana</option>
+              <option>Oats</option><option>Other</option>
+            </select>
+            <input class="other-input" placeholder="Add ingredient…" style="display:none;">
+          </label>
+        </fieldset>
+        <!-- 3. Carb-Timing Calendar -->
+        <fieldset>
+          <legend>3. Carb-Timing Calendar</legend>
+          <label>Start Date:
+            <input type="date" id="carbDate">
+          </label>
+          <label>Intensity Level:
+            <select id="intensity">
+              <option>Low</option><option>Moderate</option><option>High</option>
+            </select>
+          </label>
+        </fieldset>
+        <!-- 4. Recovery Monitor -->
+        <fieldset>
+          <legend>4. Recovery & Inflammation</legend>
+          <label>Track CRP & CK Levels:
+            <input type="number" id="crpLevel" placeholder="CRP mg/L">
+          </label>
+          <label>Nutraceutical Preference:
+            <select id="nutraPref">
+              <option>Curcumin</option><option>Omega-3</option>
+              <option>Turmeric</option><option>Ginger</option>
+              <option>Other</option>
+            </select>
+            <input class="other-input" placeholder="Specify…"
+                   style="display:none;">
+          </label>
+        </fieldset>
+        <button id="runFitness" class="btn"><i class="fas fa-running"></i> Generate Plan</button>
       </form>
       <div id="fitnessPanel" class="response" hidden>
         <button class="close-btn"><i class="fas fa-times"></i></button>
@@ -391,20 +636,56 @@
       </div>
     </section>
 
-    <!-- 13. Pharma-Integrated Nutrient & Medication Suite -->
-    <section class="module" id="pharmaSuite">
+    <!-- 8. Pharma-Integrated Nutrient & Medication Suite -->
+    <section id="pharmaSuite" class="module">
       <h2><i class="fas fa-pills"></i> Pharma-Integrated Nutrient & Medication Suite</h2>
-      <p class="desc">Check drug–nutrient interactions, custom compounding, adherence reminders.</p>
+      <p class="desc">Drug–nutrient interactions, compounding suggestions, reminders & analytics.</p>
       <form id="pharma-form">
-        <label>Medications (comma-sep):
-          <input type="text" id="medList" placeholder="e.g. Warfarin, Metformin">
-        </label>
-        <label>Supplements (comma-sep):
-          <input type="text" id="suppList" placeholder="e.g. Omega-3, Vitamin D">
-        </label>
-        <label>Compounding Request:
-          <textarea id="compoundReq" rows="2" placeholder="Describe custom formula..."></textarea>
-        </label>
+        <!-- 1. Drug–Nutrient Interaction -->
+        <fieldset>
+          <legend>1. Interaction Engine</legend>
+          <label>Medications (comma-sep):
+            <input id="medList" type="text" placeholder="e.g. Warfarin, Metformin">
+          </label>
+          <label>Food Items (comma-sep):
+            <input id="foodList" type="text" placeholder="e.g. Grapefruit, Spinach">
+          </label>
+        </fieldset>
+        <!-- 2. Custom Compounding -->
+        <fieldset>
+          <legend>2. Compounding Suggestions</legend>
+          <label>Desired Outcome:
+            <select id="compoundGoal">
+              <option>Increased Absorption</option><option>Anti-inflammatory</option>
+              <option>Energy Boost</option><option>Other</option>
+            </select>
+            <input class="other-input" placeholder="Specify…" style="display:none;">
+          </label>
+        </fieldset>
+        <!-- 3. Adherence & Reminder Hub -->
+        <fieldset>
+          <legend>3. Adherence & Reminders</legend>
+          <label>Reminder Method:
+            <select id="reminderMethod">
+              <option>SMS</option><option>Email</option><option>App Notification</option>
+            </select>
+          </label>
+          <label>Reminder Times:
+            <input type="time" id="reminderTime1">,
+            <input type="time" id="reminderTime2">
+          </label>
+        </fieldset>
+        <!-- 4. Outcome Analytics -->
+        <fieldset>
+          <legend>4. Outcome Analytics</legend>
+          <label>Compare Cohort:
+            <select id="cohortSelect">
+              <option>Diet-only</option><option>Diet+Supplements</option>
+              <option>Diet+Meds</option><option>Other</option>
+            </select>
+            <input class="other-input" placeholder="Specify…" style="display:none;">
+          </label>
+        </fieldset>
         <button id="runPharma" class="btn"><i class="fas fa-flask"></i> Run Suite</button>
       </form>
       <div id="pharmaPanel" class="response" hidden>
@@ -417,204 +698,222 @@
       </div>
     </section>
 
+    <!-- 9. Symptom-to-Treatment Advisor -->
+    <section id="symptomAdvisor" class="module">
+      <h2><i class="fas fa-user-md"></i> Symptom-to-Treatment Advisor</h2>
+      <p class="desc">Describe your symptoms and receive drug suggestions & suitable foods eaten in Ghana.</p>
+      <form id="symptom-form">
+        <label>Your Age:
+          <input type="number" id="sympAge" min="1" max="120" required>
+        </label>
+        <label>Describe Symptoms:
+          <textarea id="sympDesc" rows="4" placeholder="e.g. headache, fever, cough…"></textarea>
+        </label>
+        <label>Food Preferences (comma-sep):
+          <input id="foodPref" type="text" placeholder="e.g. Jollof rice, Pizza, Burger">
+        </label>
+        <button id="runSymptom" class="btn"><i class="fas fa-stethoscope"></i> Get Advice</button>
+      </form>
+      <div id="symptomPanel" class="response" hidden>
+        <button class="close-btn"><i class="fas fa-times"></i></button>
+        <div class="tool-row">
+          <button class="copy-btn"><i class="fas fa-copy"></i></button>
+          <button class="dl-btn"><i class="fas fa-download"></i></button>
+        </div>
+        <div class="result-content"></div>
+      </div>
+    </section>
   </main>
 
+  
    <!-- Chart.js & App Logic -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
   <script>
-  // ── OpenAI + Helpers ─────────────────────────────────────────
-  async function callOpenAI(messages) {
-    const res = await fetch('/.netlify/functions/openai-proxy', {
-      method: 'POST',
-      headers: {'Content-Type':'application/json'},
-      body: JSON.stringify({ messages })
-    });
-    if (!res.ok) throw new Error('OpenAI error');
-    const j = await res.json();
-    return j.choices[0].message.content;
-  }
-
-  function formatHTML(txt) {
-    return txt
-      .replace(/^### (.*$)/gm, '<h3>$1</h3>')
-      .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
-      .replace(/\*(.+?)\*/g, '<em>$1</em>')
-      .split(/\n{2,}/).map(p => `<p>${p.trim()}</p>`).join('');
-  }
-
-  function getSelectValue(sel) {
-    const oi = sel.parentElement.querySelector('.other-input');
-    return oi && sel.value === 'Other' ? oi.value.trim() : sel.value;
-  }
-
-  document.addEventListener('DOMContentLoaded', () => {
-    const body = document.body;
-
-    // ── SIDEBAR (mobile) & DARKMODE TOGGLES ────────────────────────
-    document.getElementById('hamburger').onclick = () => {
-      body.classList.toggle('sidebar-open');
-    };
-    document.getElementById('themeToggle').onclick = () => {
-      document.documentElement.classList.toggle('dark');
-      document.getElementById('themeToggle').classList.toggle('fa-sun');
-    };
-
-    // ── SHOW/HIDE "Other" INPUTS ────────────────────────────────────
-    document.querySelectorAll('select').forEach(sel => {
-      sel.addEventListener('change', () => {
-        const oi = sel.parentElement.querySelector('.other-input');
-        if (oi) oi.style.display = sel.value === 'Other' ? 'block' : 'none';
-      });
-    });
-
-    // ── DELEGATE RESPONSE PANEL CONTROLS ────────────────────────────
-    document.body.addEventListener('click', e => {
-      if (e.target.closest('.copy-btn')) {
-        const panel = e.target.closest('.response');
-        const txt = panel.querySelector('.result-content').innerText;
-        navigator.clipboard.writeText(txt);
-      }
-      if (e.target.closest('.dl-btn')) {
-        const panel = e.target.closest('.response');
-        const txt = panel.querySelector('.result-content').innerText;
-        const blob = new Blob([txt], { type: 'text/plain' });
-        const a = document.createElement('a');
-        a.href = URL.createObjectURL(blob);
-        a.download = 'response.txt';
-        a.click();
-      }
-      if (e.target.closest('.close-btn')) {
-        e.target.closest('.response').hidden = true;
-      }
-    });
-
-    // ── GENERIC SECTION WIRING HELPER ───────────────────────────────
-    function wireSection(btnId, fields, systemPrompt) {
-      document.getElementById(btnId).onclick = async e => {
-        e.preventDefault();
-        const panel = document.getElementById(
-          btnId.replace(/^(send|gen|analyze|get|scan|start|run)/, '') + 'Panel'
-        );
-        panel.hidden = false;
-        panel.querySelector('.result-content').innerText = 'Processing…';
-        let content = '';
-        for (const id of fields) {
-          const el = document.getElementById(id);
-          if (!el) continue;
-          if (el.tagName === 'SELECT') {
-            content += `${id}: ${getSelectValue(el)}\n`;
-          } else if (el.type === 'file') {
-            content += `${id}: [uploaded]\n`;
-          } else {
-            content += `${id}: ${el.value}\n`;
-          }
-        }
-        try {
-          const reply = await callOpenAI([
-            { role: 'system', content: systemPrompt },
-            { role: 'user', content }
-          ]);
-          panel.querySelector('.result-content').innerHTML = formatHTML(reply);
-        } catch {
-          panel.querySelector('.result-content').innerText = '⚠️ Something went wrong.';
-        }
-      };
-    }
-
-    // ── 1. Chatbot ────────────────────────────────────────────────────
-    (function() {
-      const box = document.getElementById('dietChatBox');
-      const hint = document.getElementById('dietHint');
-      let hist = [];
-      function add(who, txt) {
-        const m = document.createElement('div');
-        m.className = who === 'You' ? 'user-msg' : 'bot-msg';
-        m.innerHTML = `${formatHTML(txt)}<div class="timestamp">${new Date().toLocaleTimeString()}</div>`;
-        box.append(m);
-        box.scrollTop = box.scrollHeight;
-      }
-      document.getElementById('sendDiet').onclick = async e => {
-        e.preventDefault();
-        const inp = document.getElementById('dietInput');
-        const txt = inp.value.trim();
-        if (!txt) return;
-        add('You', txt);
-        hist.push({ who: 'You', text: txt });
-        inp.value = '';
-        hint.style.display = 'block';
-        try {
-          const reply = await callOpenAI([
-            { role: 'system', content: 'You are a dietetics assistant.' },
-            { role: 'user', content: txt }
-          ]);
-          add('AI', reply);
-          hist.push({ who: 'AI', text: reply });
-        } catch {
-          add('AI', '⚠️ Something went wrong.');
-        } finally {
-          hint.style.display = 'none';
-        }
-      };
-      document.getElementById('clearDiet').onclick = () => {
-        box.innerHTML = '';
-        hist = [];
-      };
-      document.getElementById('viewDietHistory').onclick = () => {
-        alert(hist.length ? hist.map(m => `${m.who}: ${m.text}`).join('\n\n') : 'No history');
-      };
-    })();
-
-    // ── 2. Meal Plan Generator ─────────────────────────────────────────
-    wireSection('genPlan', ['calories','dietType','allergies'], 'You are a meal planning AI.');
-
-    // ── 3. Nutrient Analyzer ──────────────────────────────────────────
-    wireSection('analyzeNutri', ['foodLog'], 'You are a nutrient analysis AI.');
-
-    // ── 4. Recipe Recommender ─────────────────────────────────────────
-    wireSection('getRecipes', ['pantry','recipeGoal'], 'You are a recipe recommendation AI.');
-
-    // ── 5. Deficiency Scanner ─────────────────────────────────────────
-    wireSection('scanDef', ['symptoms','dietOverview'], 'You are a deficiency risk AI.');
-
-    // ── 6. Progress Charts ────────────────────────────────────────────
-    const ctx1 = document.getElementById('intakeChart').getContext('2d');
-    new Chart(ctx1, {
-      type: 'line',
-      data: {
-        labels: ['Mon','Tue','Wed','Thu','Fri'],
-        datasets: [{ label: 'Calories In', data: [2000,1800,2100,1900,2050], borderColor: getComputedStyle(document.documentElement).getPropertyValue('--secondary').trim(), fill: false }]
-      }
-    });
-    const ctx2 = document.getElementById('macroChart').getContext('2d');
-    new Chart(ctx2, {
-      type: 'pie',
-      data: {
-        labels: ['Carbs','Protein','Fat'],
-        datasets: [{ data: [50,25,25], backgroundColor: [getComputedStyle(document.documentElement).getPropertyValue('--primary').trim(), getComputedStyle(document.documentElement).getPropertyValue('--primary-alt').trim(), getComputedStyle(document.documentElement).getPropertyValue('--secondary').trim()] }]
-      }
-    });
-
-    // ── 7. Genomic Portrait ────────────────────────────────────────────
-    wireSection('runGeno', ['genoUpload','microbiomeUpload'], 'You are an omics profiling AI.');
-
-    // ── 8. Chef’s Assistant ────────────────────────────────────────────
-    wireSection('startCook', ['cameraUrl','mainIng'], 'You are a live cooking assistant AI.');
-
-    // ── 9. AR Grocery ─────────────────────────────────────────────────
-    wireSection('startAR', ['arModel'], 'You are an AR produce analysis AI.');
-
-    // ── 10. Risk Radar ────────────────────────────────────────────────
-    wireSection('runRisk', ['wearableKey','labCsv'], 'You are a metabolomic risk AI.');
-
-    // ── 11. Behavioral Coach ──────────────────────────────────────────
-    wireSection('runBehavior', ['journal','currentMood'], 'You are an emotional eating coach.');
-
-    // ── 12. Fitness Coach ─────────────────────────────────────────────
-    wireSection('runFitness', ['workoutType','weeklySessions','fitApiKey'], 'You are a fitness nutrition AI.');
-
-    // ── 13. Pharma Suite ──────────────────────────────────────────────
-    wireSection('runPharma', ['medList','suppList','compoundReq'], 'You are a drug-nutrient interaction AI.');
+// ── OpenAI Proxy + Helpers ──────────────────────────────────────
+async function callOpenAI(messages) {
+  const res = await fetch('/.netlify/functions/openai-proxy', {
+    method: 'POST',
+    headers: {'Content-Type':'application/json'},
+    body: JSON.stringify({ messages })
   });
-  </script>
+  if (!res.ok) throw new Error('OpenAI error');
+  const j = await res.json();
+  return j.choices[0].message.content;
+}
+function formatHTML(txt) {
+  return txt
+    .replace(/^### (.*$)/gm,'<h3>$1</h3>')
+    .replace(/\*\*(.+?)\*\*/g,'<strong>$1</strong>')
+    .replace(/\*(.+?)\*/g,'<em>$1</em>')
+    .split(/\n{2,}/).map(p=>`<p>${p.trim()}</p>`).join('');
+}
+function getSelectValue(sel) {
+  const oi = sel.parentElement.querySelector('.other-input');
+  return oi && sel.value==='Other' ? oi.value.trim() : sel.value;
+}
+
+document.addEventListener('DOMContentLoaded',()=>{
+
+  // ── SIDEBAR & DARKMODE ─────────────────────────────────────────
+  document.getElementById('hamburger').onclick = ()=> document.body.classList.toggle('sidebar-open');
+  document.getElementById('shrinkSidebar').onclick = ()=> document.getElementById('sidebar').classList.toggle('collapsed');
+  document.getElementById('themeToggle').onclick = ()=>{
+    document.documentElement.classList.toggle('dark');
+    document.getElementById('themeToggle').classList.toggle('fa-sun');
+  };
+
+  // ── SHOW/HIDE “Other” INPUTS ────────────────────────────────────
+  document.querySelectorAll('select').forEach(sel=>{
+    sel.addEventListener('change',()=>{
+      const oi = sel.parentElement.querySelector('.other-input');
+      if(oi) oi.style.display = sel.value==='Other'?'block':'none';
+    });
+  });
+
+  // ── RESPONSE PANEL BUTTONS ──────────────────────────────────────
+  document.body.addEventListener('click',e=>{
+    if(e.target.closest('.close-btn')) e.target.closest('.response').hidden=true;
+    if(e.target.closest('.copy-btn')){
+      const txt = e.target.closest('.response').querySelector('.result-content').innerText;
+      navigator.clipboard.writeText(txt);
+    }
+    if(e.target.closest('.dl-btn')){
+      const txt = e.target.closest('.response').querySelector('.result-content').innerText;
+      const blob = new Blob([txt],{type:'text/plain'});
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download='response.txt';
+      a.click();
+    }
+  });
+
+  // ── HERO FEATURES ───────────────────────────────────────────────
+  document.getElementById('heroSearchBtn').onclick = async e => {
+    e.preventDefault();
+    const q = document.getElementById('heroRecipeSearch').value.trim();
+    if(!q) return;
+    document.getElementById('dailyTip').innerText='Searching…';
+    const reply = await callOpenAI([
+      {role:'system',content:'You are a recipe finder.'},
+      {role:'user',content:`Find recipes for: ${q}`}
+    ]);
+    document.getElementById('dailyTip').innerHTML = formatHTML(reply);
+  };
+  document.getElementById('refreshTip').onclick = async ()=>{
+    document.getElementById('dailyTip').innerText='Loading…';
+    const tip = await callOpenAI([
+      {role:'system',content:'You are a nutrition tip generator.'},
+      {role:'user',content:'Give one daily nutrition tip.'}
+    ]);
+    document.getElementById('dailyTip').innerHTML = formatHTML(tip);
+  };
+  document.getElementById('refreshMacro').onclick = async ()=>{
+    document.getElementById('macroSnapshot').innerText='Loading…';
+    const snap = await callOpenAI([
+      {role:'system',content:'You are a macro snapshot AI.'},
+      {role:'user',content:'Provide protein/carbs/fat split for standard diet.'}
+    ]);
+    document.getElementById('macroSnapshot').innerHTML = snap;
+  };
+
+  // ── GENERIC SECTION WIRING ──────────────────────────────────────
+  function wire(btnId, fieldIds, sys){
+    document.getElementById(btnId).onclick = async e => {
+      e.preventDefault();
+      const panel = document.getElementById(btnId.replace(/^(send|gen|analyze|get|scan|run)/,'')+'Panel');
+      panel.hidden=false;
+      panel.querySelector('.result-content').innerText='Processing…';
+      let content = '';
+      fieldIds.forEach(id=>{
+        const el = document.getElementById(id);
+        if(!el) return;
+        if(el.tagName==='SELECT') content+=`${id}: ${getSelectValue(el)}\n`;
+        else if(el.type==='file') content+=`${id}: [uploaded]\n`;
+        else content+=`${id}: ${el.value}\n`;
+      });
+      try{
+        const reply = await callOpenAI([{role:'system',content:sys},{role:'user',content}]);
+        panel.querySelector('.result-content').innerHTML = formatHTML(reply);
+      } catch {
+        panel.querySelector('.result-content').innerText='⚠️ Something went wrong.';
+      }
+    };
+  }
+
+  // ── 1. Chatbot ────────────────────────────────────────────────────
+  (()=>{
+    const box = document.getElementById('dietChatBox'), hint = document.getElementById('dietHint');
+    let hist = [];
+    function add(who,txt){
+      const m = document.createElement('div');
+      m.className = who==='You'?'user-msg':'bot-msg';
+      m.innerHTML = `${formatHTML(txt)}<div class="timestamp">${new Date().toLocaleTimeString()}</div>`;
+      box.append(m);
+      box.scrollTop = box.scrollHeight;
+    }
+    document.getElementById('sendDiet').onclick = async e => {
+      e.preventDefault();
+      const t = document.getElementById('dietInput');
+      const txt = t.value.trim(); if(!txt) return;
+      add('You',txt); hist.push({who:'You',text:txt});
+      t.value=''; hint.style.display='block';
+      try{
+        const reply = await callOpenAI([{role:'system',content:'You are a dietetics assistant.'},{role:'user',content:txt}]);
+        add('AI',reply); hist.push({who:'AI',text:reply});
+      } catch {
+        add('AI','⚠️ Something went wrong.');
+      } finally { hint.style.display='none'; }
+    };
+    document.getElementById('clearDiet').onclick = ()=>{ box.innerHTML=''; hist=[]; };
+    document.getElementById('viewDietHistory').onclick = ()=>{
+      const modal = document.createElement('div');
+      modal.className='history-modal';
+      modal.innerHTML = `<div class="modal-content">
+        <h3>Chat History</h3>
+        <ul>${hist.map((m,i)=>`<li><strong>${m.who}:</strong> ${m.text}
+          <button class="delete" data-i="${i}"><i class="fas fa-trash"></i></button></li>`).join('')}
+        </ul>
+        <button class="close-modal">Close</button>
+      </div>`;
+      document.body.append(modal);
+      modal.querySelectorAll('.delete').forEach(btn=>{
+        btn.onclick = ()=>{ hist.splice(btn.dataset.i,1); modal.remove(); };
+      });
+      modal.querySelector('.close-modal').onclick = ()=> modal.remove();
+    };
+  })();
+
+  // ── 2. Meal Plan ────────────────────────────────────────────────────
+  wire('genPlan',['calories','dietType','allergies','allergyList','budget'],'You are a meal planning AI.');
+
+  // ── 3. Nutrient Analyzer ──────────────────────────────────────────
+  wire('analyzeNutri',['foodLog','unitSelect'],'You are a nutrient analysis AI.');
+
+  // ── 4. Recipe Recommender ─────────────────────────────────────────
+  wire('getRecipes',['pantry','cuisineType','recipeDifficulty','maxTime'],'You are a recipe recommendation AI.');
+
+  // ── 5. Deficiency Scanner ─────────────────────────────────────────
+  wire('scanDef',['symptoms','dietOverview'],'You are a deficiency risk AI.');
+
+  // ── 6. Metabolomic Radar ─────────────────────────────────────────
+  wire('runRisk',['riskFrom','riskTo','syncBiomarkers'],'You are a metabolomic risk AI.');
+
+  // ── 7. Fitness Coach ─────────────────────────────────────────────
+  wire('runFitness',['fitGoal','fitFreq','blendIngredients','carbDate','intensity','crpLevel','nutraPref'],'You are a fitness nutrition AI.');
+
+  // ── 8. Pharma Suite ───────────────────────────────────────────────
+  wire('runPharma',['medList','foodList','compoundGoal','reminderMethod','reminderTime1','reminderTime2','cohortSelect'],'You are a pharma-nutrient interaction AI.');
+
+  // ── 9. Symptom Advisor ────────────────────────────────────────────
+  wire('runSymptom',['sympAge','sympDesc','foodPref'],'You are a symptom-to-treatment advisor AI.');
+
+  // ── 6. Progress Charts ────────────────────────────────────────────
+  const ctx1 = document.getElementById('intakeChart')?.getContext('2d');
+  if(ctx1) new Chart(ctx1,{type:'line',data:{labels:['Mon','Tue','Wed','Thu','Fri'],datasets:[{label:'Calories In',data:[2000,1800,2100,1900,2050],borderColor:getComputedStyle(document.documentElement).getPropertyValue('--color-secondary').trim(),fill:false}]}});
+  const ctx2 = document.getElementById('macroChart')?.getContext('2d');
+  if(ctx2) new Chart(ctx2,{type:'pie',data:{labels:['Carbs','Protein','Fat'],datasets:[{data:[50,25,25],backgroundColor:[getComputedStyle(document.documentElement).getPropertyValue('--color-primary').trim(),getComputedStyle(document.documentElement).getPropertyValue('--color-primary-alt').trim(),getComputedStyle(document.documentElement).getPropertyValue('--color-secondary').trim()]}]}});
+});
+</script>
 </body>
 </html>
