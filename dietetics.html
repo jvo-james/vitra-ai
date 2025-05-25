@@ -771,182 +771,219 @@ legend {
 </section>
   </main>
 
-  
-   <!-- Chart.js & App Logic -->
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  <script>
-    // ── OpenAI Proxy + Helpers ──────────────────────────────────────
-    async function callOpenAI(messages) {
-      const res = await fetch('/.netlify/functions/openai-proxy', {
-        method: 'POST',
-        headers: {'Content-Type':'application/json'},
-        body: JSON.stringify({ messages })
+  <!-- Chart.js & App Logic -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+  // ── Helpers ────────────────────────────────────────────────────────
+
+  // Transient toast
+  function showToast(msg) {
+    const t = document.createElement('div');
+    t.className = 'toast';
+    t.innerText = msg;
+    document.body.append(t);
+    setTimeout(() => t.classList.add('visible'), 10);
+    setTimeout(() => t.classList.remove('visible'), 1800);
+    setTimeout(() => t.remove(), 2200);
+  }
+
+  // OpenAI proxy
+  async function callOpenAI(messages) {
+    const res = await fetch('/.netlify/functions/openai-proxy', {
+      method: 'POST',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({ messages })
+    });
+    if (!res.ok) throw new Error('OpenAI error');
+    const j = await res.json();
+    return j.choices[0].message.content;
+  }
+
+  function formatHTML(txt) {
+    return txt
+      .replace(/^### (.*$)/gm,'<h3>$1</h3>')
+      .replace(/\*\*(.+?)\*\*/g,'<strong>$1</strong>')
+      .replace(/\*(.+?)\*/g,'<em>$1</em>')
+      .split(/\n{2,}/).map(p=>`<p>${p.trim()}</p>`).join('');
+  }
+
+  function getSelectValue(sel) {
+    const oi = sel.parentElement.querySelector('.other-input');
+    return (oi && sel.value==='Other') ? oi.value.trim() : sel.value;
+  }
+
+  document.addEventListener('DOMContentLoaded', ()=> {
+
+    // ── Toast CSS ───────────────────────────────────────────────────
+    const style = document.createElement('style');
+    style.innerHTML = `
+      .toast {
+        position: fixed; bottom: 2rem; left: 50%;
+        transform: translateX(-50%) translateY(100%);
+        background: var(--color-primary-alt); color: #fff;
+        padding: .75rem 1.5rem; border-radius: var(--radius);
+        opacity: 0; transition: transform .3s, opacity .3s;
+        z-index: 2000;
+      }
+      .toast.visible {
+        transform: translateX(-50%) translateY(0);
+        opacity: 1;
+      }
+    `;
+    document.head.append(style);
+
+    // ── Sidebar & Theme ─────────────────────────────────────────────
+    document.getElementById('hamburger').onclick =
+      ()=> document.body.classList.toggle('sidebar-open');
+
+    document.getElementById('shrinkSidebar').onclick = () => {
+      const sb = document.getElementById('sidebar');
+      sb.classList.toggle('collapsed');
+      const left = sb.classList.contains('collapsed')
+        ? 'var(--sidebar-collapsed)' : 'var(--sidebar-width)';
+      document.querySelector('header').style.left = left;
+      document.querySelector('main').style.marginLeft = left;
+    };
+
+    document.getElementById('themeToggle').onclick = () => {
+      document.documentElement.classList.toggle('dark');
+      document.getElementById('themeToggle').classList.toggle('fa-sun');
+    };
+
+    // ── “Other” input toggles ────────────────────────────────────────
+    document.querySelectorAll('select').forEach(sel => {
+      sel.addEventListener('change',()=>{
+        const oi = sel.parentElement.querySelector('.other-input');
+        if (oi) oi.style.display = sel.value==='Other'?'block':'none';
       });
-      if (!res.ok) throw new Error('OpenAI error');
-      const j = await res.json();
-      return j.choices[0].message.content;
+    });
+
+    // ── Spinner CSS ─────────────────────────────────────────────────
+    const sspin = document.createElement('style');
+    sspin.innerHTML = `
+      .spinner {
+        border: 4px solid rgba(0,0,0,0.1);
+        border-top: 4px solid var(--color-primary);
+        border-radius: 50%; width:24px; height:24px;
+        animation: spin .8s linear infinite;
+        margin: 1rem auto;
+      }
+      @keyframes spin { to { transform: rotate(360deg); } }
+    `;
+    document.head.append(sspin);
+
+    // ── Global response panel buttons ────────────────────────────────
+    document.body.addEventListener('click', e => {
+      const resp = e.target.closest('.response');
+      if (!resp) return;
+      // Close
+      if (e.target.closest('.close-btn')) {
+        resp.hidden = true;
+        return;
+      }
+      // Copy
+      if (e.target.closest('.copy-btn')) {
+        const txt = resp.querySelector('.result-content').innerText;
+        navigator.clipboard.writeText(txt).then(() =>
+          showToast('Copied!')
+        );
+        return;
+      }
+      // Download
+      if (e.target.closest('.dl-btn')) {
+        const txt = resp.querySelector('.result-content').innerText;
+        const blob = new Blob([txt],{type:'text/plain'});
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = 'response.txt';
+        a.click();
+        return;
+      }
+    });
+
+    // ── Hero Features ────────────────────────────────────────────────
+    async function handleHero(panelId, sysPrompt, getQuery) {
+      const panel = document.getElementById(panelId);
+      const q = getQuery();
+      if (!q) return showToast('Please enter a value.');
+      panel.hidden = false;
+      panel.querySelector('.result-content').innerHTML = '<div class="spinner"></div>';
+      const reply = await callOpenAI([
+        {role:'system',content: sysPrompt},
+        {role:'user',content: q}
+      ]);
+      panel.querySelector('.result-content').innerHTML = formatHTML(reply);
     }
-    function formatHTML(txt) {
-      return txt
-        .replace(/^### (.*$)/gm,'<h3>$1</h3>')
-        .replace(/\*\*(.+?)\*\*/g,'<strong>$1</strong>')
-        .replace(/\*(.+?)\*/g,'<em>$1</em>')
-        .split(/\n{2,}/).map(p=>`<p>${p.trim()}</p>`).join('');
-    }
-    function getSelectValue(sel) {
-      const oi = sel.parentElement.querySelector('.other-input');
-      return oi && sel.value==='Other' ? oi.value.trim() : sel.value;
-    }
+    document.getElementById('heroSearchBtn').onclick = e => {
+      e.preventDefault();
+      handleHero('dailyTip','You are a recipe finder.', ()=>
+        document.getElementById('heroRecipeSearch').value.trim()
+      );
+    };
+    document.getElementById('refreshTip').onclick = () =>
+      handleHero('dailyTip','You are a nutrition tip generator.', ()=> 'Give one daily nutrition tip.');
+    document.getElementById('refreshMacro').onclick = () =>
+      handleHero('macroSnapshot','You are a macro snapshot AI.', ()=> 'Provide protein/carbs/fat split for standard diet.');
 
-    document.addEventListener('DOMContentLoaded',()=>{
-
-      // ── SIDEBAR & DARKMODE ─────────────────────────────────────────
-      document.getElementById('hamburger').onclick = () =>
-        document.body.classList.toggle('sidebar-open');
-
-      document.getElementById('shrinkSidebar').onclick = () => {
-        const sb = document.getElementById('sidebar');
-        sb.classList.toggle('collapsed');
-        const left = sb.classList.contains('collapsed')
-          ? 'var(--sidebar-collapsed)'
-          : 'var(--sidebar-width)';
-        document.querySelector('header').style.setProperty('left', left);
-        document.querySelector('main').style.setProperty('margin-left', left);
-      };
-
-      document.getElementById('themeToggle').onclick = () => {
-        document.documentElement.classList.toggle('dark');
-        document.getElementById('themeToggle').classList.toggle('fa-sun');
-      };
-
-      // ── SHOW/HIDE “Other” INPUTS ────────────────────────────────────
-      document.querySelectorAll('select').forEach(sel=>{
-        sel.addEventListener('change',()=>{
-          const oi = sel.parentElement.querySelector('.other-input');
-          if(oi) oi.style.display = sel.value==='Other'?'block':'none';
-        });
-      });
-
-      // ── GLOBAL RESPONSE PANEL BUTTONS & TOOLTIPS ────────────────────
-      document.body.addEventListener('click',e=>{
-        const resp = e.target.closest('.response');
-        if(!resp) return;
-        // Close
-        if(e.target.closest('.close-btn')) {
-          resp.hidden = true;
-          return;
-        }
-        // Copy + feedback
-        if(e.target.closest('.copy-btn')){
-          const txt = resp.querySelector('.result-content').innerText;
-          navigator.clipboard.writeText(txt).then(()=>{
-            const tip = document.createElement('div');
-            tip.className = 'copy-tooltip';
-            tip.innerText = 'Copied!';
-            resp.append(tip);
-            setTimeout(()=> tip.remove(), 1500);
-          });
-          return;
-        }
-        // Download
-        if(e.target.closest('.dl-btn')){
-          const txt = resp.querySelector('.result-content').innerText;
-          const blob = new Blob([txt],{type:'text/plain'});
-          const a = document.createElement('a');
-          a.href = URL.createObjectURL(blob);
-          a.download='response.txt';
-          a.click();
-          return;
-        }
-      });
-
-      // ── HERO FEATURES ───────────────────────────────────────────────
-      document.getElementById('heroSearchBtn').onclick = async e => {
+    // ── Generic wiring ───────────────────────────────────────────────
+    function wire(btnId, allFields, requiredFields, sysPrompt) {
+      document.getElementById(btnId).onclick = async e => {
         e.preventDefault();
-        const q = document.getElementById('heroRecipeSearch').value.trim();
-        if(!q){ alert('Please enter a recipe search term.'); return; }
-        const panel = document.getElementById('dailyTip');
-        panel.hidden = false;
-        panel.querySelector('.result-content').innerHTML = '<div class="spinner"></div>';
-        const reply = await callOpenAI([
-          {role:'system',content:'You are a recipe finder.'},
-          {role:'user',content:`Find recipes for: ${q}`}
-        ]);
-        panel.querySelector('.result-content').innerHTML = formatHTML(reply);
-      };
-      document.getElementById('refreshTip').onclick = async () => {
-        const panel = document.getElementById('dailyTip');
-        panel.hidden = false;
-        panel.querySelector('.result-content').innerHTML = '<div class="spinner"></div>';
-        const tip = await callOpenAI([
-          {role:'system',content:'You are a nutrition tip generator.'},
-          {role:'user',content:'Give one daily nutrition tip.'}
-        ]);
-        panel.querySelector('.result-content').innerHTML = formatHTML(tip);
-      };
-      document.getElementById('refreshMacro').onclick = async () => {
-        const panel = document.getElementById('macroSnapshot');
-        panel.innerText = '';
-        panel.innerHTML = '<div class="spinner"></div>';
-        const snap = await callOpenAI([
-          {role:'system',content:'You are a macro snapshot AI.'},
-          {role:'user',content:'Provide protein/carbs/fat split for standard diet.'}
-        ]);
-        panel.innerHTML = snap;
-      };
-
-      // ── GENERIC SECTION WIRING WITH VALIDATION & SPINNER ─────────────
-      function wire(btnId, fieldIds, sys){
-        document.getElementById(btnId).onclick = async e => {
-          e.preventDefault();
-          // Validation
-          let missing = false;
-          fieldIds.forEach(id=>{
-            if(missing) return;
-            const el = document.getElementById(id);
-            if(!el) return;
-            if(el.tagName==='SELECT' && el.multiple) {
-              if(el.selectedOptions.length===0) missing = true;
-            } else if(!el.value || !el.value.trim()) {
-              missing = true;
+        // Validate only required fields
+        for (let id of requiredFields) {
+          if (id === 'symptoms') {
+            if (document.querySelectorAll('input[name="symptom"]:checked').length === 0) {
+              showToast('Please select at least one symptom.');
+              return;
             }
-          });
-          if(missing){
-            alert('Please fill in all required fields.');
-            return;
-          }
-          const panel = document.getElementById(btnId.replace(/^(send|gen|analyze|get|scan|run)/,'')+'Panel');
-          panel.hidden = false;
-          panel.querySelector('.result-content').innerHTML = '<div class="spinner"></div>';
-          // Gather inputs
-          let content = '';
-          fieldIds.forEach(id=>{
+          } else {
             const el = document.getElementById(id);
-            if(!el) return;
-            if(el.tagName==='SELECT' && el.multiple) {
+            if (!el || !el.value.trim()) {
+              showToast('Please fill in all required fields.');
+              return;
+            }
+          }
+        }
+        const panel = document.getElementById(
+          btnId.replace(/^(send|gen|analyze|get|scan|run)/,'') + 'Panel'
+        );
+        panel.hidden = false;
+        panel.querySelector('.result-content').innerHTML = '<div class="spinner"></div>';
+        // Gather inputs
+        let content = '';
+        for (let id of allFields) {
+          if (id === 'symptoms') {
+            const vals = Array.from(document.querySelectorAll('input[name="symptom"]:checked'))
+                           .map(cb=>cb.value).join(', ');
+            content += `symptoms: ${vals}\n`;
+          } else {
+            const el = document.getElementById(id);
+            if (!el) continue;
+            if (el.tagName==='SELECT' && el.multiple) {
               const vals = Array.from(el.selectedOptions).map(o=>o.value).join(', ');
               content += `${id}: ${vals}\n`;
             }
-            else if(el.tagName==='SELECT') {
+            else if (el.tagName==='SELECT') {
               content += `${id}: ${getSelectValue(el)}\n`;
-            }
-            else if(el.type==='file') {
-              content += `${id}: [uploaded]\n`;
             }
             else {
               content += `${id}: ${el.value}\n`;
             }
-          });
-          try{
-            const reply = await callOpenAI([{role:'system',content:sys},{role:'user',content}]);
-            panel.querySelector('.result-content').innerHTML = formatHTML(reply);
-          } catch {
-            panel.querySelector('.result-content').innerText = '⚠️ Something went wrong.';
           }
-        };
-      }
+        }
+        try {
+          const reply = await callOpenAI([
+            {role:'system',content: sysPrompt},
+            {role:'user',content}
+          ]);
+          panel.querySelector('.result-content').innerHTML = formatHTML(reply);
+        } catch {
+          panel.querySelector('.result-content').innerText = '⚠️ Something went wrong.';
+        }
+      };
+    }
 
-      // ── 1. Nutrition Chatbot ───────────────────────────────────────────
+    // ── 1. Nutrition Chatbot ───────────────────────────────────────────
       (()=>{
         const box = document.getElementById('dietChatBox'),
               hint = document.getElementById('dietHint');
@@ -990,54 +1027,90 @@ legend {
           modal.querySelector('.close-modal').onclick = ()=> modal.remove();
         };
       })();
+    
+    // 2. Meal Plan Generator (require calories & dietType)
+    wire('genPlan',
+      ['calories','dietType','allergyList','budget'],
+      ['calories','dietType'],
+      'You are a meal planning AI.'
+    );
 
-      // ── 2. Meal Plan Generator ────────────────────────────────────────
-      wire('genPlan',['calories','dietType','allergyList','budget'],'You are a meal planning AI.');
+    // 3. Nutrient Analyzer (require foodLog)
+    wire('analyzeNutri',
+      ['foodLog','unitSelect'],
+      ['foodLog'],
+      'You are a nutrient analysis AI.'
+    );
 
-      // ── 3. Nutrient Analyzer ─────────────────────────────────────────
-      wire('analyzeNutri',['foodLog','unitSelect'],'You are a nutrient analysis AI.');
+    // 4. Recipe Recommender (require pantry)
+    wire('getRecipes',
+      ['pantry','cuisineType','recipeDifficulty','maxTime'],
+      ['pantry'],
+      'You are a recipe recommendation AI.'
+    );
 
-      // ── 4. Recipe Recommender ─────────────────────────────────────────
-      wire('getRecipes',['pantry','cuisineType','recipeDifficulty','maxTime'],'You are a recipe recommendation AI.');
+    // 5. Deficiency Risk Scanner (require at least one symptom)
+    wire('scanDef',
+      ['symptoms','dietOverview'],
+      ['symptoms'],
+      'You are a deficiency risk AI.'
+    );
 
-      // ── 5. Deficiency Risk Scanner ───────────────────────────────────
-      wire('scanDef',['symptom','dietOverview'],'You are a deficiency risk AI.');
+    // 6. Metabolomic Risk Radar (require riskFrom & riskTo)
+    wire('runRisk',
+      ['riskFrom','riskTo','syncBiomarkers'],
+      ['riskFrom','riskTo'],
+      'You are a metabolomic risk AI.'
+    );
 
-      // ── 6. Metabolomic Risk Radar ────────────────────────────────────
-      wire('runRisk',['riskFrom','riskTo'],'You are a metabolomic risk AI.');
+    // 7. Fitness Nutrition Coach (require fitGoal & fitFreq)
+    wire('runFitness',
+      ['fitGoal','fitFreq','blendIngredients','carbDate','intensity','crpLevel','nutraPref'],
+      ['fitGoal','fitFreq'],
+      'You are a fitness nutrition AI.'
+    );
 
-      // ── 7. Fitness Nutrition Coach ────────────────────────────────────
-      wire('runFitness',['fitGoal','fitFreq','blendIngredients','carbDate','intensity','crpLevel','nutraPref'],'You are a fitness nutrition AI.');
+    // 8. Pharma Suite (require medList)
+    wire('runPharma',
+      ['medList','foodList','compoundGoal','reminderMethod','reminderTime1','reminderTime2','cohortSelect'],
+      ['medList'],
+      'You are a pharma-nutrient interaction AI.'
+    );
 
-      // ── 8. Pharma-Integrated Suite ────────────────────────────────────
-      wire('runPharma',['medList','foodList','compoundGoal','reminderMethod','reminderTime1','reminderTime2','cohortSelect'],'You are a pharma-nutrient interaction AI.');
+    // 9. Symptom-to-Treatment Advisor (require sympAge & sympDesc)
+    wire('runSymptom',
+      ['sympAge','sympDesc','foodPref'],
+      ['sympAge','sympDesc'],
+      'You are a symptom-to-treatment advisor AI.'
+    );
 
-      // ── 9. Symptom-to-Treatment Advisor ───────────────────────────────
-      wire('runSymptom',['sympAge','sympDesc','foodPref'],'You are a symptom-to-treatment advisor AI.');
-
-      // ── Progress Charts ───────────────────────────────────────────────
-      const ctx1 = document.getElementById('intakeChart')?.getContext('2d');
-      if(ctx1) new Chart(ctx1,{
-        type:'line',
-        data:{
-          labels:['Mon','Tue','Wed','Thu','Fri'],
-          datasets:[{
-            label:'Calories In',
-            data:[2000,1800,2100,1900,2050],
-            borderColor:getComputedStyle(document.documentElement).getPropertyValue('--color-secondary').trim(),
-            fill:false
-          }]
-        }
-      });
-      const ctx2 = document.getElementById('macroChart')?.getContext('2d');
-      if(ctx2) new Chart(ctx2,{
-        type:'pie',
-        data:{
-          labels:['Carbs','Protein','Fat'],
-          datasets:[{data:[50,25,25]}]
-        }
-      });
+    // ── Progress Charts ───────────────────────────────────────────────
+    const ctx1 = document.getElementById('intakeChart')?.getContext('2d');
+    if (ctx1) new Chart(ctx1, {
+      type:'line',
+      data:{
+        labels:['Mon','Tue','Wed','Thu','Fri'],
+        datasets:[{
+          label:'Calories In',
+          data:[2000,1800,2100,1900,2050],
+          borderColor:getComputedStyle(document.documentElement)
+                         .getPropertyValue('--color-secondary').trim(),
+          fill:false
+        }]
+      }
     });
-  </script>
+
+    const ctx2 = document.getElementById('macroChart')?.getContext('2d');
+    if (ctx2) new Chart(ctx2, {
+      type:'pie',
+      data:{
+        labels:['Carbs','Protein','Fat'],
+        datasets:[{data:[50,25,25]}]
+      }
+    });
+
+  });
+</script>
+   
 </body>
 </html>
