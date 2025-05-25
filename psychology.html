@@ -588,16 +588,10 @@
   </div>
 
   <!-- Action Buttons -->
-  <div class="dream-actions">
-    <button class="btn btn-primary" onclick="analyzeDream()">
-      <i class="fas fa-brain"></i> Analyze Dream
-    </button>
-    <button class="btn btn-secondary" onclick="interpretSymbols()">
-      <i class="fas fa-search"></i> Interpret Symbols
-    </button>
-    <button class="btn btn-secondary" onclick="generatePrompts()">
-      <i class="fas fa-pen-nib"></i> Generate Writing Prompts
-    </button>
+ <div class="dream-actions">
+    <button id="analyzeDream"   class="btn btn-primary"><i class="fas fa-brain"></i> Analyze Dream</button>
+    <button id="interpretSymbols" class="btn btn-secondary"><i class="fas fa-search"></i> Interpret Symbols</button>
+    <button id="generatePrompts"  class="btn btn-secondary"><i class="fas fa-pen-nib"></i> Generate Writing Prompts</button>
   </div>
 
   <!-- AI Response Panel -->
@@ -876,10 +870,114 @@ document.getElementById('dreamRecall').onclick = async () => {
     panel.innerHTML = `<div class="result-content">😕 Oops! Something went wrong.</div>`;
   }
 }; 
+    
     // right after DOMContentLoaded
 const intensity = document.getElementById('dreamIntensity');
 const display   = document.getElementById('dreamIntensityValue');
 intensity.oninput = () => display.textContent = intensity.value;
+   
+    // ─── Dream & Subconscious Explorer ──────────────────────────────────────
+const getDreamPanel = () => {
+  const sec = document.getElementById('dream');
+  let panel = sec.querySelector('.response');
+  if (!panel) {
+    panel = document.createElement('div');
+    panel.className = 'response';
+    sec.append(panel);
+  }
+  return panel;
+};
+
+// 0) Optional: startRecording stub
+function startRecording() {
+  alert('🔴 Recording feature coming soon!');
+}
+
+// 1) Analyze Dream narrative + symbols + intensity + themes
+document.getElementById('analyzeDream').addEventListener('click', async () => {
+  const panel = getDreamPanel();
+  panel.hidden = false;
+  panel.innerHTML = `<div class="result-content">Analyzing… <span class="spinner"></span></div>`;
+
+  const narrative = document.getElementById('dreamNarrative').value.trim();
+  const symbols   = Array.from(
+    document.querySelectorAll('#dream input[type="checkbox"]:checked')
+  ).map(cb => cb.value).join(', ');
+  const intensity = document.getElementById('dreamIntensity').value;
+  const themes    = document.getElementById('dreamThemes').value.trim();
+
+  const sys = 'You are a dream interpreter. Use all data provided.';
+  const usr = 
+    `Dream narrative: ${narrative}\n` +
+    `Symbols noticed: ${symbols}\n` +
+    `Vividness (1–10): ${intensity}\n` +
+    `Recurring themes: ${themes}`;
+
+  try {
+    const reply = await callOpenAI([
+      { role: 'system', content: sys },
+      { role: 'user',   content: usr }
+    ]);
+    panel.innerHTML = `<div class="result-content">${formatHTML(reply)}</div>`;
+  } catch {
+    panel.innerHTML = `<div class="result-content">😕 Oops! Something went wrong.</div>`;
+  }
+});
+
+// 2) Interpret Symbols only
+document.getElementById('interpretSymbols').addEventListener('click', async () => {
+  const panel = getDreamPanel();
+  panel.hidden = false;
+  panel.innerHTML = `<div class="result-content">Interpreting symbols… <span class="spinner"></span></div>`;
+
+  const symbols = Array.from(
+    document.querySelectorAll('#dream input[type="checkbox"]:checked')
+  ).map(cb => cb.value).join(', ');
+
+  const sys = 'You are a dream interpreter focusing on symbols.';
+  const usr = `Symbols selected: ${symbols}`;
+
+  try {
+    const reply = await callOpenAI([
+      { role: 'system', content: sys },
+      { role: 'user',   content: usr }
+    ]);
+    panel.innerHTML = `<div class="result-content">${formatHTML(reply)}</div>`;
+  } catch {
+    panel.innerHTML = `<div class="result-content">😕 Oops! Something went wrong.</div>`;
+  }
+});
+
+// 3) Generate Writing Prompts from dream
+document.getElementById('generatePrompts').addEventListener('click', async () => {
+  const panel = getDreamPanel();
+  panel.hidden = false;
+  panel.innerHTML = `<div class="result-content">Generating prompts… <span class="spinner"></span></div>`;
+
+  const narrative = document.getElementById('dreamNarrative').value.trim();
+
+  const sys = 'You are a creative writing assistant. Generate three journal prompts inspired by this dream.';
+  const usr = `Dream narrative: ${narrative}`;
+
+  try {
+    const reply = await callOpenAI([
+      { role: 'system', content: sys },
+      { role: 'user',   content: usr }
+    ]);
+    panel.innerHTML = `<div class="result-content">${formatHTML(reply)}</div>`;
+  } catch {
+    panel.innerHTML = `<div class="result-content">😕 Oops! Something went wrong.</div>`;
+  }
+});
+
+// 4) Vividness slider update
+const intensityEl = document.getElementById('dreamIntensity');
+const displayEl   = document.getElementById('dreamIntensityValue');
+if (intensityEl && displayEl) {
+  intensityEl.addEventListener('input', () => {
+    displayEl.textContent = intensityEl.value;
+  });
+}
     document.getElementById('voiceDiary').onclick        = ()=>alert('Integrate voice diary');
     document.getElementById('artEmotion').onclick        = ()=>handleModule('creative','Generate DALL·E art prompt','Enter an emotion:');
     document.getElementById('musicMixer').onclick        = ()=>handleModule('creative','Compose a soundscape','Describe your current mood:');
