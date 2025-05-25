@@ -26,6 +26,7 @@
   --transition: 0.3s ease;
   --shadow: 0 6px 20px rgba(0,0,0,0.1);
   --sidebar-width: 220px;
+  --sidebar-collapsed: 60px;
 }
 html.dark {
   --color-bg: #1A1A1A;
@@ -88,7 +89,15 @@ aside#sidebar nav .active a {
   color: #fff; box-shadow: var(--shadow);
   cursor: pointer;
 }
-
+aside#sidebar.collapsed {
+width: var(--sidebar-collapsed);
+ }
+ aside#sidebar.collapsed .brand span,
+ aside#sidebar.collapsed nav a span {  display: none;
+ }
+ aside#sidebar.collapsed nav a {
+ justify-content: center;
+ }
 /*────────────────────── Header ──────────────────────*/
 header {
   position: fixed; top: 0; left: var(--sidebar-width); right: 0;
@@ -313,15 +322,39 @@ legend {
 
 /*────────────────────── Responsive Adjustments ──────────────────────*/
 @media(max-width: 1024px) {
-  main { padding: .5rem; }
-  .hero-features { grid-template-columns: 1fr; }
-}
+ main { padding: .5rem; margin-left: 0; }
+  #hero .hero-features { grid-template-columns: 1fr; }
+ }
 @media(max-width: 640px) {
-  section.module { padding: .75rem; }
+  section.module { padding: .75rem; margin-left: 0; }
   .chat-input, .chat-controls { flex-direction: column; }
   .tool-row { position: static; margin-top: .5rem; }
 }
-    
+
+    .copy-tooltip {
+  position: absolute;
+  top: 0.5rem; right: 0.5rem;
+  background: var(--color-primary-alt);
+  color: #fff;
+  padding: 0.25rem 0.5rem;
+  border-radius: var(--radius);
+  font-size: 0.75rem;
+  animation: fadeOut 1.5s forwards;
+}
+@keyframes fadeOut {
+  0% { opacity: 1; }
+  100% { opacity: 0; transform: translateY(-10px); }
+}
+    /* under your CSS */
+.spinner {
+  border: 4px solid rgba(0,0,0,0.1);
+  border-top: 4px solid var(--color-primary);
+  border-radius: 50%;
+  width: 24px; height: 24px;
+  animation: spin 0.8s linear infinite;
+  margin: 1rem auto;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
   </style>
 </head>
 
@@ -371,7 +404,14 @@ legend {
         <div class="feature-card">
           <i class="fas fa-lightbulb"></i>
           <h3>Today's Nutrition Tip</h3>
-          <p id="dailyTip">Loading tip…</p>
+        <div id="dailyTip" class="response">
+   <div class="tool-row">
+     <button class="close-btn"><i class="fas fa-times"></i></button>
+     <button class="copy-btn"><i class="fas fa-copy"></i></button>
+     <button class="dl-btn"><i class="fas fa-download"></i></button>
+   </div>
+   <div class="result-content">Loading tip…</div>
+ </div>
           <button id="refreshTip" class="btn-secondary">Refresh Tip</button>
         </div>
         <!-- Quick Macro Snapshot -->
@@ -724,196 +764,279 @@ legend {
       </div>
     </section>
   </main>
-
+<!-- 6. Progress Charts -->
+<section class="module">
+  <h2><i class="fas fa-chart-line"></i> Progress Charts</h2>
+  <canvas id="intakeChart"></canvas>
+  <canvas id="macroChart"></canvas>
+</section>
   
    <!-- Chart.js & App Logic -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
   <script>
-// ── OpenAI Proxy + Helpers ──────────────────────────────────────
-async function callOpenAI(messages) {
-  const res = await fetch('/.netlify/functions/openai-proxy', {
-    method: 'POST',
-    headers: {'Content-Type':'application/json'},
-    body: JSON.stringify({ messages })
-  });
-  if (!res.ok) throw new Error('OpenAI error');
-  const j = await res.json();
-  return j.choices[0].message.content;
-}
-function formatHTML(txt) {
-  return txt
-    .replace(/^### (.*$)/gm,'<h3>$1</h3>')
-    .replace(/\*\*(.+?)\*\*/g,'<strong>$1</strong>')
-    .replace(/\*(.+?)\*/g,'<em>$1</em>')
-    .split(/\n{2,}/).map(p=>`<p>${p.trim()}</p>`).join('');
-}
-function getSelectValue(sel) {
-  const oi = sel.parentElement.querySelector('.other-input');
-  return oi && sel.value==='Other' ? oi.value.trim() : sel.value;
-}
-
-document.addEventListener('DOMContentLoaded',()=>{
-
-  // ── SIDEBAR & DARKMODE ─────────────────────────────────────────
-  document.getElementById('hamburger').onclick = ()=> document.body.classList.toggle('sidebar-open');
-  document.getElementById('shrinkSidebar').onclick = ()=> document.getElementById('sidebar').classList.toggle('collapsed');
-  document.getElementById('themeToggle').onclick = ()=>{
-    document.documentElement.classList.toggle('dark');
-    document.getElementById('themeToggle').classList.toggle('fa-sun');
-  };
-
-  // ── SHOW/HIDE “Other” INPUTS ────────────────────────────────────
-  document.querySelectorAll('select').forEach(sel=>{
-    sel.addEventListener('change',()=>{
+    // ── OpenAI Proxy + Helpers ──────────────────────────────────────
+    async function callOpenAI(messages) {
+      const res = await fetch('/.netlify/functions/openai-proxy', {
+        method: 'POST',
+        headers: {'Content-Type':'application/json'},
+        body: JSON.stringify({ messages })
+      });
+      if (!res.ok) throw new Error('OpenAI error');
+      const j = await res.json();
+      return j.choices[0].message.content;
+    }
+    function formatHTML(txt) {
+      return txt
+        .replace(/^### (.*$)/gm,'<h3>$1</h3>')
+        .replace(/\*\*(.+?)\*\*/g,'<strong>$1</strong>')
+        .replace(/\*(.+?)\*/g,'<em>$1</em>')
+        .split(/\n{2,}/).map(p=>`<p>${p.trim()}</p>`).join('');
+    }
+    function getSelectValue(sel) {
       const oi = sel.parentElement.querySelector('.other-input');
-      if(oi) oi.style.display = sel.value==='Other'?'block':'none';
-    });
-  });
-
-  // ── RESPONSE PANEL BUTTONS ──────────────────────────────────────
-  document.body.addEventListener('click',e=>{
-    if(e.target.closest('.close-btn')) e.target.closest('.response').hidden=true;
-    if(e.target.closest('.copy-btn')){
-      const txt = e.target.closest('.response').querySelector('.result-content').innerText;
-      navigator.clipboard.writeText(txt);
+      return oi && sel.value==='Other' ? oi.value.trim() : sel.value;
     }
-    if(e.target.closest('.dl-btn')){
-      const txt = e.target.closest('.response').querySelector('.result-content').innerText;
-      const blob = new Blob([txt],{type:'text/plain'});
-      const a = document.createElement('a');
-      a.href = URL.createObjectURL(blob);
-      a.download='response.txt';
-      a.click();
-    }
-  });
 
-  // ── HERO FEATURES ───────────────────────────────────────────────
-  document.getElementById('heroSearchBtn').onclick = async e => {
-    e.preventDefault();
-    const q = document.getElementById('heroRecipeSearch').value.trim();
-    if(!q) return;
-    document.getElementById('dailyTip').innerText='Searching…';
-    const reply = await callOpenAI([
-      {role:'system',content:'You are a recipe finder.'},
-      {role:'user',content:`Find recipes for: ${q}`}
-    ]);
-    document.getElementById('dailyTip').innerHTML = formatHTML(reply);
-  };
-  document.getElementById('refreshTip').onclick = async ()=>{
-    document.getElementById('dailyTip').innerText='Loading…';
-    const tip = await callOpenAI([
-      {role:'system',content:'You are a nutrition tip generator.'},
-      {role:'user',content:'Give one daily nutrition tip.'}
-    ]);
-    document.getElementById('dailyTip').innerHTML = formatHTML(tip);
-  };
-  document.getElementById('refreshMacro').onclick = async ()=>{
-    document.getElementById('macroSnapshot').innerText='Loading…';
-    const snap = await callOpenAI([
-      {role:'system',content:'You are a macro snapshot AI.'},
-      {role:'user',content:'Provide protein/carbs/fat split for standard diet.'}
-    ]);
-    document.getElementById('macroSnapshot').innerHTML = snap;
-  };
+    document.addEventListener('DOMContentLoaded',()=>{
 
-  // ── GENERIC SECTION WIRING ──────────────────────────────────────
-  function wire(btnId, fieldIds, sys){
-    document.getElementById(btnId).onclick = async e => {
-      e.preventDefault();
-      const panel = document.getElementById(btnId.replace(/^(send|gen|analyze|get|scan|run)/,'')+'Panel');
-      panel.hidden=false;
-      panel.querySelector('.result-content').innerText='Processing…';
-      let content = '';
-      fieldIds.forEach(id=>{
-        const el = document.getElementById(id);
-        if(!el) return;
-        if(el.tagName==='SELECT') content+=`${id}: ${getSelectValue(el)}\n`;
-        else if(el.type==='file') content+=`${id}: [uploaded]\n`;
-        else content+=`${id}: ${el.value}\n`;
+      // ── SIDEBAR & DARKMODE ─────────────────────────────────────────
+      document.getElementById('hamburger').onclick = () =>
+        document.body.classList.toggle('sidebar-open');
+
+      document.getElementById('shrinkSidebar').onclick = () => {
+        const sb = document.getElementById('sidebar');
+        sb.classList.toggle('collapsed');
+        const left = sb.classList.contains('collapsed')
+          ? 'var(--sidebar-collapsed)'
+          : 'var(--sidebar-width)';
+        document.querySelector('header').style.setProperty('left', left);
+        document.querySelector('main').style.setProperty('margin-left', left);
+      };
+
+      document.getElementById('themeToggle').onclick = () => {
+        document.documentElement.classList.toggle('dark');
+        document.getElementById('themeToggle').classList.toggle('fa-sun');
+      };
+
+      // ── SHOW/HIDE “Other” INPUTS ────────────────────────────────────
+      document.querySelectorAll('select').forEach(sel=>{
+        sel.addEventListener('change',()=>{
+          const oi = sel.parentElement.querySelector('.other-input');
+          if(oi) oi.style.display = sel.value==='Other'?'block':'none';
+        });
       });
-      try{
-        const reply = await callOpenAI([{role:'system',content:sys},{role:'user',content}]);
+
+      // ── GLOBAL RESPONSE PANEL BUTTONS & TOOLTIPS ────────────────────
+      document.body.addEventListener('click',e=>{
+        const resp = e.target.closest('.response');
+        if(!resp) return;
+        // Close
+        if(e.target.closest('.close-btn')) {
+          resp.hidden = true;
+          return;
+        }
+        // Copy + feedback
+        if(e.target.closest('.copy-btn')){
+          const txt = resp.querySelector('.result-content').innerText;
+          navigator.clipboard.writeText(txt).then(()=>{
+            const tip = document.createElement('div');
+            tip.className = 'copy-tooltip';
+            tip.innerText = 'Copied!';
+            resp.append(tip);
+            setTimeout(()=> tip.remove(), 1500);
+          });
+          return;
+        }
+        // Download
+        if(e.target.closest('.dl-btn')){
+          const txt = resp.querySelector('.result-content').innerText;
+          const blob = new Blob([txt],{type:'text/plain'});
+          const a = document.createElement('a');
+          a.href = URL.createObjectURL(blob);
+          a.download='response.txt';
+          a.click();
+          return;
+        }
+      });
+
+      // ── HERO FEATURES ───────────────────────────────────────────────
+      document.getElementById('heroSearchBtn').onclick = async e => {
+        e.preventDefault();
+        const q = document.getElementById('heroRecipeSearch').value.trim();
+        if(!q){ alert('Please enter a recipe search term.'); return; }
+        const panel = document.getElementById('dailyTip');
+        panel.hidden = false;
+        panel.querySelector('.result-content').innerHTML = '<div class="spinner"></div>';
+        const reply = await callOpenAI([
+          {role:'system',content:'You are a recipe finder.'},
+          {role:'user',content:`Find recipes for: ${q}`}
+        ]);
         panel.querySelector('.result-content').innerHTML = formatHTML(reply);
-      } catch {
-        panel.querySelector('.result-content').innerText='⚠️ Something went wrong.';
+      };
+      document.getElementById('refreshTip').onclick = async () => {
+        const panel = document.getElementById('dailyTip');
+        panel.hidden = false;
+        panel.querySelector('.result-content').innerHTML = '<div class="spinner"></div>';
+        const tip = await callOpenAI([
+          {role:'system',content:'You are a nutrition tip generator.'},
+          {role:'user',content:'Give one daily nutrition tip.'}
+        ]);
+        panel.querySelector('.result-content').innerHTML = formatHTML(tip);
+      };
+      document.getElementById('refreshMacro').onclick = async () => {
+        const panel = document.getElementById('macroSnapshot');
+        panel.innerText = '';
+        panel.innerHTML = '<div class="spinner"></div>';
+        const snap = await callOpenAI([
+          {role:'system',content:'You are a macro snapshot AI.'},
+          {role:'user',content:'Provide protein/carbs/fat split for standard diet.'}
+        ]);
+        panel.innerHTML = snap;
+      };
+
+      // ── GENERIC SECTION WIRING WITH VALIDATION & SPINNER ─────────────
+      function wire(btnId, fieldIds, sys){
+        document.getElementById(btnId).onclick = async e => {
+          e.preventDefault();
+          // Validation
+          let missing = false;
+          fieldIds.forEach(id=>{
+            if(missing) return;
+            const el = document.getElementById(id);
+            if(!el) return;
+            if(el.tagName==='SELECT' && el.multiple) {
+              if(el.selectedOptions.length===0) missing = true;
+            } else if(!el.value || !el.value.trim()) {
+              missing = true;
+            }
+          });
+          if(missing){
+            alert('Please fill in all required fields.');
+            return;
+          }
+          const panel = document.getElementById(btnId.replace(/^(send|gen|analyze|get|scan|run)/,'')+'Panel');
+          panel.hidden = false;
+          panel.querySelector('.result-content').innerHTML = '<div class="spinner"></div>';
+          // Gather inputs
+          let content = '';
+          fieldIds.forEach(id=>{
+            const el = document.getElementById(id);
+            if(!el) return;
+            if(el.tagName==='SELECT' && el.multiple) {
+              const vals = Array.from(el.selectedOptions).map(o=>o.value).join(', ');
+              content += `${id}: ${vals}\n`;
+            }
+            else if(el.tagName==='SELECT') {
+              content += `${id}: ${getSelectValue(el)}\n`;
+            }
+            else if(el.type==='file') {
+              content += `${id}: [uploaded]\n`;
+            }
+            else {
+              content += `${id}: ${el.value}\n`;
+            }
+          });
+          try{
+            const reply = await callOpenAI([{role:'system',content:sys},{role:'user',content}]);
+            panel.querySelector('.result-content').innerHTML = formatHTML(reply);
+          } catch {
+            panel.querySelector('.result-content').innerText = '⚠️ Something went wrong.';
+          }
+        };
       }
-    };
-  }
 
-  // ── 1. Chatbot ────────────────────────────────────────────────────
-  (()=>{
-    const box = document.getElementById('dietChatBox'), hint = document.getElementById('dietHint');
-    let hist = [];
-    function add(who,txt){
-      const m = document.createElement('div');
-      m.className = who==='You'?'user-msg':'bot-msg';
-      m.innerHTML = `${formatHTML(txt)}<div class="timestamp">${new Date().toLocaleTimeString()}</div>`;
-      box.append(m);
-      box.scrollTop = box.scrollHeight;
-    }
-    document.getElementById('sendDiet').onclick = async e => {
-      e.preventDefault();
-      const t = document.getElementById('dietInput');
-      const txt = t.value.trim(); if(!txt) return;
-      add('You',txt); hist.push({who:'You',text:txt});
-      t.value=''; hint.style.display='block';
-      try{
-        const reply = await callOpenAI([{role:'system',content:'You are a dietetics assistant.'},{role:'user',content:txt}]);
-        add('AI',reply); hist.push({who:'AI',text:reply});
-      } catch {
-        add('AI','⚠️ Something went wrong.');
-      } finally { hint.style.display='none'; }
-    };
-    document.getElementById('clearDiet').onclick = ()=>{ box.innerHTML=''; hist=[]; };
-    document.getElementById('viewDietHistory').onclick = ()=>{
-      const modal = document.createElement('div');
-      modal.className='history-modal';
-      modal.innerHTML = `<div class="modal-content">
-        <h3>Chat History</h3>
-        <ul>${hist.map((m,i)=>`<li><strong>${m.who}:</strong> ${m.text}
-          <button class="delete" data-i="${i}"><i class="fas fa-trash"></i></button></li>`).join('')}
-        </ul>
-        <button class="close-modal">Close</button>
-      </div>`;
-      document.body.append(modal);
-      modal.querySelectorAll('.delete').forEach(btn=>{
-        btn.onclick = ()=>{ hist.splice(btn.dataset.i,1); modal.remove(); };
+      // ── 1. Nutrition Chatbot ───────────────────────────────────────────
+      (()=>{
+        const box = document.getElementById('dietChatBox'),
+              hint = document.getElementById('dietHint');
+        let hist = [];
+        function add(who,txt){
+          const m = document.createElement('div');
+          m.className = who==='You'?'user-msg':'bot-msg';
+          m.innerHTML = `${formatHTML(txt)}<div class="timestamp">${new Date().toLocaleTimeString()}</div>`;
+          box.append(m);
+          box.scrollTop = box.scrollHeight;
+        }
+        document.getElementById('sendDiet').onclick = async e => {
+          e.preventDefault();
+          const t = document.getElementById('dietInput');
+          const txt = t.value.trim();
+          if(!txt){ alert('Please type a question.'); return; }
+          add('You',txt); hist.push({who:'You',text:txt});
+          t.value=''; hint.style.display='block';
+          try{
+            const reply = await callOpenAI([{role:'system',content:'You are a dietetics assistant.'},{role:'user',content:txt}]);
+            add('AI',reply); hist.push({who:'AI',text:reply});
+          } catch {
+            add('AI','⚠️ Something went wrong.');
+          } finally { hint.style.display='none'; }
+        };
+        document.getElementById('clearDiet').onclick = ()=>{ box.innerHTML=''; hist=[]; };
+        document.getElementById('viewDietHistory').onclick = ()=>{
+          const modal = document.createElement('div');
+          modal.className='history-modal';
+          modal.innerHTML = `<div class="modal-content">
+            <h3>Chat History</h3>
+            <ul>${hist.map((m,i)=>`<li><strong>${m.who}:</strong> ${m.text}
+              <button class="delete" data-i="${i}"><i class="fas fa-trash"></i></button></li>`).join('')}
+            </ul>
+            <button class="close-modal">Close</button>
+          </div>`;
+          document.body.append(modal);
+          modal.querySelectorAll('.delete').forEach(btn=>{
+            btn.onclick = ()=>{ hist.splice(btn.dataset.i,1); modal.remove(); };
+          });
+          modal.querySelector('.close-modal').onclick = ()=> modal.remove();
+        };
+      })();
+
+      // ── 2. Meal Plan Generator ────────────────────────────────────────
+      wire('genPlan',['calories','dietType','allergyList','budget'],'You are a meal planning AI.');
+
+      // ── 3. Nutrient Analyzer ─────────────────────────────────────────
+      wire('analyzeNutri',['foodLog','unitSelect'],'You are a nutrient analysis AI.');
+
+      // ── 4. Recipe Recommender ─────────────────────────────────────────
+      wire('getRecipes',['pantry','cuisineType','recipeDifficulty','maxTime'],'You are a recipe recommendation AI.');
+
+      // ── 5. Deficiency Risk Scanner ───────────────────────────────────
+      wire('scanDef',['symptom','dietOverview'],'You are a deficiency risk AI.');
+
+      // ── 6. Metabolomic Risk Radar ────────────────────────────────────
+      wire('runRisk',['riskFrom','riskTo'],'You are a metabolomic risk AI.');
+
+      // ── 7. Fitness Nutrition Coach ────────────────────────────────────
+      wire('runFitness',['fitGoal','fitFreq','blendIngredients','carbDate','intensity','crpLevel','nutraPref'],'You are a fitness nutrition AI.');
+
+      // ── 8. Pharma-Integrated Suite ────────────────────────────────────
+      wire('runPharma',['medList','foodList','compoundGoal','reminderMethod','reminderTime1','reminderTime2','cohortSelect'],'You are a pharma-nutrient interaction AI.');
+
+      // ── 9. Symptom-to-Treatment Advisor ───────────────────────────────
+      wire('runSymptom',['sympAge','sympDesc','foodPref'],'You are a symptom-to-treatment advisor AI.');
+
+      // ── Progress Charts ───────────────────────────────────────────────
+      const ctx1 = document.getElementById('intakeChart')?.getContext('2d');
+      if(ctx1) new Chart(ctx1,{
+        type:'line',
+        data:{
+          labels:['Mon','Tue','Wed','Thu','Fri'],
+          datasets:[{
+            label:'Calories In',
+            data:[2000,1800,2100,1900,2050],
+            borderColor:getComputedStyle(document.documentElement).getPropertyValue('--color-secondary').trim(),
+            fill:false
+          }]
+        }
       });
-      modal.querySelector('.close-modal').onclick = ()=> modal.remove();
-    };
-  })();
-
-  // ── 2. Meal Plan ────────────────────────────────────────────────────
-  wire('genPlan',['calories','dietType','allergies','allergyList','budget'],'You are a meal planning AI.');
-
-  // ── 3. Nutrient Analyzer ──────────────────────────────────────────
-  wire('analyzeNutri',['foodLog','unitSelect'],'You are a nutrient analysis AI.');
-
-  // ── 4. Recipe Recommender ─────────────────────────────────────────
-  wire('getRecipes',['pantry','cuisineType','recipeDifficulty','maxTime'],'You are a recipe recommendation AI.');
-
-  // ── 5. Deficiency Scanner ─────────────────────────────────────────
-  wire('scanDef',['symptoms','dietOverview'],'You are a deficiency risk AI.');
-
-  // ── 6. Metabolomic Radar ─────────────────────────────────────────
-  wire('runRisk',['riskFrom','riskTo','syncBiomarkers'],'You are a metabolomic risk AI.');
-
-  // ── 7. Fitness Coach ─────────────────────────────────────────────
-  wire('runFitness',['fitGoal','fitFreq','blendIngredients','carbDate','intensity','crpLevel','nutraPref'],'You are a fitness nutrition AI.');
-
-  // ── 8. Pharma Suite ───────────────────────────────────────────────
-  wire('runPharma',['medList','foodList','compoundGoal','reminderMethod','reminderTime1','reminderTime2','cohortSelect'],'You are a pharma-nutrient interaction AI.');
-
-  // ── 9. Symptom Advisor ────────────────────────────────────────────
-  wire('runSymptom',['sympAge','sympDesc','foodPref'],'You are a symptom-to-treatment advisor AI.');
-
-  // ── 6. Progress Charts ────────────────────────────────────────────
-  const ctx1 = document.getElementById('intakeChart')?.getContext('2d');
-  if(ctx1) new Chart(ctx1,{type:'line',data:{labels:['Mon','Tue','Wed','Thu','Fri'],datasets:[{label:'Calories In',data:[2000,1800,2100,1900,2050],borderColor:getComputedStyle(document.documentElement).getPropertyValue('--color-secondary').trim(),fill:false}]}});
-  const ctx2 = document.getElementById('macroChart')?.getContext('2d');
-  if(ctx2) new Chart(ctx2,{type:'pie',data:{labels:['Carbs','Protein','Fat'],datasets:[{data:[50,25,25],backgroundColor:[getComputedStyle(document.documentElement).getPropertyValue('--color-primary').trim(),getComputedStyle(document.documentElement).getPropertyValue('--color-primary-alt').trim(),getComputedStyle(document.documentElement).getPropertyValue('--color-secondary').trim()]}]}});
-});
-</script>
+      const ctx2 = document.getElementById('macroChart')?.getContext('2d');
+      if(ctx2) new Chart(ctx2,{
+        type:'pie',
+        data:{
+          labels:['Carbs','Protein','Fat'],
+          datasets:[{data:[50,25,25]}]
+        }
+      });
+    });
+  </script>
 </body>
 </html>
