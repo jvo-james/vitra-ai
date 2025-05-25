@@ -382,7 +382,8 @@
 }
   </style>
 </head>
-<body>
+
+  <body>
 
   <!-- SIDEBAR -->
   <aside id="sidebar">
@@ -407,42 +408,76 @@
   <!-- MAIN CONTENT -->
   <main>
 
-    <!-- HERO -->
+    <!-- HERO (stacked) -->
     <section class="hero" id="hero">
       <h1><i class="fas fa-brain"></i> Empower Your Mind with AI</h1>
       <p>Discover multimodal insights, therapeutic chats, creative therapies, and more—powered by advanced AI.</p>
-      <div class="actions">
+      <div class="actions" style="flex-direction:column; gap:1rem; max-width:400px; margin:0 auto;">
         <a href="#therapybot" class="btn btn-primary"><i class="fas fa-comments"></i> Talk to Therapy Bot</a>
-        <a href="#insight" class="btn btn-secondary"><i class="fas fa-wave-square"></i> Emotional Insight</a>
+        <a href="#insight"      class="btn btn-secondary"><i class="fas fa-wave-square"></i> Emotional Insight</a>
+        <a href="#creative"     class="btn btn-primary"><i class="fas fa-palette"></i> Creative Therapies</a>
+        <a href="#games"        class="btn btn-secondary"><i class="fas fa-gamepad"></i> Cognitive Games</a>
+      </div>
+      <div class="hero-icons" style="position:absolute; top:1rem; right:1rem; opacity:0.2; font-size:2rem;">
+        <i class="fas fa-cloud"></i>
+        <i class="fas fa-moon"></i>
+        <i class="fas fa-star"></i>
+        <i class="fas fa-lightbulb"></i>
       </div>
     </section>
 
-    <!-- 1. Conversational “Therapy Bot” -->
+    <!-- 1. Therapy Bot with extra inputs -->
     <section class="module" id="therapybot">
       <h2><i class="fas fa-robot"></i> 1. Conversational “Therapy Bot”</h2>
-      <p class="desc">Engage in guided CBT exercises or get crisis support instantly.</p>
-      <div id="chatControls" class="chat-controls" style="display:flex;justify-content:flex-end;gap:.5rem;margin-bottom:.5rem;">
-        <button id="viewHistory" title="View History"><i class="fas fa-history"></i></button>
-        <button id="clearChat" title="Clear Chat"><i class="fas fa-trash"></i></button>
-      </div>
-      <div id="chatBox" class="chat-box" role="log" aria-live="polite"></div>
-      <div class="chat-input-row" style="display:flex;gap:.5rem;margin-top:.5rem;">
-        <input id="chatInput" type="text" placeholder="Ask about your thoughts or feelings…" style="flex:1;padding:.8rem;border:1px solid var(--muted);border-radius:var(--radius);"/>
-        <button id="sendChat" class="btn btn-primary"><i class="fas fa-paper-plane"></i></button>
-      </div>
-      <div id="chatHint" class="desc" style="margin-top:.5rem;display:none;">Bot is thinking… <span class="spinner"></span></div>
+      <p class="desc">Engage in guided CBT, mindfulness, or emotional support—choose your path and let the AI adapt.</p>
+      <form id="therapy-form" style="display:grid; gap:1rem;">
+        <label>Modality:
+          <select id="therapyModality">
+            <option value="CBT">CBT Exercises</option>
+            <option value="mindfulness">Mindfulness</option>
+            <option value="emotional">Emotional Support</option>
+            <option value="guidedImagery">Guided Imagery</option>
+          </select>
+        </label>
+        <label>Session Length:
+          <select id="therapyLength">
+            <option>5 minutes</option>
+            <option>10 minutes</option>
+            <option>20 minutes</option>
+          </select>
+        </label>
+        <label>Language:
+          <select id="therapyLang">
+            <option>English</option>
+            <option>Spanish</option>
+            <option>French</option>
+          </select>
+        </label>
+        <div style="display:flex; gap:0.5rem;">
+          <input id="therapyInput" type="text" placeholder="Describe what you need…" />
+          <button id="sendChat" class="btn btn-primary"><i class="fas fa-paper-plane"></i></button>
+        </div>
+      </form>
+      <div id="chatBox" class="chat-box"></div>
+      <div id="chatHint" class="desc" style="display:none;">Bot is thinking… <span class="spinner"></span></div>
     </section>
 
-    <!-- 2. Multimodal Emotional Insight -->
+    <!-- 2. Multimodal Emotional Insight with extra features -->
     <section class="module" id="insight">
       <h2><i class="fas fa-wave-square"></i> 2. Multimodal Emotional Insight</h2>
-      <p class="desc">Record voice/video or type your thoughts to get real-time emotional analysis.</p>
-      <button class="btn btn-primary" id="startVideo"><i class="fas fa-video"></i> Record 30s Video</button>
-      <button class="btn btn-secondary" id="typingAnalysis"><i class="fas fa-keyboard"></i> Typing Dynamics</button>
-      <div id="insightPanel"></div>
+      <p class="desc">Record voice, upload a selfie, or type your thoughts to get sentiment, tone, and stress analysis.</p>
+      <div class="insight-controls" style="display:flex; flex-wrap:wrap; gap:1rem;">
+        <button id="startVideo"      class="btn btn-primary"><i class="fas fa-video"></i> Record Video</button>
+        <button id="uploadAudio"     class="btn btn-secondary"><i class="fas fa-microphone"></i> Upload Audio</button>
+        <button id="uploadImage"     class="btn btn-primary"><i class="fas fa-camera"></i> Upload Selfie</button>
+        <button id="typingAnalysis"  class="btn btn-secondary"><i class="fas fa-keyboard"></i> Type Analysis</button>
+      </div>
+      <textarea id="insightNotes" rows="3" placeholder="Or write your feelings…"></textarea>
+      <button id="runInsight" class="btn btn-primary"><i class="fas fa-play"></i> Analyze</button>
+      <div id="insightPanel" class="response" hidden></div>
     </section>
 
- <!-- 3. Daily Mood Tracker -->
+    <!-- 3. Daily Mood Tracker -->
 <section class="module" id="moodTracker">
   <h2><i class="fas fa-sliders-h"></i> 3. Daily Mood Tracker</h2>
   <p class="desc">
@@ -604,106 +639,217 @@
     <div class="result-content"></div>
   </div>
 </section>
-
-    <!-- 5. AI-Curated Creative Therapies -->
+    <!-- 5. AI-Curated Creative Therapies expanded -->
     <section class="module" id="creative">
-      <h2><i class="fas fa-palette"></i> 5. AI-Curated Creative Therapies</h2>
-      <p class="desc">Generate abstract art or soundscapes tailored to your emotions.</p>
-      <button class="btn btn-primary" id="artEmotion"><i class="fas fa-brush"></i> Generate Art</button>
-      <button class="btn btn-secondary" id="musicMixer"><i class="fas fa-music"></i> Mix Music</button>
-      <div id="creativePanel"></div>
+      <h2><i class="fas fa-palette"></i> 3. AI-Curated Creative Therapies</h2>
+      <p class="desc">Generate art, music, poetry or guided journaling prompts—all tailored to your mood and style.</p>
+      <form id="creative-form" style="display:grid; gap:1rem;">
+        <label>Therapy Type:
+          <select id="creativeType">
+            <option value="art">Abstract Art</option>
+            <option value="music">Soundscape</option>
+            <option value="poetry">Poetry</option>
+            <option value="journaling">Journaling Prompts</option>
+          </select>
+        </label>
+        <label>Style:
+          <select id="creativeStyle">
+            <option>Calm & Soft</option>
+            <option>Vibrant & Bold</option>
+            <option>Mystical</option>
+            <option>Minimalist</option>
+          </select>
+        </label>
+        <label>Detail Level:
+          <input type="range" id="creativeDetail" min="1" max="10" value="5" />
+        </label>
+        <button id="artEmotion" class="btn btn-primary"><i class="fas fa-brush"></i> Generate</button>
+      </form>
+      <div id="creativePanel" class="response" hidden></div>
     </section>
 
-    <!-- 6. Dynamic Cognitive Games -->
+    <!-- 6. Dynamic Cognitive Games expanded -->
     <section class="module" id="games">
-      <h2><i class="fas fa-gamepad"></i> 6. Dynamic Cognitive Games</h2>
-      <p class="desc">Play adaptive puzzles or co-author stories to train your mind.</p>
-      <button class="btn btn-primary" id="puzzles"><i class="fas fa-puzzle-piece"></i> Adaptive Puzzles</button>
-      <button class="btn btn-secondary" id="storyBuilder"><i class="fas fa-book"></i> Story Builder</button>
-      <div id="gamesPanel"></div>
+      <h2><i class="fas fa-gamepad"></i> 4. Dynamic Cognitive Games</h2>
+      <p class="desc">Adaptive puzzles, memory challenges, and story co-creation to train attention, memory, and creativity.</p>
+      <form id="games-form" style="display:grid; gap:1rem;">
+        <label>Game Type:
+          <select id="gameType">
+            <option value="puzzle">Logic Puzzle</option>
+            <option value="memory">Memory Match</option>
+            <option value="story">Collaborative Story</option>
+          </select>
+        </label>
+        <label>Difficulty:
+          <select id="gameDifficulty">
+            <option>Easy</option><option>Medium</option><option>Hard</option>
+          </select>
+        </label>
+        <button id="puzzles" class="btn btn-primary"><i class="fas fa-puzzle-piece"></i> Start</button>
+      </form>
+      <div id="gamesPanel" class="response" hidden></div>
     </section>
 
-    <!-- 7. Predictive Risk & Early Warning -->
+    <!-- 7. Predictive Risk & Early Warning with extra settings -->
     <section class="module" id="risk">
-      <h2><i class="fas fa-chart-line"></i> 7. Predictive Risk &amp; Early Warning</h2>
-      <p class="desc">AI monitors digital signals to alert you before crisis points.</p>
-      <button class="btn btn-primary" id="phenotyping"><i class="fas fa-tachometer-alt"></i> View Dashboard</button>
-      <button class="btn btn-secondary" id="crisisAlerts"><i class="fas fa-bell"></i> Crisis Alerts</button>
-      <div id="riskPanel"></div>
+      <h2><i class="fas fa-chart-line"></i> 5. Predictive Risk &amp; Early Warning</h2>
+      <p class="desc">Continuously monitor patterns and get alerts when risk thresholds are crossed.</p>
+      <form id="risk-form" style="display:grid; gap:1rem;">
+        <label>Alert Threshold (%):
+          <input type="number" id="riskThreshold" min="1" max="100" value="75" />
+        </label>
+        <label>Notify Via:
+          <select id="riskNotify">
+            <option>Email</option>
+            <option>SMS</option>
+            <option>In-App</option>
+          </select>
+        </label>
+        <button id="crisisAlerts" class="btn btn-primary"><i class="fas fa-bell"></i> Enable Alerts</button>
+      </form>
+      <div id="riskPanel" class="response" hidden></div>
     </section>
 
-    <!-- 8. Personalized Self-Care Plans -->
+    <!-- 8. Personalized Self-Care Plans with scheduling -->
     <section class="module" id="selfcare">
-      <h2><i class="fas fa-heart"></i> 8. Personalized Self-Care Plans</h2>
-      <p class="desc">Get AI-generated activities and reminders to stay on track.</p>
-      <button class="btn btn-primary" id="activitySuggest"><i class="fas fa-lightbulb"></i> Suggest Activities</button>
-      <button class="btn btn-secondary" id="nudges"><i class="fas fa-bell"></i> Schedule Reminders</button>
-      <div id="selfcarePanel"></div>
+      <h2><i class="fas fa-heart"></i> 6. Personalized Self-Care Plans</h2>
+      <p class="desc">AI-generated daily routines, reminders, and habit tracking to keep you on track.</p>
+      <form id="selfcare-form" style="display:grid; gap:1rem;">
+        <label>Focus Area:
+          <select id="selfcareFocus">
+            <option>Breathing Exercises</option>
+            <option>Stretch & Movement</option>
+            <option>Mindfulness Breaks</option>
+            <option>Creative Pause</option>
+          </select>
+        </label>
+        <label>Reminder Time:
+          <input type="time" id="selfcareTime" />
+        </label>
+        <button id="activitySuggest" class="btn btn-primary"><i class="fas fa-lightbulb"></i> Generate Plan</button>
+      </form>
+      <div id="selfcarePanel" class="response" hidden></div>
     </section>
 
-    <!-- 9. Virtual Reality Micro-Therapies -->
+    <!-- 9. Virtual Reality Micro-Therapies choices -->
     <section class="module" id="vr">
-      <h2><i class="fas fa-vr-cardboard"></i> 9. Virtual Reality Micro-Therapies</h2>
-      <p class="desc">Immersive VR experiences for phobia exposure and calm mindscapes.</p>
-      <button class="btn btn-primary" id="phobiaSim"><i class="fas fa-exclamation-triangle"></i> Phobia Simulator</button>
-      <button class="btn btn-secondary" id="mindscapes"><i class="fas fa-globe"></i> 360° Mindscapes</button>
-      <div id="vrPanel"></div>
+      <h2><i class="fas fa-vr-cardboard"></i> 7. Virtual Reality Micro-Therapies</h2>
+      <p class="desc">Immerse yourself in calm landscapes or graded exposure in VR to manage anxiety and fears.</p>
+      <form id="vr-form" style="display:grid; gap:1rem;">
+        <label>Environment:
+          <select id="vrEnvironment">
+            <option>Forest</option><option>Beach</option><option>Mountain</option><option>Custom</option>
+          </select>
+        </label>
+        <label>Duration:
+          <select id="vrDuration">
+            <option>2 minutes</option><option>5 minutes</option><option>10 minutes</option>
+          </select>
+        </label>
+        <button id="phobiaSim" class="btn btn-primary"><i class="fas fa-exclamation-triangle"></i> Launch</button>
+      </form>
+      <div id="vrPanel" class="response" hidden></div>
     </section>
 
     <!-- 10. Integrated Professional Ecosystem -->
     <section class="module" id="pro">
-      <h2><i class="fas fa-toolbox"></i> 10. Integrated Professional Ecosystem</h2>
-      <p class="desc">Tools for clinicians and seamless referrals when you need expert help.</p>
-      <button class="btn btn-primary" id="clinicianToolkit"><i class="fas fa-file-alt"></i> Clinician Toolkit</button>
-      <button class="btn btn-secondary" id="referralPipeline"><i class="fas fa-share-square"></i> Referral Pipeline</button>
-      <div id="proPanel"></div>
+      <h2><i class="fas fa-toolbox"></i> 8. Integrated Professional Ecosystem</h2>
+      <p class="desc">For clinicians: secure note-taking, referral management, and session analytics.</p>
+      <form id="pro-form" style="display:grid; gap:1rem;">
+        <label>Upload Session Notes (txt/json):
+          <input type="file" id="proUpload" accept=".txt,.json" />
+        </label>
+        <label>Referral Preference:
+          <select id="proReferral">
+            <option>Immediate</option><option>Standard</option><option>Low Priority</option>
+          </select>
+        </label>
+        <button id="clinicianToolkit" class="btn btn-primary"><i class="fas fa-file-alt"></i> Process</button>
+      </form>
+      <div id="proPanel" class="response" hidden></div>
     </section>
 
     <!-- 11. Medication Management & Safety -->
     <section class="module" id="medsafety">
-      <h2><i class="fas fa-pills"></i> 11. Medication Management &amp; Safety</h2>
-      <p class="desc">Check for dangerous interactions and track your adherence.</p>
-      <button class="btn btn-primary" id="medInteraction"><i class="fas fa-exchange-alt"></i> Interaction Checker</button>
-      <button class="btn btn-secondary" id="adherence"><i class="fas fa-check-circle"></i> Adherence Tracker</button>
-      <div id="medsafetyPanel"></div>
+      <h2><i class="fas fa-pills"></i> 9. Medication Management &amp; Safety</h2>
+      <p class="desc">Enter your current medications, check interactions, set adherence reminders.</p>
+      <form id="medsafety-form" style="display:grid; gap:1rem;">
+        <label>Medications (comma-separated):
+          <input type="text" id="medList" placeholder="e.g. Sertraline, Ibuprofen" />
+        </label>
+        <button id="medInteraction" class="btn btn-primary"><i class="fas fa-exchange-alt"></i> Check Interactions</button>
+        <button id="adherence" class="btn btn-secondary"><i class="fas fa-check-circle"></i> Set Reminders</button>
+      </form>
+      <div id="medsafetyPanel" class="response" hidden></div>
     </section>
 
     <!-- 12. Symptom Questionnaire -->
     <section class="module" id="symptomQuiz">
-      <h2><i class="fas fa-clipboard-list"></i> 12. Symptom Questionnaire</h2>
-      <p class="desc">Answer a quick questionnaire; get AI-powered severity and next-step advice.</p>
-      <button class="btn btn-primary" id="launchQuiz"><i class="fas fa-play"></i> Start Questionnaire</button>
-      <div id="quizPanel"></div>
+      <h2><i class="fas fa-clipboard-list"></i> 10. Symptom Questionnaire</h2>
+      <p class="desc">Answer a brief standardized survey; AI will score severity and suggest next steps.</p>
+      <form id="quiz-form" style="display:grid; gap:1rem;">
+        <label>Sleep Quality:
+          <select name="sleep"><option>Poor</option><option>Fair</option><option>Good</option></select>
+        </label>
+        <label>Appetite:
+          <select name="appetite"><option>Low</option><option>Normal</option><option>High</option></select>
+        </label>
+        <label>Concentration:
+          <select name="concentration"><option>Impaired</option><option>Average</option><option>Sharp</option></select>
+        </label>
+        <button id="launchQuiz" class="btn btn-primary"><i class="fas fa-play"></i> Submit & Analyze</button>
+      </form>
+      <div id="quizPanel" class="response" hidden></div>
     </section>
 
     <!-- 13. Community & Peer Support -->
     <section class="module" id="community">
-      <h2><i class="fas fa-users"></i> 13. Community &amp; Peer Support</h2>
-      <p class="desc">Join AI-moderated support circles or get a check-in from your Buddy Bot.</p>
-      <button class="btn btn-primary" id="supportCircles"><i class="fas fa-comments"></i> Support Circles</button>
-      <button class="btn btn-secondary" id="buddyBot"><i class="fas fa-user-friends"></i> Buddy Bot</button>
-      <div id="communityPanel"></div>
+      <h2><i class="fas fa-users"></i> 11. Community &amp; Peer Support</h2>
+      <p class="desc">Join moderated circles, host topic rooms, or get a check-in from Buddy Bot.</p>
+      <form id="community-form" style="display:grid; gap:1rem;">
+        <label>Topic:
+          <select id="communityTopic">
+            <option>Anxiety</option><option>Depression</option><option>Motivation</option><option>Mindfulness</option>
+          </select>
+        </label>
+        <label><input type="checkbox" id="anonToggle" /> Join Anonymously</label>
+        <button id="supportCircles" class="btn btn-primary"><i class="fas fa-comments"></i> Enter Circle</button>
+        <button id="buddyBot" class="btn btn-secondary"><i class="fas fa-user-friends"></i> Buddy Check-in</button>
+      </form>
+      <div id="communityPanel" class="response" hidden></div>
     </section>
 
     <!-- 14. Data Analytics & ROI -->
     <section class="module" id="analytics">
-      <h2><i class="fas fa-chart-pie"></i> 14. Data Analytics &amp; ROI</h2>
-      <p class="desc">Visualize your engagement and outcomes; export data for review.</p>
+      <h2><i class="fas fa-chart-pie"></i> 12. Data Analytics &amp; ROI</h2>
+      <p class="desc">Visualize your engagement, symptom changes, and export detailed reports.</p>
       <div class="charts">
-        <div class="chart-card"><canvas id="engagementChart"></canvas><figcaption>Sessions Over Time</figcaption></div>
-        <div class="chart-card"><canvas id="outcomeChart"></canvas><figcaption>Mood Improvement</figcaption></div>
+        <div class="chart-card">
+          <canvas id="engagementChart"></canvas>
+          <figcaption>Sessions Over Time</figcaption>
+        </div>
+        <div class="chart-card">
+          <canvas id="outcomeChart"></canvas>
+          <figcaption>Outcome Metrics</figcaption>
+        </div>
       </div>
-      <button id="exportCharts" class="btn btn-primary" style="margin-top:1rem;"><i class="fas fa-file-export"></i> Export CSV</button>
+      <div style="display:flex; gap:1rem; margin-top:1rem;">
+        <label>Date Range:
+          <input type="date" id="analyticsFrom" /> –
+          <input type="date" id="analyticsTo" />
+        </label>
+        <button id="exportCharts" class="btn btn-primary"><i class="fas fa-file-export"></i> Export CSV</button>
+      </div>
     </section>
 
     <!-- FOOTER -->
-  <footer style="text-align:center;padding:var(--padding);background:var(--surface);color:var(--muted)">
-    &copy; 2025 Vitra AI – Psychology &amp; Mental Health
-  </footer>
+    <footer style="text-align:center; padding:1rem; background:var(--surface); color:var(--muted)">
+      &copy; 2025 Vitra AI – Psychology &amp; Mental Health
+    </footer>
 
   </main>
 
-  
+</body>
   <!-- SCRIPTS -->
   
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
