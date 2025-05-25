@@ -899,8 +899,10 @@
   </main>
 
   <!-- SCRIPTS -->
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<!-- SCRIPTS (place just before closing </body>) -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
+// ── OpenAI proxy + Markdown helper ───────────────────────────────────────────
 async function callOpenAI(messages) {
   const res = await fetch('/.netlify/functions/openai-proxy', {
     method: 'POST',
@@ -916,30 +918,13 @@ function formatHTML(txt) {
   return txt
     .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
     .replace(/\*(.+?)\*/g, '<em>$1</em>')
-    .split(/\n{2,}/).map(p => `<p>${p.trim()}</p>`).join('');
+    .split(/\n{2,}/)
+    .map(p => `<p>${p.trim()}</p>`)
+    .join('');
 }
 
 document.addEventListener('DOMContentLoaded', () => {
-  const asideEl = document.getElementById('sidebar');
-  const headerEl = document.querySelector('header');
-
-  // ── SIDEBAR TOGGLE ─────────────────────────
-  document.getElementById('hamburger').onclick = () => {
-    asideEl.classList.toggle('collapsed');
-    headerEl.classList.toggle('sidebar-collapsed');
-  };
-  document.getElementById('shrinkBtn').onclick = () => {
-    asideEl.classList.toggle('collapsed');
-    headerEl.classList.toggle('sidebar-collapsed');
-  };
-
-  // ── THEME TOGGLE ────────────────────────────
-  document.getElementById('themeToggle').onclick = () => {
-    document.documentElement.classList.toggle('dark');
-    document.getElementById('themeToggle').classList.toggle('fa-sun');
-  };
-
-  // Utility: ensure panel exists
+  // ── Utility: get or create response panel under a section ───────────────
   function getPanel(sectionId) {
     const sec = document.getElementById(sectionId);
     let panel = sec.querySelector('.response');
@@ -952,81 +937,23 @@ document.addEventListener('DOMContentLoaded', () => {
     return panel;
   }
 
-  // Utility: wire any button to a generic prompt->AI flow
-  function wire(btnId, systemPrompt, ask, sectionId) {
-    document.getElementById(btnId).onclick = async () => {
-      const panel = getPanel(sectionId);
-      panel.innerHTML = `<div class="result-content">Processing <span class="spinner"></span></div>`;
-      const inp = prompt(ask);
-      if (!inp) {
-        panel.innerHTML = '';
-        return;
-      }
-      try {
-        const reply = await callOpenAI([
-          { role: 'system', content: systemPrompt },
-          { role: 'user', content: inp }
-        ]);
-        panel.innerHTML = `<div class="result-content">${formatHTML(reply)}</div>`;
-      } catch {
-        panel.innerHTML = `<div class="result-content">😕 Something went wrong.</div>`;
-      }
-      attachPanelControls(panel);
-    };
-  }
+  // ── Sidebar & Theme Toggles ────────────────────────────────────────────────
+  document.getElementById('shrinkBtn').onclick = () =>
+    document.getElementById('sidebar').classList.toggle('collapsed');
+  document.getElementById('hamburger').onclick = () =>
+    document.getElementById('sidebar').classList.toggle('open');
+  document.getElementById('themeToggle').onclick = () => {
+    document.documentElement.classList.toggle('dark');
+    document.getElementById('themeToggle').classList.toggle('fa-sun');
+  };
 
-  // After panel renders, wire up close / copy / download
-  function attachPanelControls(panel) {
-    // Close
-    let btn = panel.querySelector('.close-btn');
-    if (!btn) {
-      btn = document.createElement('button');
-      btn.className = 'close-btn';
-      btn.innerHTML = '&times;';
-      panel.append(btn);
-    }
-    btn.onclick = () => panel.hidden = true;
-
-    // Copy
-    let copy = panel.querySelector('.copy-btn');
-    if (!copy) {
-      copy = document.createElement('button');
-      copy.className = 'tool-row copy-btn';
-      copy.title = 'Copy';
-      copy.innerHTML = '<i class="fas fa-copy"></i>';
-      panel.append(copy);
-    }
-    copy.onclick = () => {
-      navigator.clipboard.writeText(panel.querySelector('.result-content').innerText);
-      copy.innerText = '✓';
-      setTimeout(() => copy.innerHTML = '<i class="fas fa-copy"></i>', 1000);
-    };
-
-    // Download
-    let dl = panel.querySelector('.dl-btn');
-    if (!dl) {
-      dl = document.createElement('button');
-      dl.className = 'tool-row dl-btn';
-      dl.title = 'Download';
-      dl.innerHTML = '<i class="fas fa-download"></i>';
-      panel.append(dl);
-    }
-    dl.onclick = () => {
-      const text = panel.querySelector('.result-content').innerText;
-      const blob = new Blob([text], { type: 'text/plain' });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url; a.download = 'response.txt'; a.click();
-      URL.revokeObjectURL(url);
-    };
-  }
-
-  // ── THERAPY BOT ───────────────────────────────────
+  // ── CHATBOT (Section 1) ────────────────────────────────────────────────────
   const chatBox   = document.getElementById('chatBox'),
         chatHint  = document.getElementById('chatHint'),
-        chatInput = document.getElementById('therapyInput');
+        chatInput = document.getElementById('therapyInput'),
+        history   = [];
 
-  function addChat(who, text) {
+  function addMessage(who, text) {
     const msg = document.createElement('div');
     msg.className = who === 'You' ? 'user-msg' : 'bot-msg';
     msg.innerHTML = `${formatHTML(text)}<div class="timestamp">${new Date().toLocaleTimeString()}</div>`;
@@ -1038,25 +965,57 @@ document.addEventListener('DOMContentLoaded', () => {
     e.preventDefault();
     const txt = chatInput.value.trim();
     if (!txt) return;
-    addChat('You', txt);
+    addMessage('You', txt);
+    history.push({ who: 'You', text: txt });
     chatInput.value = '';
     chatHint.style.display = 'block';
 
-    const sys = `Therapy | Modality: ${document.getElementById('therapyModality').value}; Length: ${document.getElementById('therapyLength').value}; Language: ${document.getElementById('therapyLang').value}`;
+    const sys = `You are a therapist. Modality=${document.getElementById('therapyModality').value}; Length=${document.getElementById('therapyLength').value}; Language=${document.getElementById('therapyLang').value}.`;
     try {
       const reply = await callOpenAI([
         { role: 'system', content: sys },
-        { role: 'user', content: txt }
+        { role: 'user',   content: txt }
       ]);
-      addChat('Therapist', reply);
+      addMessage('Therapist', reply);
+      history.push({ who: 'Therapist', text: reply });
     } catch {
-      addChat('Therapist', '⚠️ Something went wrong.');
+      addMessage('Therapist', '⚠️ Something went wrong.');
     } finally {
       chatHint.style.display = 'none';
     }
   };
 
-  // ── MOOD TRACKER ───────────────────────────────────
+  document.getElementById('clearChat').onclick = () => {
+    chatBox.innerHTML = '';
+    history.length = 0;
+  };
+  document.getElementById('viewHistory').onclick = () => {
+    const modal = document.createElement('div');
+    modal.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.6);display:flex;align-items:center;justify-content:center;z-index:2000';
+    modal.innerHTML = `
+      <div style="background:var(--surface);padding:1rem;border-radius:var(--radius);max-width:360px;width:80%;">
+        <h3>Chat History</h3>
+        <ul style="max-height:300px;overflow:auto;padding:0;list-style:none;">
+          ${history.map((m,i)=>`
+            <li style="margin:.5rem 0;">
+              <strong>${m.who}:</strong> ${m.text}
+              <button data-i="${i}" style="float:right;border:none;background:none;color:var(--secondary);cursor:pointer;">
+                <i class="fas fa-trash"></i>
+              </button>
+            </li>`).join('')}
+        </ul>
+        <button onclick="this.closest('div[style]').remove()">Close</button>
+      </div>`;
+    document.body.append(modal);
+    modal.querySelectorAll('button[data-i]').forEach(btn=>{
+      btn.onclick = () => {
+        history.splice(+btn.dataset.i,1);
+        modal.remove();
+      };
+    });
+  };
+
+  // ── MOOD TRACKER (Section 3) ──────────────────────────────────────────────
   const moodRange = document.getElementById('moodRange'),
         moodValue = document.getElementById('moodValue');
   moodRange.oninput = () => moodValue.textContent = moodRange.value;
@@ -1064,7 +1023,8 @@ document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('mood-form').onsubmit = async e => {
     e.preventDefault();
     const panel = getPanel('moodTracker');
-    panel.innerHTML = `<div class="result-content">Analyzing <span class="spinner"></span></div>`;
+    panel.innerHTML = `<div class="result-content">Analyzing… <span class="spinner"></span></div>`;
+
     const data = {
       mood: moodRange.value,
       emotions: [...document.querySelectorAll('input[name="emotions"]:checked')].map(c=>c.value),
@@ -1072,138 +1032,198 @@ document.addEventListener('DOMContentLoaded', () => {
       note: document.getElementById('moodNote').value.trim(),
       selfCare: document.getElementById('selfCare').value
     };
+
     try {
       const reply = await callOpenAI([
-        { role: 'system', content: 'You are a mood analysis assistant.' },
-        { role: 'user', content: `Mood Entry: ${JSON.stringify(data)}` }
+        { role:'system', content:'You are a mental health assistant.' },
+        { role:'user',   content:`Daily Mood Entry:\n${JSON.stringify(data)}` }
       ]);
       panel.innerHTML = `<div class="result-content">${formatHTML(reply)}</div>`;
     } catch {
       panel.innerHTML = `<div class="result-content">😕 Something went wrong.</div>`;
     }
-    attachPanelControls(panel);
   };
 
-  // ── DREAM EXPLORER ──────────────────────────────────
-  const dreamAnalyze = document.getElementById('analyzeDream'),
-        dreamInterp  = document.getElementById('interpretSymbols'),
-        dreamPrompts = document.getElementById('generatePrompts');
-
-  dreamAnalyze.onclick = async () => {
+  // ── DREAM & SUBCONSCIOUS EXPLORER (Section 4) ────────────────────────────
+  document.getElementById('analyzeDream').onclick = async () => {
     const panel = getPanel('dream');
-    panel.innerHTML = `<div class="result-content">Analyzing <span class="spinner"></span></div>`;
+    panel.innerHTML = `<div class="result-content">Analyzing… <span class="spinner"></span></div>`;
+
     const narrative = document.getElementById('dreamText').value.trim();
-    const symbols   = [...document.querySelectorAll('#dream input[type="checkbox"]:checked')].map(c=>c.value).join(', ');
-    const pre       = document.getElementById('preMood').value;
-    const post      = document.getElementById('postMood').value;
+    const symbols   = Array.from(document.querySelectorAll('#dream input[type="checkbox"]:checked'))
+                            .map(cb=>cb.value).join(', ');
+    const preMood   = document.getElementById('preMood').value;
+    const postMood  = document.getElementById('postMood').value;
     const tags      = document.getElementById('dreamTags').value.trim();
     const reflect   = document.getElementById('dreamReflect').value.trim();
 
     try {
       const reply = await callOpenAI([
-        { role: 'system', content: 'You are a dream interpreter.' },
-        { role: 'user', content:
-            `Narrative: ${narrative}\nSymbols: ${symbols}\nBefore: ${pre}\nAfter: ${post}\nTags: ${tags}\nReflection: ${reflect}`
+        { role:'system', content:'You are a dream interpreter. Use all provided data.' },
+        { role:'user',   content:
+            `Narrative: ${narrative}\n` +
+            `Symbols: ${symbols}\n` +
+            `Mood before sleep: ${preMood}\n` +
+            `Mood on waking: ${postMood}\n` +
+            `Tags: ${tags}\n` +
+            `Reflection: ${reflect}`
         }
       ]);
       panel.innerHTML = `<div class="result-content">${formatHTML(reply)}</div>`;
     } catch {
-      panel.innerHTML = `<div class="result-content">😕 Error.</div>`;
+      panel.innerHTML = `<div class="result-content">😕 Oops! Something went wrong.</div>`;
     }
-    attachPanelControls(panel);
   };
 
-  dreamInterp.onclick = async () => {
+  document.getElementById('interpretSymbols').onclick = async () => {
     const panel = getPanel('dream');
-    panel.innerHTML = `<div class="result-content">Interpreting <span class="spinner"></span></div>`;
-    const symbols = [...document.querySelectorAll('#dream input[type="checkbox"]:checked')].map(c=>c.value).join(', ');
+    panel.innerHTML = `<div class="result-content">Interpreting symbols… <span class="spinner"></span></div>`;
+    const symbols = Array.from(document.querySelectorAll('#dream input[type="checkbox"]:checked'))
+                         .map(cb=>cb.value).join(', ');
     try {
       const reply = await callOpenAI([
-        { role: 'system', content: 'You are a dream symbol expert.' },
-        { role: 'user', content: `Symbols: ${symbols}` }
+        { role:'system', content:'You are a dream symbol interpreter.' },
+        { role:'user',   content:`Symbols: ${symbols}` }
       ]);
       panel.innerHTML = `<div class="result-content">${formatHTML(reply)}</div>`;
     } catch {
-      panel.innerHTML = `<div class="result-content">😕 Error.</div>`;
+      panel.innerHTML = `<div class="result-content">😕 Oops! Something went wrong.</div>`;
     }
-    attachPanelControls(panel);
   };
 
-  dreamPrompts.onclick = async () => {
+  document.getElementById('generatePrompts').onclick = async () => {
     const panel = getPanel('dream');
-    panel.innerHTML = `<div class="result-content">Generating <span class="spinner"></span></div>`;
+    panel.innerHTML = `<div class="result-content">Generating prompts… <span class="spinner"></span></div>`;
     const narrative = document.getElementById('dreamText').value.trim();
     try {
       const reply = await callOpenAI([
-        { role: 'system', content: 'You generate journal prompts.' },
-        { role: 'user', content: `Dream: ${narrative}` }
+        { role:'system', content:'You are a creative writing assistant.' },
+        { role:'user',   content:`Generate 3 journaling prompts based on: ${narrative}` }
       ]);
       panel.innerHTML = `<div class="result-content">${formatHTML(reply)}</div>`;
     } catch {
-      panel.innerHTML = `<div class="result-content">😕 Error.</div>`;
+      panel.innerHTML = `<div class="result-content">😕 Oops! Something went wrong.</div>`;
     }
-    attachPanelControls(panel);
   };
 
-  // ── WIRE REMAINING MODULES ───────────────────────────
-  wire('startVideo',      'Analyze video emotion',         'Paste video URL:',            'insight');
-  wire('uploadAudio',     'Analyze audio emotion',         'Paste audio URL:',            'insight');
-  wire('uploadImage',     'Analyze facial emotion',        'Paste image URL:',            'insight');
-  wire('typingAnalysis',  'Analyze typing stress',         'Type a few sentences:',       'insight');
-  wire('runInsight',      'Summarize text emotion',         'Paste text:',                 'insight');
+  // ── GENERIC MODULE HANDLER (Sections 5–13) ────────────────────────────────
+  function wire(btnId, sysPrompt, askText, sectionId) {
+    const btn = document.getElementById(btnId);
+    if (!btn) return;
+    btn.onclick = async () => {
+      const panel = getPanel(sectionId);
+      panel.innerHTML = `<div class="result-content">Processing… <span class="spinner"></span></div>`;
+      const userInput = prompt(askText);
+      if (!userInput) return panel.innerHTML = '';
+      try {
+        const reply = await callOpenAI([
+          { role: 'system', content: sysPrompt },
+          { role: 'user',   content: userInput }
+        ]);
+        panel.innerHTML = `<div class="result-content">${formatHTML(reply)}</div>`;
+      } catch {
+        panel.innerHTML = `<div class="result-content">⚠️ Something went wrong.</div>`;
+      }
+    };
+  }
 
-  wire('artEmotion',      'Generate art for emotion',      'Enter an emotion:',           'creative');
-  wire('musicMixer',      'Compose music for mood',        'Describe your mood:',         'creative');
-  wire('puzzles',         'Create a logic puzzle',         'Enter a theme:',              'games');
-  wire('storyBuilder',    'Continue a story',              'Enter a seed idea:',          'games');
+  // Section 5: Multimodal Insight extras
+  wire('startVideo',     'Analyze this video for emotion',           'Paste video URL…', 'insight');
+  wire('uploadAudio',    'Analyze this audio for emotion',           'Paste audio URL…', 'insight');
+  wire('uploadImage',    'Analyze this image for emotion',           'Paste image URL…', 'insight');
+  wire('typingAnalysis', 'Analyze typing dynamics for stress levels','Type your text…',  'insight');
 
-  wire('crisisAlerts',    'Assess crisis risk',            'Describe feelings:',          'risk');
-  wire('activitySuggest', 'Suggest self-care activities',  'Tell me your current state:', 'selfcare');
-  wire('nudges',          'Schedule self-care reminders',  'What reminder would you like:', 'selfcare');
+  // Section 6: AI-Curated Creative Therapies
+  wire('artEmotion',     'Generate an AI art prompt for emotion',    'Enter an emotion…','creative');
+  wire('musicMixer',     'Compose an AI soundscape',                  'Describe your mood…','creative');
+  wire('poetry',         'Write a short poem about mood',             'Enter a theme…',     'creative');
+  wire('journaling',     'Generate journaling prompts',               'Enter a topic…',     'creative');
 
-  wire('phobiaSim',       'Launch VR phobia environment',  'N/A',                          'vr');
-  wire('mindscapes',      'Launch VR relaxation scene',    'N/A',                          'vr');
+  // Section 7: Cognitive Games
+  wire('puzzles',        'Create a logic puzzle',                    'Enter puzzle theme…','games');
+  wire('memoryMatch',    'Generate a memory-match game',             'Enter items…',       'games');
+  wire('storyBuilder',   'Continue this story',                      'Enter story seed…',  'games');
 
-  wire('clinicianToolkit','Process clinician notes',       'Paste session notes:',         'pro');
-  wire('referralPipeline','Match patient to therapist',    'Paste profile:',               'pro');
+  // Section 8: Predictive Risk
+  wire('crisisAlerts',   'Assess crisis risk and suggest actions',    'Describe feelings…', 'risk');
+  wire('phenotyping',    'Summarize user data for phenotyping',       'Paste user data…',   'risk');
 
-  wire('medInteraction',  'Check drug interactions',       'List medications (comma sep):','medsafety');
-  wire('adherence',       'Set adherence reminders',       'What reminder time?',          'medsafety');
+  // Section 9: Self-Care Plans
+  wire('activitySuggest','Suggest self-care activities',             'How have you felt?','selfcare');
+  wire('nudges',         'Compose reminder text',                    'What to remind…',   'selfcare');
 
-  wire('launchQuiz',      'Evaluate symptom quiz',         'Answer: sleep, appetite, concentration:', 'symptomQuiz');
+  // Section 10: VR Micro-Therapies
+  wire('phobiaSim',      'Generate VR phobia exposure script',        'Which phobia?','vr');
+  wire('mindscapes',     'Generate a VR calm-mind environment',       'Describe environment…','vr');
 
-  wire('supportCircles',  'Summarize community chat',      'Paste chat transcript:',       'community');
-  wire('buddyBot',        'Send buddy check-in',           'Enter last mood:',             'community');
+  // Section 11: Professional Ecosystem
+  wire('clinicianToolkit','Summarize session notes','Paste notes…','pro');
+  wire('referralPipeline','Match user to a therapist','Paste profile…','pro');
 
-  // ── CHARTS & CSV EXPORT ───────────────────────────────
-  const eng = new Chart(document.getElementById('engagementChart').getContext('2d'), {
-    type: 'line',
-    data: {
-      labels: ['Mon','Tue','Wed','Thu','Fri'],
-      datasets: [{ label:'Sessions', data:[12,9,14,11,13], borderColor: getComputedStyle(document.documentElement).getPropertyValue('--primary').trim(), fill:false }]
+  // Section 12: Medication Management
+  wire('medInteraction','Check drug interactions','Enter meds…','medsafety');
+  wire('adherence',     'Create adherence reminders','Enter schedule…','medsafety');
+
+  // Section 13: Symptom Questionnaire
+  wire('launchQuiz','Score symptom survey and advise','Paste answers…','symptomQuiz');
+
+  // Section 14: Community & Peer Support
+  wire('supportCircles','Summarize peer-support chat','Paste transcript…','community');
+  wire('buddyBot',      'Provide buddy check-in','Enter last mood…','community');
+
+  // ── CHARTS & CSV EXPORT (Section 15) ─────────────────────────────────────
+  // Ensure canvases have height
+  document.getElementById('engagementChart').height = 200;
+  document.getElementById('outcomeChart').height    = 200;
+
+  const engChart = new Chart(
+    document.getElementById('engagementChart').getContext('2d'),
+    {
+      type: 'line',
+      data: {
+        labels: ['Mon','Tue','Wed','Thu','Fri'],
+        datasets: [{
+          label: 'Sessions',
+          data: [12,9,14,11,13],
+          borderColor: getComputedStyle(document.documentElement).getPropertyValue('--primary').trim(),
+          fill: false
+        }]
+      }
     }
-  });
-  const out = new Chart(document.getElementById('outcomeChart').getContext('2d'), {
-    type: 'bar',
-    data: {
-      labels: ['Week1','Week2','Week3'],
-      datasets: [{ label:'Outcome', data:[3.2,4.1,4.5], backgroundColor: getComputedStyle(document.documentElement).getPropertyValue('--secondary').trim() }]
+  );
+
+  const outChart = new Chart(
+    document.getElementById('outcomeChart').getContext('2d'),
+    {
+      type: 'bar',
+      data: {
+        labels: ['Week 1','Week 2','Week 3'],
+        datasets: [{
+          label: 'Outcome',
+          data: [3.2,4.1,4.5],
+          backgroundColor: getComputedStyle(document.documentElement).getPropertyValue('--secondary').trim()
+        }]
+      }
     }
-  });
+  );
 
   document.getElementById('exportCharts').onclick = () => {
     let csv = 'Chart,Label,Value\n';
-    [['Sessions', eng], ['Outcome', out]].forEach(([name,c])=>{
-      c.data.labels.forEach((lab,i)=> csv+=`${name},${lab},${c.data.datasets[0].data[i]}\n`);
+    [['Sessions',engChart],['Outcome',outChart]].forEach(([name,ch]) => {
+      ch.data.labels.forEach((lab,i) => {
+        csv += `${name},${lab},${ch.data.datasets[0].data[i]}\n`;
+      });
     });
-    const blob = new Blob([csv], { type:'text/csv' }), url = URL.createObjectURL(blob),
-          a = document.createElement('a');
-    a.href = url; a.download = 'analytics.csv'; a.click();
+    const blob = new Blob([csv], { type:'text/csv' }),
+          url  = URL.createObjectURL(blob),
+          a    = document.createElement('a');
+    a.href = url;
+    a.download = 'analytics.csv';
+    a.click();
     URL.revokeObjectURL(url);
   };
 });
 </script>
-
 
 </body>
 </html>
