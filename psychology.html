@@ -849,10 +849,9 @@
 
   </main>
 
-</body>
   <!-- SCRIPTS -->
-  
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <!-- SCRIPTS -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
 // ── OpenAI proxy + Markdown helper ───────────────────────────────────────────
 async function callOpenAI(messages) {
@@ -873,9 +872,9 @@ function formatHTML(txt) {
 }
 
 document.addEventListener('DOMContentLoaded', () => {
-  // ── Utility: get-or-create response panel under any section ───────────────
-  function getPanel(sectionId) {
-    const sec = document.getElementById(sectionId);
+  // ── Utility: get or create a response panel under a section ───────────────
+  function getPanel(id) {
+    const sec = document.getElementById(id);
     let panel = sec.querySelector('.response');
     if (!panel) {
       panel = document.createElement('div');
@@ -886,7 +885,7 @@ document.addEventListener('DOMContentLoaded', () => {
     return panel;
   }
 
-  // ── Sidebar & Theme Toggles ────────────────────────────────────────────────
+  // ── Sidebar & Theme Toggles ───────────────────────────────────────────────
   document.getElementById('shrinkBtn').onclick   = () => document.getElementById('sidebar').classList.toggle('collapsed');
   document.getElementById('hamburger').onclick   = () => document.getElementById('sidebar').classList.toggle('open');
   document.getElementById('themeToggle').onclick = () => {
@@ -894,37 +893,61 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('themeToggle').classList.toggle('fa-sun');
   };
 
-  // ── CHATBOT ───────────────────────────────────────────────────────────────
+  // ── THERAPY BOT ─────────────────────────────────────────────────────────
   const chatBox   = document.getElementById('chatBox'),
-        history   = [],
-        sendChat  = document.getElementById('sendChat'),
-        chatInput = document.getElementById('chatInput'),
-        chatHint  = document.getElementById('chatHint');
+        chatHint  = document.getElementById('chatHint'),
+        chatInput = document.getElementById('therapyInput'),
+        history   = [];
 
   function addMessage(who, text) {
     const msg = document.createElement('div');
-    msg.className = who === 'You' ? 'user-msg' : 'bot-msg';
+    msg.className = who==='You' ? 'user-msg' : 'bot-msg';
     msg.innerHTML = `${formatHTML(text)}<div class="timestamp">${new Date().toLocaleTimeString()}</div>`;
     chatBox.append(msg);
     chatBox.scrollTop = chatBox.scrollHeight;
   }
 
+  document.getElementById('sendChat').onclick = async e => {
+    e.preventDefault();
+    const txt = chatInput.value.trim();
+    if (!txt) return;
+    addMessage('You', txt);
+    history.push({ who:'You', text: txt });
+    chatInput.value = '';
+    chatHint.style.display = 'block';
+
+    const sys = `You are a therapist. Modality: ${document.getElementById('therapyModality').value}; Length: ${document.getElementById('therapyLength').value}; Language: ${document.getElementById('therapyLang').value}.`;
+    try {
+      const reply = await callOpenAI([
+        { role:'system', content: sys },
+        { role:'user',   content: txt }
+      ]);
+      addMessage('Therapist', reply);
+      history.push({ who:'Therapist', text: reply });
+    } catch {
+      addMessage('Therapist', '⚠️ Something went wrong.');
+    } finally {
+      chatHint.style.display = 'none';
+    }
+  };
+
+  document.getElementById('clearChat').onclick = () => { chatBox.innerHTML=''; history.length=0; };
   document.getElementById('viewHistory').onclick = () => {
     const modal = document.createElement('div');
     modal.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.6);display:flex;align-items:center;justify-content:center;z-index:2000';
     modal.innerHTML = `
       <div style="background:var(--surface);padding:1rem;border-radius:var(--radius);max-width:360px;width:80%;">
-        <h3 style="margin-bottom:.5rem;">Chat History</h3>
-        <ul style="list-style:none;padding:0;max-height:300px;overflow:auto;">
+        <h3>Chat History</h3>
+        <ul style="max-height:300px;overflow:auto;padding:0;list-style:none;">
           ${history.map((m,i)=>`
-            <li style="margin-bottom:.5rem;">
+            <li style="margin:.5rem 0;">
               <strong>${m.who}:</strong> ${m.text}
               <button data-i="${i}" style="float:right;border:none;background:none;color:var(--secondary);cursor:pointer;">
                 <i class="fas fa-trash"></i>
               </button>
             </li>`).join('')}
         </ul>
-        <button style="margin-top:.5rem;" onclick="this.closest('div[style]').remove()">Close</button>
+        <button onclick="this.closest('div[style]').remove()">Close</button>
       </div>`;
     document.body.append(modal);
     modal.querySelectorAll('button[data-i]').forEach(btn=>{
@@ -935,43 +958,15 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   };
 
-  document.getElementById('clearChat').onclick = () => {
-    chatBox.innerHTML = '';
-    history.length = 0;
-  };
-
-  sendChat.onclick = async () => {
-    const txt = chatInput.value.trim();
-    if (!txt) return;
-    addMessage('You', txt);
-    history.push({ who: 'You', text: txt });
-    chatInput.value = '';
-    chatHint.style.display = 'block';
-    try {
-      const reply = await callOpenAI([
-        { role: 'system', content: 'You are a friendly therapist.' },
-        { role: 'user',   content: txt }
-      ]);
-      addMessage('Therapist', reply);
-      history.push({ who: 'Therapist', text: reply });
-    } catch {
-      addMessage('Therapist', '⚠️ Something went wrong.');
-    } finally {
-      chatHint.style.display = 'none';
-    }
-  };
-
-  // ── MOOD TRACKER ──────────────────────────────────────────────────────────
+  // ── MOOD TRACKER ─────────────────────────────────────────────────────────
   const moodRange = document.getElementById('moodRange'),
         moodValue = document.getElementById('moodValue');
-  moodRange.addEventListener('input', () => moodValue.textContent = moodRange.value);
 
-  document.getElementById('mood-form').addEventListener('submit', async e => {
+  moodRange.oninput = () => moodValue.textContent = moodRange.value;
+  document.getElementById('mood-form').onsubmit = async e => {
     e.preventDefault();
-    const panel = document.getElementById('moodPanel');
-    panel.hidden = false;
-    panel.querySelector('.result-content').innerHTML = 'Analyzing… <span class="spinner"></span>';
-
+    const panel = getPanel('moodTracker');
+    panel.innerHTML = `<div class="result-content">Analyzing… <span class="spinner"></span></div>`;
     const data = {
       mood: moodRange.value,
       emotions: [...document.querySelectorAll('input[name="emotions"]:checked')].map(c=>c.value),
@@ -979,29 +974,25 @@ document.addEventListener('DOMContentLoaded', () => {
       note: document.getElementById('moodNote').value.trim(),
       selfCare: document.getElementById('selfCare').value
     };
-
     try {
       const reply = await callOpenAI([
         { role:'system', content:'You are a mental health assistant.' },
-        { role:'user',   content:`Daily Mood Entry:\n${JSON.stringify(data)}` }
+        { role:'user',   content: `Daily Mood Entry:\n${JSON.stringify(data)}` }
       ]);
-      panel.querySelector('.result-content').innerHTML = formatHTML(reply);
+      panel.innerHTML = `<div class="result-content">${formatHTML(reply)}</div>`;
     } catch {
-      panel.querySelector('.result-content').innerHTML = '😕 Something went wrong.';
+      panel.innerHTML = `<div class="result-content">😕 Something went wrong.</div>`;
     }
-  });
+  };
 
   // ── DREAM & SUBCONSCIOUS EXPLORER ────────────────────────────────────────
   document.getElementById('analyzeDream').onclick = async () => {
     const panel = getPanel('dream');
     panel.innerHTML = `<div class="result-content">Analyzing… <span class="spinner"></span></div>`;
-
     const narrative = document.getElementById('dreamText').value.trim();
-    const symbols   = Array.from(
-      document.querySelectorAll('#dream input[type="checkbox"]:checked')
-    ).map(cb=>cb.value).join(', ');
-    const preMood   = document.getElementById('preMood').value;
-    const postMood  = document.getElementById('postMood').value;
+    const symbols   = Array.from(document.querySelectorAll('#dream input[type="checkbox"]:checked')).map(cb=>cb.value).join(', ');
+    const pre       = document.getElementById('preMood').value;
+    const post      = document.getElementById('postMood').value;
     const tags      = document.getElementById('dreamTags').value.trim();
     const reflect   = document.getElementById('dreamReflect').value.trim();
 
@@ -1009,12 +1000,7 @@ document.addEventListener('DOMContentLoaded', () => {
       const reply = await callOpenAI([
         { role:'system', content:'You are a dream interpreter. Use all provided data.' },
         { role:'user',   content:
-            `Narrative: ${narrative}\n` +
-            `Symbols: ${symbols}\n` +
-            `Before sleep: ${preMood}\n` +
-            `On waking: ${postMood}\n` +
-            `Tags: ${tags}\n` +
-            `Reflection: ${reflect}`
+            `Narrative: ${narrative}\nSymbols: ${symbols}\nBefore sleep: ${pre}\nOn waking: ${post}\nTags: ${tags}\nReflection: ${reflect}`
         }
       ]);
       panel.innerHTML = `<div class="result-content">${formatHTML(reply)}</div>`;
@@ -1026,9 +1012,7 @@ document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('interpretSymbols').onclick = async () => {
     const panel = getPanel('dream');
     panel.innerHTML = `<div class="result-content">Interpreting symbols… <span class="spinner"></span></div>`;
-    const symbols = Array.from(
-      document.querySelectorAll('#dream input[type="checkbox"]:checked')
-    ).map(cb=>cb.value).join(', ');
+    const symbols = Array.from(document.querySelectorAll('#dream input[type="checkbox"]:checked')).map(cb=>cb.value).join(', ');
     try {
       const reply = await callOpenAI([
         { role:'system', content:'You are a dream symbol interpreter.' },
@@ -1055,16 +1039,16 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   };
 
-  // ── GENERIC MODULE HANDLER ───────────────────────────────────────────────
-  function wire(id, systemPrompt, askText, sectionId) {
-    document.getElementById(id).onclick = async () => {
-      const panel = getPanel(sectionId);
+  // ── WIRE GENERIC MODULES ─────────────────────────────────────────────────
+  function wire(btnId, sysPrompt, askText, secId) {
+    document.getElementById(btnId).onclick = async () => {
+      const panel = getPanel(secId);
       panel.innerHTML = `<div class="result-content">Processing… <span class="spinner"></span></div>`;
       const inp = prompt(askText);
       if (!inp) return panel.innerHTML = '';
       try {
         const reply = await callOpenAI([
-          { role:'system', content: systemPrompt },
+          { role:'system', content: sysPrompt },
           { role:'user',   content: inp }
         ]);
         panel.innerHTML = `<div class="result-content">${formatHTML(reply)}</div>`;
@@ -1074,36 +1058,47 @@ document.addEventListener('DOMContentLoaded', () => {
     };
   }
 
-  // ── WIRE OTHER BUTTONS ──────────────────────────────────────────────────
+  // ── WIRE ALL OTHER BUTTONS ────────────────────────────────────────────────
   wire('startVideo',      'Analyze video emotion',         'Paste video URL:',       'insight');
   wire('typingAnalysis',  'Analyze typing for stress',     'Type a few sentences:',  'insight');
+  wire('runInsight',      'Analyze text sentiment',        'Paste your text:',       'insight');
   wire('artEmotion',      'Generate art prompt',           'Enter an emotion:',      'creative');
   wire('musicMixer',      'Compose a soundscape',          'Describe your mood:',    'creative');
   wire('puzzles',         'Create an adaptive puzzle',     'Enter puzzle theme:',    'games');
   wire('storyBuilder',    'Continue a story',              'Enter story seed:',      'games');
-  wire('phenotyping',     'Provide phenotyping dashboard', 'N/A',                    'risk');
   wire('crisisAlerts',    'Assess crisis risk',            'Describe feelings:',     'risk');
   wire('activitySuggest', 'Suggest self-care activities',  'How have you felt?',     'selfcare');
   wire('nudges',          'Schedule reminders',            'What reminder?',         'selfcare');
   wire('phobiaSim',       'Launch VR phobia simulator',    'N/A',                    'vr');
   wire('mindscapes',      'Launch VR mindscapes',          'N/A',                    'vr');
   wire('clinicianToolkit','Summarize session notes',       'Paste notes:',           'pro');
-  wire('referralPipeline','Match to therapist',            'Enter user profile:',    'pro');
+  wire('referralPipeline','Match to therapist',            'Enter profile:',         'pro');
   wire('medInteraction',  'Warn of med interactions',      'Enter two meds:',        'medsafety');
   wire('adherence',       'Track adherence',               'N/A',                    'medsafety');
-  wire('launchQuiz',      'Evaluate symptoms & advise',    'Answer quiz questions:', 'symptomQuiz');
+  wire('launchQuiz',      'Evaluate symptoms & advise',    'Answer quiz q’s:',       'symptomQuiz');
   wire('supportCircles',  'Summarize support circle chat', 'Paste chat transcript:', 'community');
   wire('buddyBot',        'Buddy check-in',                'Enter last mood:',       'community');
 
-  // ── ANALYTICS CSV EXPORT ────────────────────────────────────────────────
+  // ── CHARTS & EXPORT ───────────────────────────────────────────────────────
+  const engCtx = document.getElementById('engagementChart').getContext('2d'),
+        outCtx = document.getElementById('outcomeChart').getContext('2d');
+  new Chart(engCtx, { type: 'line', data:{
+    labels: ['Mon','Tue','Wed','Thu','Fri'],
+    datasets:[{ label:'Sessions', data:[12,9,14,11,13], borderColor: getComputedStyle(document.documentElement).getPropertyValue('--primary').trim(), fill:false }]
+  }});
+  new Chart(outCtx, { type: 'bar', data:{
+    labels: ['Week1','Week2','Week3'],
+    datasets:[{ label:'Outcome', data:[3.2,4.1,4.5], backgroundColor: getComputedStyle(document.documentElement).getPropertyValue('--secondary').trim() }]
+  }});
+
   document.getElementById('exportCharts').onclick = () => {
     const eng = Chart.getChart('engagementChart'),
           out = Chart.getChart('outcomeChart');
     let csv = 'Chart,Label,Value\n';
-    [['Sessions', eng], ['Mood', out]].forEach(([name,ch]) => {
+    [['Sessions', eng], ['Outcome', out]].forEach(([name,ch]) => {
       ch.data.labels.forEach((lab,i) => csv += `${name},${lab},${ch.data.datasets[0].data[i]}\n`);
     });
-    const blob = new Blob([csv], {type:'text/csv'}),
+    const blob = new Blob([csv], { type:'text/csv' }),
           url  = URL.createObjectURL(blob),
           a    = document.createElement('a');
     a.href = url; a.download = 'analytics.csv'; a.click();
