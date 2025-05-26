@@ -670,6 +670,11 @@ html.dark #hero {
  #recipeSearchPanel .dl-btn i {  width: 1.2rem; height: 1.2rem;
   font-size: 0.9rem;
 }
+   .date-separator {
+  text-align: center;
+  margin: 1rem 0;
+  font-weight: 700;
+   color: var(--color-primary); }
   </style>
 </head>
 
@@ -1237,8 +1242,12 @@ document.addEventListener('DOMContentLoaded', () => {
         { role: 'user', content: q }
       ]);
       panel.querySelector('.result-content').innerHTML = formatHTML(reply);
-    } catch {
-        panel.querySelector('.result-content').innerText = '⚠️ Oops! Could not fetch the recipe. Please try again.';
+   } catch (err) {
+       console.error(err);
+        panel.querySelector('.result-content').innerText =
+          `⚠️ Oops! ${err.message}`;
+     } finally {
+      panel.classList.remove('waiting');
      }
      finally {
       panel.classList.remove('waiting');
@@ -1375,8 +1384,10 @@ document.addEventListener('DOMContentLoaded', () => {
           { role: 'user', content }
         ]);
         panel.querySelector('.result-content').innerHTML = formatHTML(reply);
-      } catch {
-        panel.querySelector('.result-content').innerText = '⚠️ Something went wrong.';
+     } catch (err) {
+        console.error(err);
+       panel.querySelector('.result-content').innerText =
+          `⚠️ Error: ${err.message}`;
       } finally {
         panel.classList.remove('waiting');
       }
@@ -1454,25 +1465,26 @@ document.addEventListener('DOMContentLoaded', () => {
   history.forEach(m => addChat(m.who, m.text, m.timestamp));
 
   function addChat(who, txt, isoTimestamp) {
-    const m = document.createElement('div');
-    m.className = who === 'You' ? 'user-msg' : 'bot-msg';
-// compute human-friendly date label + time
-    const d = isoTimestamp ? new Date(isoTimestamp) : new Date();
-    const today = new Date();
-    const yesterday = new Date(today);
-    yesterday.setDate(today.getDate() - 1);
-    let dateLabel;
-    if (d.toDateString() === today.toDateString()) {
-      dateLabel = 'Today';
-    } else if (d.toDateString() === yesterday.toDateString()) {
-      dateLabel = 'Yesterday';
-    } else {
-      dateLabel = d.toLocaleDateString();
+   const d = isoTimestamp ? new Date(isoTimestamp) : new Date();
+   const today = new Date();
+   // insert a single "Today" separator if first message of today
+   if (
+     chatBox.children.length === 0 &&
+     d.toDateString() === today.toDateString()
+   ) {
+     const sep = document.createElement('div');
+     sep.className = 'date-separator';
+     sep.innerText = 'Today';
+     chatBox.append(sep);
    }
-    const timeLabel = d.toLocaleTimeString();
-    m.innerHTML = `${formatHTML(txt)}<div class="timestamp">${dateLabel}, ${timeLabel}</div>`;
-    chatBox.append(m);
-    chatBox.scrollTop = chatBox.scrollHeight;
+   // now create the message bubble
+   const m = document.createElement('div');
+   m.className = who === 'You' ? 'user-msg' : 'bot-msg';
+   // only show the time
+   const timeLabel = d.toLocaleTimeString();
+   m.innerHTML = `${formatHTML(txt)}<div class="timestamp">${timeLabel}</div>`;
+   chatBox.append(m);
+   chatBox.scrollTop = chatBox.scrollHeight;
   }
 
   document.getElementById('sendDiet').type = 'button';
