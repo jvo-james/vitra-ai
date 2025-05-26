@@ -381,7 +381,8 @@ button.btn-secondary:hover {
   right: var(--padding);
 }
     .response .tool-row {
-  position: absolute;
+  position: static;
+  margin-top: 1rem;
   bottom: var(--padding);
   left: var(--padding);
   display: flex;
@@ -1397,20 +1398,7 @@ document.addEventListener('DOMContentLoaded', () => {
           {role:'user',content}
         ]);
         panel.querySelector('.result-content').innerHTML = formatHTML(reply);
-        const canvas = document.createElement('canvas');
-   panel.appendChild(canvas);
-    new Chart(canvas.getContext('2d'), {
-      type: 'radar',
-      data: {
-       labels: ['glucose','lipids','other'], // you can parse from reply or static
-       datasets:[{
-         label: 'Biomarker Levels',
-        data: [ /* parse numbers out of reply or placeholder */ ],
-       }]
-     }
-   });
-        localStorage.setItem(pid, panel.innerHTML);
-      } catch (err) {
+         } catch (err) {
         console.error(err);
         panel.querySelector('.result-content').innerText =
           err.message.includes('Sandbox.Timedout')
@@ -1439,6 +1427,44 @@ document.addEventListener('DOMContentLoaded', () => {
   wire('runRisk',   ['riskFrom','riskTo','syncBiomarkers','biomarkers','conditions','context'],
        ['riskFrom','riskTo','biomarkers','conditions','context'],
        `You are a metabolomic health analyst. Generate a risk radar for biomarkers in date range; interpret trends and alert.`);
+  // ── After your wire(...) calls ─────────────────────────────────
+{
+  // grab the original runRisk button
+  const runRiskBtn = document.getElementById('runRisk');
+  runRiskBtn.addEventListener('click', async () => {
+    // wait until the panel has content
+    const panel = document.getElementById('riskPanel');
+    // small delay to ensure AI reply has been injected
+    setTimeout(() => {
+      // parse numeric values from AI response
+      const text = panel.querySelector('.result-content').innerText;
+      // assume format: "glucose: 90, lipids: 170, xyz: 50"
+      const matches = [...text.matchAll(/(\w+):\s*(\d+)/g)];
+      if (!matches.length) return;
+      // prepare labels + data
+      const labels = matches.map(m => m[1]);
+      const data   = matches.map(m => Number(m[2]));
+      // remove any old canvas
+      const old = panel.querySelector('canvas');
+      if (old) old.remove();
+      // create new canvas
+      const canvas = document.createElement('canvas');
+      panel.appendChild(canvas);
+      new Chart(canvas.getContext('2d'), {
+        type: 'radar',
+        data: {
+          labels,
+          datasets: [{
+            label: 'Biomarker Levels',
+            data
+          }]
+        },
+        options: { responsive: true, maintainAspectRatio: false }
+      });
+    }, 500);
+  });
+}
+  
   wire('runFitness',['fitGoal','fitFreq','blendIngredients','carbDate','intensity','crpLevel','nutraPref'],
        ['fitGoal','fitFreq'],
        `You are a certified sports nutritionist. Based on goals, freq, ingredients, dates, intensity, CRP, nutraceuticals, create a fitness nutrition plan.`);
