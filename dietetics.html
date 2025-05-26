@@ -320,18 +320,18 @@ border-radius: var(--radius);
  }
  .
 /*────────────────────── Forms & Inputs ──────────────────────*/
+
 input, textarea, select {
-  width: 100%;
   padding: .75rem;
-  border: 1px solid var(--color-muted);
-  border-radius: var(--radius);
-  background: var(--color-accent);
-  color: var(--color-text);
-  box-shadow: inset 0 2px 4px rgba(0,0,0,0.05);
+  border: 2px solid var(--color-primary-alt);
+  border-radius: .5rem;
+  background: #fff;
+  color: #333;
+  transition: border-color .2s;
 }
-select + .other-input {
-  margin-top: .5rem;
-  display: none;
+input:focus, textarea:focus, select:focus {
+  border-color: var(--color-secondary);
+  box-shadow: 0 0 0 3px rgba(136,78,160,0.2);
 }
 button.btn {
   display: inline-flex; align-items: center; gap: .5rem;
@@ -403,11 +403,9 @@ button.btn-secondary:hover {
   background: none; border: none; cursor: pointer;
 }
 .copy-btn, .dl-btn {
-  width: 1.6rem; height: 1.6rem;
-  display: flex; align-items: center; justify-content: center;
-  border: 1px solid var(--color-muted);
-  border-radius: 50%;
-  background: var(--color-accent);
+  padding: 0.25rem;
+ background: none;
+  border: none;
 }
 .copy-btn:hover, .dl-btn:hover {
   background: var(--color-primary-alt);
@@ -675,6 +673,13 @@ html.dark #hero {
   margin: 1rem 0;
   font-weight: 700;
    color: var(--color-primary); }
+   .history-date {
+  font-size: 0.85rem;
+  color: var(--color-muted);
+  margin-bottom: 0.25rem;
+  text-align: center;
+  font-weight: 600;
+}
   </style>
 </head>
 
@@ -734,9 +739,9 @@ html.dark #hero {
           <i class="fas fa-lightbulb"></i>
           <h3>Today's Nutrition Tip</h3>
         <div id="dailyTip" class="response">
-   <div class="tool-row">
      <button class="close-btn"><i class="fas fa-times"></i></button>
-     <button class="copy-btn"><i class="fas fa-copy"></i></button>
+     <div class="tool-row">
+    <button class="copy-btn"><i class="fas fa-copy"></i></button>
      <button class="dl-btn"><i class="fas fa-download"></i></button>
    </div>
    <div class="result-content">Loading tip…</div>
@@ -910,6 +915,10 @@ html.dark #hero {
             <label><input type="checkbox" name="symptom" value="Bone Pain"> Bone Pain</label>
             <label><input type="checkbox" name="symptom" value="Bruising"> Bruising</label>
             <label><input type="checkbox" name="symptom" value="Other"> Other</label>
+            <label>
+  <input type="checkbox" name="symptom" value="Other"> Other
+  <input type="text" id="otherSymptom" placeholder="Specify…" style="display:none; margin-left:.5rem;">
+</label>
           </div>
         </label>
         <label>Brief Diet Overview:
@@ -1066,16 +1075,16 @@ html.dark #hero {
         </fieldset>
         <!-- 3. Adherence & Reminder Hub -->
         <fieldset>
-          <legend>3. Adherence & Reminders</legend>
-          <label>Reminder Method:
-            <select id="reminderMethod">
-              <option>SMS</option><option>Email</option><option>App Notification</option>
-            </select>
-          </label>
-          <label>Reminder Times:
-            <input type="time" id="reminderTime1">,
-            <input type="time" id="reminderTime2">
-          </label>
+          <legend>3. Medication Scheduling</legend>
+<label>Dosage Frequency:
+  <select id="doseFreq">
+    <option>Once daily</option><option>Twice daily</option>
+    <option>With meals</option><option>Other</option>
+  </select>
+</label>
+<label>Custom Schedule Notes:
+  <textarea id="scheduleNotes" rows="2" placeholder="e.g. take with water, avoid night…"></textarea>
+</label>
         </fieldset>
         <!-- 4. Outcome Analytics -->
         <fieldset>
@@ -1207,6 +1216,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   function formatHTML(txt) {
     return txt
+      .replace(/^#### (.*$)/gm, '<h4>$1</h4>')
       .replace(/^### (.*$)/gm, '<h3>$1</h3>')
       .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
       .replace(/\*(.+?)\*/g, '<em>$1</em>')
@@ -1247,7 +1257,7 @@ document.addEventListener('DOMContentLoaded', () => {
       console.error(err);
       panel.querySelector('.result-content').innerText =
         err.message.includes('Sandbox.Timedout')
-          ? '⚠️ Server busy—please try again.'
+          ? '⚠️ Server busy, please try again.'
           : `⚠️ ${err.message}`;
     } finally {
       panel.classList.remove('waiting');
@@ -1353,8 +1363,11 @@ document.addEventListener('DOMContentLoaded', () => {
       let content='';
       for (const id of fields) {
         if (id==='symptoms') {
-          const vals=Array.from(document.querySelectorAll('input[name="symptom"]:checked'))
+          let vals = Array.from(document.querySelectorAll('input[name="symptom"]:checked'))
             .map(cb=>cb.value).join(', ');
+         if (document.getElementById('otherSymptom').value) {
+    vals += ', ' + document.getElementById('otherSymptom').value.trim();
+ }
           content+=`symptoms: ${vals}\n`;
         } else {
           const el=document.getElementById(id);
@@ -1374,6 +1387,19 @@ document.addEventListener('DOMContentLoaded', () => {
           {role:'user',content}
         ]);
         panel.querySelector('.result-content').innerHTML = formatHTML(reply);
+        const canvas = document.createElement('canvas');
+   panel.appendChild(canvas);
+    new Chart(canvas.getContext('2d'), {
+      type: 'radar',
+      data: {
+       labels: ['glucose','lipids','other'], // you can parse from reply or static
+       datasets:[{
+         label: 'Biomarker Levels',
+        data: [ /* parse numbers out of reply or placeholder */ ],
+       }]
+     }
+   });
+        localStorage.setItem(panelId, panel.innerHTML);
       } catch (err) {
         console.error(err);
         panel.querySelector('.result-content').innerText =
@@ -1386,6 +1412,11 @@ document.addEventListener('DOMContentLoaded', () => {
     };
   }
 
+  document.querySelector('input[value="Other"][name="symptom"]')
+  .addEventListener('change', e => {
+    document.getElementById('otherSymptom').style.display = e.target.checked ? 'inline-block' : 'none';
+  });
+  
   // ── Wire all your modules
   wire('genPlan',     ['calories','dietType','allergyList','budget'], ['calories','dietType'],
        `You are an expert registered dietitian. Given the user’s daily calorie target, diet type, allergies/intolerances, and budget, generate a detailed 7-day meal plan with macros and shopping list.`);
@@ -1401,7 +1432,7 @@ document.addEventListener('DOMContentLoaded', () => {
   wire('runFitness',['fitGoal','fitFreq','blendIngredients','carbDate','intensity','crpLevel','nutraPref'],
        ['fitGoal','fitFreq'],
        `You are a certified sports nutritionist. Based on goals, freq, ingredients, dates, intensity, CRP, nutraceuticals, create a fitness nutrition plan.`);
-  wire('runPharma', ['medList','foodList','compoundGoal','reminderMethod','reminderTime1','reminderTime2','cohortSelect'],
+  wire('runPharma', ['medList','foodList','compoundGoal','doseFreq','scheduleNotes','cohortSelect'],
        ['medList'],
        `You are a pharmacologist-dietitian. Analyze drug-food interactions, suggest compounding, schedule reminders, and provide analytics.`);
   wire('runSymptom',['sympAge','sympDesc','foodPref'], ['sympAge','sympDesc'],
@@ -1471,7 +1502,9 @@ document.addEventListener('DOMContentLoaded', () => {
       <div class="modal-content">
         <h3>Chat History</h3>
         <ul>
-          ${history.map((m,i)=>`
+          ${history.map((m,i) => `
+        <li>
+          <div class="history-date">${new Date(m.timestamp).toLocaleDateString()}</div>
             <li>
               <span><strong>${m.who}:</strong> ${m.text}</span>
               <button class="delete-btn" data-i="${i}"><i class="fas fa-trash"></i></button>
@@ -1568,11 +1601,16 @@ document.addEventListener('DOMContentLoaded', () => {
   exp1.innerText='Export Chart'; exp1.className='export-chart-btn';
   exp1.type='button'; document.getElementById('intakeChart').after(exp1);
   exp1.onclick=()=>{
-    const a=document.createElement('a');
-    a.href=intakeChart.toBase64Image();
-    a.download='intake-chart.png';
-    a.click();
-  };
+    const csv = [
+    ['Day','Calories'],
+    ...intakeChart.data.labels.map((d,i) => [d,intakeChart.data.datasets[0].data[i]])
+  ].map(r => r.join(',')).join('\n');
+  const blob = new Blob([csv], { type: 'text/csv' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'intake-data.csv';
+  a.click();
+};
 
   const ctx2=document.getElementById('macroChart').getContext('2d');
   const macroChart=new Chart(ctx2,{ type:'pie',
@@ -1582,11 +1620,16 @@ document.addEventListener('DOMContentLoaded', () => {
   exp2.innerText='Export Chart'; exp2.className='export-chart-btn';
   exp2.type='button'; document.getElementById('macroChart').after(exp2);
   exp2.onclick=()=>{
-    const a=document.createElement('a');
-    a.href=macroChart.toBase64Image();
-    a.download='macro-chart.png';
-    a.click();
-  };
+   const csv = [
+    ['Macro','Percent'],
+    ...macroChart.data.labels.map((m,i)=>[m,macroChart.data.datasets[0].data[i]])
+  ].map(r=>r.join(',')).join('\n');
+  const blob = new Blob([csv], { type: 'text/csv' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'macro-data.csv';
+  a.click();
+};
 });
 </script>
   
