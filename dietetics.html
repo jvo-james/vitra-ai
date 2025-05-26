@@ -227,6 +227,25 @@ h2 {
   bottom: -1.2rem; right: 1rem;
 }
 
+    .history-modal .modal-content {
+  display: flex;
+  flex-direction: column;
+}
+.history-modal .modal-content ul {
+  flex: 1 1 auto;
+  overflow-y: auto;
+  margin-bottom: 1rem;
+}
+.history-modal .modal-content .button-row {
+  display: flex;
+  justify-content: space-between;
+  gap: .5rem;
+  flex-shrink: 0;
+  position: sticky;
+  bottom: 0;
+  background: var(--color-surface);
+  padding-top: .5rem;
+}
 /*────────────────────── Forms & Inputs ──────────────────────*/
 input, textarea, select {
   width: 100%;
@@ -355,6 +374,61 @@ legend {
   margin: 1rem auto;
 }
 @keyframes spin { to { transform: rotate(360deg); } }
+.spin-text {
+  text-align: center;
+  margin-top: .5rem;
+  font-style: italic;
+  color: var(--color-muted);
+}
+    #hero { position: relative; overflow: hidden; }
+.sticker {
+  position: absolute;
+  font-size: 3rem;
+  opacity: .2;
+}
+.sticker-1 { top: 1rem; left: 2rem; transform: rotate(-15deg); }
+.sticker-2 { top: 3rem; right: 3rem; transform: rotate(10deg); }
+.sticker-3 { bottom: 2rem; left: 50%; transform: translateX(-50%) rotate(-5deg); }
+
+/* Nationality label */
+#nationality-label {
+  display: inline-flex; align-items: center;
+  gap: .5rem; margin-bottom: 1rem;
+  font-weight: 600; color: var(--color-secondary);
+}
+#nationality { width: auto; flex: 1; }
+
+/* Hero response panels styling */
+#dailyTip, #recipeSearchPanel {
+  margin-top: 1rem;
+}
+
+    .btn-secondary {
+  background: linear-gradient(135deg, var(--color-secondary), var(--color-secondary-alt));
+  color: #fff; padding: .75rem 1rem;
+  border-radius: .5rem; box-shadow: var(--shadow);
+}
+.chat-controls .btn-secondary {
+  background: none; border: 2px solid var(--color-primary);
+  color: var(--color-primary); font-weight: 600;
+}
+.chat-controls .btn-secondary:hover {
+  background: var(--color-primary); color:#fff;
+}
+    .checkbox-group label { padding: .5rem; background: var(--color-surface); border-radius: var(--radius); }
+
+    html.dark .chat-box {
+  background: var(--color-surface);
+}
+html.dark .user-msg {
+  background: var(--color-primary-alt);
+  color: #111;
+}
+html.dark .bot-msg {
+  background: var(--color-accent);
+  color: var(--color-text);
+}
+    
   </style>
 </head>
 
@@ -421,6 +495,27 @@ legend {
           <div id="macroSnapshot">Protein: – g / Carbs: – g / Fat: – g</div>
           <button id="refreshMacro" class="btn-secondary">Update</button>
         </div>
+        <!-- Nationality input (point 4) -->
+<label id="nationality-label">
+  <i class="fas fa-globe"></i>
+  Nationality:
+  <input type="text" id="nationality" placeholder="e.g. Ghanaian">
+</label>
+
+<!-- Recipe Search response panel -->
+<div id="recipeSearchPanel" class="response" hidden>
+  <button class="close-btn"><i class="fas fa-times"></i></button>
+  <div class="result-content"></div>
+  <div class="tool-row">
+    <button class="copy-btn"><i class="fas fa-copy"></i></button>
+    <button class="dl-btn"><i class="fas fa-download"></i></button>
+  </div>
+</div>
+
+<!-- Add decorative “stickers” -->
+<i class="fas fa-pepper-hot sticker sticker-1"></i>
+<i class="fas fa-carrot sticker sticker-2"></i>
+<i class="fas fa-ice-cream sticker sticker-3"></i>
       </div>
     </section>
 
@@ -581,7 +676,11 @@ legend {
     <!-- 6. Metabolomic Risk Radar -->
     <section id="riskRadar" class="module">
       <h2><i class="fas fa-chart-pie"></i> Metabolomic Risk Radar</h2>
-      <p class="desc">Continuous biomarker tracking and predictive health alerts.</p>
+     <p class="desc">
+  Continuous biomarker tracking (e.g. glucose, lipids) over any date range.
+  Generates an interactive risk “radar” chart and predictive health alerts based
+  on your trends. Enable “sync” for live updates.
+</p>
       <form id="risk-form">
         <label>Date Range:
           <input type="date" id="riskFrom"> – <input type="date" id="riskTo">
@@ -774,7 +873,7 @@ legend {
  <!-- Chart.js & App Logic -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
-  <script>
+<script>
   // ── Inject Additional CSS ─────────────────────────────────────────
   (function injectStyles() {
     const css = `
@@ -801,7 +900,11 @@ legend {
         margin: 1rem auto;
       }
       @keyframes spin { to { transform: rotate(360deg); } }
-      /* Response panel button positions and hide while waiting */
+      .spin-text {
+        text-align: center; margin-top: .5rem;
+        font-style: italic; color: var(--color-muted);
+      }
+      /* Response panel button positions; hide while waiting */
       .response .close-btn {
         position: absolute; top: var(--padding); right: var(--padding);
       }
@@ -823,13 +926,14 @@ legend {
         background: var(--color-surface);
         padding: var(--padding);
         border-radius: var(--radius);
-        max-height: 80%; overflow-y: auto;
-        width: 90%; max-width: 400px;
-        position: relative;
+        max-height: 80%; width: 90%; max-width: 400px;
+        display: flex; flex-direction: column;
       }
-      .history-modal h3 { margin-bottom: 1rem; }
-      .history-modal ul { list-style: none; padding: 0; margin: 0 0 1rem; }
-      .history-modal ul li {
+      .history-modal .modal-content ul {
+        flex: 1; overflow-y: auto; margin-bottom: 1rem;
+        list-style: none; padding: 0;
+      }
+      .history-modal .modal-content ul li {
         display: flex; justify-content: space-between; align-items: center;
         margin-bottom: .5rem;
       }
@@ -837,17 +941,22 @@ legend {
         background: none; border: none; cursor: pointer;
         color: var(--color-primary-alt); font-size: 1rem;
       }
+      .history-modal .button-row {
+        display: flex; justify-content: space-between; gap: .5rem;
+        flex-shrink: 0; position: sticky; bottom: 0;
+        background: var(--color-surface); padding-top: .5rem;
+      }
       .history-modal .close-modal,
       .history-modal .clear-all-btn {
         background: var(--color-primary); color: #fff;
         border: none; padding: .5rem 1rem; border-radius: var(--radius);
-        cursor: pointer; margin-top: 1rem;
+        cursor: pointer;
       }
       /* Checkbox layout */
       .checkbox-group { display: flex; flex-wrap: wrap; gap: .5rem; }
       .checkbox-group label {
-        flex: 1 1 45%;
-        display: flex; align-items: center; gap: .25rem;
+        flex: 1 1 45%; display: flex; align-items: center; gap: .25rem;
+        background: var(--color-surface); padding: .5rem; border-radius: var(--radius);
       }
       /* Dark-mode fixes */
       html.dark input,
@@ -899,7 +1008,7 @@ legend {
   }
 
   document.addEventListener('DOMContentLoaded', () => {
-    // ── Sidebar & Theme ───────────────────────────────────────────
+    // ── Sidebar & Dark Mode ────────────────────────────────────────
     document.getElementById('hamburger').onclick = () =>
       document.body.classList.toggle('sidebar-open');
     document.getElementById('shrinkSidebar').onclick = () => {
@@ -915,7 +1024,7 @@ legend {
       document.getElementById('themeToggle').classList.toggle('fa-sun');
     };
 
-    // ── “Other” Inputs ─────────────────────────────────────────────
+    // ── “Other” Input Toggles ───────────────────────────────────────
     document.querySelectorAll('select').forEach(sel => {
       sel.addEventListener('change', () => {
         const oi = sel.parentElement.querySelector('.other-input');
@@ -923,10 +1032,26 @@ legend {
       });
     });
 
+    // ── Phase Texts ────────────────────────────────────────────────
+    const PHASE_TEXT = {
+      heroSearchBtn: 'Searching recipes…',
+      refreshTip:    'Loading tip…',
+      refreshMacro:  'Updating macro snapshot…',
+      genPlan:       'Generating plan…',
+      analyzeNutri:  'Analyzing nutrition…',
+      getRecipes:    'Recommending recipes…',
+      scanDef:       'Scanning deficiencies…',
+      runRisk:       'Running radar…',
+      runFitness:    'Generating fitness plan…',
+      runPharma:     'Running pharma suite…',
+      runSymptom:    'Diagnosing symptoms…'
+    };
+
     // ── Chatbot Logic ──────────────────────────────────────────────
     const box = document.getElementById('dietChatBox'),
           hint = document.getElementById('dietHint');
     let hist = [];
+
     function addMsg(who, txt) {
       const m = document.createElement('div');
       m.className = who==='You' ? 'user-msg' : 'bot-msg';
@@ -934,6 +1059,7 @@ legend {
       box.append(m);
       box.scrollTop = box.scrollHeight;
     }
+
     document.getElementById('sendDiet').onclick = async e => {
       e.preventDefault();
       const txt = document.getElementById('dietInput').value.trim();
@@ -943,9 +1069,9 @@ legend {
       document.getElementById('dietInput').value = '';
       hint.style.display = 'block';
       try {
-        const nationality = document.getElementById('nationality')?.value.trim() || '';
+        const nat = document.getElementById('nationality').value.trim() || '';
         const reply = await callOpenAI([
-          {role:'system',content:`User nationality: ${nationality}`},
+          {role:'system',content:`Nationality: ${nat}`},
           {role:'system',content:'You are a dietetics assistant.'},
           {role:'user',content:txt}
         ]);
@@ -957,9 +1083,12 @@ legend {
         hint.style.display = 'none';
       }
     };
+
     document.getElementById('clearDiet').onclick = () => {
       box.innerHTML = '';
+      hist = [];
     };
+
     document.getElementById('viewDietHistory').onclick = () => {
       const modal = document.createElement('div');
       modal.className = 'history-modal';
@@ -968,34 +1097,31 @@ legend {
           <h3>Chat History</h3>
           <ul>
             ${hist.map((m,i)=>
-              `<li>
-                <span><strong>${m.who}:</strong> ${m.text}</span>
+              `<li><span><strong>${m.who}:</strong> ${m.text}</span>
                 <button class="delete-btn" data-i="${i}"><i class="fas fa-trash"></i></button>
-              </li>`
-            ).join('')}
+              </li>`).join('')}
           </ul>
-          <button class="clear-all-btn">Delete Chat History</button>
-          <button class="close-modal">Close</button>
-        </div>
-      `;
+          <div class="button-row">
+            <button class="clear-all-btn">Delete Chat History</button>
+            <button class="close-modal">Close</button>
+          </div>
+        </div>`;
       document.body.append(modal);
-      // per-message delete
+
       modal.querySelectorAll('.delete-btn').forEach(btn => {
         btn.onclick = () => {
           hist.splice(btn.dataset.i, 1);
           btn.closest('li').remove();
         };
       });
-      // clear all
       modal.querySelector('.clear-all-btn').onclick = () => {
         hist = [];
         modal.querySelector('ul').innerHTML = '';
       };
-      // close
       modal.querySelector('.close-modal').onclick = () => modal.remove();
     };
 
-    // ── Global Panel Buttons ────────────────────────────────────────
+    // ── Global Panel Controls ───────────────────────────────────────
     document.body.addEventListener('click', e => {
       const resp = e.target.closest('.response');
       if (!resp) return;
@@ -1018,18 +1144,20 @@ legend {
       }
     });
 
-    // ── Hero Handlers ───────────────────────────────────────────────
-    async function handleHero(panelId, sysPrompt, queryFn) {
+    // ── Hero Handler ───────────────────────────────────────────────
+    async function handleHero(btnId, panelId, sysPrompt, queryFn) {
       const q = queryFn();
       if (!q) { showToast('Please enter a value.'); return; }
       const panel = document.getElementById(panelId);
       panel.hidden = false;
       panel.classList.add('waiting');
-      panel.querySelector('.result-content').innerHTML = '<div class="spinner"></div>';
+      const phase = PHASE_TEXT[btnId] || 'Please wait…';
+      panel.querySelector('.result-content').innerHTML =
+        `<div class="spinner"></div><div class="spin-text">${phase}</div>`;
       try {
-        const nationality = document.getElementById('nationality')?.value.trim() || '';
+        const nat = document.getElementById('nationality').value.trim() || '';
         const reply = await callOpenAI([
-          {role:'system',content:`User nationality: ${nationality}`},
+          {role:'system',content:`Nationality: ${nat}`},
           {role:'system',content:sysPrompt},
           {role:'user',content:q}
         ]);
@@ -1040,24 +1168,51 @@ legend {
         panel.classList.remove('waiting');
       }
     }
+
+    // ── Hero Wiring ────────────────────────────────────────────────
     document.getElementById('heroSearchBtn').onclick = e => {
       e.preventDefault();
-      handleHero('dailyTip','You are a recipe finder.', ()=>
+      handleHero('heroSearchBtn','recipeSearchPanel','You are a recipe finder.', ()=>
         document.getElementById('heroRecipeSearch').value.trim()
       );
     };
+    // Load tip on page load
+    handleHero('refreshTip','dailyTip','You are a nutrition tip generator.', ()=> 'Give one daily nutrition tip.');
     document.getElementById('refreshTip').onclick = () =>
-      handleHero('dailyTip','You are a nutrition tip generator.', ()=>'Give one daily nutrition tip.');
-    document.getElementById('refreshMacro').onclick = () =>
-      handleHero('macroSnapshot','You are a macro snapshot AI.', ()=>'Provide protein/carbs/fat split for standard diet.');
+      handleHero('refreshTip','dailyTip','You are a nutrition tip generator.', ()=> 'Give one daily nutrition tip.');
 
-    // ── Generic Section Wiring ─────────────────────────────────────
+    // Macro Snapshot Chart
+    const heroMacroCtx = document.createElement('canvas');
+    heroMacroCtx.id = 'heroMacroChart';
+    document.querySelector('#hero .feature-card:last-child').append(heroMacroCtx);
+    const heroMacroChart = new Chart(heroMacroCtx.getContext('2d'), {
+      type:'pie',
+      data:{ labels:['Carbs','Protein','Fat'], datasets:[{data:[1,1,1]}] },
+      options:{ animation:false }
+    });
+    document.getElementById('refreshMacro').onclick = () => {
+      const panel = document.getElementById('macroSnapshot');
+      panel.innerHTML = `<div class="spinner"></div><div class="spin-text">${PHASE_TEXT.refreshMacro}</div>`;
+      const nat = document.getElementById('nationality').value.trim() || '';
+      callOpenAI([
+        {role:'system',content:`Nationality: ${nat}`},
+        {role:'system',content:'You are a macro snapshot AI.'},
+        {role:'user',content:'Provide protein/carbs/fat percentages.'}
+      ]).then(reply=>{
+        const nums = reply.match(/\d+/g).map(Number);
+        heroMacroChart.data.datasets[0].data = nums;
+        heroMacroChart.update();
+        panel.innerHTML = '';
+      }).catch(_=> panel.innerText = '⚠️ Error');
+    };
+
+    // ── Generic Wiring ─────────────────────────────────────────────
     function wire(btnId, allFields, requiredFields, sysPrompt) {
       document.getElementById(btnId).onclick = async e => {
         e.preventDefault();
-        // validate
+        // Validate
         for (let id of requiredFields) {
-          if (id==='symptoms') {
+          if (id === 'symptoms') {
             if (!document.querySelector('input[name="symptom"]:checked')) {
               showToast('Please select at least one symptom.');
               return;
@@ -1070,18 +1225,20 @@ legend {
             }
           }
         }
-        // find panel
+        // Panel lookup
         const raw = btnId.replace(/^(send|gen|analyze|get|scan|run)/,'');
-        const panelId = raw.charAt(0).toLowerCase()+raw.slice(1)+'Panel';
+        const panelId = raw.charAt(0).toLowerCase() + raw.slice(1) + 'Panel';
         const panel = document.getElementById(panelId);
         panel.hidden = false;
         panel.classList.add('waiting');
-        panel.querySelector('.result-content').innerHTML = '<div class="spinner"></div>';
-        // gather inputs
+        const phase = PHASE_TEXT[btnId] || 'Please wait…';
+        panel.querySelector('.result-content').innerHTML =
+          `<div class="spinner"></div><div class="spin-text">${phase}</div>`;
+        // Gather inputs
         let content = '';
-        const nat = document.getElementById('nationality')?.value.trim() || '';
+        const nat = document.getElementById('nationality').value.trim() || '';
         for (let id of allFields) {
-          if (id==='symptoms') {
+          if (id === 'symptoms') {
             const vals = Array.from(document.querySelectorAll('input[name="symptom"]:checked'))
                           .map(cb=>cb.value).join(', ');
             content += `symptoms: ${vals}\n`;
@@ -1097,10 +1254,10 @@ legend {
             }
           }
         }
-        // call AI
+        // AI call
         try {
           const reply = await callOpenAI([
-            {role:'system',content:`User nationality: ${nat}`},
+            {role:'system',content:`Nationality: ${nat}`},
             {role:'system',content:sysPrompt},
             {role:'user',content}
           ]);
@@ -1113,41 +1270,30 @@ legend {
       };
     }
 
-    // 2. Meal Plan
-    wire('genPlan',['calories','dietType','allergyList','budget'],['calories','dietType'],'You are a meal planning AI.');
-    // 3. Nutrient Analyzer
-    wire('analyzeNutri',['foodLog','unitSelect'],['foodLog'],'You are a nutrient analysis AI.');
-    // 4. Recipe Recommender
-    wire('getRecipes',['pantry','cuisineType','recipeDifficulty','maxTime'],['pantry'],'You are a recipe recommendation AI.');
-    // 5. Deficiency Scanner
-    wire('scanDef',['symptoms','dietOverview'],['symptoms'],'You are a deficiency risk AI.');
-    // 6. Metabolomic Radar
-    wire('runRisk',['riskFrom','riskTo','syncBiomarkers'],['riskFrom','riskTo'],'You are a metabolomic risk AI. Provide continuous biomarker tracking alerts and explanations.');
-    // 7. Fitness Coach
-    wire('runFitness',['fitGoal','fitFreq','blendIngredients','carbDate','intensity','crpLevel','nutraPref'],['fitGoal','fitFreq'],'You are a fitness nutrition AI.');
-    // 8. Pharma Suite
-    wire('runPharma',['medList','foodList','compoundGoal','reminderMethod','reminderTime1','reminderTime2','cohortSelect'],['medList'],'You are a pharma-nutrient interaction AI.');
-    // 9. Symptom Advisor
-    wire('runSymptom',['sympAge','sympDesc','foodPref'],['sympAge','sympDesc'],'You are a symptom-to-treatment advisor AI.');
+    // ── Wire All Sections ───────────────────────────────────────────
+    wire('genPlan',      ['calories','dietType','allergyList','budget'], ['calories','dietType'],      'You are a meal planning AI.');
+    wire('analyzeNutri', ['foodLog','unitSelect'],                  ['foodLog'],                      'You are a nutrient analysis AI.');
+    wire('getRecipes',   ['pantry','cuisineType','recipeDifficulty','maxTime'], ['pantry'], 'You are a recipe recommendation AI.');
+    wire('scanDef',      ['symptoms','dietOverview'],               ['symptoms'],                    'You are a deficiency risk AI.');
+    wire('runRisk',      ['riskFrom','riskTo','syncBiomarkers'],     ['riskFrom','riskTo'],           'You are a metabolomic risk AI. Provide continuous biomarker tracking alerts.');
+    wire('runFitness',   ['fitGoal','fitFreq','blendIngredients','carbDate','intensity','crpLevel','nutraPref'], ['fitGoal','fitFreq'], 'You are a fitness nutrition AI.');
+    wire('runPharma',    ['medList','foodList','compoundGoal','reminderMethod','reminderTime1','reminderTime2','cohortSelect'], ['medList'], 'You are a pharma-nutrient interaction AI.');
+    wire('runSymptom',   ['sympAge','sympDesc','foodPref'],         ['sympAge','sympDesc'],           'You are a symptom-to-treatment advisor AI.');
 
     // ── Progress Charts ─────────────────────────────────────────────
     const ctx1 = document.getElementById('intakeChart')?.getContext('2d');
     if (ctx1) new Chart(ctx1,{ type:'line', data:{
       labels:['Mon','Tue','Wed','Thu','Fri'],
-      datasets:[{
-        label:'Calories In',
-        data:[2000,1800,2100,1900,2050],
+      datasets:[{ label:'Calories In', data:[2000,1800,2100,1900,2050],
         borderColor:getComputedStyle(document.documentElement)
-                       .getPropertyValue('--color-secondary').trim(),
-        fill:false
-      }]
+                       .getPropertyValue('--color-secondary').trim(), fill:false }]
     }});
     const ctx2 = document.getElementById('macroChart')?.getContext('2d');
     if (ctx2) new Chart(ctx2,{ type:'pie', data:{
-      labels:['Carbs','Protein','Fat'],
-      datasets:[{ data:[50,25,25] }]
+      labels:['Carbs','Protein','Fat'], datasets:[{ data:[50,25,25] }]
     }});
   });
 </script>
+  
 </body>
 </html>
