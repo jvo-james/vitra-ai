@@ -1071,7 +1071,25 @@ document.addEventListener('DOMContentLoaded', () => {
       ]);
       panel.querySelector('.result-content').innerHTML = formatHTML(reply);
     } catch {
-      panel.querySelector('.result-content').innerText = '⚠️ Something went wrong.';
+      // if recipe search failed for ANY query, show a dynamic template
+      if (panelId === 'recipeSearchPanel') {
+        // capitalize the user’s query for the title
+        const title = q.charAt(0).toUpperCase() + q.slice(1);
+        panel.querySelector('.result-content').innerHTML = `
+          <h3>Sample Recipe: ${title}</h3>
+          <p><strong>Ingredients:</strong> [List your main ingredients for ${q} here]</p>
+          <p><strong>Instructions:</strong></p>
+          <ol>
+            <li>Prepare and season your main ingredient(s).</li>
+            <li>Sauté aromatics (onion, garlic, etc.) until fragrant.</li>
+            <li>Add your main ingredient(s) and cook until nearly done.</li>
+            <li>Stir in any vegetables, liquids (stock, sauce) and simmer.</li>
+            <li>Adjust seasoning, cook until everything is tender, then serve.</li>
+          </ol>
+          <p class="macro-desc">Use this template as a guide to cook “${q}” even if the AI failed.</p>`;
+      } else {
+        panel.querySelector('.result-content').innerText = '⚠️ Oops! Could not fetch the recipe. Please try again.';
+     }
     } finally {
       panel.classList.remove('waiting');
     }
