@@ -682,11 +682,11 @@ html.dark #hero {
     </div>
     <nav>
       <ul>
-        <li><a href="herbal.html"><i class="fas fa-seedling"></i> Herbal Medicine</a></li>
-        <li><a href="psych.html"><i class="fas fa-brain"></i> Psychology & MH</a></li>
-        <li class="active"><a href="#"><i class="fas fa-apple-alt"></i> Dietetics</a></li>
-        <li><a href="pharmacy.html"><i class="fas fa-prescription-bottle-alt"></i> E-Pharmacy</a></li>
-        <li><a href="consult.html"><i class="fas fa-calendar-check"></i> Consult Booking</a></li>
+        <li><a href="herbal.html"><i class="fas fa-seedling"></i> <span>Herbal Medicine</span></a></li>
+        <li><a href="psych.html"><i class="fas fa-brain"></i> <span>Psychology & MH </span></a></li>
+        <li class="active"><a href="#"><i class="fas fa-apple-alt"></i> <span>Dietetics</span></a></li>
+        <li><a href="pharmacy.html"><i class="fas fa-prescription-bottle-alt"></i> <span>E-Pharmacy</span></a></li>
+        <li><a href="consult.html"><i class="fas fa-calendar-check"></i> <span>Consult Booking</span></a></li>
       </ul>
     </nav>
     <button id="shrinkSidebar" aria-label="Toggle sidebar">
@@ -1451,12 +1451,26 @@ document.addEventListener('DOMContentLoaded', () => {
         chatHint = document.getElementById('dietHint');
   let history = JSON.parse(localStorage.getItem('chatHistory') || '[]');
   // render past history
-  history.forEach(m => addChat(m.who, m.text));
+  history.forEach(m => addChat(m.who, m.text, m.timestamp));
 
-  function addChat(who, txt) {
+  function addChat(who, txt, isoTimestamp) {
     const m = document.createElement('div');
     m.className = who === 'You' ? 'user-msg' : 'bot-msg';
-    m.innerHTML = `${formatHTML(txt)}<div class="timestamp">${new Date().toLocaleTimeString()}</div>`;
+// compute human-friendly date label + time
+    const d = isoTimestamp ? new Date(isoTimestamp) : new Date();
+    const today = new Date();
+    const yesterday = new Date(today);
+    yesterday.setDate(today.getDate() - 1);
+    let dateLabel;
+    if (d.toDateString() === today.toDateString()) {
+      dateLabel = 'Today';
+    } else if (d.toDateString() === yesterday.toDateString()) {
+      dateLabel = 'Yesterday';
+    } else {
+      dateLabel = d.toLocaleDateString();
+   }
+    const timeLabel = d.toLocaleTimeString();
+    m.innerHTML = `${formatHTML(txt)}<div class="timestamp">${dateLabel}, ${timeLabel}</div>`;
     chatBox.append(m);
     chatBox.scrollTop = chatBox.scrollHeight;
   }
@@ -1466,7 +1480,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const q = document.getElementById('dietInput').value.trim();
     if (!q) return showToast('Please type a question.');
     addChat('You', q);    
-    history.push({ who: 'You', text: q });
+    const now = new Date();
+    history.push({ who: 'You', text: q, timestamp: now.toISOString() });    
     localStorage.setItem('chatHistory', JSON.stringify(history));
     document.getElementById('dietInput').value = '';
     chatHint.style.display = 'block';
@@ -1476,8 +1491,9 @@ document.addEventListener('DOMContentLoaded', () => {
         { role: 'system', content: 'You are a dietetics assistant.' },
         { role: 'user', content: q }
       ]);
-      addChat('AI', reply);
-      history.push({ who: 'AI', text: reply });
+      const now2 = new Date();
+     addChat('AI', reply, now2.toISOString());
+     history.push({ who: 'AI', text: reply, timestamp: now2.toISOString() });
       localStorage.setItem('chatHistory', JSON.stringify(history));
     } catch {
       addChat('AI', '⚠️ Something went wrong.');
@@ -1558,7 +1574,10 @@ document.addEventListener('DOMContentLoaded', () => {
     const left = sb.classList.contains('collapsed') ? 'var(--sidebar-collapsed)' : 'var(--sidebar-width)';
     document.querySelector('header').style.left = left;
     document.querySelector('main').style.marginLeft = left;
-  };
+    const icon = document.querySelector('#shrinkSidebar i');
+    icon.classList.toggle('fa-angle-double-left');
+    icon.classList.toggle('fa-angle-double-right');
+   };
   document.getElementById('themeToggle').type = 'button';
   document.getElementById('themeToggle').onclick = () => {
     document.documentElement.classList.toggle('dark');
