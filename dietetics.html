@@ -1192,10 +1192,17 @@ document.addEventListener('DOMContentLoaded', () => {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ messages })
     });
-    if (!res.ok) throw new Error('OpenAI error');
-    const j = await res.json();
-    return j.choices[0].message.content;
-  }
+    if (!res.ok) {
+     const errText = await res.text();
+      throw new Error(`OpenAI error ${res.status}: ${errText}`);
+    }
+   const j = await res.json();
+   // if JSON shape is unexpected, show it
+   if (!j.choices?.[0]?.message?.content) {
+     throw new Error(`Malformed response: ${JSON.stringify(j)}`);
+    }
+   return j.choices[0].message.content;
+   }
 
   function formatHTML(txt) {
     return txt
@@ -1494,7 +1501,6 @@ document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('clearDiet').type = 'button';
   document.getElementById('clearDiet').onclick = () => {
    chatBox.innerHTML = '';
-   history = [];
   };
 
   document.getElementById('viewDietHistory').type = 'button';
