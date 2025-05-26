@@ -34,6 +34,16 @@ html.dark {
   --color-text: #ECECEC;
   --color-muted: #AAA;
 }
+    html.dark input,
+html.dark textarea,
+html.dark select {
+ background: var(--color-surface);
+ color: var(--color-text);
+ border-color: var(--color-muted);
+}
+/* Chat bubbles already inherit var(--color-text) but just in case: */
+html.dark .user-msg { color: #111; }
+html.dark .bot-msg  { color: var(--color-text); }
 * {
   margin: 0; padding: 0; box-sizing: border-box;
   font-family: 'Montserrat', sans-serif;
@@ -197,7 +207,7 @@ h2 {
   border: 1px solid var(--color-muted);
   border-radius: var(--radius);
   padding: var(--padding);
-  max-height: 300px; overflow-y: auto;
+  max-height: 500px; overflow-y: auto;
   display: flex; flex-direction: column; gap: .5rem;
 }
 .chat-input {
@@ -246,6 +256,23 @@ h2 {
   background: var(--color-surface);
   padding-top: .5rem;
 }
+    .history-modal {
+  position: fixed;
+ top: 0; left: 0; right: 0; bottom: 0;
+ background: rgba(0,0,0,0.5);
+ display: flex;
+ align-items: center;
+ justify-content: center;
+ z-index: 2000;
+}
+.history-modal .modal-content {
+  background: var(--color-surface);
+ padding: var(--padding);
+border-radius: var(--radius);
+ max-width: 90%;
+ max-height: 80%;
+}
+    
 /*────────────────────── Forms & Inputs ──────────────────────*/
 input, textarea, select {
   width: 100%;
@@ -433,6 +460,60 @@ html.dark .bot-msg {
     .response .result-content {
   margin-top: 2.5rem;  /* enough space for the close button */
 }
+    /* Limit the hero macro chart size */
+.feature-card #heroMacroChart {
+  max-width: 180px;
+  margin: 0.5rem auto;
+  display: block;
+}
+/* Optional: center the text under it */
+.feature-card .macro-desc {
+  text-align: center;
+  font-size: 0.9rem;
+  color: var(--color-muted);
+  margin-top: 0.25rem;
+}
+    /* Hero background gradient */
+#hero {
+  background: linear-gradient(135deg, var(--color-primary-alt), var(--color-secondary));
+  color: #fff;
+  overflow: hidden;
+  position: relative;
+}
+/* Hero text */
+#hero h2, #hero .desc {
+  text-shadow: 1px 1px 4px rgba(0,0,0,0.3);
+}
+/* Feature cards – glass effect */
+#hero .feature-card {
+  background: rgba(255,255,255,0.15);
+  backdrop-filter: blur(10px);
+  transition: transform .4s, box-shadow .4s;
+}
+#hero .feature-card:hover {
+  transform: translateY(-10px);
+  box-shadow: 0 12px 30px rgba(0,0,0,0.3);
+}
+/* Dark mode tweak */
+html.dark #hero {
+  background: linear-gradient(135deg, #333, #555);
+}
+     .checkbox-group {
+  display: grid;
+ grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));  gap: .75rem;
+ }
+ .checkbox-group label {
+   display: flex; align-items: center; gap: .25rem;
+ }
+     @media(max-width: 640px) {
+   section.module { padding: .75rem; margin-left: 0; }
+   .chat-input, .chat-controls { flex-direction: column; }
+   .tool-row { position: static; margin-top: .5rem; }
+  canvas { max-width: 100% !important; height: auto !important; }
+ #hero .feature-card { flex-direction: column; }
+  #hero .feature-card button,
+  #hero .feature-card input { width: 100%; }
+ }
   </style>
 </head>
 
@@ -977,6 +1058,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const q = qFn();
     if (!q) return showToast('Please enter a value.');
     const panel = document.getElementById(panelId);
+    panel.classList.add('waiting');
     panel.hidden = false;
     panel.classList.add('waiting');
     panel.querySelector('.result-content').innerHTML =
@@ -1020,6 +1102,11 @@ document.addEventListener('DOMContentLoaded', () => {
   const heroMacroCanvas = document.createElement('canvas');
   heroMacroCanvas.id = 'heroMacroChart';
   document.querySelector('#hero .feature-card:nth-child(3)').append(heroMacroCanvas);
+   // description under the chart
+  const macroDesc = document.createElement('p');
+  macroDesc.className = 'macro-desc';
+  macroDesc.innerText = 'This pie chart shows your macro distribution (%).';
+  document.querySelector('#hero .feature-card:nth-child(3)').append(macroDesc);
   const heroMacroChart = new Chart(heroMacroCanvas.getContext('2d'), {
     type: 'pie',
     data: { labels: ['Carbs','Protein','Fat'], datasets: [{ data: [1,1,1] }] },
@@ -1082,6 +1169,7 @@ document.addEventListener('DOMContentLoaded', () => {
         pid = raw.charAt(0).toLowerCase() + raw.slice(1) + 'Panel';
       }
       const panel = document.getElementById(pid);
+      panel.classList.add('waiting');
       panel.hidden = false;
       panel.classList.add('waiting');
       panel.querySelector('.result-content').innerHTML =
@@ -1140,7 +1228,9 @@ document.addEventListener('DOMContentLoaded', () => {
   // ── Chatbot wiring ─────────────────────────────────────────────
   const chatBox  = document.getElementById('dietChatBox'),
         chatHint = document.getElementById('dietHint');
-  let history = [];
+  let history = JSON.parse(localStorage.getItem('chatHistory') || '[]');
+  // render past history
+  history.forEach(m => addChat(m.who, m.text));
 
   function addChat(who, txt) {
     const m = document.createElement('div');
@@ -1154,8 +1244,9 @@ document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('sendDiet').onclick = async () => {
     const q = document.getElementById('dietInput').value.trim();
     if (!q) return showToast('Please type a question.');
-    addChat('You', q);
+    addChat('You', q);    
     history.push({ who: 'You', text: q });
+    localStorage.setItem('chatHistory', JSON.stringify(history));
     document.getElementById('dietInput').value = '';
     chatHint.style.display = 'block';
     try {
@@ -1166,6 +1257,7 @@ document.addEventListener('DOMContentLoaded', () => {
       ]);
       addChat('AI', reply);
       history.push({ who: 'AI', text: reply });
+      localStorage.setItem('chatHistory', JSON.stringify(history));
     } catch {
       addChat('AI', '⚠️ Something went wrong.');
     } finally {
@@ -1175,9 +1267,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
   document.getElementById('clearDiet').type = 'button';
   document.getElementById('clearDiet').onclick = () => {
-    chatBox.innerHTML = '';
-    history = [];
-  };
+   chatBox.innerHTML = '';
+   history = [];
+ localStorage.removeItem('chatHistory');
+ };
 
   document.getElementById('viewDietHistory').type = 'button';
   document.getElementById('viewDietHistory').onclick = () => {
@@ -1250,7 +1343,9 @@ document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('themeToggle').type = 'button';
   document.getElementById('themeToggle').onclick = () => {
     document.documentElement.classList.toggle('dark');
-    document.getElementById('themeToggle').classList.toggle('fa-sun');
+    const icon = document.getElementById('themeToggle');
+ icon.classList.toggle('fa-moon');
+ icon.classList.toggle('fa-sun');
   };
 
   // ── “Other” inputs visibility ──────────────────────────────────
