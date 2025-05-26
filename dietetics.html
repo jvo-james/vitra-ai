@@ -894,453 +894,421 @@ html.dark .bot-msg {
  <!-- Chart.js & App Logic -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
-// ── Global State & Persistence ───────────────────────────────────
-let userNationality = localStorage.getItem('nationality') || '';
+(() => {
+  // ── Constants & Global State ────────────────────────────────
+  const NATION_KEY   = 'vitrai_nationality';
+  const HISTORY_KEY  = 'vitrai_chat_history';
+  let userNationality = localStorage.getItem(NATION_KEY) || '';
+  let chatHistory     = JSON.parse(localStorage.getItem(HISTORY_KEY) || '[]');
 
-// ── Shared CSS for Toasts, Spinners & Panels ─────────────────────
-(function(){
-  const css = `
-    .toast {
-      position: fixed; bottom: 2rem; left: 50%;
-      transform: translateX(-50%) translateY(100%);
-      background: var(--color-primary-alt); color: #fff;
-      padding: .75rem 1.5rem; border-radius: var(--radius);
-      opacity: 0; transition: transform .3s, opacity .3s; z-index:2000;
-    }
-    .toast.visible { transform: translateX(-50%) translateY(0); opacity:1; }
-    .spinner {
-      border:4px solid rgba(0,0,0,0.1);
-      border-top:4px solid var(--color-primary);
-      border-radius:50%; width:24px; height:24px;
-      animation:spin .8s linear infinite; margin:1rem auto;
-    }
-    @keyframes spin { to{transform:rotate(360deg);} }
-    .spin-text {
-      text-align:center; margin-top:.5rem;
-      font-style:italic; color:var(--color-muted);
-    }
-    .response .close-btn { position:absolute; top:var(--padding); right:var(--padding); }
-    .response .tool-row {
-      display:flex; gap:.5rem;
-      position:absolute; bottom:var(--padding); right:var(--padding);
-    }
-    .response.waiting .close-btn,
-    .response.waiting .tool-row { display:none!important; }
-    .export-chart-btn {
-      margin-top:.5rem; padding:.25rem .5rem;
-      background:var(--color-secondary); color:#fff;
-      border:none; border-radius:.5rem; cursor:pointer;
-    }
-  `;
-  const s=document.createElement('style');
-  s.textContent=css;
-  document.head.appendChild(s);
-})();
-
-// ── Helpers ───────────────────────────────────────────────────────
-function showToast(msg){
-  const t=document.createElement('div'); t.className='toast'; t.innerText=msg;
-  document.body.appendChild(t);
-  requestAnimationFrame(()=>t.classList.add('visible'));
-  setTimeout(()=>t.classList.remove('visible'),1800);
-  setTimeout(()=>t.remove(),2200);
-}
-
-async function callOpenAI(messages){
-  const res=await fetch('/.netlify/functions/openai-proxy',{
-    method:'POST', headers:{'Content-Type':'application/json'},
-    body:JSON.stringify({messages})
-  });
-  if(!res.ok) throw new Error('OpenAI error');
-  const j=await res.json();
-  return j.choices[0].message.content;
-}
-
-function formatHTML(txt){
-  return txt
-    .replace(/^### (.*$)/gm,'<h3>$1</h3>')
-    .replace(/\*\*(.+?)\*\*/g,'<strong>$1</strong>')
-    .replace(/\*(.+?)\*/g,'<em>$1</em>')
-    .split(/\n{2,}/).map(p=>`<p>${p.trim()}</p>`).join('');
-}
-
-function getSelectValue(sel){
-  const oi=sel.parentElement.querySelector('.other-input');
-  return (oi && sel.value==='Other') ? oi.value.trim() : sel.value;
-}
-
-// ── DOMContentLoaded ─────────────────────────────────────────────
-document.addEventListener('DOMContentLoaded',()=>{
-
-  // — Nationality persistence & set button
-  document.getElementById('setNationality').onclick=()=>{
-    const v=document.getElementById('nationality').value.trim();
-    if(!v) return showToast('Enter your nationality.');
-    localStorage.setItem('nationality',v);
-    userNationality=v;
-    showToast(`Nationality set to ${v}`);
-  };
-
-  // — Sidebar & Dark Mode
-  document.getElementById('hamburger').onclick=()=>document.body.classList.toggle('sidebar-open');
-  document.getElementById('shrinkSidebar').onclick=()=>{
-    const sb=document.getElementById('sidebar');
-    sb.classList.toggle('collapsed');
-    const left=sb.classList.contains('collapsed')?'var(--sidebar-collapsed)':'var(--sidebar-width)';
-    document.querySelector('header').style.left=left;
-    document.querySelector('main').style.marginLeft=left;
-  };
-  document.getElementById('themeToggle').onclick=()=>{
-    document.documentElement.classList.toggle('dark');
-    document.getElementById('themeToggle').classList.toggle('fa-sun');
-  };
-
-  // — “Other” inputs
-  document.querySelectorAll('select').forEach(sel=>{
-    sel.onchange=()=> {
-      const oi=sel.parentElement.querySelector('.other-input');
-      if(oi) oi.style.display=sel.value==='Other'?'block':'none';
-    };
-  });
-
-  // — Phase texts for each button
-  const PHASE_TEXT={
-    heroSearchBtn:'Searching recipes…',
-    refreshTip:'Loading tip…',
-    refreshMacro:'Updating macro snapshot…',
-    genPlan:'Generating plan…',
-    analyzeNutri:'Analyzing nutrition…',
-    getRecipes:'Recommending recipes…',
-    scanDef:'Scanning deficiencies…',
-    runRisk:'Running radar…',
-    runFitness:'Generating fitness plan…',
-    runPharma:'Running pharma suite…',
-    runSymptom:'Diagnosing symptoms…'
-  };
-
-  // ── Chatbot wiring ─────────────────────────────────────────────
-  const chatBox=document.getElementById('dietChatBox'),
-        chatHint=document.getElementById('dietHint');
-  let history=[];
-
-  function addChat(who,txt){
-    const m=document.createElement('div');
-    m.className=who==='You'?'user-msg':'bot-msg';
-    m.innerHTML=`${formatHTML(txt)}<div class="timestamp">${new Date().toLocaleTimeString()}</div>`;
-    chatBox.append(m);
-    chatBox.scrollTop=chatBox.scrollHeight;
+  // ── Utility Functions ───────────────────────────────────────
+  function showToast(msg) {
+    const t = document.createElement('div');
+    t.className = 'toast';
+    t.innerText = msg;
+    document.body.append(t);
+    requestAnimationFrame(() => t.classList.add('visible'));
+    setTimeout(() => t.classList.remove('visible'), 1800);
+    setTimeout(() => t.remove(), 2200);
   }
 
-  document.getElementById('sendDiet').onclick=async e=>{
-    e.preventDefault();
-    const q=document.getElementById('dietInput').value.trim();
-    if(!q) return showToast('Please type a question.');
-    addChat('You',q); history.push({who:'You',text:q});
-    document.getElementById('dietInput').value='';
-    chatHint.style.display='block';
-    try{
-      const reply=await callOpenAI([
-        {role:'system',content:`Nationality: ${userNationality}`},
-        {role:'system',content:'You are a dietetics assistant.'},
-        {role:'user',content:q}
-      ]);
-      addChat('AI',reply); history.push({who:'AI',text:reply});
-    }catch{
-      addChat('AI','⚠️ Something went wrong.');
-    }finally{
-      chatHint.style.display='none';
-    }
-  };
+  async function callOpenAI(messages) {
+    const res = await fetch('/.netlify/functions/openai-proxy', {
+      method: 'POST', headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({messages})
+    });
+    if (!res.ok) throw new Error('OpenAI error');
+    const j = await res.json();
+    return j.choices[0].message.content;
+  }
 
-  document.getElementById('clearDiet').onclick=()=>{
-    chatBox.innerHTML='';
-    history=[];
-  };
-  document.getElementById('viewDietHistory').onclick=()=>{
-    const modal=document.createElement('div');
-    modal.className='history-modal';
-    modal.innerHTML=`
-      <div class="modal-content">
-        <h3>Chat History</h3>
-        <ul>
-          ${history.map((m,i)=>`
-            <li>
-              <span><strong>${m.who}:</strong> ${m.text}</span>
-              <button class="delete-btn" data-i="${i}"><i class="fas fa-trash"></i></button>
-            </li>`).join('')}
-        </ul>
-        <div class="button-row">
-          <button class="clear-all-btn">Delete Chat History</button>
-          <button class="close-modal">Close</button>
-        </div>
-      </div>`;
-    document.body.append(modal);
-    modal.querySelectorAll('.delete-btn').forEach(btn=>{
-      btn.onclick=()=>{
-        history.splice(btn.dataset.i,1);
-        btn.closest('li').remove();
+  function formatHTML(txt) {
+    return txt
+      .replace(/^### (.*$)/gm,'<h3>$1</h3>')
+      .replace(/\*\*(.+?)\*\*/g,'<strong>$1</strong>')
+      .replace(/\*(.+?)\*/g,'<em>$1</em>')
+      .split(/\n{2,}/).map(p=>`<p>${p.trim()}</p>`).join('');
+  }
+
+  function getSelectValue(sel) {
+    const oi = sel.parentElement.querySelector('.other-input');
+    return (oi && sel.value==='Other') ? oi.value.trim() : sel.value;
+  }
+
+  function saveHistory() {
+    localStorage.setItem(HISTORY_KEY, JSON.stringify(chatHistory));
+  }
+
+  function addChat(who, txt) {
+    const m = document.createElement('div');
+    m.className = who==='You' ? 'user-msg' : 'bot-msg';
+    m.innerHTML = formatHTML(txt) + 
+      `<div class="timestamp">${new Date().toLocaleTimeString()}</div>`;
+    const box = document.getElementById('dietChatBox');
+    box.append(m);
+    box.scrollTop = box.scrollHeight;
+  }
+
+  // ── On Load ──────────────────────────────────────────────────
+  document.addEventListener('DOMContentLoaded', () => {
+    // Populate nationality input
+    const natInput = document.getElementById('nationality');
+    if (userNationality) {
+      natInput.value = userNationality;
+      showToast(`Nationality loaded: ${userNationality}`);
+    }
+
+    // Reload chat history
+    chatHistory.forEach(msg => addChat(msg.who, msg.text));
+
+    // “Other” inputs
+    document.querySelectorAll('select').forEach(sel => {
+      sel.onchange = () => {
+        const oi = sel.parentElement.querySelector('.other-input');
+        if (oi) oi.style.display = (sel.value==='Other' ? 'block' : 'none');
       };
     });
-    modal.querySelector('.clear-all-btn').onclick=()=>{
-      history=[]; modal.querySelector('ul').innerHTML='';
+
+    // Sidebar & Theme
+    document.getElementById('hamburger')
+      .onclick = () => document.body.classList.toggle('sidebar-open');
+    document.getElementById('shrinkSidebar')
+      .onclick = () => {
+        const sb = document.getElementById('sidebar');
+        sb.classList.toggle('collapsed');
+        const left = sb.classList.contains('collapsed') ?
+                       'var(--sidebar-collapsed)' :
+                       'var(--sidebar-width)';
+        document.querySelector('header').style.left = left;
+        document.querySelector('main').style.marginLeft = left;
+      };
+    document.getElementById('themeToggle')
+      .onclick = () => {
+        document.documentElement.classList.toggle('dark');
+        document.getElementById('themeToggle').classList.toggle('fa-sun');
+      };
+
+    // Set Nationality button
+    document.getElementById('setNationality').onclick = () => {
+      const v = natInput.value.trim();
+      if (!v) return showToast('Enter your nationality.');
+      localStorage.setItem(NATION_KEY, v);
+      userNationality = v;
+      showToast(`Nationality set to ${v}`);
     };
-    modal.querySelector('.close-modal').onclick=()=>modal.remove();
-  };
 
-  // ── Response panel copy/download/close ─────────────────────────
-  document.body.addEventListener('click',e=>{
-    const rp=e.target.closest('.response');
-    if(!rp) return;
-    if(e.target.closest('.close-btn')){
-      rp.hidden=true; return;
-    }
-    if(e.target.closest('.copy-btn')){
-      const txt=rp.querySelector('.result-content').innerText;
-      navigator.clipboard.writeText(txt).then(()=>showToast('Copied!'));
-      return;
-    }
-    if(e.target.closest('.dl-btn')){
-      const txt=rp.querySelector('.result-content').innerText;
-      const blob=new Blob([txt],{type:'text/plain'});
-      const a=document.createElement('a');
-      a.href=URL.createObjectURL(blob);
-      a.download='response.txt';
-      a.click();
-      return;
-    }
-  });
+    // Clear & View Chat History
+    document.getElementById('clearDiet').onclick = () => {
+      document.getElementById('dietChatBox').innerHTML = '';
+      chatHistory = [];
+      saveHistory();
+    };
+    document.getElementById('viewDietHistory').onclick = () => {
+      const modal = document.createElement('div');
+      modal.className = 'history-modal';
+      modal.innerHTML = `
+        <div class="modal-content">
+          <h3>Chat History</h3>
+          <ul>
+            ${chatHistory.map((m,i)=>`
+              <li>
+                <span><strong>${m.who}:</strong> ${m.text}</span>
+                <button class="delete-btn" data-i="${i}">
+                  <i class="fas fa-trash"></i>
+                </button>
+              </li>`).join('')}
+          </ul>
+          <div class="button-row">
+            <button class="clear-all-btn">Delete All</button>
+            <button class="close-modal">Close</button>
+          </div>
+        </div>`;
+      document.body.append(modal);
+      modal.querySelectorAll('.delete-btn').forEach(btn => {
+        btn.onclick = () => {
+          const i = +btn.dataset.i;
+          chatHistory.splice(i,1);
+          saveHistory();
+          btn.closest('li').remove();
+        };
+      });
+      modal.querySelector('.clear-all-btn').onclick = () => {
+        chatHistory = [];
+        saveHistory();
+        modal.querySelector('ul').innerHTML = '';
+      };
+      modal.querySelector('.close-modal').onclick = () => modal.remove();
+    };
 
-  // ── Hero: handleHero helper ────────────────────────────────────
-  async function handleHero(btnId,panelId,sysPrompt,qFn){
-    const q=qFn();
-    if(!q) return showToast('Please enter a value.');
-    const panel=document.getElementById(panelId);
-    panel.hidden=false; panel.classList.add('waiting');
-    const phase=PHASE_TEXT[btnId]||'Please wait…';
-    panel.querySelector('.result-content').innerHTML=
-      `<div class="spinner"></div><div class="spin-text">${phase}</div>`;
-    try{
-      const reply=await callOpenAI([
-        {role:'system',content:`Nationality: ${userNationality}`},
-        {role:'system',content:sysPrompt},
-        {role:'user',content:q}
-      ]);
-      panel.querySelector('.result-content').innerHTML=formatHTML(reply);
-    }catch{
-      panel.querySelector('.result-content').innerText='⚠️ Something went wrong.';
-    }finally{
-      panel.classList.remove('waiting');
-    }
-  }
-
-  // ── Wire Hero Buttons ──────────────────────────────────────────
-  document.getElementById('heroSearchBtn').onclick=e=>{
-    e.preventDefault();
-    handleHero(
-      'heroSearchBtn',
-      'recipeSearchPanel',
-      'You are a recipe finder.',
-      ()=>document.getElementById('heroRecipeSearch').value.trim()
-    );
-  };
-  // auto-load tip on page load
-  handleHero(
-    'refreshTip',
-    'dailyTip',
-    'You are a nutrition tip generator.',
-    ()=> 'Give one daily nutrition tip.'
-  );
-  document.getElementById('refreshTip').onclick=()=>handleHero(
-    'refreshTip',
-    'dailyTip',
-    'You are a nutrition tip generator.',
-    ()=> 'Give one daily nutrition tip.'
-  );
-
-  // ── Macro Snapshot Chart ───────────────────────────────────────
-  const heroMacroCanvas=document.createElement('canvas');
-  heroMacroCanvas.id='heroMacroChart';
-  document.querySelector('#hero .feature-card:last-child').append(heroMacroCanvas);
-  const heroMacroChart=new Chart(heroMacroCanvas.getContext('2d'),{
-    type:'pie',
-    data:{ labels:['Carbs','Protein','Fat'],datasets:[{data:[1,1,1]}] },
-    options:{ animation:false }
-  });
-  document.getElementById('refreshMacro').onclick=async ()=>{
-    const panel=document.getElementById('macroSnapshot');
-    panel.classList.add('waiting');
-    panel.innerHTML=`<div class="spinner"></div><div class="spin-text">${PHASE_TEXT.refreshMacro}</div>`;
-    try{
-      const reply=await callOpenAI([
-        {role:'system',content:`Nationality: ${userNationality}`},
-        {role:'system',content:'You are a macro snapshot AI.'},
-        {role:'user',content:'Provide protein/carbs/fat percentages.'}
-      ]);
-      const nums=reply.match(/\d+/g).map(Number);
-      heroMacroChart.data.datasets[0].data=nums;
-      heroMacroChart.update();
-      panel.innerHTML=`Protein: ${nums[1]}% / Carbs: ${nums[0]}% / Fat: ${nums[2]}%`;
-    }catch{
-      panel.innerText='⚠️ Error';
-    }finally{
-      panel.classList.remove('waiting');
-    }
-  };
-
-  // ── Generic module wiring helper ──────────────────────────────
-  function wire(btnId,fields,required,sysPrompt){
-    document.getElementById(btnId).onclick=async e=>{
-      e.preventDefault();
-      // validate
-      for(let id of required){
-        if(id==='symptoms'){
-          if(!document.querySelector('input[name="symptom"]:checked')){
-            return showToast('Select at least one symptom.');
-          }
-        } else {
-          const el=document.getElementById(id);
-          if(!el||!el.value.trim()){
-            return showToast('Please fill in all required fields.');
-          }
-        }
+    // Copy / Download / Close for all response panels
+    document.body.addEventListener('click', e => {
+      const rp = e.target.closest('.response');
+      if (!rp) return;
+      if (e.target.closest('.close-btn')) {
+        rp.hidden = true; return;
       }
-      // panel lookup
-      const raw=btnId.replace(/^(send|gen|analyze|get|scan|run)/,'');
-      const pid=raw.charAt(0).toLowerCase()+raw.slice(1)+'Panel';
-      const panel=document.getElementById(pid);
-      panel.hidden=false; panel.classList.add('waiting');
-      const phase=PHASE_TEXT[btnId]||'Please wait…';
-      panel.querySelector('.result-content').innerHTML=
-        `<div class="spinner"></div><div class="spin-text">${phase}</div>`;
-
-      // gather
-      let content='';
-      for(let id of fields){
-        if(id==='symptoms'){
-          const vals=Array.from(document.querySelectorAll('input[name="symptom"]:checked'))
-                         .map(cb=>cb.value).join(', ');
-          content+=`symptoms: ${vals}\n`;
-        } else {
-          const el=document.getElementById(id);
-          if(!el) continue;
-          if(el.tagName==='SELECT'&&el.multiple){
-            content+=`${id}: ${Array.from(el.selectedOptions).map(o=>o.value).join(', ')}\n`;
-          } else if(el.tagName==='SELECT'){
-            content+=`${id}: ${getSelectValue(el)}\n`;
-          } else {
-            content+=`${id}: ${el.value}\n`;
-          }
-        }
+      if (e.target.closest('.copy-btn')) {
+        const txt = rp.querySelector('.result-content').innerText;
+        navigator.clipboard.writeText(txt).then(() => showToast('Copied!'));
+        return;
       }
+      if (e.target.closest('.dl-btn')) {
+        const txt = rp.querySelector('.result-content').innerText;
+        const blob = new Blob([txt], {type:'text/plain'});
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = 'response.txt';
+        a.click();
+        return;
+      }
+    });
 
-      // call AI
-      try{
-        const reply=await callOpenAI([
-          {role:'system',content:`Nationality: ${userNationality}`},
-          {role:'system',content:sysPrompt},
-          {role:'user',content}
+    // ── Hero / Daily Tip / Macro Snapshot ─────────────────────────
+    const PHASE = {
+      heroSearchBtn: 'Searching recipes…',
+      refreshTip:    'Loading tip…',
+      refreshMacro:  'Updating macro snapshot…',
+      genPlan:       'Generating plan…',
+      analyzeNutri:  'Analyzing nutrition…',
+      getRecipes:    'Recommending recipes…',
+      scanDef:       'Scanning deficiencies…',
+      runRisk:       'Running radar…',
+      runFitness:    'Generating fitness plan…',
+      runPharma:     'Running pharma suite…',
+      runSymptom:    'Diagnosing symptoms…'
+    };
+
+    async function handleHero(btnId, panelId, sysPrompt, getQ) {
+      const q = getQ();
+      if (!q) return showToast('Please enter a value.');
+      const panel = document.getElementById(panelId);
+      panel.hidden = false;
+      panel.classList.add('waiting');
+      panel.querySelector('.result-content').innerHTML =
+        `<div class="spinner"></div><div class="spin-text">${PHASE[btnId]}</div>`;
+      try {
+        const reply = await callOpenAI([
+          {role:'system', content:`Nationality: ${userNationality}`},
+          {role:'system', content: sysPrompt},
+          {role:'user', content: q}
         ]);
-        panel.querySelector('.result-content').innerHTML=formatHTML(reply);
-      }catch{
-        panel.querySelector('.result-content').innerText='⚠️ Something went wrong.';
-      }finally{
+        panel.querySelector('.result-content').innerHTML = formatHTML(reply);
+      } catch {
+        panel.querySelector('.result-content').innerText =
+          '⚠️ Something went wrong.';
+      } finally {
+        panel.classList.remove('waiting');
+      }
+    }
+
+    // Wire Hero Search
+    document.getElementById('heroSearchBtn').onclick = e => {
+      e.preventDefault();
+      handleHero(
+        'heroSearchBtn',
+        'recipeSearchPanel',
+        'You are a recipe finder.',
+        () => document.getElementById('heroRecipeSearch').value.trim()
+      );
+    };
+
+    // Auto-load & Refresh Tip
+    const loadTip = () => handleHero(
+      'refreshTip',
+      'dailyTip',
+      'You are a nutrition tip generator.',
+      () => 'Give one daily nutrition tip.'
+    );
+    loadTip();
+    document.getElementById('refreshTip').onclick = loadTip;
+
+    // Macro Snapshot Chart
+    const heroMacroCtx = (() => {
+      const c = document.createElement('canvas');
+      c.id = 'heroMacroChart';
+      document.querySelector('#hero .feature-card:last-child').append(c);
+      return c.getContext('2d');
+    })();
+    const heroMacroChart = new Chart(heroMacroCtx, {
+      type: 'pie',
+      data: { labels:['Carbs','Protein','Fat'], datasets:[{data:[1,1,1]}] },
+      options: { animation:false }
+    });
+    document.getElementById('refreshMacro').onclick = async () => {
+      const panel = document.getElementById('macroSnapshot');
+      panel.classList.add('waiting');
+      panel.innerHTML =
+        `<div class="spinner"></div><div class="spin-text">${PHASE.refreshMacro}</div>`;
+      try {
+        const reply = await callOpenAI([
+          {role:'system',content:`Nationality: ${userNationality}`},
+          {role:'system',content:'You are a macro snapshot AI.'},
+          {role:'user',content:'Provide protein/carbs/fat percentages.'}
+        ]);
+        const nums = reply.match(/\d+/g).map(Number);
+        heroMacroChart.data.datasets[0].data = nums;
+        heroMacroChart.update();
+        panel.innerHTML =
+          `Protein: ${nums[1]}% / Carbs: ${nums[0]}% / Fat: ${nums[2]}%`;
+      } catch {
+        panel.innerText = '⚠️ Error';
+      } finally {
         panel.classList.remove('waiting');
       }
     };
-  }
 
-  // ── Wire Every Module ──────────────────────────────────────────
-  wire(
-    'genPlan',
-    ['calories','dietType','allergyList','budget'],
-    ['calories','dietType'],
-    'You are a meal planning AI.'
-  );
-  wire(
-    'analyzeNutri',
-    ['foodLog','unitSelect'],
-    ['foodLog'],
-    'You are a nutrient analysis AI.'
-  );
-  wire(
-    'getRecipes',
-    ['pantry','cuisineType','recipeDifficulty','maxTime'],
-    ['pantry'],
-    'You are a recipe recommendation AI.'
-  );
-  wire(
-    'scanDef',
-    ['symptoms','dietOverview'],
-    ['symptoms'],
-    'You are a deficiency risk AI.'
-  );
-  wire(
-    'runRisk',
-    ['riskFrom','riskTo','syncBiomarkers','biomarkers','conditions','context'],
-    ['riskFrom','riskTo','biomarkers','conditions','context'],
-    'You are a metabolomic risk AI. Provide tracking alerts and interpret results.'
-  );
-  wire(
-    'runFitness',
-    ['fitGoal','fitFreq','blendIngredients','carbDate','intensity','crpLevel','nutraPref'],
-    ['fitGoal','fitFreq'],
-    'You are a fitness nutrition AI.'
-  );
-  wire(
-    'runPharma',
-    ['medList','foodList','compoundGoal','reminderMethod','reminderTime1','reminderTime2','cohortSelect'],
-    ['medList'],
-    'You are a pharma-nutrient interaction AI.'
-  );
-  wire(
-    'runSymptom',
-    ['sympAge','sympDesc','foodPref'],
-    ['sympAge','sympDesc'],
-    'You are a symptom-to-treatment advisor AI.'
-  );
+    // ── Nutrition Chatbot Wiring ─────────────────────────────────
+    const chatForm = document.getElementById('diet-form');
+    const chatInput = document.getElementById('dietInput');
+    const chatHint  = document.getElementById('dietHint');
 
-  // ── Charts + Export Buttons ────────────────────────────────────
-  // Intake
-  const ctx1=document.getElementById('intakeChart').getContext('2d');
-  const intakeChart=new Chart(ctx1,{
-    type:'line',
-    data:{
-      labels:['Mon','Tue','Wed','Thu','Fri'],
-      datasets:[{
-        label:'Calories In',
-        data:[2000,1800,2100,1900,2050],
-        borderColor:getComputedStyle(document.documentElement).getPropertyValue('--color-secondary').trim(),
-        fill:false
-      }]
+    chatForm.onsubmit = async e => {
+      e.preventDefault();
+      const q = chatInput.value.trim();
+      if (!q) return showToast('Please type a question.');
+      addChat('You', q);
+      chatHistory.push({who:'You', text:q});
+      saveHistory();
+      chatInput.value = '';
+      chatHint.style.display = 'block';
+      try {
+        const reply = await callOpenAI([
+          {role:'system', content:`Nationality: ${userNationality}`},
+          {role:'system', content:'You are a dietetics assistant.'},
+          {role:'user', content:q}
+        ]);
+        addChat('AI', reply);
+        chatHistory.push({who:'AI', text:reply});
+        saveHistory();
+      } catch {
+        addChat('AI', '⚠️ Something went wrong.');
+      } finally {
+        chatHint.style.display = 'none';
+      }
+    };
+
+    // ── Generic Module Wiring ───────────────────────────────────
+    function wire(btnId, fields, required, sysPrompt) {
+      document.getElementById(btnId).onclick = async e => {
+        e.preventDefault();
+        for (let id of required) {
+          if (id==='symptoms') {
+            if (!document.querySelector('input[name="symptom"]:checked')) {
+              return showToast('Select at least one symptom.');
+            }
+          } else {
+            const el = document.getElementById(id);
+            if (!el || !el.value.trim()) {
+              return showToast('Please fill in all required fields.');
+            }
+          }
+        }
+        const raw  = btnId.replace(/^(send|gen|analyze|get|scan|run)/, '');
+        const pid  = raw.charAt(0).toLowerCase()+raw.slice(1)+'Panel';
+        const panel= document.getElementById(pid);
+        panel.hidden = false;
+        panel.classList.add('waiting');
+        panel.querySelector('.result-content').innerHTML =
+          `<div class="spinner"></div><div class="spin-text">${PHASE[btnId]}</div>`;
+
+        let content = '';
+        for (let id of fields) {
+          if (id==='symptoms') {
+            const vals = Array.from(document.querySelectorAll('input[name="symptom"]:checked'))
+              .map(cb=>cb.value).join(', ');
+            content += `symptoms: ${vals}\n`;
+          } else {
+            const el = document.getElementById(id);
+            if (!el) continue;
+            if (el.tagName==='SELECT' && el.multiple) {
+              content += `${id}: ${Array.from(el.selectedOptions).map(o=>o.value).join(', ')}\n`;
+            } else if (el.tagName==='SELECT') {
+              content += `${id}: ${getSelectValue(el)}\n`;
+            } else {
+              content += `${id}: ${el.value}\n`;
+            }
+          }
+        }
+
+        try {
+          const reply = await callOpenAI([
+            {role:'system', content:`Nationality: ${userNationality}`},
+            {role:'system', content:sysPrompt},
+            {role:'user', content}
+          ]);
+          panel.querySelector('.result-content').innerHTML = formatHTML(reply);
+        } catch {
+          panel.querySelector('.result-content').innerText = '⚠️ Something went wrong.';
+        } finally {
+          panel.classList.remove('waiting');
+        }
+      };
     }
-  });
-  const exp1=document.createElement('button');
-  exp1.innerText='Export Chart'; exp1.className='export-chart-btn';
-  document.getElementById('intakeChart').after(exp1);
-  exp1.onclick=()=>{
-    const url=intakeChart.toBase64Image();
-    const a=document.createElement('a');
-    a.href=url; a.download='intake-chart.png'; a.click();
-  };
 
-  // Macro
-  const ctx2=document.getElementById('macroChart').getContext('2d');
-  const macroChart=new Chart(ctx2,{
-    type:'pie',
-    data:{
-      labels:['Carbs','Protein','Fat'],
-      datasets:[{data:[50,25,25]}]
-    }
-  });
-  const exp2=document.createElement('button');
-  exp2.innerText='Export Chart'; exp2.className='export-chart-btn';
-  document.getElementById('macroChart').after(exp2);
-  exp2.onclick=()=>{
-    const url=macroChart.toBase64Image();
-    const a=document.createElement('a');
-    a.href=url; a.download='macro-chart.png'; a.click();
-  };
-});
+    // ── Wire All Modules ─────────────────────────────────────────
+    wire('genPlan',      ['calories','dietType','allergyList','budget'],     ['calories','dietType'],       'You are a meal planning AI.');
+    wire('analyzeNutri', ['foodLog','unitSelect'],                         ['foodLog'],                   'You are a nutrient analysis AI.');
+    wire('getRecipes',   ['pantry','cuisineType','recipeDifficulty','maxTime'], ['pantry'],                   'You are a recipe recommendation AI.');
+    wire('scanDef',      ['symptoms','dietOverview'],                      ['symptoms'],                  'You are a deficiency risk AI.');
+    wire('runRisk',      ['riskFrom','riskTo','syncBiomarkers','biomarkers','conditions','context'],
+                                                            ['riskFrom','riskTo','biomarkers','conditions','context'],
+                                                            'You are a metabolomic risk AI. Provide tracking alerts and interpret results.');
+    wire('runFitness',   ['fitGoal','fitFreq','blendIngredients','carbDate','intensity','crpLevel','nutraPref'],
+                                                            ['fitGoal','fitFreq'],         'You are a fitness nutrition AI.');
+    wire('runPharma',    ['medList','foodList','compoundGoal','reminderMethod','reminderTime1','reminderTime2','cohortSelect'],
+                                                            ['medList'],                  'You are a pharma-nutrient interaction AI.');
+    wire('runSymptom',   ['sympAge','sympDesc','foodPref'],               ['sympAge','sympDesc'],        'You are a symptom-to-treatment advisor AI.');
+
+    // ── Progress Charts & Export ─────────────────────────────────
+    // Intake Chart
+    (() => {
+      const ctx = document.getElementById('intakeChart').getContext('2d');
+      const chart = new Chart(ctx, {
+        type: 'line',
+        data: {
+          labels: ['Mon','Tue','Wed','Thu','Fri'],
+          datasets: [{
+            label: 'Calories In',
+            data: [2000,1800,2100,1900,2050],
+            borderColor: getComputedStyle(document.documentElement)
+              .getPropertyValue('--color-secondary').trim(),
+            fill: false
+          }]
+        }
+      });
+      const btn = document.createElement('button');
+      btn.innerText = 'Export Chart';
+      btn.className = 'export-chart-btn';
+      document.getElementById('intakeChart').after(btn);
+      btn.onclick = () => {
+        const a = document.createElement('a');
+        a.href = chart.toBase64Image();
+        a.download = 'intake-chart.png';
+        a.click();
+      };
+    })();
+
+    // Macro Pie Chart
+    (() => {
+      const ctx = document.getElementById('macroChart').getContext('2d');
+      const chart = new Chart(ctx, {
+        type: 'pie',
+        data: { labels: ['Carbs','Protein','Fat'], datasets: [{data: [50,25,25]}] }
+      });
+      const btn = document.createElement('button');
+      btn.innerText = 'Export Chart';
+      btn.className = 'export-chart-btn';
+      document.getElementById('macroChart').after(btn);
+      btn.onclick = () => {
+        const a = document.createElement('a');
+        a.href = chart.toBase64Image();
+        a.download = 'macro-chart.png';
+        a.click();
+      };
+    })();
+
+  }); // end DOMContentLoaded
+})(); // end IIFE
 </script>
 
   
