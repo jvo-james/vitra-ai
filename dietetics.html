@@ -428,7 +428,26 @@ html.dark .bot-msg {
   background: var(--color-accent);
   color: var(--color-text);
 }
-    
+
+    #hero {
+  height: 80vh;
+  overflow: hidden;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+}
+.hero-features {
+  flex: 1;
+  overflow-y: auto;     /* if lots of panels appear, scroll inside here */
+  padding-right: 1rem;  /* keep space for scroll bar */
+}
+.feature-card {
+  /* ensure each card is a fixed height if you want uniformity */
+  min-height: 200px;
+}
+    .response .result-content {
+  margin-top: 2.5rem;  /* enough space for the close button */
+}
   </style>
 </head>
 
@@ -473,6 +492,15 @@ html.dark .bot-msg {
           <h3>Recipe Search</h3>
           <input type="text" id="heroRecipeSearch" placeholder="e.g. Jollof rice with chicken">
           <button id="heroSearchBtn" class="btn">Search</button>
+        <!-- Recipe Search response panel -->
+<div id="recipeSearchPanel" class="response" hidden>
+  <button class="close-btn"><i class="fas fa-times"></i></button>
+  <div class="result-content"></div>
+  <div class="tool-row">
+    <button class="copy-btn"><i class="fas fa-copy"></i></button>
+    <button class="dl-btn"><i class="fas fa-download"></i></button>
+  </div>
+</div>
         </div>
         <!-- Today's Tip -->
         <div class="feature-card">
@@ -501,21 +529,20 @@ html.dark .bot-msg {
   Nationality:
   <input type="text" id="nationality" placeholder="e.g. Ghanaian">
 </label>
+<button id="setNationality" class="btn-secondary">Set Nationality</button>
 
-<!-- Recipe Search response panel -->
-<div id="recipeSearchPanel" class="response" hidden>
-  <button class="close-btn"><i class="fas fa-times"></i></button>
-  <div class="result-content"></div>
-  <div class="tool-row">
-    <button class="copy-btn"><i class="fas fa-copy"></i></button>
-    <button class="dl-btn"><i class="fas fa-download"></i></button>
-  </div>
-</div>
 
 <!-- Add decorative “stickers” -->
 <i class="fas fa-pepper-hot sticker sticker-1"></i>
 <i class="fas fa-carrot sticker sticker-2"></i>
 <i class="fas fa-ice-cream sticker sticker-3"></i>
+  <!-- Inside <section id="hero">, add after the existing 3 stickers: -->
+<i class="fas fa-apple-alt sticker" style="top:10%;left:15%;"></i>
+<i class="fas fa-bread-slice sticker" style="top:20%;right:20%;"></i>
+<i class="fas fa-lemon sticker" style="bottom:25%;left:10%;"></i>
+<i class="fas fa-fish sticker" style="bottom:15%;right:15%;"></i>
+<i class="fas fa-bacon sticker" style="top:50%;left:50%;"></i>
+<!-- …and so on—just copy/paste with different icons & positions -->   
       </div>
     </section>
 
@@ -1008,6 +1035,14 @@ html.dark .bot-msg {
   }
 
   document.addEventListener('DOMContentLoaded', () => {
+    
+    // ── NATIONALITY SETUP ──────────────────────────────────────────
+  document.getElementById('setNationality')?.addEventListener('click', () => {
+    const v = document.getElementById('nationality').value.trim();
+    if (!v) return showToast('Please enter your nationality.');
+    userNationality = v;
+    showToast(`Nationality set to ${v}`);
+  });
     // ── Sidebar & Dark Mode ────────────────────────────────────────
     document.getElementById('hamburger').onclick = () =>
       document.body.classList.toggle('sidebar-open');
@@ -1226,60 +1261,58 @@ html.dark .bot-msg {
           }
         }
         // Panel lookup
-        const raw = btnId.replace(/^(send|gen|analyze|get|scan|run)/,'');
-        const panelId = raw.charAt(0).toLowerCase() + raw.slice(1) + 'Panel';
-        const panel = document.getElementById(panelId);
-        panel.hidden = false;
-        panel.classList.add('waiting');
-        const phase = PHASE_TEXT[btnId] || 'Please wait…';
-        panel.querySelector('.result-content').innerHTML =
-          `<div class="spinner"></div><div class="spin-text">${phase}</div>`;
-        // Gather inputs
-        let content = '';
-        const nat = document.getElementById('nationality').value.trim() || '';
-        for (let id of allFields) {
-          if (id === 'symptoms') {
-            const vals = Array.from(document.querySelectorAll('input[name="symptom"]:checked'))
-                          .map(cb=>cb.value).join(', ');
-            content += `symptoms: ${vals}\n`;
+      const raw = btnId.replace(/^(send|gen|analyze|get|scan|run)/,'');
+      const pid = raw.charAt(0).toLowerCase()+raw.slice(1)+'Panel';
+      const panel = document.getElementById(pid);
+      panel.hidden=false; panel.classList.add('waiting');
+      const phase = PHASE_TEXT[btnId]||'Please wait…';
+      panel.querySelector('.result-content').innerHTML=
+        `<div class="spinner"></div><div class="spin-text">${phase}</div>`;
+      // Gather content
+      let content='';
+      for (let id of allFields) {
+        if (id==='symptoms') {
+          const vals=Array.from(document.querySelectorAll('input[name="symptom"]:checked'))
+            .map(cb=>cb.value).join(', ');
+          content+=`symptoms: ${vals}\n`;
+        } else {
+          const el=document.getElementById(id);
+          if (!el) continue;
+          if (el.tagName==='SELECT'&&el.multiple) {
+            content+=`${id}: ${Array.from(el.selectedOptions).map(o=>o.value).join(', ')}\n`;
+          } else if (el.tagName==='SELECT') {
+            content+=`${id}: ${getSelectValue(el)}\n`;
           } else {
-            const el = document.getElementById(id);
-            if (!el) continue;
-            if (el.tagName==='SELECT' && el.multiple) {
-              content += `${id}: ${Array.from(el.selectedOptions).map(o=>o.value).join(', ')}\n`;
-            } else if (el.tagName==='SELECT') {
-              content += `${id}: ${getSelectValue(el)}\n`;
-            } else {
-              content += `${id}: ${el.value}\n`;
-            }
+            content+=`${id}: ${el.value}\n`;
           }
         }
-        // AI call
-        try {
-          const reply = await callOpenAI([
-            {role:'system',content:`Nationality: ${nat}`},
-            {role:'system',content:sysPrompt},
-            {role:'user',content}
-          ]);
-          panel.querySelector('.result-content').innerHTML = formatHTML(reply);
-        } catch {
-          panel.querySelector('.result-content').innerText = '⚠️ Something went wrong.';
-        } finally {
-          panel.classList.remove('waiting');
-        }
-      };
-    }
+      }
+      // Call AI
+      try {
+        const reply = await callOpenAI([
+          {role:'system',content:`Nationality: ${userNationality}`},
+          {role:'system',content:sysPrompt},
+          {role:'user',content}
+        ]);
+        panel.querySelector('.result-content').innerHTML = formatHTML(reply);
+      } catch {
+        panel.querySelector('.result-content').innerText='⚠️ Something went wrong.';
+      } finally {
+        panel.classList.remove('waiting');
+      }
+    };
+  }
 
-    // ── Wire All Sections ───────────────────────────────────────────
-    wire('genPlan',      ['calories','dietType','allergyList','budget'], ['calories','dietType'],      'You are a meal planning AI.');
-    wire('analyzeNutri', ['foodLog','unitSelect'],                  ['foodLog'],                      'You are a nutrient analysis AI.');
-    wire('getRecipes',   ['pantry','cuisineType','recipeDifficulty','maxTime'], ['pantry'], 'You are a recipe recommendation AI.');
-    wire('scanDef',      ['symptoms','dietOverview'],               ['symptoms'],                    'You are a deficiency risk AI.');
-    wire('runRisk',      ['riskFrom','riskTo','syncBiomarkers'],     ['riskFrom','riskTo'],           'You are a metabolomic risk AI. Provide continuous biomarker tracking alerts.');
-    wire('runFitness',   ['fitGoal','fitFreq','blendIngredients','carbDate','intensity','crpLevel','nutraPref'], ['fitGoal','fitFreq'], 'You are a fitness nutrition AI.');
-    wire('runPharma',    ['medList','foodList','compoundGoal','reminderMethod','reminderTime1','reminderTime2','cohortSelect'], ['medList'], 'You are a pharma-nutrient interaction AI.');
-    wire('runSymptom',   ['sympAge','sympDesc','foodPref'],         ['sympAge','sympDesc'],           'You are a symptom-to-treatment advisor AI.');
-
+  // ── WIRE ALL MODULES ────────────────────────────────────────────
+  wire('genPlan',['calories','dietType','allergyList','budget'],['calories','dietType'],'You are a meal planning AI.');
+  wire('analyzeNutri',['foodLog','unitSelect'],['foodLog'],'You are a nutrient analysis AI.');
+  wire('getRecipes',['pantry','cuisineType','recipeDifficulty','maxTime'],['pantry'],'You are a recipe recommendation AI.');
+  wire('scanDef',['symptoms','dietOverview'],['symptoms'],'You are a deficiency risk AI.');
+  wire('runRisk',['riskFrom','riskTo','syncBiomarkers'],['riskFrom','riskTo'],'You are a metabolomic risk AI.');
+  wire('runFitness',['fitGoal','fitFreq','blendIngredients','carbDate','intensity','crpLevel','nutraPref'],['fitGoal','fitFreq'],'You are a fitness nutrition AI.');
+  wire('runPharma',['medList','foodList','compoundGoal','reminderMethod','reminderTime1','reminderTime2','cohortSelect'],['medList'],'You are a pharma-nutrient interaction AI.');
+  wire('runSymptom',['sympAge','sympDesc','foodPref'],['sympAge','sympDesc'],'You are a symptom-to-treatment advisor AI.');
+    
     // ── Progress Charts ─────────────────────────────────────────────
     const ctx1 = document.getElementById('intakeChart')?.getContext('2d');
     if (ctx1) new Chart(ctx1,{ type:'line', data:{
