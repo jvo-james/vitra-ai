@@ -208,6 +208,7 @@ h2 {
   border-radius: var(--radius);
   padding: var(--padding);
   max-height: 500px; overflow-y: auto;
+  min-height: 250px;
   display: flex; flex-direction: column; gap: .5rem;
 }
 .chat-input {
@@ -324,6 +325,10 @@ button.btn-secondary:hover {
 .tool-row {
   position: absolute; bottom: var(--padding); right: var(--padding);
   display: flex; gap: .5rem;
+}
+    .response .tool-row {
+  position: static !important;
+  margin-top: 1rem;
 }
 .close-btn, .copy-btn, .dl-btn {
   background: none; border: none; cursor: pointer;
@@ -462,9 +467,10 @@ html.dark .bot-msg {
 }
     /* Limit the hero macro chart size */
 .feature-card #heroMacroChart {
-  max-width: 180px;
-  margin: 0.5rem auto;
-  display: block;
+  width: 100%;
+  height: 180px;
+ object-fit: contain;
+ margin: 0.5rem 0
 }
 /* Optional: center the text under it */
 .feature-card .macro-desc {
@@ -473,37 +479,21 @@ html.dark .bot-msg {
   color: var(--color-muted);
   margin-top: 0.25rem;
 }
-    /* Hero background gradient */
-#hero {
-  background: linear-gradient(135deg, var(--color-primary-alt), var(--color-secondary));
-  color: #fff;
-  overflow: hidden;
-  position: relative;
-}
-/* Hero text */
-#hero h2, #hero .desc {
-  text-shadow: 1px 1px 4px rgba(0,0,0,0.3);
-}
-/* Feature cards – glass effect */
-#hero .feature-card {
-  background: rgba(255,255,255,0.15);
-  backdrop-filter: blur(10px);
-  transition: transform .4s, box-shadow .4s;
-}
-#hero .feature-card:hover {
-  transform: translateY(-10px);
-  box-shadow: 0 12px 30px rgba(0,0,0,0.3);
-}
+
 /* Dark mode tweak */
 html.dark #hero {
   background: linear-gradient(135deg, #333, #555);
 }
      .checkbox-group {
-  display: grid;
- grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));  gap: .75rem;
- }
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 1rem; }
  .checkbox-group label {
-   display: flex; align-items: center; gap: .25rem;
+   display: inline-flex;
+  align-items: center;
+  gap: .5rem;
+ white-space: nowrap;
  }
      @media(max-width: 640px) {
    section.module { padding: .75rem; margin-left: 0; }
@@ -514,6 +504,56 @@ html.dark #hero {
   #hero .feature-card button,
   #hero .feature-card input { width: 100%; }
  }
+    #dailyTip .tool-row,
+#recipeSearchPanel .tool-row {
+  position: static;
+  margin-top: 0.75rem;
+  display: flex;
+  justify-content: flex-end;
+}
+   .history-modal .modal-content {
+  box-shadow: var(--shadow);
+  display: grid;
+  grid-template-rows: auto 1fr auto;
+  gap: .5rem;
+}
+.history-modal .modal-content h3 {
+  text-align: center;
+  color: var(--color-primary);
+}
+.history-modal ul {
+  list-style: none;
+  overflow-y: auto;
+  padding: 0 .5rem;
+}
+.history-modal ul li {
+  display: flex;
+  justify-content: space-between;
+  padding: .5rem 0;
+  border-bottom: 1px solid var(--color-muted);
+}
+.history-modal .button-row {
+  position: sticky;
+  bottom: 0;
+  background: var(--color-surface);
+  padding: .5rem 0;
+}
+.history-modal button {
+  flex: 1;
+  margin: 0 .25rem;
+  padding: .5rem;
+ border: none;
+ border-radius: var(--radius);
+ cursor: pointer;
+}
+.history-modal .clear-all-btn {
+  background: var(--color-primary);
+  color: #fff;
+}
+.history-modal .close-modal {
+  background: var(--color-secondary);
+ color: #fff;
+}
   </style>
 </head>
 
@@ -982,8 +1022,12 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   // ── Global State & Persistence ───────────────────────────────────
-  let userNationality = localStorage.getItem('nationality') || '';
-
+  let userNationality = localStorage.getItem('nationality') || ''; 
+  // if we have one, prefill the input so it survives refresh
+ if (userNationality) {
+   const ni = document.getElementById('nationality');
+   ni.value = userNationality;
+ }
   // ── Shared CSS for Toasts, Spinners & Panels ─────────────────────
   (function(){
     const css = `
@@ -1071,26 +1115,9 @@ document.addEventListener('DOMContentLoaded', () => {
       ]);
       panel.querySelector('.result-content').innerHTML = formatHTML(reply);
     } catch {
-      // if recipe search failed for ANY query, show a dynamic template
-      if (panelId === 'recipeSearchPanel') {
-        // capitalize the user’s query for the title
-        const title = q.charAt(0).toUpperCase() + q.slice(1);
-        panel.querySelector('.result-content').innerHTML = `
-          <h3>Sample Recipe: ${title}</h3>
-          <p><strong>Ingredients:</strong> [List your main ingredients for ${q} here]</p>
-          <p><strong>Instructions:</strong></p>
-          <ol>
-            <li>Prepare and season your main ingredient(s).</li>
-            <li>Sauté aromatics (onion, garlic, etc.) until fragrant.</li>
-            <li>Add your main ingredient(s) and cook until nearly done.</li>
-            <li>Stir in any vegetables, liquids (stock, sauce) and simmer.</li>
-            <li>Adjust seasoning, cook until everything is tender, then serve.</li>
-          </ol>
-          <p class="macro-desc">Use this template as a guide to cook “${q}” even if the AI failed.</p>`;
-      } else {
         panel.querySelector('.result-content').innerText = '⚠️ Oops! Could not fetch the recipe. Please try again.';
      }
-    } finally {
+     finally {
       panel.classList.remove('waiting');
     }
   }
@@ -1128,7 +1155,11 @@ document.addEventListener('DOMContentLoaded', () => {
   const heroMacroChart = new Chart(heroMacroCanvas.getContext('2d'), {
     type: 'pie',
     data: { labels: ['Carbs','Protein','Fat'], datasets: [{ data: [1,1,1] }] },
-    options: { animation: false }
+    options: {
+      animation: false,
+      maintainAspectRatio: false,
+      layout: { padding: 10 }
+    }
   });
 
   const refreshMacroBtn = document.getElementById('refreshMacro');
@@ -1230,19 +1261,68 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   // ── Wire all modules ───────────────────────────────────────────
-  wire('genPlan',      ['calories','dietType','allergyList','budget'], ['calories','dietType'], 'You are a meal planning AI.');
-  wire('analyzeNutri', ['foodLog','unitSelect'],                  ['foodLog'],           'You are a nutrient analysis AI.');
-  wire('getRecipes',   ['pantry','cuisineType','recipeDifficulty','maxTime'], ['pantry'],   'You are a recipe recommendation AI.');
-  wire('scanDef',      ['symptoms','dietOverview'],                ['symptoms'],         'You are a deficiency risk AI.');
-  wire('runRisk',      ['riskFrom','riskTo','syncBiomarkers','biomarkers','conditions','context'],
-                     ['riskFrom','riskTo','biomarkers','conditions','context'],
-                     'You are a metabolomic risk AI. Provide tracking alerts and interpret results.');
-  wire('runFitness',   ['fitGoal','fitFreq','blendIngredients','carbDate','intensity','crpLevel','nutraPref'],
-                     ['fitGoal','fitFreq'], 'You are a fitness nutrition AI.');
-  wire('runPharma',    ['medList','foodList','compoundGoal','reminderMethod','reminderTime1','reminderTime2','cohortSelect'],
-                     ['medList'], 'You are a pharma-nutrient interaction AI.');
-  wire('runSymptom',   ['sympAge','sympDesc','foodPref'],          ['sympAge','sympDesc'], 'You are a symptom-to-treatment advisor AI.');
+  wire(
+    'genPlan',
+    ['calories','dietType','allergyList','budget'],
+    ['calories','dietType'],
+    'You are an expert registered dietitian. Given the user’s daily calorie target, diet type, allergies/intolerances, and budget, generate a detailed 7-day meal plan. ' +
+    'For each day, list breakfast, lunch, dinner (with approximate calories and macro breakdown), plus a consolidated shopping list at the end.'
+  );
 
+  wire(
+    'analyzeNutri',
+   ['foodLog','unitSelect'],
+    ['foodLog'],
+    'You are a nutrition scientist. Analyze the user’s food log and unit preference, and produce a complete macro- and micronutrient breakdown. ' +
+    'Present totals for calories, protein, carbs, fats, fiber, vitamins, and minerals in a clear table format, and comment on any notable deficiencies or excesses.'
+  );
+
+  wire(
+    'getRecipes',
+    ['pantry','cuisineType','recipeDifficulty','maxTime'],
+   ['pantry'],
+    'You are a professional chef AI. Given the user’s pantry items, desired cuisine style, difficulty, and maximum prep time, recommend 3 original recipes. ' +
+    'For each recipe, include title, ingredients list, step-by-step instructions, and approximate prep & cook times.'
+ );
+
+  wire(
+    'scanDef',
+   ['symptoms','dietOverview'],
+    ['symptoms'],
+    'You are a clinical dietitian. Based on the user’s selected symptoms and diet overview, identify potential nutrient deficiencies. ' +
+    'Provide a ranked list of likely deficiencies, rationale for each, and dietary recommendations (foods or supplements) to address them.'
+  );
+
+  wire(
+    'runRisk',
+    ['riskFrom','riskTo','syncBiomarkers','biomarkers','conditions','context'],
+    ['riskFrom','riskTo','biomarkers','conditions','context'],
+    'You are a metabolomic health analyst. Given the date range, biomarkers (e.g. glucose, lipids), sync status, conditions, and context, generate an interactive risk radar. ' +
+    'Interpret trends, highlight any values outside optimal ranges, and provide actionable health alerts or recommendations.'
+  );
+
+  wire(
+    'runFitness',
+    ['fitGoal','fitFreq','blendIngredients','carbDate','intensity','crpLevel','nutraPref'],
+    ['fitGoal','fitFreq'],
+    'You are a certified sports nutritionist. Based on the user’s fitness goal, weekly workout frequency, available ingredients, carb-timing start date, intensity level, CRP level, and preferred nutraceuticals, create a customized ‘fitness nutrition coach’ plan. ' +
+    'Include daily macro targets, pre/post-workout blend recipes, and recovery recommendations.'
+  );
+
+  wire(
+    'runPharma',
+    ['medList','foodList','compoundGoal','reminderMethod','reminderTime1','reminderTime2','cohortSelect'],
+   ['medList'],
+    'You are a pharmacologist-dietitian. Analyze drug–food interactions for the given medications and food items, suggest compounding strategies for the desired outcome, schedule reminders per user preference, and deliver analytics comparing the selected cohort.'
+  );
+
+  wire(
+    'runSymptom',
+    ['sympAge','sympDesc','foodPref'],
+    ['sympAge','sympDesc'],
+    'You are a medical nutrition therapist. Given the user’s age, symptom description, and food preferences, diagnose possible conditions, recommend first-line OTC treatments and appropriate Ghanaian foods to support recovery, with safety notes.'
+  );
+  
   // ── Chatbot wiring ─────────────────────────────────────────────
   const chatBox  = document.getElementById('dietChatBox'),
         chatHint = document.getElementById('dietHint');
@@ -1287,8 +1367,7 @@ document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('clearDiet').onclick = () => {
    chatBox.innerHTML = '';
    history = [];
- localStorage.removeItem('chatHistory');
- };
+  };
 
   document.getElementById('viewDietHistory').type = 'button';
   document.getElementById('viewDietHistory').onclick = () => {
