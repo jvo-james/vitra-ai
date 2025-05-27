@@ -454,49 +454,45 @@
     </footer>
   </main>
 
-    <script>
+   <script>
 document.addEventListener('DOMContentLoaded', () => {
-  //───────────────────── Toast Helper ─────────────────────
+  // ──────────────── Toast Helper ────────────────
   function showToast(msg) {
     const t = document.createElement('div');
     t.className = 'toast';
     t.innerText = msg;
-    document.body.append(t);
+    document.body.appendChild(t);
     requestAnimationFrame(() => t.classList.add('visible'));
     setTimeout(() => t.remove(), 3000);
   }
 
-  //───────────────────── Sanitize AI Content ─────────────────────
+  // ──────────────── Sanitize AI Content ────────────────
   function sanitizeAIContent(raw) {
     let inTable = false;
     return raw
-      // code blocks
       .replace(/```([\s\S]+?)```/g, (_, code) => `<pre>${code.trim()}</pre>`)
-      // headers
       .replace(/^#### (.+)$/gm, '<h4>$1</h4>')
       .replace(/^### (.+)$/gm, '<h3>$1</h3>')
       .replace(/^## (.+)$/gm, '<h2>$1</h2>')
-      // bold & italic
       .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
       .replace(/\*(.+?)\*/g, '<em>$1</em>')
-      // tables
       .replace(/^\|(.+)\|$/gm, (_, row) => {
         const cols = row.split('|').map(c => c.trim());
         if (!inTable) {
           inTable = true;
           return '<table><thead><tr>' +
-            cols.map(c => `<th>${c}</th>`).join('') +
-            '</tr></thead><tbody>';
+                 cols.map(c => `<th>${c}</th>`).join('') +
+                 '</tr></thead><tbody>';
         } else {
           return '<tr>' +
-            cols.map(c => `<td>${c}</td>`).join('') +
-            '</tr>';
+                 cols.map(c => `<td>${c}</td>`).join('') +
+                 '</tr>';
         }
       })
       .replace(/$/, () => inTable ? '</tbody></table>' : '');
   }
 
-  //───────────────────── AI Caller ─────────────────────
+  // ──────────────── AI Caller ────────────────
   async function callAI(prompt) {
     try {
       const res = await fetch('/.netlify/functions/openai-proxy', {
@@ -505,7 +501,7 @@ document.addEventListener('DOMContentLoaded', () => {
         body: JSON.stringify({
           messages: [
             { role: 'system', content: 'You are a helpful consultation booking assistant.' },
-            { role: 'user', content: prompt }
+            { role: 'user',   content: prompt }
           ]
         })
       });
@@ -513,27 +509,24 @@ document.addEventListener('DOMContentLoaded', () => {
       const json = await res.json();
       return json.choices?.[0]?.message?.content || '⚠️ Unexpected AI response.';
     } catch (err) {
-      return err.message.includes('Sandbox.Timedout')
-        ? '⚠️ The AI is taking longer than usual—please try again.'
-        : '⚠️ Error: ' + err.message;
+      if (err.message.includes('Sandbox.Timedout')) {
+        return '⚠️ AI is taking longer than usual—please try again.';
+      }
+      return '⚠️ Error: ' + err.message;
     }
   }
 
-  //───────────────────── Spinner & Tools ─────────────────────
+  // ──────────────── Spinner & Tools ────────────────
   const PHASE_TEXT = {
-    heroBookBtn:       'Preparing booking interface…',
-    bookAppointment:   'Booking appointment…',
-    checkAvailability:'Checking availability…',
-    rescheduleBtn:     'Rescheduling…',
-    cancelBtn:         'Cancelling…',
-    bulkUpload:        'Processing bulk upload…',
-    sendScheduler:     'Consulting scheduler…'
+    findProvider:     'Finding providers…',
+    loadSlots:        'Loading available slots…',
+    processPayment:   'Processing payment…'
   };
 
   function startThinking(panel, key) {
     panel.hidden = false;
     panel.querySelector('.result-content').innerHTML = `
-      <div class="spin-header">${PHASE_TEXT[key]||'Thinking…'}</div>
+      <div class="spin-header">${PHASE_TEXT[key] || 'Thinking…'}</div>
       <div class="spinner"></div>`;
     const old = panel.querySelector('.tool-row');
     if (old) old.remove();
@@ -551,7 +544,7 @@ document.addEventListener('DOMContentLoaded', () => {
     panel.querySelector('.close-btn').style.display = 'block';
   }
 
-  //───────────────────── Sidebar & Theme ─────────────────────
+  // ──────────────── Sidebar & Theme ────────────────
   document.getElementById('hamburger').onclick = () =>
     document.body.classList.toggle('sidebar-open');
 
@@ -571,93 +564,58 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('themeToggle').classList.toggle('fa-sun');
   };
 
-  //───────────────────── Hero Button ─────────────────────
-  document.getElementById('heroBookBtn').addEventListener('click', async e => {
+  // ──────────────── Module Handlers ────────────────
+
+  // 1. Intelligent Provider Match
+  document.getElementById('findProvider').onclick = async e => {
     e.preventDefault();
-    const panel = document.getElementById('bookingPanel');
-    startThinking(panel, 'heroBookBtn');
-    const txt = await callAI('Show me the booking form for a new consultation with all options.');
-    panel.querySelector('.result-content').innerHTML = sanitizeAIContent(txt);
-    injectTools(panel);
-  });
-
-  //───────────────────── Module Handlers ─────────────────────
-  // helper to wire form button
-  function wire(buttonId, panelId, gatherPrompt) {
-    document.getElementById(buttonId).onclick = async e => {
-      e.preventDefault();
-      const panel = document.getElementById(panelId);
-      startThinking(panel, buttonId);
-      const prompt = gatherPrompt();
-      const txt = await callAI(prompt);
-      panel.querySelector('.result-content').innerHTML = sanitizeAIContent(txt);
-      injectTools(panel);
-    };
-  }
-
-  // Book single appointment
-  wire('bookAppointment', 'bookingPanel', () => {
-    const name = document.getElementById('clientName').value.trim();
-    const svc  = document.getElementById('serviceType').value;
-    const dr   = document.getElementById('providerSelect').value;
-    const date = document.getElementById('apptDate').value;
-    const time = document.getElementById('apptTime').value;
-    if (!name || !svc || !dr || !date || !time) {
-      return 'Please fill all required booking fields.';
-    }
-    return `Book a ${svc} consultation for ${name} with ${dr} on ${date} at ${time}.`;
-  });
-
-  // Check availability
-  wire('checkAvailability', 'availabilityPanel', () => {
-    const svc  = document.getElementById('availService').value;
-    const dr   = document.getElementById('availProvider').value;
-    const date = document.getElementById('availDate').value;
-    if (!svc || !dr || !date) {
-      return 'Select service, provider and date to check availability.';
-    }
-    return `List available slots for ${svc} with ${dr} on ${date}.`;
-  });
-
-  // Reschedule
-  wire('rescheduleBtn', 'reschedulePanel', () => {
-    const apptId = document.getElementById('rescheduleId').value.trim();
-    const date   = document.getElementById('newDate').value;
-    const time   = document.getElementById('newTime').value;
-    if (!apptId || !date || !time) {
-      return 'Please provide appointment ID, new date, and new time.';
-    }
-    return `Reschedule appointment ${apptId} to ${date} at ${time}.`;
-  });
-
-  // Cancel
-  wire('cancelBtn', 'cancelPanel', () => {
-    const apptId = document.getElementById('cancelId').value.trim();
-    if (!apptId) return 'Enter the appointment ID to cancel.';
-    return `Cancel appointment ${apptId}.`;
-  });
-
-  // Bulk upload CSV of appointments
-  document.getElementById('bulkUpload').onclick = async e => {
-    e.preventDefault();
-    const file = document.getElementById('bulkFile').files[0];
-    const panel = document.getElementById('bulkPanel');
-    if (!file) {
-      showToast('Please select a CSV file to upload.');
-      return;
-    }
-    startThinking(panel, 'bulkUpload');
-    const text = await file.text();
-    // extract lines of "name,date,time,service,provider"
-    const lines = text.split('\n').slice(1).filter(l => l.trim());
-    const meds  = lines.join('; ');
-    const prompt = `Bulk book these appointments:\n${meds}`;
-    const res = await callAI(prompt);
-    panel.querySelector('.result-content').innerHTML = sanitizeAIContent(res);
+    const panel = document.getElementById('providerResults');
+    startThinking(panel, 'findProvider');
+    const concern  = document.getElementById('matchConcern').value;
+    const language = document.getElementById('matchLanguage').value;
+    const resp = await callAI(`Match providers for concern="${concern}", language="${language}".`);
+    panel.querySelector('.result-content').innerHTML = sanitizeAIContent(resp);
     injectTools(panel);
   };
 
-  // Copy / Download / Close controls
+  // 2. Smart Calendar & Availability
+  document.getElementById('loadSlots').onclick = async e => {
+    e.preventDefault();
+    const panel = document.getElementById('slotList');
+    startThinking(panel, 'loadSlots');
+    const prov = document.getElementById('calendarProvider').value;
+    const date = document.getElementById('calendarDate').value;
+    const resp = await callAI(`List available slots for provider="${prov}" on ${date}.`);
+    panel.querySelector('.result-content').innerHTML = sanitizeAIContent(resp);
+    injectTools(panel);
+  };
+
+  // 3. Telehealth Mode Selection
+  document.getElementById('confirmMode').onclick = e => {
+    e.preventDefault();
+    showToast('Your telehealth mode has been saved.');
+  };
+
+  // 4. Auto Reminders & Follow-Up
+  document.getElementById('setReminders').onclick = e => {
+    e.preventDefault();
+    showToast('Reminder preferences updated.');
+  };
+
+  // 5. Insurance & Payment
+  document.getElementById('processPayment').onclick = async e => {
+    e.preventDefault();
+    const panel = document.getElementById('paymentResponse');
+    startThinking(panel, 'processPayment');
+    const ins = document.getElementById('insProvider').value.trim();
+    const pol = document.getElementById('insPolicy').value.trim();
+    const pm  = document.getElementById('payMethod').value;
+    const resp = await callAI(`Process payment: insurance="${ins}", policy="${pol}", method="${pm}".`);
+    panel.querySelector('.result-content').innerHTML = sanitizeAIContent(resp);
+    injectTools(panel);
+  };
+
+  // ──────────────── Copy / Download / Close ────────────────
   document.body.addEventListener('click', e => {
     const rsp = e.target.closest('.response');
     if (!rsp) return;
@@ -678,126 +636,45 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 
-    // ───────────────────── Module wiring ─────────────────────
- // Provider match
-document.getElementById('findProvider').onclick = async e => {
-   e.preventDefault();
-  const panel = document.getElementById('providerResults');
-   startThinking(panel, 'findProvider');
-  const concern  = document.getElementById('matchConcern').value;
-  const language = document.getElementById('matchLanguage').value;
-  const resp = await callAI(`Match provider for concern="${concern}", language="${language}".`);
-  panel.querySelector('.result-content').innerHTML = sanitizeAIContent(resp);
-   injectTools(panel);
- };
-
-// Calendar slots
- document.getElementById('loadSlots').onclick = async e => {
-  e.preventDefault();
-  const panel = document.getElementById('slotList');
-  startThinking(panel, 'loadSlots');
-  const prov = document.getElementById('calendarProvider').value;
-  const date = document.getElementById('calendarDate').value;
-  const resp = await callAI(`List slots for provider=${prov} on ${date}.`);
-  panel.querySelector('.result-content').innerHTML = sanitizeAIContent(resp);
-  injectTools(panel);
- };
-
-// Telehealth mode
- document.getElementById('confirmMode').onclick = e => {
-  e.preventDefault();
-  showToast('Your preferred telehealth mode has been saved.');
-};
-
-// Reminders
-document.getElementById('setReminders').onclick = async e => {
-  e.preventDefault();
-   showToast('Reminder preferences updated.');
- };
-
-// Payment
- document.getElementById('processPayment').onclick = async e => {
-  e.preventDefault();
-  const panel = document.getElementById('paymentResponse');
-   startThinking(panel, 'processPayment');
-   const ins = document.getElementById('insProvider').value;
-   const pol = document.getElementById('insPolicy').value;
-   const pm  = document.getElementById('payMethod').value;
-  const resp = await callAI(`Process payment: insurance=${ins} policy=${pol} or method=${pm}.`);
-   panel.querySelector('.result-content').innerHTML = sanitizeAIContent(resp);
-   injectTools(panel);
- };
-  
-  //───────────────────── Scheduler Chat ─────────────────────
-  const chatBox = document.getElementById('schedulerChatBox');
-  let lastDate  = null;
-  const chatHistory = [];
-
+  // ──────────────── Live AI Chat Support ────────────────
+  const chatBox = document.getElementById('consultChatBox');
   function addChat(role, text) {
     const now = new Date();
-    const dateKey = now.toDateString();
-    // date separator
-    if (dateKey !== lastDate) {
+    const dateStr = now.toLocaleDateString();
+    // insert date separator if first or new day
+    const lastSep = chatBox.querySelector('.chat-date:last-of-type');
+    const lastDate = lastSep && new Date(lastSep.dataset.date).toDateString();
+    if (!lastSep || lastDate !== now.toDateString()) {
       const sep = document.createElement('div');
       sep.className = 'chat-date';
-      // Today / Yesterday / actual date
-      const diffDays = Math.floor((new Date() - now.setHours(0,0,0,0)) / 864e5);
-      sep.innerText = diffDays === 0 ? 'Today'
-        : diffDays === 1 ? 'Yesterday'
-        : new Date(dateKey).toLocaleDateString();
-      chatBox.append(sep);
-      lastDate = dateKey;
+      sep.dataset.date = now.toDateString();
+      const dayDiff = Math.floor((new Date() - new Date(now.toDateString())) / 864e5);
+      sep.innerText = dayDiff === 0 ? 'Today'
+                   : dayDiff === 1 ? 'Yesterday'
+                   : now.toLocaleDateString();
+      chatBox.appendChild(sep);
     }
-    const ts = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    const ts = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
     const msg = document.createElement('div');
     msg.className = role === 'user' ? 'user-msg' : 'bot-msg';
     msg.innerHTML = `<div class="msg-text">${text}</div><div class="msg-ts">${ts}</div>`;
-    chatBox.append(msg);
+    chatBox.appendChild(msg);
     chatBox.scrollTop = chatBox.scrollHeight;
-    chatHistory.push({ role, text, time: `${dateKey} ${ts}` });
   }
 
-  document.getElementById('sendScheduler').onclick = async e => {
+  document.getElementById('sendConsult').onclick = async e => {
     e.preventDefault();
-    const q = document.getElementById('schedulerInput').value.trim();
+    const q = document.getElementById('consultInput').value.trim();
     if (!q) return showToast('Type a message');
     addChat('user', q);
-    document.getElementById('schedulerInput').value = '';
+    document.getElementById('consultInput').value = '';
     const spinner = document.createElement('div');
     spinner.className = 'spinner';
-    chatBox.append(spinner);
+    chatBox.appendChild(spinner);
     const resp = await callAI(q);
     spinner.remove();
     addChat('bot', sanitizeAIContent(resp));
   };
-
-  document.getElementById('clearSchedulerChat').onclick = () => {
-    chatBox.innerHTML = '';
-    lastDate = null;
-    chatHistory.length = 0;
-  };
-
-  // History modal
-  const histModal = document.getElementById('historyModal');
-  document.getElementById('historyBtn').onclick = e => {
-    e.preventDefault();
-    const list = document.getElementById('historyList');
-    list.innerHTML = chatHistory.map((h,i) => `
-      <div class="history-item">
-        <strong>${h.role==='user'?'You':'Scheduler'}:</strong> ${h.text}
-        <div class="msg-ts">${h.time}</div>
-        <button class="delete-history" data-index="${i}">&times;</button>
-      </div>`).join('');
-    histModal.hidden = false;
-  };
-  document.querySelector('.close-modal').onclick = () => histModal.hidden = true;
-  document.getElementById('historyList').addEventListener('click', e => {
-    if (!e.target.matches('.delete-history')) return;
-    const i = +e.target.dataset.index;
-    chatHistory.splice(i, 1);
-    e.target.closest('.history-item').remove();
-  });
-
 });
 </script>
 </body>
