@@ -77,7 +77,9 @@
 
   /*──────────────────── Header ────────────────────*/
   header {
-    position:fixed; top:0; left:220px; right:0;
+    position: sticky; /* now sticky */
+   top: 0; left: 220px; right: 0;
+  z-index: 1001;
     height:60px; background: var(--pharm-surface);
     display:flex; align-items:center; justify-content:space-between;
     padding:0 var(--padding); box-shadow:var(--shadow);
@@ -231,7 +233,31 @@
   input, textarea, select, button { font-size: 0.9rem; }
   .tool-row { bottom:0.5rem; right:0.5rem; flex-direction: column; }
 }
+/* Sidebar collapsed */
+  aside#sidebar.collapsed { width:60px !important; }
+  /* Header and main adjustments handled inline in JS */
+
+  /* Chat timestamps */
+  .msg-ts { font-size:0.75rem; color:var(--pharm-muted); margin-top:0.25rem; }
+
+  /* History modal */
+  .modal {
+   position: fixed; top:0; left:0; width:100%; height:100%;
+    background: rgba(0,0,0,0.5); display:flex; align-items:center;
+    justify-content:center; z-index:2000;
+  }
+  .modal-content {
+    background: var(--pharm-surface); padding:1.5rem;
+    border-radius: var(--radius); width:90%; max-width:500px;
+    position:relative;
+  }
+  .close-modal {
+    position:absolute; top:0.5rem; right:0.75rem; font-size:1.5rem;
+   cursor:pointer;
+  }
+  .history-item { margin-bottom:1rem; }
 </style>
+
 </head>
 <body>
   <!-- Sidebar -->
@@ -249,6 +275,9 @@
         <li><a href="consult.html"><i class="fas fa-calendar-check"></i> <span>Consult Booking</span></a></li>
       </ul>
    </nav>
+    <button id="shrinkSidebar" title="Toggle sidebar" style="margin:0.5rem; background:none; border:none; cursor:pointer;">
+    <i class="fas fa-chevron-left"></i>
+    </button>
   </aside>
 
   <!-- Header -->
@@ -424,6 +453,9 @@
       <p class="desc">Ask any drug question—AI provides answers with citations & follow-ups.</p>
       <div class="chat-controls">
         <button id="clearPharmaChat" class="btn-secondary"><i class="fas fa-trash"></i> Clear</button>
+         <button id="historyBtn" class="btn" style="margin-bottom:0.5rem;">
+      <i class="fas fa-history"></i> History
+   </button
       </div>
       <div id="pharmaChatBox" class="chat-box"></div>
       <form id="pharma-form" class="chat-input">
@@ -432,6 +464,15 @@
       </form>
     </section>
 
+    <!-- History Modal -->
+  <div id="historyModal" class="modal" hidden>
+   <div class="modal-content">
+     <span class="close-modal">&times;</span>
+      <h3>Chat History</h3>
+      <div id="historyList" style="max-height:400px; overflow-y:auto;"></div>
+    </div>
+  </div>
+    
     <!-- 9. [Your Creative Extra] Bulk Refill Scheduler -->
     <section id="refillScheduler" class="module">
       <h2><i class="fas fa-sync-alt"></i> Bulk Refill Scheduler</h2>
@@ -443,6 +484,16 @@
         <div class="result-content"></div>
       </div>
     </section>
+
+    <!-- Two Charts Section -->
+  <section id="charts" class="module">
+    <h2><i class="fas fa-chart-line"></i> Usage Statistics</h2>
+   <canvas id="chart1"></canvas>
+    <canvas id="chart2" style="margin-top:1rem;"></canvas>
+    <button id="exportChartsData" class="btn" style="margin-top:1rem;">
+     <i class="fas fa-file-export"></i> Export Data (CSV)
+    </button>
+ </section>
       <footer>
     <small>© 2025 AI-Pharmacy Chain</small>
   </footer>
@@ -562,6 +613,15 @@ document.addEventListener('DOMContentLoaded', () => {
   //──────────────────── Sidebar & Dark Mode ────────────────────
   document.getElementById('hamburger').onclick =
     () => document.body.classList.toggle('sidebar-open');
+ const shrinkBtn = document.getElementById('shrinkSidebar');
+  shrinkBtn.onclick = () => {
+    const sb = document.getElementById('sidebar');
+    sb.classList.toggle('collapsed');
+    shrinkBtn.querySelector('i').classList.toggle('fa-chevron-left');
+    shrinkBtn.querySelector('i').classList.toggle('fa-chevron-right');
+    document.querySelector('header').style.left = sb.classList.contains('collapsed') ? '60px' : '220px';
+    document.querySelector('main').style.marginLeft = sb.classList.contains('collapsed') ? '70px' : '240px';
+  };
   document.getElementById('themeToggle').onclick = () => {
     document.documentElement.classList.toggle('dark');
     document.getElementById('themeToggle').classList.toggle('fa-moon');
@@ -669,6 +729,63 @@ document.addEventListener('DOMContentLoaded', () => {
     chatBox.innerHTML = '';
   };
 
+  // Add timestamps and history storage
+  const history = [];
+  function addMessage(type, text) {
+    const wrapper = document.createElement('div');
+    const ts = new Date().toLocaleString();
+    wrapper.className = type === 'user' ? 'user-msg' : 'bot-msg';
+    wrapper.innerHTML = `<div class="msg-text">${text}</div>
+                         <div class="msg-ts">${ts}</div>`;
+   chatBox.append(wrapper);
+    chatBox.scrollTop = chatBox.scrollHeight;
+    history.push({ role: type, text, time: ts });
+  }
+  // Override original sendPharma to use addMessage
+ document.getElementById('sendPharma').onclick = async () => {
+   const q = document.getElementById('pharmaInput').value.trim();
+    if (!q) return showToast('Type a question');
+   addMessage('user', q);
+   document.getElementById('pharmaInput').value = '';
+    const spinner = document.createElement('div');
+   spinner.className = 'spinner'; chatBox.append(spinner);
+   const a = await callAI(q);
+    spinner.remove();
+    addMessage('bot', sanitizeAIContent(a));
+  };
+
+  // History modal
+  const modal = document.getElementById('historyModal');
+  document.getElementById('historyBtn').onclick = () => {
+    const list = document.getElementById('historyList');
+    list.innerHTML = history.map(h => `
+     <div class="history-item">
+       <strong>${h.role === 'user' ? 'You' : 'Bot'}:</strong> ${h.text}
+       <div class="msg-ts">${h.time}</div>
+     </div>`).join('');
+   modal.hidden = false;
+  };
+  modal.querySelector('.close-modal').onclick = () => modal.hidden = true;
+
+  //──────────────────── Charts Setup ────────────────────
+  const data1 = { labels:['Jan','Feb','Mar','Apr'], datasets:[{ label:'Scans', data:[120,150,170,200] }] };
+  const data2 = { labels:['Mon','Tue','Wed','Thu','Fri'], datasets:[{ label:'Lookups', data:[30,45,60,55,70] }] };
+  const ctx1 = document.getElementById('chart1').getContext('2d');
+  const ctx2 = document.getElementById('chart2').getContext('2d');
+  new Chart(ctx1, { type:'line', data:data1, options:{ responsive:true } });
+  new Chart(ctx2, { type:'bar', data:data2, options:{ responsive:true } });
+
+  // Export to CSV
+ document.getElementById('exportChartsData').onclick = () => {
+    const rows = [['Month','Scans'], ...data1.labels.map((lbl,i)=>[lbl, data1.datasets[0].data[i]])];
+    const csv = rows.map(r=>r.join(',')).join('\n');
+    const blob = new Blob([csv],{type:'text/csv'});
+   const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+   a.download = 'scans_by_month.csv';
+    a.click();
+  };
+  
   //──────────────────── “Other” Inputs ────────────────────
   document.querySelectorAll('select').forEach(sel => {
     sel.onchange = () => {
