@@ -11,19 +11,19 @@
   <link rel="stylesheet"
         href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
-  <style>
-  /*──────────────────── Consultation Booking Theme ────────────────────*/
+<style>
+  /*──────────────────── Global Theme ────────────────────*/
   :root {
-    --cb-primary: #3b3f88;         /* deep indigo */
-    --cb-primary-alt: #5c4d99;     /* lighter indigo */
-    --cb-accent: #f08a5d;          /* warm coral */
-    --cb-bg: #f7f6f9;              /* very light lavender */
-    --cb-surface: #ffffff;         /* white cards */
-    --cb-text: #2d2d2d;            /* almost black */
-    --cb-muted: #777777;           /* gray for secondary text */
+    --cb-primary: #3b3f88;       /* deep indigo */
+    --cb-primary-alt: #5c4d99;   /* lighter indigo */
+    --cb-accent: #f08a5d;        /* warm coral */
+    --cb-bg: #f7f6f9;            /* light lavender */
+    --cb-surface: #ffffff;       /* card backgrounds */
+    --cb-text: #2d2d2d;          /* dark text */
+    --cb-muted: #777777;         /* secondary text */
     --radius: 0.75rem;
     --padding: 1rem;
-    --shadow: 0 4px 12px rgba(0,0,0,0.08);
+    --shadow: 0 4px 12px rgba(0,0,0,0.1);
     --transition: 0.3s ease;
   }
   html.dark {
@@ -33,39 +33,42 @@
     --cb-muted: #aaaaaa;
     --shadow: 0 4px 12px rgba(0,0,0,0.4);
   }
-
-  /*──────────────────── Reset & Base ────────────────────*/
-  * { margin:0; padding:0; box-sizing:border-box; }
+  *, *::before, *::after {
+    box-sizing: border-box;
+    transition: var(--transition);
+  }
   body {
+    margin: 0; padding: 0;
     font-family: 'Montserrat', sans-serif;
     background: var(--cb-bg);
     color: var(--cb-text);
-    transition: background var(--transition), color var(--transition);
+    line-height: 1.5;
   }
-  a { text-decoration:none; color: inherit; }
-  h1,h2,h3,h4 { color: var(--cb-primary); }
-  p.desc { color: var(--cb-muted); margin-bottom:0.75rem; }
-  button, input, select, textarea { font-family:inherit; transition: var(--transition); }
-  :focus { outline:2px solid var(--cb-accent); }
+  a { color: inherit; text-decoration: none; }
+  h1,h2,h3,h4 { margin-bottom: 0.5rem; color: var(--cb-primary); }
+  p.desc { color: var(--cb-muted); margin-bottom: 1rem; }
 
-  /*──────────────────── Sidebar ────────────────────*/
+  /*──────────────────── Layout ────────────────────*/
   aside#sidebar {
     position: fixed; top: 0; left: 0; bottom: 0;
     width: 220px; background: var(--cb-surface);
-    box-shadow: var(--shadow); z-index:1000;
+    box-shadow: var(--shadow); z-index: 1000;
     display: flex; flex-direction: column;
-   --sidebar-width: 220px;
-}
-  aside#sidebar .brand {
-    display: flex; align-items: center; gap: 0.5rem;
-    padding: var(--padding); font-size:1.25rem;
-    background: var(--cb-primary); color: #fff;
   }
-  aside#sidebar nav ul { list-style:none; flex:1; overflow-y:auto; }
+  aside#sidebar .brand {
+    padding: var(--padding);
+    font-size: 1.25rem;
+    background: var(--cb-primary);
+    color: #fff;
+    display: flex; align-items: center; gap: 0.5rem;
+  }
+  aside#sidebar nav ul {
+    flex: 1; overflow-y: auto; margin: 0; padding: 0; list-style: none;
+  }
   aside#sidebar nav li a {
-    display:flex; align-items:center; gap:0.75rem;
-    padding:0.75rem var(--padding); border-radius:var(--radius);
-    color: var(--cb-text);
+    display: flex; align-items: center; gap: 0.75rem;
+    padding: 0.75rem var(--padding);
+    border-radius: var(--radius);
   }
   aside#sidebar nav li.active a,
   aside#sidebar nav li a:hover {
@@ -73,197 +76,199 @@
     color: #fff;
   }
   #shrinkSidebar {
+    background: none; border: none; font-size: 1.25rem;
+    color: var(--cb-primary); cursor: pointer;
     margin: var(--padding);
-    background: none; border: none;
-    cursor: pointer; color: var(--cb-primary);
-    font-size:1.25rem;
   }
 
-  /*──────────────────── Header ────────────────────*/
   header {
-    position: sticky; top:0; left: var(--sidebar-width, 220px); right:0;
-    height:60px; background: var(--cb-surface);
-    display:flex; align-items:center; justify-content:space-between;
-    padding: 0 var(--padding); box-shadow:var(--shadow);
-    transition: left var(--transition);
-    z-index:1001;
+    position: sticky; top: 0; left: 220px; right: 0;
+    height: 60px; background: var(--cb-surface);
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 0 var(--padding);
+    box-shadow: var(--shadow); z-index: 1001;
   }
   #hamburger, #themeToggle {
-    font-size:1.5rem; color: var(--cb-primary); cursor:pointer;
+    font-size: 1.5rem; color: var(--cb-primary); cursor: pointer;
   }
 
-  /*──────────────────── Main & Modules ────────────────────*/
   main {
-    margin: 100px var(--padding) var(--padding) var(--sidebar-width, 220px);
+    margin: 100px var(--padding) var(--padding) 240px;
     transition: margin-left var(--transition);
   }
   section.module {
     background: var(--cb-surface);
     border-radius: var(--radius);
     padding: var(--padding);
-    margin-bottom:1.5rem;
-    box-shadow:var(--shadow);
-    transition: transform var(--transition);
+    margin-bottom: 1.5rem;
+    box-shadow: var(--shadow);
   }
-  section.module:hover { transform: translateY(-4px); }
 
-  /*──────────────────── Hero Section ────────────────────*/
+  /*──────────────────── Hero ────────────────────*/
   #hero {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: var(--padding);
-    background: var(--cb-primary-alt);
-    color: #fff;
+    display: grid; grid-template-columns: 1fr 1fr; gap: var(--padding);
+    background: var(--cb-primary-alt); color: #fff;
     padding: 2rem var(--padding);
     border-radius: var(--radius);
-    box-shadow:var(--shadow);
-    margin-bottom:2rem;
+    box-shadow: var(--shadow);
+    margin-bottom: 2rem;
   }
-  #hero .hero-text h2 { font-size:2.25rem; margin-bottom:0.5rem; }
-  #hero .hero-text p { color: rgba(255,255,255,0.9); }
+  #hero .hero-text h2 { font-size: 2.25rem; margin-bottom: 0.5rem; }
   #hero .hero-features {
-    display: flex; flex-direction: column; gap:1rem;
+    display: flex; flex-direction: column; gap: 1rem;
   }
   #hero .feature-card {
     background: #fff; color: var(--cb-primary);
-    padding:1rem; border-radius:var(--radius);
-    box-shadow:0 2px 8px rgba(0,0,0,0.1);
-    display:flex; align-items:center; justify-content:space-between;
-    transition: background var(--transition), transform var(--transition);
+    padding: 1rem; border-radius: var(--radius);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    display: flex; align-items: center; justify-content: space-between;
+    cursor: pointer;
   }
   #hero .feature-card:hover {
-    background: var(--cb-accent); color:#fff;
+    background: var(--cb-accent); color: #fff;
     transform: translateY(-3px);
   }
-  #hero .feature-card i {
-    font-size:2rem;
-  }
+  #hero .feature-card i { font-size: 2rem; }
   #hero .feature-card .btn {
-    background: var(--cb-primary); color:#fff;
-    padding:0.5rem 1rem; border-radius:var(--radius);
+    background: var(--cb-primary); color: #fff;
+    padding: 0.5rem 1rem; border-radius: var(--radius);
   }
 
   /*──────────────────── Forms & Inputs ────────────────────*/
-  input[type="text"], input[type="date"], select, textarea {
-    width:100%; padding:0.75rem; margin-top:0.5rem;
-    border:2px solid var(--cb-primary-alt);
-    border-radius:var(--radius);
-    background: var(--cb-bg); color: var(--cb-text);
+  label { display: block; margin-bottom: 1rem; }
+  input, select, textarea {
+    width: 100%; padding: 0.75rem; margin-top: 0.5rem;
+    border: 2px solid var(--cb-primary-alt);
+    border-radius: var(--radius);
+    background: var(--cb-bg);
+    color: var(--cb-text);
   }
   input:focus, select:focus, textarea:focus {
     border-color: var(--cb-accent);
     box-shadow: 0 0 0 3px rgba(240,138,93,0.3);
   }
   button.btn {
-    background: var(--cb-accent); color:#fff;
-    border:none; padding:0.75rem 1.25rem;
-    border-radius:var(--radius); box-shadow:var(--shadow);
-    cursor:pointer; transition: background var(--transition);
+    background: var(--cb-accent); color: #fff;
+    border: none; padding: 0.75rem 1.25rem;
+    border-radius: var(--radius); box-shadow: var(--shadow);
+    cursor: pointer;
   }
-  button.btn:hover {
-    background: #d4724f;
-  }
+  button.btn:hover { background: #d4724f; }
 
   /*──────────────────── Response Panels ────────────────────*/
   .response {
     background: var(--cb-surface);
     border-left: 4px solid var(--cb-accent);
-    margin-top:1rem; padding:var(--padding);
-    position:relative; box-shadow:var(--shadow);
+    padding: var(--padding);
+    margin-top: 1rem;
+    position: relative;
+    box-shadow: var(--shadow);
   }
   .response .close-btn {
-    position:absolute; top:0.5rem; right:0.5rem;
-    background:none; border:none; font-size:1.1rem; cursor:pointer;
+    position: absolute; top: 0.5rem; right: 0.5rem;
+    background: none; border: none; font-size: 1.1rem; cursor: pointer;
     color: var(--cb-muted);
   }
-  .response .result-content { margin-top:1rem; }
 
   /*──────────────────── Chat & History ────────────────────*/
   .chat-box {
-    background: var(--cb-bg); border:2px solid var(--cb-primary-alt);
-    border-radius:var(--radius); padding:var(--padding);
-    max-height:300px; overflow-y:auto; margin-bottom:1rem;
+    background: var(--cb-bg);
+    border: 2px solid var(--cb-primary-alt);
+    border-radius: var(--radius);
+    padding: var(--padding);
+    max-height: 300px; overflow-y: auto;
+    margin-bottom: 1rem;
   }
-  .chat-input { display:flex; gap:0.5rem; }
+  .chat-input { display: flex; gap: 0.5rem; }
+  .chat-input input { flex: 1; border-radius: var(--radius) 0 0 var(--radius); }
+  .chat-input button { border-radius: 0 var(--radius) var(--radius) 0; }
   .user-msg, .bot-msg {
-    max-width:70%; padding:0.75rem; border-radius:var(--radius);
-    position:relative; word-wrap:break-word;
+    max-width: 70%; padding: 0.75rem; border-radius: var(--radius);
+    margin-bottom: 0.5rem; word-wrap: break-word;
   }
   .user-msg {
-    align-self:flex-end; background:var(--cb-primary); color:#fff;
-    border-bottom-right-radius:0;
+    align-self: flex-end; background: var(--cb-primary); color: #fff;
+    border-bottom-right-radius: 0;
   }
   .bot-msg {
-    align-self:flex-start; background:var(--cb-surface); color:var(--cb-text);
-    border-bottom-left-radius:0;
+    align-self: flex-start; background: var(--cb-surface); color: var(--cb-text);
+    border-bottom-left-radius: 0;
   }
   .chat-date {
-    text-align:center; margin:1rem 0; font-size:0.9rem;
-    color:var(--cb-muted); font-weight:600;
+    text-align: center; margin: 1rem 0; font-size: 0.9rem;
+    color: var(--cb-muted); font-weight: 600;
   }
-  .msg-ts {
-    font-size:0.75rem; color:var(--cb-muted); margin-top:0.25rem;
-  }
+  .msg-ts { font-size: 0.75rem; color: var(--cb-muted); }
 
-  /*──────────────────── Modals ────────────────────*/
+  /*──────────────────── Modals & History ────────────────────*/
   .modal {
-    position: fixed; top:0; left:0; width:100%; height:100%;
-    background: rgba(0,0,0,0.5); display:flex;
-    align-items:center; justify-content:center; z-index:2000;
+    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+    background: rgba(0,0,0,0.5); display: none;
+    align-items: center; justify-content: center; z-index: 2000;
   }
   .modal-content {
-    background: var(--cb-surface); padding:1.5rem;
-    border-radius: var(--radius); width:90%; max-width:500px;
-    box-shadow:var(--shadow); position:relative;
+    background: var(--cb-surface); padding: 1.5rem;
+    border-radius: var(--radius); width: 90%; max-width: 600px;
+    box-shadow: var(--shadow); position: relative;
   }
   .close-modal {
-    position:absolute; top:0.5rem; right:0.75rem;
-    font-size:1.5rem; color:var(--cb-muted); cursor:pointer;
+    position: absolute; top: 0.5rem; right: 0.75rem;
+    font-size: 1.5rem; cursor: pointer; color: var(--cb-muted);
   }
   .history-item {
-    background: var(--cb-bg); padding:0.75rem; margin-bottom:0.75rem;
-    border-radius:var(--radius); display:flex; justify-content:space-between;
-    align-items:center;
+    background: var(--cb-bg); padding: 0.75rem; margin-bottom: 0.75rem;
+    border-radius: var(--radius); display: flex;
+    justify-content: space-between; align-items: center;
   }
   .delete-history {
-    background: var(--cb-primary-alt); color:#fff;
-    border:none; padding:0.3rem 0.6rem; border-radius:var(--radius);
-    cursor:pointer; transition: background var(--transition);
+    background: var(--cb-primary-alt); color: #fff;
+    border: none; padding: 0.3rem 0.6rem; border-radius: var(--radius);
+    cursor: pointer;
   }
-  .delete-history:hover {
-    background: var(--cb-primary);
+  .delete-history:hover { background: var(--cb-primary); }
+
+  /*──────────────────── Analytics Cards & Calendar ────────────────────*/
+  .analytics-grid {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(240px,1fr));
+    gap: var(--padding);
   }
- html.dark #hero {
- background: var(--cb-primary);
- }
- html.dark #hero .feature-card {
-  background: var(--cb-surface); color: var(--cb-text);
- }
- html.dark #hero .feature-card:hover {
-  background: var(--cb-accent); color:#fff;
- }
-     html.dark button.btn {
-  background: var(--cb-accent); color: #fff;
- }
- html.dark .toast {
-  background: var(--cb-primary-alt);
- }
-  /*──────────────────── Media Queries ────────────────────*/
+  .analytics-card {
+    background: var(--cb-surface);
+    border-radius: var(--radius);
+    padding: var(--padding);
+    box-shadow: var(--shadow);
+  }
+  .calendar {
+    width: 100%; background: var(--cb-surface);
+    border-radius: var(--radius); overflow: hidden;
+    box-shadow: var(--shadow);
+  }
+  .calendar .row {
+    display: flex;
+  }
+  .calendar .cell {
+    flex: 1; padding: 0.5rem; border: 1px solid var(--cb-bg);
+    text-align: center; cursor: pointer;
+  }
+  .calendar .cell.closed { background: #eee; color: #999; cursor: not-allowed; }
+  .calendar .cell.open { background: var(--cb-accent); color: #fff; }
+  .calendar .cell.today { border: 2px solid var(--cb-primary); }
+
+  /*──────────────────── Responsive ────────────────────*/
+  @media (max-width: 1024px) {
+    header { left: 60px; }
+    main { margin-left: 80px; }
+  }
   @media (max-width: 768px) {
     aside#sidebar { transform: translateX(-100%); }
     body.sidebar-open aside#sidebar { transform: none; }
     header { left: 0; }
     main { margin-left: 1rem; margin-top: 100px; }
     #hero { grid-template-columns: 1fr; }
-      header h1 {
-    font-size: 1.2rem;   
-    white-space: normal;  
-    flex: 1;              
-  }
   }
 </style>
 </head>
-  <body>
+<body>
   <!-- Sidebar -->
   <aside id="sidebar">
     <div class="brand">
@@ -272,16 +277,16 @@
     </div>
     <nav>
       <ul>
-        <li><a href="herbal.html"><i class="fas fa-seedling"></i> <span>Herbal Medicine</span></a></li>
-        <li><a href="psychology.html"><i class="fas fa-brain"></i> <span>Psychology & MH</span></a></li>
-        <li><a href="epharmacy.html"><i class="fas fa-prescription-bottle-alt"></i> <span>E-Pharmacy</span></a></li>
-        <li><a href="dietetics.html"><i class="fas fa-apple-alt"></i> <span>Dietetics</span></a></li>
-        <li class="active"><a href="#"><i class="fas fa-calendar-check"></i> <span>Consult Booking</span></a></li>
+        <li class="active"><a href="#providerMatch"><i class="fas fa-user-md"></i><span>Provider Match</span></a></li>
+        <li><a href="#availabilityCalendar"><i class="fas fa-calendar-alt"></i><span>Availability</span></a></li>
+        <li><a href="#bookAppointment"><i class="fas fa-book-medical"></i><span>Book Appointment</span></a></li>
+        <li><a href="#dashboard"><i class="fas fa-tachometer-alt"></i><span>Dashboard</span></a></li>
+        <li><a href="#feedback"><i class="fas fa-star"></i><span>Feedback</span></a></li>
+        <li><a href="#analytics"><i class="fas fa-chart-line"></i><span>Analytics</span></a></li>
+        <li><a href="#liveChat"><i class="fas fa-comments"></i><span>Live Chat</span></a></li>
       </ul>
     </nav>
-    <button id="shrinkSidebar" title="Toggle sidebar">
-      <i class="fas fa-chevron-left"></i>
-    </button>
+    <button id="shrinkSidebar" title="Toggle sidebar"><i class="fas fa-chevron-left"></i></button>
   </aside>
 
   <!-- Header -->
@@ -294,386 +299,425 @@
   <!-- Hero -->
   <section id="hero" class="module">
     <div class="hero-text">
-      <h2><i class="fas fa-stethoscope"></i> Book Your Consultation</h2>
-      <p class="desc">AI-driven scheduling, provider matching, and automated follow-up—right at your fingertips.</p>
+      <h2><i class="fas fa-stethoscope"></i> Seamless Consultation Booking</h2>
+      <p class="desc">From instant provider match to one-click appointment, powered by AI.</p>
+      <a href="#providerMatch" class="btn hero-btn"><i class="fas fa-user-md"></i> Get Matched Now</a>
     </div>
-    <div class="hero-features">
-      <div class="feature-card">
-        <i class="fas fa-user-md"></i>
-        <h3>Intelligent Provider Match</h3>
-        <a class="btn" href="#providerMatch">Match Now</a>
-      </div>
-      <div class="feature-card">
-        <i class="fas fa-calendar-alt"></i>
-        <h3>Smart Calendar</h3>
-        <a class="btn" href="#calendar">View Slots</a>
-      </div>
-      <div class="feature-card">
-        <i class="fas fa-video"></i>
-        <h3>Telehealth Modes</h3>
-        <a class="btn" href="#telehealth">Choose Mode</a>
-      </div>
-      <div class="feature-card">
-        <i class="fas fa-bell"></i>
-        <h3>Auto Reminders</h3>
-        <a class="btn" href="#reminders">Configure</a>
+    <div class="hero-graphic">
+      <!-- You can replace this with an illustrative SVG or image -->
+      <img src="hero-consult.svg" alt="Consultation illustration" />
+    </div>
+  </section>
+
+  <!-- 1. Personalized AI Provider Matching -->
+  <section id="providerMatch" class="module">
+    <h2><i class="fas fa-user-md"></i> Personalized Provider Matching</h2>
+    <p class="desc">Answer a few questions and get instantly matched to the best in-network specialist.</p>
+    <form id="matchForm">
+      <label>Chief Concern:
+        <input type="text" id="concernInput" placeholder="e.g. persistent cough">
+      </label>
+      <label>Urgency:
+        <select id="urgencyInput">
+          <option>Low</option>
+          <option>Medium</option>
+          <option>High</option>
+        </select>
+      </label>
+      <label>Preferred Language:
+        <select id="languageInput">
+          <option>English</option>
+          <option>Twi</option>
+          <option>Ga</option>
+          <option>Ewe</option>
+        </select>
+      </label>
+      <button id="findMatch" class="btn"><i class="fas fa-search"></i> Find My Specialist</button>
+    </form>
+
+    <div id="matchResults" class="response" hidden>
+      <button class="close-btn"><i class="fas fa-times"></i></button>
+      <div class="result-content">
+        <!-- AI will choose among these pseudo-providers -->
+        <ul id="providerList">
+          <li data-id="p1"><strong>Dr. Kwame Asante</strong> – Pulmonologist, Korle Bu Teaching Hospital</li>
+          <li data-id="p2"><strong>Dr. Abena Owusu</strong> – Cardiologist, 37 Military Hospital</li>
+          <li data-id="p3"><strong>Dr. Kojo Mensah</strong> – Psychiatrist, Ridge Hospital</li>
+          <li data-id="p4"><strong>Dr. Yaa Dufie</strong> – Dietitian, Nyaho Medical Centre</li>
+          <li data-id="p5"><strong>Dr. Nana Adjei</strong> – General Practitioner, Cape Coast Polyclinic</li>
+          <li data-id="p6"><strong>Dr. Efua Amponsah</strong> – Endocrinologist, LEKMA Hospital</li>
+          <li data-id="p7"><strong>Dr. Michael Addo</strong> – Neurologist, 37 Military Hospital</li>
+          <li data-id="p8"><strong>Dr. Grace Ofori</strong> – Dermatologist, Accra Dermatology Centre</li>
+          <li data-id="p9"><strong>Dr. Joseph Kumi</strong> – Orthopedic Surgeon, Komfo Anokye Teaching Hospital</li>
+          <li data-id="p10"><strong>Dr. Ama Brew</strong> – Pediatrician, Trust Hospital</li>
+        </ul>
       </div>
     </div>
   </section>
 
-  <main>
-    <!-- 1. Provider Matching -->
-    <section id="providerMatch" class="module">
-      <h2><i class="fas fa-user-md"></i> Intelligent Provider Match</h2>
-      <p class="desc">Answer a few questions and let our AI suggest the best specialist for your needs.</p>
-      <label>Your Concern:
-        <select id="matchConcern">
-          <option>General Consultation</option>
-          <option>Chronic Disease</option>
-          <option>Mental Health</option>
-          <option>Nutrition Advice</option>
-          <option>Herbal Remedies</option>
-          <option>Other</option>
+  <!-- 2. Real-Time Availability Calendar -->
+  <section id="availabilityCalendar" class="module">
+    <h2><i class="fas fa-calendar-alt"></i> Real-Time Availability</h2>
+    <p class="desc">Browse open slots, filter by date/time/consultation type, or jump to your next available.</p>
+    <div class="calendar-controls">
+      <label>Date:
+        <input type="date" id="calendarDateInput">
+      </label>
+      <label>Time of Day:
+        <select id="timeOfDayInput">
+          <option>Morning</option>
+          <option>Afternoon</option>
+          <option>Evening</option>
         </select>
       </label>
-      <label>Preferred Language:
-        <select id="matchLanguage">
-          <option>English</option>
-          <option>Spanish</option>
-          <option>French</option>
-          <option>Other</option>
+      <label>Type:
+        <select id="visitTypeInput">
+          <option>Telehealth</option>
+          <option>In-Person</option>
         </select>
       </label>
-      <button id="findProvider" class="btn"><i class="fas fa-search"></i> Find Providers</button>
-      <div id="providerResults" class="response" hidden>
-        <button class="close-btn"><i class="fas fa-times"></i></button>
-        <div class="result-content"></div>
+      <button id="filterSlots" class="btn"><i class="fas fa-filter"></i> Filter</button>
+      <button id="nextAvailable" class="btn"><i class="fas fa-forward"></i> Next Available</button>
+    </div>
+    <div id="calendarGrid">
+      <!-- Simple pseudo-calendar table -->
+      <table>
+        <thead>
+          <tr><th>Sun</th><th>Mon</th><th>Tue</th><th>Wed</th><th>Thu</th><th>Fri</th><th>Sat</th></tr>
+        </thead>
+        <tbody>
+          <!-- Fill with your calendar-render logic -->
+          <tr>
+            <td class="closed">—</td>
+            <td class="open">10:00, 14:00</td>
+            <td class="open">09:00, 13:00, 16:00</td>
+            <td class="closed">—</td>
+            <td class="open">11:00, 15:00</td>
+            <td class="open">09:30, 12:30, 17:00</td>
+            <td class="closed">—</td>
+          </tr>
+          <!-- more rows… -->
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- 3. Book an Appointment -->
+  <section id="bookAppointment" class="module">
+    <h2><i class="fas fa-book-medical"></i> Book Your Appointment</h2>
+    <p class="desc">Select from our roster of specialists and schedule in seconds.</p>
+    <form id="appointmentForm">
+      <label>Your Name:
+        <input type="text" id="clientName" placeholder="John Doe">
+      </label>
+      <label>Select Professional:
+        <select id="professionalSelect">
+          <option>Dr. Kwame Asante (Pulmonologist)</option>
+          <option>Dr. Abena Owusu (Cardiologist)</option>
+          <option>Dr. Kojo Mensah (Psychiatrist)</option>
+          <option>Ms. Akosua Baah (Physical Therapist)</option>
+          <option>Mr. Daniel Boakye (Pharmacist)</option>
+          <option>Dr. Yaa Dufie (Dietitian)</option>
+          <option>Dr. Michael Addo (Neurologist)</option>
+          <option>Mrs. Esther Kumi (Occupational Therapist)</option>
+          <option>Dr. Grace Ofori (Dermatologist)</option>
+          <option>Mr. Stephen Tetteh (Speech Therapist)</option>
+          <option>Dr. Joseph Kumi (Orthopedic Surgeon)</option>
+          <option>Dr. Ama Brew (Pediatrician)</option>
+        </select>
+      </label>
+      <label>Date:
+        <input type="date" id="apptDate">
+      </label>
+      <label>Time:
+        <input type="time" id="apptTime">
+      </label>
+      <button id="bookNow" class="btn"><i class="fas fa-check"></i> Book Now</button>
+    </form>
+    <!-- booking confirmation modal -->
+    <div id="bookingModal" class="modal" hidden>
+      <div class="modal-content">
+        <span class="close-modal">&times;</span>
+        <h3>Confirm Your Appointment</h3>
+        <div class="result-content" id="bookingSummary">
+          <!-- AI will fill summary and recommendation -->
+        </div>
+        <button id="confirmBooking" class="btn">Confirm</button>
       </div>
-    </section>
+    </div>
+  </section>
 
-    <!-- 2. Smart Calendar -->
-    <section id="calendar" class="module">
-      <h2><i class="fas fa-calendar-alt"></i> Smart Calendar & Availability</h2>
-      <p class="desc">See opening slots for all matched providers. Filter by date, time, and consultation type.</p>
-      <label>Select Provider:
-        <select id="calendarProvider">
-          <option>Dr. Smith (General)</option>
-          <option>Dr. Patel (Cardiology)</option>
-          <option>Dr. Lopez (Psychiatry)</option>
-        </select>
-      </label>
-      <label>Pick Date:
-        <input type="date" id="calendarDate">
-      </label>
-      <button id="loadSlots" class="btn"><i class="fas fa-sync-alt"></i> Load Slots</button>
-      <div id="slotList" class="response" hidden>
-        <button class="close-btn"><i class="fas fa-times"></i></button>
-        <div class="result-content"></div>
+  <!-- 4. Patient Dashboard & History -->
+  <section id="dashboard" class="module">
+    <h2><i class="fas fa-tachometer-alt"></i> Your Dashboard</h2>
+    <p class="desc">Manage upcoming visits, review past appointments, download summaries.</p>
+    <div class="dashboard-tabs">
+      <button data-tab="upcoming" class="active">Upcoming</button>
+      <button data-tab="past">Past</button>
+    </div>
+    <div id="upcoming" class="dashboard-list">
+      <ul>
+        <li>
+          <strong>Dr. Abena Owusu</strong> – 2025-05-30 14:00  
+          <button class="btn-sm rescheduleBtn">Reschedule</button>
+          <button class="btn-sm cancelBtn">Cancel</button>
+        </li>
+        <!-- more items… -->
+      </ul>
+    </div>
+    <div id="past" class="dashboard-list" hidden>
+      <ul>
+        <li>
+          <strong>Dr. Kojo Mensah</strong> – 2025-04-12 10:00  
+          <button class="btn-sm">Download Summary</button>
+          <button class="btn-sm">Download Invoice</button>
+        </li>
+        <!-- more… -->
+      </ul>
+    </div>
+  </section>
+
+  <!-- 5. Feedback & Ratings -->
+  <section id="feedback" class="module">
+    <h2><i class="fas fa-star"></i> Feedback & Ratings</h2>
+    <p class="desc">Help us improve—quick 1-min survey.</p>
+    <label>Rate your last visit:  
+      <select id="ratingInput">
+        <option>⭐</option><option>⭐⭐</option><option>⭐⭐⭐</option><option>⭐⭐⭐⭐</option><option>⭐⭐⭐⭐⭐</option>
+      </select>
+    </label>
+    <label>Comments:
+      <textarea id="feedbackInput" rows="3" placeholder="Any suggestions?"></textarea>
+    </label>
+    <button id="submitFeedback" class="btn"><i class="fas fa-paper-plane"></i> Submit</button>
+  </section>
+
+  <!-- 6. Analytics & Optimization -->
+  <section id="analytics" class="module">
+    <h2><i class="fas fa-chart-line"></i> Analytics & Optimization</h2>
+    <div class="chart-container">
+      <canvas id="noShowChart"></canvas>
+      <canvas id="peakTimesChart" style="margin-top:1rem;"></canvas>
+    </div>
+    <button id="optimizeStaffing" class="btn"><i class="fas fa-cogs"></i> AI Suggest Staffing</button>
+    <div id="optimizationResult" class="response" hidden>
+      <button class="close-btn"><i class="fas fa-times"></i></button>
+      <div class="result-content"></div>
+    </div>
+  </section>
+
+  <!-- 7. Live AI Chat Support -->
+  <section id="liveChat" class="module">
+    <h2><i class="fas fa-comments"></i> Live AI Chat Support</h2>
+    <p class="desc">24/7 assistant for all your booking questions.</p>
+    <div class="chat-controls">
+      <button id="clearChat" class="btn-sm"><i class="fas fa-trash"></i> Clear</button>
+      <button id="showHistory" class="btn-sm"><i class="fas fa-history"></i> History</button>
+    </div>
+    <div id="chatBox" class="chat-box"></div>
+    <form id="chatForm" class="chat-input">
+      <input id="chatInput" type="text" placeholder="Ask me anything…">
+      <button id="sendChat" class="btn"><i class="fas fa-paper-plane"></i></button>
+    </form>
+    <!-- Chat history modal -->
+    <div id="chatHistoryModal" class="modal" hidden>
+      <div class="modal-content">
+        <span class="close-modal">&times;</span>
+        <h3>Chat History</h3>
+        <div id="chatHistoryList"></div>
+        <button id="clearHistoryChat" class="btn-sm">Clear All</button>
       </div>
-    </section>
+    </div>
+  </section>
 
-    <!-- 3. Telehealth Mode Selection -->
-    <section id="telehealth" class="module">
-      <h2><i class="fas fa-video"></i> Telehealth Modes</h2>
-      <p class="desc">Choose how you’d like to connect: video call, phone call, or in-person.</p>
-      <label>
-        <input type="radio" name="mode" value="video" checked> Video Call
-      </label>
-      <label>
-        <input type="radio" name="mode" value="phone"> Phone Call
-      </label>
-      <label>
-        <input type="radio" name="mode" value="inperson"> In-Person Visit
-      </label>
-      <button id="confirmMode" class="btn"><i class="fas fa-check"></i> Confirm Mode</button>
-    </section>
+  <!-- Footer -->
+  <footer>
+    <small>© 2025 AI-Pharmacy Chain — All rights reserved</small>
+  </footer>
 
-    <!-- 4. Auto Reminders & Follow-Up -->
-    <section id="reminders" class="module">
-      <h2><i class="fas fa-bell"></i> Auto Reminders & Follow-Up</h2>
-      <p class="desc">Never miss an appointment, and get AI-driven follow-up recommendations.</p>
-      <label>Reminder Channels:</label>
-      <label><input type="checkbox" value="email" checked> Email</label>
-      <label><input type="checkbox" value="sms"> SMS</label>
-      <label><input type="checkbox" value="app"> App Notification</label>
-      <label>Follow-Up Interval:
-        <select id="followUpInterval">
-          <option>1 Day</option>
-          <option>3 Days</option>
-          <option>1 Week</option>
-          <option>2 Weeks</option>
-        </select>
-      </label>
-      <button id="setReminders" class="btn"><i class="fas fa-cogs"></i> Set Reminders</button>
-    </section>
 
-    <!-- 5. Insurance & Payment -->
-    <section id="payment" class="module">
-      <h2><i class="fas fa-credit-card"></i> Insurance & Payment</h2>
-      <p class="desc">Enter your insurance details or choose direct payment options.</p>
-      <label>Insurance Provider:
-        <input list="ins-list" id="insProvider" placeholder="Select or type…">
-        <datalist id="ins-list">
-          <option>HealthInsure Co.</option>
-          <option>Medicare</option>
-          <option>LifeCare</option>
-          <option>Other</option>
-        </datalist>
-      </label>
-      <label>Policy Number:
-        <input type="text" id="insPolicy" placeholder="####-####-####">
-      </label>
-      <label>Or Pay Directly:
-        <select id="payMethod">
-          <option>Credit Card</option>
-          <option>PayPal</option>
-          <option>Mobile Wallet</option>
-        </select>
-      </label>
-      <button id="processPayment" class="btn"><i class="fas fa-wallet"></i> Continue to Payment</button>
-      <div id="paymentResponse" class="response" hidden>
-        <button class="close-btn"><i class="fas fa-times"></i></button>
-        <div class="result-content"></div>
-      </div>
-    </section>
-
-    <!-- 6. Live Chat Support -->
-    <section id="liveChat" class="module">
-      <h2><i class="fas fa-comments"></i> Live AI Chat Support</h2>
-      <p class="desc">Have questions? Chat with our AI assistant 24/7.</p>
-      <div class="chat-box" id="consultChatBox"></div>
-      <form id="consultChatForm" class="chat-input">
-        <input id="schedulerInput" type="text" placeholder="Ask a question…">
-        <button id="sendScheduler" class="btn"><i class="fas fa-paper-plane"></i></button>
-      </form>
-    </section>
-
-    <!-- Footer -->
-    <footer>
-      <small>© 2025 AI-Pharmacy Chain — Consultation Booking Suite</small>
-    </footer>
-  </main>
-
-   <script>
+ <script>
 document.addEventListener('DOMContentLoaded', () => {
-  // ──────────────── Toast Helper ────────────────
+  // Helper: Toast
   function showToast(msg) {
     const t = document.createElement('div');
     t.className = 'toast';
     t.innerText = msg;
-    document.body.appendChild(t);
+    document.body.append(t);
     requestAnimationFrame(() => t.classList.add('visible'));
     setTimeout(() => t.remove(), 3000);
   }
 
-  // ──────────────── Sanitize AI Content ────────────────
-  function sanitizeAIContent(raw) {
-    let inTable = false;
-    return raw
-      .replace(/```([\s\S]+?)```/g, (_, code) => `<pre>${code.trim()}</pre>`)
-      .replace(/^#### (.+)$/gm, '<h4>$1</h4>')
-      .replace(/^### (.+)$/gm, '<h3>$1</h3>')
-      .replace(/^## (.+)$/gm, '<h2>$1</h2>')
-      .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
-      .replace(/\*(.+?)\*/g, '<em>$1</em>')
-      .replace(/^\|(.+)\|$/gm, (_, row) => {
-        const cols = row.split('|').map(c => c.trim());
-        if (!inTable) {
-          inTable = true;
-          return '<table><thead><tr>' +
-                 cols.map(c => `<th>${c}</th>`).join('') +
-                 '</tr></thead><tbody>';
-        } else {
-          return '<tr>' +
-                 cols.map(c => `<td>${c}</td>`).join('') +
-                 '</tr>';
-        }
-      })
-      .replace(/$/, () => inTable ? '</tbody></table>' : '');
-  }
-
-  // ──────────────── AI Caller ────────────────
-  async function callAI(prompt) {
-    try {
-      const res = await fetch('/.netlify/functions/openai-proxy', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          messages: [
-            { role: 'system', content: 'You are a helpful consultation booking assistant.' },
-            { role: 'user',   content: prompt }
-          ]
-        })
-      });
-      if (!res.ok) throw new Error(await res.text());
-      const json = await res.json();
-      return json.choices?.[0]?.message?.content || '⚠️ Unexpected AI response.';
-    } catch (err) {
-      if (err.message.includes('Sandbox.Timedout')) {
-        return '⚠️ AI is taking longer than usual—please try again.';
-      }
-      return '⚠️ Error: ' + err.message;
-    }
-  }
-
-  // ──────────────── Spinner & Tools ────────────────
-  const PHASE_TEXT = {
-    findProvider:     'Finding providers…',
-    loadSlots:        'Loading available slots…',
-    processPayment:   'Processing payment…'
-  };
-
-  function startThinking(panel, key) {
-    panel.hidden = false;
-    panel.querySelector('.result-content').innerHTML = `
-      <div class="spin-header">${PHASE_TEXT[key] || 'Thinking…'}</div>
-      <div class="spinner"></div>`;
-    const old = panel.querySelector('.tool-row');
-    if (old) old.remove();
-    panel.querySelector('.close-btn').style.display = 'none';
-  }
-
-  function injectTools(panel) {
-    if (panel.querySelector('.tool-row')) return;
-    const tools = document.createElement('div');
-    tools.className = 'tool-row';
-    tools.innerHTML = `
-      <button class="copy-btn"><i class="fas fa-copy"></i></button>
-      <button class="dl-btn"><i class="fas fa-download"></i></button>`;
-    panel.appendChild(tools);
-    panel.querySelector('.close-btn').style.display = 'block';
-  }
-
-  // ──────────────── Sidebar & Theme ────────────────
+  // Sidebar toggle
   document.getElementById('hamburger').onclick = () =>
     document.body.classList.toggle('sidebar-open');
-
-  const shrinkBtn = document.getElementById('shrinkSidebar');
-  shrinkBtn.onclick = () => {
+  document.getElementById('shrinkSidebar').onclick = () => {
     const sb = document.getElementById('sidebar');
     sb.classList.toggle('collapsed');
-    shrinkBtn.querySelector('i').classList.toggle('fa-chevron-left');
-    shrinkBtn.querySelector('i').classList.toggle('fa-chevron-right');
     document.querySelector('header').style.left = sb.classList.contains('collapsed') ? '60px' : '220px';
     document.querySelector('main').style.marginLeft = sb.classList.contains('collapsed') ? '70px' : '240px';
   };
 
+  // Theme toggle
   document.getElementById('themeToggle').onclick = () => {
     document.documentElement.classList.toggle('dark');
     document.getElementById('themeToggle').classList.toggle('fa-moon');
     document.getElementById('themeToggle').classList.toggle('fa-sun');
   };
 
-  // ──────────────── Module Handlers ────────────────
-
-  // 1. Intelligent Provider Match
-  document.getElementById('findProvider').onclick = async e => {
-    e.preventDefault();
-    const panel = document.getElementById('providerResults');
-    startThinking(panel, 'findProvider');
-    const concern  = document.getElementById('matchConcern').value;
-    const language = document.getElementById('matchLanguage').value;
-    const resp = await callAI(`Match providers for concern="${concern}", language="${language}".`);
-    panel.querySelector('.result-content').innerHTML = sanitizeAIContent(resp);
-    injectTools(panel);
-  };
-
-  // 2. Smart Calendar & Availability
-  document.getElementById('loadSlots').onclick = async e => {
-    e.preventDefault();
-    const panel = document.getElementById('slotList');
-    startThinking(panel, 'loadSlots');
-    const prov = document.getElementById('calendarProvider').value;
-    const date = document.getElementById('calendarDate').value;
-    const resp = await callAI(`List available slots for provider="${prov}" on ${date}.`);
-    panel.querySelector('.result-content').innerHTML = sanitizeAIContent(resp);
-    injectTools(panel);
-  };
-
-  // 3. Telehealth Mode Selection
-  document.getElementById('confirmMode').onclick = e => {
-    e.preventDefault();
-    showToast('Your telehealth mode has been saved.');
-  };
-
-  // 4. Auto Reminders & Follow-Up
-  document.getElementById('setReminders').onclick = e => {
-    e.preventDefault();
-    showToast('Reminder preferences updated.');
-  };
-
-  // 5. Insurance & Payment
-  document.getElementById('processPayment').onclick = async e => {
-    e.preventDefault();
-    const panel = document.getElementById('paymentResponse');
-    startThinking(panel, 'processPayment');
-    const ins = document.getElementById('insProvider').value.trim();
-    const pol = document.getElementById('insPolicy').value.trim();
-    const pm  = document.getElementById('payMethod').value;
-    const resp = await callAI(`Process payment: insurance="${ins}", policy="${pol}", method="${pm}".`);
-    panel.querySelector('.result-content').innerHTML = sanitizeAIContent(resp);
-    injectTools(panel);
-  };
-
-  // ──────────────── Copy / Download / Close ────────────────
-  document.body.addEventListener('click', e => {
-    const rsp = e.target.closest('.response');
-    if (!rsp) return;
-    if (e.target.closest('.copy-btn')) {
-      const txt = rsp.querySelector('.result-content').innerText;
-      navigator.clipboard.writeText(txt).then(() => showToast('Copied to clipboard'));
-    }
-    if (e.target.closest('.dl-btn')) {
-      const txt = rsp.querySelector('.result-content').innerText;
-      const blob = new Blob([txt], { type: 'text/plain' });
-      const a = document.createElement('a');
-      a.href = URL.createObjectURL(blob);
-      a.download = 'response.txt';
-      a.click();
-    }
-    if (e.target.closest('.close-btn')) {
-      rsp.hidden = true;
-    }
+  // Smooth anchor scrolling
+  document.querySelectorAll('aside#sidebar nav a').forEach(a => {
+    a.onclick = e => {
+      e.preventDefault();
+      const id = a.getAttribute('href').slice(1);
+      document.getElementById(id).scrollIntoView({ behavior:'smooth', block:'start' });
+    };
   });
 
-  // ──────────────── Live AI Chat Support ────────────────
-  const chatBox = document.getElementById('consultChatBox');
+  // 1. Provider Matching
+  document.getElementById('findMatch').onclick = e => {
+    e.preventDefault();
+    const concern = document.getElementById('concernInput').value.trim();
+    const urgency = document.getElementById('urgencyInput').value;
+    const lang    = document.getElementById('languageInput').value;
+    if (!concern) return showToast('Please enter your concern');
+    // Simple pseudo-AI: pick random provider from list
+    const items = Array.from(document.querySelectorAll('#providerList li'));
+    const chosen = items[Math.floor(Math.random() * items.length)];
+    document.getElementById('matchResults').hidden = false;
+    items.forEach(li => li.style.background = '');
+    chosen.style.background = 'var(--cb-accent)';
+  };
+  document.querySelector('#matchResults .close-btn').onclick = () =>
+    document.getElementById('matchResults').hidden = true;
+
+  // 2. Calendar Filtering & Next Available
+  document.getElementById('filterSlots').onclick = e => {
+    e.preventDefault();
+    showToast('Slots filtered (UI stub)');
+    // You’d implement real filtering logic here
+  };
+  document.getElementById('nextAvailable').onclick = e => {
+    e.preventDefault();
+    showToast('Next available: 2025-06-01 09:00');
+  };
+
+  // 3. Booking modal
+  const bookingModal = document.getElementById('bookingModal');
+  document.getElementById('bookNow').onclick = e => {
+    e.preventDefault();
+    const name = document.getElementById('clientName').value.trim();
+    const prof = document.getElementById('professionalSelect').value;
+    const date = document.getElementById('apptDate').value;
+    const time = document.getElementById('apptTime').value;
+    if (!name || !date || !time) return showToast('Please fill all fields');
+    bookingModal.hidden = false;
+    document.getElementById('bookingSummary').innerHTML = `
+      <p><strong>${name}</strong>, you are booking with <em>${prof}</em></p>
+      <p>On <strong>${date}</strong> at <strong>${time}</strong>.</p>
+      <p>AI recommends this provider based on your previous answers.</p>
+    `;
+  };
+  bookingModal.querySelector('.close-modal').onclick = () => bookingModal.hidden = true;
+  document.getElementById('confirmBooking').onclick = () => {
+    bookingModal.hidden = true;
+    showToast('Appointment Confirmed!');
+  };
+
+  // 4. Dashboard tabs
+  document.querySelectorAll('.dashboard-tabs button').forEach(btn => {
+    btn.onclick = () => {
+      document.querySelectorAll('.dashboard-tabs button').forEach(b=>b.classList.remove('active'));
+      btn.classList.add('active');
+      const tab = btn.dataset.tab;
+      document.querySelectorAll('.dashboard-list').forEach(d=>d.hidden = d.id!==tab);
+    };
+  });
+  // Reschedule & cancel
+  document.querySelectorAll('.rescheduleBtn').forEach(btn => {
+    btn.onclick = () => showToast('Reschedule flow triggered');
+  });
+  document.querySelectorAll('.cancelBtn').forEach(btn => {
+    btn.onclick = () => showToast('Appointment cancelled');
+  });
+
+  // 5. Feedback submission
+  document.getElementById('submitFeedback').onclick = e => {
+    e.preventDefault();
+    showToast('Thank you for your feedback!');
+  };
+
+  // 6. Analytics & staffing optimization
+  const noShowCtx = document.getElementById('noShowChart').getContext('2d');
+  const peakCtx   = document.getElementById('peakTimesChart').getContext('2d');
+  new Chart(noShowCtx, { type:'bar', data:{
+      labels:['Week1','Week2','Week3','Week4'], datasets:[{ label:'No-Show %', data:[10,12,8,15] }]
+    }});
+  new Chart(peakCtx, { type:'line', data:{
+      labels:['Mon','Tue','Wed','Thu','Fri'], datasets:[{ label:'Bookings', data:[30,45,60,55,70] }]
+    }});
+  document.getElementById('optimizeStaffing').onclick = () => {
+    document.getElementById('optimizationResult').hidden = false;
+    document.querySelector('#optimizationResult .result-content').innerText =
+      'AI suggests adding 2 nurses on Wed afternoons and 1 admin on Fridays.';
+  };
+  document.querySelector('#optimizationResult .close-btn').onclick = () =>
+    document.getElementById('optimizationResult').hidden = true;
+
+  // 7. Live Chat Support
+  const chatBox  = document.getElementById('chatBox');
+  const historyModal = document.getElementById('chatHistoryModal');
+  const historyList  = document.getElementById('chatHistoryList');
+  let lastDateKey = null;
+  const chatHistory = [];
   function addChat(role, text) {
     const now = new Date();
-    const dateStr = now.toLocaleDateString();
-    // insert date separator if first or new day
-    const lastSep = chatBox.querySelector('.chat-date:last-of-type');
-    const lastDate = lastSep && new Date(lastSep.dataset.date).toDateString();
-    if (!lastSep || lastDate !== now.toDateString()) {
+    const dateKey = now.toDateString();
+    if (dateKey !== lastDateKey) {
       const sep = document.createElement('div');
       sep.className = 'chat-date';
-      sep.dataset.date = now.toDateString();
-      const dayDiff = Math.floor((new Date() - new Date(now.toDateString())) / 864e5);
-      sep.innerText = dayDiff === 0 ? 'Today'
-                   : dayDiff === 1 ? 'Yesterday'
-                   : now.toLocaleDateString();
-      chatBox.appendChild(sep);
+      const diff = Math.floor((new Date() - new Date(dateKey)) / 864e5);
+      sep.innerText = diff===0 ? 'Today' : diff===1 ? 'Yesterday' : now.toLocaleDateString();
+      chatBox.append(sep);
+      lastDateKey = dateKey;
     }
-    const ts = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    const ts = now.toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'});
     const msg = document.createElement('div');
-    msg.className = role === 'user' ? 'user-msg' : 'bot-msg';
+    msg.className = role==='user' ? 'user-msg' : 'bot-msg';
     msg.innerHTML = `<div class="msg-text">${text}</div><div class="msg-ts">${ts}</div>`;
-    chatBox.appendChild(msg);
+    chatBox.append(msg);
     chatBox.scrollTop = chatBox.scrollHeight;
+    chatHistory.push({ role, text, time:`${dateKey} ${ts}` });
   }
-
-  document.getElementById('sendConsult').onclick = async e => {
+  document.getElementById('sendChat').onclick = e => {
     e.preventDefault();
-    const q = document.getElementById('consultInput').value.trim();
-    if (!q) return showToast('Type a message');
-    addChat('user', q);
-    document.getElementById('consultInput').value = '';
-    const spinner = document.createElement('div');
-    spinner.className = 'spinner';
-    chatBox.appendChild(spinner);
-    const resp = await callAI(q);
-    spinner.remove();
-    addChat('bot', sanitizeAIContent(resp));
+    const txt = document.getElementById('chatInput').value.trim();
+    if (!txt) return showToast('Type a message');
+    addChat('user', txt);
+    document.getElementById('chatInput').value = '';
+    setTimeout(() => addChat('bot', 'AI: ' + txt.split('').reverse().join('')), 500);
+  };
+  document.getElementById('clearChat').onclick = () => {
+    chatBox.innerHTML = '';
+    lastDateKey = null;
+    chatHistory.length = 0;
+  };
+  document.getElementById('showHistory').onclick = () => {
+    historyList.innerHTML = chatHistory.map((h,i)=>`
+      <div class="history-item">
+        <span><strong>${h.role==='user'?'You':'AI'}:</strong> ${h.text}</span>
+        <div class="msg-ts">${h.time}</div>
+        <button class="delete-history" data-i="${i}">&times;</button>
+      </div>`).join('');
+    historyModal.hidden = false;
+  };
+  historyModal.querySelector('.close-modal').onclick = () => historyModal.hidden = true;
+  historyList.onclick = e => {
+    if (e.target.matches('.delete-history')) {
+      const i = +e.target.dataset.i;
+      chatHistory.splice(i,1);
+      e.target.closest('.history-item').remove();
+    }
   };
 });
 </script>
