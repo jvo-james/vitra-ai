@@ -10,6 +10,238 @@
   <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
   <link rel="stylesheet"
         href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+  <style>
+  /*──────────────────── Consultation Booking Theme ────────────────────*/
+  :root {
+    --cb-primary: #3b3f88;         /* deep indigo */
+    --cb-primary-alt: #5c4d99;     /* lighter indigo */
+    --cb-accent: #f08a5d;          /* warm coral */
+    --cb-bg: #f7f6f9;              /* very light lavender */
+    --cb-surface: #ffffff;         /* white cards */
+    --cb-text: #2d2d2d;            /* almost black */
+    --cb-muted: #777777;           /* gray for secondary text */
+    --radius: 0.75rem;
+    --padding: 1rem;
+    --shadow: 0 4px 12px rgba(0,0,0,0.08);
+    --transition: 0.3s ease;
+  }
+  html.dark {
+    --cb-bg: #1a1b2e;
+    --cb-surface: #2d2d44;
+    --cb-text: #e0e0e0;
+    --cb-muted: #aaaaaa;
+    --shadow: 0 4px 12px rgba(0,0,0,0.4);
+  }
+
+  /*──────────────────── Reset & Base ────────────────────*/
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body {
+    font-family: 'Montserrat', sans-serif;
+    background: var(--cb-bg);
+    color: var(--cb-text);
+    transition: background var(--transition), color var(--transition);
+  }
+  a { text-decoration:none; color: inherit; }
+  h1,h2,h3,h4 { color: var(--cb-primary); }
+  p.desc { color: var(--cb-muted); margin-bottom:0.75rem; }
+  button, input, select, textarea { font-family:inherit; transition: var(--transition); }
+  :focus { outline:2px solid var(--cb-accent); }
+
+  /*──────────────────── Sidebar ────────────────────*/
+  aside#sidebar {
+    position: fixed; top: 0; left: 0; bottom: 0;
+    width: 220px; background: var(--cb-surface);
+    box-shadow: var(--shadow); z-index:1000;
+    display: flex; flex-direction: column;
+  }
+  aside#sidebar .brand {
+    display: flex; align-items: center; gap: 0.5rem;
+    padding: var(--padding); font-size:1.25rem;
+    background: var(--cb-primary); color: #fff;
+  }
+  aside#sidebar nav ul { list-style:none; flex:1; overflow-y:auto; }
+  aside#sidebar nav li a {
+    display:flex; align-items:center; gap:0.75rem;
+    padding:0.75rem var(--padding); border-radius:var(--radius);
+    color: var(--cb-text);
+  }
+  aside#sidebar nav li.active a,
+  aside#sidebar nav li a:hover {
+    background: var(--cb-primary-alt);
+    color: #fff;
+  }
+  #shrinkSidebar {
+    margin: var(--padding);
+    background: none; border: none;
+    cursor: pointer; color: var(--cb-primary);
+    font-size:1.25rem;
+  }
+
+  /*──────────────────── Header ────────────────────*/
+  header {
+    position: sticky; top:0; left:220px; right:0;
+    height:60px; background: var(--cb-surface);
+    display:flex; align-items:center; justify-content:space-between;
+    padding: 0 var(--padding); box-shadow:var(--shadow);
+    transition: left var(--transition);
+    z-index:1001;
+  }
+  #hamburger, #themeToggle {
+    font-size:1.5rem; color: var(--cb-primary); cursor:pointer;
+  }
+
+  /*──────────────────── Main & Modules ────────────────────*/
+  main {
+    margin: 100px var(--padding) var(--padding) 240px;
+    transition: margin-left var(--transition);
+  }
+  section.module {
+    background: var(--cb-surface);
+    border-radius: var(--radius);
+    padding: var(--padding);
+    margin-bottom:1.5rem;
+    box-shadow:var(--shadow);
+    transition: transform var(--transition);
+  }
+  section.module:hover { transform: translateY(-4px); }
+
+  /*──────────────────── Hero Section ────────────────────*/
+  #hero {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--padding);
+    background: var(--cb-primary-alt);
+    color: #fff;
+    padding: 2rem var(--padding);
+    border-radius: var(--radius);
+    box-shadow:var(--shadow);
+    margin-bottom:2rem;
+  }
+  #hero .hero-text h2 { font-size:2.25rem; margin-bottom:0.5rem; }
+  #hero .hero-text p { color: rgba(255,255,255,0.9); }
+  #hero .hero-features {
+    display: flex; flex-direction: column; gap:1rem;
+  }
+  #hero .feature-card {
+    background: #fff; color: var(--cb-primary);
+    padding:1rem; border-radius:var(--radius);
+    box-shadow:0 2px 8px rgba(0,0,0,0.1);
+    display:flex; align-items:center; justify-content:space-between;
+    transition: background var(--transition), transform var(--transition);
+  }
+  #hero .feature-card:hover {
+    background: var(--cb-accent); color:#fff;
+    transform: translateY(-3px);
+  }
+  #hero .feature-card i {
+    font-size:2rem;
+  }
+  #hero .feature-card .btn {
+    background: var(--cb-primary); color:#fff;
+    padding:0.5rem 1rem; border-radius:var(--radius);
+  }
+
+  /*──────────────────── Forms & Inputs ────────────────────*/
+  input[type="text"], input[type="date"], select, textarea {
+    width:100%; padding:0.75rem; margin-top:0.5rem;
+    border:2px solid var(--cb-primary-alt);
+    border-radius:var(--radius);
+    background: var(--cb-bg); color: var(--cb-text);
+  }
+  input:focus, select:focus, textarea:focus {
+    border-color: var(--cb-accent);
+    box-shadow: 0 0 0 3px rgba(240,138,93,0.3);
+  }
+  button.btn {
+    background: var(--cb-accent); color:#fff;
+    border:none; padding:0.75rem 1.25rem;
+    border-radius:var(--radius); box-shadow:var(--shadow);
+    cursor:pointer; transition: background var(--transition);
+  }
+  button.btn:hover {
+    background: #d4724f;
+  }
+
+  /*──────────────────── Response Panels ────────────────────*/
+  .response {
+    background: var(--cb-surface);
+    border-left: 4px solid var(--cb-accent);
+    margin-top:1rem; padding:var(--padding);
+    position:relative; box-shadow:var(--shadow);
+  }
+  .response .close-btn {
+    position:absolute; top:0.5rem; right:0.5rem;
+    background:none; border:none; font-size:1.1rem; cursor:pointer;
+    color: var(--cb-muted);
+  }
+  .response .result-content { margin-top:1rem; }
+
+  /*──────────────────── Chat & History ────────────────────*/
+  .chat-box {
+    background: var(--cb-bg); border:2px solid var(--cb-primary-alt);
+    border-radius:var(--radius); padding:var(--padding);
+    max-height:300px; overflow-y:auto; margin-bottom:1rem;
+  }
+  .chat-input { display:flex; gap:0.5rem; }
+  .user-msg, .bot-msg {
+    max-width:70%; padding:0.75rem; border-radius:var(--radius);
+    position:relative; word-wrap:break-word;
+  }
+  .user-msg {
+    align-self:flex-end; background:var(--cb-primary); color:#fff;
+    border-bottom-right-radius:0;
+  }
+  .bot-msg {
+    align-self:flex-start; background:var(--cb-surface); color:var(--cb-text);
+    border-bottom-left-radius:0;
+  }
+  .chat-date {
+    text-align:center; margin:1rem 0; font-size:0.9rem;
+    color:var(--cb-muted); font-weight:600;
+  }
+  .msg-ts {
+    font-size:0.75rem; color:var(--cb-muted); margin-top:0.25rem;
+  }
+
+  /*──────────────────── Modals ────────────────────*/
+  .modal {
+    position: fixed; top:0; left:0; width:100%; height:100%;
+    background: rgba(0,0,0,0.5); display:flex;
+    align-items:center; justify-content:center; z-index:2000;
+  }
+  .modal-content {
+    background: var(--cb-surface); padding:1.5rem;
+    border-radius: var(--radius); width:90%; max-width:500px;
+    box-shadow:var(--shadow); position:relative;
+  }
+  .close-modal {
+    position:absolute; top:0.5rem; right:0.75rem;
+    font-size:1.5rem; color:var(--cb-muted); cursor:pointer;
+  }
+  .history-item {
+    background: var(--cb-bg); padding:0.75rem; margin-bottom:0.75rem;
+    border-radius:var(--radius); display:flex; justify-content:space-between;
+    align-items:center;
+  }
+  .delete-history {
+    background: var(--cb-primary-alt); color:#fff;
+    border:none; padding:0.3rem 0.6rem; border-radius:var(--radius);
+    cursor:pointer; transition: background var(--transition);
+  }
+  .delete-history:hover {
+    background: var(--cb-primary);
+  }
+
+  /*──────────────────── Media Queries ────────────────────*/
+  @media (max-width: 768px) {
+    aside#sidebar { transform: translateX(-100%); }
+    body.sidebar-open aside#sidebar { transform: none; }
+    header { left: 0; }
+    main { margin-left: 1rem; margin-top: 100px; }
+    #hero { grid-template-columns: 1fr; }
+  }
+</style>
 </head>
   <body>
   <!-- Sidebar -->
