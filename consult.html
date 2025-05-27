@@ -10,6 +10,8 @@
   <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
   <link rel="stylesheet"
         href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
 
 <style>
   /*──────────────────── Global Theme ────────────────────*/
@@ -207,10 +209,16 @@
   .msg-ts { font-size: 0.75rem; color: var(--cb-muted); }
 
   /*──────────────────── Modals & History ────────────────────*/
-  .modal {
-    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-    background: rgba(0,0,0,0.5); display: none;
-    align-items: center; justify-content: center; z-index: 2000;
+ .modal {
+  position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+   background: rgba(0,0,0,0.5);
+   display: flex;                  /* show container as flex */
+   align-items: center; justify-content: center;
+    z-index: 2000;
+ }
+  /* hide when [hidden] is present */
+  .modal[hidden] {
+   display: none !important;
   }
   .modal-content {
     background: var(--cb-surface); padding: 1.5rem;
@@ -346,7 +354,7 @@
           <option>Ewe</option>
         </select>
       </label>
-      <button id="findMatch" class="btn"><i class="fas fa-search"></i> Find My Specialist</button>
+      <button type="button" id="findMatch" class="btn"><i class="fas fa-search"></i> Find My Specialist</button>
     </form>
 
     <div id="matchResults" class="response" hidden>
@@ -390,8 +398,8 @@
           <option>In-Person</option>
         </select>
       </label>
-      <button id="filterSlots" class="btn"><i class="fas fa-filter"></i> Filter</button>
-      <button id="nextAvailable" class="btn"><i class="fas fa-forward"></i> Next Available</button>
+      <button type="button" id="filterSlots" class="btn"><i class="fas fa-filter"></i> Filter</button>
+      <button type="button" id="nextAvailable" class="btn"><i class="fas fa-forward"></i> Next Available</button>
     </div>
   <div id="calendarGrid">
       <div id="calendar"></div>
@@ -428,7 +436,7 @@
       <label>Time:
         <input type="time" id="apptTime">
       </label>
-      <button id="bookNow" class="btn"><i class="fas fa-check"></i> Book Now</button>
+      <button type="button" id="bookNow" class="btn"><i class="fas fa-check"></i> Book Now</button>
     </form>
     <!-- booking confirmation modal -->
     <div id="bookingModal" class="modal" hidden>
@@ -438,7 +446,7 @@
         <div class="result-content" id="bookingSummary">
           <!-- AI will fill summary and recommendation -->
         </div>
-        <button id="confirmBooking" class="btn">Confirm</button>
+        <button type="button" id="confirmBooking" class="btn">Confirm</button>
       </div>
     </div>
   </section>
@@ -448,15 +456,15 @@
     <h2><i class="fas fa-tachometer-alt"></i> Your Dashboard</h2>
     <p class="desc">Manage upcoming visits, review past appointments, download summaries.</p>
     <div class="dashboard-tabs">
-      <button data-tab="upcoming" class="active">Upcoming</button>
-      <button data-tab="past">Past</button>
+      <button type="button" data-tab="upcoming" class="active">Upcoming</button>
+      <button type="button" data-tab="past">Past</button>
     </div>
     <div id="upcoming" class="dashboard-list">
       <ul>
         <li>
           <strong>Dr. Abena Owusu</strong> – 2025-05-30 14:00  
-          <button class="btn-sm rescheduleBtn">Reschedule</button>
-          <button class="btn-sm cancelBtn">Cancel</button>
+          <button type="button" class="btn-sm rescheduleBtn">Reschedule</button>
+          <button type="button" class="btn-sm cancelBtn">Cancel</button>
         </li>
         <!-- more items… -->
       </ul>
@@ -465,8 +473,8 @@
       <ul>
         <li>
           <strong>Dr. Kojo Mensah</strong> – 2025-04-12 10:00  
-          <button class="btn-sm">Download Summary</button>
-          <button class="btn-sm">Download Invoice</button>
+          <button type="button" class="btn-sm">Download Summary</button>
+          <button type="button" class="btn-sm">Download Invoice</button>
         </li>
         <!-- more… -->
       </ul>
@@ -485,7 +493,7 @@
     <label>Comments:
       <textarea id="feedbackInput" rows="3" placeholder="Any suggestions?"></textarea>
     </label>
-    <button id="submitFeedback" class="btn"><i class="fas fa-paper-plane"></i> Submit</button>
+    <button type="button" id="submitFeedback" class="btn"><i class="fas fa-paper-plane"></i> Submit</button>
   </section>
 
   <!-- 6. Analytics & Optimization -->
@@ -495,7 +503,7 @@
       <canvas id="noShowChart"></canvas>
       <canvas id="peakTimesChart" style="margin-top:1rem;"></canvas>
     </div>
-    <button id="optimizeStaffing" class="btn"><i class="fas fa-cogs"></i> AI Suggest Staffing</button>
+    <button type="button" id="optimizeStaffing" class="btn"><i class="fas fa-cogs"></i> AI Suggest Staffing</button>
     <div id="optimizationResult" class="response" hidden>
       <button class="close-btn"><i class="fas fa-times"></i></button>
       <div class="result-content"></div>
@@ -507,13 +515,13 @@
     <h2><i class="fas fa-comments"></i> Live AI Chat Support</h2>
     <p class="desc">24/7 assistant for all your booking questions.</p>
     <div class="chat-controls">
-      <button id="clearChat" class="btn-sm"><i class="fas fa-trash"></i> Clear</button>
-      <button id="showHistory" class="btn-sm"><i class="fas fa-history"></i> History</button>
+      <button type="button" id="clearChat" class="btn-sm"><i class="fas fa-trash"></i> Clear</button>
+      <button type="button" id="showHistory" class="btn-sm"><i class="fas fa-history"></i> History</button>
     </div>
     <div id="chatBox" class="chat-box"></div>
     <form id="chatForm" class="chat-input">
       <input id="chatInput" type="text" placeholder="Ask me anything…">
-      <button id="sendChat" class="btn"><i class="fas fa-paper-plane"></i></button>
+      <button type="button" id="sendChat" class="btn"><i class="fas fa-paper-plane"></i></button>
     </form>
     <!-- Chat history modal -->
     <div id="chatHistoryModal" class="modal" hidden>
@@ -521,7 +529,7 @@
         <span class="close-modal">&times;</span>
         <h3>Chat History</h3>
         <div id="chatHistoryList"></div>
-        <button id="clearHistoryChat" class="btn-sm">Clear All</button>
+        <button type="button" id="clearHistoryChat" class="btn-sm">Clear All</button>
       </div>
     </div>
   </section>
@@ -533,20 +541,12 @@
 
 <script>
   // ====== CONFIG & HELPERS ======
-  const OPENAI_API_KEY = 'YOUR_OPENAI_API_KEY_HERE';
-
-  async function callOpenAI(messages) {
-    const res = await fetch('https://api.openai.com/v1/chat/completions', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${OPENAI_API_KEY}`
-      },
-      body: JSON.stringify({
-        model: 'gpt-4o-mini',
-        messages
-      })
-    });
+     const res = await fetch('/.netlify/functions/openai-proxy', {
+     method: 'POST',
+     headers: { 'Content-Type': 'application/json' },
+     body: JSON.stringify({ messages })
+   });
+  
     if (!res.ok) {
       const errTxt = await res.text();
       throw new Error(`OpenAI ${res.status}: ${errTxt}`);
