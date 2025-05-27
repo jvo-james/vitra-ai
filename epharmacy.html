@@ -244,7 +244,7 @@
   .modal {
    position: fixed; top:0; left:0; width:100%; height:100%;
     background: rgba(0,0,0,0.5); display:flex; align-items:center;
-    justify-content:center; z-index:2000;
+    justify-content:center; z-index:2000; display:none;
   }
   .modal-content {
     background: var(--pharm-surface); padding:1.5rem;
@@ -256,6 +256,19 @@
    cursor:pointer;
   }
   .history-item { margin-bottom:1rem; }
+
+   .spinner {
+ width:24px; height:24px;
+border:4px solid rgba(0,0,0,0.1);
+ border-top-color: var(--pharm-primary);
+  border-radius:50%;
+  animation: spin 0.8s linear infinite;
+ }
+
+@keyframes spin {
+ to { transform: rotate(360deg); }
+}
+
 </style>
 
 </head>
@@ -326,13 +339,46 @@
   <main>
     <!-- 0. Prescription Scanner & OCR -->
     <section id="prescriptionScanner" class="module">
-      <h2><i class="fas fa-camera"></i> Prescription Scanner</h2>
-      <p class="desc">Upload a photo of your prescription and let AI decode it.</p>
-      <input type="file" id="rxImage" accept="image/*">
-      <button id="scanRx" class="btn"><i class="fas fa-magic"></i> Scan Rx</button>
-      <div id="scannerPanel" class="response" hidden>
-        <button class="close-btn"><i class="fas fa-times"></i></button>
-        <div class="result-content"></div>
+      <h2><i class="fas fa-microscope"></i> Smart Prescription Builder</h2>
+      <p class="desc">Choose from the options below to craft your prescription profile.</p>
+      <label>Patient Age:
+        <input type="number" id="rxAge" placeholder="e.g. 45">
+      </label>
+      <label>Weight (kg):
+        <input type="number" id="rxWeight" placeholder="e.g. 70">
+      </label>
+      <label>Diagnosis:
+        <select id="rxDiagnosis">
+          <option>Hypertension</option>
+          <option>Diabetes</option>
+          <option>Malaria</option>
+          <option>Asthma</option>
+          <option>Other</option>
+       </select>
+      </label>
+      <label>Medication Type:
+        <select id="rxMode">
+          <option>Tablet</option>
+          <option>Syrup</option>
+          <option>Injection</option>
+         <option>Cream</option>
+       </select>
+      </label>
+      <label>Dosage Frequency:
+        <select id="rxFreq">
+          <option>Once daily</option>
+         <option>Twice daily</option>
+          <option>Every 8 hours</option>
+          <option>As needed</option>
+        </select>
+      </label>
+    <label>Additional Notes:
+        <textarea id="rxNotes" rows="2" placeholder="e.g. take with food…"></textarea>
+     </label>
+     <button id="scanRx" class="btn"><i class="fas fa-cogs"></i> Build Prescription</button>
+       <div id="scannerPanel" class="response" hidden>
+         <button class="close-btn"><i class="fas fa-times"></i></button>
+         <div class="result-content"></div>
       </div>
     </section>
 
@@ -361,7 +407,19 @@
     <section id="interactionChecker" class="module">
       <h2><i class="fas fa-exchange-alt"></i> Drug–Drug & Drug–Food Interaction Checker</h2>
       <p class="desc">Enter your meds and foods/supplements to see risk alerts.</p>
-      <textarea id="interactionList" rows="3" placeholder="e.g. Metformin, Grapefruit, Warfarin…"></textarea>
+    <label>Drug 1:
+        <input list="drug-list" id="intDrug1" placeholder="Paracetamol">
+      </label>
+      <label>Drug 2:
+        <input list="drug-list" id="intDrug2" placeholder="Aspirin">
+      </label>
+      <label>Food/Supplement:
+        <input list="food-list" id="intFood" placeholder="Grapefruit, Milk…">
+      </label>
+      <datalist id="food-list">
+        <option>Grapefruit</option><option>Milk</option><option>Alcohol</option>
+        <option>Iron supplement</option><option>Other</option>
+      </datalist>
       <button id="checkInteractions" class="btn"><i class="fas fa-shield-alt"></i> Check Interactions</button>
       <div id="interactionPanel" class="response" hidden>
         <button class="close-btn"><i class="fas fa-times"></i></button>
@@ -372,7 +430,8 @@
     <!-- 3. Dosage Calculator & Titration Planner -->
     <section id="dosageCalculator" class="module">
       <h2><i class="fas fa-calculator"></i> Dosage & Titration Planner</h2>
-      <p class="desc">Enter patient metrics, and get dosing schedules & monitoring checklists.</p>
+       <p class="desc">Provide patient info; AI will calculate starting dose, titration steps, and follow-up checks.</p>
+      <small>⦿ Titration: dose adjustments over time<br>⦿ Monitoring: when to check labs/vitals</small>  
       <label>Weight (kg): <input type="number" id="patientWeight"></label>
       <label>Creatinine Clearance (mL/min): <input type="number" id="crCl"></label>
       <label>Liver Function (ALT U/L): <input type="number" id="altValue"></label>
@@ -417,7 +476,8 @@
     <!-- 6. Compound Formulation Advisor -->
     <section id="compoundAdvisor" class="module">
       <h2><i class="fas fa-flask"></i> Compound Formulation Advisor</h2>
-      <p class="desc">Enter ingredients & strength; get compounding recipes & stability notes.</p>
+     <p class="desc">List your active ingredients and desired final strength; AI returns a step-by-step compounding protocol, including excipients, mixing order, and storage guidance.</p>
+      <small>⦿ Excipients: fillers, binders<br>⦿ Stability: shelf life, storage temp.</small>  
       <textarea id="compoundList" rows="3" placeholder="e.g. Amoxicillin 125mg/mL, Glycerin…"></textarea>
       <input type="text" id="compoundStrength" placeholder="Desired strength (e.g. 20mg/mL)">
       <button id="adviseCompound" class="btn"><i class="fas fa-tools"></i> Advise Formulation</button>
@@ -430,7 +490,8 @@
     <!-- 7. Side-Effect & Adverse Event Predictor -->
     <section id="sideEffectPredictor" class="module">
       <h2><i class="fas fa-exclamation-circle"></i> Side-Effect Predictor</h2>
-      <p class="desc">Select patient profile & meds to see high-risk adverse events.</p>
+      <p class="desc">Enter age, comorbidities, and chosen medications; AI predicts likely side-effects, severity, and monitoring advice.</p>
+      <small>⦿ Severity grading (mild/moderate/severe)<br>⦿ Monitoring intervals</small>
       <label>Age: <input type="number" id="patientAge"></label>
       <label>Comorbidities:
         <select id="comorbiditySelect">
@@ -514,6 +575,10 @@ document.addEventListener('DOMContentLoaded', () => {
     requestAnimationFrame(() => t.classList.add('visible'));
     setTimeout(() => t.remove(), 2000);
   }
+
+    // Ensure history modal is hidden on load
+  const historyModal = document.getElementById('historyModal');
+  historyModal.style.display = 'none';
 
   //──────────────────── “Thinking…” Texts ────────────────────
   const PHASE_TEXT = {
@@ -765,7 +830,10 @@ document.addEventListener('DOMContentLoaded', () => {
      </div>`).join('');
    modal.hidden = false;
   };
-  modal.querySelector('.close-modal').onclick = () => modal.hidden = true;
+  modal.querySelector('.close-modal').onclick = () => {
+   modal.style.display = 'none';
+ };
+
 
   //──────────────────── Charts Setup ────────────────────
   const data1 = { labels:['Jan','Feb','Mar','Apr'], datasets:[{ label:'Scans', data:[120,150,170,200] }] };
