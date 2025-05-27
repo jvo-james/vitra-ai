@@ -433,5 +433,302 @@
       <small>© 2025 AI-Pharmacy Chain — Consultation Booking Suite</small>
     </footer>
   </main>
+
+    <script>
+document.addEventListener('DOMContentLoaded', () => {
+  //───────────────────── Toast Helper ─────────────────────
+  function showToast(msg) {
+    const t = document.createElement('div');
+    t.className = 'toast';
+    t.innerText = msg;
+    document.body.append(t);
+    requestAnimationFrame(() => t.classList.add('visible'));
+    setTimeout(() => t.remove(), 3000);
+  }
+
+  //───────────────────── Sanitize AI Content ─────────────────────
+  function sanitizeAIContent(raw) {
+    let inTable = false;
+    return raw
+      // code blocks
+      .replace(/```([\s\S]+?)```/g, (_, code) => `<pre>${code.trim()}</pre>`)
+      // headers
+      .replace(/^#### (.+)$/gm, '<h4>$1</h4>')
+      .replace(/^### (.+)$/gm, '<h3>$1</h3>')
+      .replace(/^## (.+)$/gm, '<h2>$1</h2>')
+      // bold & italic
+      .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+      .replace(/\*(.+?)\*/g, '<em>$1</em>')
+      // tables
+      .replace(/^\|(.+)\|$/gm, (_, row) => {
+        const cols = row.split('|').map(c => c.trim());
+        if (!inTable) {
+          inTable = true;
+          return '<table><thead><tr>' +
+            cols.map(c => `<th>${c}</th>`).join('') +
+            '</tr></thead><tbody>';
+        } else {
+          return '<tr>' +
+            cols.map(c => `<td>${c}</td>`).join('') +
+            '</tr>';
+        }
+      })
+      .replace(/$/, () => inTable ? '</tbody></table>' : '');
+  }
+
+  //───────────────────── AI Caller ─────────────────────
+  async function callAI(prompt) {
+    try {
+      const res = await fetch('/.netlify/functions/openai-proxy', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          messages: [
+            { role: 'system', content: 'You are a helpful consultation booking assistant.' },
+            { role: 'user', content: prompt }
+          ]
+        })
+      });
+      if (!res.ok) throw new Error(await res.text());
+      const json = await res.json();
+      return json.choices?.[0]?.message?.content || '⚠️ Unexpected AI response.';
+    } catch (err) {
+      return err.message.includes('Sandbox.Timedout')
+        ? '⚠️ The AI is taking longer than usual—please try again.'
+        : '⚠️ Error: ' + err.message;
+    }
+  }
+
+  //───────────────────── Spinner & Tools ─────────────────────
+  const PHASE_TEXT = {
+    heroBookBtn:       'Preparing booking interface…',
+    bookAppointment:   'Booking appointment…',
+    checkAvailability:'Checking availability…',
+    rescheduleBtn:     'Rescheduling…',
+    cancelBtn:         'Cancelling…',
+    bulkUpload:        'Processing bulk upload…',
+    sendScheduler:     'Consulting scheduler…'
+  };
+
+  function startThinking(panel, key) {
+    panel.hidden = false;
+    panel.querySelector('.result-content').innerHTML = `
+      <div class="spin-header">${PHASE_TEXT[key]||'Thinking…'}</div>
+      <div class="spinner"></div>`;
+    const old = panel.querySelector('.tool-row');
+    if (old) old.remove();
+    panel.querySelector('.close-btn').style.display = 'none';
+  }
+
+  function injectTools(panel) {
+    if (panel.querySelector('.tool-row')) return;
+    const tools = document.createElement('div');
+    tools.className = 'tool-row';
+    tools.innerHTML = `
+      <button class="copy-btn"><i class="fas fa-copy"></i></button>
+      <button class="dl-btn"><i class="fas fa-download"></i></button>`;
+    panel.appendChild(tools);
+    panel.querySelector('.close-btn').style.display = 'block';
+  }
+
+  //───────────────────── Sidebar & Theme ─────────────────────
+  document.getElementById('hamburger').onclick = () =>
+    document.body.classList.toggle('sidebar-open');
+
+  const shrinkBtn = document.getElementById('shrinkSidebar');
+  shrinkBtn.onclick = () => {
+    const sb = document.getElementById('sidebar');
+    sb.classList.toggle('collapsed');
+    shrinkBtn.querySelector('i').classList.toggle('fa-chevron-left');
+    shrinkBtn.querySelector('i').classList.toggle('fa-chevron-right');
+    document.querySelector('header').style.left = sb.classList.contains('collapsed') ? '60px' : '220px';
+    document.querySelector('main').style.marginLeft = sb.classList.contains('collapsed') ? '70px' : '240px';
+  };
+
+  document.getElementById('themeToggle').onclick = () => {
+    document.documentElement.classList.toggle('dark');
+    document.getElementById('themeToggle').classList.toggle('fa-moon');
+    document.getElementById('themeToggle').classList.toggle('fa-sun');
+  };
+
+  //───────────────────── Hero Button ─────────────────────
+  document.getElementById('heroBookBtn').addEventListener('click', async e => {
+    e.preventDefault();
+    const panel = document.getElementById('bookingPanel');
+    startThinking(panel, 'heroBookBtn');
+    const txt = await callAI('Show me the booking form for a new consultation with all options.');
+    panel.querySelector('.result-content').innerHTML = sanitizeAIContent(txt);
+    injectTools(panel);
+  });
+
+  //───────────────────── Module Handlers ─────────────────────
+  // helper to wire form button
+  function wire(buttonId, panelId, gatherPrompt) {
+    document.getElementById(buttonId).onclick = async e => {
+      e.preventDefault();
+      const panel = document.getElementById(panelId);
+      startThinking(panel, buttonId);
+      const prompt = gatherPrompt();
+      const txt = await callAI(prompt);
+      panel.querySelector('.result-content').innerHTML = sanitizeAIContent(txt);
+      injectTools(panel);
+    };
+  }
+
+  // Book single appointment
+  wire('bookAppointment', 'bookingPanel', () => {
+    const name = document.getElementById('clientName').value.trim();
+    const svc  = document.getElementById('serviceType').value;
+    const dr   = document.getElementById('providerSelect').value;
+    const date = document.getElementById('apptDate').value;
+    const time = document.getElementById('apptTime').value;
+    if (!name || !svc || !dr || !date || !time) {
+      return 'Please fill all required booking fields.';
+    }
+    return `Book a ${svc} consultation for ${name} with ${dr} on ${date} at ${time}.`;
+  });
+
+  // Check availability
+  wire('checkAvailability', 'availabilityPanel', () => {
+    const svc  = document.getElementById('availService').value;
+    const dr   = document.getElementById('availProvider').value;
+    const date = document.getElementById('availDate').value;
+    if (!svc || !dr || !date) {
+      return 'Select service, provider and date to check availability.';
+    }
+    return `List available slots for ${svc} with ${dr} on ${date}.`;
+  });
+
+  // Reschedule
+  wire('rescheduleBtn', 'reschedulePanel', () => {
+    const apptId = document.getElementById('rescheduleId').value.trim();
+    const date   = document.getElementById('newDate').value;
+    const time   = document.getElementById('newTime').value;
+    if (!apptId || !date || !time) {
+      return 'Please provide appointment ID, new date, and new time.';
+    }
+    return `Reschedule appointment ${apptId} to ${date} at ${time}.`;
+  });
+
+  // Cancel
+  wire('cancelBtn', 'cancelPanel', () => {
+    const apptId = document.getElementById('cancelId').value.trim();
+    if (!apptId) return 'Enter the appointment ID to cancel.';
+    return `Cancel appointment ${apptId}.`;
+  });
+
+  // Bulk upload CSV of appointments
+  document.getElementById('bulkUpload').onclick = async e => {
+    e.preventDefault();
+    const file = document.getElementById('bulkFile').files[0];
+    const panel = document.getElementById('bulkPanel');
+    if (!file) {
+      showToast('Please select a CSV file to upload.');
+      return;
+    }
+    startThinking(panel, 'bulkUpload');
+    const text = await file.text();
+    // extract lines of "name,date,time,service,provider"
+    const lines = text.split('\n').slice(1).filter(l => l.trim());
+    const meds  = lines.join('; ');
+    const prompt = `Bulk book these appointments:\n${meds}`;
+    const res = await callAI(prompt);
+    panel.querySelector('.result-content').innerHTML = sanitizeAIContent(res);
+    injectTools(panel);
+  };
+
+  // Copy / Download / Close controls
+  document.body.addEventListener('click', e => {
+    const rsp = e.target.closest('.response');
+    if (!rsp) return;
+    if (e.target.closest('.copy-btn')) {
+      const txt = rsp.querySelector('.result-content').innerText;
+      navigator.clipboard.writeText(txt).then(() => showToast('Copied to clipboard'));
+    }
+    if (e.target.closest('.dl-btn')) {
+      const txt = rsp.querySelector('.result-content').innerText;
+      const blob = new Blob([txt], { type: 'text/plain' });
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = 'response.txt';
+      a.click();
+    }
+    if (e.target.closest('.close-btn')) {
+      rsp.hidden = true;
+    }
+  });
+
+  //───────────────────── Scheduler Chat ─────────────────────
+  const chatBox = document.getElementById('schedulerChatBox');
+  let lastDate  = null;
+  const chatHistory = [];
+
+  function addChat(role, text) {
+    const now = new Date();
+    const dateKey = now.toDateString();
+    // date separator
+    if (dateKey !== lastDate) {
+      const sep = document.createElement('div');
+      sep.className = 'chat-date';
+      // Today / Yesterday / actual date
+      const diffDays = Math.floor((new Date() - now.setHours(0,0,0,0)) / 864e5);
+      sep.innerText = diffDays === 0 ? 'Today'
+        : diffDays === 1 ? 'Yesterday'
+        : new Date(dateKey).toLocaleDateString();
+      chatBox.append(sep);
+      lastDate = dateKey;
+    }
+    const ts = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    const msg = document.createElement('div');
+    msg.className = role === 'user' ? 'user-msg' : 'bot-msg';
+    msg.innerHTML = `<div class="msg-text">${text}</div><div class="msg-ts">${ts}</div>`;
+    chatBox.append(msg);
+    chatBox.scrollTop = chatBox.scrollHeight;
+    chatHistory.push({ role, text, time: `${dateKey} ${ts}` });
+  }
+
+  document.getElementById('sendScheduler').onclick = async e => {
+    e.preventDefault();
+    const q = document.getElementById('schedulerInput').value.trim();
+    if (!q) return showToast('Type a message');
+    addChat('user', q);
+    document.getElementById('schedulerInput').value = '';
+    const spinner = document.createElement('div');
+    spinner.className = 'spinner';
+    chatBox.append(spinner);
+    const resp = await callAI(q);
+    spinner.remove();
+    addChat('bot', sanitizeAIContent(resp));
+  };
+
+  document.getElementById('clearSchedulerChat').onclick = () => {
+    chatBox.innerHTML = '';
+    lastDate = null;
+    chatHistory.length = 0;
+  };
+
+  // History modal
+  const histModal = document.getElementById('historyModal');
+  document.getElementById('historyBtn').onclick = e => {
+    e.preventDefault();
+    const list = document.getElementById('historyList');
+    list.innerHTML = chatHistory.map((h,i) => `
+      <div class="history-item">
+        <strong>${h.role==='user'?'You':'Scheduler'}:</strong> ${h.text}
+        <div class="msg-ts">${h.time}</div>
+        <button class="delete-history" data-index="${i}">&times;</button>
+      </div>`).join('');
+    histModal.hidden = false;
+  };
+  document.querySelector('.close-modal').onclick = () => histModal.hidden = true;
+  document.getElementById('historyList').addEventListener('click', e => {
+    if (!e.target.matches('.delete-history')) return;
+    const i = +e.target.dataset.index;
+    chatHistory.splice(i, 1);
+    e.target.closest('.history-item').remove();
+  });
+
+});
+</script>
 </body>
 </html>
