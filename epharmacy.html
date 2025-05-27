@@ -220,6 +220,17 @@
   }
   html.dark button.btn { background:var(--pharm-primary-alt); }
   html.dark th { background:#0a9396; }
+  @media(max-width:420px) {
+  body { font-size: 0.9rem; }
+  aside#sidebar { width: 60px; }
+  header { left: 60px; }
+  main { margin: 80px 1rem 1rem 70px; }
+  .feature-card { padding: 0.75rem; }
+  .hero-features { grid-template-columns: 1fr; }
+  section.module { padding: 0.75rem; }
+  input, textarea, select, button { font-size: 0.9rem; }
+  .tool-row { bottom:0.5rem; right:0.5rem; flex-direction: column; }
+}
 </style>
 </head>
 <body>
@@ -440,21 +451,10 @@
 
 
   <!-- Shared Scripts -->
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
 document.addEventListener('DOMContentLoaded', () => {
-  // Prevent real form submits
-  document.querySelectorAll('form').forEach(f => f.addEventListener('submit', e => e.preventDefault()));
-
-  // Sidebar & Dark Mode
-  document.getElementById('hamburger').onclick = () => document.body.classList.toggle('sidebar-open');
-  document.getElementById('themeToggle').onclick = () => {
-    document.documentElement.classList.toggle('dark');
-    document.getElementById('themeToggle').classList.toggle('fa-moon');
-    document.getElementById('themeToggle').classList.toggle('fa-sun');
-  };
-
-  // Toast helper
+  //──────────────────── Toast Helper ────────────────────
   function showToast(msg) {
     const t = document.createElement('div');
     t.className = 'toast';
@@ -464,111 +464,219 @@ document.addEventListener('DOMContentLoaded', () => {
     setTimeout(() => t.remove(), 2000);
   }
 
-  // Generic AI caller
-  async function callAI(prompt) {
-    const res = await fetch('/.netlify/functions/openai-proxy', {
-      method:'POST',
-      headers:{'Content-Type':'application/json'},
-      body: JSON.stringify({ messages:[
-        {role:'system', content:'You are a helpful pharmacy AI.'},
-        {role:'user', content:prompt}
-      ]})
-    });
-    if (!res.ok) throw new Error(await res.text());
-    const j = await res.json();
-    return j.choices[0].message.content;
+  //──────────────────── “Thinking…” Texts ────────────────────
+  const PHASE_TEXT = {
+    heroScanBtn:      'Decoding prescription…',
+    heroDrugBtn:      'Fetching drug info…',
+    heroInteractBtn:  'Analyzing interactions…',
+    heroDoseBtn:      'Calculating dosage…',
+    scanRx:           'Decoding prescription…',
+    lookupDrug:       'Retrieving monograph…',
+    checkInteractions:'Checking interactions…',
+    computeDose:      'Computing dose…',
+    adviseDrug:       'Formulating recommendation…',
+    predictPrice:     'Estimating price…',
+    adviseCompound:   'Designing formulation…',
+    predictSideEffects:'Predicting side-effects…'
+  };
+
+  //──────────────────── Sanitize AI Content ────────────────────
+  function sanitizeAIContent(raw) {
+    // track table state
+    let inTable = false;
+    return raw
+      .replace(/^#### (.+)$/gm, '<h4>$1</h4>')
+      .replace(/^### (.+)$/gm, '<h3>$1</h3>')
+      .replace(/^## (.+)$/gm, '<h2>$1</h2>')
+      .replace(/\*\*(.+?)\*\*/g,'<strong>$1</strong>')
+      .replace(/\*(.+?)\*/g,    '<em>$1</em>')
+      .replace(/^\|(.+)\|$/gm, function(_, row) {
+        const cols = row.split('|').map(c=>c.trim());
+        if (!inTable) {
+          inTable = true;
+          return '<table><thead><tr>' +
+                 cols.map(c=>`<th>${c}</th>`).join('') +
+                 '</tr></thead><tbody>';
+        } else {
+          return '<tr>' +
+                 cols.map(c=>`<td>${c}</td>`).join('') +
+                 '</tr>';
+        }
+      })
+      .replace(/$/, function() {
+        if (inTable) { inTable = false; return '</tbody></table>'; }
+        return '';
+      });
   }
 
-  // Wire a hero card
-  function wireHero(btnId, panelId, promptFn) {
-    const btn = document.getElementById(btnId);
-    btn.onclick = async () => {
-      const panel = document.getElementById(panelId);
-      panel.hidden = false;
-      panel.querySelector('.result-content').innerHTML = '<div class="spinner"></div>';
-      try {
-        const txt = await callAI(promptFn());
-        panel.querySelector('.result-content').innerHTML = txt;
-      } catch (e) {
-        panel.querySelector('.result-content').innerText = '⚠️ '+e.message;
+  //──────────────────── Generic AI Caller ────────────────────
+  async function callAI(prompt) {
+    try {
+      const res = await fetch('/.netlify/functions/openai-proxy', {
+        method:'POST',
+        headers:{ 'Content-Type':'application/json' },
+        body: JSON.stringify({ messages:[
+          { role:'system', content:'You are a helpful pharmacy AI.' },
+          { role:'user',   content:prompt }
+        ]})
+      });
+      if (!res.ok) {
+        const err = await res.text();
+        throw new Error(err);
       }
+      const j = await res.json();
+      return j.choices?.[0]?.message?.content
+             ?? '⚠️ Unexpected AI response format.';
+    } catch (err) {
+      if (err.message.includes('Sandbox.Timedout')) {
+        return '⚠️ Sorry, the AI is taking longer than usual—please try again in a moment.';
+      }
+      return '⚠️ Error: ' + err.message;
+    }
+  }
+
+  //──────────────────── Helper: show spinner + text ────────────────────
+  function startThinking(panel, btnId) {
+    panel.hidden = false;
+    panel.querySelector('.result-content').innerHTML =
+      `<div class="spin-header">${PHASE_TEXT[btnId]||'Thinking…'}</div>
+       <div class="spinner"></div>`;
+    // remove any existing tool-row
+    const old = panel.querySelector('.tool-row');
+    if (old) old.remove();
+  }
+
+  //──────────────────── Helper: inject copy/download ────────────────────
+  function injectTools(panel) {
+    // avoid duplicate
+    if (panel.querySelector('.tool-row')) return;
+    const tools = document.createElement('div');
+    tools.className = 'tool-row';
+    tools.innerHTML = `
+      <button class="copy-btn"><i class="fas fa-copy"></i></button>
+      <button class="dl-btn"><i class="fas fa-download"></i></button>
+    `;
+    panel.appendChild(tools);
+  }
+
+  //──────────────────── Sidebar & Dark Mode ────────────────────
+  document.getElementById('hamburger').onclick =
+    () => document.body.classList.toggle('sidebar-open');
+  document.getElementById('themeToggle').onclick = () => {
+    document.documentElement.classList.toggle('dark');
+    document.getElementById('themeToggle').classList.toggle('fa-moon');
+    document.getElementById('themeToggle').classList.toggle('fa-sun');
+  };
+
+  //──────────────────── Generic wiring for hero cards ────────────────────
+  function wireHero(btnId, panelId, promptFn) {
+    document.getElementById(btnId).onclick = async () => {
+      const panel = document.getElementById(panelId);
+      startThinking(panel, btnId);
+      const txt = await callAI(promptFn());
+      panel.querySelector('.result-content').innerHTML = sanitizeAIContent(txt);
+      injectTools(panel);
     };
   }
+
   wireHero('heroScanBtn','scannerPanel', () => 'OCR and decode this prescription image');
-  wireHero('heroDrugBtn','drugInfoPanel', () => `Lookup drug: ${document.getElementById('drugInput').value}`);
-  wireHero('heroInteractBtn','interactionPanel', () => `Check interactions: ${document.getElementById('interactionList').value}`);
+  wireHero('heroDrugBtn','drugInfoPanel', () => {
+    const d = document.getElementById('drugInput').value.trim();
+    return d ? `Lookup drug: ${d}` : 'Please specify a drug.';
+  });
+  wireHero('heroInteractBtn','interactionPanel', () => {
+    const v = document.getElementById('interactionList').value.trim();
+    return v ? `Check interactions: ${v}` : 'Please list meds/foods to check.';
+  });
   wireHero('heroDoseBtn','dosagePanel', () => {
-    return `Compute dosage for weight=${document.getElementById('patientWeight').value}, `+
-           `CrCl=${document.getElementById('crCl').value}, ALT=${document.getElementById('altValue').value}`;
+    const w = document.getElementById('patientWeight').value,
+          c = document.getElementById('crCl').value,
+          a = document.getElementById('altValue').value;
+    return (w&&c&&a)
+      ? `Compute dosage for weight=${w}, CrCl=${c}, ALT=${a}`
+      : 'Please fill all patient metrics.';
   });
 
-  // Generic module wiring
+  //──────────────────── Generic wiring for modules ────────────────────
   function wire(btnId, inputIds, panelId, buildPrompt) {
-    const btn = document.getElementById(btnId);
-    btn.onclick = async () => {
+    document.getElementById(btnId).onclick = async () => {
       const panel = document.getElementById(panelId);
-      panel.hidden = false;
-      panel.querySelector('.result-content').innerHTML = '<div class="spinner"></div>';
-      try {
-        // build prompt from inputs
-        const prompt = buildPrompt(inputIds.map(id => {
-          const el = document.getElementById(id);
-          return el.tagName==='TEXTAREA'||el.tagName==='INPUT'
-            ? el.value 
-            : '';
-        }));
-        const txt = await callAI(prompt);
-        panel.querySelector('.result-content').innerHTML = txt;
-      } catch(e) {
-        panel.querySelector('.result-content').innerText = '⚠️ '+e.message;
-      }
+      startThinking(panel, btnId);
+      const vals = inputIds.map(id => document.getElementById(id).value.trim());
+      const prompt = buildPrompt(vals);
+      const txt = await callAI(prompt);
+      panel.querySelector('.result-content').innerHTML = sanitizeAIContent(txt);
+      injectTools(panel);
     };
   }
 
-  wire('scanRx', [], 'scannerPanel', ()=> 'OCR and decode the uploaded image');  
-  wire('lookupDrug',['drugInput'], 'drugInfoPanel', ([drug])=>`Give me monograph for ${drug}`);
-  wire('checkInteractions',['interactionList'], 'interactionPanel', ([list])=>`Check interactions for ${list}`);
-  wire('computeDose',['patientWeight','crCl','altValue'],'dosagePanel', vals=>
-    `Plan dosage for patient with weight=${vals[0]}, CrCl=${vals[1]}, ALT=${vals[2]}`);
-  wire('adviseDrug',['symptomInput'],'advisePanel',([sym])=>`Recommend meds for symptoms: ${sym}`);
-  wire('predictPrice',['priceDrugInput','currencyInput'],'pricePanel',([drug,cur])=>
-    `Predict price of ${drug} in ${cur}, list nearby pharmacies`);
-  wire('adviseCompound',['compoundList','compoundStrength'],'compoundPanel',([list,str])=>
-    `Formulate ${str} from ingredients: ${list}`);
-  wire('predictSideEffects',['patientAge','sideEffectDrugs'],'sideEffectPanel',([age,drugs])=>
-    `Predict side-effects for age ${age} on drugs: ${drugs}`);
-  
-  // Chatbot wiring
+  wire('scanRx',          [],               'scannerPanel',   ()=>'OCR and decode the uploaded image');
+  wire('lookupDrug',      ['drugInput'],    'drugInfoPanel',  ([d])=> d?`Give me monograph for ${d}`:'Enter a drug.');
+  wire('checkInteractions',['interactionList'],'interactionPanel',([l])=>l?`Check interactions for ${l}`:'Enter a list.');
+  wire('computeDose',     ['patientWeight','crCl','altValue'],'dosagePanel',
+       ([w,c,a])=> (w&&c&&a)?`Plan dosage for weight=${w},CrCl=${c},ALT=${a}`:'Fill all fields.');
+  wire('adviseDrug',      ['symptomInput'], 'advisePanel',    ([s])=>s?`Recommend meds for symptoms: ${s}`:'Describe symptoms.');
+  wire('predictPrice',    ['priceDrugInput','currencyInput'],'pricePanel',
+       ([d,c])=>d&&c?`Predict price of ${d} in ${c}, list nearby pharmacies`:'Select drug & currency.');
+  wire('adviseCompound',  ['compoundList','compoundStrength'],'compoundPanel',
+       ([l,s])=>l&&s?`Formulate ${s} from ingredients: ${l}`:'Enter ingredients & strength.');
+  wire('predictSideEffects',['patientAge','sideEffectDrugs'],'sideEffectPanel',
+       ([age,drugs])=>age&&drugs?`Predict side-effects for age ${age} on drugs: ${drugs}`:'Enter age & meds.');
+
+  //──────────────────── Copy / Download Handlers ────────────────────
+  document.body.addEventListener('click', e => {
+    const rp = e.target.closest('.response');
+    if (!rp) return;
+    if (e.target.closest('.copy-btn')) {
+      const txt = rp.querySelector('.result-content').innerText;
+      navigator.clipboard.writeText(txt).then(()=>showToast('Copied!'));
+    }
+    if (e.target.closest('.dl-btn')) {
+      const txt = rp.querySelector('.result-content').innerText;
+      const blob = new Blob([txt],{type:'text/plain'});
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = 'response.txt';
+      a.click();
+    }
+    if (e.target.closest('.close-btn')) {
+      rp.hidden = true;
+    }
+  });
+
+  //──────────────────── Chatbot Wiring ────────────────────
   const chatBox = document.getElementById('pharmaChatBox');
   document.getElementById('sendPharma').onclick = async () => {
-    const q = document.getElementById('pharmaInput').value;
-    if(!q) return showToast('Type a question');
-    const msgDiv = document.createElement('div');
-    msgDiv.className='user-msg'; msgDiv.innerText = q;
-    chatBox.append(msgDiv);
-    document.getElementById('pharmaInput').value='';
-    document.getElementById('pharma-form').style.opacity=0.5;
-    try {
-      const a = await callAI(q);
-      const botDiv = document.createElement('div');
-      botDiv.className='bot-msg'; botDiv.innerHTML = a;
-      chatBox.append(botDiv);
-      chatBox.scrollTop = chatBox.scrollHeight;
-    } catch(e) {
-      showToast(e.message);
-    } finally {
-      document.getElementById('pharma-form').style.opacity=1;
-    }
+    const q = document.getElementById('pharmaInput').value.trim();
+    if (!q) return showToast('Type a question');
+    // user message
+    const u = document.createElement('div');
+    u.className = 'user-msg'; u.innerText = q;
+    chatBox.append(u);
+    document.getElementById('pharmaInput').value = '';
+    // thinking indicator
+    const spinner = document.createElement('div');
+    spinner.className = 'spinner'; chatBox.append(spinner);
+    // call AI
+    const a = await callAI(q);
+    spinner.remove();
+    const b = document.createElement('div');
+    b.className = 'bot-msg'; b.innerHTML = sanitizeAIContent(a);
+    chatBox.append(b);
+    chatBox.scrollTop = chatBox.scrollHeight;
   };
-  document.getElementById('clearPharmaChat').onclick = () => chatBox.innerHTML='';
+  document.getElementById('clearPharmaChat').onclick = () => {
+    chatBox.innerHTML = '';
+  };
 
-  // “Other” selects
+  //──────────────────── “Other” Inputs ────────────────────
   document.querySelectorAll('select').forEach(sel => {
     sel.onchange = () => {
       const oi = sel.parentElement.querySelector('.other-input');
-      if (oi) oi.style.display = sel.value==='Other'?'inline-block':'none';
+      if (oi) oi.style.display = sel.value==='Other'?'block':'none';
     };
   });
+
 });
 </script>
 </body>
