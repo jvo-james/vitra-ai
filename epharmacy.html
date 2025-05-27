@@ -118,9 +118,11 @@
   color: var(--pharm-accent);  /* swapped text color */
   padding:2rem var(--padding);
      border-radius: var(--radius); margin-bottom:2rem;
-  width: calc(100% - 240px - 2*var(--padding));
-  margin: 0 var(--padding) 2rem var(--padding);
-
+  margin-bottom:2rem;
+ margin-left: 240px; /* align with main */
+  margin-right: var(--padding);
+  width: auto;
+  
   }
   #hero h2 { font-size:2rem; display:flex; align-items:center; gap:0.5rem; }
   #hero p.desc { color:rgba(255,255,255,0.9); }
@@ -312,6 +314,20 @@ border:4px solid rgba(0,0,0,0.1);
  .chat-date {
     text-align:center; margin:1rem 0; font-size:0.8rem; color:var(--pharm-muted);
   }
+    .response .result-content .formula {
+    font-family: 'Courier New', monospace;
+    background: rgba(0,0,0,0.05);
+   padding: 0.2rem 0.4rem;
+    border-radius: var(--radius);
+  }
+  .response .result-content pre {
+   background: rgba(0,0,0,0.05);
+    padding: 0.5rem;
+    border-radius: var(--radius);
+    overflow-x: auto;
+   font-family: 'Courier New', monospace;
+  }
+ 
 </style>
 
 </head>
@@ -419,8 +435,7 @@ border:4px solid rgba(0,0,0,0.1);
       </select>
        <!-- text input appears if “Other” -->
       <input type="text" id="rxDiagOther" class="other-input" placeholder="Specify diagnosis…" style="display:none;margin-top:0.5rem;" required>
-   </label>
-       </select>
+
       </label>
       <label>Medication Type:
         <select id="rxMode">
@@ -672,6 +687,9 @@ document.addEventListener('DOMContentLoaded', () => {
   function sanitizeAIContent(raw) {
     // track table state
     let inTable = false;
+       raw = raw.replace(/```([\s\S]+?)```/g, (_, code) => `<pre>${code.trim()}</pre>`);
+       raw = raw.replace(/\$(.+?)\$/g, (_, expr) => `<span class="formula">${expr}</span>`);
+
     return raw
       .replace(/^#### (.+)$/gm, '<h4>$1</h4>')
       .replace(/^### (.+)$/gm, '<h3>$1</h3>')
