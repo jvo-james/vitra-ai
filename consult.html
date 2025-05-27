@@ -54,7 +54,8 @@
     width: 220px; background: var(--cb-surface);
     box-shadow: var(--shadow); z-index:1000;
     display: flex; flex-direction: column;
-  }
+   --sidebar-width: 220px;
+}
   aside#sidebar .brand {
     display: flex; align-items: center; gap: 0.5rem;
     padding: var(--padding); font-size:1.25rem;
@@ -80,7 +81,7 @@
 
   /*──────────────────── Header ────────────────────*/
   header {
-    position: sticky; top:0; left:220px; right:0;
+    position: sticky; top:0; left: var(--sidebar-width, 220px); right:0;
     height:60px; background: var(--cb-surface);
     display:flex; align-items:center; justify-content:space-between;
     padding: 0 var(--padding); box-shadow:var(--shadow);
@@ -93,7 +94,7 @@
 
   /*──────────────────── Main & Modules ────────────────────*/
   main {
-    margin: 100px var(--padding) var(--padding) 240px;
+    margin: 100px var(--padding) var(--padding) var(--sidebar-width, 220px);
     transition: margin-left var(--transition);
   }
   section.module {
@@ -232,7 +233,21 @@
   .delete-history:hover {
     background: var(--cb-primary);
   }
-
+ html.dark #hero {
+ background: var(--cb-primary);
+ }
+ html.dark #hero .feature-card {
+  background: var(--cb-surface); color: var(--cb-text);
+ }
+ html.dark #hero .feature-card:hover {
+  background: var(--cb-accent); color:#fff;
+ }
+     html.dark button.btn {
+  background: var(--cb-accent); color: #fff;
+ }
+ html.dark .toast {
+  background: var(--cb-primary-alt);
+ }
   /*──────────────────── Media Queries ────────────────────*/
   @media (max-width: 768px) {
     aside#sidebar { transform: translateX(-100%); }
@@ -240,6 +255,11 @@
     header { left: 0; }
     main { margin-left: 1rem; margin-top: 100px; }
     #hero { grid-template-columns: 1fr; }
+      header h1 {
+    font-size: 1.2rem;   
+    white-space: normal;  
+    flex: 1;              
+  }
   }
 </style>
 </head>
@@ -423,8 +443,8 @@
       <p class="desc">Have questions? Chat with our AI assistant 24/7.</p>
       <div class="chat-box" id="consultChatBox"></div>
       <form id="consultChatForm" class="chat-input">
-        <input id="consultInput" type="text" placeholder="Ask a question…">
-        <button id="sendConsult" class="btn"><i class="fas fa-paper-plane"></i></button>
+        <input id="schedulerInput" type="text" placeholder="Ask a question…">
+        <button id="sendScheduler" class="btn"><i class="fas fa-paper-plane"></i></button>
       </form>
     </section>
 
@@ -658,6 +678,56 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 
+    // ───────────────────── Module wiring ─────────────────────
+ // Provider match
+document.getElementById('findProvider').onclick = async e => {
+   e.preventDefault();
+  const panel = document.getElementById('providerResults');
+   startThinking(panel, 'findProvider');
+  const concern  = document.getElementById('matchConcern').value;
+  const language = document.getElementById('matchLanguage').value;
+  const resp = await callAI(`Match provider for concern="${concern}", language="${language}".`);
+  panel.querySelector('.result-content').innerHTML = sanitizeAIContent(resp);
+   injectTools(panel);
+ };
+
+// Calendar slots
+ document.getElementById('loadSlots').onclick = async e => {
+  e.preventDefault();
+  const panel = document.getElementById('slotList');
+  startThinking(panel, 'loadSlots');
+  const prov = document.getElementById('calendarProvider').value;
+  const date = document.getElementById('calendarDate').value;
+  const resp = await callAI(`List slots for provider=${prov} on ${date}.`);
+  panel.querySelector('.result-content').innerHTML = sanitizeAIContent(resp);
+  injectTools(panel);
+ };
+
+// Telehealth mode
+ document.getElementById('confirmMode').onclick = e => {
+  e.preventDefault();
+  showToast('Your preferred telehealth mode has been saved.');
+};
+
+// Reminders
+document.getElementById('setReminders').onclick = async e => {
+  e.preventDefault();
+   showToast('Reminder preferences updated.');
+ };
+
+// Payment
+ document.getElementById('processPayment').onclick = async e => {
+  e.preventDefault();
+  const panel = document.getElementById('paymentResponse');
+   startThinking(panel, 'processPayment');
+   const ins = document.getElementById('insProvider').value;
+   const pol = document.getElementById('insPolicy').value;
+   const pm  = document.getElementById('payMethod').value;
+  const resp = await callAI(`Process payment: insurance=${ins} policy=${pol} or method=${pm}.`);
+   panel.querySelector('.result-content').innerHTML = sanitizeAIContent(resp);
+   injectTools(panel);
+ };
+  
   //───────────────────── Scheduler Chat ─────────────────────
   const chatBox = document.getElementById('schedulerChatBox');
   let lastDate  = null;
