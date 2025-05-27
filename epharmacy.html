@@ -803,9 +803,14 @@ document.addEventListener('DOMContentLoaded', () => {
     return d ? `Lookup drug: ${d}` : 'Please specify a drug.';
   });
   wireHero('heroInteractBtn','interactionPanel', () => {
-    const v = document.getElementById('interactionList').value.trim();
-    return v ? `Check interactions: ${v}` : 'Please list meds/foods to check.';
+    // now pulls the two drugs + food field
+    const d1 = document.getElementById('intDrug1').value.trim();
+    const d2 = document.getElementById('intDrug2').value.trim();
+    const f  = document.getElementById('intFood').value.trim();
+    if (!d1 || !d2) return 'Please select two drugs.';
+    return `Check interactions between ${d1} and ${d2}` + (f? ` when taken with ${f}.` : '.');
   });
+
   wireHero('heroDoseBtn','dosagePanel', () => {
     const w = document.getElementById('patientWeight').value,
           c = document.getElementById('crCl').value,
@@ -949,7 +954,7 @@ document.addEventListener('DOMContentLoaded', () => {
     spinner.remove();
     addMessage('bot', sanitizeAIContent(a));
   };
-
+);
   // History modal
   const modal = document.getElementById('historyModal');
   document.getElementById('historyBtn').onclick = () => {
