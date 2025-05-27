@@ -85,8 +85,14 @@
     position: sticky; top: 0; left: 220px; right: 0;
     height: 60px; background: var(--cb-surface);
     display: flex; align-items: center; justify-content: space-between;
-    padding: 0 var(--padding);
+    padding: 0 var(--padding); flex-wrap: wrap;
     box-shadow: var(--shadow); z-index: 1001;
+  }
+  header h1 {
+    flex: 1 1 auto;          /* + let the title shrink/grow */
+    margin: 0.5rem 0;        /* + some vertical breathing room */
+    word-break: break-word;  /* + wrap long titles */
+    font-size: 1.25rem;      /* + a slightly smaller base size */
   }
   #hamburger, #themeToggle {
     font-size: 1.5rem; color: var(--cb-primary); cursor: pointer;
@@ -266,6 +272,14 @@
     main { margin-left: 1rem; margin-top: 100px; }
     #hero { grid-template-columns: 1fr; }
   }
+    /* make our generated calendar look like your cells */
+  #calendar {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 1px;
+    background: var(--cb-bg);
+    border: 1px solid var(--cb-bg);
+  }
 </style>
 </head>
 <body>
@@ -379,27 +393,9 @@
       <button id="filterSlots" class="btn"><i class="fas fa-filter"></i> Filter</button>
       <button id="nextAvailable" class="btn"><i class="fas fa-forward"></i> Next Available</button>
     </div>
-    <div id="calendarGrid">
-      <!-- Simple pseudo-calendar table -->
-      <table>
-        <thead>
-          <tr><th>Sun</th><th>Mon</th><th>Tue</th><th>Wed</th><th>Thu</th><th>Fri</th><th>Sat</th></tr>
-        </thead>
-        <tbody>
-          <!-- Fill with your calendar-render logic -->
-          <tr>
-            <td class="closed">—</td>
-            <td class="open">10:00, 14:00</td>
-            <td class="open">09:00, 13:00, 16:00</td>
-            <td class="closed">—</td>
-            <td class="open">11:00, 15:00</td>
-            <td class="open">09:30, 12:30, 17:00</td>
-            <td class="closed">—</td>
-          </tr>
-          <!-- more rows… -->
-        </tbody>
-      </table>
-    </div>
+  <div id="calendarGrid">
+      <div id="calendar"></div>
+   </div>
   </section>
 
   <!-- 3. Book an Appointment -->
@@ -602,6 +598,64 @@ document.addEventListener('DOMContentLoaded', () => {
     showToast('Next available: 2025-06-01 09:00');
   };
 
+    // ——— Generate a simple monthly calendar ———
+  function generateCalendar(year, month) {
+    const cal = document.getElementById('calendar');
+   cal.innerHTML = '';  // clear
+   // day names header
+   ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'].forEach(d => {
+     const hd = document.createElement('div');
+      hd.className = 'cell';
+      hd.style.fontWeight = '600';
+      hd.innerText = d;
+     cal.append(hd);
+   });
+   // first day offset
+    const first = new Date(year, month, 1).getDay();
+   // total days
+   const days = new Date(year, month+1, 0).getDate();
+    // blank cells until first
+   for (let i=0; i<first; i++) {
+     const blank = document.createElement('div');
+    blank.className = 'cell closed';
+      cal.append(blank);
+    }
+    // create day cells
+   for (let d=1; d<=days; d++) {
+     const cell = document.createElement('div');
+     cell.className = 'cell';
+     // randomly mark some as closed
+     if (Math.random() < 0.3) {
+       cell.classList.add('closed');
+        cell.innerText = d;
+     } else {
+        cell.classList.add('open');
+       cell.innerText = d;
+        cell.onclick = () => {
+          document.querySelectorAll('#calendar .cell.open.selected')
+            .forEach(c=>c.classList.remove('selected'));
+         cell.classList.add('selected');
+          showToast(`You selected: ${year}-${month+1}-${d}`);
+        };
+     }
+     // highlight today
+      const today = new Date();
+     if (today.getFullYear()===year && today.getMonth()===month && today.getDate()===d) {
+        cell.classList.add('today');
+     }
+     cal.append(cell);
+   }
+ }
+ // call initially with current month
+  const now = new Date();
+ generateCalendar(now.getFullYear(), now.getMonth());
+
+  // optionally regenerate when date input changes
+ document.getElementById('calendarDateInput').onchange = e => {
+    const d = new Date(e.target.value);
+    if (!isNaN(d)) generateCalendar(d.getFullYear(), d.getMonth());
+ };
+  
   // 3. Booking modal
   const bookingModal = document.getElementById('bookingModal');
   document.getElementById('bookNow').onclick = e => {
