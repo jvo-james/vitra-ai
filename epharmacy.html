@@ -597,7 +597,7 @@ border:4px solid rgba(0,0,0,0.1);
         <button id="clearPharmaChat" class="btn-secondary"><i class="fas fa-trash"></i> Clear</button>
          <button id="historyBtn" class="btn" style="margin-bottom:0.5rem;">
       <i class="fas fa-history"></i> History
-   </button
+         </button>
       </div>
       <div id="pharmaChatBox" class="chat-box"></div>
       <form id="pharma-form" class="chat-input">
@@ -786,16 +786,18 @@ document.addEventListener('DOMContentLoaded', () => {
   };
 
   //──────────────────── Generic wiring for hero cards ────────────────────
-  function wireHero(btnId, panelId, promptFn) {
-    document.getElementById(btnId).onclick = async () => {
-      event.preventDefault && event.preventDefault();
+ function wireHero(btnId, panelId, promptFn) {
+   document.getElementById(btnId).addEventListener('click', async (event) => {
+     // prevent anchor’s default jump
+     event.preventDefault();
       const panel = document.getElementById(panelId);
       startThinking(panel, btnId);
       const txt = await callAI(promptFn());
       panel.querySelector('.result-content').innerHTML = sanitizeAIContent(txt);
-      injectTools(panel);
-    };
+     injectTools(panel);
+    });
   }
+
 
   wireHero('heroScanBtn','scannerPanel', () => 'OCR and decode this prescription image');
   wireHero('heroDrugBtn','drugInfoPanel', () => {
@@ -954,7 +956,7 @@ document.addEventListener('DOMContentLoaded', () => {
     spinner.remove();
     addMessage('bot', sanitizeAIContent(a));
   };
-);
+  });
   // History modal
   const modal = document.getElementById('historyModal');
   document.getElementById('historyBtn').onclick = () => {
