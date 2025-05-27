@@ -10,7 +10,15 @@
   <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
   <link rel="stylesheet"
         href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-
+<!-- +————— Add MathJax for real math rendering —————+ -->
+<script>
+window.MathJax = {
+  tex: { inlineMath: [['$', '$'], ['\\(', '\\)']] },
+  svg: { fontCache: 'global' }
+};
+</script>
+<script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
+<!-- +———————————————————————————————————————+ -->
 
   <!-- Shared Styles -->
 <style>
@@ -96,7 +104,7 @@
 
   /*──────────────────── Main Modules ────────────────────*/
   main {
-    margin:80px var(--padding) var(--padding) 240px;
+    margin:100px var(--padding) var(--padding) 240px;
     transition:margin-left var(--transition);
   }
   section.module {
@@ -110,20 +118,36 @@
   section.module:hover { transform: translateY(-4px); }
 
   /*──────────────────── Hero Section ────────────────────*/
- #hero {
-   position:relative;
-   overflow:hidden;
-   /* swap the hero gradient colors */
-   background: linear-gradient(120deg, var(--pharm-primary-alt), var(--pharm-primary));
-  color: var(--pharm-accent);  /* swapped text color */
-  padding:2rem var(--padding);
-     border-radius: var(--radius); margin-bottom:2rem;
-  margin-bottom:2rem;
- margin-left: 90px; /* align with main */
-  margin-right: var(--padding);
-  width: 320px;
-  
-  }
+/* +——————— Hero Section (new unified style) ———————+ */
+#hero {
+  grid-column: 1 / -1;
+  background: var(--pharm-primary-alt);
+  color: var(--pharm-surface);
+  padding: var(--padding);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--padding);
+  margin-bottom: 1.5rem;
+}
+#hero.dark {
+  background: var(--pharm-primary);
+  color: var(--pharm-accent);
+}
+#hero .hero-text {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+#hero .hero-text h2 { margin-bottom: 0.5rem; }
+#hero .hero-text p { margin-bottom: 1rem; }
+#hero .hero-features {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+/* +—————————————————————————————————————————————+ */
   #hero h2 { font-size:2rem; display:flex; align-items:center; gap:0.5rem; }
   #hero p.desc { color:rgba(255,255,255,0.9); }
   .hero-features {
@@ -255,9 +279,13 @@ aside#sidebar.collapsed {
   aside#sidebar.collapsed nav li a {
     justify-content:center;
  }
-
-
-
+aside#sidebar {
+  top: 60px;   /* instead of top:0 */
+}
+  aside#sidebar.collapsed {
+  overflow: visible;
+}
+  
   /* Chat timestamps */
   .msg-ts { font-size:0.75rem; color:var(--pharm-muted); margin-top:0.25rem; }
 
@@ -360,10 +388,12 @@ border:4px solid rgba(0,0,0,0.1);
   </header>
 
   <!-- Hero -->
-  <section id="hero" class="module">
+<section id="hero" class="module">
+  <div class="hero-text">
     <h2><i class="fas fa-prescription"></i> Empower Your E-Pharmacy Experience</h2>
     <p class="desc">AI-powered tools for scanning, checking interactions, dosage planning & more.</p>
-    <div class="hero-features">
+  </div>
+  <div class="hero-features">
       <div class="feature-card">
         <i class="fas fa-camera"></i>
         <h3>Rx Scanner</h3>
@@ -464,7 +494,7 @@ border:4px solid rgba(0,0,0,0.1);
     </section>
 
     <!-- 1. Drug Information -->
-    <section id="drugInfo" class="module">
+    <section id="drugInfoPanel" class="module">
       <h2><i class="fas fa-pills"></i> Drug Information Lookup</h2>
       <p class="desc">Paste or select your drug, and get monographs, dosages, & safety info.</p>
       <input list="drug-list" id="drugInput" placeholder="Type or select a drug…">
@@ -602,6 +632,30 @@ border:4px solid rgba(0,0,0,0.1);
       <div id="pharmaChatBox" class="chat-box"></div>
       <form id="pharma-form" class="chat-input">
         <input id="pharmaInput" type="text" placeholder="Ask me anything about meds…">
+       <label>Or type your meds:
+  <select id="refillSelect" multiple>
+    <option>Amoxicillin</option>
+    <option>Metformin</option>
+    <option>Lisinopril</option>
+    <option>Amlodipine</option>
+    <option>Omeprazole</option>
+    <option>Simvastatin</option>
+    <option>Atorvastatin</option>
+    <option>Albuterol</option>
+    <option>Gabapentin</option>
+    <option>Warfarin</option>
+    <option>Prednisone</option>
+    <option>Azithromycin</option>
+    <option>Clopidogrel</option>
+    <option>Citalopram</option>
+    <option>Sertraline</option>
+    <option>Furosemide</option>
+    <option>Hydrochlorothiazide</option>
+    <option>Levothyroxine</option>
+    <option>Other</option>
+  </select>
+</label>
+<input type="text" id="refillOther" class="other-input" placeholder="Specify other…" style="display:none;">
         <button id="sendPharma" class="btn"><i class="fas fa-paper-plane"></i></button>
       </form>
     </section>
@@ -653,7 +707,7 @@ border:4px solid rgba(0,0,0,0.1);
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
 document.addEventListener('DOMContentLoaded', () => {
-  //──────────────────── Toast Helper ────────────────────
+  // Toast helper
   function showToast(msg) {
     const t = document.createElement('div');
     t.className = 'toast';
@@ -663,114 +717,96 @@ document.addEventListener('DOMContentLoaded', () => {
     setTimeout(() => t.remove(), 2000);
   }
 
-    // Ensure history modal is hidden on load
-  const historyModal = document.getElementById('historyModal');
-  historyModal.style.display = 'none';
-
-  //──────────────────── “Thinking…” Texts ────────────────────
-  const PHASE_TEXT = {
-    heroScanBtn:      'Decoding prescription…',
-    heroDrugBtn:      'Fetching drug info…',
-    heroInteractBtn:  'Analyzing interactions…',
-    heroDoseBtn:      'Calculating dosage…',
-    scanRx:           'Decoding prescription…',
-    lookupDrug:       'Retrieving monograph…',
-    checkInteractions:'Checking interactions…',
-    computeDose:      'Computing dose…',
-    adviseDrug:       'Formulating recommendation…',
-    predictPrice:     'Estimating price…',
-    adviseCompound:   'Designing formulation…',
-    predictSideEffects:'Predicting side-effects…'
-  };
-
-  //──────────────────── Sanitize AI Content ────────────────────
+  // Sanitize AI content (keep $...$ for MathJax; basic markdown + tables)
   function sanitizeAIContent(raw) {
-    // track table state
     let inTable = false;
-       raw = raw.replace(/```([\s\S]+?)```/g, (_, code) => `<pre>${code.trim()}</pre>`);
-       raw = raw.replace(/\$(.+?)\$/g, (_, expr) => `<span class="formula">${expr}</span>`);
-
-    return raw
+    raw = raw
+      .replace(/```([\s\S]+?)```/g, (_, code) => `<pre>${code.trim()}</pre>`)
       .replace(/^#### (.+)$/gm, '<h4>$1</h4>')
       .replace(/^### (.+)$/gm, '<h3>$1</h3>')
       .replace(/^## (.+)$/gm, '<h2>$1</h2>')
-      .replace(/\*\*(.+?)\*\*/g,'<strong>$1</strong>')
-      .replace(/\*(.+?)\*/g,    '<em>$1</em>')
-      .replace(/^\|(.+)\|$/gm, function(_, row) {
-        const cols = row.split('|').map(c=>c.trim());
+      .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+      .replace(/\*(.+?)\*/g, '<em>$1</em>')
+      .replace(/^\|(.+)\|$/gm, (_, row) => {
+        const cols = row.split('|').map(c => c.trim());
         if (!inTable) {
           inTable = true;
           return '<table><thead><tr>' +
-                 cols.map(c=>`<th>${c}</th>`).join('') +
-                 '</tr></thead><tbody>';
+            cols.map(c => `<th>${c}</th>`).join('') +
+            '</tr></thead><tbody>';
         } else {
           return '<tr>' +
-                 cols.map(c=>`<td>${c}</td>`).join('') +
-                 '</tr>';
+            cols.map(c => `<td>${c}</td>`).join('') +
+            '</tr>';
         }
       })
-      .replace(/$/, function() {
-        if (inTable) { inTable = false; return '</tbody></table>'; }
-        return '';
-      });
+      .replace(/$/, () => inTable ? '</tbody></table>' : '');
+    return raw;
   }
 
-  //──────────────────── Generic AI Caller ────────────────────
+  // Generic AI caller
   async function callAI(prompt) {
     try {
       const res = await fetch('/.netlify/functions/openai-proxy', {
-        method:'POST',
-        headers:{ 'Content-Type':'application/json' },
-        body: JSON.stringify({ messages:[
-          { role:'system', content:'You are a helpful pharmacy AI.' },
-          { role:'user',   content:prompt }
-        ]})
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          messages: [
+            { role: 'system', content: 'You are a helpful pharmacy AI.' },
+            { role: 'user', content: prompt }
+          ]
+        })
       });
-      if (!res.ok) {
-        const err = await res.text();
-        throw new Error(err);
-      }
+      if (!res.ok) throw new Error(await res.text());
       const j = await res.json();
-      return j.choices?.[0]?.message?.content
-             ?? '⚠️ Unexpected AI response format.';
+      return j.choices?.[0]?.message?.content || '⚠️ Unexpected AI response.';
     } catch (err) {
-      if (err.message.includes('Sandbox.Timedout')) {
-        return '⚠️ Sorry, the AI is taking longer than usual—please try again in a moment.';
-      }
-      return '⚠️ Error: ' + err.message;
+      return err.message.includes('Sandbox.Timedout')
+        ? '⚠️ Sorry, the AI is taking longer than usual—please try again.'
+        : '⚠️ Error: ' + err.message;
     }
   }
 
-  //──────────────────── Helper: show spinner + text ────────────────────
+  // Spinner + waiting text
+  const PHASE_TEXT = {
+    heroScanBtn: 'Decoding prescription…',
+    heroDrugBtn: 'Fetching drug info…',
+    heroInteractBtn: 'Analyzing interactions…',
+    heroDoseBtn: 'Calculating dosage…',
+    scanRx: 'Decoding prescription…',
+    lookupDrug: 'Retrieving monograph…',
+    checkInteractions: 'Checking interactions…',
+    computeDose: 'Computing dose…',
+    adviseDrug: 'Formulating recommendation…',
+    predictPrice: 'Estimating price…',
+    adviseCompound: 'Designing formulation…',
+    predictSideEffects: 'Predicting side-effects…',
+    scheduleRefill: 'Scheduling refills…'
+  };
   function startThinking(panel, btnId) {
     panel.hidden = false;
-    panel.querySelector('.result-content').innerHTML =
-      `<div class="spin-header">${PHASE_TEXT[btnId]||'Thinking…'}</div>
-       <div class="spinner"></div>`;
-    // remove any existing tool-row
+    panel.querySelector('.result-content').innerHTML = `
+      <div class="spin-header">${PHASE_TEXT[btnId]||'Thinking…'}</div>
+      <div class="spinner"></div>`;
     const old = panel.querySelector('.tool-row');
     if (old) old.remove();
     panel.querySelector('.close-btn').style.display = 'none';
   }
-
-  //──────────────────── Helper: inject copy/download ────────────────────
   function injectTools(panel) {
-    // avoid duplicate
     if (panel.querySelector('.tool-row')) return;
     const tools = document.createElement('div');
     tools.className = 'tool-row';
     tools.innerHTML = `
       <button class="copy-btn"><i class="fas fa-copy"></i></button>
-      <button class="dl-btn"><i class="fas fa-download"></i></button>
-    `;
+      <button class="dl-btn"><i class="fas fa-download"></i></button>`;
     panel.appendChild(tools);
     panel.querySelector('.close-btn').style.display = 'block';
   }
 
-  //──────────────────── Sidebar & Dark Mode ────────────────────
-  document.getElementById('hamburger').onclick =
-    () => document.body.classList.toggle('sidebar-open');
- const shrinkBtn = document.getElementById('shrinkSidebar');
+  // Sidebar & Dark Mode toggles
+  document.getElementById('hamburger').onclick = () =>
+    document.body.classList.toggle('sidebar-open');
+  const shrinkBtn = document.getElementById('shrinkSidebar');
   shrinkBtn.onclick = () => {
     const sb = document.getElementById('sidebar');
     sb.classList.toggle('collapsed');
@@ -785,34 +821,29 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('themeToggle').classList.toggle('fa-sun');
   };
 
-  //──────────────────── Generic wiring for hero cards ────────────────────
- function wireHero(btnId, panelId, promptFn) {
-   document.getElementById(btnId).addEventListener('click', async (event) => {
-     // prevent anchor’s default jump
-     event.preventDefault();
+  // Hero wiring
+  function wireHero(btnId, panelId, promptFn) {
+    document.getElementById(btnId).addEventListener('click', async e => {
+      e.preventDefault();
       const panel = document.getElementById(panelId);
       startThinking(panel, btnId);
       const txt = await callAI(promptFn());
       panel.querySelector('.result-content').innerHTML = sanitizeAIContent(txt);
-     injectTools(panel);
+      injectTools(panel);
     });
   }
-
-
   wireHero('heroScanBtn','scannerPanel', () => 'OCR and decode this prescription image');
   wireHero('heroDrugBtn','drugInfoPanel', () => {
     const d = document.getElementById('drugInput').value.trim();
     return d ? `Lookup drug: ${d}` : 'Please specify a drug.';
   });
   wireHero('heroInteractBtn','interactionPanel', () => {
-    // now pulls the two drugs + food field
     const d1 = document.getElementById('intDrug1').value.trim();
     const d2 = document.getElementById('intDrug2').value.trim();
     const f  = document.getElementById('intFood').value.trim();
-    if (!d1 || !d2) return 'Please select two drugs.';
-    return `Check interactions between ${d1} and ${d2}` + (f? ` when taken with ${f}.` : '.');
+    if (!d1||!d2) return 'Please select two drugs.';
+    return `Check interactions between ${d1} and ${d2}` + (f ? ` when taken with ${f}.` : '.');
   });
-
   wireHero('heroDoseBtn','dosagePanel', () => {
     const w = document.getElementById('patientWeight').value,
           c = document.getElementById('crCl').value,
@@ -822,219 +853,184 @@ document.addEventListener('DOMContentLoaded', () => {
       : 'Please fill all patient metrics.';
   });
 
-  //──────────────────── Generic wiring for modules ────────────────────
+  // Module wiring
   function wire(btnId, inputIds, panelId, buildPrompt) {
     document.getElementById(btnId).onclick = async () => {
       const panel = document.getElementById(panelId);
       startThinking(panel, btnId);
       const vals = inputIds.map(id => document.getElementById(id).value.trim());
-      const prompt = buildPrompt(vals);
-      const txt = await callAI(prompt);
+      const txt = await callAI(buildPrompt(vals));
       panel.querySelector('.result-content').innerHTML = sanitizeAIContent(txt);
       injectTools(panel);
     };
   }
-
-  wire('scanRx',
-       ['rxAge','rxWeight','rxDiagnosis','rxDiagOther','rxMode','rxFreq','rxNotes'],
-      'scannerPanel',
-      ([age,wt,diag,diagOther,mode,freq,notes]) => {
+  wire('scanRx',['rxAge','rxWeight','rxDiagnosis','rxDiagOther','rxMode','rxFreq','rxNotes'],'scannerPanel',
+       ([age,wt,diag,diagOther,mode,freq,notes]) => {
          const finalDiag = diag==='Other' ? diagOther : diag;
-        if (!age||!wt||!finalDiag||!mode||!freq) return 'Please fill all required fields.';
-         return `Build a prescription for a ${age}-year-old, ${wt} kg patient diagnosed with ${finalDiag}, ` +
-                `route: ${mode}, frequency: ${freq}. Notes: ${notes}`;
+         if (!age||!wt||!finalDiag||!mode||!freq) return 'Please fill all required fields.';
+         return `Build a prescription for a ${age}-year-old, ${wt} kg patient diagnosed with ${finalDiag}, route: ${mode}, frequency: ${freq}. Notes: ${notes}`;
        });
-  wire('lookupDrug',
-      ['drugInput'],
-      'drugInfoPanel',
+  wire('lookupDrug',['drugInput'],'drugInfoPanel',
        ([d]) => d
          ? `Provide detailed monograph, dosing, side-effects, and counseling points for ${d}.`
-         : 'Please select or type a drug.');  wire('checkInteractions',
-       ['intDrug1','intDrug2','intFood','intFoodOther'],
-       'interactionPanel',
+         : 'Please select or type a drug.');
+  wire('checkInteractions',['intDrug1','intDrug2','intFood','intFoodOther'],'interactionPanel',
        ([d1,d2,food,foodOther]) => {
          const finalFood = food==='Other' ? foodOther : food;
          if (!d1||!d2) return 'Please select two drugs.';
          return `Check interactions between ${d1} and ${d2}` +
                 (finalFood ? ` when taken with ${finalFood}.` : '.');
        });
-  wire('computeDose',     ['patientWeight','crCl','altValue'],'dosagePanel',
-       ([w,c,a])=> (w&&c&&a)?`Plan dosage for weight=${w},CrCl=${c},ALT=${a}`:'Fill all fields.');
-  wire('adviseDrug',      ['symptomInput'], 'advisePanel',    ([s])=>s?`Recommend meds for symptoms: ${s}`:'Describe symptoms.');
-  wire('predictPrice',    ['priceDrugInput','currencyInput'],'pricePanel',
-       ([d,c])=>d&&c?`Predict price of ${d} in ${c}, list nearby pharmacies`:'Select drug & currency.');
-  wire('adviseCompound',  ['compoundList','compoundStrength'],'compoundPanel',
-       ([l,s])=>l&&s?`Formulate ${s} from ingredients: ${l}`:'Enter ingredients & strength.');
+  wire('computeDose',['patientWeight','crCl','altValue'],'dosagePanel',
+       ([w,c,a]) => (w&&c&&a) ? `Plan dosage for weight=${w},CrCl=${c},ALT=${a}` : 'Fill all fields.');
+  wire('adviseDrug',['symptomInput'],'advisePanel',
+       ([s]) => s ? `Recommend meds for symptoms: ${s}` : 'Describe symptoms.');
+  wire('predictPrice',['priceDrugInput','currencyInput'],'pricePanel',
+       ([d,c]) => d&&c ? `Predict price of ${d} in ${c}, list nearby pharmacies` : 'Select drug & currency.');
+  wire('adviseCompound',['compoundList','compoundStrength'],'compoundPanel',
+       ([l,s]) => l&&s ? `Formulate ${s} from ingredients: ${l}` : 'Enter ingredients & strength.');
   wire('predictSideEffects',['patientAge','sideEffectDrugs'],'sideEffectPanel',
-       ([age,drugs])=>age&&drugs?`Predict side-effects for age ${age} on drugs: ${drugs}`:'Enter age & meds.');
+       ([age,drugs]) => age&&drugs ? `Predict side-effects for age ${age} on drugs: ${drugs}` : 'Enter age & meds.');
 
-  //──────────────────── Copy / Download Handlers ────────────────────
+  // Copy / Download / Close buttons
   document.body.addEventListener('click', e => {
     const rp = e.target.closest('.response');
     if (!rp) return;
-     if (e.target.closest('.copy-btn')) {
-      const txt = rp.querySelector('.result-content').innerText;
-      navigator.clipboard.writeText(txt).then(() => {
-        showToast('✅ Copied to clipboard');
-      });
+    if (e.target.closest('.copy-btn')) {
+      navigator.clipboard.writeText(rp.querySelector('.result-content').innerText)
+        .then(() => showToast('✅ Copied to clipboard'));
     }
     if (e.target.closest('.dl-btn')) {
       const txt = rp.querySelector('.result-content').innerText;
-      const blob = new Blob([txt],{type:'text/plain'});
+      const blob = new Blob([txt], { type:'text/plain' });
       const a = document.createElement('a');
       a.href = URL.createObjectURL(blob);
       a.download = 'response.txt';
       a.click();
     }
-    if (e.target.closest('.close-btn')) {
-      rp.hidden = true;
-    }
+    if (e.target.closest('.close-btn')) rp.hidden = true;
   });
 
-  //──────────────────── Chatbot Wiring ────────────────────
+  // Chatbot with date separator + timestamps
   const chatBox = document.getElementById('pharmaChatBox');
-  document.getElementById('sendPharma').addEventListener('click', async e => {
-   e.preventDefault();
+  let lastChatDate = null;
+  function addMessage(type, text) {
+    const now = new Date();
+    const dateStr = now.toLocaleDateString();
+    if (dateStr !== lastChatDate) {
+      const sep = document.createElement('div');
+      sep.className = 'chat-date';
+      sep.innerText = dateStr;
+      chatBox.append(sep);
+      lastChatDate = dateStr;
+    }
+    const ts = now.toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'});
+    const wrapper = document.createElement('div');
+    wrapper.className = type === 'user' ? 'user-msg' : 'bot-msg';
+    wrapper.innerHTML = `<div class="msg-text">${text}</div><div class="msg-ts">${ts}</div>`;
+    chatBox.append(wrapper);
+    chatBox.scrollTop = chatBox.scrollHeight;
+    history.push({ role: type, text, time: `${dateStr} ${ts}` });
+  }
+  const history = [];
+  // Send handler
+  document.getElementById('sendPharma').onclick = async e => {
+    e.preventDefault();
     const q = document.getElementById('pharmaInput').value.trim();
     if (!q) return showToast('Type a question');
-    // user message
-    const u = document.createElement('div');
-    u.className = 'user-msg'; u.innerText = q;
-    chatBox.append(u);
+    addMessage('user', q);
     document.getElementById('pharmaInput').value = '';
-    // thinking indicator
     const spinner = document.createElement('div');
     spinner.className = 'spinner'; chatBox.append(spinner);
-    // call AI
     const a = await callAI(q);
-    spinner.remove();
-    const b = document.createElement('div');
-    b.className = 'bot-msg'; b.innerHTML = sanitizeAIContent(a);
-    chatBox.append(b);
-    chatBox.scrollTop = chatBox.scrollHeight;
-  });
-    document.getElementById('clearPharmaChat').onclick = () => {
-   chatBox.innerHTML = '';
-  };
-  document.getElementById('historyBtn').addEventListener('click', e => {
-   e.preventDefault();
-    // existing history logic...
-  });
-
-  document.getElementById('clearHistory').onclick = () => {
-    history.length = 0;
-    document.getElementById('historyList').innerHTML = '';
-  };
-  document.getElementById('historyList').addEventListener('click', e => {
-    if (!e.target.matches('.delete-history')) return;
-   const idx = e.target.dataset.index;
-   history.splice(idx,1);
-   e.target.closest('.history-item').remove();
- });
-
-  // Add timestamps and history storage
-  const history = [];
-  function addMessage(type, text) {
-    const wrapper = document.createElement('div');
-    const ts = new Date().toLocaleString();
-    wrapper.className = type === 'user' ? 'user-msg' : 'bot-msg';
-    wrapper.innerHTML = `<div class="msg-text">${text}</div>
-                         <div class="msg-ts">${ts}</div>`;
-   chatBox.append(wrapper);
-    chatBox.scrollTop = chatBox.scrollHeight;
-    history.push({ role: type, text, time: ts });
-  }
-  // Override original sendPharma to use addMessage
- document.getElementById('sendPharma').onclick = async () => {
-   const q = document.getElementById('pharmaInput').value.trim();
-    if (!q) return showToast('Type a question');
-   addMessage('user', q);
-   document.getElementById('pharmaInput').value = '';
-    const spinner = document.createElement('div');
-   spinner.className = 'spinner'; chatBox.append(spinner);
-   const a = await callAI(q);
     spinner.remove();
     addMessage('bot', sanitizeAIContent(a));
   };
+  document.getElementById('clearPharmaChat').onclick = () => chatBox.innerHTML = '';
+
   // History modal
-  const modal = document.getElementById('historyModal');
-  document.getElementById('historyBtn').onclick = () => {
+  const historyModal = document.getElementById('historyModal');
+  document.getElementById('historyBtn').addEventListener('click', e => {
+    e.preventDefault();
     const list = document.getElementById('historyList');
-    list.innerHTML = history.map(h => `
-     <div class="history-item">
-       <strong>${h.role === 'user' ? 'You' : 'Bot'}:</strong> ${h.text}
-       <div class="msg-ts">${h.time}</div>
-     </div>`).join('');
-   modal.hidden = false;
-  };
-  modal.querySelector('.close-modal').onclick = () => {
-   modal.style.display = 'none';
- };
+    list.innerHTML = history.map((h,i) => `
+      <div class="history-item">
+        <strong>${h.role==='user'?'You':'Bot'}:</strong> ${h.text}
+        <div class="msg-ts">${h.time}</div>
+        <button class="delete-history" data-index="${i}">Delete</button>
+      </div>`).join('');
+    historyModal.hidden = false;
+  });
+  document.querySelector('.close-modal').onclick = () => historyModal.hidden = true;
+  document.getElementById('historyList').addEventListener('click', e => {
+    if (!e.target.matches('.delete-history')) return;
+    const idx = +e.target.dataset.index;
+    history.splice(idx,1);
+    e.target.closest('.history-item').remove();
+  });
 
-
-  //──────────────────── Charts Setup ────────────────────
+  // Charts setup (unchanged) …
   const data1 = { labels:['Jan','Feb','Mar','Apr'], datasets:[{ label:'Scans', data:[120,150,170,200] }] };
   const data2 = { labels:['Mon','Tue','Wed','Thu','Fri'], datasets:[{ label:'Lookups', data:[30,45,60,55,70] }] };
-  const ctx1 = document.getElementById('chart1').getContext('2d');
-  const ctx2 = document.getElementById('chart2').getContext('2d');
-  new Chart(ctx1, {
-    type:'line',
-    data: data1,
-   options: {
-      responsive: true,
-     plugins: { title:{ display:true, text:'Monthly Rx Scans' } },
-      scales: {
-        x: { title:{ display:true, text:'Month' } },
-        y: { title:{ display:true, text:'Scans' } }
-      }
+  new Chart(document.getElementById('chart1').getContext('2d'), {
+    type:'line', data:data1,
+    options:{ responsive:true,
+      plugins:{ title:{ display:true, text:'Monthly Rx Scans' } },
+      scales:{ x:{ title:{ display:true, text:'Month' } },
+               y:{ title:{ display:true, text:'Scans' } } }
     }
   });
-  new Chart(ctx2, {
-    type:'bar',
-    data: data2,
-    options: {
-      responsive: true,
-     plugins: { title:{ display:true, text:'Weekly Drug Lookups' } },
-     scales: {
-        x: { title:{ display:true, text:'Day of Week' } },
-        y: { title:{ display:true, text:'Lookups' } }
-      }
+  new Chart(document.getElementById('chart2').getContext('2d'), {
+    type:'bar', data:data2,
+    options:{ responsive:true,
+      plugins:{ title:{ display:true, text:'Weekly Drug Lookups' } },
+      scales:{ x:{ title:{ display:true, text:'Day of Week' } },
+               y:{ title:{ display:true, text:'Lookups' } } }
     }
   });
-  // Export to CSV
- document.getElementById('exportChartsData').onclick = () => {
+  document.getElementById('exportChartsData').onclick = () => {
     const rows = [['Month','Scans'], ...data1.labels.map((lbl,i)=>[lbl, data1.datasets[0].data[i]])];
     const csv = rows.map(r=>r.join(',')).join('\n');
     const blob = new Blob([csv],{type:'text/csv'});
-   const a = document.createElement('a');
+    const a = document.createElement('a');
     a.href = URL.createObjectURL(blob);
-   a.download = 'scans_by_month.csv';
+    a.download = 'scans_by_month.csv';
     a.click();
   };
-  
-  // Bulk Refill Scheduler: parse CSV and send AI prompt
+
+  // Bulk Refill Scheduler
+  document.getElementById('refillSelect').addEventListener('change', e => {
+    document.getElementById('refillOther').style.display =
+      Array.from(e.target.selectedOptions).some(o=>o.value==='Other') ? 'block' : 'none';
+  });
   document.getElementById('scheduleRefill').onclick = async e => {
-   e.preventDefault();
-   const file = document.getElementById('refillList').files[0];
-    if (!file) return showToast('Please upload a CSV or XLSX');
+    e.preventDefault();
+    const file = document.getElementById('refillList').files[0];
+    const sel  = Array.from(document.getElementById('refillSelect').selectedOptions).map(o=>o.value);
+    const other = document.getElementById('refillOther').value.trim();
+    if (!file && sel.length===0 && !other) {
+      return showToast('Please upload a file or select/type at least one med');
+    }
+    let meds = sel.filter(m=>m!=='Other');
+    if (sel.includes('Other') && other) meds.push(other);
+    if (meds.length===0 && file) {
+      const text = await file.text();
+      meds = text.split('\n').slice(1).map(l=>l.split(',')[0]).filter(Boolean);
+    }
     const panel = document.getElementById('refillPanel');
-   startThinking(panel, 'scheduleRefill');
-   const text = await file.text();
-    // simple CSV parse: first column med names
-   const lines = text.split('\n').slice(1).map(l=>l.split(',')[0]).join(', ');
-    const prompt = `Schedule refill reminders for these meds: ${lines}`;
-   const res = await callAI(prompt);
+    startThinking(panel, 'scheduleRefill');
+    const prompt = `Schedule refill reminders for these meds: ${meds.join(', ')}`;
+    const res = await callAI(prompt);
     panel.querySelector('.result-content').innerHTML = sanitizeAIContent(res);
-   injectTools(panel);
+    injectTools(panel);
   };
-  
-  //──────────────────── “Other” Inputs ────────────────────
+
+  // “Other” input toggles for all module selects
   document.querySelectorAll('select').forEach(sel => {
     sel.onchange = () => {
-      const oi = sel.closest('label').querySelector('.other-input');
-      if (!oi) return;
-      oi.style.display = sel.value==='Other' ? 'block' : 'none';
-   };
+      const oi = sel.closest('label')?.querySelector('.other-input');
+      if (oi) oi.style.display = sel.value==='Other' ? 'block' : 'none';
+    };
   });
 
 });
