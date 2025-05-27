@@ -110,11 +110,16 @@
   section.module:hover { transform: translateY(-4px); }
 
   /*──────────────────── Hero Section ────────────────────*/
-  #hero {
-    position:relative; overflow:hidden;
-    background: linear-gradient(120deg, var(--pharm-primary), var(--pharm-primary-alt));
-    color:#fff; padding:2rem var(--padding);
-    border-radius: var(--radius); margin-bottom:2rem;
+ #hero {
+   position:relative;
+   overflow:hidden;
+   /* swap the hero gradient colors */
+   background: linear-gradient(120deg, var(--pharm-primary-alt), var(--pharm-primary));
+  color: var(--pharm-accent);  /* swapped text color */
+  padding:2rem var(--padding);
+     border-radius: var(--radius); margin-bottom:2rem;
+  max-width: calc(100% - 240px - (var(--padding)*2)); /* same width as main */
+  margin: 0 auto 2rem;
   }
   #hero h2 { font-size:2rem; display:flex; align-items:center; gap:0.5rem; }
   #hero p.desc { color:rgba(255,255,255,0.9); }
@@ -124,7 +129,8 @@
     gap:1rem; margin-top:1.5rem;
   }
   .feature-card {
-    background:rgba(255,255,255,0.1);
+   background: var(--pharm-secondary);     color: var(--pharm-primary-alt);
+
     padding:1rem; border-radius:var(--radius);
     text-align:center; box-shadow:0 2px 8px rgba(0,0,0,0.2);
     transition:background .3s, transform .3s;
@@ -264,11 +270,35 @@ border:4px solid rgba(0,0,0,0.1);
   border-radius:50%;
   animation: spin 0.8s linear infinite;
  }
+ .spinner, .spin-header {
+  display: inline-block;
+  vertical-align: middle;
+  }
+ .spin-header {
+   margin-right: 0.5rem;
+ }
 
 @keyframes spin {
  to { transform: rotate(360deg); }
 }
 
+   #pharmaChatBox { display:flex; flex-direction:column; gap:0.5rem; }
+  .user-msg, .bot-msg {
+   max-width: 70%; padding:0.75rem; border-radius: var(--radius);
+    position: relative; word-wrap: break-word;
+  }
+  .user-msg {
+   align-self: flex-end; background: var(--pharm-primary); color:#fff;
+   border-bottom-right-radius:0;
+  }
+  .bot-msg {
+    align-self: flex-start; background: var(--pharm-surface); color:var(--pharm-text);
+    border-bottom-left-radius:0;
+  }
+  /* date separators */
+ .chat-date {
+    text-align:center; margin:1rem 0; font-size:0.8rem; color:var(--pharm-muted);
+  }
 </style>
 
 </head>
@@ -349,11 +379,34 @@ border:4px solid rgba(0,0,0,0.1);
       </label>
       <label>Diagnosis:
         <select id="rxDiagnosis">
-          <option>Hypertension</option>
-          <option>Diabetes</option>
-          <option>Malaria</option>
+        
           <option>Asthma</option>
-          <option>Other</option>
+       
+          <option>Malaria</option>
+          <option>Hypertension</option>
+         <option>Diabetes</option>
+          <option>Typhoid</option>
+         <option>Yellow Fever</option>
+         <option>Hepatitis B</option>
+         <option>HIV/AIDS</option>
+         <option>Tuberculosis</option>
+          <option>Cholera</option>
+          <option>Sickle Cell</option>
+         <option>Pneumonia</option>
+         <option>Diarrhea</option>
+         <option>Meningitis</option>
+         <option>COVID-19</option>
+        <option>Measles</option>
+         <option>Polio</option>
+        <option>Lassa Fever</option>
+         <option>Dengue</option>
+          <option>Onchocerciasis</option>
+          <option>Trypanosomiasis</option>
+         <option>Other</option>
+      </select>
+       <!-- text input appears if “Other” -->
+      <input type="text" id="rxDiagOther" class="other-input" placeholder="Specify diagnosis…" style="display:none;margin-top:0.5rem;" required>
+   </label>
        </select>
       </label>
       <label>Medication Type:
@@ -529,7 +582,13 @@ border:4px solid rgba(0,0,0,0.1);
   <div id="historyModal" class="modal" hidden>
    <div class="modal-content">
      <span class="close-modal">&times;</span>
-      <h3>Chat History</h3>
+      <div class="modal-header">
+        <h3>Chat History</h3>
+       <button id="clearHistory" class="btn" style="float:right;">
+         <i class="fas fa-trash-alt"></i>
+        </button>
+      </div>
+
       <div id="historyList" style="max-height:400px; overflow-y:auto;"></div>
     </div>
   </div>
@@ -735,9 +794,29 @@ document.addEventListener('DOMContentLoaded', () => {
     };
   }
 
-  wire('scanRx',          [],               'scannerPanel',   ()=>'OCR and decode the uploaded image');
-  wire('lookupDrug',      ['drugInput'],    'drugInfoPanel',  ([d])=> d?`Give me monograph for ${d}`:'Enter a drug.');
-  wire('checkInteractions',['interactionList'],'interactionPanel',([l])=>l?`Check interactions for ${l}`:'Enter a list.');
+  wire('scanRx',
+       ['rxAge','rxWeight','rxDiagnosis','rxDiagOther','rxMode','rxFreq','rxNotes'],
+      'scannerPanel',
+      ([age,wt,diag,diagOther,mode,freq,notes]) => {
+         const finalDiag = diag==='Other' ? diagOther : diag;
+        if (!age||!wt||!finalDiag||!mode||!freq) return 'Please fill all required fields.';
+         return `Build a prescription for a ${age}-year-old, ${wt} kg patient diagnosed with ${finalDiag}, ` +
+                `route: ${mode}, frequency: ${freq}. Notes: ${notes}`;
+       });
+  wire('lookupDrug',
+      ['drugInput'],
+      'drugInfoPanel',
+       ([d]) => d
+         ? `Provide detailed monograph, dosing, side-effects, and counseling points for ${d}.`
+         : 'Please select or type a drug.');  wire('checkInteractions',
+       ['intDrug1','intDrug2','intFood','intFoodOther'],
+       'interactionPanel',
+       ([d1,d2,food,foodOther]) => {
+         const finalFood = food==='Other' ? foodOther : food;
+         if (!d1||!d2) return 'Please select two drugs.';
+         return `Check interactions between ${d1} and ${d2}` +
+                (finalFood ? ` when taken with ${finalFood}.` : '.');
+       });
   wire('computeDose',     ['patientWeight','crCl','altValue'],'dosagePanel',
        ([w,c,a])=> (w&&c&&a)?`Plan dosage for weight=${w},CrCl=${c},ALT=${a}`:'Fill all fields.');
   wire('adviseDrug',      ['symptomInput'], 'advisePanel',    ([s])=>s?`Recommend meds for symptoms: ${s}`:'Describe symptoms.');
@@ -790,9 +869,19 @@ document.addEventListener('DOMContentLoaded', () => {
     chatBox.append(b);
     chatBox.scrollTop = chatBox.scrollHeight;
   };
-  document.getElementById('clearPharmaChat').onclick = () => {
-    chatBox.innerHTML = '';
+    document.getElementById('clearPharmaChat').onclick = () => {
+   chatBox.innerHTML = '';
   };
+  document.getElementById('clearHistory').onclick = () => {
+    history.length = 0;
+    document.getElementById('historyList').innerHTML = '';
+  };
+  document.getElementById('historyList').addEventListener('click', e => {
+    if (!e.target.matches('.delete-history')) return;
+   const idx = e.target.dataset.index;
+   history.splice(idx,1);
+   e.target.closest('.history-item').remove();
+ });
 
   // Add timestamps and history storage
   const history = [];
@@ -840,9 +929,30 @@ document.addEventListener('DOMContentLoaded', () => {
   const data2 = { labels:['Mon','Tue','Wed','Thu','Fri'], datasets:[{ label:'Lookups', data:[30,45,60,55,70] }] };
   const ctx1 = document.getElementById('chart1').getContext('2d');
   const ctx2 = document.getElementById('chart2').getContext('2d');
-  new Chart(ctx1, { type:'line', data:data1, options:{ responsive:true } });
-  new Chart(ctx2, { type:'bar', data:data2, options:{ responsive:true } });
-
+  new Chart(ctx1, {
+    type:'line',
+    data: data1,
+   options: {
+      responsive: true,
+     plugins: { title:{ display:true, text:'Monthly Rx Scans' } },
+      scales: {
+        x: { title:{ display:true, text:'Month' } },
+        y: { title:{ display:true, text:'Scans' } }
+      }
+    }
+  });
+  new Chart(ctx2, {
+    type:'bar',
+    data: data2,
+    options: {
+      responsive: true,
+     plugins: { title:{ display:true, text:'Weekly Drug Lookups' } },
+     scales: {
+        x: { title:{ display:true, text:'Day of Week' } },
+        y: { title:{ display:true, text:'Lookups' } }
+      }
+    }
+  });
   // Export to CSV
  document.getElementById('exportChartsData').onclick = () => {
     const rows = [['Month','Scans'], ...data1.labels.map((lbl,i)=>[lbl, data1.datasets[0].data[i]])];
@@ -857,9 +967,10 @@ document.addEventListener('DOMContentLoaded', () => {
   //──────────────────── “Other” Inputs ────────────────────
   document.querySelectorAll('select').forEach(sel => {
     sel.onchange = () => {
-      const oi = sel.parentElement.querySelector('.other-input');
-      if (oi) oi.style.display = sel.value==='Other'?'block':'none';
-    };
+      const oi = sel.closest('label').querySelector('.other-input');
+      if (!oi) return;
+      oi.style.display = sel.value==='Other' ? 'block' : 'none';
+   };
   });
 
 });
