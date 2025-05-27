@@ -82,6 +82,12 @@ window.MathJax = {
     background: var(--pharm-primary-alt);
     color:#fff;
   }
+  aside#sidebar {
+     transform:translateX(-100%);
+     transition:transform .3s;
+    width: 220px;          
+    overflow-x: auto;
+  }
 
   /*──────────────────── Header ────────────────────*/
   header {
@@ -125,6 +131,13 @@ window.MathJax = {
    border-radius: var(--radius);
    box-shadow: var(--shadow);
    margin-bottom: 1.5rem;
+ }
+   #hero {
+   display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: var(--padding);
+   max-width: 1200px;  
+   margin: 0 auto 1.5rem auto;
  }
  #hero .hero-text h2 { color: var(--pharm-primary); }
  /* Split into two columns on desktop, one on mobile */
@@ -709,21 +722,22 @@ border:4px solid rgba(0,0,0,0.1);
   <!-- Shared Scripts -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
+// When DOM is ready
 document.addEventListener('DOMContentLoaded', () => {
-  // Toast helper
+  // ───────────────── Toast Helper ─────────────────
   function showToast(msg) {
     const t = document.createElement('div');
     t.className = 'toast';
     t.innerText = msg;
-    document.body.append(t);
+    document.body.appendChild(t);
     requestAnimationFrame(() => t.classList.add('visible'));
     setTimeout(() => t.remove(), 2000);
   }
 
-  // Sanitize AI content (keep $...$ for MathJax; basic markdown + tables)
+  // ───────────────── Sanitize AI Content ─────────────────
   function sanitizeAIContent(raw) {
     let inTable = false;
-    raw = raw
+    return raw
       .replace(/```([\s\S]+?)```/g, (_, code) => `<pre>${code.trim()}</pre>`)
       .replace(/^#### (.+)$/gm, '<h4>$1</h4>')
       .replace(/^### (.+)$/gm, '<h3>$1</h3>')
@@ -731,46 +745,45 @@ document.addEventListener('DOMContentLoaded', () => {
       .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
       .replace(/\*(.+?)\*/g, '<em>$1</em>')
       .replace(/^\|(.+)\|$/gm, (_, row) => {
-        const cols = row.split('|').map(c => c.trim());
+        const cols = row.split('|').map(c=>c.trim());
         if (!inTable) {
           inTable = true;
           return '<table><thead><tr>' +
-            cols.map(c => `<th>${c}</th>`).join('') +
+            cols.map(c=>`<th>${c}</th>`).join('') +
             '</tr></thead><tbody>';
-        } else {
-          return '<tr>' +
-            cols.map(c => `<td>${c}</td>`).join('') +
-            '</tr>';
         }
+        return '<tr>' + cols.map(c=>`<td>${c}</td>`).join('') + '</tr>';
       })
-      .replace(/$/, () => inTable ? '</tbody></table>' : '');
-    return raw;
+      .replace(/$/, () => {
+        if (inTable) { inTable = false; return '</tbody></table>'; }
+        return '';
+      });
   }
 
-  // Generic AI caller
+  // ───────────────── AI Caller ─────────────────
   async function callAI(prompt) {
     try {
       const res = await fetch('/.netlify/functions/openai-proxy', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        method:'POST',
+        headers:{ 'Content-Type':'application/json' },
         body: JSON.stringify({
-          messages: [
-            { role: 'system', content: 'You are a helpful pharmacy AI.' },
-            { role: 'user', content: prompt }
+          messages:[
+            { role:'system', content:'You are a helpful pharmacy AI.' },
+            { role:'user', content: prompt }
           ]
         })
       });
       if (!res.ok) throw new Error(await res.text());
       const j = await res.json();
       return j.choices?.[0]?.message?.content || '⚠️ Unexpected AI response.';
-    } catch (err) {
-      return err.message.includes('Sandbox.Timedout')
-        ? '⚠️ Sorry, the AI is taking longer than usual—please try again.'
-        : '⚠️ Error: ' + err.message;
+    } catch(err) {
+      if (err.message.includes('Sandbox.Timedout'))
+        return '⚠️ AI timeout—please try again.';
+      return '⚠️ Error: ' + err.message;
     }
   }
 
-  // Spinner + waiting text
+  // ───────────────── Spinner Texts ─────────────────
   const PHASE_TEXT = {
     heroScanBtn: 'Decoding prescription…',
     heroDrugBtn: 'Fetching drug info…',
@@ -786,6 +799,7 @@ document.addEventListener('DOMContentLoaded', () => {
     predictSideEffects: 'Predicting side-effects…',
     scheduleRefill: 'Scheduling refills…'
   };
+
   function startThinking(panel, btnId) {
     panel.hidden = false;
     panel.querySelector('.result-content').innerHTML = `
@@ -795,6 +809,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (old) old.remove();
     panel.querySelector('.close-btn').style.display = 'none';
   }
+
   function injectTools(panel) {
     if (panel.querySelector('.tool-row')) return;
     const tools = document.createElement('div');
@@ -806,9 +821,10 @@ document.addEventListener('DOMContentLoaded', () => {
     panel.querySelector('.close-btn').style.display = 'block';
   }
 
-  // Sidebar & Dark Mode toggles
+  // ───────────────── Sidebar & Dark Mode ─────────────────
   document.getElementById('hamburger').onclick = () =>
     document.body.classList.toggle('sidebar-open');
+
   const shrinkBtn = document.getElementById('shrinkSidebar');
   shrinkBtn.onclick = () => {
     const sb = document.getElementById('sidebar');
@@ -818,13 +834,25 @@ document.addEventListener('DOMContentLoaded', () => {
     document.querySelector('header').style.left = sb.classList.contains('collapsed') ? '60px' : '220px';
     document.querySelector('main').style.marginLeft = sb.classList.contains('collapsed') ? '70px' : '240px';
   };
+
   document.getElementById('themeToggle').onclick = () => {
     document.documentElement.classList.toggle('dark');
     document.getElementById('themeToggle').classList.toggle('fa-moon');
     document.getElementById('themeToggle').classList.toggle('fa-sun');
   };
 
-  // Hero wiring
+  // ───────────────── Smooth Scroll Offset ─────────────────
+  document.querySelectorAll('a.btn[href^="#"]').forEach(a=>{
+    a.addEventListener('click', e=>{
+      e.preventDefault();
+      const tgt = document.querySelector(a.getAttribute('href'));
+      if (!tgt) return;
+      const top = tgt.getBoundingClientRect().top + window.pageYOffset - 70;
+      window.scrollTo({ top, behavior: 'smooth' });
+    });
+  });
+
+  // ───────────────── Hero Wiring ─────────────────
   function wireHero(btnId, panelId, promptFn) {
     document.getElementById(btnId).addEventListener('click', async e => {
       e.preventDefault();
@@ -838,14 +866,16 @@ document.addEventListener('DOMContentLoaded', () => {
   wireHero('heroScanBtn','scannerPanel', () => 'OCR and decode this prescription image');
   wireHero('heroDrugBtn','drugInfoPanel', () => {
     const d = document.getElementById('drugInput').value.trim();
-    return d ? `Lookup drug: ${d}` : 'Please specify a drug.';
+    return d
+      ? `Lookup drug: ${d}`
+      : '⚠️ Please specify a drug.';
   });
   wireHero('heroInteractBtn','interactionPanel', () => {
-    const d1 = document.getElementById('intDrug1').value.trim();
-    const d2 = document.getElementById('intDrug2').value.trim();
-    const f  = document.getElementById('intFood').value.trim();
-    if (!d1||!d2) return 'Please select two drugs.';
-    return `Check interactions between ${d1} and ${d2}` + (f ? ` when taken with ${f}.` : '.');
+    const d1 = document.getElementById('intDrug1').value.trim(),
+          d2 = document.getElementById('intDrug2').value.trim(),
+          f  = document.getElementById('intFood').value.trim();
+    if (!d1||!d2) return '⚠️ Please select two drugs.';
+    return `Check interactions between ${d1} and ${d2}` + (f?` when taken with ${f}.`:'.');
   });
   wireHero('heroDoseBtn','dosagePanel', () => {
     const w = document.getElementById('patientWeight').value,
@@ -853,59 +883,80 @@ document.addEventListener('DOMContentLoaded', () => {
           a = document.getElementById('altValue').value;
     return (w&&c&&a)
       ? `Compute dosage for weight=${w}, CrCl=${c}, ALT=${a}`
-      : 'Please fill all patient metrics.';
+      : '⚠️ Please fill all patient metrics.';
   });
 
-  // Module wiring
+  // ───────────────── Module Wiring ─────────────────
   function wire(btnId, inputIds, panelId, buildPrompt) {
     document.getElementById(btnId).onclick = async () => {
       const panel = document.getElementById(panelId);
       startThinking(panel, btnId);
-      const vals = inputIds.map(id => document.getElementById(id).value.trim());
+      const vals = inputIds.map(id=>document.getElementById(id).value.trim());
       const txt = await callAI(buildPrompt(vals));
       panel.querySelector('.result-content').innerHTML = sanitizeAIContent(txt);
       injectTools(panel);
     };
   }
-  wire('scanRx',['rxAge','rxWeight','rxDiagnosis','rxDiagOther','rxMode','rxFreq','rxNotes'],'scannerPanel',
-       ([age,wt,diag,diagOther,mode,freq,notes]) => {
-         const finalDiag = diag==='Other' ? diagOther : diag;
-         if (!age||!wt||!finalDiag||!mode||!freq) return 'Please fill all required fields.';
-         return `Build a prescription for a ${age}-year-old, ${wt} kg patient diagnosed with ${finalDiag}, route: ${mode}, frequency: ${freq}. Notes: ${notes}`;
+
+  wire('scanRx',
+       ['rxAge','rxWeight','rxDiagnosis','rxDiagOther','rxMode','rxFreq','rxNotes'],
+       'scannerPanel',
+       ([age,wt,diag,diagOther,mode,freq,notes])=>{
+         const finalDiag = diag==='Other'?diagOther:diag;
+         if (!age||!wt||!finalDiag||!mode||!freq)
+           return '⚠️ Please fill all required fields.';
+         return `Build a prescription for a ${age}-year-old, ${wt}kg patient with ${finalDiag}, route: ${mode}, freq: ${freq}. Notes: ${notes}`;
        });
+
   wire('lookupDrug',['drugInput'],'drugInfoPanel',
        ([d]) => d
-         ? `Provide detailed monograph, dosing, side-effects, and counseling points for ${d}.`
-         : 'Please select or type a drug.');
-  wire('checkInteractions',['intDrug1','intDrug2','intFood'],'interactionPanel',
-       ([d1,d2,food,foodOther]) => {
-         const finalFood = food==='Other' ? foodOther : food;
-         if (!d1||!d2) return 'Please select two drugs.';
-         return `Check interactions between ${d1} and ${d2}` +
-                (finalFood ? ` when taken with ${finalFood}.` : '.');
-       });
-  wire('computeDose',['patientWeight','crCl','altValue'],'dosagePanel',
-       ([w,c,a]) => (w&&c&&a) ? `Plan dosage for weight=${w},CrCl=${c},ALT=${a}` : 'Fill all fields.');
-  wire('adviseDrug',['symptomInput'],'advisePanel',
-       ([s]) => s ? `Recommend meds for symptoms: ${s}` : 'Describe symptoms.');
-  wire('predictPrice',['priceDrugInput','currencyInput'],'pricePanel',
-       ([d,c]) => d&&c ? `Predict price of ${d} in ${c}, list nearby pharmacies` : 'Select drug & currency.');
-  wire('adviseCompound',['compoundList','compoundStrength'],'compoundPanel',
-       ([l,s]) => l&&s ? `Formulate ${s} from ingredients: ${l}` : 'Enter ingredients & strength.');
-  wire('predictSideEffects',['patientAge','sideEffectDrugs'],'sideEffectPanel',
-       ([age,drugs]) => age&&drugs ? `Predict side-effects for age ${age} on drugs: ${drugs}` : 'Enter age & meds.');
+         ? `You are a pharmacy monograph AI. For drug “${d}”, provide:
+1. Mechanism of action  
+2. Typical dosing (incl. renal/hepatic adjustments)  
+3. Major adverse effects + monitoring advice  
+4. Key counseling points`
+         : '⚠️ Please select or type a drug.');
 
-  // Copy / Download / Close buttons
+  wire('checkInteractions',['intDrug1','intDrug2','intFood'],'interactionPanel',
+       ([d1,d2,food])=>{
+         if (!d1||!d2) return '⚠️ Please select two drugs.';
+         return `Check interactions between ${d1} and ${d2}` + (food?` when taken with ${food}.` : '.');
+       });
+
+  wire('computeDose',['patientWeight','crCl','altValue'],'dosagePanel',
+       ([w,c,a]) => (w&&c&&a)
+         ? `Plan dosage for weight=${w},CrCl=${c},ALT=${a}`
+         : '⚠️ Fill all fields.');
+
+  wire('adviseDrug',['symptomInput'],'advisePanel',
+       ([s]) => s ? `Recommend meds for symptoms: ${s}` : '⚠️ Describe symptoms.');
+
+  wire('predictPrice',['priceDrugInput','currencyInput'],'pricePanel',
+       ([d,c]) => (d&&c)
+         ? `Predict price of ${d} in ${c} + list nearby pharmacies`
+         : '⚠️ Select drug & currency.');
+
+  wire('adviseCompound',['compoundList','compoundStrength'],'compoundPanel',
+       ([l,s]) => (l&&s)
+         ? `Formulate ${s} from ingredients: ${l}`
+         : '⚠️ Enter ingredients & strength.');
+
+  wire('predictSideEffects',['patientAge','sideEffectDrugs'],'sideEffectPanel',
+       ([age,drugs]) => (age&&drugs)
+         ? `Predict side-effects for age ${age} on drugs: ${drugs}`
+         : '⚠️ Enter age & meds.');
+
+  // ─────────────── Copy / Download / Close ───────────────
   document.body.addEventListener('click', e => {
     const rp = e.target.closest('.response');
     if (!rp) return;
     if (e.target.closest('.copy-btn')) {
       navigator.clipboard.writeText(rp.querySelector('.result-content').innerText)
-        .then(() => showToast('✅ Copied to clipboard'));
+        .then(()=> showToast('✅ Copied'));
     }
     if (e.target.closest('.dl-btn')) {
       const txt = rp.querySelector('.result-content').innerText;
-      const blob = new Blob([txt], { type:'text/plain' });
+      const blob = new Blob([txt], {type:'text/plain'});
       const a = document.createElement('a');
       a.href = URL.createObjectURL(blob);
       a.download = 'response.txt';
@@ -914,33 +965,45 @@ document.addEventListener('DOMContentLoaded', () => {
     if (e.target.closest('.close-btn')) rp.hidden = true;
   });
 
-  // Chatbot with date separator + timestamps
+  // ─────────────── Chatbot + History ───────────────
   const chatBox = document.getElementById('pharmaChatBox');
-  let lastChatDate = null;
+  let lastDateKey = null;
+  const history = [];
+
+  function formatDateHeader(date) {
+    const today = new Date(),
+          diff = (today - date)/(1000*60*60*24);
+    if (diff < 1) return 'Today';
+    if (diff < 2) return 'Yesterday';
+    return date.toLocaleDateString();
+  }
+
   function addMessage(type, text) {
-    const now = new Date();
-    const dateStr = now.toLocaleDateString();
-    if (dateStr !== lastChatDate) {
+    const now = new Date(),
+          key = now.toDateString();
+    if (key !== lastDateKey) {
       const sep = document.createElement('div');
       sep.className = 'chat-date';
-      sep.innerText = dateStr;
+      sep.innerText = formatDateHeader(now);
       chatBox.append(sep);
-      lastChatDate = dateStr;
+      lastDateKey = key;
     }
-    const ts = now.toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'});
-    const wrapper = document.createElement('div');
-    wrapper.className = type === 'user' ? 'user-msg' : 'bot-msg';
-    wrapper.innerHTML = `<div class="msg-text">${text}</div><div class="msg-ts">${ts}</div>`;
+    const ts = now.toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'}),
+          wrapper = document.createElement('div');
+    wrapper.className = type==='user'?'user-msg':'bot-msg';
+    wrapper.innerHTML = `
+      <div class="msg-text">${text}</div>
+      <div class="msg-ts">${ts}</div>`;
     chatBox.append(wrapper);
     chatBox.scrollTop = chatBox.scrollHeight;
-    history.push({ role: type, text, time: `${dateStr} ${ts}` });
+    history.push({ role:type, text, time: `${now.toDateString()} ${ts}` });
   }
-  const history = [];
-  // Send handler
+
+  // Send
   document.getElementById('sendPharma').onclick = async e => {
     e.preventDefault();
     const q = document.getElementById('pharmaInput').value.trim();
-    if (!q) return showToast('Type a question');
+    if (!q) return showToast('⚠️ Type a question');
     addMessage('user', q);
     document.getElementById('pharmaInput').value = '';
     const spinner = document.createElement('div');
@@ -949,86 +1012,107 @@ document.addEventListener('DOMContentLoaded', () => {
     spinner.remove();
     addMessage('bot', sanitizeAIContent(a));
   };
-  document.getElementById('clearPharmaChat').onclick = () => chatBox.innerHTML = '';
+
+  // Clear chat
+  document.getElementById('clearPharmaChat').onclick = () => {
+    chatBox.innerHTML = '';
+    lastDateKey = null;
+    history.length = 0;
+  };
 
   // History modal
-  const historyModal = document.getElementById('historyModal');
+  const historyModal = document.getElementById('historyModal'),
+        historyList  = document.getElementById('historyList');
+
   document.getElementById('historyBtn').addEventListener('click', e => {
     e.preventDefault();
-    const list = document.getElementById('historyList');
-    list.innerHTML = history.map((h,i) => `
+    historyList.innerHTML = history.map((h,i)=>`
       <div class="history-item">
         <strong>${h.role==='user'?'You':'Bot'}:</strong> ${h.text}
         <div class="msg-ts">${h.time}</div>
-        <button class="delete-history" data-index="${i}">Delete</button>
+        <button class="delete-history" data-index="${i}">×</button>
       </div>`).join('');
     historyModal.hidden = false;
   });
-  document.querySelector('.close-modal').onclick = () => historyModal.hidden = true;
-  document.getElementById('historyList').addEventListener('click', e => {
+
+  document.querySelector('.close-modal').onclick = () => {
+    historyModal.hidden = true;
+  };
+
+  historyList.addEventListener('click', e => {
     if (!e.target.matches('.delete-history')) return;
     const idx = +e.target.dataset.index;
     history.splice(idx,1);
     e.target.closest('.history-item').remove();
   });
 
-  // Charts setup (unchanged) …
-  const data1 = { labels:['Jan','Feb','Mar','Apr'], datasets:[{ label:'Scans', data:[120,150,170,200] }] };
-  const data2 = { labels:['Mon','Tue','Wed','Thu','Fri'], datasets:[{ label:'Lookups', data:[30,45,60,55,70] }] };
+  // ─────────────── Charts Setup ───────────────
+  const data1 = { labels:['Jan','Feb','Mar','Apr'], datasets:[{ label:'Scans', data:[120,150,170,200] }] },
+        data2 = { labels:['Mon','Tue','Wed','Thu','Fri'], datasets:[{ label:'Lookups', data:[30,45,60,55,70] }] };
+
   new Chart(document.getElementById('chart1').getContext('2d'), {
     type:'line', data:data1,
-    options:{ responsive:true,
+    options:{
+      responsive:true,
       plugins:{ title:{ display:true, text:'Monthly Rx Scans' } },
-      scales:{ x:{ title:{ display:true, text:'Month' } },
-               y:{ title:{ display:true, text:'Scans' } } }
+      scales:{
+        x:{ title:{ display:true, text:'Month' } },
+        y:{ title:{ display:true, text:'Scans' } }
+      }
     }
   });
   new Chart(document.getElementById('chart2').getContext('2d'), {
     type:'bar', data:data2,
-    options:{ responsive:true,
+    options:{
+      responsive:true,
       plugins:{ title:{ display:true, text:'Weekly Drug Lookups' } },
-      scales:{ x:{ title:{ display:true, text:'Day of Week' } },
-               y:{ title:{ display:true, text:'Lookups' } } }
+      scales:{
+        x:{ title:{ display:true, text:'Day of Week' } },
+        y:{ title:{ display:true, text:'Lookups' } }
+      }
     }
   });
+
   document.getElementById('exportChartsData').onclick = () => {
-    const rows = [['Month','Scans'], ...data1.labels.map((lbl,i)=>[lbl, data1.datasets[0].data[i]])];
-    const csv = rows.map(r=>r.join(',')).join('\n');
-    const blob = new Blob([csv],{type:'text/csv'});
-    const a = document.createElement('a');
+    const rows = [['Month','Scans'], ...data1.labels.map((lbl,i)=>[lbl,data1.datasets[0].data[i]])],
+          csv  = rows.map(r=>r.join(',')).join('\n'),
+          blob = new Blob([csv],{type:'text/csv'}),
+          a    = document.createElement('a');
     a.href = URL.createObjectURL(blob);
     a.download = 'scans_by_month.csv';
     a.click();
   };
 
-  // Bulk Refill Scheduler
+  // ─────────────── Bulk Refill Scheduler ───────────────
   document.getElementById('refillSelect').addEventListener('change', e => {
     document.getElementById('refillOther').style.display =
-      Array.from(e.target.selectedOptions).some(o=>o.value==='Other') ? 'block' : 'none';
+      Array.from(e.target.selectedOptions).some(o=>o.value==='Other')
+        ? 'block' : 'none';
   });
+
   document.getElementById('scheduleRefill').onclick = async e => {
     e.preventDefault();
-    const file = document.getElementById('refillList').files[0];
-    const sel  = Array.from(document.getElementById('refillSelect').selectedOptions).map(o=>o.value);
-    const other = document.getElementById('refillOther').value.trim();
+    const file = document.getElementById('refillList').files[0],
+          sel  = Array.from(document.getElementById('refillSelect').selectedOptions).map(o=>o.value),
+          other= document.getElementById('refillOther').value.trim();
     if (!file && sel.length===0 && !other) {
-      return showToast('Please upload a file or select/type at least one med');
+      return showToast('⚠️ Upload a file or select/type at least one med');
     }
     let meds = sel.filter(m=>m!=='Other');
     if (sel.includes('Other') && other) meds.push(other);
-    if (meds.length===0 && file) {
+    if (!meds.length && file) {
       const text = await file.text();
       meds = text.split('\n').slice(1).map(l=>l.split(',')[0]).filter(Boolean);
     }
     const panel = document.getElementById('refillPanel');
-    startThinking(panel, 'scheduleRefill');
-    const prompt = `Schedule refill reminders for these meds: ${meds.join(', ')}`;
+    startThinking(panel,'scheduleRefill');
+    const prompt = `Schedule refill reminders for: ${meds.join(', ')}`;
     const res = await callAI(prompt);
     panel.querySelector('.result-content').innerHTML = sanitizeAIContent(res);
     injectTools(panel);
   };
 
-  // “Other” input toggles for all module selects
+  // ─────────────── “Other” Toggle for All Selects ───────────────
   document.querySelectorAll('select').forEach(sel => {
     sel.onchange = () => {
       const oi = sel.closest('label')?.querySelector('.other-input');
@@ -1036,7 +1120,7 @@ document.addEventListener('DOMContentLoaded', () => {
     };
   });
 
-});
+}); 
 </script>
 </body>
 </html>
