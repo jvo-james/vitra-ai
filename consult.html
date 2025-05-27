@@ -531,249 +531,400 @@
     <small>© 2025 AI-Pharmacy Chain — All rights reserved</small>
   </footer>
 
+<script>
+  // ====== CONFIG & HELPERS ======
+  const OPENAI_API_KEY = 'YOUR_OPENAI_API_KEY_HERE';
 
- <script>
-document.addEventListener('DOMContentLoaded', () => {
-  // Helper: Toast
+  async function callOpenAI(messages) {
+    const res = await fetch('https://api.openai.com/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${OPENAI_API_KEY}`
+      },
+      body: JSON.stringify({
+        model: 'gpt-4o-mini',
+        messages
+      })
+    });
+    if (!res.ok) {
+      const errTxt = await res.text();
+      throw new Error(`OpenAI ${res.status}: ${errTxt}`);
+    }
+    const data = await res.json();
+    return data.choices[0].message.content.trim();
+  }
+
   function showToast(msg) {
     const t = document.createElement('div');
     t.className = 'toast';
     t.innerText = msg;
-    document.body.append(t);
+    document.body.appendChild(t);
     requestAnimationFrame(() => t.classList.add('visible'));
     setTimeout(() => t.remove(), 3000);
   }
 
-  // Sidebar toggle
-  document.getElementById('hamburger').onclick = () =>
-    document.body.classList.toggle('sidebar-open');
-  document.getElementById('shrinkSidebar').onclick = () => {
-    const sb = document.getElementById('sidebar');
-    sb.classList.toggle('collapsed');
-    document.querySelector('header').style.left = sb.classList.contains('collapsed') ? '60px' : '220px';
-    document.querySelector('main').style.marginLeft = sb.classList.contains('collapsed') ? '70px' : '240px';
-  };
+  document.addEventListener('DOMContentLoaded', () => {
 
-  // Theme toggle
-  document.getElementById('themeToggle').onclick = () => {
-    document.documentElement.classList.toggle('dark');
-    document.getElementById('themeToggle').classList.toggle('fa-moon');
-    document.getElementById('themeToggle').classList.toggle('fa-sun');
-  };
+    // ====== 1. Personalized AI Provider Matching ======
+    const providers = [
+      { id:'p1', name:'Dr. Kwame Asante', spec:'Pulmonologist, Korle Bu' },
+      { id:'p2', name:'Dr. Abena Owusu', spec:'Cardiologist, 37 Military' },
+      { id:'p3', name:'Dr. Kojo Mensah', spec:'Psychiatrist, Ridge' },
+      { id:'p4', name:'Dr. Yaa Dufie', spec:'Dietitian, Nyaho Medical' },
+      { id:'p5', name:'Dr. Nana Adjei', spec:'GP, Cape Coast' },
+      { id:'p6', name:'Dr. Efua Amponsah', spec:'Endocrinologist, LEKMA' },
+      { id:'p7', name:'Dr. Michael Addo', spec:'Neurologist, 37 Military' },
+      { id:'p8', name:'Dr. Grace Ofori', spec:'Dermatologist, Accra Derm.' },
+      { id:'p9', name:'Dr. Joseph Kumi', spec:'Ortho Surgeon, Komfo Anokye' },
+      { id:'p10',name:'Dr. Ama Brew', spec:'Pediatrician, Trust Hosp.' },
+      // + 8 more creative roles
+      { id:'p11', name:'Ms. Akosua Baah', spec:'PT, Tema General' },
+      { id:'p12', name:'Mr. Daniel Boakye', spec:'Pharmacist, Ridge' },
+      { id:'p13', name:'Mrs. Esther Kumi', spec:'OT, Cape Coast' },
+      { id:'p14', name:'Ms. Joy Mensah', spec:'Speech Therapist, LEKMA' },
+      { id:'p15', name:'Dr. Paul Yeboah', spec:'Dermatologist, Korle Bu' },
+      { id:'p16', name:'Dr. Linda Frimpong', spec:'Nephrologist, 37 Military' },
+      { id:'p17', name:'Mr. Kwesi Owusu', spec:'Nutritionist, Nyaho Med.' },
+      { id:'p18', name:'Ms. Abena Boateng', spec:'Psychologist, Accra Psych.' }
+    ];
 
-  // Smooth anchor scrolling
-  document.querySelectorAll('aside#sidebar nav a').forEach(a => {
-    a.onclick = e => {
+    document.getElementById('findMatch').type = 'button';
+    document.getElementById('findMatch').addEventListener('click', async e => {
       e.preventDefault();
-      const id = a.getAttribute('href').slice(1);
-      document.getElementById(id).scrollIntoView({ behavior:'smooth', block:'start' });
-    };
-  });
+      const concern = document.getElementById('concernInput').value.trim();
+      const urgency  = document.getElementById('urgencyInput').value;
+      const lang     = document.getElementById('languageInput').value;
+      if (!concern) return showToast('Enter your chief concern');
+      const sys = `You are an AI matching system. Here are providers:\n${providers.map(p=>`- ${p.name}, ${p.spec}`).join('\n')}`;
+      const user = `Patient: concern="${concern}", urgency="${urgency}", language="${lang}". Recommend the single best provider.`;
+      const loading = e.target;
+      loading.disabled = true;
+      loading.innerText = 'Matching…';
+      try {
+        const reply = await callOpenAI([{role:'system',content:sys},{role:'user',content:user}]);
+        document.getElementById('matchResults').hidden = false;
+        document.getElementById('matchResults').querySelector('.result-content').innerText = reply;
+      } catch(err) {
+        showToast(err.message);
+      } finally {
+        loading.disabled = false;
+        loading.innerText = 'Find My Specialist';
+      }
+    });
 
-  // 1. Provider Matching
-  document.getElementById('findMatch').onclick = e => {
-    e.preventDefault();
-    const concern = document.getElementById('concernInput').value.trim();
-    const urgency = document.getElementById('urgencyInput').value;
-    const lang    = document.getElementById('languageInput').value;
-    if (!concern) return showToast('Please enter your concern');
-    // Simple pseudo-AI: pick random provider from list
-    const items = Array.from(document.querySelectorAll('#providerList li'));
-    const chosen = items[Math.floor(Math.random() * items.length)];
-    document.getElementById('matchResults').hidden = false;
-    items.forEach(li => li.style.background = '');
-    chosen.style.background = 'var(--cb-accent)';
-  };
-  document.querySelector('#matchResults .close-btn').onclick = () =>
-    document.getElementById('matchResults').hidden = true;
+    document.querySelector('#matchResults .close-btn').addEventListener('click', () => {
+      document.getElementById('matchResults').hidden = true;
+    });
 
-  // 2. Calendar Filtering & Next Available
-  document.getElementById('filterSlots').onclick = e => {
-    e.preventDefault();
-    showToast('Slots filtered (UI stub)');
-    // You’d implement real filtering logic here
-  };
-  document.getElementById('nextAvailable').onclick = e => {
-    e.preventDefault();
-    showToast('Next available: 2025-06-01 09:00');
-  };
 
-    // ——— Generate a simple monthly calendar ———
-  function generateCalendar(year, month) {
-    const cal = document.getElementById('calendar');
-   cal.innerHTML = '';  // clear
-   // day names header
-   ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'].forEach(d => {
-     const hd = document.createElement('div');
-      hd.className = 'cell';
-      hd.style.fontWeight = '600';
-      hd.innerText = d;
-     cal.append(hd);
-   });
-   // first day offset
-    const first = new Date(year, month, 1).getDay();
-   // total days
-   const days = new Date(year, month+1, 0).getDate();
-    // blank cells until first
-   for (let i=0; i<first; i++) {
-     const blank = document.createElement('div');
-    blank.className = 'cell closed';
-      cal.append(blank);
+    // ====== 2. Real-Time Availability Calendar ======
+    const calEl = document.getElementById('calendar');
+    function generateCalendar(year, month) {
+      calEl.innerHTML = '';
+      ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'].forEach(d => {
+        const hd = document.createElement('div');
+        hd.className = 'cell'; hd.style.fontWeight='600';
+        hd.innerText = d; calEl.append(hd);
+      });
+      const firstDay = new Date(year,month,1).getDay();
+      const daysInM = new Date(year,month+1,0).getDate();
+      for(let i=0;i<firstDay;i++){
+        const blank = document.createElement('div');
+        blank.className = 'cell closed'; blank.innerText=''; calEl.append(blank);
+      }
+      for(let d=1;d<=daysInM;d++){
+        const cell = document.createElement('div');
+        cell.className='cell';
+        // pseudo availability
+        if (Math.random()<0.4) {
+          cell.classList.add('closed');
+          cell.innerText = d;
+        } else {
+          cell.classList.add('open');
+          cell.innerText = d;
+          cell.addEventListener('click', () => {
+            document.querySelectorAll('#calendar .cell.open.selected')
+              .forEach(c=>c.classList.remove('selected'));
+            cell.classList.add('selected');
+            showToast(`Selected ${year}-${month+1}-${d}`);
+          });
+        }
+        // highlight today
+        const t = new Date();
+        if(t.getFullYear()===year && t.getMonth()===month && t.getDate()===d){
+          cell.classList.add('today');
+        }
+        calEl.append(cell);
+      }
     }
-    // create day cells
-   for (let d=1; d<=days; d++) {
-     const cell = document.createElement('div');
-     cell.className = 'cell';
-     // randomly mark some as closed
-     if (Math.random() < 0.3) {
-       cell.classList.add('closed');
-        cell.innerText = d;
-     } else {
-        cell.classList.add('open');
-       cell.innerText = d;
-        cell.onclick = () => {
-          document.querySelectorAll('#calendar .cell.open.selected')
-            .forEach(c=>c.classList.remove('selected'));
-         cell.classList.add('selected');
-          showToast(`You selected: ${year}-${month+1}-${d}`);
-        };
-     }
-     // highlight today
-      const today = new Date();
-     if (today.getFullYear()===year && today.getMonth()===month && today.getDate()===d) {
-        cell.classList.add('today');
-     }
-     cal.append(cell);
-   }
- }
- // call initially with current month
-  const now = new Date();
- generateCalendar(now.getFullYear(), now.getMonth());
+    // initial
+    let today = new Date();
+    generateCalendar(today.getFullYear(), today.getMonth());
+    // filters
+    document.getElementById('filterSlots').type='button';
+    document.getElementById('filterSlots').addEventListener('click', e=>{
+      showToast('Filtered (stub)');
+    });
+    document.getElementById('nextAvailable').type='button';
+    document.getElementById('nextAvailable').addEventListener('click', e=>{
+      showToast('Next: ' + `${today.getFullYear()}-${today.getMonth()+1}-${today.getDate()+3}`);
+    });
+    // date-navigation
+    document.getElementById('calendarDateInput').addEventListener('change', e=>{
+      const d = new Date(e.target.value);
+      if(!isNaN(d)) generateCalendar(d.getFullYear(), d.getMonth());
+    });
 
-  // optionally regenerate when date input changes
- document.getElementById('calendarDateInput').onchange = e => {
-    const d = new Date(e.target.value);
-    if (!isNaN(d)) generateCalendar(d.getFullYear(), d.getMonth());
- };
-  
-  // 3. Booking modal
-  const bookingModal = document.getElementById('bookingModal');
-  document.getElementById('bookNow').onclick = e => {
-    e.preventDefault();
-    const name = document.getElementById('clientName').value.trim();
-    const prof = document.getElementById('professionalSelect').value;
-    const date = document.getElementById('apptDate').value;
-    const time = document.getElementById('apptTime').value;
-    if (!name || !date || !time) return showToast('Please fill all fields');
-    bookingModal.hidden = false;
-    document.getElementById('bookingSummary').innerHTML = `
-      <p><strong>${name}</strong>, you are booking with <em>${prof}</em></p>
-      <p>On <strong>${date}</strong> at <strong>${time}</strong>.</p>
-      <p>AI recommends this provider based on your previous answers.</p>
-    `;
-  };
-  bookingModal.querySelector('.close-modal').onclick = () => bookingModal.hidden = true;
-  document.getElementById('confirmBooking').onclick = () => {
-    bookingModal.hidden = true;
-    showToast('Appointment Confirmed!');
-  };
 
-  // 4. Dashboard tabs
-  document.querySelectorAll('.dashboard-tabs button').forEach(btn => {
-    btn.onclick = () => {
-      document.querySelectorAll('.dashboard-tabs button').forEach(b=>b.classList.remove('active'));
-      btn.classList.add('active');
-      const tab = btn.dataset.tab;
-      document.querySelectorAll('.dashboard-list').forEach(d=>d.hidden = d.id!==tab);
-    };
-  });
-  // Reschedule & cancel
-  document.querySelectorAll('.rescheduleBtn').forEach(btn => {
-    btn.onclick = () => showToast('Reschedule flow triggered');
-  });
-  document.querySelectorAll('.cancelBtn').forEach(btn => {
-    btn.onclick = () => showToast('Appointment cancelled');
-  });
+    // ====== 3. Book Your Appointment ======
+    const bookBtn = document.getElementById('bookNow');
+    const modal   = document.getElementById('bookingModal');
+    bookBtn.type='button';
+    bookBtn.addEventListener('click', e => {
+      e.preventDefault();
+      const name  = document.getElementById('clientName').value.trim();
+      const prof  = document.getElementById('professionalSelect').value;
+      const date  = document.getElementById('apptDate').value;
+      const time  = document.getElementById('apptTime').value;
+      if(!name||!date||!time) return showToast('Fill all fields');
+      modal.hidden = false;
+      document.getElementById('bookingSummary').innerHTML = `
+        <p><strong>${name}</strong> → <em>${prof}</em></p>
+        <p>${date} @ ${time}</p>
+        <p>Confirm your booking?</p>
+      `;
+    });
+    modal.querySelector('.close-modal').addEventListener('click', ()=> modal.hidden=true);
+    document.getElementById('confirmBooking').type='button';
+    document.getElementById('confirmBooking').addEventListener('click', async ()=>{
+      modal.hidden = true;
+      showToast('Confirming…');
+      // AI predicts best professional for any additional details
+      const extra = 'No extra details.';
+      try {
+        const reply = await callOpenAI([
+          {role:'system',content:'You are an appointment assistant.'},
+          {role:'user',content:`Booking for ${document.getElementById('clientName').value}`}
+        ]);
+        alert('AI says: ' + reply);
+      } catch(e){ showToast(e.message); }
+    });
 
-  // 5. Feedback submission
-  document.getElementById('submitFeedback').onclick = e => {
-    e.preventDefault();
-    showToast('Thank you for your feedback!');
-  };
 
-  // 6. Analytics & staffing optimization
-  const noShowCtx = document.getElementById('noShowChart').getContext('2d');
-  const peakCtx   = document.getElementById('peakTimesChart').getContext('2d');
-  new Chart(noShowCtx, { type:'bar', data:{
-      labels:['Week1','Week2','Week3','Week4'], datasets:[{ label:'No-Show %', data:[10,12,8,15] }]
-    }});
-  new Chart(peakCtx, { type:'line', data:{
-      labels:['Mon','Tue','Wed','Thu','Fri'], datasets:[{ label:'Bookings', data:[30,45,60,55,70] }]
-    }});
-  document.getElementById('optimizeStaffing').onclick = () => {
-    document.getElementById('optimizationResult').hidden = false;
-    document.querySelector('#optimizationResult .result-content').innerText =
-      'AI suggests adding 2 nurses on Wed afternoons and 1 admin on Fridays.';
-  };
-  document.querySelector('#optimizationResult .close-btn').onclick = () =>
-    document.getElementById('optimizationResult').hidden = true;
-
-  // 7. Live Chat Support
-  const chatBox  = document.getElementById('chatBox');
-  const historyModal = document.getElementById('chatHistoryModal');
-  const historyList  = document.getElementById('chatHistoryList');
-  let lastDateKey = null;
-  const chatHistory = [];
-  function addChat(role, text) {
-    const now = new Date();
-    const dateKey = now.toDateString();
-    if (dateKey !== lastDateKey) {
-      const sep = document.createElement('div');
-      sep.className = 'chat-date';
-      const diff = Math.floor((new Date() - new Date(dateKey)) / 864e5);
-      sep.innerText = diff===0 ? 'Today' : diff===1 ? 'Yesterday' : now.toLocaleDateString();
-      chatBox.append(sep);
-      lastDateKey = dateKey;
+    // ====== 4. Patient Dashboard & History ======
+    let appointments = [
+      { id:1, doc:'Dr. Abena Owusu', datetime:'2025-05-30T14:00', status:'upcoming' },
+      { id:2, doc:'Dr. Kojo Mensah', datetime:'2025-04-12T10:00', status:'past' }
+    ];
+    function renderDashboard() {
+      ['upcoming','past'].forEach(tab=>{
+        const container = document.getElementById(tab);
+        container.querySelector('ul').innerHTML = appointments
+          .filter(a=>a.status===tab)
+          .map(a=>`
+            <li data-id="${a.id}">
+              <strong>${a.doc}</strong> – ${a.datetime.replace('T',' ')}
+              ${tab==='upcoming'
+                ? `<button class="btn-sm rescheduleBtn">Reschedule</button>
+                   <button class="btn-sm cancelBtn">Cancel</button>`
+                : `<button class="btn-sm downloadSummary">Summary</button>
+                   <button class="btn-sm downloadInvoice">Invoice</button>`
+              }
+            </li>`).join('');
+      });
+      // wire buttons
+      document.querySelectorAll('.rescheduleBtn').forEach(btn=>{
+        btn.type='button';
+        btn.addEventListener('click', e=>{
+          const li = e.target.closest('li');
+          const id = +li.dataset.id;
+          const newDt = prompt('New datetime (YYYY-MM-DDThh:mm):');
+          if(newDt){
+            appointments.find(a=>a.id===id).datetime=newDt;
+            renderDashboard();
+            showToast('Rescheduled');
+          }
+        });
+      });
+      document.querySelectorAll('.cancelBtn').forEach(btn=>{
+        btn.type='button';
+        btn.addEventListener('click', e=>{
+          const id = +e.target.closest('li').dataset.id;
+          appointments = appointments.filter(a=>a.id!==id);
+          renderDashboard();
+          showToast('Cancelled');
+        });
+      });
+      document.querySelectorAll('.downloadSummary').forEach(btn=>{
+        btn.type='button';
+        btn.addEventListener('click', ()=> {
+          const blob=new Blob(['Visit summary...'],'text/plain');
+          const a=document.createElement('a');
+          a.href=URL.createObjectURL(blob); a.download='summary.txt'; a.click();
+        });
+      });
+      document.querySelectorAll('.downloadInvoice').forEach(btn=>{
+        btn.type='button';
+        btn.addEventListener('click', ()=> {
+          const blob=new Blob(['Invoice pdf...'],'application/pdf');
+          const a=document.createElement('a');
+          a.href=URL.createObjectURL(blob); a.download='invoice.pdf'; a.click();
+        });
+      });
     }
-    const ts = now.toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'});
-    const msg = document.createElement('div');
-    msg.className = role==='user' ? 'user-msg' : 'bot-msg';
-    msg.innerHTML = `<div class="msg-text">${text}</div><div class="msg-ts">${ts}</div>`;
-    chatBox.append(msg);
-    chatBox.scrollTop = chatBox.scrollHeight;
-    chatHistory.push({ role, text, time:`${dateKey} ${ts}` });
-  }
-  document.getElementById('sendChat').onclick = e => {
-    e.preventDefault();
-    const txt = document.getElementById('chatInput').value.trim();
-    if (!txt) return showToast('Type a message');
-    addChat('user', txt);
-    document.getElementById('chatInput').value = '';
-    setTimeout(() => addChat('bot', 'AI: ' + txt.split('').reverse().join('')), 500);
-  };
-  document.getElementById('clearChat').onclick = () => {
-    chatBox.innerHTML = '';
-    lastDateKey = null;
-    chatHistory.length = 0;
-  };
-  document.getElementById('showHistory').onclick = () => {
-    historyList.innerHTML = chatHistory.map((h,i)=>`
-      <div class="history-item">
-        <span><strong>${h.role==='user'?'You':'AI'}:</strong> ${h.text}</span>
-        <div class="msg-ts">${h.time}</div>
-        <button class="delete-history" data-i="${i}">&times;</button>
-      </div>`).join('');
-    historyModal.hidden = false;
-  };
-  historyModal.querySelector('.close-modal').onclick = () => historyModal.hidden = true;
-  historyList.onclick = e => {
-    if (e.target.matches('.delete-history')) {
-      const i = +e.target.dataset.i;
-      chatHistory.splice(i,1);
-      e.target.closest('.history-item').remove();
+    renderDashboard();
+    document.querySelectorAll('.dashboard-tabs button').forEach(b=>{
+      b.type='button';
+      b.addEventListener('click',()=>{
+        document.querySelectorAll('.dashboard-tabs button')
+          .forEach(x=>x.classList.remove('active'));
+        b.classList.add('active');
+        document.querySelectorAll('.dashboard-list')
+          .forEach(d=>d.hidden = d.id!==b.dataset.tab);
+      });
+    });
+
+
+    // ====== 5. Feedback & Ratings ======
+    document.getElementById('submitFeedback').type='button';
+    document.getElementById('submitFeedback').addEventListener('click', async e=>{
+      e.preventDefault();
+      const rating = document.getElementById('ratingInput').value;
+      const comment= document.getElementById('feedbackInput').value.trim();
+      showToast('Submitting feedback…');
+      try {
+        const scan = await callOpenAI([
+          {role:'system',content:'You are a feedback analyzer. Flag red concerns.'},
+          {role:'user',content:`Rating=${rating}, Comment="${comment}"`}
+        ]);
+        if (/red[- ]?flag/i.test(scan)) {
+          alert('⚠️ Red-flag feedback routed to quality team');
+        } else {
+          showToast('Thanks for your feedback!');
+        }
+      } catch(err){
+        showToast(err.message);
+      }
+    });
+
+
+    // ====== 6. Analytics & Optimization ======
+    // require <canvas id="noShowChart"> & <canvas id="peakTimesChart">
+    const noShowCtx = document.getElementById('noShowChart').getContext('2d');
+    const peakCtx   = document.getElementById('peakTimesChart').getContext('2d');
+    const noShowChart = new Chart(noShowCtx, {
+      type:'bar',
+      data:{labels:['W1','W2','W3','W4'],datasets:[{label:'No-Show %',data:[10,12,8,15]}]}
+    });
+    const peakChart = new Chart(peakCtx, {
+      type:'line',
+      data:{labels:['Mon','Tue','Wed','Thu','Fri'],datasets:[{label:'Bookings',data:[30,45,60,55,70]}]}
+    });
+    document.getElementById('optimizeStaffing').type='button';
+    document.getElementById('optimizeStaffing').addEventListener('click', async ()=>{
+      document.getElementById('optimizationResult').hidden = false;
+      document.querySelector('#optimizationResult .result-content').innerText = 'Analyzing…';
+      try {
+        const advice = await callOpenAI([
+          {role:'system',content:'You are a staffing optimization AI.'},
+          {role:'user',content:'Provide staffing suggestions based on no-show & peak data.'}
+        ]);
+        document.querySelector('#optimizationResult .result-content').innerText = advice;
+      } catch(e){
+        showToast(e.message);
+      }
+    });
+    document.querySelector('#optimizationResult .close-btn').addEventListener('click', ()=>{
+      document.getElementById('optimizationResult').hidden = true;
+    });
+
+
+    // ====== 7. Live AI Chat Support (iMessage style) ======
+    const chatBox = document.getElementById('chatBox');
+    const chatInp = document.getElementById('chatInput');
+    let lastDay = null;
+    const chatHistory = JSON.parse(localStorage.getItem('liveChat')||'[]');
+
+    function renderChatItem(who,text,iso) {
+      const d = iso ? new Date(iso) : new Date();
+      const dayStr = d.toDateString();
+      if (dayStr !== lastDay) {
+        const sep = document.createElement('div');
+        sep.className = 'chat-date';
+        if (dayStr === new Date().toDateString()) sep.innerText='Today';
+        else {
+          const yday = new Date();
+          yday.setDate(yday.getDate()-1);
+          sep.innerText = (dayStr === yday.toDateString())?'Yesterday':d.toLocaleDateString();
+        }
+        chatBox.append(sep);
+        lastDay = dayStr;
+      }
+      const msg = document.createElement('div');
+      msg.className = who==='user'?'user-msg':'bot-msg';
+      msg.innerHTML = `<div class="msg-text">${text}</div>
+                       <div class="msg-ts">${d.toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'})}</div>`;
+      chatBox.append(msg);
+      chatBox.scrollTop = chatBox.scrollHeight;
     }
-  };
-});
+
+    // load history
+    chatHistory.forEach(m=>renderChatItem(m.role,m.text,m.iso));
+    // send
+    document.getElementById('sendChat').type='button';
+    document.getElementById('sendChat').addEventListener('click', async e=>{
+      e.preventDefault();
+      const txt = chatInp.value.trim(); if(!txt)return;
+      renderChatItem('user',txt);
+      const nowIso = new Date().toISOString();
+      chatHistory.push({role:'user',text:txt,iso:nowIso});
+      chatInp.value='';
+      // AI reply stub or real
+      try {
+        const reply = await callOpenAI([
+          {role:'system',content:'You are chat support.'},
+          {role:'user',content:txt}
+        ]);
+        renderChatItem('bot',reply);
+        chatHistory.push({role:'bot',text:reply,iso:new Date().toISOString()});
+      } catch(err){
+        renderChatItem('bot','⚠️ '+err.message);
+      }
+      localStorage.setItem('liveChat', JSON.stringify(chatHistory));
+    });
+    document.getElementById('clearChat').type='button';
+    document.getElementById('clearChat').addEventListener('click', ()=>{
+      chatBox.innerHTML=''; lastDay=null; chatHistory.length=0;
+      localStorage.removeItem('liveChat');
+    });
+    document.getElementById('showHistory').type='button';
+    document.getElementById('showHistory').addEventListener('click', ()=>{
+      const modal = document.getElementById('chatHistoryModal');
+      const list  = document.getElementById('chatHistoryList');
+      list.innerHTML = chatHistory.map((m,i)=>`
+        <div class="history-item">
+          <span><strong>${m.role==='user'?'You':'AI'}:</strong> ${m.text}</span>
+          <div class="msg-ts">${new Date(m.iso).toLocaleString()}</div>
+          <button class="delete-history" data-i="${i}">&times;</button>
+        </div>`).join('');
+      modal.hidden = false;
+      list.querySelectorAll('.delete-history').forEach(btn=>{
+        btn.addEventListener('click', e=>{
+          const i=+e.target.dataset.i;
+          chatHistory.splice(i,1);
+          e.target.closest('.history-item').remove();
+          localStorage.setItem('liveChat', JSON.stringify(chatHistory));
+        });
+      });
+    });
+    document.querySelector('#chatHistoryModal .close-modal').addEventListener('click', ()=>{
+      document.getElementById('chatHistoryModal').hidden = true;
+    });
+
+  });
 </script>
+
+  
 </body>
 </html>
