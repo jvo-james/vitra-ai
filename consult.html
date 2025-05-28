@@ -555,7 +555,7 @@
  
   <section id="appointmentFlow" class="module" hidden>
     <h2><i class="fas fa-calendar-alt"></i> Schedule with <span id="chosenProvider"></span></h2>
-<div class="calendar-controls" style="display: none;">
+<div class="calendar-controls">
   <label>Select Professional:
         <select id="availProfessional">
          <option value="p1">Dr. Kwame Asante – Pulmonologist, Korle Bu Teaching Hospital</option>
@@ -862,7 +862,6 @@
     const providers = [
       {id:'p1',name:'Dr. Kwame Asante',spec:'Pulmonologist, Korle Bu'},
       {id:'p2',name:'Dr. Abena Owusu',spec:'Cardiologist, 37 Military'},
-      /* …and so on p3–p18… */
       {id:'p3',name:'Dr. Kojo Mensah',spec:'Psychiatrist, Ridge'},
       {id:'p4',name:'Dr. Yaa Dufie',spec:'Dietitian, Nyaho Medical'},
       {id:'p5',name:'Dr. Nana Adjei',spec:'GP, Cape Coast'},
@@ -911,17 +910,26 @@
         </div>`;
       matchPanel.hidden = false;
 
-     document.getElementById('proceedMatch').addEventListener('click', ()=>{
-      const chosen = top; 
-      providerMatchEl.hidden = true;
-      appointmentEl.hidden  = false;
-      // call our helper with real name
-      startAppointmentFlow(chosen);
-    });
-      document.getElementById('chooseOwn').addEventListener('click', () => {
-  matchPanel.querySelector('.result-content').hidden = true;
- document.getElementById('chooseOwnSelect').hidden = false;
-});
+    document.getElementById('proceedMatch')
+   .addEventListener('click', () => {
+     providerMatchEl.hidden = true;
+     appointmentEl.hidden   = false;
+     startAppointmentFlow(top);
+   });
+      
+      document.getElementById('chooseOwn')
+   .addEventListener('click', () => {
+     matchPanel.querySelector('.result-content').hidden = true;
+     document.getElementById('chooseOwnSelect').hidden = false;
+   });
+ document.getElementById('ownProvider')
+   .addEventListener('change', e => {
+     const id = e.target.value;
+     const pn = providers.find(p=>p.id===id).name;
+     providerMatchEl.hidden = true;
+     appointmentEl.hidden   = false;
+     startAppointmentFlow(pn);
+   });
        document.getElementById('ownProvider').addEventListener('change', e => {
       const id = e.target.value;
       const provider = providers.find(p=>p.id===id).name;
@@ -945,74 +953,72 @@
       if (!e.target.matches('button')) return;
       window.selectedTime = e.target.innerText;
       window.selectedDate = timeSlotsEl.querySelector('h4').innerText.split(' on ')[1];
-      // move on to step 3
-      document.getElementById('calendar').hidden = true;
-      document.getElementById('timeSlots').hidden = true;
-      document.getElementById('finalBookingForm').hidden = false;
-      document.getElementById('summarySelection').innerHTML =
-        `<p><strong>${window.selectedDate}</strong> at <strong>${window.selectedTime}</strong></p>`;
+      showSummary();
     });
 
-    // below where you do startAppointmentFlow:
-function startAppointmentFlow(providerName) {
-      const header = appointmentEl.querySelector('h2');
-      header.innerHTML = `Schedule with <strong>${providerName}</strong>`;
-      // make sure the desc is shown once
-      if (!appointmentEl.querySelector('.flow-desc')) {
-        appointmentEl.insertAdjacentHTML('afterbegin',
-          '<p class="desc flow-desc">Select an available date below, then pick a time slot.</p>');
-      }
-      // lock the calendar selector
-      profSelect.value = providers.find(p=>p.name===providerName).id;
-      profSelect.disabled = true;
-      generateCalendar(displayYear, displayMonth);
-    } // add description
- if(!appointmentEl.querySelector('.flow-desc')){
-   appointmentEl.insertAdjacentHTML('afterbegin',
-     '<p class="desc">Select an available date below, then pick a time slot.</p>');
- }
+  // ─── 3. SUMMARY & CONFIRM ────────
+  function showSummary() {
+  // grab all needed elements
+  const calendarEl       = document.getElementById('calendar');
+  const timeSlotsElLocal = document.getElementById('timeSlots');
+  const finalForm        = document.getElementById('finalBookingForm');
+  const summarySelection = document.getElementById('summarySelection');
+  const editBtn          = document.getElementById('editSelection');
+  const confirmBtn       = document.getElementById('confirmBookingFinal');
+  const clientName       = document.getElementById('clientNameFinal');
+
+  // toggle visibility
+  calendarEl.hidden      = true;
+  timeSlotsElLocal.hidden= true;
+  finalForm.hidden       = false;
+
+  // fill in the chosen slot
+  summarySelection.innerHTML =
+    `<p><strong>${window.selectedDate}</strong> at <strong>${window.selectedTime}</strong></p>`;
+
+  // back-button: restores calendar view
+  editBtn.onclick = () => {
+    calendarEl.hidden       = false;
+    timeSlotsElLocal.hidden = false;
+    finalForm.hidden        = true;
+    summarySelection.innerHTML = '';
+    document.querySelectorAll('#calendar .selected')
+      .forEach(c => c.classList.remove('selected'));
+  };
+
+  // confirm & book
+  confirmBtn.onclick = async () => {
+    const name = clientName.value.trim();
+    if (!name) return showToast('Please enter your name');
+    showToast(PHASE.confirmBooking);
+    await new Promise(r => setTimeout(r, 1500));
+    finalForm.innerHTML =
+      `<div class="result-content">
+         🎉 Success, <strong>${name}</strong>!<br>
+         Your appointment on <strong>${window.selectedDate}</strong> at <strong>${window.selectedTime}</strong> is confirmed.
+       </div>`;
+  };
 }
     
-    // ─── 3. SUMMARY & CONFIRM ────────────────────────────
-    function showSummary(){
-      const summary = document.createElement('div');
-      summary.id = 'bookingSummaryStep';
-      summary.innerHTML = `
-        <h3>Review & Confirm</h3>
-        <p><strong>Provider:</strong> ${document.getElementById('chosenProvider').innerText}</p>
-        <p><strong>Date:</strong> ${window.selectedDate}</p>
-        <p><strong>Time:</strong> ${window.selectedTime}</p>
-        <label>Your Name:<br><input id="sumName" /></label>
-        <div class="summary-actions" style="margin-top:1rem">
-          <button id="backToCalendar" class="btn btn-outline">‹ Back</button>
-          <button id="confirmBookingFinal" class="btn">Confirm ✔️</button>
-        </div>`;
-      appointmentEl.parentNode.insertBefore(summary, appointmentEl.nextSibling);
-      appointmentEl.hidden = true;
+    // below where you do startAppointmentFlow:
+function startAppointmentFlow(providerName) {
+   // header
+   appointmentEl.querySelector('h2').innerHTML =
+     `<i class="fas fa-calendar-alt"></i> Schedule with <strong>${providerName}</strong>`;
+   // one-time description
+   if (!appointmentEl.querySelector('.flow-desc')) {
+     appointmentEl.insertAdjacentHTML(
+       'afterbegin',
+       `<p class="desc flow-desc">Select an available date, then pick a time slot.</p>`
+     );
+   }
+   // lock select & render
+   profSelect.value = providers.find(p=>p.name===providerName).id;
+   profSelect.disabled = true;
+   generateCalendar(displayYear, displayMonth);
+ } 
+   
 
-      document.getElementById('backToCalendar').onclick = ()=>{
-        summary.remove();
-        appointmentEl.hidden = false;
-      };
-       document.getElementById('confirmBookingFinal').addEventListener('click', async () => {
-      const name = document.getElementById('clientNameFinal').value.trim();
-      if (!name) return showToast('Please enter your name');
-      showToast(PHASE.confirmBooking);
-      await new Promise(r => setTimeout(r, 1500));
-      document.getElementById('finalBookingForm').innerHTML =
-        `<div class="result-content">
-           🎉 Success, <strong>${name}</strong>!<br>
-           Your appointment on <strong>${window.selectedDate}</strong> at <strong>${window.selectedTime}</strong> is confirmed.
-        </div>`;
-    });
-    document.getElementById('editSelection').addEventListener('click', () => {
-      document.getElementById('calendar').hidden = false;
-      document.getElementById('timeSlots').hidden = false;
-      document.getElementById('finalBookingForm').hidden = true;
-      document.querySelectorAll('#calendar .selected').forEach(c => c.classList.remove('selected'));
-      document.getElementById('summarySelection').innerHTML = '';
-    });
-    }
 
   }); // DOMContentLoaded
 })(); // IIFE
