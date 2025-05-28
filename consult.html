@@ -11,7 +11,7 @@
   <link rel="stylesheet"
         href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
+<script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
 
 <style>
   /*──────────────────── Global Theme ────────────────────*/
@@ -288,6 +288,31 @@
     background: var(--cb-bg);
     border: 1px solid var(--cb-bg);
   }
+  /* Spinner */
+.spinner {
+  border: 4px solid rgba(0,0,0,0.1);
+  border-left-color: var(--cb-primary);
+  border-radius: 50%;
+  width: 24px; height: 24px;
+  animation: spin 1s linear infinite;
+  margin: .5rem auto;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* Toast */
+.toast {
+  position: fixed; bottom: 1rem; left: 50%;
+  transform: translateX(-50%) translateY(100%);
+  background: var(--cb-primary-alt); color: #fff;
+  padding: .75rem 1.5rem; border-radius: var(--radius);
+  box-shadow: var(--shadow); opacity: 0;
+  transition: transform .3s, opacity .3s;
+  z-index: 2000;
+}
+.toast.visible {
+  transform: translateX(-50%) translateY(0);
+  opacity: 1;
+}
 </style>
 </head>
 <body>
@@ -539,34 +564,77 @@
     <small>© 2025 AI-Pharmacy Chain — All rights reserved</small>
   </footer>
 
-<script>
-  // ====== CONFIG & HELPERS ======
-     const res = await fetch('/.netlify/functions/openai-proxy', {
-     method: 'POST',
-     headers: { 'Content-Type': 'application/json' },
-     body: JSON.stringify({ messages })
-   });
-  
-    if (!res.ok) {
-      const errTxt = await res.text();
-      throw new Error(`OpenAI ${res.status}: ${errTxt}`);
-    }
-    const data = await res.json();
-    return data.choices[0].message.content.trim();
-  }
 
+<script>
+(async()=>{
+  // ─── CORE AI CALLER & HELPERS ────────────────────────
+  async function callOpenAI(messages) {
+    try {
+      const res = await fetch('/.netlify/functions/openai-proxy', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ messages })
+      });
+      if (!res.ok) {
+        const err = await res.text();
+        throw new Error(err);
+      }
+      const j = await res.json();
+      return j.choices?.[0]?.message?.content.trim() || '⚠️ Unexpected AI response.';
+    } catch(err) {
+      if (err.message.includes('Sandbox.Timedout')) {
+        return '⚠️ Server busy—please try again shortly.';
+      }
+      return '⚠️ Error: '+err.message;
+    }
+  }
   function showToast(msg) {
     const t = document.createElement('div');
     t.className = 'toast';
     t.innerText = msg;
-    document.body.appendChild(t);
-    requestAnimationFrame(() => t.classList.add('visible'));
-    setTimeout(() => t.remove(), 3000);
+    document.body.append(t);
+    requestAnimationFrame(()=>t.classList.add('visible'));
+    setTimeout(()=>t.remove(),3000);
+  }
+  function formatHTML(txt) {
+    return txt
+      .replace(/^#### (.*$)/gm,'<h4>$1</h4>')
+      .replace(/^### (.*$)/gm,'<h3>$1</h3>')
+      .replace(/\*\*(.+?)\*\*/g,'<strong>$1</strong>')
+      .replace(/\*(.+?)\*/g,'<em>$1</em>')
+      .replace(/```([\s\S]+?)```/g,'<pre><code>$1</code></pre>')
+      .split(/\n{2,}/g).map(p=>`<p>${p.trim()}</p>`).join('');
+  }
+  function injectTools(panel) {
+    if (panel.querySelector('.tool-row')) return;
+    const row = document.createElement('div');
+    row.className = 'tool-row';
+    row.innerHTML = `
+      <button class="copy-btn"><i class="fas fa-copy"></i></button>
+      <button class="dl-btn"><i class="fas fa-download"></i></button>
+    `;
+    panel.append(row);
+  }
+  const PHASE = {
+    findMatch: 'Matching…',
+    filterSlots: 'Filtering…',
+    bookNow: 'Preparing…',
+    confirmBooking: 'Confirming…',
+    submitFeedback: 'Submitting…',
+    optimizeStaffing: 'Analyzing…',
+    sendChat: 'Thinking…'
+  };
+  function startSpinner(panel, phase) {
+    panel.hidden = false;
+    panel.innerHTML = `
+      <div class="spin-text">${PHASE[phase]||'Thinking…'}</div>
+      <div class="spinner"></div>
+    `;
   }
 
-  document.addEventListener('DOMContentLoaded', () => {
+  document.addEventListener('DOMContentLoaded',()=>{
 
-    // ====== 1. Personalized AI Provider Matching ======
+    // ─── 1. PROVIDER MATCHING ────────────────────────────
     const providers = [
       { id:'p1', name:'Dr. Kwame Asante', spec:'Pulmonologist, Korle Bu' },
       { id:'p2', name:'Dr. Abena Owusu', spec:'Cardiologist, 37 Military' },
@@ -588,131 +656,102 @@
       { id:'p17', name:'Mr. Kwesi Owusu', spec:'Nutritionist, Nyaho Med.' },
       { id:'p18', name:'Ms. Abena Boateng', spec:'Psychologist, Accra Psych.' }
     ];
-
-    document.getElementById('findMatch').type = 'button';
-    document.getElementById('findMatch').addEventListener('click', async e => {
+    document.getElementById('findMatch').onclick = async e=>{
       e.preventDefault();
+      const btn = e.currentTarget;
       const concern = document.getElementById('concernInput').value.trim();
-      const urgency  = document.getElementById('urgencyInput').value;
-      const lang     = document.getElementById('languageInput').value;
       if (!concern) return showToast('Enter your chief concern');
-      const sys = `You are an AI matching system. Here are providers:\n${providers.map(p=>`- ${p.name}, ${p.spec}`).join('\n')}`;
-      const user = `Patient: concern="${concern}", urgency="${urgency}", language="${lang}". Recommend the single best provider.`;
-      const loading = e.target;
-      loading.disabled = true;
-      loading.innerText = 'Matching…';
+      const urgency = document.getElementById('urgencyInput').value;
+      const lang = document.getElementById('languageInput').value;
+      const sys = `You are AI match. Providers:\n${providers.map(p=>`- ${p.name}, ${p.spec}`).join('\n')}`;
+      const user = `Concern="${concern}", urgency="${urgency}", lang="${lang}". Pick best provider.`;
+      btn.disabled = true; btn.innerText = PHASE.findMatch;
+      const panel = document.getElementById('matchResults');
       try {
-        const reply = await callOpenAI([{role:'system',content:sys},{role:'user',content:user}]);
-        document.getElementById('matchResults').hidden = false;
-        document.getElementById('matchResults').querySelector('.result-content').innerText = reply;
+        startSpinner(panel,'findMatch');
+        const reply = await callOpenAI([
+          {role:'system',content:sys},
+          {role:'user',content:user}
+        ]);
+        panel.innerHTML = `<div class="result-content">${formatHTML(reply)}</div>`;
+        injectTools(panel);
       } catch(err) {
-        showToast(err.message);
+        showToast(err);
       } finally {
-        loading.disabled = false;
-        loading.innerText = 'Find My Specialist';
+        btn.disabled = false;
+        btn.innerHTML = '<i class="fas fa-search"></i> Find My Specialist';
       }
-    });
-
-    document.querySelector('#matchResults .close-btn').addEventListener('click', () => {
+    };
+    document.querySelector('#matchResults .close-btn').onclick = ()=> {
       document.getElementById('matchResults').hidden = true;
-    });
+    };
 
-
-    // ====== 2. Real-Time Availability Calendar ======
+    // ─── 2. AVAILABILITY CALENDAR ─────────────────────────
     const calEl = document.getElementById('calendar');
-    function generateCalendar(year, month) {
+    function generateCalendar(yr,mth) {
       calEl.innerHTML = '';
-      ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'].forEach(d => {
+      ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'].forEach(d=>{
         const hd = document.createElement('div');
-        hd.className = 'cell'; hd.style.fontWeight='600';
-        hd.innerText = d; calEl.append(hd);
+        hd.className='cell'; hd.style.fontWeight='600'; hd.innerText = d;
+        calEl.append(hd);
       });
-      const firstDay = new Date(year,month,1).getDay();
-      const daysInM = new Date(year,month+1,0).getDate();
-      for(let i=0;i<firstDay;i++){
-        const blank = document.createElement('div');
-        blank.className = 'cell closed'; blank.innerText=''; calEl.append(blank);
+      const first = new Date(yr,mth,1).getDay();
+      const days = new Date(yr,mth+1,0).getDate();
+      for(let i=0;i<first;i++){
+        const b=document.createElement('div');
+        b.className='cell closed'; calEl.append(b);
       }
-      for(let d=1;d<=daysInM;d++){
-        const cell = document.createElement('div');
-        cell.className='cell';
-        // pseudo availability
-        if (Math.random()<0.4) {
-          cell.classList.add('closed');
-          cell.innerText = d;
-        } else {
-          cell.classList.add('open');
-          cell.innerText = d;
-          cell.addEventListener('click', () => {
-            document.querySelectorAll('#calendar .cell.open.selected')
-              .forEach(c=>c.classList.remove('selected'));
+      for(let d=1;d<=days;d++){
+        const cell=document.createElement('div');
+        cell.className='cell '+(Math.random()<0.4?'closed':'open');
+        cell.innerText=d;
+        if(cell.classList.contains('open')){
+          cell.onclick = ()=>{
+            document.querySelectorAll('#calendar .selected').forEach(x=>x.classList.remove('selected'));
             cell.classList.add('selected');
-            showToast(`Selected ${year}-${month+1}-${d}`);
-          });
+            showToast(`Selected ${yr}-${mth+1}-${d}`);
+          };
         }
-        // highlight today
-        const t = new Date();
-        if(t.getFullYear()===year && t.getMonth()===month && t.getDate()===d){
+        const today = new Date();
+        if(today.getFullYear()===yr && today.getMonth()===mth && today.getDate()===d){
           cell.classList.add('today');
         }
         calEl.append(cell);
       }
     }
-    // initial
     let today = new Date();
-    generateCalendar(today.getFullYear(), today.getMonth());
-    // filters
-    document.getElementById('filterSlots').type='button';
-    document.getElementById('filterSlots').addEventListener('click', e=>{
-      showToast('Filtered (stub)');
-    });
-    document.getElementById('nextAvailable').type='button';
-    document.getElementById('nextAvailable').addEventListener('click', e=>{
-      showToast('Next: ' + `${today.getFullYear()}-${today.getMonth()+1}-${today.getDate()+3}`);
-    });
-    // date-navigation
-    document.getElementById('calendarDateInput').addEventListener('change', e=>{
-      const d = new Date(e.target.value);
-      if(!isNaN(d)) generateCalendar(d.getFullYear(), d.getMonth());
-    });
+    generateCalendar(today.getFullYear(),today.getMonth());
+    document.getElementById('filterSlots').onclick = ()=>showToast('Filtered (stub)');
+    document.getElementById('nextAvailable').onclick = ()=>showToast('Next available stub');
+    document.getElementById('calendarDateInput').onchange = e=>{
+      const d=new Date(e.target.value);
+      if(!isNaN(d)) generateCalendar(d.getFullYear(),d.getMonth());
+    };
 
-
-    // ====== 3. Book Your Appointment ======
-    const bookBtn = document.getElementById('bookNow');
-    const modal   = document.getElementById('bookingModal');
-    bookBtn.type='button';
-    bookBtn.addEventListener('click', e => {
+    // ─── 3. BOOK APPOINTMENT ─────────────────────────────
+    const modal = document.getElementById('bookingModal');
+    document.getElementById('bookNow').onclick = e=>{
       e.preventDefault();
-      const name  = document.getElementById('clientName').value.trim();
-      const prof  = document.getElementById('professionalSelect').value;
-      const date  = document.getElementById('apptDate').value;
-      const time  = document.getElementById('apptTime').value;
-      if(!name||!date||!time) return showToast('Fill all fields');
+      const n=document.getElementById('clientName').value.trim();
+      const p=document.getElementById('professionalSelect').value;
+      const dt=document.getElementById('apptDate').value;
+      const tm=document.getElementById('apptTime').value;
+      if(!n||!dt||!tm) return showToast('Fill all fields');
       modal.hidden = false;
       document.getElementById('bookingSummary').innerHTML = `
-        <p><strong>${name}</strong> → <em>${prof}</em></p>
-        <p>${date} @ ${time}</p>
-        <p>Confirm your booking?</p>
-      `;
-    });
-    modal.querySelector('.close-modal').addEventListener('click', ()=> modal.hidden=true);
-    document.getElementById('confirmBooking').type='button';
-    document.getElementById('confirmBooking').addEventListener('click', async ()=>{
-      modal.hidden = true;
-      showToast('Confirming…');
-      // AI predicts best professional for any additional details
-      const extra = 'No extra details.';
-      try {
-        const reply = await callOpenAI([
-          {role:'system',content:'You are an appointment assistant.'},
-          {role:'user',content:`Booking for ${document.getElementById('clientName').value}`}
-        ]);
-        alert('AI says: ' + reply);
-      } catch(e){ showToast(e.message); }
-    });
+        <p><strong>${n}</strong> → <em>${p}</em></p><p>${dt} @ ${tm}</p>`;
+    };
+    document.querySelector('#bookingModal .close-modal').onclick = ()=>modal.hidden=true;
+    document.getElementById('confirmBooking').onclick = async ()=>{
+      modal.hidden = true; showToast(PHASE.confirmBooking);
+      const reply = await callOpenAI([
+        {role:'system',content:'You are appointment assistant.'},
+        {role:'user',content:'Confirm booking.'}
+      ]);
+      alert(reply);
+    };
 
-
-    // ====== 4. Patient Dashboard & History ======
+    // ─── 4. DASHBOARD TABS ────────────────────────────────
     let appointments = [
       { id:1, doc:'Dr. Abena Owusu', datetime:'2025-05-30T14:00', status:'upcoming' },
       { id:2, doc:'Dr. Kojo Mensah', datetime:'2025-04-12T10:00', status:'past' }
@@ -786,31 +825,24 @@
     });
 
 
-    // ====== 5. Feedback & Ratings ======
-    document.getElementById('submitFeedback').type='button';
-    document.getElementById('submitFeedback').addEventListener('click', async e=>{
-      e.preventDefault();
-      const rating = document.getElementById('ratingInput').value;
-      const comment= document.getElementById('feedbackInput').value.trim();
-      showToast('Submitting feedback…');
-      try {
-        const scan = await callOpenAI([
-          {role:'system',content:'You are a feedback analyzer. Flag red concerns.'},
-          {role:'user',content:`Rating=${rating}, Comment="${comment}"`}
-        ]);
-        if (/red[- ]?flag/i.test(scan)) {
-          alert('⚠️ Red-flag feedback routed to quality team');
-        } else {
-          showToast('Thanks for your feedback!');
-        }
-      } catch(err){
-        showToast(err.message);
-      }
-    });
+    // ─── 5. FEEDBACK ──────────────────────────────────────
+    document.getElementById('submitFeedback').onclick = async ()=>{
+      const r=document.getElementById('ratingInput').value;
+      const c=document.getElementById('feedbackInput').value.trim();
+      const panel=document.createElement('div');
+      panel.className='response';
+      startSpinner(panel,'submitFeedback');
+      document.body.append(panel);
+      const scan = await callOpenAI([
+        {role:'system',content:'You are feedback analyzer.'},
+        {role:'user',content:`Rating=${r}, Comment="${c}"`}
+      ]);
+      panel.innerHTML = `<div class="result-content">${scan.includes('red-flag')
+        ? '⚠️ Red-flag feedback routed.' : 'Thanks for your feedback!'}</div>`;
+      injectTools(panel);
+    };
 
-
-    // ====== 6. Analytics & Optimization ======
-    // require <canvas id="noShowChart"> & <canvas id="peakTimesChart">
+    // ─── 6. ANALYTICS & OPTIMIZATION ─────────────────────
     const noShowCtx = document.getElementById('noShowChart').getContext('2d');
     const peakCtx   = document.getElementById('peakTimesChart').getContext('2d');
     const noShowChart = new Chart(noShowCtx, {
@@ -838,93 +870,78 @@
     document.querySelector('#optimizationResult .close-btn').addEventListener('click', ()=>{
       document.getElementById('optimizationResult').hidden = true;
     });
-
-
-    // ====== 7. Live AI Chat Support (iMessage style) ======
+    // ─── 7. LIVE AI CHAT ──────────────────────────────────
     const chatBox = document.getElementById('chatBox');
-    const chatInp = document.getElementById('chatInput');
     let lastDay = null;
-    const chatHistory = JSON.parse(localStorage.getItem('liveChat')||'[]');
-
-    function renderChatItem(who,text,iso) {
-      const d = iso ? new Date(iso) : new Date();
-      const dayStr = d.toDateString();
-      if (dayStr !== lastDay) {
-        const sep = document.createElement('div');
-        sep.className = 'chat-date';
-        if (dayStr === new Date().toDateString()) sep.innerText='Today';
-        else {
-          const yday = new Date();
-          yday.setDate(yday.getDate()-1);
-          sep.innerText = (dayStr === yday.toDateString())?'Yesterday':d.toLocaleDateString();
-        }
+    let chatHistory = JSON.parse(localStorage.getItem('liveChat')||'[]');
+    function renderChat(who,txt,iso){
+      const d=new Date(iso),day=d.toDateString();
+      if(day!==lastDay){
+        const sep=document.createElement('div');
+        sep.className='chat-date';
+        sep.innerText = (day===new Date().toDateString()?'Today':day);
         chatBox.append(sep);
-        lastDay = dayStr;
+        lastDay=day;
       }
-      const msg = document.createElement('div');
-      msg.className = who==='user'?'user-msg':'bot-msg';
-      msg.innerHTML = `<div class="msg-text">${text}</div>
-                       <div class="msg-ts">${d.toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'})}</div>`;
-      chatBox.append(msg);
-      chatBox.scrollTop = chatBox.scrollHeight;
+      const m=document.createElement('div');
+      m.className=who==='user'?'user-msg':'bot-msg';
+      m.innerHTML=`<div class="msg-text">${formatHTML(txt)}</div>
+                   <div class="msg-ts">${d.toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'})}</div>`;
+      chatBox.append(m);
+      chatBox.scrollTop=chatBox.scrollHeight;
     }
-
-    // load history
-    chatHistory.forEach(m=>renderChatItem(m.role,m.text,m.iso));
-    // send
-    document.getElementById('sendChat').type='button';
-    document.getElementById('sendChat').addEventListener('click', async e=>{
-      e.preventDefault();
-      const txt = chatInp.value.trim(); if(!txt)return;
-      renderChatItem('user',txt);
-      const nowIso = new Date().toISOString();
-      chatHistory.push({role:'user',text:txt,iso:nowIso});
-      chatInp.value='';
-      // AI reply stub or real
-      try {
-        const reply = await callOpenAI([
-          {role:'system',content:'You are chat support.'},
-          {role:'user',content:txt}
-        ]);
-        renderChatItem('bot',reply);
-        chatHistory.push({role:'bot',text:reply,iso:new Date().toISOString()});
-      } catch(err){
-        renderChatItem('bot','⚠️ '+err.message);
-      }
-      localStorage.setItem('liveChat', JSON.stringify(chatHistory));
-    });
-    document.getElementById('clearChat').type='button';
-    document.getElementById('clearChat').addEventListener('click', ()=>{
-      chatBox.innerHTML=''; lastDay=null; chatHistory.length=0;
+    chatHistory.forEach(m=>renderChat(m.role,m.text,m.iso));
+    document.getElementById('sendChat').onclick = async ()=>{
+      const txt=document.getElementById('chatInput').value.trim();
+      if(!txt) return showToast('Type a question');
+      const iso=new Date().toISOString();
+      renderChat('user',txt,iso);
+      chatHistory.push({role:'user',text:txt,iso});
+      document.getElementById('chatInput').value='';
+      const spinner=document.createElement('div');
+      spinner.className='bot-msg';
+      spinner.innerHTML=`<div class="spin-text">${PHASE.sendChat}</div>
+                         <div class="spinner"></div>`;
+      chatBox.append(spinner);
+      const reply=await callOpenAI([
+        {role:'system',content:'You are chat support.'},
+        {role:'user',content:txt}
+      ]);
+      spinner.remove();
+      renderChat('bot',reply,new Date().toISOString());
+      chatHistory.push({role:'bot',text:reply,iso:new Date().toISOString()});
+      localStorage.setItem('liveChat',JSON.stringify(chatHistory));
+    };
+    document.getElementById('clearChat').onclick = ()=>{
+      chatBox.innerHTML=''; chatHistory=[]; lastDay=null;
       localStorage.removeItem('liveChat');
-    });
-    document.getElementById('showHistory').type='button';
-    document.getElementById('showHistory').addEventListener('click', ()=>{
-      const modal = document.getElementById('chatHistoryModal');
-      const list  = document.getElementById('chatHistoryList');
+    };
+    document.getElementById('showHistory').onclick = ()=>{
+      const modal=document.getElementById('chatHistoryModal');
+      const list=document.getElementById('chatHistoryList');
       list.innerHTML = chatHistory.map((m,i)=>`
         <div class="history-item">
           <span><strong>${m.role==='user'?'You':'AI'}:</strong> ${m.text}</span>
           <div class="msg-ts">${new Date(m.iso).toLocaleString()}</div>
           <button class="delete-history" data-i="${i}">&times;</button>
         </div>`).join('');
-      modal.hidden = false;
       list.querySelectorAll('.delete-history').forEach(btn=>{
-        btn.addEventListener('click', e=>{
+        btn.onclick=e=>{
           const i=+e.target.dataset.i;
           chatHistory.splice(i,1);
+          localStorage.setItem('liveChat',JSON.stringify(chatHistory));
           e.target.closest('.history-item').remove();
-          localStorage.setItem('liveChat', JSON.stringify(chatHistory));
-        });
+        };
       });
-    });
-    document.querySelector('#chatHistoryModal .close-modal').addEventListener('click', ()=>{
-      document.getElementById('chatHistoryModal').hidden = true;
-    });
+      modal.hidden=false;
+    };
+    document.querySelector('#chatHistoryModal .close-modal').onclick = ()=>{
+      document.getElementById('chatHistoryModal').hidden=true;
+    };
 
-  });
+  }); // DOMContentLoaded
+})(); // IIFE
 </script>
-
   
 </body>
 </html>
