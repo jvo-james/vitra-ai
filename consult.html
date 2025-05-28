@@ -264,25 +264,41 @@
     padding: var(--padding);
     box-shadow: var(--shadow);
   }
-  .calendar {
-    width: 100%; background: var(--cb-surface);
-    border-radius: var(--radius); overflow: hidden;
+  /* ─────── Calendar Grid ─────── */
+  #calendar {
+    display: grid;
+    grid-template-columns: repeat(7,1fr);
+    gap: 1px;
+    background: var(--cb-bg);
+    border-radius: var(--radius);
     box-shadow: var(--shadow);
+    margin-top: 1rem;
   }
-  .calendar .row {
-    display: flex;
+  #calendar .cell {
+    padding: 0.75rem;
+    background: var(--cb-surface);
+    text-align: center;
+    cursor: pointer;
+    transition: transform var(--transition);
   }
-  .calendar .cell {
-    flex: 1; padding: 0.5rem; border: 1px solid var(--cb-bg);
-    text-align: center; cursor: pointer;
+  #calendar .cell.closed {
+    background: #f0f0f0;
+    color: var(--cb-muted);
+    cursor: not-allowed;
   }
-  .calendar .cell.closed { background: #eee; color: #999; cursor: not-allowed; }
-  .calendar .cell.open { background: linear-gradient(135deg, var(--cb-accent), var(--cb-primary-alt));
+  #calendar .cell.open {
+    background: var(--cb-accent);
     color: #fff;
-    box-shadow: 0 2px 6px rgba(0,0,0,0.2); }
-  .calendar .cell.today { background: var(--cb-bg);
-  border: 3px dashed var(--cb-primary-alt);
-  font-weight: bold; }
+  }
+  #calendar .cell.today {
+    border: 2px dashed var(--cb-primary);
+    font-weight: bold;
+  }
+  #calendar .cell.selected {
+    outline: 3px solid var(--cb-primary-alt);
+    transform: scale(1.05);
+    z-index: 1;
+  }
 
   /*──────────────────── Responsive ────────────────────*/
   @media (max-width: 1024px) {
@@ -449,8 +465,8 @@
  
   <section id="appointmentFlow" class="module" hidden>
     <h2><i class="fas fa-calendar-alt"></i> Schedule with <span id="chosenProvider"></span></h2>
-    <div class="calendar-controls">
-      <label>Select Professional:
+<div class="calendar-controls" style="display: none;">
+  <label>Select Professional:
         <select id="availProfessional">
          <option value="p1">Dr. Kwame Asante – Pulmonologist, Korle Bu Teaching Hospital</option>
 <option value="p2">Dr. Abena Owusu – Cardiologist, 37 Military Hospital</option>
@@ -495,15 +511,20 @@
    <div id="calendarHeader" class="calendar-header"></div>
    <button type="button" id="nextMonth" class="btn-sm">&rarr;</button>
   </div>
-    <div id="calendar"></div>
-    <div id="timeSlots"></div>
-    <form id="finalBookingForm" hidden>
-      <h3>Confirm your details</h3>
-      <label>Your Name: <input id="clientNameFinal" required></label>
-      <div id="summarySelection"></div>
-      <button id="editSelection" type="button" class="btn-sm">Edit</button>
-      <button id="confirmBookingFinal" type="button" class="btn">Confirm & Book</button>
-    </form>
+   <div id="calendar"></div>
+   <div id="timeSlots"></div>
+   <!-- STEP 3: user details + confirm -->
+   <form id="finalBookingForm" hidden style="margin-top: 1.5rem;">
+     <h3>Confirm your details</h3>
+     <label>Your Name:
+       <input id="clientNameFinal" placeholder="Full Name" required>
+     </label>
+     <div id="summarySelection" style="margin-bottom: 1rem;"></div>
+     <div class="summary-actions">
+       <button id="editSelection" type="button" class="btn btn-outline">‹ Back</button>
+       <button id="confirmBookingFinal" type="button" class="btn">Confirm & Book</button>
+     </div>
+   </form>
   </section>
   <!-- 4. Patient Dashboard & History -->
   <section id="dashboard" class="module">
@@ -798,17 +819,25 @@
     });
 
     // ─── 2. PICK A SLOT ──────────────────────────────────
-    calEl.addEventListener('click', e=>{
-      if(!e.target.classList.contains('open')) return;
+     calEl.addEventListener('click', e => {
+      if (!e.target.classList.contains('open')) return;
+      // clear previous selection
+      calEl.querySelectorAll('.selected').forEach(c=>c.classList.remove('selected'));
+      e.target.classList.add('selected');
       const day = e.target.innerText;
-      const dateKey = `${displayYear}-${String(displayMonth+1).padStart(2,'0')}-${day.padStart(2,'0')}`;
-      renderTimeSlots(dateKey,availability[profSelect.value][dateKey]);
+      const dateKey = `${displayYear}-${String(displayMonth+1).padStart(2,'0')}-${String(day).padStart(2,'0')}`;
+      renderTimeSlots(dateKey, availability[profSelect.value][dateKey]);
     });
-    timeSlotsEl.addEventListener('click', e=>{
-      if(!e.target.matches('button')) return;
+    timeSlotsEl.addEventListener('click', e => {
+      if (!e.target.matches('button')) return;
       window.selectedTime = e.target.innerText;
       window.selectedDate = timeSlotsEl.querySelector('h4').innerText.split(' on ')[1];
-      showSummary();
+      // move on to step 3
+      document.getElementById('calendar').hidden = true;
+      document.getElementById('timeSlots').hidden = true;
+      document.getElementById('finalBookingForm').hidden = false;
+      document.getElementById('summarySelection').innerHTML =
+        `<p><strong>${window.selectedDate}</strong> at <strong>${window.selectedTime}</strong></p>`;
     });
 
     // ─── 3. SUMMARY & CONFIRM ────────────────────────────
@@ -832,13 +861,24 @@
         summary.remove();
         appointmentEl.hidden = false;
       };
-      document.getElementById('confirmBookingFinal').onclick = async ()=>{
-        const nm = document.getElementById('sumName').value.trim();
-        if(!nm) return showToast('Please enter your name');
-        showToast(PHASE.confirmBooking);
-        await new Promise(r=>setTimeout(r,1500));
-        summary.innerHTML = `<div class="result-content">🎉 Success, ${nm}! Your ${window.selectedDate} @ ${window.selectedTime} appointment is booked. See you then!</div>`;
-      };
+       document.getElementById('confirmBookingFinal').addEventListener('click', async () => {
+      const name = document.getElementById('clientNameFinal').value.trim();
+      if (!name) return showToast('Please enter your name');
+      showToast(PHASE.confirmBooking);
+      await new Promise(r => setTimeout(r, 1500));
+      document.getElementById('finalBookingForm').innerHTML =
+        `<div class="result-content">
+           🎉 Success, <strong>${name}</strong>!<br>
+           Your appointment on <strong>${window.selectedDate}</strong> at <strong>${window.selectedTime}</strong> is confirmed.
+        </div>`;
+    });
+    document.getElementById('editSelection').addEventListener('click', () => {
+      document.getElementById('calendar').hidden = false;
+      document.getElementById('timeSlots').hidden = false;
+      document.getElementById('finalBookingForm').hidden = true;
+      document.querySelectorAll('#calendar .selected').forEach(c => c.classList.remove('selected'));
+      document.getElementById('summarySelection').innerHTML = '';
+    });
     }
 
   }); // DOMContentLoaded
