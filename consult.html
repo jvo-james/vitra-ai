@@ -462,7 +462,13 @@
       <button type="button" id="nextAvailable" class="btn"><i class="fas fa-forward"></i> Next Available</button>
     </div>
   <div id="calendarGrid">
-      <div id="calendar"></div>
+       <div class="month-nav">
+     <button type="button" id="prevMonth" class="btn-sm">&larr;</button>
+     <span id="calendarHeader"></span>
+      <button type="button" id="nextMonth" class="btn-sm">&rarr;</button>
+    </div>
+    <div id="calendar"></div>
+
     </div>
    <div id="timeSlots" class="time-slots"></div>
 
@@ -724,11 +730,12 @@
     };
 
     // ─── 2. AVAILABILITY CALENDAR ─────────────────────────
-    const calEl       = document.getElementById('calendar');
-    const profSelect  = document.getElementById('availProfessional');
-    const timeSlotsEl = document.getElementById('timeSlots');
+const calEl       = document.getElementById('calendar');
+const headerEl    = document.getElementById('calendarHeader');
+const profSelect  = document.getElementById('availProfessional');
+const timeSlotsEl = document.getElementById('timeSlots');
 
-   // mock availability data per professional
+// mock availability data per professional
     const availability = {
   p1: {
     '2025-06-10': ['09:00','10:00','11:00'],
@@ -821,98 +828,97 @@
     '2025-06-20': ['14:00','15:00','16:00']
  }
 };
-    
-    // track displayed month/year
-   let displayYear  = new Date().getFullYear();
-    let displayMonth = new Date().getMonth();
 
-    function generateCalendar(yr, mth) {
-      calEl.innerHTML = '';
-      // header: show month/year
-     const header = document.createElement('div');
-      header.style.textAlign = 'center';
-      header.style.marginBottom = '0.5rem';
-      header.innerHTML = `<strong>${new Date(yr, mth).toLocaleString('default',{ month:'long', year:'numeric' })}</strong>`;
-      calEl.append(header);
+let displayYear  = new Date().getFullYear();
+let displayMonth = new Date().getMonth();
 
-     ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'].forEach(d=>{
-       const hd = document.createElement('div');
-       hd.className = 'cell'; hd.style.fontWeight='600'; hd.innerText = d;
-        calEl.append(hd);
-     });
-     const firstDay = new Date(yr,mth,1).getDay();
-      const daysInM  = new Date(yr,mth+1,0).getDate();
-      // blanks
-      for(let i=0;i<firstDay;i++){
-        const b=document.createElement('div');
-        b.className='cell closed'; calEl.append(b);
-     }
-      // days
-      const profId = profSelect.value;
-      const availDates = availability[profId]||{};
-      for(let d=1; d<=daysInM; d++){
-        const dateKey = `${yr}-${String(mth+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
-        const cell = document.createElement('div');
-        const isOpen = availDates[dateKey];
-        cell.className = `cell ${isOpen?'open':'closed'}`;
-        cell.innerText  = d;
-        if(isOpen){
-          cell.addEventListener('click',()=>{
-            // highlight selection
-           calEl.querySelectorAll('.cell.selected').forEach(x=>x.classList.remove('selected'));
-            cell.classList.add('selected');
-           // render time slots
-            renderTimeSlots(dateKey, isOpen);
-          });
-        }
-        // highlight today
-        const t = new Date();
-        if(t.getFullYear()===yr && t.getMonth()===mth && t.getDate()===d){
-         cell.classList.add('today');
-       }
-       calEl.append(cell);
-      }
-      // clear any old time slots
-      timeSlotsEl.innerHTML = '';
+function generateCalendar(yr, mth) {
+  calEl.innerHTML = '';
+  headerEl.innerText = new Date(yr, mth)
+    .toLocaleString('default',{ month:'long', year:'numeric' });
+
+  // weekday headings
+  ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'].forEach(d=>{
+    const hd = document.createElement('div');
+    hd.className = 'cell'; hd.style.fontWeight='600'; hd.innerText = d;
+    calEl.append(hd);
+  });
+
+  // blanks
+  const firstDay = new Date(yr,mth,1).getDay();
+  for(let i=0;i<firstDay;i++){
+    const b = document.createElement('div');
+    b.className = 'cell closed'; calEl.append(b);
+  }
+
+  // days
+  const profId     = profSelect.value;
+  const availDates = availability[profId] || {};
+  const daysInM    = new Date(yr,mth+1,0).getDate();
+  const today      = new Date();
+
+  for(let d=1; d<=daysInM; d++){
+    const dateKey = `${yr}-${String(mth+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+    const cell    = document.createElement('div');
+    const isOpen  = availDates[dateKey];
+
+    cell.className = `cell ${isOpen ? 'open' : 'closed'}`;
+    cell.innerText = d;
+
+    if(isOpen) {
+      cell.addEventListener('click',()=>{
+        calEl.querySelectorAll('.cell.selected').forEach(x=>x.classList.remove('selected'));
+        cell.classList.add('selected');
+        renderTimeSlots(dateKey, isOpen);
+      });
     }
 
-    function renderTimeSlots(dateKey, slots){
-     timeSlotsEl.innerHTML = `<h4>Available times on ${dateKey}:</h4>`;
-     const ul = document.createElement('ul');
-      ul.style.listStyle = 'none';
-      ul.style.padding = '0';
-      slots.forEach(t=>{
-        const li = document.createElement('li');
-        const btn = document.createElement('button');
-        btn.type = 'button';
-        btn.className = 'btn-sm';
-        btn.innerText = t;
-        btn.style.margin = '0.25rem';
-        btn.onclick = () => showToast(`You selected ${dateKey} @ ${t}`);
-        li.append(btn);
-       ul.append(li);
-     });
-      timeSlotsEl.append(ul);
+    if (today.getFullYear()===yr && today.getMonth()===mth && today.getDate()===d) {
+      cell.classList.add('today');
     }
 
-    // initial render
-    generateCalendar(displayYear, displayMonth);
+    calEl.append(cell);
+  }
 
-    // month navigation
-    document.getElementById('prevMonth').onclick = () => {
-      displayMonth--;
-      if(displayMonth<0){ displayMonth=11; displayYear--; }
-      generateCalendar(displayYear, displayMonth);
-    };
-    document.getElementById('nextMonth').onclick = () => {
-      displayMonth++;
-     if(displayMonth>11){ displayMonth=0; displayYear++; }
-      generateCalendar(displayYear, displayMonth);
-    };
+  timeSlotsEl.innerHTML = '';
+}
 
-    // when professional changes
-    profSelect.onchange = () => generateCalendar(displayYear, displayMonth);
+function renderTimeSlots(dateKey, slots) {
+  timeSlotsEl.innerHTML = `<h4>Available times on ${dateKey}:</h4>`;
+  const ul = document.createElement('ul');
+  ul.style.listStyle = 'none';
+  ul.style.padding   = '0';
+  slots.forEach(t=>{
+    const li  = document.createElement('li');
+    const btn = document.createElement('button');
+    btn.type      = 'button';
+    btn.className = 'btn-sm';
+    btn.innerText = t;
+    btn.style.margin = '0.25rem';
+    btn.addEventListener('click', () => showToast(`You selected ${dateKey} @ ${t}`));
+    li.append(btn);
+    ul.append(li);
+  });
+  timeSlotsEl.append(ul);
+}
 
+// initial render
+generateCalendar(displayYear, displayMonth);
+
+// Prev/Next buttons
+document.getElementById('prevMonth').onclick = () => {
+  displayMonth--;
+  if (displayMonth < 0) { displayMonth = 11; displayYear--; }
+  generateCalendar(displayYear, displayMonth);
+};
+document.getElementById('nextMonth').onclick = () => {
+  displayMonth++;
+  if (displayMonth > 11) { displayMonth = 0; displayYear++; }
+  generateCalendar(displayYear, displayMonth);
+};
+
+// regenerate when professional changes
+profSelect.onchange = () => generateCalendar(displayYear, displayMonth);
     // date‐picker nav (optional)
     document.getElementById('calendarDateInput').onchange = e => {
      const d = new Date(e.target.value);
