@@ -461,12 +461,13 @@
       <button type="button" id="filterSlots" class="btn"><i class="fas fa-filter"></i> Filter</button>
       <button type="button" id="nextAvailable" class="btn"><i class="fas fa-forward"></i> Next Available</button>
     </div>
-  <div id="calendarGrid">
-       <div class="month-nav">
-     <button type="button" id="prevMonth" class="btn-sm">&larr;</button>
-    <div id="calendarHeader" class="calendar-header"></div>
-      <button type="button" id="nextMonth" class="btn-sm">&rarr;</button>
-    </div>
+<div class="month-nav">
+  <button id="prevMonth">&larr;</button>
+  <div id="calendarHeader"></div>
+  <button id="nextMonth">&rarr;</button>
+</div>
+<div id="calendar"></div>
+<div id="timeSlots"></div>
     <div id="calendar"></div>
 
     </div>
@@ -607,7 +608,141 @@
     <small>© 2025 AI-Pharmacy Chain — All rights reserved</small>
   </footer>
 
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  // 1. Elements
+  const calEl       = document.getElementById('calendar');
+  const headerEl    = document.getElementById('calendarHeader');
+  const profSelect  = document.getElementById('availProfessional');
+  const dateInput   = document.getElementById('calendarDateInput');
+  const prevBtn     = document.getElementById('prevMonth');
+  const nextBtn     = document.getElementById('nextMonth');
+  const filterBtn   = document.getElementById('filterSlots');
+  const nextAvailBtn= document.getElementById('nextAvailable');
+  const timeSlotsEl = document.getElementById('timeSlots');
 
+  // 2. Mock availability for p1–p18
+  const availability = {
+    p1:  { '2025-06-10': ['09:00','10:00','11:00'], '2025-06-12': ['14:00','15:00'], '2025-06-15': ['08:30','09:30','10:30'] },
+    p2:  { '2025-06-03': ['10:00','13:00','16:00'], '2025-06-04': ['09:00','11:00'], '2025-06-15': ['12:00','14:00'] },
+    p3:  { '2025-06-08': ['08:00','09:00','10:00','11:00'], '2025-06-11': ['13:30','14:30'], '2025-06-16': ['15:00','16:00'] },
+    p4:  { '2025-06-05': ['09:30','10:30','11:30'], '2025-06-09': ['14:00','15:00','16:00'], '2025-06-18': ['08:00','09:00'] },
+    p5:  { '2025-06-07': ['08:15','09:15','10:15'], '2025-06-13': ['13:00','14:00'], '2025-06-17': ['10:00','11:00','12:00'] },
+    p6:  { '2025-06-02': ['09:00','10:00'], '2025-06-14': ['11:00','12:00','13:00'], '2025-06-19': ['14:00','15:00'] },
+    p7:  { '2025-06-06': ['08:30','09:30','10:30'], '2025-06-12': ['13:00','14:00','15:00'], '2025-06-20': ['09:00','10:00'] },
+    p8:  { '2025-06-01': ['10:00','11:00','12:00'], '2025-06-11': ['14:30','15:30'], '2025-06-16': ['08:00','09:00','10:00'] },
+    p9:  { '2025-06-04': ['09:00','10:00','11:00'], '2025-06-13': ['13:00','14:00'], '2025-06-18': ['15:00','16:00'] },
+    p10: { '2025-06-03': ['08:00','09:00','10:00'], '2025-06-10': ['11:00','12:00','13:00'], '2025-06-17': ['14:00','15:00'] },
+    p11: { '2025-06-05': ['09:30','10:30','11:30'], '2025-06-14': ['13:00','14:00','15:00'], '2025-06-19': ['08:00','09:00'] },
+    p12: { '2025-06-02': ['10:00','11:00','12:00'], '2025-06-08': ['14:00','15:00'], '2025-06-20': ['09:00','10:00','11:00'] },
+    p13: { '2025-06-07': ['08:00','09:00','10:00'], '2025-06-12': ['11:30','12:30','13:30'], '2025-06-18': ['14:00','15:00'] },
+    p14: { '2025-06-03': ['09:15','10:15','11:15'], '2025-06-09': ['13:00','14:00','15:00'], '2025-06-16': ['08:00','09:00'] },
+    p15: { '2025-06-05': ['08:30','09:30','10:30'], '2025-06-13': ['11:00','12:00','13:00'], '2025-06-19': ['14:30','15:30'] },
+    p16: { '2025-06-02': ['10:00','11:00','12:00'], '2025-06-11': ['13:15','14:15'], '2025-06-17': ['09:00','10:00','11:00'] },
+    p17: { '2025-06-04': ['09:00','10:00','11:00'], '2025-06-10': ['12:00','13:00','14:00'], '2025-06-15': ['15:00','16:00'] },
+    p18: { '2025-06-01': ['08:00','09:00','10:00'], '2025-06-08': ['11:30','12:30','13:30'], '2025-06-20': ['14:00','15:00','16:00'] }
+  };
+
+  // 3. Calendar state
+  let displayYear  = new Date().getFullYear();
+  let displayMonth = new Date().getMonth();
+
+  // 4. Render function
+  function generateCalendar(yr, mth) {
+    // header
+    headerEl.innerText = new Date(yr, mth)
+      .toLocaleString('default',{ month:'long', year:'numeric' });
+
+    // weekdays
+    calEl.innerHTML = '';
+    ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'].forEach(wd => {
+      const hd = document.createElement('div');
+      hd.className = 'cell'; hd.style.fontWeight='600'; hd.innerText = wd;
+      calEl.append(hd);
+    });
+
+    // blanks
+    const firstDay = new Date(yr, mth, 1).getDay();
+    for(let i=0; i<firstDay; i++){
+      const blank = document.createElement('div');
+      blank.className = 'cell closed';
+      calEl.append(blank);
+    }
+
+    // days
+    const availDates = availability[ profSelect.value ] || {};
+    const today      = new Date();
+    const daysInMon  = new Date(yr, mth+1, 0).getDate();
+
+    for(let d=1; d<=daysInMon; d++){
+      const dateKey = `${yr}-${String(mth+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+      const open    = !!availDates[dateKey];
+      const cell    = document.createElement('div');
+
+      cell.className = `cell ${open?'open':'closed'}`;
+      cell.innerText = d;
+
+      if(open){
+        cell.addEventListener('click', ()=>{
+          // select
+          calEl.querySelectorAll('.cell.selected')
+            .forEach(x=>x.classList.remove('selected'));
+          cell.classList.add('selected');
+          // render times
+          renderTimeSlots(dateKey, availDates[dateKey]);
+        });
+      }
+
+      // today border
+      if(today.getFullYear()===yr && today.getMonth()===mth && today.getDate()===d){
+        cell.classList.add('today');
+      }
+
+      calEl.append(cell);
+    }
+
+    // clear old slots
+    timeSlotsEl.innerHTML = '';
+  }
+
+  // 5. Time-slots renderer
+  function renderTimeSlots(dateKey, slots){
+    timeSlotsEl.innerHTML = `<h4>Available times on ${dateKey}:</h4>`;
+    const ul = document.createElement('ul');
+    ul.style.listStyle = 'none';
+    ul.style.padding   = '0';
+
+    slots.forEach(t => {
+      const li  = document.createElement('li');
+      const btn = document.createElement('button');
+      btn.type      = 'button';
+      btn.className = 'btn-sm';
+      btn.innerText = t;
+      btn.style.margin = '0.25rem';
+      btn.addEventListener('click', () => {
+        alert(`You picked ${dateKey} at ${t}`);
+      });
+      li.append(btn);
+      ul.append(li);
+    });
+
+    timeSlotsEl.append(ul);
+  }
+
+  // 6. Initial render + controls
+  generateCalendar(displayYear, displayMonth);
+  prevBtn.onclick     = () => { displayMonth--; if(displayMonth<0){displayMonth=11;displayYear--;} generateCalendar(displayYear, displayMonth); };
+  nextBtn.onclick     = () => { displayMonth++; if(displayMonth>11){displayMonth=0;displayYear++;} generateCalendar(displayYear, displayMonth); };
+  profSelect.onchange = () => generateCalendar(displayYear, displayMonth);
+  dateInput.onchange  = e => {
+    const d = new Date(e.target.value);
+    if(!isNaN(d)){ displayYear=d.getFullYear(); displayMonth=d.getMonth(); }
+    generateCalendar(displayYear, displayMonth);
+  };
+  filterBtn.onclick   = () => alert('Filter coming soon');
+  nextAvailBtn.onclick= () => alert('See highlighted dates');
+});
+</script>
 <script>
 (async()=>{
   // ─── CORE AI CALLER & HELPERS ────────────────────────
@@ -729,221 +864,7 @@
       document.getElementById('matchResults').hidden = true;
     };
 
-    // ─── 2. AVAILABILITY CALENDAR ─────────────────────────
-const calEl       = document.getElementById('calendar');
-const headerEl    = document.getElementById('calendarHeader');
-const profSelect  = document.getElementById('availProfessional');
-const timeSlotsEl = document.getElementById('timeSlots');
-
-// mock availability data per professional
-    const availability = {
-  p1: {
-    '2025-06-10': ['09:00','10:00','11:00'],
-    '2025-06-12': ['14:00','15:00'],
-    '2025-06-15': ['08:30','09:30','10:30']
-  },
-  p2: {
-    '2025-06-03': ['10:00','13:00','16:00'],
-    '2025-06-04': ['09:00','11:00'],
-    '2025-06-15': ['12:00','14:00']
-  },
-  p3: {
-    '2025-06-08': ['08:00','09:00','10:00','11:00'],
-    '2025-06-11': ['13:30','14:30'],
-    '2025-06-16': ['15:00','16:00']
-  },
-  p4: {
-    '2025-06-05': ['09:30','10:30','11:30'],
-    '2025-06-09': ['14:00','15:00','16:00'],
-    '2025-06-18': ['08:00','09:00']
-  },
-  p5: {
-    '2025-06-07': ['08:15','09:15','10:15'],
-    '2025-06-13': ['13:00','14:00'],
-    '2025-06-17': ['10:00','11:00','12:00']
-  },
-  p6: {
-    '2025-06-02': ['09:00','10:00'],
-    '2025-06-14': ['11:00','12:00','13:00'],
-    '2025-06-19': ['14:00','15:00']
-  },
-  p7: {
-    '2025-06-06': ['08:30','09:30','10:30'],
-    '2025-06-12': ['13:00','14:00','15:00'],
-    '2025-06-20': ['09:00','10:00']
-  },
-  p8: {
-    '2025-06-01': ['10:00','11:00','12:00'],
-    '2025-06-11': ['14:30','15:30'],
-    '2025-06-16': ['08:00','09:00','10:00']
-  },
-  p9: {
-    '2025-06-04': ['09:00','10:00','11:00'],
-    '2025-06-13': ['13:00','14:00'],
-    '2025-06-18': ['15:00','16:00']
-  },
-  p10: {
-    '2025-06-03': ['08:00','09:00','10:00'],
-    '2025-06-10': ['11:00','12:00','13:00'],
-    '2025-06-17': ['14:00','15:00']
-  },
-  p11: {
-    '2025-06-05': ['09:30','10:30','11:30'],
-    '2025-06-14': ['13:00','14:00','15:00'],
-    '2025-06-19': ['08:00','09:00']
-  },
-  p12: {
-    '2025-06-02': ['10:00','11:00','12:00'],
-    '2025-06-08': ['14:00','15:00'],
-    '2025-06-20': ['09:00','10:00','11:00']
-  },
-  p13: {
-    '2025-06-07': ['08:00','09:00','10:00'],
-   '2025-06-12': ['11:30','12:30','13:30'],
-    '2025-06-18': ['14:00','15:00']
-  },
-  p14: {
-    '2025-06-03': ['09:15','10:15','11:15'],
-    '2025-06-09': ['13:00','14:00','15:00'],
-    '2025-06-16': ['08:00','09:00']
-  },
-  p15: {
-    '2025-06-05': ['08:30','09:30','10:30'],
-    '2025-06-13': ['11:00','12:00','13:00'],
-    '2025-06-19': ['14:30','15:30']
-  },
-  p16: {
-    '2025-06-02': ['10:00','11:00','12:00'],
-    '2025-06-11': ['13:15','14:15'],
-    '2025-06-17': ['09:00','10:00','11:00']
-  },
-  p17: {
-    '2025-06-04': ['09:00','10:00','11:00'],
-    '2025-06-10': ['12:00','13:00','14:00'],
-    '2025-06-15': ['15:00','16:00']
-  },
-  p18: {
-   '2025-06-01': ['08:00','09:00','10:00'],
-    '2025-06-08': ['11:30','12:30','13:30'],
-    '2025-06-20': ['14:00','15:00','16:00']
- }
-};
-
-let displayYear  = new Date().getFullYear();
-let displayMonth = new Date().getMonth();
-
-function generateCalendar(yr, mth) {
-  headerEl.innerText = new Date(yr, mth)
-    .toLocaleString('default',{ month:'long', year:'numeric' });
-
-  // weekday headings
-  calEl.innerHTML = '';
-  ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'].forEach(d=>{
-    const hd = document.createElement('div');
-    hd.className = 'cell'; hd.style.fontWeight='600'; hd.innerText = d;
-    calEl.append(hd);
-  });
-
-  // blanks
-  const firstDay = new Date(yr,mth,1).getDay();
-  for(let i=0;i<firstDay;i++){
-    const b = document.createElement('div');
-    b.className = 'cell closed'; calEl.append(b);
-  }
-
-  // days
-  const profId     = profSelect.value;
-  const availDates = availability[profId] || {};
-  const daysInM    = new Date(yr,mth+1,0).getDate();
-  const today      = new Date();
-
-  for(let d=1; d<=daysInM; d++){
-    const dateKey = `${yr}-${String(mth+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
-    const cell    = document.createElement('div');
-    const isOpen  = availDates[dateKey];
-
-    cell.className = `cell ${isOpen ? 'open' : 'closed'}`;
-    cell.innerText = d;
-
-    if(isOpen) {
-      cell.addEventListener('click',()=>{
-        calEl.querySelectorAll('.cell.selected').forEach(x=>x.classList.remove('selected'));
-        cell.classList.add('selected');
-        renderTimeSlots(dateKey, isOpen);
-      });
-    }
-
-    if (today.getFullYear()===yr && today.getMonth()===mth && today.getDate()===d) {
-      cell.classList.add('today');
-    }
-
-    calEl.append(cell);
-  }
-
-  timeSlotsEl.innerHTML = '';
-}
-
-function renderTimeSlots(dateKey, slots) {
-  timeSlotsEl.innerHTML = `<h4>Available times on ${dateKey}:</h4>`;
-  const ul = document.createElement('ul');
-  ul.style.listStyle = 'none';
-  ul.style.padding   = '0';
-  slots.forEach(t=>{
-    const li  = document.createElement('li');
-    const btn = document.createElement('button');
-    btn.type      = 'button';
-    btn.className = 'btn-sm';
-    btn.innerText = t;
-    btn.style.margin = '0.25rem';
-    btn.addEventListener('click', () => showToast(`You selected ${dateKey} @ ${t}`));
-    li.append(btn);
-    ul.append(li);
-  });
-  timeSlotsEl.append(ul);
-}
-
-// initial render
-generateCalendar(displayYear, displayMonth);
-
-// Prev/Next buttons
-document.getElementById('prevMonth').onclick = () => {
-  displayMonth--;
-  if (displayMonth < 0) { displayMonth = 11; displayYear--; }
-  generateCalendar(displayYear, displayMonth);
-};
-document.getElementById('nextMonth').onclick = () => {
-  displayMonth++;
-  if (displayMonth > 11) { displayMonth = 0; displayYear++; }
-  generateCalendar(displayYear, displayMonth);
-};
-
-// regenerate when professional changes
-profSelect.onchange = () => generateCalendar(displayYear, displayMonth);
-    // date‐picker nav (optional)
-    document.getElementById('calendarDateInput').onchange = e => {
-     const d = new Date(e.target.value);
-     if(!isNaN(d)){
-       displayYear  = d.getFullYear();
-        displayMonth = d.getMonth();
-       generateCalendar(displayYear, displayMonth);
-      }
-    };
-
-    // filterSlots & nextAvailable can remain stubs or you can hook into availability data
-    document.getElementById('filterSlots').onclick    = ()=> showToast('Filter feature coming soon');
-   document.getElementById('nextAvailable').onclick  = ()=> showToast('Next available: see highlighted dates');
-
-
-    
-    let today = new Date();
-    generateCalendar(today.getFullYear(),today.getMonth());
-    document.getElementById('filterSlots').onclick = ()=>showToast('Filtered (stub)');
-    document.getElementById('nextAvailable').onclick = ()=>showToast('Next available stub');
-    document.getElementById('calendarDateInput').onchange = e=>{
-      const d=new Date(e.target.value);
-      if(!isNaN(d)) generateCalendar(d.getFullYear(),d.getMonth());
-    };
-
+   
     // ─── 3. BOOK APPOINTMENT ─────────────────────────────
     const modal = document.getElementById('bookingModal');
     document.getElementById('bookNow').onclick = e=>{
