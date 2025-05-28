@@ -88,6 +88,13 @@
 .sidebar-open aside#sidebar {
   transform: translateX(0);
 }
+  @media (min-width: 769px) {
+  #hamburger { display: none; }      
+ }
+  body.sidebar-open header,
+ body.sidebar-open main {
+ margin-left: 220px;  
+ }
   header {
     position: sticky; top: 0; left: 220px; right: 0;
     height: 60px; background: var(--cb-surface);
@@ -126,7 +133,7 @@
     box-shadow: var(--shadow);
     margin-bottom: 2rem;
   }
-  #hero .hero-text h2 { font-size: 2.25rem; margin-bottom: 0.5rem; }
+  #hero .hero-text h2 { font-size: 2.25rem; margin-bottom: 0.5rem; color: #fff; }
   #hero .hero-features {
     display: flex; flex-direction: column; gap: 1rem;
   }
@@ -270,13 +277,20 @@
     text-align: center; cursor: pointer;
   }
   .calendar .cell.closed { background: #eee; color: #999; cursor: not-allowed; }
-  .calendar .cell.open { background: var(--cb-accent); color: #fff; }
-  .calendar .cell.today { border: 2px solid var(--cb-primary); }
+  .calendar .cell.open { background: linear-gradient(135deg, var(--cb-accent), var(--cb-primary-alt));
+    color: #fff;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.2); }
+  .calendar .cell.today {  background: var(--cb-bg);
+    border: 3px dashed var(--cb-primary-alt); }
 
   /*──────────────────── Responsive ────────────────────*/
   @media (max-width: 1024px) {
     header { left: 60px; }
     main { margin-left: 80px; }
+     body.sidebar-shrink header,
+    body.sidebar-shrink main {
+      margin-left: 60px;
+    }
   }
   @media (max-width: 768px) {
     aside#sidebar { transform: translateX(-100%); }
@@ -333,7 +347,8 @@
   opacity: 1;
 }
    .calendar .cell.selected {
-  outline: 3px solid var(--cb-accent);
+  outline: 3px solid var(--cb-primary);
+ transform: scale(1.1);
  }
 
 </style>
@@ -422,13 +437,16 @@
           <li data-id="p10"><strong>Dr. Ama Brew</strong> – Pediatrician, Trust Hospital</li>
         </ul>
       </div>
+      <div class="match-actions">
+      <button id="proceedMatch" class="btn">Proceed with AI choice</button>
+      <button id="chooseOwn" class="btn btn-outline">Choose own provider</button>
+    </div>
     </div>
   </section>
 
-  <!-- 2. Real-Time Availability Calendar -->
-  <section id="availabilityCalendar" class="module">
-    <h2><i class="fas fa-calendar-alt"></i> Real-Time Availability</h2>
-    <p class="desc">Browse open slots, filter by date/time/consultation type, or jump to your next available.</p>
+ 
+  <section id="appointmentFlow" class="module" hidden>
+    <h2><i class="fas fa-calendar-alt"></i> Schedule with <span id="chosenProvider"></span></h2>
     <div class="calendar-controls">
       <label>Select Professional:
         <select id="availProfessional">
@@ -470,61 +488,21 @@
       <button type="button" id="filterSlots" class="btn"><i class="fas fa-filter"></i> Filter</button>
       <button type="button" id="nextAvailable" class="btn"><i class="fas fa-forward"></i> Next Available</button>
     </div>
-  <div class="month-nav">
+     <div class="month-nav">
    <button type="button" id="prevMonth" class="btn-sm">&larr;</button>
    <div id="calendarHeader" class="calendar-header"></div>
    <button type="button" id="nextMonth" class="btn-sm">&rarr;</button>
   </div>
- <div id="calendar"></div>
- <div id="timeSlots" class="time-slots"></div>
-
-  </section>
-
-  <!-- 3. Book an Appointment -->
-  <section id="bookAppointment" class="module">
-    <h2><i class="fas fa-book-medical"></i> Book Your Appointment</h2>
-    <p class="desc">Select from our roster of specialists and schedule in seconds.</p>
-    <form id="appointmentForm">
-      <label>Your Name:
-        <input type="text" id="clientName" placeholder="John Doe">
-      </label>
-      <label>Select Professional:
-        <select id="professionalSelect">
-          <option>Dr. Kwame Asante (Pulmonologist)</option>
-          <option>Dr. Abena Owusu (Cardiologist)</option>
-          <option>Dr. Kojo Mensah (Psychiatrist)</option>
-          <option>Ms. Akosua Baah (Physical Therapist)</option>
-          <option>Mr. Daniel Boakye (Pharmacist)</option>
-          <option>Dr. Yaa Dufie (Dietitian)</option>
-          <option>Dr. Michael Addo (Neurologist)</option>
-          <option>Mrs. Esther Kumi (Occupational Therapist)</option>
-          <option>Dr. Grace Ofori (Dermatologist)</option>
-          <option>Mr. Stephen Tetteh (Speech Therapist)</option>
-          <option>Dr. Joseph Kumi (Orthopedic Surgeon)</option>
-          <option>Dr. Ama Brew (Pediatrician)</option>
-        </select>
-      </label>
-      <label>Date:
-        <input type="date" id="apptDate">
-      </label>
-      <label>Time:
-        <input type="time" id="apptTime">
-      </label>
-      <button type="button" id="bookNow" class="btn"><i class="fas fa-check"></i> Book Now</button>
+    <div id="calendar"></div>
+    <div id="timeSlots"></div>
+    <form id="finalBookingForm" hidden>
+      <h3>Confirm your details</h3>
+      <label>Your Name: <input id="clientNameFinal" required></label>
+      <div id="summarySelection"></div>
+      <button id="editSelection" type="button" class="btn-sm">Edit</button>
+      <button id="confirmBookingFinal" type="button" class="btn">Confirm & Book</button>
     </form>
-    <!-- booking confirmation modal -->
-    <div id="bookingModal" class="modal" hidden>
-      <div class="modal-content">
-        <span class="close-modal">&times;</span>
-        <h3>Confirm Your Appointment</h3>
-        <div class="result-content" id="bookingSummary">
-          <!-- AI will fill summary and recommendation -->
-        </div>
-        <button type="button" id="confirmBooking" class="btn">Confirm</button>
-      </div>
-    </div>
   </section>
-
   <!-- 4. Patient Dashboard & History -->
   <section id="dashboard" class="module">
     <h2><i class="fas fa-tachometer-alt"></i> Your Dashboard</h2>
@@ -634,7 +612,8 @@ document.addEventListener('DOMContentLoaded', () => {
     bodyEl.classList.toggle('sidebar-shrink');
   });
   hamburger.addEventListener('click', () => {
-    bodyEl.classList.toggle('sidebar-open');
+   bodyEl.classList.toggle('sidebar-open');
+   bodyEl.classList.remove('sidebar-shrink'); 
   });
 
   // ─── DARK MODE TOGGLE ───────────────────────────────
@@ -876,8 +855,23 @@ document.addEventListener('DOMContentLoaded', () => {
           {role:'system',content:sys},
           {role:'user',content:user}
         ]);
-        panel.innerHTML = `<div class="result-content">${formatHTML(reply)}</div>`;
-        injectTools(panel);
+      // build matchResults including both the AI text *and* the action buttons
+    panel.innerHTML = `
+      <div class="result-content">${formatHTML(reply)}</div>
+      <div class="match-actions">
+        <button id="proceedMatch" class="btn">Proceed with AI choice</button>
+        <button id="chooseOwn" class="btn btn-outline">Choose own provider</button>
+      </div>`;
+    injectTools(panel);
+    panel.hidden = false;
+    // capture the AI-chosen provider (assumes AI reply highlights one <li data-id="…">)
+    const chosenLi = panel.querySelector('li.selected, li.highlight'); 
+    const providerId = chosenLi?.dataset.id || profSelect.value;
+    document.getElementById('proceedMatch').onclick = () => startAppointmentFlow(providerId);
+    document.getElementById('chooseOwn').onclick   = () => {
+      panel.hidden = true;
+      document.getElementById('appointmentFlow').hidden = false;
+    };        
       } catch(err) {
         showToast(err);
       } finally {
@@ -889,7 +883,51 @@ document.addEventListener('DOMContentLoaded', () => {
       document.getElementById('matchResults').hidden = true;
     };
 
-   
+   /** Initialize merged flow **/
+function startAppointmentFlow(selectedId) {
+  const flow = document.getElementById('appointmentFlow');
+  const headerName = providers.find(p=>p.id===selectedId).name;
+  document.getElementById('chosenProvider').innerText = headerName;
+  flow.hidden = false;
+  generateCalendar(displayYear, displayMonth); // reuse existing
+  profSelect.value = selectedId;
+}
+
+// when user clicks on a time slot button:
+document.body.addEventListener('click', e=>{
+  if (e.target.matches('#timeSlots button')) { 
+    // capture date/time
+    const date = e.target.closest('.time-slots').querySelector('h4').textContent.split(' on ')[1];
+    const time = e.target.innerText;
+    // hide calendar, show final form
+    document.getElementById('calendar').hidden = true;
+    document.getElementById('timeSlots').hidden = true;
+    const form = document.getElementById('finalBookingForm');
+    form.hidden = false;
+    document.getElementById('summarySelection').innerHTML =
+      `<p>${date} @ ${time}</p>`;
+  }
+});
+
+// confirm & book flow
+document.getElementById('confirmBookingFinal').onclick = async ()=> {
+  const name = document.getElementById('clientNameFinal').value.trim();
+  if(!name) return showToast('Enter your name');
+  // simulate loading
+  showToast('Booking…');
+  await new Promise(r=>setTimeout(r, 1500));
+  // creative success
+  alert(`🎉 All set, ${name}! Your appointment is confirmed. See you soon!`);
+};
+document.getElementById('editSelection').onclick = () => {
+  // reset in-page without full reload
+  document.getElementById('calendar').hidden       = false;
+  document.getElementById('timeSlots').hidden      = false;
+  document.getElementById('finalBookingForm').hidden = true;
+  document.querySelectorAll('.cell.selected').forEach(c=>c.classList.remove('selected'));
+  document.getElementById('summarySelection').innerHTML = '';
+};
+
     // ─── 3. BOOK APPOINTMENT ─────────────────────────────
     const modal = document.getElementById('bookingModal');
     document.getElementById('bookNow').onclick = e=>{
