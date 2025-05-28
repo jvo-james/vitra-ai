@@ -99,7 +99,7 @@
   justify-content: center;
 }
 .sidebar-shrink #sidebar nav li a span { 
-  display: none; }
+  display: none !important; }
   @media (min-width: 769px) {
   #hamburger { display: none; }      
  }
@@ -125,9 +125,13 @@
   }
 
  header, main {
-  margin-left: 220px;
-  transition: margin-left var(--transition);
-}
+   margin-left: var(--sidebar-width,220px);
+   transition: margin-left var(--transition);
+ }
+ body.sidebar-shrink header,
+ body.sidebar-shrink main {
+   margin-left: var(--sidebar-collapsed-width,60px);
+ }
   
   section.module {
     background: var(--cb-surface);
@@ -381,7 +385,47 @@
   transform: scale(1.1);
   z-index: 1;
  }
+ button#findMatch.btn {
+   position: relative;
+ }
+ button#findMatch.btn.loading {
+   color: transparent;            /* hide text */
+ }
+ button#findMatch.btn.loading::after {
+   content: 'Matching…';
+   position: absolute; top:50%; left:50%;
+   transform: translate(-50%,-50%);
+ }
+ button#findMatch.btn.loading .spinner {
+   position: absolute; top:50%; right:1rem;
+   transform: translateY(-50%);
+   display: inline-block;
+ }
 
+  .month-nav {
+   display: flex; align-items: center; justify-content: center;
+   gap: 1rem; margin-bottom: 1rem;
+ }
+ .month-nav button {
+   background: var(--cb-primary-alt); color: #fff;
+   border: none; padding: .5rem; border-radius: var(--radius);
+ }
+ .month-nav #calendarHeader {
+   font-size: 1.25rem; font-weight: 600;
+ }
+
+ #timeSlots {
+   background: var(--cb-surface); padding: var(--padding);
+   border-radius: var(--radius); box-shadow: var(--shadow);
+   margin-top: 1rem;
+ }
+ #timeSlots h4 { margin-bottom: .75rem; color: var(--cb-primary-alt); }
+ #timeSlots ul { display: flex; flex-wrap: wrap; gap: .5rem; }
+ #timeSlots ul li button {
+   background: var(--cb-primary-alt); color: #fff;
+   padding: .5rem 1rem; border-radius: var(--radius);
+   box-shadow: var(--shadow); cursor: pointer;
+ }
 </style>
 </head>
 <body>
@@ -466,8 +510,41 @@
           <li data-id="p8"><strong>Dr. Grace Ofori</strong> – Dermatologist, Accra Dermatology Centre</li>
           <li data-id="p9"><strong>Dr. Joseph Kumi</strong> – Orthopedic Surgeon, Komfo Anokye Teaching Hospital</li>
           <li data-id="p10"><strong>Dr. Ama Brew</strong> – Pediatrician, Trust Hospital</li>
+          <li data-id="p11"><strong>Ms. Akosua Baah</strong> – Physical Therapist, Tema General Hospital</li>
+          <li data-id="p12"><strong>Mr. Daniel Boakye</strong> – Pharmacist, Ridge Hospital</li>
+          <li data-id="p13"><strong>Mrs. Esther Kum</strong>i – Occupational Therapist, Cape Coast Polyclinic</li>
+          <li data-id="p14"><strong>Ms. Joy Mensah</strong> – Speech Therapist, LEKMA Hospital</li>
+          <li data-id="p15"><strong>Dr. Paul Yeboah</strong> – Nephrologist, Korle Bu Teaching Hospital</li>
+          <li data-id="p16"><strong>Dr. Linda Frimpong</strong> – Rheumatologist, 37 Military Hospital</li>
+          <li data-id="p17"><strong>Mr. Kwesi Owusu</strong> – Nutritionist, Nyaho Medical Centre</li>
+          <li data-id="p18"><strong>Ms. Abena Boateng</strong> – Clinical Psychologist, Accra Psychology Clinic</li>       
         </ul>
       </div>
+       <div id="chooseOwnSelect" hidden>
+   <label>Pick Your Provider:
+     <select id="ownProvider">
+       <option disabled selected>-- Select --</option>
+         <option value="p1">Dr. Kwame Asante – Pulmonologist, Korle Bu Teaching Hospital</option>
+<option value="p2">Dr. Abena Owusu – Cardiologist, 37 Military Hospital</option>
+<option value="p3">Dr. Kojo Mensah – Psychiatrist, Ridge Hospital</option>
+<option value="p4">Dr. Yaa Dufie – Dietitian, Nyaho Medical Centre</option>
+<option value="p5">Dr. Nana Adjei – General Practitioner, Cape Coast Polyclinic</option>
+<option value="p6">Dr. Efua Amponsah – Endocrinologist, LEKMA Hospital</option>
+<option value="p7">Dr. Michael Addo – Neurologist, 37 Military Hospital</option>
+<option value="p8">Dr. Grace Ofori – Dermatologist, Accra Dermatology Centre</option>
+<option value="p9">Dr. Joseph Kumi – Orthopedic Surgeon, Komfo Anokye Teaching Hospital</option>
+<option value="p10">Dr. Ama Brew – Pediatrician, Trust Hospital</option>
+<option value="p11">Ms. Akosua Baah – Physical Therapist, Tema General Hospital</option>
+<option value="p12">Mr. Daniel Boakye – Pharmacist, Ridge Hospital</option>
+<option value="p13">Mrs. Esther Kumi – Occupational Therapist, Cape Coast Polyclinic</option>
+<option value="p14">Ms. Joy Mensah – Speech Therapist, LEKMA Hospital</option>
+<option value="p15">Dr. Paul Yeboah – Nephrologist, Korle Bu Teaching Hospital</option>
+<option value="p16">Dr. Linda Frimpong – Rheumatologist, 37 Military Hospital</option>
+<option value="p17">Mr. Kwesi Owusu – Nutritionist, Nyaho Medical Centre</option>
+<option value="p18">Ms. Abena Boateng – Clinical Psychologist, Accra Psychology Clinic</option>        
+     </select>
+   </label>
+ </div>
       <div class="match-actions">
       <button id="proceedMatch" class="btn">Proceed with AI choice</button>
       <button id="chooseOwn" class="btn btn-outline">Choose own provider</button>
@@ -532,6 +609,9 @@
      <label>Your Name:
        <input id="clientNameFinal" placeholder="Full Name" required>
      </label>
+      <label>Email: <input id="clientEmail" type="email" required></label>
+     <label>Phone: <input id="clientPhone" type="tel" required></label>
+
      <div id="summarySelection" style="margin-bottom: 1rem;"></div>
      <div class="summary-actions">
        <button id="editSelection" type="button" class="btn btn-outline">‹ Back</button>
@@ -697,7 +777,6 @@
     const availability = {
       p1:  { '2025-06-10':['09:00','10:00','11:00'], '2025-06-12':['14:00','15:00'], '2025-06-15':['08:30','09:30','10:30'] },
       p2:  { '2025-06-03':['10:00','13:00','16:00'], '2025-06-04':['09:00','11:00'], '2025-06-15':['12:00','14:00'] },
-      /* …continue p3–p18 exactly as before… */
       p3:  { '2025-06-08':['08:00','09:00','10:00','11:00'], '2025-06-11':['13:30','14:30'], '2025-06-16':['15:00','16:00'] },
       p4:  { '2025-06-05':['09:30','10:30','11:30'], '2025-06-09':['14:00','15:00','16:00'], '2025-06-18':['08:00','09:00'] },
       p5:  { '2025-06-07':['08:15','09:15','10:15'], '2025-06-13':['13:00','14:00'], '2025-06-17':['10:00','11:00','12:00'] },
@@ -806,35 +885,50 @@
       const btn = e.currentTarget;
       const concern = document.getElementById('concernInput').value.trim();
       if(!concern) return showToast('Enter your chief concern');
-      btn.disabled = true; btn.innerText = PHASE.findMatch;
+     btn.disabled = true;
+      btn.innerHTML = `${PHASE.findMatch} <span class="spinner"></span>`;
       const sys = `You are AI match. Providers:\n${providers.map(p=>`- ${p.name}, ${p.spec}`).join('\n')}`;
       const usr = `Concern="${concern}". Pick best provider.`;
       const raw = await callOpenAI([{role:'system',content:sys},{role:'user',content:usr}]);
-      btn.disabled = false; btn.innerHTML = '<i class="fas fa-search"></i> Find My Specialist';
+     btn.disabled = false;
+     btn.innerHTML = '<i class="fas fa-search"></i> Find My Specialist';
 
       // only take the very first line as the AI pick
-      const top = raw.split(/\r?\n/)[0].replace(/^[-\d\.\)\s]*/,'').trim();
+     const cleaned = raw
+        .replace(/```[\s\S]*?```/g, '')
+        .replace(/^(#+)\s*/gm, '')               
+        .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+        .replace(/\*(.+?)\*/g, '<em>$1</em>');
+      const top = cleaned.split(/\r?\n/)[0].trim();
+
       matchPanel.innerHTML = `
         <div class="result-content"><strong>${top}</strong></div>
+       <div id="chooseOwnSelect" hidden>
+       </div>
         <div class="match-actions">
           <button id="proceedMatch" class="btn">Next ➔</button>
           <button id="chooseOwn" class="btn btn-outline">Choose Own</button>
         </div>`;
       matchPanel.hidden = false;
 
-      document.getElementById('proceedMatch').onclick = ()=>{
-        providerMatchEl.hidden = true;
-        appointmentEl.hidden  = false;
-        // lock in AI pick
-        document.getElementById('chosenProvider').innerText = top;
-        profSelect.value = providers.find(p=>top.startsWith(p.name)).id;
-        profSelect.disabled = true;
-        generateCalendar(displayYear,displayMonth);
-      };
-      document.getElementById('chooseOwn').onclick = ()=>{
-        providerMatchEl.hidden = true;
-        appointmentEl.hidden  = false;
-      };
+     document.getElementById('proceedMatch').addEventListener('click', ()=>{
+      const chosen = top; 
+      providerMatchEl.hidden = true;
+      appointmentEl.hidden  = false;
+      // call our helper with real name
+      startAppointmentFlow(chosen);
+    });
+      document.getElementById('chooseOwn').addEventListener('click', () => {
+  matchPanel.querySelector('.result-content').hidden = true;
+ document.getElementById('chooseOwnSelect').hidden = false;
+});
+       document.getElementById('ownProvider').addEventListener('change', e => {
+      const id = e.target.value;
+      const provider = providers.find(p=>p.id===id).name;
+      providerMatchEl.hidden = true;
+      appointmentEl.hidden   = false;
+      startAppointmentFlow(provider);
+    });
     });
 
     // ─── 2. PICK A SLOT ──────────────────────────────────
@@ -859,6 +953,26 @@
         `<p><strong>${window.selectedDate}</strong> at <strong>${window.selectedTime}</strong></p>`;
     });
 
+    // below where you do startAppointmentFlow:
+function startAppointmentFlow(providerName) {
+      const header = appointmentEl.querySelector('h2');
+      header.innerHTML = `Schedule with <strong>${providerName}</strong>`;
+      // make sure the desc is shown once
+      if (!appointmentEl.querySelector('.flow-desc')) {
+        appointmentEl.insertAdjacentHTML('afterbegin',
+          '<p class="desc flow-desc">Select an available date below, then pick a time slot.</p>');
+      }
+      // lock the calendar selector
+      profSelect.value = providers.find(p=>p.name===providerName).id;
+      profSelect.disabled = true;
+      generateCalendar(displayYear, displayMonth);
+    } // add description
+ if(!appointmentEl.querySelector('.flow-desc')){
+   appointmentEl.insertAdjacentHTML('afterbegin',
+     '<p class="desc">Select an available date below, then pick a time slot.</p>');
+ }
+}
+    
     // ─── 3. SUMMARY & CONFIRM ────────────────────────────
     function showSummary(){
       const summary = document.createElement('div');
