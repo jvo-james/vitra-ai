@@ -934,37 +934,7 @@ profSelect.onchange = () => generateCalendar(displayYear, displayMonth);
    document.getElementById('nextAvailable').onclick  = ()=> showToast('Next available: see highlighted dates');
 
 
-    function generateCalendar(yr,mth) {
-      calEl.innerHTML = '';
-      ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'].forEach(d=>{
-        const hd = document.createElement('div');
-        hd.className='cell'; hd.style.fontWeight='600'; hd.innerText = d;
-        calEl.append(hd);
-      });
-      const first = new Date(yr,mth,1).getDay();
-      const days = new Date(yr,mth+1,0).getDate();
-      for(let i=0;i<first;i++){
-        const b=document.createElement('div');
-        b.className='cell closed'; calEl.append(b);
-      }
-      for(let d=1;d<=days;d++){
-        const cell=document.createElement('div');
-        cell.className='cell '+(Math.random()<0.4?'closed':'open');
-        cell.innerText=d;
-        if(cell.classList.contains('open')){
-          cell.onclick = ()=>{
-            document.querySelectorAll('#calendar .selected').forEach(x=>x.classList.remove('selected'));
-            cell.classList.add('selected');
-            showToast(`Selected ${yr}-${mth+1}-${d}`);
-          };
-        }
-        const today = new Date();
-        if(today.getFullYear()===yr && today.getMonth()===mth && today.getDate()===d){
-          cell.classList.add('today');
-        }
-        calEl.append(cell);
-      }
-    }
+    
     let today = new Date();
     generateCalendar(today.getFullYear(),today.getMonth());
     document.getElementById('filterSlots').onclick = ()=>showToast('Filtered (stub)');
