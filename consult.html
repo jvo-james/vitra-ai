@@ -88,6 +88,18 @@
 .sidebar-open aside#sidebar {
   transform: translateX(0);
 }
+  .sidebar-shrink #sidebar {
+  width: 60px;
+}
+.sidebar-shrink header,
+.sidebar-shrink main {
+  margin-left: 60px;
+}
+  .sidebar-shrink #sidebar nav li a {
+  justify-content: center;
+}
+.sidebar-shrink #sidebar nav li a span { 
+  display: none; }
   @media (min-width: 769px) {
   #hamburger { display: none; }      
  }
@@ -112,10 +124,11 @@
     font-size: 1.5rem; color: var(--cb-primary); cursor: pointer;
   }
 
-  main {
-    margin: 100px var(--padding) var(--padding) 240px;
-    transition: margin-left var(--transition);
-  }
+ header, main {
+  margin-left: 220px;
+  transition: margin-left var(--transition);
+}
+  
   section.module {
     background: var(--cb-surface);
     border-radius: var(--radius);
@@ -661,7 +674,13 @@
     const timeSlotsEl     = document.getElementById('timeSlots');
 
     // ─── STYLES & TOGGLES ───────────────────────────────
-    sidebarBtn.addEventListener('click', ()=> bodyEl.classList.toggle('sidebar-shrink'));
+    sidebarBtn.addEventListener('click', () => {
+  bodyEl.classList.toggle('sidebar-shrink');
+  // flip the chevron
+  const icon = sidebarBtn.querySelector('i');
+  icon.classList.toggle('fa-chevron-left');
+  icon.classList.toggle('fa-chevron-right');
+});
     hamburger.addEventListener('click', ()=>{
       bodyEl.classList.toggle('sidebar-open');
       bodyEl.classList.remove('sidebar-shrink');
