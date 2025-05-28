@@ -96,7 +96,7 @@
  margin-left: 220px;  
  }
   header {
-    position: sticky; top: 0; left: 220px; right: 0;
+    position: sticky; top: 0;
     height: 60px; background: var(--cb-surface);
     display: flex; align-items: center; justify-content: space-between;
     padding: 0 var(--padding); flex-wrap: wrap;
@@ -280,8 +280,9 @@
   .calendar .cell.open { background: linear-gradient(135deg, var(--cb-accent), var(--cb-primary-alt));
     color: #fff;
     box-shadow: 0 2px 6px rgba(0,0,0,0.2); }
-  .calendar .cell.today {  background: var(--cb-bg);
-    border: 3px dashed var(--cb-primary-alt); }
+  .calendar .cell.today { background: var(--cb-bg);
+  border: 3px dashed var(--cb-primary-alt);
+  font-weight: bold; }
 
   /*──────────────────── Responsive ────────────────────*/
   @media (max-width: 1024px) {
@@ -348,7 +349,8 @@
 }
    .calendar .cell.selected {
   outline: 3px solid var(--cb-primary);
- transform: scale(1.1);
+  transform: scale(1.1);
+  z-index: 1;
  }
 
 </style>
@@ -928,8 +930,11 @@ function startAppointmentFlow(selectedId) {
 document.body.addEventListener('click', e=>{
   if (e.target.matches('#timeSlots button')) { 
     // capture date/time
-    const date = e.target.closest('.time-slots').querySelector('h4').textContent.split(' on ')[1];
+    const date = e.target.closest('#timeSlots').querySelector('h4').textContent.split(' on ')[1];
     const time = e.target.innerText;
+    // store globally
+    window.selectedDate = date;
+    window.selectedTime = time;
     // hide calendar, show final form
     document.getElementById('calendar').hidden = true;
     document.getElementById('timeSlots').hidden = true;
@@ -948,7 +953,7 @@ document.getElementById('confirmBookingFinal').onclick = async ()=> {
   showToast('Booking…');
   await new Promise(r=>setTimeout(r, 1500));
   // creative success
-  alert(`🎉 All set, ${name}! Your appointment is confirmed. See you soon!`);
+  alert(`🎉 Hey ${name}! Your appointment is booked on ${window.selectedDate} at ${window.selectedTime}. Can’t wait to see you!`);
 };
 document.getElementById('editSelection').onclick = () => {
   // reset in-page without full reload
