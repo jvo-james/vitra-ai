@@ -421,6 +421,27 @@
     <h2><i class="fas fa-calendar-alt"></i> Real-Time Availability</h2>
     <p class="desc">Browse open slots, filter by date/time/consultation type, or jump to your next available.</p>
     <div class="calendar-controls">
+      <label>Select Professional:
+        <select id="availProfessional">
+         <option value="p1">Dr. Kwame Asante – Pulmonologist, Korle Bu Teaching Hospital</option>
+<option value="p2">Dr. Abena Owusu – Cardiologist, 37 Military Hospital</option>
+<option value="p3">Dr. Kojo Mensah – Psychiatrist, Ridge Hospital</option>
+<option value="p4">Dr. Yaa Dufie – Dietitian, Nyaho Medical Centre</option>
+<option value="p5">Dr. Nana Adjei – General Practitioner, Cape Coast Polyclinic</option>
+<option value="p6">Dr. Efua Amponsah – Endocrinologist, LEKMA Hospital</option>
+<option value="p7">Dr. Michael Addo – Neurologist, 37 Military Hospital</option>
+<option value="p8">Dr. Grace Ofori – Dermatologist, Accra Dermatology Centre</option>
+<option value="p9">Dr. Joseph Kumi – Orthopedic Surgeon, Komfo Anokye Teaching Hospital</option>
+<option value="p10">Dr. Ama Brew – Pediatrician, Trust Hospital</option>
+<option value="p11">Ms. Akosua Baah – Physical Therapist, Tema General Hospital</option>
+<option value="p12">Mr. Daniel Boakye – Pharmacist, Ridge Hospital</option>
+<option value="p13">Mrs. Esther Kumi – Occupational Therapist, Cape Coast Polyclinic</option>
+<option value="p14">Ms. Joy Mensah – Speech Therapist, LEKMA Hospital</option>
+<option value="p15">Dr. Paul Yeboah – Nephrologist, Korle Bu Teaching Hospital</option>
+<option value="p16">Dr. Linda Frimpong – Rheumatologist, 37 Military Hospital</option>
+<option value="p17">Mr. Kwesi Owusu – Nutritionist, Nyaho Medical Centre</option>
+<option value="p18">Ms. Abena Boateng – Clinical Psychologist, Accra Psychology Clinic</option>        </select>
+      </label>
       <label>Date:
         <input type="date" id="calendarDateInput">
       </label>
@@ -442,7 +463,9 @@
     </div>
   <div id="calendarGrid">
       <div id="calendar"></div>
-   </div>
+    </div>
+   <div id="timeSlots" class="time-slots"></div>
+
   </section>
 
   <!-- 3. Book an Appointment -->
@@ -701,7 +724,210 @@
     };
 
     // ─── 2. AVAILABILITY CALENDAR ─────────────────────────
-    const calEl = document.getElementById('calendar');
+    const calEl       = document.getElementById('calendar');
+    const profSelect  = document.getElementById('availProfessional');
+    const timeSlotsEl = document.getElementById('timeSlots');
+
+   // mock availability data per professional
+    const availability = {
+  p1: {
+    '2025-06-10': ['09:00','10:00','11:00'],
+    '2025-06-12': ['14:00','15:00'],
+    '2025-06-15': ['08:30','09:30','10:30']
+  },
+  p2: {
+    '2025-06-03': ['10:00','13:00','16:00'],
+    '2025-06-04': ['09:00','11:00'],
+    '2025-06-15': ['12:00','14:00']
+  },
+  p3: {
+    '2025-06-08': ['08:00','09:00','10:00','11:00'],
+    '2025-06-11': ['13:30','14:30'],
+    '2025-06-16': ['15:00','16:00']
+  },
+  p4: {
+    '2025-06-05': ['09:30','10:30','11:30'],
+    '2025-06-09': ['14:00','15:00','16:00'],
+    '2025-06-18': ['08:00','09:00']
+  },
+  p5: {
+    '2025-06-07': ['08:15','09:15','10:15'],
+    '2025-06-13': ['13:00','14:00'],
+    '2025-06-17': ['10:00','11:00','12:00']
+  },
+  p6: {
+    '2025-06-02': ['09:00','10:00'],
+    '2025-06-14': ['11:00','12:00','13:00'],
+    '2025-06-19': ['14:00','15:00']
+  },
+  p7: {
+    '2025-06-06': ['08:30','09:30','10:30'],
+    '2025-06-12': ['13:00','14:00','15:00'],
+    '2025-06-20': ['09:00','10:00']
+  },
+  p8: {
+    '2025-06-01': ['10:00','11:00','12:00'],
+    '2025-06-11': ['14:30','15:30'],
+    '2025-06-16': ['08:00','09:00','10:00']
+  },
+  p9: {
+    '2025-06-04': ['09:00','10:00','11:00'],
+    '2025-06-13': ['13:00','14:00'],
+    '2025-06-18': ['15:00','16:00']
+  },
+  p10: {
+    '2025-06-03': ['08:00','09:00','10:00'],
+    '2025-06-10': ['11:00','12:00','13:00'],
+    '2025-06-17': ['14:00','15:00']
+  },
+  p11: {
+    '2025-06-05': ['09:30','10:30','11:30'],
+    '2025-06-14': ['13:00','14:00','15:00'],
+    '2025-06-19': ['08:00','09:00']
+  },
+  p12: {
+    '2025-06-02': ['10:00','11:00','12:00'],
+    '2025-06-08': ['14:00','15:00'],
+    '2025-06-20': ['09:00','10:00','11:00']
+  },
+  p13: {
+    '2025-06-07': ['08:00','09:00','10:00'],
+   '2025-06-12': ['11:30','12:30','13:30'],
+    '2025-06-18': ['14:00','15:00']
+  },
+  p14: {
+    '2025-06-03': ['09:15','10:15','11:15'],
+    '2025-06-09': ['13:00','14:00','15:00'],
+    '2025-06-16': ['08:00','09:00']
+  },
+  p15: {
+    '2025-06-05': ['08:30','09:30','10:30'],
+    '2025-06-13': ['11:00','12:00','13:00'],
+    '2025-06-19': ['14:30','15:30']
+  },
+  p16: {
+    '2025-06-02': ['10:00','11:00','12:00'],
+    '2025-06-11': ['13:15','14:15'],
+    '2025-06-17': ['09:00','10:00','11:00']
+  },
+  p17: {
+    '2025-06-04': ['09:00','10:00','11:00'],
+    '2025-06-10': ['12:00','13:00','14:00'],
+    '2025-06-15': ['15:00','16:00']
+  },
+  p18: {
+   '2025-06-01': ['08:00','09:00','10:00'],
+    '2025-06-08': ['11:30','12:30','13:30'],
+    '2025-06-20': ['14:00','15:00','16:00']
+ }
+};
+    
+    // track displayed month/year
+   let displayYear  = new Date().getFullYear();
+    let displayMonth = new Date().getMonth();
+
+    function generateCalendar(yr, mth) {
+      calEl.innerHTML = '';
+      // header: show month/year
+     const header = document.createElement('div');
+      header.style.textAlign = 'center';
+      header.style.marginBottom = '0.5rem';
+      header.innerHTML = `<strong>${new Date(yr, mth).toLocaleString('default',{ month:'long', year:'numeric' })}</strong>`;
+      calEl.append(header);
+
+     ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'].forEach(d=>{
+       const hd = document.createElement('div');
+       hd.className = 'cell'; hd.style.fontWeight='600'; hd.innerText = d;
+        calEl.append(hd);
+     });
+     const firstDay = new Date(yr,mth,1).getDay();
+      const daysInM  = new Date(yr,mth+1,0).getDate();
+      // blanks
+      for(let i=0;i<firstDay;i++){
+        const b=document.createElement('div');
+        b.className='cell closed'; calEl.append(b);
+     }
+      // days
+      const profId = profSelect.value;
+      const availDates = availability[profId]||{};
+      for(let d=1; d<=daysInM; d++){
+        const dateKey = `${yr}-${String(mth+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+        const cell = document.createElement('div');
+        const isOpen = availDates[dateKey];
+        cell.className = `cell ${isOpen?'open':'closed'}`;
+        cell.innerText  = d;
+        if(isOpen){
+          cell.addEventListener('click',()=>{
+            // highlight selection
+           calEl.querySelectorAll('.cell.selected').forEach(x=>x.classList.remove('selected'));
+            cell.classList.add('selected');
+           // render time slots
+            renderTimeSlots(dateKey, isOpen);
+          });
+        }
+        // highlight today
+        const t = new Date();
+        if(t.getFullYear()===yr && t.getMonth()===mth && t.getDate()===d){
+         cell.classList.add('today');
+       }
+       calEl.append(cell);
+      }
+      // clear any old time slots
+      timeSlotsEl.innerHTML = '';
+    }
+
+    function renderTimeSlots(dateKey, slots){
+     timeSlotsEl.innerHTML = `<h4>Available times on ${dateKey}:</h4>`;
+     const ul = document.createElement('ul');
+      ul.style.listStyle = 'none';
+      ul.style.padding = '0';
+      slots.forEach(t=>{
+        const li = document.createElement('li');
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'btn-sm';
+        btn.innerText = t;
+        btn.style.margin = '0.25rem';
+        btn.onclick = () => showToast(`You selected ${dateKey} @ ${t}`);
+        li.append(btn);
+       ul.append(li);
+     });
+      timeSlotsEl.append(ul);
+    }
+
+    // initial render
+    generateCalendar(displayYear, displayMonth);
+
+    // month navigation
+    document.getElementById('prevMonth').onclick = () => {
+      displayMonth--;
+      if(displayMonth<0){ displayMonth=11; displayYear--; }
+      generateCalendar(displayYear, displayMonth);
+    };
+    document.getElementById('nextMonth').onclick = () => {
+      displayMonth++;
+     if(displayMonth>11){ displayMonth=0; displayYear++; }
+      generateCalendar(displayYear, displayMonth);
+    };
+
+    // when professional changes
+    profSelect.onchange = () => generateCalendar(displayYear, displayMonth);
+
+    // date‐picker nav (optional)
+    document.getElementById('calendarDateInput').onchange = e => {
+     const d = new Date(e.target.value);
+     if(!isNaN(d)){
+       displayYear  = d.getFullYear();
+        displayMonth = d.getMonth();
+       generateCalendar(displayYear, displayMonth);
+      }
+    };
+
+    // filterSlots & nextAvailable can remain stubs or you can hook into availability data
+    document.getElementById('filterSlots').onclick    = ()=> showToast('Filter feature coming soon');
+   document.getElementById('nextAvailable').onclick  = ()=> showToast('Next available: see highlighted dates');
+
+
     function generateCalendar(yr,mth) {
       calEl.innerHTML = '';
       ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'].forEach(d=>{
