@@ -856,12 +856,43 @@ document.addEventListener('DOMContentLoaded', () => {
           {role:'user',content:user}
         ]);
       // build matchResults including both the AI text *and* the action buttons
-    panel.innerHTML = `
-      <div class="result-content">${formatHTML(reply)}</div>
-      <div class="match-actions">
-        <button id="proceedMatch" class="btn">Proceed with AI choice</button>
-        <button id="chooseOwn" class="btn btn-outline">Choose own provider</button>
-      </div>`;
+   panel.innerHTML = `
+     <div class="result-content">${formatHTML(reply)}</div>
+     <ul id="providerList">
+       <li data-id="p1">Dr. Kwame Asante – Pulmonologist</li>
+       <li data-id="p2">Dr. Abena Owusu – Cardiologist</li>
+       <li data-id="p3">Dr. Kojo Mensah – Psychiatrist</li>
+       <li data-id="p4">Dr. Yaa Dufie – Dietitian</li>
+       <li data-id="p5">Dr. Nana Adjei – General Practitioner</li>
+       <li data-id="p6">Dr. Efua Amponsah – Endocrinologist</li>
+       <li data-id="p7">Dr. Michael Addo – Neurologist</li>
+       <li data-id="p8">Dr. Grace Ofori – Dermatologist</li>
+       <li data-id="p9">Dr. Joseph Kumi – Orthopedic Surgeon</li>
+       <li data-id="p10">Dr. Ama Brew – Pediatrician</li>
+
+     </ul>
+     <div class="match-actions">
+       <button id="proceedMatch" class="btn">Proceed with AI choice</button>
+       <button id="chooseOwn"   class="btn btn-outline">Choose own provider</button>
+     </div>`;
+
+  // 1) let the user pick one of these
+  const items = panel.querySelectorAll('#providerList li');
+  items.forEach(li => li.addEventListener('click', () => {
+    items.forEach(x => x.classList.remove('selected'));
+    li.classList.add('selected');
+  }));
+
+  // 2) wire up “Proceed”
+  document.getElementById('proceedMatch').addEventListener('click', () => {
+    const sel = panel.querySelector('#providerList li.selected') || items[0];
+    startAppointmentFlow(sel.dataset.id);
+    panel.hidden = true;
+  });
+  document.getElementById('chooseOwn').addEventListener('click', () => {
+    panel.hidden = true;
+    document.getElementById('appointmentFlow').hidden = false;
+  });
     injectTools(panel);
     panel.hidden = false;
     // capture the AI-chosen provider (assumes AI reply highlights one <li data-id="…">)
