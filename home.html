@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en" aria-theme="light">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+  <title>Vitra AI – Holistic Health Platform</title>
+ <!-- Fonts & Icons -->
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;600;700&display=swap" rel="stylesheet">
+  <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
+  <link rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
+
+
+  <style>
+  /*────────────────── THEME & RESET ──────────────────*/
+  :root {
+    --bg: #f5f7fa;
+    --text: #1a1a1a;
+    --muted: #555;
+    --radius: 0.6rem;
+    --padding: 1rem;
+    --transition: 0.3s ease;
+    --nav-h: 60px;
+  }
+  *,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+  html{font-family:'Montserrat',sans-serif;scroll-behavior:smooth}
+  body{background:var(--bg);color:var(--text);overflow-x:hidden;}
+  a{color:inherit;text-decoration:none}
+  button{font:inherit;cursor:pointer;}
+  /*────────────────── NAVBAR ──────────────────*/
+  header{position:fixed;top:0;left:0;right:0;height:var(--nav-h);background:#fff;display:flex;align-items:center;justify-content:space-between;padding:0 var(--padding);box-shadow:0 2px 8px rgba(0,0,0,0.1);z-index:1000}
+  .logo{font-size:1.2rem;font-weight:700;color:#4a4a4a;}
+  nav ul{display:flex;gap:1rem;list-style:none;}
+  nav li{position:relative;}
+  nav a{padding:.5rem;transition:color var(--transition);}
+  nav a:hover{color:#0077cc;}
+  .theme-toggle{font-size:1.2rem;color:#777;}
+  /*────────────────── HERO ──────────────────*/
+  .hero{height:calc(100vh - var(--nav-h));background:linear-gradient(135deg,#89f7fe 0%,#66a6ff 100%);display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;color:#fff;padding:0 var(--padding);}
+  .hero h1{font-size:3rem;margin-bottom:.5rem;text-shadow:0 2px 4px rgba(0,0,0,0.2);}
+  .hero p{font-size:1.2rem;margin-bottom:1.5rem;max-width:600px;}
+  .hero .btn{background:#fff;color:#66a6ff;padding:.8rem 1.6rem;border-radius:var(--radius);font-weight:600;transition:transform var(--transition);}
+  .hero .btn:hover{transform:translateY(-3px);}
+  /*────────────────── SERVICES GRID ──────────────────*/
+  .services{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:1.5rem;padding:2rem var(--padding);}
+  .card{background:#fff;border-radius:var(--radius);box-shadow:0 2px 8px rgba(0,0,0,0.1);overflow:hidden;display:flex;flex-direction:column;transition:transform var(--transition);}
+  .card:hover{transform:translateY(-5px);}
+  .card-icon{font-size:2.5rem;padding:1.5rem;display:flex;justify-content:center;align-items:center;}
+  .card h3{padding:0 var(--padding);margin-bottom:.5rem;}
+  .card p{flex:1;padding:0 var(--padding) var(--padding);color:var(--muted);}
+  .card button{margin:0 var(--padding) var(--padding);padding:.6rem 1rem;background:var(--bg);border:1px solid #ccc;border-radius:var(--radius);transition:background var(--transition);}
+  .card button:hover{background:#eee;}
+  /* Colors per theme */
+  .card.herbal     .card-icon{background:#2a6f4e;color:#fff;}
+  .card.psych      .card-icon{background:#7da4e8;color:#fff;}
+  .card.diet       .card-icon{background:#fced97;color:#555;}
+  .card.pharm      .card-icon{background:#1f5d2f;color:#fff;}
+  .card.consult    .card-icon{background:#4b0082;color:#fff;}
+  /*────────────────── HOW IT WORKS ──────────────────*/
+  .steps{background:#fff;padding:2rem var(--padding);margin:2rem 0;box-shadow:0 2px 8px rgba(0,0,0,0.1);border-radius:var(--radius);}
+  .steps h2{text-align:center;margin-bottom:1rem;color:#333;}
+  .steps-list{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:1rem;}
+  .step{display:flex;align-items:flex-start;gap:1rem;}
+  .step-icon{font-size:1.8rem;color:var(--primary);}
+  .step-content h4{margin-bottom:.3rem;}
+  .step-content p{color:var(--muted);}
+  /*────────────────── FOOTER ──────────────────*/
+  footer{background:#fff;padding:1rem var(--padding);text-align:center;color:var(--muted);font-size:.9rem;border-top:1px solid #eee;}
+  /*────────────────── RESPONSIVE ──────────────────*/
+  @media(max-width:600px){
+    .hero h1{font-size:2.2rem;}
+    .hero p{font-size:1rem;}
+  }
+  </style>
+</head>
+<body>
+
+  <!-- NAVBAR -->
+  <header>
+    <div class="logo"><i class="fas fa-leaf"></i> Vitra AI</div>
+    <nav>
+      <ul>
+        <li><a href="#hero">Home</a></li>
+        <li><a href="#services">Services</a></li>
+        <li><a href="#howitworks">How It Works</a></li>
+      </ul>
+    </nav>
+    <div class="theme-toggle" id="themeToggle"><i class="fas fa-moon"></i></div>
+  </header>
+
+  <!-- HERO -->
+  <section class="hero" id="hero">
+    <h1>Welcome to Vitra AI</h1>
+    <p>Your one-stop digital health platform. From Herbal Remedies to Mental Wellness, Dietetics, E-Pharmacy, and Consultations—AI-powered and personalized just for you.</p>
+    <button class="btn" onclick="document.getElementById('services').scrollIntoView({behavior:'smooth'})">
+      <i class="fas fa-th-large"></i> Explore Services
+    </button>
+  </section>
+
+  <!-- SERVICES GRID -->
+  <section class="services" id="services">
+    <!-- Herbal Medicine -->
+    <div class="card herbal">
+      <div class="card-icon"><i class="fas fa-seedling"></i></div>
+      <h3>Herbal Medicine</h3>
+      <p>Explore AI-powered plant identification, custom herbal blends, safety checks, and more.</p>
+      <button onclick="window.location='index.html'"><i class="fas fa-arrow-right"></i> Go to Herbal</button>
+    </div>
+    <!-- Psychology & Mental Health -->
+    <div class="card psych">
+      <div class="card-icon"><i class="fas fa-brain"></i></div>
+      <h3>Psychology &amp; Mental Health</h3>
+      <p>Chat with our therapy bot, track your mood, creative therapies, VR micro-therapies, and community support.</p>
+      <button onclick="window.location='psychology.html'"><i class="fas fa-arrow-right"></i> Go to Psychology</button>
+    </div>
+    <!-- Dietetics -->
+    <div class="card diet">
+      <div class="card-icon"><i class="fas fa-utensils"></i></div>
+      <h3>Dietetics</h3>
+      <p>Personalized meal plans, nutrient analysis, AI-driven shopping lists, and recipe generators.</p>
+      <button onclick="window.location='dietetics.html'"><i class="fas fa-arrow-right"></i> Go to Dietetics</button>
+    </div>
+    <!-- E-Pharmacy -->
+    <div class="card pharm">
+      <div class="card-icon"><i class="fas fa-prescription-bottle-alt"></i></div>
+      <h3>E-Pharmacy</h3>
+      <p>Order medications online, AI-powered drug interaction checks, and home delivery tracking.</p>
+      <button onclick="window.location='pharmacy.html'"><i class="fas fa-arrow-right"></i> Go to E-Pharmacy</button>
+    </div>
+    <!-- Consultation Booking -->
+    <div class="card consult">
+      <div class="card-icon"><i class="fas fa-calendar-check"></i></div>
+      <h3>Consultation Booking</h3>
+      <p>Book appointments with pharmacists, dietitians, or therapists—smart matching based on your needs.</p>
+      <button onclick="window.location='consult.html'"><i class="fas fa-arrow-right"></i> Go to Consult</button>
+    </div>
+  </section>
+
+  <!-- HOW IT WORKS -->
+  <section class="steps" id="howitworks">
+    <h2><i class="fas fa-cogs"></i> How Vitra AI Works</h2>
+    <div class="steps-list">
+      <div class="step">
+        <div class="step-icon"><i class="fas fa-hand-pointer"></i></div>
+        <div class="step-content">
+          <h4>1. Choose Your Service</h4>
+          <p>Select from Herbal, Mental Health, Diet, Pharmacy, or Booking—all via a single platform.</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-icon"><i class="fas fa-robot"></i></div>
+        <div class="step-content">
+          <h4>2. Chat with AI</h4>
+          <p>Describe your needs in plain language—the AI analyzes, diagnoses, and guides you.</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-icon"><i class="fas fa-heart"></i></div>
+        <div class="step-content">
+          <h4>3. Get Personalized Solutions</h4>
+          <p>Receive tailored recommendations: herbal blends, therapy exercises, meal plans, or medication deliveries.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer>
+    <p>&copy; 2025 Vitra AI. <a href="#hero">Home</a> • <a href="terms.html">Terms</a> • <a href="privacy.html">Privacy</a></p>
+  </footer>
+
+  <!-- SCRIPTS -->
+  <script>
+    // Theme toggle
+    document.getElementById('themeToggle').onclick = () => {
+      document.documentElement.classList.toggle('dark');
+      document.getElementById('themeToggle').classList.toggle('fa-sun');
+    };
+  </script>
+</body>
+</html>
