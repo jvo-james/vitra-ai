@@ -350,11 +350,12 @@ body.sidebar-shrink footer {
   }
   /* Spinner */
 .spinner {
-  animation: spin 1s linear infinite;
-  margin: .5rem auto;
-  border: 6px solid rgba(0,0,0,0.15);        
-  border-left-color: var(--cb-accent);     
-  width: 32px; height: 32px;  
+   border: 6px solid rgba(0,0,0,0.1);
+  width: 32px; height: 32px;
+   border-left-color: var(--cb-primary);
+   border-radius: 50%;
+   animation: spin 1s linear infinite;
+   margin: .5rem auto; 
 }
 @keyframes spin { to { transform: rotate(360deg); } }
 .hero-graphic {
@@ -563,47 +564,6 @@ body.sidebar-shrink footer {
  
   <section id="appointmentFlow" class="module" hidden>
     <h2><i class="fas fa-calendar-alt"></i> Schedule with <span id="chosenProvider"></span></h2>
-<div class="calendar-controls">
-  <label>Select Professional:
-        <select id="availProfessional">
-         <option value="p1">Dr. Kwame Asante – Pulmonologist, Korle Bu Teaching Hospital</option>
-<option value="p2">Dr. Abena Owusu – Cardiologist, 37 Military Hospital</option>
-<option value="p3">Dr. Kojo Mensah – Psychiatrist, Ridge Hospital</option>
-<option value="p4">Dr. Yaa Dufie – Dietitian, Nyaho Medical Centre</option>
-<option value="p5">Dr. Nana Adjei – General Practitioner, Cape Coast Polyclinic</option>
-<option value="p6">Dr. Efua Amponsah – Endocrinologist, LEKMA Hospital</option>
-<option value="p7">Dr. Michael Addo – Neurologist, 37 Military Hospital</option>
-<option value="p8">Dr. Grace Ofori – Dermatologist, Accra Dermatology Centre</option>
-<option value="p9">Dr. Joseph Kumi – Orthopedic Surgeon, Komfo Anokye Teaching Hospital</option>
-<option value="p10">Dr. Ama Brew – Pediatrician, Trust Hospital</option>
-<option value="p11">Ms. Akosua Baah – Physical Therapist, Tema General Hospital</option>
-<option value="p12">Mr. Daniel Boakye – Pharmacist, Ridge Hospital</option>
-<option value="p13">Mrs. Esther Kumi – Occupational Therapist, Cape Coast Polyclinic</option>
-<option value="p14">Ms. Joy Mensah – Speech Therapist, LEKMA Hospital</option>
-<option value="p15">Dr. Paul Yeboah – Nephrologist, Korle Bu Teaching Hospital</option>
-<option value="p16">Dr. Linda Frimpong – Rheumatologist, 37 Military Hospital</option>
-<option value="p17">Mr. Kwesi Owusu – Nutritionist, Nyaho Medical Centre</option>
-<option value="p18">Ms. Abena Boateng – Clinical Psychologist, Accra Psychology Clinic</option>        </select>
-      </label>
-      <label>Date:
-        <input type="date" id="calendarDateInput">
-      </label>
-      <label>Time of Day:
-        <select id="timeOfDayInput">
-          <option>Morning</option>
-          <option>Afternoon</option>
-          <option>Evening</option>
-        </select>
-      </label>
-      <label>Type:
-        <select id="visitTypeInput">
-          <option>Telehealth</option>
-          <option>In-Person</option>
-        </select>
-      </label>
-      <button type="button" id="filterSlots" class="btn"><i class="fas fa-filter"></i> Filter</button>
-      <button type="button" id="nextAvailable" class="btn"><i class="fas fa-forward"></i> Next Available</button>
-    </div>
      <div class="month-nav">
    <button type="button" id="prevMonth" class="btn-sm">&larr;</button>
    <div id="calendarHeader" class="calendar-header"></div>
@@ -908,14 +868,39 @@ body.sidebar-shrink footer {
         .replace(/\*(.+?)\*/g, '<em>$1</em>');
       const top = cleaned.split(/\r?\n/)[0].trim();
 
-      matchPanel.innerHTML = `
-        <div class="result-content"><strong>${top}</strong></div>
-       <div id="chooseOwnSelect" hidden>
-       </div>
-        <div class="match-actions">
-          <button id="proceedMatch" class="btn">Next ➔</button>
-          <button id="chooseOwn" class="btn btn-outline">Choose Own</button>
-        </div>`;
+     const [name, spec] = top.split(' – ');
+    matchPanel.innerHTML = `
+      <div class="result-content">
+        <strong>${name}</strong> – ${spec}
+      </div>
+      <div id="chooseOwnSelect" hidden>
+        <label>Pick Your Provider:
+          <select id="ownProvider">
+             <option value="p1">Dr. Kwame Asante – Pulmonologist, Korle Bu Teaching Hospital</option>
+<option value="p2">Dr. Abena Owusu – Cardiologist, 37 Military Hospital</option>
+<option value="p3">Dr. Kojo Mensah – Psychiatrist, Ridge Hospital</option>
+<option value="p4">Dr. Yaa Dufie – Dietitian, Nyaho Medical Centre</option>
+<option value="p5">Dr. Nana Adjei – General Practitioner, Cape Coast Polyclinic</option>
+<option value="p6">Dr. Efua Amponsah – Endocrinologist, LEKMA Hospital</option>
+<option value="p7">Dr. Michael Addo – Neurologist, 37 Military Hospital</option>
+<option value="p8">Dr. Grace Ofori – Dermatologist, Accra Dermatology Centre</option>
+<option value="p9">Dr. Joseph Kumi – Orthopedic Surgeon, Komfo Anokye Teaching Hospital</option>
+<option value="p10">Dr. Ama Brew – Pediatrician, Trust Hospital</option>
+<option value="p11">Ms. Akosua Baah – Physical Therapist, Tema General Hospital</option>
+<option value="p12">Mr. Daniel Boakye – Pharmacist, Ridge Hospital</option>
+<option value="p13">Mrs. Esther Kumi – Occupational Therapist, Cape Coast Polyclinic</option>
+<option value="p14">Ms. Joy Mensah – Speech Therapist, LEKMA Hospital</option>
+<option value="p15">Dr. Paul Yeboah – Nephrologist, Korle Bu Teaching Hospital</option>
+<option value="p16">Dr. Linda Frimpong – Rheumatologist, 37 Military Hospital</option>
+<option value="p17">Mr. Kwesi Owusu – Nutritionist, Nyaho Medical Centre</option>
+<option value="p18">Ms. Abena Boateng – Clinical Psychologist, Accra Psychology Clinic</option>   
+          </select>
+        </label>
+      </div>
+      <div class="match-actions">
+        <button id="proceedMatch" class="btn">Next ➔</button>
+        <button id="chooseOwn" class="btn btn-outline">Choose Own</button>
+      </div>`;
       matchPanel.hidden = false;
 
    document.getElementById('proceedMatch').onclick = ()=>{
@@ -1004,16 +989,27 @@ body.sidebar-shrink footer {
     finalForm.innerHTML =
       `<div class="result-content">
          🎉 Success, <strong>${name}</strong>!<br>
-         Your appointment on <strong>${window.selectedDate}</strong> at <strong>${window.selectedTime}</strong> is confirmed.
+         Your appointment with <strong>${window.assignedProvider}</strong><br>
+         on <strong>${window.selectedDate}</strong> at <strong>${window.selectedTime}</strong> is confirmed.
        </div>`;
+    // ─── push it to the dashboard’s Upcoming list ───
+    document.querySelector('#upcoming ul').insertAdjacentHTML('beforeend',
+      `<li>
+         <strong>${window.assignedProvider}</strong> – ${window.selectedDate} ${window.selectedTime}
+         <button class="btn-sm rescheduleBtn">Reschedule</button>
+         <button class="btn-sm cancelBtn">Cancel</button>
+       </li>`
+    );
   };
 }
     
     // below where you do startAppointmentFlow:
 function startAppointmentFlow(providerName) {
    // header
-   appointmentEl.querySelector('h2').innerHTML =
-     `<i class="fas fa-calendar-alt"></i> Schedule with <strong>${providerName}</strong>`;
+  appointmentEl.querySelector('h2').innerHTML =
+    `<i class="fas fa-calendar-alt"></i> Schedule with <strong>${providerName}</strong>`;
+  // store for later
+  window.assignedProvider = providerName;
    // one-time description
    if (!appointmentEl.querySelector('.flow-desc')) {
      appointmentEl.insertAdjacentHTML(
