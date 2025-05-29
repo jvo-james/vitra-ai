@@ -294,6 +294,73 @@
       .hero h1 { font-size:2.2rem; }
       .hero p  { font-size:1rem; }
     }
+
+    .sidebar {
+  position: fixed;
+  top: 0;
+  left: -250px;
+  height: 100%;
+  width: 250px;
+  background: #0d47a1;
+  color: white;
+  padding: 2rem 1rem;
+  transition: left 0.3s ease;
+  z-index: 1000;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.sidebar-nav a {
+  color: white;
+  text-decoration: none;
+  font-size: 1.2rem;
+}
+
+.sidebar.show {
+  left: 0;
+}
+
+.sidebar-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  height: 100%;
+  width: 100%;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 900;
+  display: none;
+}
+
+.sidebar-overlay.show {
+  display: block;
+}
+/* Sidebar Nav & Auth */
+.sidebar-nav {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  margin-bottom: 2rem;
+}
+.sidebar-nav a {
+  color: var(--text);
+  text-decoration: none;
+  font-size: 1.1rem;
+  padding: 0.5rem;
+}
+.sidebar-auth {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  margin-bottom: 2rem;
+}
+.sidebar-theme {
+  margin-top: auto;
+  text-align: center;
+  font-size: 1.5rem;
+  cursor: pointer;
+}
+
   </style>
 </head>
 <body>
@@ -317,6 +384,26 @@
     <i id="themeToggle" class="fas fa-moon"></i>
     <i class="fas fa-bars hamburger" id="hamburger"></i>
   </nav>
+
+<div class="sidebar-overlay" id="sidebarOverlay"></div>
+<aside class="sidebar" id="sidebar">
+ <ul class="sidebar-nav">
+    <li><a href="#services">Services</a></li>
+    <li><a href="#features">Features</a></li>
+    <li><a href="#newsletter">Newsletter</a></li>
+  </ul>
+  <div class="sidebar-auth">
+    <button class="btn btn-secondary" id="sidebarSignIn">
+      <i class="fas fa-sign-in-alt"></i> Sign In
+    </button>
+    <button class="btn btn-primary" id="sidebarSignUp">
+      <i class="fas fa-user-plus"></i> Sign Up
+    </button>
+  </div>
+  <div class="sidebar-theme">
+    <i id="sidebarThemeToggle" class="fas fa-moon"></i>
+  </div>
+</aside>
 
   <!-- SIGN IN MODAL -->
   <div class="modal-backdrop" id="signInModal">
@@ -381,7 +468,7 @@
             <h4>Herbal Medicine</h4>
             <p>Natural remedies crafted by AI-driven recommendations.</p>
           </div>  </a>
-        <a href="pyschology.html" class="service-card" data-aos="fade-up" data-aos-delay="100">
+        <a href="psychology.html" class="service-card" data-aos="fade-up" data-aos-delay="100">
           <img src="mental.jpg" alt="Psychology">
           <div class="info">
             <i class="fas fa-brain"></i>
@@ -403,7 +490,7 @@
             <p>Order prescriptions with AI dosage checks.</p>
           </div>
         </a>
-        <a href="booking.html" class="service-card" data-aos="fade-up" data-aos-delay="400">
+        <a href="consult.html" class="service-card" data-aos="fade-up" data-aos-delay="400">
           <img src="book.jpg" alt="Consultation">
           <div class="info">
             <i class="fas fa-calendar-check"></i>
@@ -485,6 +572,45 @@
       btn.classList.toggle('fa-moon');
       btn.classList.toggle('fa-sun');
     };
+  document.addEventListener('DOMContentLoaded', () => {
+  const hamburger = document.querySelector('.hamburger');
+  const sidebar = document.getElementById('sidebar');
+  const overlay = document.getElementById('sidebarOverlay');
+
+  const headerSignIn = document.getElementById('openSignIn');
+  const headerSignUp = document.getElementById('openSignUp');
+  const sidebarSignIn = document.getElementById('sidebarSignIn');
+  const sidebarSignUp = document.getElementById('sidebarSignUp');
+  const themeToggle = document.getElementById('themeToggle');
+  const sidebarTheme = document.getElementById('sidebarThemeToggle');
+
+  function openSidebar() {
+    sidebar.classList.add('show');
+    overlay.classList.add('show');
+  }
+  function closeSidebar() {
+    sidebar.classList.remove('show');
+    overlay.classList.remove('show');
+  }
+
+  // Hamburger => open
+  hamburger.addEventListener('click', openSidebar);
+  // Click outside => close
+  overlay.addEventListener('click', closeSidebar);
+
+  // Sidebar buttons proxy header modals
+  sidebarSignIn.addEventListener('click', () => {
+    closeSidebar();
+    headerSignIn.click();
+  });
+  sidebarSignUp.addEventListener('click', () => {
+    closeSidebar();
+    headerSignUp.click();
+  });
+
+  // Theme toggle in sidebar
+  sidebarTheme.addEventListener('click', () => themeToggle.click());
+});
 
  
 
