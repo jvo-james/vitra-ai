@@ -819,7 +819,6 @@
       {id:'p17',name:'Mr. Kwesi Owusu',spec:'Nutritionist, Nyaho Med.'},
       {id:'p18',name:'Ms. Abena Boateng',spec:'Psychologist, Accra Psych.'}
     ];
-    let availability = {/* as before */};
     let currentProviderId = null;
     let currentProviderName = '';
     let displayYear = new Date().getFullYear();
@@ -977,13 +976,20 @@
       const [name, spec] = top.split('–').map(s=>s.trim());
       resultContent.innerHTML = `<strong>${name}</strong> – ${spec}`;
       matchPanel.hidden=false;
-      // wire buttons
-      chooseOwnBtn.onclick=()=> {
-        resultContent.style.display='none';
-        matchPanel.querySelector('#chooseOwnSelect').hidden=false;
+     // wire buttons
+      chooseOwnBtn.onclick = () => {
+        resultContent.hidden = true;
+        document.getElementById('chooseOwnSelect').hidden = false;
       };
-      proceedMatchBtn.onclick=()=> startAppointment(name, providers.find(p=>p.name===name).id);
-      ownSelect.onchange=e=> startAppointment(providers.find(p=>p.id===e.target.value).name, e.target.value);
+      proceedMatchBtn.onclick = () => {
+        const matchId = providers.find(p=>p.name===name).id;
+        startAppointment(name, matchId);
+      };
+      ownSelect.onchange = e => {
+        const selId = e.target.value;
+        const selName = providers.find(p=>p.id===selId).name;
+        startAppointment(selName, selId);
+      };
       matchPanel.querySelector('.close-btn').onclick=()=> matchPanel.hidden=true;
     });
 
