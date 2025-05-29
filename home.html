@@ -8,8 +8,6 @@
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet"
         href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"/>
-  <!-- AOS for scroll animations -->
-  <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet"/>
   <style>
     /*──────── RESET & BASE ────────*/
     *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
@@ -60,7 +58,20 @@
     .navbar li a:hover { color:var(--primary); }
     #themeToggle { font-size:1.2rem; }
 
-    /*──────── HERO ────────*/
+ .navbar { position: fixed; top:0; left:0; right:0; display:flex; align-items:center; justify-content:space-between; padding:.75rem var(--padding); background:var(--surface); box-shadow:0 2px 8px rgba(0,0,0,0.1); z-index:1000; }
+  .navbar .logo svg { width:2.5rem; height:2.5rem; }
+  .navbar ul { display:flex; gap:var(--gap); }
+  .navbar .auth { display:flex; gap:.75rem; }
+  .navbar .btn { padding:.5rem 1rem; border-radius:var(--radius); font-weight:500; transition:background .2s; display:flex; align-items:center; gap:.5rem; }
+  .btn-primary { background:var(--primary); color:#fff; }
+  .btn-secondary { background:transparent; color:var(--primary); border:2px solid var(--primary); }
+  /* hamburger */
+  .hamburger { display:none; font-size:1.5rem; cursor:pointer; }
+  @media(max-width:768px){
+    .navbar ul, .navbar .auth { display:none; }
+    .hamburger { display:block; }
+  }
+    
  /*────────────────── HERO ──────────────────*/
 .hero {
   display: flex;
@@ -129,13 +140,33 @@
 
     /* Decorative floating icons */
     .hero .float-icon {
-     position:absolute; font-size:2.5rem; opacity:1;
+     position:absolute; font-size : 3rem; opacity : 0.4;
       animation: float 6s ease-in-out infinite;
     }
-    .hero .float-icon:nth-child(1){ top:10%; left:15%; color:#2A6F4E; }
-    .hero .float-icon:nth-child(2){ top:20%; right:20%; color:#E76F51; animation-delay:2s; }
-    .hero .float-icon:nth-child(3){ bottom:15%; left:25%; color:#FAB005; animation-delay:4s; }
-    .hero .float-icon:nth-child(4){ bottom:10%; right:15%; color:#386BFF; animation-delay:1s; }
+ .hero .float-icon:nth-of-type(1) {
+      top: 15%;
+      left: 8%;
+      color: #2A6F4E;
+      animation-delay: 0s;
+    }
+    .hero .float-icon:nth-of-type(2) {
+      top: 40%;
+      left: 20%;
+      color: #E76F51;
+      animation-delay: 1.5s;
+    }
+    .hero .float-icon:nth-of-type(3) {
+      bottom: 25%;
+      left: 12%;
+      color: #FAB005;
+      animation-delay: 3s;
+    }
+    .hero .float-icon:nth-of-type(4) {
+      bottom: 10%;
+      left: 28%;
+      color: #386BFF;
+      animation-delay: 4.5s;
+    }
     @keyframes float {
       0%,100% { transform: translateY(0); }
       50% { transform: translateY(-15px);}
@@ -208,6 +239,14 @@
     .testimonial-nav button {
       background:rgba(0,0,0,0.3); color:#fff; padding:.5rem; border-radius:50%;
     }
+ /*──────── MODAL COMMON ────────*/
+  .modal-backdrop { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.5); justify-content:center; align-items:center; z-index:2000; }
+  .modal { background:var(--surface); padding:var(--padding); border-radius:var(--radius); width:90%; max-width:400px; box-shadow:0 2px 10px rgba(0,0,0,0.2); }
+  .modal h3 { margin-bottom:1rem; }
+  .modal form { display:flex; flex-direction:column; gap:1rem; }
+  .modal input { padding:.75rem 1rem; border:1px solid var(--muted); border-radius:var(--radius); }
+  .modal button { padding:.75rem; border-radius:var(--radius); background:var(--primary); color:#fff; }
+  .modal .close { position:absolute; top:.5rem; right:.75rem; font-size:1.2rem; cursor:pointer; }
 
     /*──────── FAQ ────────*/
     .faq-item { margin-bottom:1rem; border-radius:var(--radius); overflow:hidden; box-shadow:0 2px 8px rgba(0,0,0,0.05);}
@@ -261,21 +300,53 @@
 
   <!-- NAVBAR -->
   <nav class="navbar">
-   <div class="logo">
+    <div class="logo">
       <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" fill="var(--primary)">
-        <path d="M10,90 L50,10 L90,90 L75,90 L50,30 L25,90 Z"/>
+        <polygon points="10,10 25,90 50,40 75,90 90,10 65,10 50,70 35,10"/>
       </svg>
     </div>
     <ul>
       <li><a href="#services">Services</a></li>
       <li><a href="#features">Features</a></li>
-      <li><a href="#gallery">Gallery</a></li>
-      <li><a href="#testimonials">Testimonials</a></li>
-      <li><a href="#faq">FAQ</a></li>
+      <li><a href="#newsletter">Newsletter</a></li>
     </ul>
+    <div class="auth">
+      <button class="btn btn-secondary" id="openSignIn"><i class="fas fa-sign-in-alt"></i> Sign In</button>
+      <button class="btn btn-primary" id="openSignUp"><i class="fas fa-user-plus"></i> Sign Up</button>
+    </div>
     <i id="themeToggle" class="fas fa-moon"></i>
+    <i class="fas fa-bars hamburger" id="hamburger"></i>
   </nav>
 
+  <!-- SIGN IN MODAL -->
+  <div class="modal-backdrop" id="signInModal">
+    <div class="modal">
+      <span class="close" data-close>&times;</span>
+      <h3>Sign In</h3>
+      <form id="signInForm">
+        <input type="email" id="signInEmail" placeholder="Email" required />
+        <input type="password" id="signInPass" placeholder="Password" required />
+        <a href="#" id="forgotPass">Forgot password?</a>
+        <button type="submit">Sign In</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- SIGN UP MODAL -->
+  <div class="modal-backdrop" id="signUpModal">
+    <div class="modal">
+      <span class="close" data-close>&times;</span>
+      <h3>Sign Up</h3>
+      <form id="signUpForm">
+        <input type="text" id="signUpName" placeholder="Full Name" required />
+        <input type="email" id="signUpEmail" placeholder="Email" required />
+        <input type="password" id="signUpPass" placeholder="Password" required />
+        <input type="password" id="signUpPass2" placeholder="Confirm Password" required />
+        <button type="submit">Create Account</button>
+      </form>
+    </div>
+  </div>
+  
   <!-- MAIN CONTENT -->
   <main>
 
@@ -424,7 +495,46 @@
     });
     back.onclick = () => window.scrollTo({ top:0, behavior:'smooth' });
 
-  
+   // hamburger toggle
+    document.getElementById('hamburger').onclick = () => {
+      document.querySelector('.navbar ul').classList.toggle('open');
+      document.querySelector('.auth').classList.toggle('open');
+    };
+
+    // modal open/close
+    document.getElementById('openSignIn').onclick = () => {
+      document.getElementById('signInModal').style.display = 'flex';
+    };
+    document.getElementById('openSignUp').onclick = () => {
+      document.getElementById('signUpModal').style.display = 'flex';
+    };
+    document.querySelectorAll('[data-close]').forEach(el=>{
+      el.onclick = ()=> {
+        el.closest('.modal-backdrop').style.display='none';
+      };
+    });
+
+    // Sign In form
+    document.getElementById('signInForm').onsubmit = e => {
+      e.preventDefault();
+      const email = e.target.signInEmail.value;
+      const pass = e.target.signInPass.value;
+      // dummy check: don't allow missing
+      alert(`Welcome back ${email}!`);
+      document.getElementById('signInModal').style.display = 'none';
+    };
+
+    // Sign Up form
+    document.getElementById('signUpForm').onsubmit = e => {
+      e.preventDefault();
+      const name = e.target.signUpName.value;
+      if (e.target.signUpPass.value !== e.target.signUpPass2.value) {
+        alert('Passwords do not match');
+        return;
+      }
+      alert(`Hello ${name}! Your account has been created.`);
+      document.getElementById('signUpModal').style.display = 'none';
+    };
   </script>
 </body>
 </html>
