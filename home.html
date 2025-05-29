@@ -5,279 +5,458 @@
   <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
   <title>Vitra AI – Home</title>
   <!-- Fonts & Icons -->
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;600;700&display=swap" rel="stylesheet">
-  <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet"
-        href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
+        href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"/>
+  <!-- AOS for scroll animations -->
+  <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet"/>
+  <style>
+    /*──────── RESET & BASE ────────*/
+    *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+    html { font-family: 'Montserrat', sans-serif; scroll-behavior: smooth; }
+    body { background: var(--bg); color: var(--text); transition: background .3s, color .3s;}
+    a { text-decoration:none; color:inherit; }
+    img { max-width:100%; display:block; }
+    ul { list-style:none; }
+    button { font:inherit; cursor:pointer; border:none; background:none; }
 
-<style>
-  /*────────────────── RESET & BASE ──────────────────*/
-  *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
-  html { font-family: 'Montserrat', sans-serif; scroll-behavior: smooth; }
-  body { background: #F7FAFE; color: #1A1A1A; }
-  a { text-decoration:none; color:inherit; }
-  button { font:inherit; cursor:pointer; border:none; background:none; }
+    /*──────── VARIABLES ────────*/
+    :root {
+      --primary: #386BFF;
+      --secondary: #FFFFFF;
+      --bg: #F7FAFE;
+      --surface: #FFFFFF;
+      --text: #1A1A1A;
+      --muted: #555555;
+      --radius: 0.75rem;
+      --padding: 1.5rem;
+      --gap: 1rem;
+      --max-width: 1200px;
+    }
+    html.dark {
+      --bg: #1F2233;
+      --surface: #2B2E44;
+      --text: #E0E0E0;
+      --muted: #888888;
+    }
 
-  /*────────────────── VARIABLES ──────────────────*/
-  :root {
-    --primary: #386BFF;
-    --secondary: #FFFFFF;
-    --bg: #F7FAFE;
-    --surface: #FFFFFF;
-    --text: #1A1A1A;
-    --muted: #555555;
-    --radius: 0.75rem;
-    --padding: 1.5rem;
-    --gap: 1rem;
-    --max-width: 1200px;
-  }
-  html.dark {
-    --bg: #1F2233;
-    --surface: #2B2E44;
-    --text: #E0E0E0;
-    --muted: #888888;
-  }
+    /*──────── GLOBAL LAYOUT ────────*/
+    main { margin: auto; padding: var(--padding); max-width: var(--max-width); }
+    section { margin-bottom: 3rem; }
 
-  /*────────────────── LAYOUT ──────────────────*/
-  main {
-    margin: auto;
-    padding: var(--padding);
-    max-width: var(--max-width);
-  }
-  section { margin-bottom: 2rem; }
+    /*──────── NAVBAR ────────*/
+    .navbar {
+      position: fixed; top: 0; left: 0; right: 0;
+      background: var(--surface); display: flex; align-items: center;
+      justify-content: space-between; padding: .75rem var(--padding);
+      box-shadow:0 2px 8px rgba(0,0,0,0.1); z-index:1000;
+    }
+    .navbar .logo { font-weight:700; font-size:1.25rem; color:var(--primary); }
+    .navbar ul { display:flex; gap:var(--gap); }
+    .navbar li a { padding:.5rem; transition: color .2s; }
+    .navbar li a:hover { color:var(--primary); }
+    #themeToggle { font-size:1.2rem; }
 
-  /*────────────────── HERO ──────────────────*/
-  .hero {
-    position: relative;
-    background: var(--surface);
-    border-radius: var(--radius);
-    padding: 4rem var(--padding);
-    text-align: center;
-    overflow: hidden;
-    box-shadow:0 2px 8px rgba(0,0,0,0.05);
-  }
-  .hero h1 {
-    font-size: 2.5rem;
-    line-height: 1.2;
-    margin-bottom:1rem;
-    font-weight:600;
-  }
-  .hero p {
-    font-size:1.15rem;
-    color:var(--muted);
-    margin-bottom:2rem;
-  }
-  .hero .actions {
-    display:flex;
-    gap:var(--gap);
-    justify-content:center;
-    flex-wrap:wrap;
-  }
-  .hero .actions a {
-    display:inline-flex;
-    align-items:center;
-    gap:.5rem;
-    padding:.75rem 1.5rem;
-    border-radius:var(--radius);
-    font-weight:500;
-    transition: transform .2s;
-  }
-  .hero .actions a.btn-primary {
-    background:var(--primary);
-    color:#fff;
-  }
-  .hero .actions a.btn-secondary {
-    background:transparent;
-    color:var(--primary);
-    border:2px solid var(--primary);
-  }
-  .hero .actions a:hover {
-    transform:translateY(-2px);
-  }
-  /* Decorative icons */
-  .hero .icon {
-    position:absolute;
-    font-size:3rem;
-    opacity:0.2;
-  }
-  .hero .icon.leaf    { top:1rem; left:1rem;  color:#2A6F4E; }
-  .hero .icon.brain   { top:1rem; right:1rem; color:#E76F51; }
-  .hero .icon.apple   { bottom:1rem; left:1rem; color:#FAB005; }
-  .hero .icon.chat    { bottom:1rem; right:1rem;color:#386BFF; }
+    /*──────── HERO ────────*/
+    .hero {
+      position: relative; margin-top:4rem;
+      background: url('ai.jpg') center/cover no-repeat;
+      border-radius: var(--radius); overflow: hidden;
+      color: #fff; text-align:center;
+    }
+    .hero::after {
+      content: ''; position:absolute; inset:0;
+      background: rgba(0,0,0,0.4);
+    }
+    .hero .content {
+      position: relative; padding: 6rem 2rem;
+    }
+    .hero h1 { font-size:3rem; margin-bottom:1rem; }
+    .hero p { font-size:1.2rem; margin-bottom:2rem; }
+    .hero .actions a {
+      display:inline-flex; align-items:center; gap:.5rem;
+      padding:.75rem 1.5rem; border-radius:var(--radius);
+      font-weight:600; transition: background .3s, transform .2s;
+    }
+    .hero .btn-primary { background:var(--primary); color:#fff; }
+    .hero .btn-secondary {
+      background:transparent; color:#fff; border:2px solid #fff;
+    }
+    .hero .actions a:hover { transform:translateY(-3px); }
 
-  /*────────────────── SERVICES GRID ──────────────────*/
-  #services {
-    display:grid;
-    gap:var(--gap);
-    grid-template-columns:repeat(auto-fit,minmax(160px,1fr));
-  }
-  .service-card {
-    background:var(--surface);
-    border-radius:var(--radius);
-    padding:var(--padding);
-    box-shadow:0 2px 8px rgba(0,0,0,0.05);
-    text-align:center;
-    transition:transform .2s;
-    cursor:pointer;
-  }
-  .service-card:hover {
-    transform:translateY(-4px);
-  }
-  .service-card i {
-    font-size:2.5rem;
-    margin-bottom:.5rem;
-  }
-  .service-card p {
-    font-weight:600;
-    margin-top:.25rem;
-  }
+    /* Decorative floating icons */
+    .hero .float-icon {
+      position:absolute; font-size:2.5rem; opacity:0.3;
+      animation: float 6s ease-in-out infinite;
+    }
+    .hero .float-icon:nth-child(1){ top:10%; left:15%; color:#2A6F4E; }
+    .hero .float-icon:nth-child(2){ top:20%; right:20%; color:#E76F51; animation-delay:2s; }
+    .hero .float-icon:nth-child(3){ bottom:15%; left:25%; color:#FAB005; animation-delay:4s; }
+    .hero .float-icon:nth-child(4){ bottom:10%; right:15%; color:#386BFF; animation-delay:1s; }
+    @keyframes float {
+      0%,100% { transform: translateY(0); }
+      50% { transform: translateY(-15px);}
+    }
 
-  /*────────────────── INFO SECTIONS ──────────────────*/
-  .info {
-    text-align:center;
-    padding:0 var(--padding);
-  }
-  .info h2 {
-    font-size:2rem;
-    margin-bottom:.5rem;
-    font-weight:600;
-  }
-  .info p {
-    font-size:1rem;
-    color:var(--muted);
-    line-height:1.5;
-    max-width:720px;
-    margin:auto;
-  }
+    /*──────── SERVICES ────────*/
+    .services {
+      display:grid; gap:var(--gap);
+      grid-template-columns:repeat(auto-fit,minmax(200px,1fr));
+    }
+    .service-card {
+      background: var(--surface); border-radius: var(--radius);
+      overflow:hidden; box-shadow:0 2px 8px rgba(0,0,0,0.1);
+      transition: transform .2s, box-shadow .2s;
+    }
+    .service-card img { width:100%; height:140px; object-fit:cover; }
+    .service-card .info {
+      padding:var(--padding); text-align:center;
+    }
+    .service-card .info i { font-size:2rem; margin-bottom:.5rem; color:var(--primary);}
+    .service-card .info h4 { margin-bottom:.5rem; font-weight:600;}
+    .service-card:hover { transform: translateY(-5px); box-shadow:0 4px 12px rgba(0,0,0,0.15); }
 
-  /*────────────────── STEPS ──────────────────*/
-  .steps {
-    display:grid;
-    grid-template-columns:repeat(auto-fit,minmax(180px,1fr));
-    gap:var(--gap);
-    margin-top:2rem;
-    padding:0 var(--padding);
-  }
-  .step {
-    text-align:center;
-  }
-  .step i {
-    font-size:2.5rem;
-    color:var(--primary);
-    margin-bottom:.5rem;
-  }
-  .step h3 {
-    font-size:1.1rem;
-    font-weight:600;
-    margin-bottom:.25rem;
-  }
-  .step p {
-    font-size:.95rem;
-    color:var(--muted);
-  }
+    /*──────── FEATURES ────────*/
+    .features {
+      display:flex; flex-wrap:wrap; gap:var(--gap);
+    }
+    .feature {
+      flex:1 1 300px; display:flex; background:var(--surface);
+      border-radius:var(--radius); overflow:hidden; box-shadow:0 2px 8px rgba(0,0,0,0.1);
+      transition:transform .2s;
+    }
+    .feature img { width:150px; object-fit:cover; }
+    .feature .text { padding:var(--padding); }
+    .feature .text i { font-size:1.5rem; color:var(--primary); margin-bottom:.5rem;}
+    .feature .text h4 { margin-bottom:.5rem; font-weight:600;}
+    .feature:hover { transform: translateY(-4px);}
+    
+    /*──────── GALLERY ────────*/
+    .gallery {
+      display:grid; grid-template-columns:repeat(auto-fit,minmax(200px,1fr));
+      gap:var(--gap);
+    }
+    .gallery img { cursor:pointer; border-radius:var(--radius); }
 
-  /*────────────────── RESPONSIVE TWEAKS ──────────────────*/
-  @media(max-width:768px){
-    .hero h1 { font-size:2rem; }
-    .hero p  { font-size:1rem; }
-  }
-</style>
+    /* Lightbox */
+    #lightbox {
+      position:fixed; top:0; left:0; width:100%; height:100%;
+      background: rgba(0,0,0,0.8); display:none; justify-content:center; align-items:center;
+      z-index:2000;
+    }
+    #lightbox img { max-width:90%; max-height:90%; border-radius:var(--radius); }
+    #lightbox:target { display:flex; }
 
+    /*──────── TESTIMONIALS ────────*/
+    .testimonials { position: relative; overflow:hidden; }
+    .testimonial-track {
+      display:flex; transition: transform .5s ease;
+    }
+    .testimonial {
+      flex:0 0 100%; padding:var(--padding); box-sizing:border-box;
+      text-align:center;
+    }
+    .testimonial p { font-style:italic; margin-bottom:1rem; }
+    .testimonial h5 { font-weight:600; }
+    .testimonial-nav {
+      position:absolute; top:50%; width:100%; display:flex; justify-content:space-between;
+      transform: translateY(-50%);
+    }
+    .testimonial-nav button {
+      background:rgba(0,0,0,0.3); color:#fff; padding:.5rem; border-radius:50%;
+    }
+
+    /*──────── FAQ ────────*/
+    .faq-item { margin-bottom:1rem; border-radius:var(--radius); overflow:hidden; box-shadow:0 2px 8px rgba(0,0,0,0.05);}
+    .faq-item summary {
+      background: var(--surface); padding:var(--padding); cursor:pointer;
+      display:flex; align-items:center; justify-content:space-between;
+      font-weight:600;
+    }
+    .faq-item summary i { transition: transform .2s; }
+    .faq-item[open] summary i { transform: rotate(180deg); }
+    .faq-item div { padding:0 var(--padding) var(--padding); background: var(--bg); }
+
+    /*──────── NEWSLETTER ────────*/
+    .newsletter {
+      background: var(--surface); padding:var(--padding); border-radius:var(--radius);
+      text-align:center; box-shadow:0 2px 8px rgba(0,0,0,0.05);
+    }
+    .newsletter input[type="email"] {
+      padding:.75rem 1rem; width:70%; max-width:320px; border:1px solid var(--muted);
+      border-radius:var(--radius) 0 0 var(--radius);
+    }
+    .newsletter button {
+      padding:.8rem 1.2rem; background:var(--primary); color:#fff;
+      border-radius:0 var(--radius) var(--radius) 0;
+    }
+
+    /*──────── BACK TO TOP ────────*/
+    #backToTop {
+      position:fixed; bottom:2rem; right:2rem; display:none;
+      background:var(--primary); color:#fff; padding:.75rem;
+      border-radius:50%; font-size:1.2rem; cursor:pointer; box-shadow:0 2px 8px rgba(0,0,0,0.2);
+      z-index:1000;
+    }
+
+    /*──────── FOOTER ────────*/
+    footer {
+      background: var(--surface); padding:var(--padding); text-align:center;
+      box-shadow:0 -2px 8px rgba(0,0,0,0.05);
+    }
+    .socials a { margin:0 .5rem; font-size:1.2rem; color:var(--muted); transition: color .2s;}
+    .socials a:hover { color:var(--primary); }
+
+    /*──────── RESPONSIVE ────────*/
+    @media(max-width:768px){
+      .hero h1 { font-size:2.2rem; }
+      .hero p  { font-size:1rem; }
+    }
+  </style>
 </head>
 <body>
 
-  <!-- MAIN -->
+  <!-- NAVBAR -->
+  <nav class="navbar">
+    <div class="logo"><i class="fas fa-robot"></i> Vitra AI</div>
+    <ul>
+      <li><a href="#services">Services</a></li>
+      <li><a href="#features">Features</a></li>
+      <li><a href="#gallery">Gallery</a></li>
+      <li><a href="#testimonials">Testimonials</a></li>
+      <li><a href="#faq">FAQ</a></li>
+    </ul>
+    <i id="themeToggle" class="fas fa-moon"></i>
+  </nav>
+
+  <!-- MAIN CONTENT -->
   <main>
 
     <!-- HERO -->
-    <section class="hero">
-      <h1><i class="fas fa-robot"></i> AI-Powered Healthcare, Redefined</h1>
-      <p>Explore our innovative AI services for holistic wellness and care.</p>
-      <div class="actions">
-        <a href="#services" class="btn btn-primary"><i class="fas fa-th-large"></i> Explore Services</a>
-        <a href="psychology.html#therapybot" class="btn btn-secondary"><i class="fas fa-comments"></i> Talk to AI</a>
+    <section class="hero" data-aos="fade-up">
+      <div class="content">
+        <h1>AI-Powered Healthcare, Redefined</h1>
+        <p>Explore our innovative AI services for holistic wellness and care.</p>
+        <div class="actions">
+          <a href="#services" class="btn-primary"><i class="fas fa-th-large"></i> Explore</a>
+          <a href="psychology.html#therapybot" class="btn-secondary"><i class="fas fa-comments"></i> Talk to AI</a>
+        </div>
+      </div>
+      <i class="fas fa-leaf float-icon"></i>
+      <i class="fas fa-brain float-icon"></i>
+      <i class="fas fa-apple-alt float-icon"></i>
+      <i class="fas fa-heartbeat float-icon"></i>
+    </section>
+
+    <!-- SERVICES -->
+    <section id="services">
+      <h2 data-aos="fade-right">Our Services</h2>
+      <div class="services">
+        <div class="service-card" data-aos="fade-up">
+          <img src="herbs.webp" alt="Herbal Medicine">
+          <div class="info">
+            <i class="fas fa-leaf"></i>
+            <h4>Herbal Medicine</h4>
+            <p>Natural remedies crafted by AI-driven recommendations.</p>
+          </div>
+        </div>
+        <div class="service-card" data-aos="fade-up" data-aos-delay="100">
+          <img src=mental.jpg" alt="Psychology">
+          <div class="info">
+            <i class="fas fa-brain"></i>
+            <h4>Mental Health & Psychology</h4>
+            <p>Start a confidential chat with our AI therapist.</p>
+          </div>
+        </div>
+        <div class="service-card" data-aos="fade-up" data-aos-delay="200">
+          <img src="diet.jpg" alt="Dietetics">
+          <div class="info">
+            <i class="fas fa-apple-alt"></i>
+            <h4>Dietetics</h4>
+            <p>Personalized meal plans for optimal nutrition.</p>
+          </div>
+        </div>
+        <div class="service-card" data-aos="fade-up" data-aos-delay="300">
+          <img src="pills.jpg" alt="E-Pharmacy">
+          <div class="info">
+            <i class="fas fa-pills"></i>
+            <h4>E-Pharmacy</h4>
+            <p>Order prescriptions with AI dosage checks.</p>
+          </div>
+        </div>
+        <div class="service-card" data-aos="fade-up" data-aos-delay="400">
+          <img src="book.jpg" alt="Consultation">
+          <div class="info">
+            <i class="fas fa-calendar-check"></i>
+            <h4>Consult Booking</h4>
+            <p>Schedule live video consults with experts.</p>
+          </div>
+        </div>
       </div>
     </section>
 
-    <!-- SERVICES GRID -->
-    <section id="services" class="services">
-      <div class="service-card" onclick="location.href='index.html'">
-        <i class="fas fa-leaf" style="color:#2A6F4E"></i>
-        <p>Herbal Medicine</p>
-      </div>
-      <div class="service-card" onclick="location.href='psychology.html'">
-        <i class="fas fa-brain" style="color:#E76F51"></i>
-        <p>Psychology &amp; Mental Health</p>
-      </div>
-      <div class="service-card" onclick="location.href='dietetics.html'">
-        <i class="fas fa-apple-alt" style="color:#FAB005"></i>
-        <p>Dietetics</p>
-      </div>
-      <div class="service-card" onclick="location.href='pharmacy.html'">
-        <i class="fas fa-pills" style="color:#2F8F7F"></i>
-        <p>E-Pharmacy</p>
-      </div>
-      <div class="service-card" onclick="location.href='consult.html'">
-        <i class="fas fa-calendar-check" style="color:#4B3F72"></i>
-        <p>Consultation Booking</p>
+    <!-- FEATURES -->
+    <section id="features">
+      <h2 data-aos="fade-left">Why Vitra AI?</h2>
+      <div class="features">
+        <div class="feature" data-aos="zoom-in">
+          <img src="https://via.placeholder.com/150" alt="Personalized">
+          <div class="text">
+            <i class="fas fa-user-shield"></i>
+            <h4>Personalized</h4>
+            <p>Your care, your way—AI adapts to you.</p>
+          </div>
+        </div>
+        <div class="feature" data-aos="zoom-in" data-aos-delay="100">
+          <img src="https://via.placeholder.com/150" alt="Secure">
+          <div class="text">
+            <i class="fas fa-lock"></i>
+            <h4>Secure</h4>
+            <p>End-to-end encryption for all data.</p>
+          </div>
+        </div>
+        <div class="feature" data-aos="zoom-in" data-aos-delay="200">
+          <img src="https://via.placeholder.com/150" alt="24/7">
+          <div class="text">
+            <i class="fas fa-clock"></i>
+            <h4>24/7 Access</h4>
+            <p>Support whenever you need it.</p>
+          </div>
+        </div>
       </div>
     </section>
 
-    <!-- WHAT IS VITRA AI -->
-    <section class="info">
-      <h2>What is Vitra AI?</h2>
-      <p>
-        Vitra AI harnesses the power of artificial intelligence to provide cutting-edge solutions  
-        in herbal medicine, mental health, dietetics, e-pharmacy, and seamless consultation booking.  
-        Our mission: holistic, personalized care at your fingertips.
-      </p>
+    <!-- GALLERY -->
+    <section id="gallery">
+      <h2 data-aos="fade-up">Gallery</h2>
+      <div class="gallery">
+        <a href="#img1"><img src="https://via.placeholder.com/300" alt="Gallery 1"></a>
+        <a href="#img2"><img src="https://via.placeholder.com/300" alt="Gallery 2"></a>
+        <a href="#img3"><img src="https://via.placeholder.com/300" alt="Gallery 3"></a>
+        <a href="#img4"><img src="https://via.placeholder.com/300" alt="Gallery 4"></a>
+      </div>
+      <!-- Lightbox targets -->
+      <div id="img1"><img src="https://via.placeholder.com/800x600" alt=""></div>
+      <div id="img2"><img src="https://via.placeholder.com/800x600" alt=""></div>
+      <div id="img3"><img src="https://via.placeholder.com/800x600" alt=""></div>
+      <div id="img4"><img src="https://via.placeholder.com/800x600" alt=""></div>
+      <a id="lightbox" href="#"></a>
     </section>
 
-    <!-- HOW IT WORKS -->
-    <section class="info">
-      <h2>How It Works</h2>
-      <div class="steps">
-        <div class="step">
-          <i class="fas fa-1 fa-circle" style="color:var(--primary)"></i>
-          <h3>Choose a service</h3>
-          <p>Select from our holistic healthcare offerings</p>
+    <!-- TESTIMONIALS -->
+    <section id="testimonials">
+      <h2 data-aos="fade-right">What Our Clients Say</h2>
+      <div class="testimonials" data-aos="fade-up">
+        <div class="testimonial-track" id="track">
+          <div class="testimonial">
+            <p>"Vitra AI’s herbal suggestions completely transformed my health routine!"</p>
+            <h5>— Jane Doe</h5>
+          </div>
+          <div class="testimonial">
+            <p>"The AI therapist listened and provided real insights. Highly recommend."</p>
+            <h5>— John Smith</h5>
+          </div>
+          <div class="testimonial">
+            <p>"I love the meal plans—it’s like having a personal dietician."</p>
+            <h5>— Sarah Lee</h5>
+          </div>
         </div>
-        <div class="step">
-          <i class="fas fa-2 fa-circle" style="color:var(--primary)"></i>
-          <h3>Talk to AI</h3>
-          <p>Engage with our AI expert for personalized guidance</p>
-        </div>
-        <div class="step">
-          <i class="fas fa-3 fa-circle" style="color:var(--primary)"></i>
-          <h3>Get personalized care</h3>
-          <p>Receive tailored recommendations & next steps</p>
+        <div class="testimonial-nav">
+          <button id="prev"><i class="fas fa-chevron-left"></i></button>
+          <button id="next"><i class="fas fa-chevron-right"></i></button>
         </div>
       </div>
+    </section>
+
+    <!-- FAQ -->
+    <section id="faq">
+      <h2 data-aos="fade-left">Frequently Asked Questions</h2>
+      <div data-aos="fade-up">
+        <details class="faq-item">
+          <summary>Is my data secure? <i class="fas fa-chevron-down"></i></summary>
+          <div>Your health data is encrypted and stored securely with zero-knowledge protocols.</div>
+        </details>
+        <details class="faq-item">
+          <summary>How do I start a session? <i class="fas fa-chevron-down"></i></summary>
+          <div>Choose your service, click “Talk to AI,” and follow the on-screen prompts.</div>
+        </details>
+        <details class="faq-item">
+          <summary>Can I cancel anytime? <i class="fas fa-chevron-down"></i></summary>
+          <div>Yes—we offer a flexible subscription with monthly cancellation.</div>
+        </details>
+      </div>
+    </section>
+
+    <!-- NEWSLETTER -->
+    <section class="newsletter" data-aos="zoom-in">
+      <h2>Stay Updated</h2>
+      <p>Subscribe to our newsletter for the latest AI health tips.</p>
+      <form onsubmit="alert('Thank you for subscribing!'); return false;">
+        <input type="email" placeholder="Your email address" required/>
+        <button type="submit"><i class="fas fa-envelope"></i> Subscribe</button>
+      </form>
     </section>
 
   </main>
 
+  <!-- BACK TO TOP -->
+  <div id="backToTop"><i class="fas fa-arrow-up"></i></div>
+
   <!-- FOOTER -->
-  <footer style="text-align:center;padding:var(--padding);background:var(--surface);color:var(--muted)">
-    &copy; 2025 Vitra AI. All rights reserved.
+  <footer>
+    <p>&copy; 2025 Vitra AI. All rights reserved.</p>
+    <div class="socials">
+      <a href="#"><i class="fab fa-facebook-f"></i></a>
+      <a href="#"><i class="fab fa-twitter"></i></a>
+      <a href="#"><i class="fab fa-instagram"></i></a>
+      <a href="#"><i class="fab fa-linkedin-in"></i></a>
+    </div>
   </footer>
 
   <!-- SCRIPTS -->
+  <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
   <script>
-    // Sidebar toggle
-    document.getElementById('shrinkBtn').onclick = () => {
-      document.getElementById('sidebar').classList.toggle('collapsed');
-    };
-    // Mobile nav
-    document.getElementById('hamburger').onclick = () => {
-      document.getElementById('sidebar').classList.toggle('open');
-    };
+    // Initialize scroll animations
+    AOS.init({ duration: 800 });
+
     // Theme toggle
     document.getElementById('themeToggle').onclick = () => {
       document.documentElement.classList.toggle('dark');
       document.getElementById('themeToggle').classList.toggle('fa-sun');
+    };
+
+    // Testimonial carousel
+    const track = document.getElementById('track');
+    let index = 0;
+    document.getElementById('next').onclick = () => {
+      index = (index + 1) % 3;
+      track.style.transform = `translateX(-${index * 100}%)`;
+    };
+    document.getElementById('prev').onclick = () => {
+      index = (index + 2) % 3;
+      track.style.transform = `translateX(-${index * 100}%)`;
+    };
+
+    // Back to top
+    const back = document.getElementById('backToTop');
+    window.addEventListener('scroll', () => {
+      back.style.display = window.scrollY > 400 ? 'block' : 'none';
+    });
+    back.onclick = () => window.scrollTo({ top:0, behavior:'smooth' });
+
+    // Lightbox
+    document.querySelectorAll('#gallery a').forEach(a => {
+      a.onclick = e => {
+        e.preventDefault();
+        const href = a.getAttribute('href');
+        document.getElementById('lightbox').setAttribute('href', '#');
+        document.getElementById('lightbox').innerHTML = 
+          `<img src="${document.querySelector(href + ' img, ' + href).src}" alt="">`;
+        document.getElementById('lightbox').style.display = 'flex';
+      };
+    });
+    document.getElementById('lightbox').onclick = () => {
+      document.getElementById('lightbox').style.display = 'none';
     };
   </script>
 </body>
