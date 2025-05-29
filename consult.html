@@ -350,12 +350,11 @@ body.sidebar-shrink footer {
   }
   /* Spinner */
 .spinner {
-  border: 4px solid rgba(0,0,0,0.1);
-  border-left-color: var(--cb-primary);
-  border-radius: 50%;
-  width: 24px; height: 24px;
   animation: spin 1s linear infinite;
   margin: .5rem auto;
+  border: 6px solid rgba(0,0,0,0.15);        
+  border-left-color: var(--cb-accent);     
+  width: 32px; height: 32px;  
 }
 @keyframes spin { to { transform: rotate(360deg); } }
 .hero-graphic {
@@ -408,6 +407,8 @@ body.sidebar-shrink footer {
    transform: translateY(-50%);
    display: inline-block;
  }
+ .calendar-controls { display: none !important; }
+ #filterSlots, #nextAvailable { display: none !important; }
 
   .month-nav {
    display: flex; align-items: center; justify-content: center;
@@ -426,7 +427,7 @@ body.sidebar-shrink footer {
    border-radius: var(--radius); box-shadow: var(--shadow);
    margin-top: 1rem;
  }
- #timeSlots h4 { margin-bottom: .75rem; color: var(--cb-primary-alt); }
+ #timeSlots h4 { margin-bottom: .75rem; color: var(--cb-primary-alt); font-weight: 600;  }
  #timeSlots ul { display: flex; flex-wrap: wrap; gap: .5rem; }
  #timeSlots ul li button {
    background: var(--cb-primary-alt); color: #fff;
@@ -917,12 +918,13 @@ body.sidebar-shrink footer {
         </div>`;
       matchPanel.hidden = false;
 
-    document.getElementById('proceedMatch')
-   .addEventListener('click', () => {
-     providerMatchEl.hidden = true;
-     appointmentEl.hidden   = false;
-     startAppointmentFlow(top);
-   });
+   document.getElementById('proceedMatch').onclick = ()=>{
+        chosenProviderName = top;
+       document.getElementById('chosenProvider').innerText = chosenProviderName;
+        providerMatchEl.hidden = true;
+        appointmentEl.hidden   = false;
+        startAppointmentFlow(chosenProviderName);
+      };
       
       document.getElementById('chooseOwn')
    .addEventListener('click', () => {
