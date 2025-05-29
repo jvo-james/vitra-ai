@@ -17,9 +17,8 @@
   *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
   html { font-family: 'Montserrat', sans-serif; scroll-behavior: smooth; }
   body { background: #F7FAFE; color: #1A1A1A; }
-
-  a { text-decoration: none; color: inherit; }
-  button { font: inherit; cursor: pointer; border: none; background: none; }
+  a { text-decoration:none; color:inherit; }
+  button { font:inherit; cursor:pointer; border:none; background:none; }
 
   /*────────────────── VARIABLES ──────────────────*/
   :root {
@@ -30,11 +29,23 @@
     --text: #1A1A1A;
     --muted: #555555;
     --radius: 0.75rem;
-    --padding: 1rem;
+    --padding: 1.5rem;
+    --gap: 1rem;
+    --max-width: 1200px;
+  }
+  html.dark {
+    --bg: #1F2233;
+    --surface: #2B2E44;
+    --text: #E0E0E0;
+    --muted: #888888;
   }
 
   /*────────────────── LAYOUT ──────────────────*/
-  main { max-width: 480px; margin: auto; padding: var(--padding); }
+  main {
+    margin: auto;
+    padding: var(--padding);
+    max-width: var(--max-width);
+  }
   section { margin-bottom: 2rem; }
 
   /*────────────────── HERO ──────────────────*/
@@ -42,155 +53,142 @@
     position: relative;
     background: var(--surface);
     border-radius: var(--radius);
-    padding: 3rem 1.5rem;
+    padding: 4rem var(--padding);
     text-align: center;
     overflow: hidden;
+    box-shadow:0 2px 8px rgba(0,0,0,0.05);
   }
   .hero h1 {
-    font-size: 2rem;
+    font-size: 2.5rem;
     line-height: 1.2;
-    margin-bottom: 1rem;
-    font-weight: 600;
+    margin-bottom:1rem;
+    font-weight:600;
   }
   .hero p {
-    font-size: 1rem;
-    color: var(--muted);
-    margin-bottom: 1.5rem;
+    font-size:1.15rem;
+    color:var(--muted);
+    margin-bottom:2rem;
   }
   .hero .actions {
-    display: flex;
-    gap: 0.75rem;
-    justify-content: center;
-    flex-wrap: wrap;
+    display:flex;
+    gap:var(--gap);
+    justify-content:center;
+    flex-wrap:wrap;
   }
   .hero .actions a {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.5rem;
-    padding: 0.75rem 1.5rem;
-    border-radius: var(--radius);
-    font-weight: 500;
-    transition: background 0.2s, transform 0.2s;
+    display:inline-flex;
+    align-items:center;
+    gap:.5rem;
+    padding:.75rem 1.5rem;
+    border-radius:var(--radius);
+    font-weight:500;
+    transition: transform .2s;
   }
   .hero .actions a.btn-primary {
-    background: var(--primary);
-    color: #fff;
+    background:var(--primary);
+    color:#fff;
   }
   .hero .actions a.btn-secondary {
-    background: transparent;
-    color: var(--primary);
-    border: 2px solid var(--primary);
+    background:transparent;
+    color:var(--primary);
+    border:2px solid var(--primary);
   }
   .hero .actions a:hover {
-    transform: translateY(-2px);
+    transform:translateY(-2px);
   }
-
   /* Decorative icons */
   .hero .icon {
-    position: absolute;
-    font-size: 2.5rem;
-    opacity: 0.2;
+    position:absolute;
+    font-size:3rem;
+    opacity:0.2;
   }
-  .hero .icon.leaf { top: 1rem; left: 1rem; color: #2A6F4E; }
-  .hero .icon.brain { top: 1rem; right: 1rem; color: #E76F51; }
-  .hero .icon.apple { bottom: 1rem; left: 1rem; color: #FAB005; }
-  .hero .icon.chat { bottom: 1rem; right: 1rem; color: #386BFF; }
+  .hero .icon.leaf    { top:1rem; left:1rem;  color:#2A6F4E; }
+  .hero .icon.brain   { top:1rem; right:1rem; color:#E76F51; }
+  .hero .icon.apple   { bottom:1rem; left:1rem; color:#FAB005; }
+  .hero .icon.chat    { bottom:1rem; right:1rem;color:#386BFF; }
 
   /*────────────────── SERVICES GRID ──────────────────*/
   #services {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 1rem;
+    display:grid;
+    gap:var(--gap);
+    grid-template-columns:repeat(auto-fit,minmax(160px,1fr));
   }
   .service-card {
-    background: var(--surface);
-    border-radius: var(--radius);
-    padding: var(--padding);
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
-    text-align: center;
-    transition: transform 0.2s;
+    background:var(--surface);
+    border-radius:var(--radius);
+    padding:var(--padding);
+    box-shadow:0 2px 8px rgba(0,0,0,0.05);
+    text-align:center;
+    transition:transform .2s;
+    cursor:pointer;
   }
   .service-card:hover {
-    transform: translateY(-4px);
+    transform:translateY(-4px);
   }
   .service-card i {
-    font-size: 2rem;
-    margin-bottom: 0.5rem;
+    font-size:2.5rem;
+    margin-bottom:.5rem;
   }
   .service-card p {
-    font-weight: 600;
-    margin-top: 0.25rem;
+    font-weight:600;
+    margin-top:.25rem;
   }
 
   /*────────────────── INFO SECTIONS ──────────────────*/
   .info {
-    text-align: center;
+    text-align:center;
+    padding:0 var(--padding);
   }
   .info h2 {
-    font-size: 1.5rem;
-    margin-bottom: 0.5rem;
-    font-weight: 600;
+    font-size:2rem;
+    margin-bottom:.5rem;
+    font-weight:600;
   }
   .info p {
-    font-size: 0.95rem;
-    color: var(--muted);
-    line-height: 1.5;
-    max-width: 360px;
-    margin: 0 auto;
+    font-size:1rem;
+    color:var(--muted);
+    line-height:1.5;
+    max-width:720px;
+    margin:auto;
   }
 
   /*────────────────── STEPS ──────────────────*/
   .steps {
-    display: flex;
-    justify-content: space-around;
-    margin-top: 1.5rem;
-    flex-wrap: wrap;
-    gap: 1rem;
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(180px,1fr));
+    gap:var(--gap);
+    margin-top:2rem;
+    padding:0 var(--padding);
   }
   .step {
-    max-width: 100px;
-    text-align: center;
+    text-align:center;
   }
   .step i {
-    font-size: 2rem;
-    color: var(--primary);
-    margin-bottom: 0.5rem;
+    font-size:2.5rem;
+    color:var(--primary);
+    margin-bottom:.5rem;
   }
   .step h3 {
-    font-size: 0.95rem;
-    font-weight: 600;
-    margin-bottom: 0.25rem;
+    font-size:1.1rem;
+    font-weight:600;
+    margin-bottom:.25rem;
   }
   .step p {
-    font-size: 0.85rem;
-    color: var(--muted);
+    font-size:.95rem;
+    color:var(--muted);
   }
 
-  /*────────────────── RESPONSIVE ──────────────────*/
-  @media (max-width: 360px) {
-    .hero h1 { font-size: 1.75rem; }
-    .hero .actions a { flex: 1 1 100%; justify-content: center; }
-    #services { grid-template-columns: 1fr; }
-    .steps { flex-direction: column; align-items: center; }
+  /*────────────────── RESPONSIVE TWEAKS ──────────────────*/
+  @media(max-width:768px){
+    .hero h1 { font-size:2rem; }
+    .hero p  { font-size:1rem; }
   }
 </style>
 
 </head>
 <body>
 
-  <!-- SIDEBAR -->
-  <aside id="sidebar">
-    <div class="brand"><i class="fas fa-leaf"></i><span>Vitra AI</span></div>
-    <nav>
-      <a href="home.html" class="active"><i class="fas fa-home"></i><span>Home</span></a>
-      <a href="index.html"><i class="fas fa-seedling"></i><span>Herbal Medicine</span></a>
-      <a href="psychology.html"><i class="fas fa-brain"></i><span>Psych &amp; MH</span></a>
-      <a href="dietetics.html"><i class="fas fa-utensils"></i><span>Dietetics</span></a>
-      <a href="pharmacy.html"><i class="fas fa-prescription-bottle-alt"></i><span>E-Pharmacy</span></a>
-      <a href="consult.html"><i class="fas fa-calendar-check"></i><span>Consult Booking</span></a>
-    </nav>
-    <button id="shrinkBtn" aria-label="Toggle sidebar"><i class="fas fa-angle-double-left"></i></button>
-  </aside>
+
 
   <!-- HEADER -->
   <header>
