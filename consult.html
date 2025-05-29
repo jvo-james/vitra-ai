@@ -14,993 +14,805 @@
 <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
 
 <style>
-  /*──────────────────── Global Theme ────────────────────*/
+  /*──────────────────── CSS VARIABLES & THEME ────────────────────*/
   :root {
-    --cb-primary: #3b3f88;       
-    --cb-primary-alt: #5c4d99;   
-    --cb-accent: #f08a5d;        
-    --cb-bg: #f7f6f9;           
-    --cb-surface: #ffffff;      
-    --cb-text: #2d2d2d;          
-    --cb-muted: #777777;         
-    --radius: 0.75rem;
-    --padding: 1rem;
-    --shadow: 0 4px 12px rgba(0,0,0,0.1);
-    --transition: 0.3s ease;
+    --clr-primary:       #4A90E2;
+    --clr-primary-light: #6BAAED;
+    --clr-secondary:     #50E3C2;
+    --clr-bg:            #F5F7FA;
+    --clr-surface:       #FFFFFF;
+    --clr-text:          #333333;
+    --clr-text-light:    #666666;
+    --clr-muted:         #AAAAAA;
+    --radius:            0.5rem;
+    --spacing:           1rem;
+    --transition:        0.3s ease;
+    --shadow-sm:         0 1px 3px rgba(0,0,0,0.1);
+    --shadow:            0 4px 12px rgba(0,0,0,0.1);
   }
-  html.dark {
-    --cb-bg: #1a1b2e;
-    --cb-surface: #2d2d44;
-    --cb-text: #e0e0e0;
-    --cb-muted: #aaaaaa;
-    --shadow: 0 4px 12px rgba(0,0,0,0.4);
+  [aria-theme="dark"] {
+    --clr-bg:      #1F1F1F;
+    --clr-surface: #2A2A2A;
+    --clr-text:    #EEEEEE;
+    --clr-text-light:#CCCCCC;
+    --clr-muted:   #888888;
+    --shadow-sm:   0 1px 3px rgba(0,0,0,0.5);
+    --shadow:      0 4px 12px rgba(0,0,0,0.5);
   }
-  *, *::before, *::after {
+
+  /*──────────────────── GLOBAL RESET & BASE ────────────────────*/
+  *,
+  *::before,
+  *::after {
     box-sizing: border-box;
     transition: var(--transition);
   }
   body {
-    margin: 0; padding: 0;
-    font-family: 'Montserrat', sans-serif;
-    background: var(--cb-bg);
-    color: var(--cb-text);
-    line-height: 1.5;
+    margin: 0;
+    font-family: 'Inter', sans-serif;
+    background: var(--clr-bg);
+    color: var(--clr-text);
+    line-height: 1.6;
+    display: flex;
+    min-height: 100vh;
   }
-  a { color: inherit; text-decoration: none; }
-  h1,h2,h3,h4 { margin-bottom: 0.5rem; color: var(--cb-primary); }
-  p.desc { color: var(--cb-muted); margin-bottom: 1rem; }
+  a {
+    color: var(--clr-primary);
+    text-decoration: none;
+  }
+  img {
+    max-width: 100%;
+    display: block;
+    border-radius: var(--radius);
+  }
+  button {
+    cursor: pointer;
+    border: none;
+    background: none;
+  }
 
-  /*──────────────────── Layout ────────────────────*/
-  aside#sidebar {
-    position: fixed; top: 0; left: 0; bottom: 0;
-    width: 220px; background: var(--cb-surface);
-    box-shadow: var(--shadow); z-index: 1000;
-    display: flex; flex-direction: column;
+  /*──────────────────── SIDEBAR ────────────────────*/
+  #sidebar {
+    width: 240px;
+    background: var(--clr-surface);
+    box-shadow: var(--shadow);
+    padding: var(--spacing);
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing);
   }
-  aside#sidebar .brand {
-    padding: var(--padding);
+  #sidebar .brand h1 {
+    margin: 0;
     font-size: 1.25rem;
-    background: var(--cb-primary);
-    color: #fff;
-    display: flex; align-items: center; gap: 0.5rem;
+    color: var(--clr-primary);
   }
-  aside#sidebar nav ul {
-    flex: 1; overflow-y: auto; margin: 0; padding: 0; list-style: none;
+  #sidebar nav ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
   }
-  aside#sidebar nav li a {
-    display: flex; align-items: center; gap: 0.75rem;
-    padding: 0.75rem var(--padding);
+  #sidebar nav ul li {
+    margin-bottom: 0.5rem;
+  }
+  #sidebar nav ul li > a {
+    display: block;
+    padding: 0.5rem;
     border-radius: var(--radius);
+    color: var(--clr-text);
   }
-  aside#sidebar nav li.active a,
-  aside#sidebar nav li a:hover {
-    background: var(--cb-primary-alt);
+  #sidebar nav ul li > a:hover {
+    background: var(--clr-primary-light);
     color: #fff;
   }
-  #shrinkSidebar {
-    background: none; border: none; font-size: 1.25rem;
-    color: var(--cb-primary); cursor: pointer;
-    margin: var(--padding);
+  #sidebar nav .subnav {
+    list-style: none;
+    padding-left: 1rem;
+    margin-top: 0.25rem;
   }
-.sidebar-shrink #sidebar {
-  width: 60px;
-}
-.sidebar-open aside#sidebar {
-  transform: translateX(0);
-}
-  .sidebar-shrink #sidebar {
-  width: 60px;
-}
-.sidebar-shrink header,
-.sidebar-shrink main {
-  margin-left: 60px;
-}
-  .sidebar-shrink #sidebar nav li a {
-  justify-content: center;
-}
-.sidebar-shrink #sidebar nav li a span { 
-  display: none !important; }
-  @media (min-width: 769px) {
-  #hamburger { display: none; }      
- }
-  body.sidebar-open header,
- body.sidebar-open main {
- margin-left: 220px;  
- }
-  header {
-    position: sticky; top: 0;
-    height: 60px; background: var(--cb-surface);
-    display: flex; align-items: center; justify-content: space-between;
-    padding: 0 var(--padding); flex-wrap: wrap;
-    box-shadow: var(--shadow); z-index: 1001;
-  }
-  header h1 {
-    flex: 1 1 auto;          
-    margin: 0.5rem 0;        
-    word-break: break-word; 
-    font-size: 1.25rem;     
-  }
-  #hamburger, #themeToggle {
-    font-size: 1.5rem; color: var(--cb-primary); cursor: pointer;
+  #sidebar nav .subnav li a {
+    font-size: 0.9rem;
+    color: var(--clr-text-light);
   }
 
-header, section, footer {
-   margin-left: var(--sidebar-width,220px);
-   transition: margin-left var(--transition);
- }
-
- body.sidebar-shrink header,
-body.sidebar-shrink section,
-body.sidebar-shrink footer {
-   margin-left: var(--sidebar-collapsed-width,60px);
- }
-   .sidebar-shrink #sidebar .brand {
- justify-content: center;      
- }
- .sidebar-shrink #sidebar .brand span {
-  display: none;               
- }
-  section.module {
-    background: var(--cb-surface);
+  /*──────────────────── MAIN CONTENT ────────────────────*/
+  #main-content {
+    flex: 1;
+    padding: var(--spacing);
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing);
+  }
+  .module {
+    background: var(--clr-surface);
     border-radius: var(--radius);
-    padding: var(--padding);
-    margin-bottom: 1.5rem;
-    box-shadow: var(--shadow);
+    box-shadow: var(--shadow-sm);
+    padding: var(--spacing);
   }
 
-  /*──────────────────── Hero ────────────────────*/
+  /*──────────────────── BUTTONS ────────────────────*/
+  .btn {
+    padding: 0.5rem 1rem;
+    border-radius: var(--radius);
+    font-weight: 500;
+  }
+  .btn-primary {
+    background: var(--clr-primary);
+    color: #fff;
+  }
+  .btn-primary:hover {
+    background: var(--clr-primary-light);
+  }
+  .btn-outline {
+    border: 1px solid var(--clr-primary);
+    color: var(--clr-primary);
+  }
+  .btn-outline:hover {
+    background: var(--clr-primary);
+    color: #fff;
+  }
+  .btn-sm {
+    padding: 0.25rem 0.5rem;
+    font-size: 0.85rem;
+  }
+
+  /*──────────────────── HERO / QUICK ACTIONS ────────────────────*/
   #hero {
-    display: grid; grid-template-columns: 1fr 1fr; gap: var(--padding);
-    background: var(--cb-primary-alt); color: #fff;
-    padding: 2rem var(--padding);
-    border-radius: var(--radius);
-    box-shadow: var(--shadow);
-    margin-bottom: 2rem;
-  }
-  #hero .hero-text h2 { font-size: 2.25rem; margin-bottom: 0.5rem; color: #fff; }
-  #hero .hero-features {
-    display: flex; flex-direction: column; gap: 1rem;
-  }
-  #hero .feature-card {
-    background: #fff; color: var(--cb-primary);
-    padding: 1rem; border-radius: var(--radius);
-    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-    display: flex; align-items: center; justify-content: space-between;
-    cursor: pointer;
-  }
-  #hero .feature-card:hover {
-    background: var(--cb-accent); color: #fff;
-    transform: translateY(-3px);
-  }
-  #hero .feature-card i { font-size: 2rem; }
-  #hero .feature-card .btn {
-    background: var(--cb-primary); color: #fff;
-    padding: 0.5rem 1rem; border-radius: var(--radius);
-  }
-
-  /*──────────────────── Forms & Inputs ────────────────────*/
-  label { display: block; margin-bottom: 1rem; }
-  input, select, textarea {
-    width: 100%; padding: 0.75rem; margin-top: 0.5rem;
-    border: 2px solid var(--cb-primary-alt);
-    border-radius: var(--radius);
-    background: var(--cb-bg);
-    color: var(--cb-text);
-  }
-  input:focus, select:focus, textarea:focus {
-    border-color: var(--cb-accent);
-    box-shadow: 0 0 0 3px rgba(240,138,93,0.3);
-  }
-  button.btn {
-    background: var(--cb-accent); color: #fff;
-    border: none; padding: 0.75rem 1.25rem;
-    border-radius: var(--radius); box-shadow: var(--shadow);
-    cursor: pointer;
-  }
-  button.btn:hover { background: #d4724f; }
-
-  /*──────────────────── Response Panels ────────────────────*/
-  .response {
-    background: var(--cb-surface);
-    border-left: 4px solid var(--cb-accent);
-    padding: var(--padding);
-    margin-top: 1rem;
-    position: relative;
-    box-shadow: var(--shadow);
-  }
-  .response .close-btn {
-    position: absolute; top: 0.5rem; right: 0.5rem;
-    background: none; border: none; font-size: 1.1rem; cursor: pointer;
-    color: var(--cb-muted);
-  }
-
-  /*──────────────────── Chat & History ────────────────────*/
-  .chat-box {
-    background: var(--cb-bg);
-    border: 2px solid var(--cb-primary-alt);
-    border-radius: var(--radius);
-    padding: var(--padding);
-    max-height: 300px; overflow-y: auto;
-    margin-bottom: 1rem;
-  }
-  .chat-input { display: flex; gap: 0.5rem; }
-  .chat-input input { flex: 1; border-radius: var(--radius) 0 0 var(--radius); }
-  .chat-input button { border-radius: 0 var(--radius) var(--radius) 0; }
-  .user-msg, .bot-msg {
-    max-width: 70%; padding: 0.75rem; border-radius: var(--radius);
-    margin-bottom: 0.5rem; word-wrap: break-word;
-  }
-  .user-msg {
-    align-self: flex-end; background: var(--cb-primary); color: #fff;
-    border-bottom-right-radius: 0;
-  }
-  .bot-msg {
-    align-self: flex-start; background: var(--cb-surface); color: var(--cb-text);
-    border-bottom-left-radius: 0;
-  }
-  .chat-date {
-    text-align: center; margin: 1rem 0; font-size: 0.9rem;
-    color: var(--cb-muted); font-weight: 600;
-  }
-  .msg-ts { font-size: 0.75rem; color: var(--cb-muted); }
-
-  /*──────────────────── Modals & History ────────────────────*/
- .modal {
-  position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-   background: rgba(0,0,0,0.5);
-   display: flex;                  /* show container as flex */
-   align-items: center; justify-content: center;
-    z-index: 2000;
- }
-  /* hide when [hidden] is present */
-  .modal[hidden] {
-   display: none !important;
-  }
-  .modal-content {
-    background: var(--cb-surface); padding: 1.5rem;
-    border-radius: var(--radius); width: 90%; max-width: 600px;
-    box-shadow: var(--shadow); position: relative;
-  }
-  .close-modal {
-    position: absolute; top: 0.5rem; right: 0.75rem;
-    font-size: 1.5rem; cursor: pointer; color: var(--cb-muted);
-  }
-  .history-item {
-    background: var(--cb-bg); padding: 0.75rem; margin-bottom: 0.75rem;
-    border-radius: var(--radius); display: flex;
-    justify-content: space-between; align-items: center;
-  }
-  .delete-history {
-    background: var(--cb-primary-alt); color: #fff;
-    border: none; padding: 0.3rem 0.6rem; border-radius: var(--radius);
-    cursor: pointer;
-  }
-  .delete-history:hover { background: var(--cb-primary); }
-
-  /*──────────────────── Analytics Cards & Calendar ────────────────────*/
-  .analytics-grid {
-    display: grid; grid-template-columns: repeat(auto-fit, minmax(240px,1fr));
-    gap: var(--padding);
-  }
-  .analytics-card {
-    background: var(--cb-surface);
-    border-radius: var(--radius);
-    padding: var(--padding);
-    box-shadow: var(--shadow);
-  }
-  /* ─────── Calendar Grid ─────── */
-  #calendar {
-    display: grid;
-    grid-template-columns: repeat(7,1fr);
-    gap: 1px;
-    background: var(--cb-bg);
-    border-radius: var(--radius);
-    box-shadow: var(--shadow);
-    margin-top: 1rem;
-  }
-  #calendar .cell {
-    padding: 0.75rem;
-    background: var(--cb-surface);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
     text-align: center;
-    cursor: pointer;
-    transition: transform var(--transition);
+    gap: var(--spacing);
   }
-  #calendar .cell.closed {
-    background: #f0f0f0;
-    color: var(--cb-muted);
-    cursor: not-allowed;
+  #hero h2 {
+    margin: 0;
+    font-size: 2rem;
   }
-  #calendar .cell.open {
-    background: var(--cb-accent);
+  .quick-tabs {
+    display: flex;
+    gap: 0.5rem;
+  }
+  .quick-tabs button {
+    background: var(--clr-surface);
+    color: var(--clr-text-light);
+  }
+  .quick-tabs button.active {
+    background: var(--clr-primary);
     color: #fff;
   }
-  #calendar .cell.today {
-    border: 2px dashed var(--cb-primary);
-    font-weight: bold;
+
+  /*──────────────────── MATCH & SEARCH ────────────────────*/
+  #quick-match .match-controls,
+  #quick-match .keyword-search {
+    display: flex;
+    gap: 0.5rem;
+    margin-bottom: var(--spacing);
   }
-  #calendar .cell.selected {
-    outline: 3px solid var(--cb-primary-alt);
-    transform: scale(1.05);
-    z-index: 1;
+  #quick-match input[type="text"],
+  #quick-match select {
+    flex: 1;
+    padding: 0.5rem;
+    border: 1px solid var(--clr-muted);
+    border-radius: var(--radius);
+  }
+  .drawer {
+    background: var(--clr-surface);
+    box-shadow: var(--shadow);
+    position: absolute;
+    top: 100%;
+    right: var(--spacing);
+    width: 280px;
+    padding: var(--spacing);
+    border-radius: var(--radius);
+    z-index: 10;
+  }
+  .hidden {
+    display: none !important;
+  }
+  .provider-card {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing);
+    padding: var(--spacing);
+    border-bottom: 1px solid var(--clr-muted);
+  }
+  .provider-card:hover {
+    background: var(--clr-primary-light);
+    color: #fff;
+  }
+  .provider-card .fav-btn {
+    margin-left: auto;
+    background: none;
+    font-size: 1.25rem;
   }
 
-  /*──────────────────── Responsive ────────────────────*/
-  @media (max-width: 1024px) {
-    header { left: 60px; }
-    main { margin-left: 80px; }
-     body.sidebar-shrink header,
-    body.sidebar-shrink main {
-      margin-left: 60px;
-    }
+  /*──────────────────── CALENDAR & SLOTS ────────────────────*/
+  .calendar-controls {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-bottom: var(--spacing);
   }
-  @media (max-width: 768px) {
-    aside#sidebar { transform: translateX(-100%); }
-    body.sidebar-open aside#sidebar { transform: none; }
-    header { left: 0; }
-    main { margin-left: 1rem; margin-top: 100px; }
-    #hero { grid-template-columns: 1fr; }
+  .view-toggle {
+    margin-bottom: var(--spacing);
   }
-    /* make our generated calendar look like your cells */
-  #calendar {
+  .view-toggle button {
+    background: var(--clr-surface);
+    color: var(--clr-text-light);
+  }
+  .view-toggle button.active {
+    background: var(--clr-primary);
+    color: #fff;
+  }
+  #calendarContainer {
+    overflow-x: auto;
+  }
+  .calendar-grid {
     display: grid;
     grid-template-columns: repeat(7, 1fr);
-    gap: 1px;
-    background: var(--cb-bg);
-    border: 1px solid var(--cb-bg);
+    gap: 2px;
   }
-  /* Spinner */
-.spinner {
-   border: 6px solid rgba(0,0,0,0.1);
-  width: 32px; height: 32px;
-   border-left-color: var(--cb-primary);
-   border-radius: 50%;
-   animation: spin 1s linear infinite;
-   margin: .5rem auto; 
-}
-@keyframes spin { to { transform: rotate(360deg); } }
-.hero-graphic {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
+  .cell {
+    padding: 0.75rem;
+    text-align: center;
+    border-radius: var(--radius);
+  }
+  .cell.header {
+    font-weight: 600;
+    background: var(--clr-primary-light);
+    color: #fff;
+  }
+  .cell.open {
+    background: var(--clr-surface);
+    cursor: pointer;
+  }
+  .cell.open:hover {
+    background: var(--clr-primary);
+    color: #fff;
+  }
+  .cell.closed {
+    background: var(--clr-muted);
+    color: #fff;
+  }
+  .slot-btn {
+    margin: 0.25rem;
+    background: var(--clr-primary-light);
+    color: #fff;
+  }
 
-.hero-graphic .hero-img {
-  max-width: 100%;
-  max-height: 300px;      /* adjust as needed */
-  width: auto;
-  height: auto;
-  object-fit: contain;
-  border-radius: var(--radius);
-  box-shadow: var(--shadow);
-}
-/* Toast */
-.toast {
-  position: fixed; bottom: 1rem; left: 50%;
-  transform: translateX(-50%) translateY(100%);
-  background: var(--cb-primary-alt); color: #fff;
-  padding: .75rem 1.5rem; border-radius: var(--radius);
-  box-shadow: var(--shadow); opacity: 0;
-  transition: transform .3s, opacity .3s;
-  z-index: 2000;
-}
-.toast.visible {
-  transform: translateX(-50%) translateY(0);
-  opacity: 1;
-}
-   .calendar .cell.selected {
-  outline: 3px solid var(--cb-primary);
-  transform: scale(1.1);
-  z-index: 1;
- }
- button#findMatch.btn {
-   position: relative;
- }
- button#findMatch.btn.loading {
-   color: transparent;            /* hide text */
- }
- button#findMatch.btn.loading::after {
-   content: 'Matching…';
-   position: absolute; top:50%; left:50%;
-   transform: translate(-50%,-50%);
- }
- button#findMatch.btn.loading .spinner {
-   position: absolute; top:50%; right:1rem;
-   transform: translateY(-50%);
-   display: inline-block;
- }
- .calendar-controls { display: none !important; }
- #filterSlots, #nextAvailable { display: none !important; }
+  /*──────────────────── BOOKING FORM & CONFIRM ────────────────────*/
+  #confirmPay {
+    margin-top: var(--spacing);
+  }
+  #bookingForm label {
+    display: block;
+    margin-bottom: 0.75rem;
+  }
+  #bookingForm input,
+  #bookingForm textarea {
+    width: 100%;
+    padding: 0.5rem;
+    border: 1px solid var(--clr-muted);
+    border-radius: var(--radius);
+  }
+  .add-ons {
+    margin: var(--spacing) 0;
+  }
 
-  .month-nav {
-   display: flex; align-items: center; justify-content: center;
-   gap: 1rem; margin-bottom: 1rem;
- }
- .month-nav button {
-   background: var(--cb-primary-alt); color: #fff;
-   border: none; padding: .5rem; border-radius: var(--radius);
- }
- .month-nav #calendarHeader {
-   font-size: 1.25rem; font-weight: 600;
- }
+  /*──────────────────── VISITS CARDS ────────────────────*/
+  .visits-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fit,minmax(280px,1fr));
+    gap: var(--spacing);
+  }
+  .visit-card {
+    display: flex;
+    background: var(--clr-surface);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow-sm);
+    overflow: hidden;
+  }
+  .visit-card .provider-photo {
+    width: 96px;
+    height: 96px;
+    object-fit: cover;
+  }
+  .visit-info {
+    padding: var(--spacing);
+    flex: 1;
+  }
+  .visit-info h4 {
+    margin: 0 0 0.5rem;
+  }
+  .visit-info p {
+    margin: 0 0 1rem;
+    color: var(--clr-text-light);
+  }
+  .visit-info .actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
 
- #timeSlots {
-   background: var(--cb-surface); padding: var(--padding);
-   border-radius: var(--radius); box-shadow: var(--shadow);
-   margin-top: 1rem;
- }
- #timeSlots h4 { margin-bottom: .75rem; color: var(--cb-primary-alt); font-weight: 600;  }
- #timeSlots ul { display: flex; flex-wrap: wrap; gap: .5rem; }
- #timeSlots ul li button {
-   background: var(--cb-primary-alt); color: #fff;
-   padding: .5rem 1rem; border-radius: var(--radius);
-   box-shadow: var(--shadow); cursor: pointer;
- }
+  /*──────────────────── FEEDBACK FORM ────────────────────*/
+  #feedbackForm label {
+    display: block;
+    margin-bottom: 0.75rem;
+  }
+  #feedbackForm select,
+  #feedbackForm textarea {
+    width: 100%;
+    padding: 0.5rem;
+    border: 1px solid var(--clr-muted);
+    border-radius: var(--radius);
+  }
+
+  /*──────────────────── TOAST ────────────────────*/
+  .toast {
+    position: fixed;
+    bottom: var(--spacing);
+    left: 50%;
+    transform: translateX(-50%) translateY(100%);
+    background: var(--clr-primary);
+    color: #fff;
+    padding: 0.75rem 1.5rem;
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    opacity: 0;
+    transition: transform 0.3s, opacity 0.3s;
+    z-index: 10000;
+  }
+  .toast.visible {
+    transform: translateX(-50%) translateY(0);
+    opacity: 1;
+  }
+
+  /*──────────────────── RESPONSIVE ────────────────────*/
+  @media (max-width: 1024px) {
+    #sidebar { display: none; }
+    body { flex-direction: column; }
+  }
+  @media (max-width: 600px) {
+    .calendar-grid { grid-template-columns: repeat(2,1fr); }
+    .visit-card { flex-direction: column; align-items: center; }
+    .visit-info .actions { justify-content: center; }
+  }
 </style>
+
+  
 </head>
 <body>
-  <!-- Sidebar -->
+  <!-- Sidebar Navigation -->
   <aside id="sidebar">
     <div class="brand">
-      <i class="fas fa-calendar-check"></i>
-      <span>Vitra AI Consult</span>
+      <h1>Vitra AI Consult</h1>
     </div>
     <nav>
       <ul>
-        <li class="active"><a href="#providerMatch"><i class="fas fa-user-md"></i><span>Provider Match</span></a></li>
-        <li><a href="#availabilityCalendar"><i class="fas fa-calendar-alt"></i><span>Availability</span></a></li>
-        <li><a href="#bookAppointment"><i class="fas fa-book-medical"></i><span>Book Appointment</span></a></li>
-        <li><a href="#dashboard"><i class="fas fa-tachometer-alt"></i><span>Dashboard</span></a></li>
-        <li><a href="#feedback"><i class="fas fa-star"></i><span>Feedback</span></a></li>
-        <li><a href="#analytics"><i class="fas fa-chart-line"></i><span>Analytics</span></a></li>
-        <li><a href="#liveChat"><i class="fas fa-comments"></i><span>Live Chat</span></a></li>
+        <li><a href="#book-appointment">Book Appointment</a>
+          <ul class="subnav">
+            <li><a href="#quick-match">Quick-Match</a></li>
+            <li><a href="#search-filter">Search & Filter</a></li>
+            <li><a href="#calendar-booking">Calendar</a></li>
+          </ul>
+        </li>
+        <li><a href="#my-visits">My Visits</a>
+          <ul class="subnav">
+            <li><a href="#upcoming-visits">Upcoming</a></li>
+            <li><a href="#past-visits">Past</a></li>
+            <li><a href="#favorites">Favorites</a></li>
+          </ul>
+        </li>
+        <li><a href="#feedback">Feedback</a>
+          <ul class="subnav">
+            <li><a href="#pending-feedback">Pending</a></li>
+            <li><a href="#feedback-history">History</a></li>
+          </ul>
+        </li>
+        <li><a href="#settings">Settings</a>
+          <ul class="subnav">
+            <li><a href="#notifications">Notifications</a></li>
+            <li><a href="#payment-methods">Payment Methods</a></li>
+            <li><a href="#profile-insurance">Profile & Insurance</a></li>
+          </ul>
+        </li>
       </ul>
     </nav>
-    <button id="shrinkSidebar" title="Toggle sidebar"><i class="fas fa-chevron-left"></i></button>
   </aside>
 
-  <!-- Header -->
-  <header>
-    <i id="hamburger" class="fas fa-bars"></i>
-    <h1>AI-Powered Consultation Booking</h1>
-    <i id="themeToggle" class="fas fa-moon"></i>
-  </header>
-
-  <!-- Hero -->
-  <section id="hero" class="module">
-    <div class="hero-text">
-      <h2><i class="fas fa-stethoscope"></i> Seamless Consultation Booking</h2>
-      <p class="desc">From instant provider match to one-click appointment, powered by AI.</p>
-      <a href="#providerMatch" class="btn hero-btn"><i class="fas fa-user-md"></i> Get Matched Now</a>
-    </div>
-    <div class="hero-graphic">
-      <!-- You can replace this with an illustrative SVG or image -->
-      <img class="hero-img" src="9E2CDE35-303A-4C5F-A4A9-1B0420CF8B0C.png" alt="Consultation illustration" />
-    </div>
-  </section>
-
-  <!-- 1. Personalized AI Provider Matching -->
-  <section id="providerMatch" class="module">
-    <h2><i class="fas fa-user-md"></i> Personalized Provider Matching</h2>
-    <p class="desc">Answer a few questions and get instantly matched to the best in-network specialist.</p>
-    <form id="matchForm">
-      <label>Chief Concern:
-        <input type="text" id="concernInput" placeholder="e.g. persistent cough">
-      </label>
-      <label>Urgency:
-        <select id="urgencyInput">
-          <option>Low</option>
-          <option>Medium</option>
-          <option>High</option>
-        </select>
-      </label>
-      <label>Preferred Language:
-        <select id="languageInput">
-          <option>English</option>
-          <option>Twi</option>
-          <option>Ga</option>
-          <option>Ewe</option>
-        </select>
-      </label>
-      <button type="button" id="findMatch" class="btn"><i class="fas fa-search"></i> Find My Specialist</button>
-    </form>
-
-    <div id="matchResults" class="response" hidden>
-      <button class="close-btn"><i class="fas fa-times"></i></button>
-      <div class="result-content">
-        <!-- AI will choose among these pseudo-providers -->
-        <ul id="providerList">
-          <li data-id="p1"><strong>Dr. Kwame Asante</strong> – Pulmonologist, Korle Bu Teaching Hospital</li>
-          <li data-id="p2"><strong>Dr. Abena Owusu</strong> – Cardiologist, 37 Military Hospital</li>
-          <li data-id="p3"><strong>Dr. Kojo Mensah</strong> – Psychiatrist, Ridge Hospital</li>
-          <li data-id="p4"><strong>Dr. Yaa Dufie</strong> – Dietitian, Nyaho Medical Centre</li>
-          <li data-id="p5"><strong>Dr. Nana Adjei</strong> – General Practitioner, Cape Coast Polyclinic</li>
-          <li data-id="p6"><strong>Dr. Efua Amponsah</strong> – Endocrinologist, LEKMA Hospital</li>
-          <li data-id="p7"><strong>Dr. Michael Addo</strong> – Neurologist, 37 Military Hospital</li>
-          <li data-id="p8"><strong>Dr. Grace Ofori</strong> – Dermatologist, Accra Dermatology Centre</li>
-          <li data-id="p9"><strong>Dr. Joseph Kumi</strong> – Orthopedic Surgeon, Komfo Anokye Teaching Hospital</li>
-          <li data-id="p10"><strong>Dr. Ama Brew</strong> – Pediatrician, Trust Hospital</li>
-          <li data-id="p11"><strong>Ms. Akosua Baah</strong> – Physical Therapist, Tema General Hospital</li>
-          <li data-id="p12"><strong>Mr. Daniel Boakye</strong> – Pharmacist, Ridge Hospital</li>
-          <li data-id="p13"><strong>Mrs. Esther Kum</strong>i – Occupational Therapist, Cape Coast Polyclinic</li>
-          <li data-id="p14"><strong>Ms. Joy Mensah</strong> – Speech Therapist, LEKMA Hospital</li>
-          <li data-id="p15"><strong>Dr. Paul Yeboah</strong> – Nephrologist, Korle Bu Teaching Hospital</li>
-          <li data-id="p16"><strong>Dr. Linda Frimpong</strong> – Rheumatologist, 37 Military Hospital</li>
-          <li data-id="p17"><strong>Mr. Kwesi Owusu</strong> – Nutritionist, Nyaho Medical Centre</li>
-          <li data-id="p18"><strong>Ms. Abena Boateng</strong> – Clinical Psychologist, Accra Psychology Clinic</li>       
-        </ul>
+  <!-- Main Content -->
+  <main id="main-content">
+    <!-- 1. Hero / Quick Actions -->
+    <section id="hero" class="module">
+      <div class="hero-content">
+        <h2>Seamless Appointment Booking</h2>
+        <p>Instant matches, easy scheduling, and no-hassle follow-up.</p>
+        <button id="btnBookNow" class="btn-primary">Book an Appointment</button>
+        <div class="quick-tabs">
+          <button data-tab="upcoming" class="active">View Upcoming</button>
+          <button data-tab="past">View Past</button>
+        </div>
+        <p class="context-tip">Need urgent care? <a href="#quick-match">Click here</a></p>
       </div>
-       <div id="chooseOwnSelect" hidden>
-   <label>Pick Your Provider:
-     <select id="ownProvider">
-       <option disabled selected>-- Select --</option>
-         <option value="p1">Dr. Kwame Asante – Pulmonologist, Korle Bu Teaching Hospital</option>
-<option value="p2">Dr. Abena Owusu – Cardiologist, 37 Military Hospital</option>
-<option value="p3">Dr. Kojo Mensah – Psychiatrist, Ridge Hospital</option>
-<option value="p4">Dr. Yaa Dufie – Dietitian, Nyaho Medical Centre</option>
-<option value="p5">Dr. Nana Adjei – General Practitioner, Cape Coast Polyclinic</option>
-<option value="p6">Dr. Efua Amponsah – Endocrinologist, LEKMA Hospital</option>
-<option value="p7">Dr. Michael Addo – Neurologist, 37 Military Hospital</option>
-<option value="p8">Dr. Grace Ofori – Dermatologist, Accra Dermatology Centre</option>
-<option value="p9">Dr. Joseph Kumi – Orthopedic Surgeon, Komfo Anokye Teaching Hospital</option>
-<option value="p10">Dr. Ama Brew – Pediatrician, Trust Hospital</option>
-<option value="p11">Ms. Akosua Baah – Physical Therapist, Tema General Hospital</option>
-<option value="p12">Mr. Daniel Boakye – Pharmacist, Ridge Hospital</option>
-<option value="p13">Mrs. Esther Kumi – Occupational Therapist, Cape Coast Polyclinic</option>
-<option value="p14">Ms. Joy Mensah – Speech Therapist, LEKMA Hospital</option>
-<option value="p15">Dr. Paul Yeboah – Nephrologist, Korle Bu Teaching Hospital</option>
-<option value="p16">Dr. Linda Frimpong – Rheumatologist, 37 Military Hospital</option>
-<option value="p17">Mr. Kwesi Owusu – Nutritionist, Nyaho Medical Centre</option>
-<option value="p18">Ms. Abena Boateng – Clinical Psychologist, Accra Psychology Clinic</option>        
-     </select>
-   </label>
- </div>
-      <div class="match-actions">
-      <button id="proceedMatch" class="btn">Proceed with AI choice</button>
-      <button id="chooseOwn" class="btn btn-outline">Choose own provider</button>
-    </div>
-    </div>
-  </section>
+    </section>
 
- 
-  <section id="appointmentFlow" class="module" hidden>
-    <h2><i class="fas fa-calendar-alt"></i> Schedule with <span id="chosenProvider"></span></h2>
-     <div class="month-nav">
-   <button type="button" id="prevMonth" class="btn-sm">&larr;</button>
-   <div id="calendarHeader" class="calendar-header"></div>
-   <button type="button" id="nextMonth" class="btn-sm">&rarr;</button>
-  </div>
-   <div id="calendar"></div>
-   <div id="timeSlots"></div>
-   <!-- STEP 3: user details + confirm -->
-   <form id="finalBookingForm" hidden style="margin-top: 1.5rem;">
-     <h3>Confirm your details</h3>
-     <label>Your Name:
-       <input id="clientNameFinal" placeholder="Full Name" required>
-     </label>
-      <label>Email: <input id="clientEmail" type="email" required></label>
-     <label>Phone: <input id="clientPhone" type="tel" required></label>
-
-     <div id="summarySelection" style="margin-bottom: 1rem;"></div>
-     <div class="summary-actions">
-       <button id="editSelection" type="button" class="btn btn-outline">‹ Back</button>
-       <button id="confirmBookingFinal" type="button" class="btn">Confirm & Book</button>
-     </div>
-   </form>
-  </section>
-  <!-- 4. Patient Dashboard & History -->
-  <section id="dashboard" class="module">
-    <h2><i class="fas fa-tachometer-alt"></i> Your Dashboard</h2>
-    <p class="desc">Manage upcoming visits, review past appointments, download summaries.</p>
-    <div class="dashboard-tabs">
-      <button type="button" data-tab="upcoming" class="active">Upcoming</button>
-      <button type="button" data-tab="past">Past</button>
-    </div>
-    <div id="upcoming" class="dashboard-list">
-      <ul>
-        <li>
-          <strong>Dr. Abena Owusu</strong> – 2025-05-30 14:00  
-          <button type="button" class="btn-sm rescheduleBtn">Reschedule</button>
-          <button type="button" class="btn-sm cancelBtn">Cancel</button>
-        </li>
-        <!-- more items… -->
-      </ul>
-    </div>
-    <div id="past" class="dashboard-list" hidden>
-      <ul>
-        <li>
-          <strong>Dr. Kojo Mensah</strong> – 2025-04-12 10:00  
-          <button type="button" class="btn-sm">Download Summary</button>
-          <button type="button" class="btn-sm">Download Invoice</button>
-        </li>
-        <!-- more… -->
-      </ul>
-    </div>
-  </section>
-
-  <!-- 5. Feedback & Ratings -->
-  <section id="feedback" class="module">
-    <h2><i class="fas fa-star"></i> Feedback & Ratings</h2>
-    <p class="desc">Help us improve—quick 1-min survey.</p>
-    <label>Rate your last visit:  
-      <select id="ratingInput">
-        <option>⭐</option><option>⭐⭐</option><option>⭐⭐⭐</option><option>⭐⭐⭐⭐</option><option>⭐⭐⭐⭐⭐</option>
-      </select>
-    </label>
-    <label>Comments:
-      <textarea id="feedbackInput" rows="3" placeholder="Any suggestions?"></textarea>
-    </label>
-    <button type="button" id="submitFeedback" class="btn"><i class="fas fa-paper-plane"></i> Submit</button>
-  </section>
-
-  <!-- 6. Analytics & Optimization -->
-  <section id="analytics" class="module">
-    <h2><i class="fas fa-chart-line"></i> Analytics & Optimization</h2>
-    <div class="chart-container">
-      <canvas id="noShowChart"></canvas>
-      <canvas id="peakTimesChart" style="margin-top:1rem;"></canvas>
-    </div>
-    <button type="button" id="optimizeStaffing" class="btn"><i class="fas fa-cogs"></i> AI Suggest Staffing</button>
-    <div id="optimizationResult" class="response" hidden>
-      <button class="close-btn"><i class="fas fa-times"></i></button>
-      <div class="result-content"></div>
-    </div>
-  </section>
-
-  <!-- 7. Live AI Chat Support -->
-  <section id="liveChat" class="module">
-    <h2><i class="fas fa-comments"></i> Live AI Chat Support</h2>
-    <p class="desc">24/7 assistant for all your booking questions.</p>
-    <div class="chat-controls">
-      <button type="button" id="clearChat" class="btn-sm"><i class="fas fa-trash"></i> Clear</button>
-      <button type="button" id="showHistory" class="btn-sm"><i class="fas fa-history"></i> History</button>
-    </div>
-    <div id="chatBox" class="chat-box"></div>
-    <form id="chatForm" class="chat-input">
-      <input id="chatInput" type="text" placeholder="Ask me anything…">
-      <button type="button" id="sendChat" class="btn"><i class="fas fa-paper-plane"></i></button>
-    </form>
-    <!-- Chat history modal -->
-    <div id="chatHistoryModal" class="modal" hidden>
-      <div class="modal-content">
-        <span class="close-modal">&times;</span>
-        <h3>Chat History</h3>
-        <div id="chatHistoryList"></div>
-        <button type="button" id="clearHistoryChat" class="btn-sm">Clear All</button>
+    <!-- 2. Provider Match & Search -->
+    <section id="quick-match" class="module">
+      <h3>AI Quick-Match & Search</h3>
+      <div class="match-controls">
+        <input type="text" id="symptomInput" placeholder="Describe your concern (or type…)" />
+        <button id="btnAIMatch" class="btn">Match me</button>
       </div>
-    </div>
-  </section>
+      <div class="keyword-search">
+        <input type="text" id="keywordInput" placeholder="Search keywords (e.g. cardio, kids)" />
+        <button id="btnKeywordSearch" class="btn-outline">Search</button>
+      </div>
+      <button id="btnFilterDrawer" class="btn-outline toggle-drawer">Filters</button>
+      <div id="filterDrawer" class="drawer hidden">
+        <h4>Filters</h4>
+        <label>Specialty:
+          <select><option>Any</option><option>Cardiology</option><option>Pediatrics</option></select>
+        </label>
+        <label>Language:
+          <select><option>Any</option><option>English</option><option>Twi</option></select>
+        </label>
+        <label>Mode:
+          <select><option>Either</option><option>Telehealth</option><option>In-Person</option></select>
+        </label>
+        <label>Insurance:
+          <select><option>Any</option><option>Network A</option><option>Network B</option></select>
+        </label>
+      </div>
+      <div id="matchResultsContainer"></div>
+    </section>
 
-  <!-- Footer -->
-  <footer>
-    <small>© 2025 AI-Pharmacy Chain — All rights reserved</small>
-  </footer>
+    <!-- 3. Booking Calendar -->
+    <section id="calendar-booking" class="module">
+      <h3>Choose Your Slot</h3>
+      <div class="calendar-controls">
+        <button id="btnNextAvailable" class="btn-sm">Next Available</button>
+        <button id="btnPickDate" class="btn-sm">Pick a Date</button>
+        <label><input type="checkbox" id="syncGoogle" /> Sync to Google</label>
+        <label><input type="checkbox" id="syncOutlook" /> Sync to Outlook</label>
+      </div>
+      <div class="view-toggle">
+        <button data-view="month" class="active">Month View</button>
+        <button data-view="week">Week View</button>
+      </div>
+      <div id="calendarContainer"></div>
+      <div id="timeSlotGrid"></div>
+
+      <!-- 4. Confirm & Pay -->
+      <div id="confirmPay" class="module">
+        <h4>Confirm & Pay</h4>
+        <form id="bookingForm">
+          <label>Name: <input type="text" id="clientName" required /></label>
+          <label>Email: <input type="email" id="clientEmail" required /></label>
+          <label>Phone: <input type="tel" id="clientPhone" required /></label>
+
+          <div class="add-ons">
+            <h5>Optional Add-Ons</h5>
+            <label><input type="checkbox" id="preVisitQ" /> Pre-visit Questionnaire</label>
+            <label>Upload Docs: <input type="file" id="uploadDocs" multiple /></label>
+            <label>Co-pay: <input type="text" id="coPayAmt" placeholder="$0.00" /></label>
+          </div>
+          <button type="submit" class="btn-primary">Confirm & Book</button>
+        </form>
+      </div>
+    </section>
+
+    <!-- 5. Dashboard / History -->
+    <section id="my-visits" class="module">
+      <h3>My Visits</h3>
+      <div class="visit-tabs">
+        <button data-tab="upcoming" class="active">Upcoming</button>
+        <button data-tab="past">Past</button>
+        <button data-tab="favorites">Favorites</button>
+      </div>
+      <!-- Upcoming -->
+      <div id="upcoming-visits" class="visits-list">
+        <!-- Example card -->
+        <article class="visit-card">
+          <img src="provider.jpg" alt="Dr. Name" class="provider-photo"/>
+          <div class="visit-info">
+            <h4>Dr. Abena Owusu <span class="spec">Cardiologist</span></h4>
+            <p>2025-06-15 • 14:00 • Telehealth</p>
+            <div class="actions">
+              <button class="btn-sm">Reschedule</button>
+              <button class="btn-sm">Cancel</button>
+              <button class="btn-sm">Add to Calendar</button>
+              <button class="btn-sm">Join Telehealth</button>
+            </div>
+          </div>
+        </article>
+      </div>
+      <!-- Past -->
+      <div id="past-visits" class="visits-list hidden">
+        <article class="visit-card">
+          <img src="provider.jpg" alt="Dr. Name" class="provider-photo"/>
+          <div class="visit-info">
+            <h4>Dr. Kojo Mensah <span class="spec">Psychiatrist</span></h4>
+            <p>2025-05-20 • 10:00 • In-Person</p>
+            <div class="actions">
+              <button class="btn-sm">Download Summary</button>
+              <button class="btn-sm">Download Invoice</button>
+              <button class="btn-sm">Rebook Same Slot</button>
+            </div>
+          </div>
+        </article>
+      </div>
+      <!-- Favorites -->
+      <div id="favorites" class="visits-list hidden">
+        <p>⭐ No favorites yet. Mark a provider to see them here.</p>
+      </div>
+    </section>
+
+    <!-- 6. Feedback & Ratings -->
+    <section id="feedback" class="module">
+      <h3>Feedback & Ratings</h3>
+      <form id="feedbackForm">
+        <label>Rate your last visit:
+          <select id="rating">
+            <option value="1">⭐</option>
+            <option value="2">⭐⭐</option>
+            <option value="3">⭐⭐⭐</option>
+            <option value="4">⭐⭐⭐⭐</option>
+            <option value="5">⭐⭐⭐⭐⭐</option>
+          </select>
+        </label>
+        <label>What went well?
+          <textarea id="positive" rows="2"></textarea>
+        </label>
+        <label>How can we improve?
+          <textarea id="improve" rows="2"></textarea>
+        </label>
+        <label>
+          Would you recommend to a friend?
+          <input type="checkbox" id="npsToggle" />
+        </label>
+        <button type="submit" class="btn-primary">Submit Feedback</button>
+      </form>
+    </section>
+  </main>
+
 
 
 <script>
 (function(){
-  // ─── PHASE LABELS & HELPERS ─────────────────────────
-  const PHASE = {
-    findMatch:    'Matching…',
-    confirmBooking: 'Confirming…',
-    sendChat:     'Thinking…'
-  };
-
+  // ─── HELPERS & STATE ─────────────────────────────────
   function showToast(msg) {
     const t = document.createElement('div');
     t.className = 'toast';
     t.innerText = msg;
     document.body.append(t);
-    requestAnimationFrame(()=> t.classList.add('visible'));
-    setTimeout(()=> t.remove(), 3000);
+    requestAnimationFrame(() => t.classList.add('visible'));
+    setTimeout(() => t.remove(), 3000);
   }
 
-  async function callOpenAI(messages) {
-    try {
-      const res = await fetch('/.netlify/functions/openai-proxy', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ messages })
-      });
-      if (!res.ok) throw new Error(await res.text());
-      const j = await res.json();
-      return j.choices?.[0]?.message?.content.trim() || '⚠️ Unexpected AI response.';
-    } catch(err) {
-      return '⚠️ ' + err.message;
-    }
-  }
+  const providers = [
+    { id:'p1', name:'Dr. Kwame Asante', spec:'Pulmonologist', photo:'provider1.jpg' },
+    { id:'p2', name:'Dr. Abena Owusu', spec:'Cardiologist', photo:'provider2.jpg' },
+    { id:'p3', name:'Dr. Kojo Mensah', spec:'Psychiatrist', photo:'provider3.jpg' }
+  ];
+  let currentProvider = null;
+  let selectedDate = null;
+  let selectedTime = null;
+  let displayYear = new Date().getFullYear();
+  let displayMonth = new Date().getMonth();
+  let calendarView = 'month'; // or 'week'
+
+  // sample availability (same for all providers)
+  const availability = {
+    '2025-06-20': ['09:00','10:30','14:00'],
+    '2025-06-21': ['08:00','11:15','15:45'],
+    '2025-06-22': ['10:00','13:00','16:00']
+  };
 
   document.addEventListener('DOMContentLoaded', ()=>{
+
     // ─── ELEMENTS ───────────────────────────────────────
-    const sidebarBtn      = document.getElementById('shrinkSidebar');
-    const hamburger       = document.getElementById('hamburger');
-    const themeToggle     = document.getElementById('themeToggle');
-    const bodyEl          = document.body;
-    const providerMatchEl = document.getElementById('providerMatch');
-    const appointmentEl   = document.getElementById('appointmentFlow');
-    const matchPanel      = document.getElementById('matchResults');
-    const calEl           = document.getElementById('calendar');
-    const headerEl        = document.getElementById('calendarHeader');
-    const prevBtn         = document.getElementById('prevMonth');
-    const nextBtn         = document.getElementById('nextMonth');
-    const timeSlotsEl     = document.getElementById('timeSlots');
-    const finalForm       = document.getElementById('finalBookingForm');
-    const summarySelection= document.getElementById('summarySelection');
-    const editBtn         = document.getElementById('editSelection');
-    const confirmBtn      = document.getElementById('confirmBookingFinal');
-    const clientNameInput = document.getElementById('clientNameFinal');
-    const upcomingList    = document.querySelector('#upcoming ul');
+    const btnBookNow      = document.getElementById('btnBookNow');
+    const heroTabs        = document.querySelectorAll('#hero .quick-tabs button');
+    const sectionUpcoming = document.getElementById('upcoming-visits');
+    const sectionPast     = document.getElementById('past-visits');
+    const sectionFavorites= document.getElementById('favorites');
 
-    // ─── STATE ──────────────────────────────────────────
-    let currentProviderId   = null;
-    let currentProviderName = '';
-    let displayYear         = new Date().getFullYear();
-    let displayMonth        = new Date().getMonth();
+    const btnAIMatch      = document.getElementById('btnAIMatch');
+    const btnKeywordSearch= document.getElementById('btnKeywordSearch');
+    const symptomInput    = document.getElementById('symptomInput');
+    const keywordInput    = document.getElementById('keywordInput');
+    const filterDrawer    = document.getElementById('filterDrawer');
+    const btnFilterDrawer = document.getElementById('btnFilterDrawer');
+    const matchResults    = document.getElementById('matchResultsContainer');
 
-    // ─── SIDEBAR & THEME ────────────────────────────────
-    sidebarBtn.addEventListener('click', () => {
-      bodyEl.classList.toggle('sidebar-shrink');
-      const icon = sidebarBtn.querySelector('i');
-      icon.classList.toggle('fa-chevron-left');
-      icon.classList.toggle('fa-chevron-right');
-    });
-    hamburger.addEventListener('click', ()=>{
-      bodyEl.classList.toggle('sidebar-open');
-      bodyEl.classList.remove('sidebar-shrink');
-    });
-    themeToggle.addEventListener('click', ()=>{
-      const html = document.documentElement;
-      html.classList.toggle('dark');
-      html.setAttribute('aria-theme', html.classList.contains('dark') ? 'dark' : 'light');
-      themeToggle.classList.toggle('fa-sun');
-      themeToggle.classList.toggle('fa-moon');
-    });
+    const btnNextAvail    = document.getElementById('btnNextAvailable');
+    const btnPickDate     = document.getElementById('btnPickDate');
+    const syncGoogle      = document.getElementById('syncGoogle');
+    const syncOutlook     = document.getElementById('syncOutlook');
+    const viewToggleBtns  = document.querySelectorAll('#calendar-booking .view-toggle button');
+    const calendarContainer= document.getElementById('calendarContainer');
+    const timeSlotGrid    = document.getElementById('timeSlotGrid');
 
-    // ─── AVAILABILITY DATA ──────────────────────────────
-    const availability = {
-      p1:  { '2025-06-10':['09:00','10:00','11:00'], '2025-06-12':['14:00','15:00'], '2025-06-15':['08:30','09:30','10:30'] },
-      p2:  { '2025-06-03':['10:00','13:00','16:00'], '2025-06-04':['09:00','11:00'], '2025-06-15':['12:00','14:00'] },
-      p3:  { '2025-06-08':['08:00','09:00','10:00','11:00'], '2025-06-11':['13:30','14:30'], '2025-06-16':['15:00','16:00'] },
-      p4:  { '2025-06-05':['09:30','10:30','11:30'], '2025-06-09':['14:00','15:00','16:00'], '2025-06-18':['08:00','09:00'] },
-      p5:  { '2025-06-07':['08:15','09:15','10:15'], '2025-06-13':['13:00','14:00'], '2025-06-17':['10:00','11:00','12:00'] },
-      p6:  { '2025-06-02':['09:00','10:00'], '2025-06-14':['11:00','12:00','13:00'], '2025-06-19':['14:00','15:00'] },
-      p7:  { '2025-06-06':['08:30','09:30','10:30'], '2025-06-12':['13:00','14:00','15:00'], '2025-06-20':['09:00','10:00'] },
-      p8:  { '2025-06-01':['10:00','11:00','12:00'], '2025-06-11':['14:30','15:30'], '2025-06-16':['08:00','09:00','10:00'] },
-      p9:  { '2025-06-04':['09:00','10:00','11:00'], '2025-06-13':['13:00','14:00'], '2025-06-18':['15:00','16:00'] },
-      p10: { '2025-06-03':['08:00','09:00','10:00'], '2025-06-10':['11:00','12:00','13:00'], '2025-06-17':['14:00','15:00'] },
-      p11: { '2025-06-05':['09:30','10:30','11:30'], '2025-06-14':['13:00','14:00','15:00'], '2025-06-19':['08:00','09:00'] },
-      p12: { '2025-06-02':['10:00','11:00','12:00'], '2025-06-08':['14:00','15:00'], '2025-06-20':['09:00','10:00','11:00'] },
-      p13: { '2025-06-07':['08:00','09:00','10:00'], '2025-06-12':['11:30','12:30','13:30'], '2025-06-18':['14:00','15:00'] },
-      p14: { '2025-06-03':['09:15','10:15','11:15'], '2025-06-09':['13:00','14:00','15:00'], '2025-06-16':['08:00','09:00'] },
-      p15: { '2025-06-05':['08:30','09:30','10:30'], '2025-06-13':['11:00','12:00','13:00'], '2025-06-19':['14:30','15:30'] },
-      p16: { '2025-06-02':['10:00','11:00','12:00'], '2025-06-11':['13:15','14:15'], '2025-06-17':['09:00','10:00','11:00'] },
-      p17: { '2025-06-04':['09:00','10:00','11:00'], '2025-06-10':['12:00','13:00','14:00'], '2025-06-15':['15:00','16:00'] },
-      p18: { '2025-06-01':['08:00','09:00','10:00'], '2025-06-08':['11:30','12:30','13:30'], '2025-06-20':['14:00','15:00','16:00'] }
+    const bookingForm     = document.getElementById('bookingForm');
+    const confirmSection  = document.getElementById('confirmPay');
+
+    const upcomingList    = document.getElementById('upcoming-visits');
+    const pastList        = document.getElementById('past-visits');
+    const favoritesList   = document.getElementById('favorites');
+
+    const feedbackForm    = document.getElementById('feedbackForm');
+
+    // ─── HERO QUICK TABS ────────────────────────────────
+    heroTabs.forEach(btn => {
+      btn.onclick = () => {
+        heroTabs.forEach(b=>b.classList.remove('active'));
+        btn.classList.add('active');
+        const tab = btn.dataset.tab;
+        sectionUpcoming.classList.toggle('hidden', tab!=='upcoming');
+        sectionPast.classList.toggle('hidden', tab!=='past');
+        sectionFavorites.classList.toggle('hidden', tab!=='favorites');
+      };
+    });
+    btnBookNow.onclick = ()=> {
+      document.getElementById('quick-match').scrollIntoView({behavior:'smooth'});
     };
 
+    // ─── FILTER DRAWER ──────────────────────────────────
+    btnFilterDrawer.onclick = ()=> filterDrawer.classList.toggle('hidden');
 
-    // ─── CALENDAR RENDERING ─────────────────────────────
-    function generateCalendar(yr, mth) {
-      headerEl.innerText = new Date(yr, mth)
-        .toLocaleString('default', { month:'long', year:'numeric' });
-      calEl.innerHTML = '';
-      ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'].forEach(wd => {
-        const hd = document.createElement('div');
-        hd.className = 'cell'; hd.style.fontWeight = '600'; hd.innerText = wd;
-        calEl.append(hd);
+    // ─── MATCHING ──────────────────────────────────────
+    function renderProviderCard(p) {
+      return `
+        <article class="provider-card" data-id="${p.id}">
+          <img src="${p.photo}" alt="${p.name}" class="provider-photo"/>
+          <div class="info">
+            <h4>${p.name} <span class="spec">${p.spec}</span></h4>
+            <button class="btn-sm fav-btn">⭐</button>
+          </div>
+        </article>`;
+    }
+    function bindMatchClicks() {
+      matchResults.querySelectorAll('.provider-card').forEach(card=>{
+        card.onclick = ()=>{
+          const id = card.dataset.id;
+          currentProvider = providers.find(p=>p.id===id);
+          document.getElementById('calendar-booking').scrollIntoView({behavior:'smooth'});
+          startAppointmentFlow();
+        };
+        card.querySelector('.fav-btn').onclick = e=>{
+          e.stopPropagation();
+          card.classList.toggle('favorited');
+          if(card.classList.contains('favorited')) {
+            favoritesList.insertAdjacentHTML('beforeend', renderProviderCard(currentProvider));
+          }
+        };
       });
+    }
+    btnAIMatch.onclick = ()=>{
+      const idx = Math.floor(Math.random()*providers.length);
+      matchResults.innerHTML = renderProviderCard(providers[idx]);
+      bindMatchClicks();
+    };
+    btnKeywordSearch.onclick = ()=>{
+      const kw = keywordInput.value.trim().toLowerCase();
+      const filtered = providers.filter(p=>
+        p.name.toLowerCase().includes(kw) ||
+        p.spec.toLowerCase().includes(kw)
+      );
+      matchResults.innerHTML = filtered.map(renderProviderCard).join('') || '<p>No results</p>';
+      bindMatchClicks();
+    };
+
+    // ─── CALENDAR & TIME SLOTS ──────────────────────────
+    function renderCalendar(yr, mth) {
+      calendarContainer.innerHTML = '';
       const firstDay = new Date(yr, mth, 1).getDay();
-      for(let i=0; i<firstDay; i++){
-        const blank = document.createElement('div');
-        blank.className = 'cell closed'; calEl.append(blank);
-      }
-      const avail = availability[currentProviderId] || {};
-      const today = new Date();
       const daysInMon = new Date(yr, mth+1, 0).getDate();
-      for(let d=1; d<=daysInMon; d++) {
-        const dateKey = `${yr}-${String(mth+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
-        const open = !!avail[dateKey];
-        const cell = document.createElement('div');
-        cell.className = `cell ${open ? 'open' : 'closed'}`;
-        cell.innerText = d;
-        if(open) {
-          cell.addEventListener('click', ()=>{
-            calEl.querySelectorAll('.cell.selected').forEach(x=>x.classList.remove('selected'));
-            cell.classList.add('selected');
-            renderTimeSlots(dateKey, avail[dateKey]);
-          });
+      if(calendarView==='month') {
+        // render month grid
+        const grid = document.createElement('div');
+        grid.className = 'calendar-grid';
+        ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'].forEach(wd=>{
+          const hd = document.createElement('div');
+          hd.className='cell header'; hd.innerText=wd; grid.append(hd);
+        });
+        for(let i=0;i<firstDay;i++){
+          const blank = document.createElement('div');
+          blank.className='cell empty'; grid.append(blank);
         }
-        if(today.getFullYear()===yr && today.getMonth()===mth && today.getDate()===d) {
-          cell.classList.add('today');
+        for(let d=1; d<=daysInMon; d++){
+          const dateKey = `${yr}-${String(mth+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+          const cell = document.createElement('div');
+          cell.className = availability[dateKey] ? 'cell open' : 'cell closed';
+          cell.innerText = d;
+          if(availability[dateKey]) {
+            cell.onclick = ()=> {
+              selectedDate = dateKey;
+              renderTimeSlots(dateKey);
+            };
+          }
+          grid.append(cell);
         }
-        calEl.append(cell);
+        calendarContainer.append(grid);
+      } else {
+        // week view stub
+        calendarContainer.innerHTML = '<p>Week view coming soon…</p>';
       }
-      timeSlotsEl.innerHTML = '';
     }
-
-    function renderTimeSlots(dateKey, slots) {
-      timeSlotsEl.innerHTML = `<h4>Available times on ${dateKey}:</h4>`;
-      const ul = document.createElement('ul');
-      ul.style.listStyle = 'none'; ul.style.padding = '0';
-      slots.forEach(t => {
-        const li = document.createElement('li');
+    function renderTimeSlots(dateKey) {
+      timeSlotGrid.innerHTML = `<h4>Times on ${dateKey}</h4>`;
+      (availability[dateKey]||[]).forEach(t=>{
         const btn = document.createElement('button');
-        btn.type = 'button'; btn.className = 'btn-sm'; btn.innerText = t;
-        btn.style.margin = '0.25rem';
-        li.append(btn); ul.append(li);
+        btn.className='btn-sm slot-btn';
+        btn.innerText = t;
+        btn.onclick = ()=>{
+          selectedTime = t;
+          confirmSection.scrollIntoView({behavior:'smooth'});
+        };
+        timeSlotGrid.append(btn);
       });
-      timeSlotsEl.append(ul);
+    }
+    viewToggleBtns.forEach(btn=>{
+      btn.onclick = ()=>{
+        viewToggleBtns.forEach(b=>b.classList.remove('active'));
+        btn.classList.add('active');
+        calendarView = btn.dataset.view;
+        renderCalendar(displayYear,displayMonth);
+      };
+    });
+    btnNextAvail.onclick = () => {
+      // pick first available date
+      const dates = Object.keys(availability).sort();
+      selectedDate = dates[0];
+      renderCalendar(displayYear,displayMonth);
+      renderTimeSlots(selectedDate);
+      confirmSection.scrollIntoView({behavior:'smooth'});
+    };
+    btnPickDate.onclick = ()=> calendarContainer.scrollIntoView({behavior:'smooth'});
+
+    // ─── START APPOINTMENT FLOW ────────────────────────
+    function startAppointmentFlow() {
+      document.querySelector('#calendar-booking h3').innerText =
+        `Choose Your Slot: ${currentProvider.name}`;
+      renderCalendar(displayYear,displayMonth);
     }
 
-    prevBtn.onclick = ()=>{
-      displayMonth--; if(displayMonth<0){ displayMonth=11; displayYear--; }
-      generateCalendar(displayYear, displayMonth);
-    };
-    nextBtn.onclick = ()=>{
-      displayMonth++; if(displayMonth>11){ displayMonth=0; displayYear++; }
-      generateCalendar(displayYear, displayMonth);
-    };
-
-    // ─── PROVIDERS LIST ─────────────────────────────────
-    const providers = [
-      {id:'p1',name:'Dr. Kwame Asante',spec:'Pulmonologist, Korle Bu'},
-      {id:'p2',name:'Dr. Abena Owusu',spec:'Cardiologist, 37 Military'},
-      {id:'p3',name:'Dr. Kojo Mensah',spec:'Psychiatrist, Ridge'},
-      {id:'p4',name:'Dr. Yaa Dufie',spec:'Dietitian, Nyaho Medical'},
-      {id:'p5',name:'Dr. Nana Adjei',spec:'GP, Cape Coast'},
-      {id:'p6',name:'Dr. Efua Amponsah',spec:'Endocrinologist, LEKMA'},
-      {id:'p7',name:'Dr. Michael Addo',spec:'Neurologist, 37 Military'},
-      {id:'p8',name:'Dr. Grace Ofori',spec:'Dermatologist, Accra Derm.'},
-      {id:'p9',name:'Dr. Joseph Kumi',spec:'Ortho Surgeon, Komfo Anokye'},
-      {id:'p10',name:'Dr. Ama Brew',spec:'Pediatrician, Trust Hosp.'},
-      {id:'p11',name:'Ms. Akosua Baah',spec:'PT, Tema General'},
-      {id:'p12',name:'Mr. Daniel Boakye',spec:'Pharmacist, Ridge'},
-      {id:'p13',name:'Mrs. Esther Kumi',spec:'OT, Cape Coast'},
-      {id:'p14',name:'Ms. Joy Mensah',spec:'Speech Therapist, LEKMA'},
-      {id:'p15',name:'Dr. Paul Yeboah',spec:'Dermatologist, Korle Bu'},
-      {id:'p16',name:'Dr. Linda Frimpong',spec:'Nephrologist, 37 Military'},
-      {id:'p17',name:'Mr. Kwesi Owusu',spec:'Nutritionist, Nyaho Med.'},
-      {id:'p18',name:'Ms. Abena Boateng',spec:'Psychologist, Accra Psych.'}
-    ];
-
-    // ─── 1. PROVIDER MATCHING ────────────────────────────
-    document.getElementById('findMatch').onclick = async e => {
+    // ─── BOOKING FORM ──────────────────────────────────
+    bookingForm.onsubmit = e => {
       e.preventDefault();
-      const btn = e.currentTarget;
-      const concern = document.getElementById('concernInput').value.trim();
-      if(!concern) return showToast('Enter your chief concern');
-      btn.disabled = true;
-      btn.innerHTML = `${PHASE.findMatch} <span class="spinner"></span>`;
-
-      const sys = `You are AI match. Providers:\n${providers.map(p=>`- ${p.name}`).join('\n')}`;
-      const usr = `Concern="${concern}". Pick best provider.`;
-      const raw = await callOpenAI([{ role:'system', content:sys },{ role:'user', content:usr }]);
-      btn.disabled = false;
-      btn.innerHTML = '<i class="fas fa-search"></i> Find My Specialist';
-
-      const cleaned = raw
-        .replace(/```[\s\S]*?```/g,'')
-        .replace(/^(#+)\s*/gm,'')
-        .replace(/\*\*(.+?)\*\*/g,'<strong>$1</strong>')
-        .replace(/\*(.+?)\*/g,'<em>$1</em>');
-      const top = cleaned.split(/\r?\n/)[0].trim();
-      const [name, spec] = top.split(' – ');
-
-      matchPanel.innerHTML = `
-        <button class="close-btn"><i class="fas fa-times"></i></button>
-        <div class="result-content">
-          <strong>${name}</strong> – ${spec}
-        </div>
-        <div id="chooseOwnSelect" hidden>
-          <label>Pick Your Provider:
-            <select id="ownProvider">
-              ${providers.map(p=>
-                `<option value="${p.id}">${p.name}</option>`
-              ).join('')}
-            </select>
-          </label>
-        </div>
-        <div class="match-actions">
-          <button id="proceedMatch" class="btn">Next ➔</button>
-          <button id="chooseOwn" class="btn btn-outline">Choose Own</button>
-        </div>`;
-      matchPanel.hidden = false;
-
-      // close panel
-      matchPanel.querySelector('.close-btn').onclick = ()=> matchPanel.hidden = true;
-
-      // “Next” → schedule with AI pick
-      matchPanel.querySelector('#proceedMatch').onclick = ()=>{
-        currentProviderName = name;
-        currentProviderId   = providers.find(p=>p.name===name).id;
-        providerMatchEl.hidden = true;
-        appointmentEl.hidden   = false;
-        startAppointmentFlow(currentProviderId, currentProviderName);
-      };
-
-      // show dropdown
-      matchPanel.querySelector('#chooseOwn').onclick = ()=>{
-        matchPanel.querySelector('.result-content').hidden = true;
-        matchPanel.querySelector('#chooseOwnSelect').hidden = false;
-      };
-
-      // handle manual pick
-      matchPanel.querySelector('#ownProvider').onchange = e => {
-        currentProviderId   = e.target.value;
-        currentProviderName = providers.find(p=>p.id===currentProviderId).name;
-        providerMatchEl.hidden = true;
-        appointmentEl.hidden   = false;
-        startAppointmentFlow(currentProviderId, currentProviderName);
-      };
+      const name = bookingForm.clientName.value;
+      if(!name) { showToast('Enter your name'); return; }
+      // add to upcoming
+      upcomingList.insertAdjacentHTML('beforeend', `
+        <article class="visit-card">
+          <img src="${currentProvider.photo}" alt="${currentProvider.name}" class="provider-photo"/>
+          <div class="visit-info">
+            <h4>${currentProvider.name} <span class="spec">${currentProvider.spec}</span></h4>
+            <p>${selectedDate} • ${selectedTime} • ${syncGoogle.checked?'Synced':''}</p>
+            <div class="actions">
+              <button class="btn-sm">Reschedule</button>
+              <button class="btn-sm">Cancel</button>
+              <button class="btn-sm">Add to Calendar</button>
+            </div>
+          </div>
+        </article>`);
+      showToast('Appointment booked!');
+      bookingForm.reset();
+      confirmSection.classList.add('hidden');
     };
 
-    // ─── 2. SLOT PICK & SUMMARY ─────────────────────────
-    calEl.addEventListener('click', e => {
-      if(!e.target.classList.contains('open')) return;
-      calEl.querySelectorAll('.cell.selected').forEach(c=>c.classList.remove('selected'));
-      e.target.classList.add('selected');
-      const d = e.target.innerText;
-      const dateKey = `${displayYear}-${String(displayMonth+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
-      renderTimeSlots(dateKey, availability[currentProviderId][dateKey]);
-    });
+    // ─── FEEDBACK FORM ─────────────────────────────────
+    feedbackForm.onsubmit = e => {
+      e.preventDefault();
+      showToast('Thanks for your feedback!');      
+      feedbackForm.reset();
+    };
 
-    timeSlotsEl.addEventListener('click', e => {
-      if(!e.target.matches('button')) return;
-      window.selectedTime = e.target.innerText;
-      window.selectedDate = timeSlotsEl.querySelector('h4').innerText.split(' on ')[1];
-      showSummary();
-    });
-
-    function showSummary() {
-      calEl.hidden       = true;
-      timeSlotsEl.hidden = true;
-      finalForm.hidden   = false;
-      summarySelection.innerHTML =
-        `<p><strong>${window.selectedDate}</strong> at <strong>${window.selectedTime}</strong></p>`;
-
-      editBtn.onclick = ()=>{
-        calEl.hidden       = false;
-        timeSlotsEl.hidden = false;
-        finalForm.hidden   = true;
-        summarySelection.innerHTML = '';
-        calEl.querySelectorAll('.selected').forEach(c=>c.classList.remove('selected'));
-      };
-
-      confirmBtn.onclick = async ()=>{
-        const clientName = clientNameInput.value.trim();
-        if(!clientName) return showToast('Please enter your name');
-        showToast(PHASE.confirmBooking);
-        await new Promise(r=>setTimeout(r,1500));
-        finalForm.innerHTML = `
-          <div class="result-content">
-            🎉 Success, <strong>${clientName}</strong>!<br>
-            Your appointment with <strong>${currentProviderName}</strong><br>
-            on <strong>${window.selectedDate}</strong> at <strong>${window.selectedTime}</strong> is confirmed.
-          </div>`;
-        upcomingList.insertAdjacentHTML('beforeend', `
-          <li>
-            <strong>${currentProviderName}</strong> – ${window.selectedDate} ${window.selectedTime}
-            <button class="btn-sm rescheduleBtn">Reschedule</button>
-            <button class="btn-sm cancelBtn">Cancel</button>
-          </li>`);
-      };
-    }
-
-    // ─── 4. INITIALIZE AN EMPTY CALENDAR ─────────────────
-    // Appointment flow remains hidden until a provider is chosen.
-
-    // ─── 5. START APPOINTMENT FLOW ──────────────────────
-    function startAppointmentFlow(providerId, providerName) {
-      appointmentEl.querySelector('h2').innerHTML =
-        `<i class="fas fa-calendar-alt"></i> Schedule with <strong>${providerName}</strong>`;
-      if(!appointmentEl.querySelector('.flow-desc')) {
-        appointmentEl.insertAdjacentHTML('afterbegin',
-          `<p class="desc flow-desc">Select an available date, then pick a time slot.</p>`);
-      }
-      generateCalendar(displayYear, displayMonth);
-    }
-
-  }); // DOMContentLoaded
-})(); // IIFE
+    // ─── INITIALIZE ────────────────────────────────────
+    sectionPast.classList.add('hidden');
+    sectionFavorites.classList.add('hidden');
+    confirmSection.classList.add('hidden');
+  });
+})();
 </script>
 
   
