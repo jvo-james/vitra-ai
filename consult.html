@@ -751,11 +751,10 @@ hero-text .desc {
 
 
 <script>
-// ─── CORE & HELPERS ─────────────────────────────────────────────────
-document.addEventListener("DOMContentLoaded", () => {
+(function () {
   const PHASE = {
-    findMatch:       "Matching…",
-    confirmBooking:  "Confirming…"
+    findMatch: "Matching…",
+    confirmBooking: "Confirming…",
   };
 
   function showToast(msg) {
@@ -767,57 +766,65 @@ document.addEventListener("DOMContentLoaded", () => {
     setTimeout(() => t.remove(), 3000);
   }
 
-  function scrollToSection(sel) {
-    const el = document.querySelector(sel);
-    if (el) el.scrollIntoView({ behavior: "smooth" });
+  async function callOpenAI(messages) {
+    try {
+      const res = await fetch("/.netlify/functions/openai-proxy", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ messages }),
+      });
+      if (!res.ok) throw new Error(await res.text());
+      const j = await res.json();
+      return j.choices?.[0]?.message?.content.trim() || "";
+    } catch (err) {
+      console.error("OpenAI error:", err);
+      return "";
+    }
   }
 
-  // ─── ELEMENT REFERENCES ────────────────────────────────────────────
-  // Nav / Theme / Sidebar
-  const btnBookHero    = document.querySelector("#hero .hero-btn");
-  const btnBookQuick   = document.querySelector("#quickActions .btn");
-  const btnViewUpcoming= document.getElementById("viewUpcoming");
-  const btnViewPast    = document.getElementById("viewPast");
-  const urgentLink     = document.getElementById("urgentCare");
-  const sidebarBtn     = document.getElementById("shrinkSidebar");
-  const hamburger      = document.getElementById("hamburger");
-  const themeToggle    = document.getElementById("themeToggle");
-  const bodyEl         = document.body;
+  document.addEventListener("DOMContentLoaded", () => {
+    // ─── ELEMENT REFERENCES ─────────────────────────────────────────
+    const bodyEl         = document.body;
+    const sidebarBtn     = document.getElementById("shrinkSidebar");
+    const hamburger      = document.getElementById("hamburger");
+    const themeToggle    = document.getElementById("themeToggle");
+    const btnBookHero    = document.querySelector("#hero .hero-btn");
+    const btnBookQuick   = document.querySelector("#quickActions .btn");
+    const btnViewUpcoming= document.getElementById("viewUpcoming");
+    const btnViewPast    = document.getElementById("viewPast");
+    const urgentLink     = document.getElementById("urgentCare");
+    const urgentBooking  = document.getElementById("urgentBooking");
+    const urgentPayBtn   = document.getElementById("urgentPayBtn");
 
-  // AI Match
-  const findMatchBtn   = document.getElementById("findMatchBtn");
-  const matchResults   = document.getElementById("matchResults");
-  const scheduleBtn    = document.getElementById("scheduleMatchBtn");
-  const closeMatchBtn  = matchResults.querySelector(".close-btn");
-  const matchedNameEl  = document.getElementById("matchedName");
-  const matchedSpecEl  = document.getElementById("matchedSpec");
+    // Provider-match & calendar
+    const matchForm      = document.getElementById("matchForm");
+    const findMatchBtn   = document.getElementById("findMatchBtn");
+    const matchResults   = document.getElementById("matchResults");
+    const closeBtn       = matchResults.querySelector(".close-btn");
+    const scheduleBtn    = document.getElementById("scheduleMatchBtn");
+    const matchedNameEl  = document.getElementById("matchedName");
+    const matchedSpecEl  = document.getElementById("matchedSpec");
+    const appointFlow    = document.getElementById("appointmentFlow");
+    const chosenProv     = document.getElementById("chosenProvider");
+    const calHeader      = document.getElementById("calendarHeader");
+    const calGrid        = document.getElementById("calendar");
+    const prevMonthBtn   = document.getElementById("prevMonth");
+    const nextMonthBtn   = document.getElementById("nextMonth");
+    const timeSlotsEl    = document.getElementById("timeSlots");
+    const confirmForm    = document.getElementById("confirmForm");
+    const summaryText    = document.getElementById("summaryText");
+    const confirmBtn     = document.getElementById("confirmBtn");
 
-  // Scheduling
-  const appointFlow    = document.getElementById("appointmentFlow");
-  const chosenProv     = document.getElementById("chosenProvider");
-  const calHeader      = document.getElementById("calendarHeader");
-  const calGrid        = document.getElementById("calendar");
-  const prevMonthBtn   = document.getElementById("prevMonth");
-  const nextMonthBtn   = document.getElementById("nextMonth");
-  const timeSlotsEl    = document.getElementById("timeSlots");
-  const confirmForm    = document.getElementById("confirmForm");
-  const summaryTextEl  = document.getElementById("summaryText");
-  const confirmBtn     = document.getElementById("confirmBtn");
+    // Rich Dashboard
+    const richTabs       = document.querySelectorAll("#feature-rich-dashboard .dashboard-tabs button");
+    const richUpcoming   = document.getElementById("rich-upcoming");
+    const richPast       = document.getElementById("rich-past");
+    const richFavorites  = document.getElementById("rich-favorites");
 
-  // Urgent booking
-  const urgentPanel    = document.getElementById("urgentBooking");
-  const urgentDate     = document.getElementById("urgentDate");
-  const urgentTime     = document.getElementById("urgentTime");
-  const urgentPayBtn   = document.getElementById("urgentPayBtn");
+    // Upcoming calendar container
+    const upcomingContainer = document.getElementById("upcomingCalendarContainer");
 
-  // Dashboard
-  const richTabs       = document.querySelectorAll("#feature-rich-dashboard .dashboard-tabs button");
-  const richUpcoming   = document.getElementById("rich-upcoming");
-  const richPast       = document.getElementById("rich-past");
-  const richFavorites  = document.getElementById("rich-favorites");
-  const upcomingCalCtr = document.getElementById("upcomingCalendarContainer");
-
-  // Providers + availability
+   // Providers + availability
     const providers = [
       { id: "p1",  name: "Dr. Kwame Asante", spec: "Pulmonologist, Korle Bu" },
       { id: "p2",  name: "Dr. Abena Owusu", spec: "Cardiologist, 37 Military" },
@@ -859,266 +866,257 @@ document.addEventListener("DOMContentLoaded", () => {
       p18: { "2025-05-31": ["09:30","10:30","12:00"], "2025-06-01": ["08:00","09:00","10:00"], "2025-06-08": ["11:30","12:30","13:30"], "2025-06-20": ["14:00","15:00","16:00"] }
     };
 
+    // State
+    let providerId, providerName;
+    let year = new Date().getFullYear(), month = new Date().getMonth();
+    let selectedDate, selectedTime;
 
-  let providerId, providerName;
-  let curYear = new Date().getFullYear(), curMonth = new Date().getMonth();
-  let selectedDate, selectedTime;
+    // ─── BUTTON LISTENERS ─────────────────────────────────────────
 
-  // ─── NAVIGATION & THEME ─────────────────────────────────────────
-  btnBookHero.addEventListener("click",  () => scrollToSection("#providerMatch"));
-  btnBookQuick.addEventListener("click", () => scrollToSection("#providerMatch"));
-  btnViewUpcoming.addEventListener("click", () => { scrollToSection("#feature-rich-dashboard"); showRichTab("rich-upcoming"); });
-  btnViewPast.addEventListener("click", () => { scrollToSection("#feature-rich-dashboard"); showRichTab("rich-past"); });
-  urgentLink.addEventListener("click", () => {
-    urgentPanel.hidden = false;
-    scrollToSection("#urgentBooking");
-  });
+    // Hero & Quick-action “Book appointment”
+    btnBookHero.addEventListener("click",  () => scrollToSection("#providerMatch"));
+    btnBookQuick.addEventListener("click", () => scrollToSection("#providerMatch"));
 
-  sidebarBtn.addEventListener("click", () => {
-    bodyEl.classList.toggle("sidebar-shrink");
-    sidebarBtn.querySelector("i").classList.toggle("fa-chevron-left");
-    sidebarBtn.querySelector("i").classList.toggle("fa-chevron-right");
-  });
-  hamburger.addEventListener("click", () => {
-    bodyEl.classList.toggle("sidebar-open");
-    bodyEl.classList.remove("sidebar-shrink");
-  });
+    // View Upcoming / Past in Rich Dashboard
+    btnViewUpcoming.addEventListener("click", () => {
+      scrollToSection("#feature-rich-dashboard");
+      showRichTab("rich-upcoming");
+    });
+    btnViewPast.addEventListener("click", () => {
+      scrollToSection("#feature-rich-dashboard");
+      showRichTab("rich-past");
+    });
 
-  themeToggle.addEventListener("click", () => {
-    const html = document.documentElement;
-    html.classList.toggle("dark");
-    themeToggle.classList.toggle("fa-moon");
-    themeToggle.classList.toggle("fa-sun");
-  });
+    // Urgent care toggle
+    urgentLink.addEventListener("click", () => {
+      urgentBooking.hidden = false;
+      scrollToSection("#urgentBooking");
+    });
 
-  // ─── URGENT + PAYSTACK ──────────────────────────────────────────
-  urgentPayBtn.addEventListener("click", () => {
-    if (!urgentDate.value || !urgentTime.value) {
-      return showToast("Please select date & time");
-    }
-    PaystackPop.setup({
-      key:    "pk_test_297586e51710e83d3c159bfe71ff45c7e23411fa",
-      email:  "guest@domain.com",
-      amount: 50000,
-      currency: "GHS",
-      ref:    "URGENT_"+Date.now(),
-      callback() {
-        showToast("Payment successful!");
-        addUrgentAppointment(urgentDate.value, urgentTime.value);
-      },
-      onClose() {
-        showToast("Payment cancelled.");
+    // Paystack urgent booking
+    urgentPayBtn.addEventListener("click", () => {
+      const d = document.getElementById("urgentDate").value;
+      const t = document.getElementById("urgentTime").value;
+      if (!d || !t) {
+        return showToast("Please select date and time.");
       }
-    }).openIframe();
-  });
+      PaystackPop.setup({
+        key: "pk_test_297586e51710e83d3c159bfe71ff45c7e23411fa",
+        email: document.getElementById("clientEmail")?.value || "guest@domain.com",
+        amount: 50000,
+        currency: "GHS",
+        ref: "URGENT_" + Date.now(),
+        callback() {
+          showToast("Payment successful!");
+          addUrgentAppointment(d, t);
+        },
+        onClose() {
+          showToast("Payment cancelled.");
+        }
+      }).openIframe();
+    });
 
-  function addUrgentAppointment(d, t) {
-    const card = document.createElement("div");
-    card.className = "card";
-    card.innerHTML = `
-      <i class="fas fa-user-md fa-2x"></i>
-      <div class="details">
-        <h4><strong>Urgent Consult</strong></h4>
-        <p>${d} • ${t}</p>
-      </div>
-      <div class="actions">
-        <button class="btn-cancel"><i class="fas fa-times"></i></button>
-      </div>`;
-    card.querySelector(".btn-cancel").onclick = () => {
-      card.remove();
-      renderUpcomingCalendar();
-      showToast("Urgent appointment canceled.");
-    };
-    richUpcoming.append(card);
-    renderUpcomingCalendar();
-    urgentPanel.hidden = true;
-  }
+    // Sidebar toggle
+    sidebarBtn.addEventListener("click", () => {
+      bodyEl.classList.toggle("sidebar-shrink");
+      const icon = sidebarBtn.querySelector("i");
+      icon.classList.toggle("fa-chevron-left");
+      icon.classList.toggle("fa-chevron-right");
+    });
 
-  // ─── AI MATCH “Predict Specialist” ─────────────────────────────
-  findMatchBtn.addEventListener("click", async () => {
-    const concern = document.getElementById("concernInput").value.trim();
-    if (!concern) return showToast("Enter your concern");
+    // Mobile hamburger
+    hamburger.addEventListener("click", () => {
+      bodyEl.classList.toggle("sidebar-open");
+      bodyEl.classList.remove("sidebar-shrink");
+    });
 
-    findMatchBtn.disabled = true;
-    findMatchBtn.innerText = PHASE.findMatch;
+    // Dark/light mode
+    themeToggle.addEventListener("click", () => {
+      const html = document.documentElement;
+      html.classList.toggle("dark");
+      html.setAttribute("aria-theme", html.classList.contains("dark") ? "dark" : "light");
+      themeToggle.classList.toggle("fa-sun");
+      themeToggle.classList.toggle("fa-moon");
+    });
 
-    // call your AI proxy
-    let pickName;
-    try {
-      const resp = await fetch("/.netlify/functions/openai-proxy", {
-        method:"POST",
-        headers:{"Content-Type":"application/json"},
-        body:JSON.stringify({
-          messages:[
-            { role:"system", content:
-              "You are AI match. Providers:\n" +
-              providers.map(p=>`- ${p.name} – ${p.spec}`).join("\n")
-            },
-            { role:"user", content:`Concern="${concern}". Pick best provider name only.` }
-          ]
-        })
+    // Match → AI prediction
+    findMatchBtn.addEventListener("click", async () => {
+      const concern = document.getElementById("concernInput").value.trim();
+      if (!concern) {
+        showToast("Please enter your chief concern.");
+        return;
+      }
+      findMatchBtn.disabled = true;
+      findMatchBtn.innerHTML = `${PHASE.findMatch} <span class="spinner"></span>`;
+
+      let provider = null;
+      try {
+        const sys = `You are AI match. Providers:\n${providers.map(p => `- ${p.name} – ${p.spec}`).join("\n")}`;
+        const usr = `Concern="${concern}", Urgency="${document.getElementById("urgencyInput").value}", Language="${document.getElementById("languageInput").value}". Pick best provider by exact name only.`;
+        const raw = await callOpenAI([
+          { role: "system", content: sys },
+          { role: "user",   content: usr }
+        ]);
+        const firstLine = raw.replace(/```[\s\S]*?```/g, "").split(/\r?\n/)[0].trim();
+        const matchName = firstLine.split("–")[0]?.trim();
+        provider = providers.find(p => p.name === matchName);
+      } catch (e) {
+        console.error(e);
+      }
+      if (!provider) {
+        provider = providers[Math.floor(Math.random() * providers.length)];
+      }
+
+      findMatchBtn.disabled = false;
+      findMatchBtn.innerHTML = '<i class="fas fa-search"></i> Predict Specialist';
+
+      matchedNameEl.textContent = provider.name;
+      matchedSpecEl.textContent = provider.spec;
+      providerId = provider.id;
+      providerName = provider.name;
+      matchResults.hidden = false;
+    });
+
+    // Close AI result
+    closeBtn.addEventListener("click", () => {
+      matchResults.hidden = true;
+    });
+
+    // Go to scheduling
+    scheduleBtn.addEventListener("click", () => {
+      matchResults.hidden = true;
+      appointFlow.hidden = false;
+      chosenProv.textContent = providerName;
+      buildCalendar(year, month);
+    });
+
+    // Calendar nav
+    prevMonthBtn.addEventListener("click", () => {
+      month--; if (month < 0) { month = 11; year--; }
+      buildCalendar(year, month);
+    });
+    nextMonthBtn.addEventListener("click", () => {
+      month++; if (month > 11) { month = 0; year++; }
+      buildCalendar(year, month);
+    });
+
+    function buildCalendar(y, m) {
+      calHeader.textContent = new Date(y, m).toLocaleString("default", { month: "long", year: "numeric" });
+      calGrid.innerHTML = "";
+      ["Su","Mo","Tu","We","Th","Fr","Sa"].forEach(w => {
+        const hd = document.createElement("div");
+        hd.className = "cell"; hd.style.fontWeight = "600"; hd.innerText = w;
+        calGrid.append(hd);
       });
-      const j = await resp.json();
-      pickName = (j.choices?.[0]?.message?.content||"").split("\n")[0].trim();
-    } catch {
-      pickName = "";
-    }
-    const found = providers.find(p=>p.name===pickName) || providers[Math.floor(Math.random()*providers.length)];
-
-    providerId   = found.id;
-    providerName = found.name;
-    matchedNameEl.textContent = found.name;
-    matchedSpecEl.textContent = found.spec;
-    matchResults.hidden = false;
-
-    findMatchBtn.disabled = false;
-    findMatchBtn.innerHTML = `<i class="fas fa-search"></i> Predict Specialist`;
-  });
-
-  closeMatchBtn.addEventListener("click", () => {
-    matchResults.hidden = true;
-  });
-
-  scheduleBtn.addEventListener("click", () => {
-    matchResults.hidden = true;
-    appointFlow.hidden  = false;
-    chosenProv.textContent = providerName;
-    buildCalendar(curYear, curMonth);
-  });
-
-  // ─── CALENDAR & TIME SLOTS ────────────────────────────────────
-  prevMonthBtn.addEventListener("click", () => {
-    curMonth--; if(curMonth<0){curMonth=11;curYear--;}
-    buildCalendar(curYear,curMonth);
-  });
-  nextMonthBtn.addEventListener("click", () => {
-    curMonth++; if(curMonth>11){curMonth=0;curYear++;}
-    buildCalendar(curYear,curMonth);
-  });
-
-  function buildCalendar(Y,M){
-    calHeader.innerText = new Date(Y,M).toLocaleString("default",{month:"long",year:"numeric"});
-    calGrid.innerHTML = "";
-    ["Su","Mo","Tu","We","Th","Fr","Sa"].forEach(wd=>{
-      const hd = document.createElement("div");
-      hd.className="cell"; hd.style.fontWeight="600"; hd.innerText=wd;
-      calGrid.append(hd);
-    });
-    const first = new Date(Y,M,1).getDay();
-    for(let i=0;i<first;i++){
-      const blank = document.createElement("div");
-      blank.className="cell closed"; calGrid.append(blank);
-    }
-    const avail = availability[providerId]||{};
-    const today = new Date();
-    const days = new Date(Y,M+1,0).getDate();
-    for(let d=1;d<=days;d++){
-      const dateKey = `${Y}-${String(M+1).padStart(2,"0")}-${String(d).padStart(2,"0")}`;
-      const isPast = new Date(Y,M,d) < new Date().setHours(0,0,0,0);
-      const open   = !isPast && Array.isArray(avail[dateKey]);
-      const cell   = document.createElement("div");
-      cell.className = `cell ${open?"open":"closed"}`;
-      cell.innerText = d;
-      if(open) cell.onclick = ()=> selectDate(dateKey);
-      if(Y===today.getFullYear()&&M===today.getMonth()&&d===today.getDate()){
-        cell.classList.add("today");
+      const firstDay = new Date(y, m, 1).getDay();
+      for (let i = 0; i < firstDay; i++) {
+        const blank = document.createElement("div");
+        blank.className = "cell closed"; calGrid.append(blank);
       }
-      calGrid.append(cell);
+      const days = new Date(y, m + 1, 0).getDate();
+      const avail = availability[providerId] || {};
+      const today = new Date();
+      for (let d = 1; d <= days; d++) {
+        const dateKey = `${y}-${String(m + 1).padStart(2, "0")}-${String(d).padStart(2, "0")}`;
+        const isPast = new Date(y, m, d) < new Date().setHours(0,0,0,0);
+        const open = !isPast && Array.isArray(avail[dateKey]);
+        const cell = document.createElement("div");
+        cell.className = `cell ${open ? "open" : "closed"}`;
+        cell.innerText = d;
+        if (open) cell.addEventListener("click", () => selectDate(dateKey));
+        if (today.getFullYear() === y && today.getMonth() === m && today.getDate() === d) {
+          cell.classList.add("today");
+        }
+        calGrid.append(cell);
+      }
+      timeSlotsEl.innerHTML = "";
+      confirmForm.hidden = true;
     }
-    timeSlotsEl.innerHTML="";
-    confirmForm.hidden = true;
-  }
 
-  function selectDate(key){
-    selectedDate = key;
-    const slots = availability[providerId][key]||[];
-    timeSlotsEl.innerHTML = `<h4>Available on ${key}:</h4>`;
-    const ul = document.createElement("ul");
-    ul.style.display="flex"; ul.style.gap="0.5rem";
-    slots.forEach(t=>{
-      const li = document.createElement("li");
-      const btn= document.createElement("button");
-      btn.className = "btn-sm";
-      btn.innerText = t;
-      btn.onclick  = ()=> selectTime(t);
-      li.append(btn); ul.append(li);
+    function selectDate(key) {
+      selectedDate = key;
+      const slots = availability[providerId][key] || [];
+      timeSlotsEl.innerHTML = `<h4>Available on ${key}:</h4>`;
+      const ul = document.createElement("ul");
+      ul.style.display = "flex"; ul.style.gap = "0.5rem";
+      slots.forEach(t => {
+        const li = document.createElement("li");
+        const btn = document.createElement("button");
+        btn.type = "button"; btn.className = "btn-sm"; btn.innerText = t;
+        btn.addEventListener("click", () => selectTime(t));
+        li.append(btn); ul.append(li);
+      });
+      timeSlotsEl.append(ul);
+    }
+
+    function selectTime(t) {
+      selectedTime = t;
+      summaryText.textContent = `You selected ${selectedDate} at ${selectedTime}.`;
+      confirmForm.hidden = false;
+      confirmForm.scrollIntoView({ behavior: "smooth" });
+    }
+
+    confirmBtn.addEventListener("click", () => {
+      const name = document.getElementById("clientName").value.trim();
+      const email = document.getElementById("clientEmail").value.trim();
+      if (!name) { showToast("Enter your name"); return; }
+      showToast(PHASE.confirmBooking);
+      setTimeout(() => {
+        alert(`Confirmed with ${providerName} on ${selectedDate} @ ${selectedTime}`);
+        // you can also inject into dashboard here
+        renderUpcomingCalendar();
+      }, 800);
     });
-    timeSlotsEl.append(ul);
-  }
 
-  function selectTime(t){
-    selectedTime = t;
-    summaryTextEl.innerText = `You selected ${selectedDate} at ${selectedTime}.`;
-    confirmForm.hidden = false;
-    confirmForm.scrollIntoView({ behavior:"smooth" });
-  }
+    // ─── Rich Dashboard Tabs ───────────────────────────────────
+    function showRichTab(tab) {
+      richUpcoming.hidden  = (tab !== "rich-upcoming");
+      richPast.hidden      = (tab !== "rich-past");
+      richFavorites.hidden = (tab !== "rich-favorites");
+      richTabs.forEach(b => b.classList.toggle("active", b.dataset.tab === tab));
+    }
+    richTabs.forEach(btn => btn.addEventListener("click", () => showRichTab(btn.dataset.tab)));
+    showRichTab("rich-upcoming");
 
-  confirmBtn.addEventListener("click", () => {
-    const name = document.getElementById("clientName").value.trim();
-    if(!name) return showToast("Enter your name");
-    showToast(PHASE.confirmBooking);
-    setTimeout(() => {
-      alert(`Confirmed with ${providerName} on ${selectedDate} @ ${selectedTime}`);
-      // add to dashboard:
+    // Urgent appointment card
+    function addUrgentAppointment(d, t) {
       const card = document.createElement("div");
-      card.className="card";
+      card.className = "card";
       card.innerHTML = `
         <i class="fas fa-user-md fa-2x"></i>
-        <div class="details">
-          <h4><strong>${providerName}</strong></h4>
-          <p>${selectedDate} • ${selectedTime}</p>
-        </div>
-        <div class="actions">
-          <button class="btn-reschedule"><i class="fas fa-sync-alt"></i></button>
-          <button class="btn-cancel"><i class="fas fa-times"></i></button>
-          <button class="btn-addcal"><i class="fas fa-calendar-plus"></i></button>
-        </div>`;
-      // wire dashboard buttons…
-      card.querySelector(".btn-cancel").onclick = () => { card.remove(); renderUpcomingCalendar(); showToast("Canceled."); };
-      card.querySelector(".btn-reschedule").onclick = () => { appointFlow.hidden=false; buildCalendar(curYear,curMonth); };
-      card.querySelector(".btn-addcal").onclick = () => {
-        const ics = [
-          "BEGIN:VCALENDAR","VERSION:2.0","BEGIN:VEVENT",
-          `SUMMARY:Consult with ${providerName}`,
-          `DTSTART:${selectedDate.replace(/-/g,"") }T${selectedTime.replace(":","")}00`,
-          "END:VEVENT","END:VCALENDAR"
-        ].join("\r\n");
-        const blob=new Blob([ics],{type:"text/calendar"});
-        const url=URL.createObjectURL(blob);
-        const a=document.createElement("a");
-        a.href=url; a.download="appointment.ics"; a.click();
-        showToast("Added to calendar.");
-      };
+        <div class="details"><h4><strong>Urgent Consult</strong></h4><p>${d} • ${t}</p></div>
+        <div class="actions"><button class="btn-cancel"><i class="fas fa-times"></i></button></div>
+      `;
+      card.querySelector(".btn-cancel").addEventListener("click", () => {
+        card.remove();
+        renderUpcomingCalendar();
+        showToast("Urgent appointment canceled.");
+      });
       richUpcoming.append(card);
       renderUpcomingCalendar();
-      scrollToSection("#feature-rich-dashboard");
-      confirmForm.hidden = true;
-    }, 1000);
+      urgentBooking.hidden = true;
+    }
+
+    // Upcoming calendar renderer
+    function renderUpcomingCalendar() {
+      upcomingContainer.innerHTML = "";
+      richUpcoming.querySelectorAll(".card .details").forEach(det => {
+        const name = det.querySelector("h4").textContent;
+        const dt   = det.querySelector("p").textContent;
+        const entry = document.createElement("div");
+        entry.className = "calendar-entry";
+        entry.innerHTML = `<strong>${name}</strong><br/>${dt}`;
+        upcomingContainer.append(entry);
+      });
+    }
+    renderUpcomingCalendar();
+
+    // Scroll‐helper
+    function scrollToSection(id) {
+      document.querySelector(id).scrollIntoView({ behavior: "smooth" });
+    }
   });
-
-  // ─── DASHBOARD TABS & RENDER ──────────────────────────────────
-  function showRichTab(tab){
-    richUpcoming.hidden   = tab!=="rich-upcoming";
-    richPast.hidden       = tab!=="rich-past";
-    richFavorites.hidden  = tab!=="rich-favorites";
-    richTabs.forEach(b=> b.classList.toggle("active", b.dataset.tab===tab));
-  }
-  richTabs.forEach(btn=> btn.addEventListener("click", ()=> showRichTab(btn.dataset.tab)));
-  showRichTab("rich-upcoming");
-
-  function renderUpcomingCalendar(){
-    upcomingCalCtr.innerHTML = "";
-    richUpcoming.querySelectorAll(".card .details").forEach(det => {
-      const name = det.querySelector("h4").textContent;
-      const when = det.querySelector("p").textContent;
-      const e = document.createElement("div");
-      e.className="calendar-entry";
-      e.innerHTML = `<strong>${name}</strong><br>${when}`;
-      upcomingCalCtr.append(e);
-    });
-  }
-  renderUpcomingCalendar();
-});  // end DOMContentLoaded
+})();
 </script>
 
 </body>
