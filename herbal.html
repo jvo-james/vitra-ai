@@ -825,8 +825,15 @@ footer a {
     <a href="mental.html"><i class="fas fa-brain"></i><span>Psychology & Mental Health</span></a>
     <a href="dietetics.html"><i class="fas fa-utensils"></i><span>Dietetics</span></a>
     <a href="pharmacy.html"><i class="fas fa-prescription-bottle-alt"></i><span>E-Pharmacy</span></a>
-    <a href="consult.html"><i class="fas fa-calendar-check"></i><span>Consultation Booking</span></a>
-      <button id="shrinkBtn" aria-label="Toggle sidebar"><i class="fas fa-angle-double-left"></i></button>
+ <a href="consult.html" id="consult-link" style="position:relative;">
+      <i class="fas fa-calendar-check"></i><span>Consultation Booking</span>
+      <!-- shrink button moved here -->
+      <button id="shrinkBtn" aria-label="Toggle sidebar"
+              style="position:absolute; right:0; top:50%; transform:translateY(-50%);">
+        <i class="fas fa-angle-double-left"></i>
+      </button>
+    </a>
+            <button id="shrinkBtn" aria-label="Toggle sidebar"><i class="fas fa-angle-double-left"></i></button>
     </nav>
   </aside>
 
@@ -883,8 +890,11 @@ footer a {
         <button type="submit">Identify</button>
         <div class="hint">Use a clear close-up of a leaf or flower.</div>
       </form>
-      <img id="idenPreview" alt="" style="max-width:200px;margin-top:1rem;display:none;"/>
-      <div id="idenResult" class="response" role="status" aria-live="polite" hidden>
+     <img id="idenPreview" alt="" style="max-width:200px;margin-top:1rem;display:none;"/>
+      <div id="idenClear" style="display:none; margin-top:.5rem;">
+        <a href="#" onclick="clearPreview(); return false;">Remove Image</a>
+      </div>
+            <div id="idenResult" class="response" role="status" aria-live="polite" hidden>
         <button class="close-btn" aria-label="Close result">×</button>
         <div class="result-content"></div>
       </div>
@@ -1277,10 +1287,19 @@ footer a {
         reader.onload = e => {
           preview.src = e.target.result;
           preview.style.display = 'block';
+          document.getElementById('idenClear').style.display = 'block';
         };
         reader.readAsDataURL(input.files[0]);
       }
     }
+  function clearPreview() {
+    document.getElementById('idenPreview').style.display = 'none';
+    document.getElementById('idenPreview').src = '';
+    document.getElementById('idenClear').style.display = 'none';
+    document.getElementById('idenDesc').value = '';
+    // also clear the file input
+    document.querySelector('#iden-form input[type=file]').value = '';
+  }
   </script>
 <script>
  
@@ -1623,6 +1642,11 @@ footer a {
     panel.innerHTML = '<div class="result-content">Calculating… <span class="spinner"></span></div>';
     const rx   = +document.getElementById('roiRx').value;
     const cost = +document.getElementById('roiCost').value;
+    // validate inputs
+    if (!(rx > 0) || !(cost > 0)) {
+      panel.innerHTML = '<div class="result-content">⚠️ Please enter positive numbers for prescriptions and cost.</div>';
+      return;
+    }
     try {
       const reply = await callOpenAI([
         { role: 'system', content: 'You are a finance expert. Explain ROI step by step with clear equations in plain HTML.' },
@@ -1638,7 +1662,6 @@ footer a {
   //──────────────────────────────────────────────────────────────────────────────
   // INIT & EVENT LISTENERS
   //──────────────────────────────────────────────────────────────────────────────
-  document.addEventListener('DOMContentLoaded', () => {
     // Charts & export
     initCharts();
     document.querySelector('button[onclick="exportAnalytics()"]').onclick = exportAnalytics;
@@ -1660,14 +1683,15 @@ footer a {
       sidebar.classList.toggle('open');
     });
 
-    // Theme toggle
-    const themeToggle = document.getElementById('themeToggle');
-    themeToggle.addEventListener('click', () => {
-      document.documentElement.classList.toggle('dark');
-      themeToggle.classList.toggle('fa-sun');
-      themeToggle.classList.toggle('fa-moon');
+   themeToggle.addEventListener('click', () => {
+      const htmlEl = document.documentElement;
+      const isDark = htmlEl.classList.toggle('dark');
+      themeToggle.classList.toggle('fa-sun', isDark);
+      themeToggle.classList.toggle('fa-moon', !isDark);
+      // sync aria-theme
+      htmlEl.setAttribute('aria-theme', isDark ? 'dark' : 'light');
     });
-
+  
     // AI Herbalist Chat enhancements
     const chatBox   = document.getElementById('chatBox');
     const savedChat = localStorage.getItem('chatHistory');
