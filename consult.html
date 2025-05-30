@@ -570,6 +570,17 @@ hero-text .desc {
      .modal[hidden] {
     display: none !important;
   }
+    #urgentMatchResults .close-btn {
+   position: absolute;
+   top: 0.5rem;
+   right: 0.5rem;
+   background: var(--cb-accent);
+   color: #fff;
+   border-radius: 50%;
+   width: 2rem; height: 2rem;
+   display:flex; align-items:center; justify-content:center;
+   cursor:pointer;
+ }
   </style>
 </head>
 
@@ -642,6 +653,7 @@ hero-text .desc {
     <button type="button" id="urgentFindMatchBtn" class="btn">
       <i class="fas fa-search"></i> Find Specialist
     </button>
+    <button type="button" id="urgentStep1Back" class="btn-sm" hidden>Back</button>
   </div>
 
   <!-- Step 2: Display the AI-picked specialist -->
@@ -657,6 +669,9 @@ hero-text .desc {
     <button id="urgentScheduleBtn" class="btn">
       <i class="fas fa-calendar-alt"></i> Schedule with this Specialist
     </button>
+    <button type="button" id="urgentStep2Back" class="btn-sm">Back</button>
+    <button type="button" id="urgentStep2Close" class="btn-sm">Close</button>
+
   </div>
 
   <!-- Step 3: Calendar & Time -->
@@ -675,6 +690,9 @@ hero-text .desc {
     <button id="urgentNextToDetails" class="btn">
       <i class="fas fa-arrow-right"></i> Next
     </button>
+   <button type="button" id="urgentStep3Back" class="btn-sm">Back</button>
+    <button type="button" id="urgentStep3Close" class="btn-sm">Close</button>
+
   </div>
 
   <!-- Step 4: Your Details & Confirm (opens review-modal) -->
@@ -690,6 +708,8 @@ hero-text .desc {
     <button type="button" id="urgentConfirmBtn" class="btn">
       <i class="fas fa-check"></i> Review & Pay ₵500
     </button>
+     <button type="button" id="urgentStep4Back" class="btn-sm">Back</button>
+    <button type="button" id="urgentStep4Close" class="btn-sm">Close</button>
   </form>
 </section>
     
@@ -725,11 +745,12 @@ hero-text .desc {
     <button type="button" id="findMatchBtn" class="btn">
       <i class="fas fa-search"></i> Predict Specialist
     </button>
-  </form>
+    </form>
 
   <!-- Step 2: Display the AI-picked specialist -->
   <div id="matchResults" class="response" hidden>
-    <button class="close-btn"><i class="fas fa-times"></i></button>
+    <button id="matchResultsClose" class="close-btn"><i class="fas fa-times"></i></button>
+    <button id="matchResultsBack" class="btn-sm">Back</button>
     <div class="card">
       <i class="fas fa-user-md fa-2x"></i>
       <div class="details">
@@ -744,6 +765,7 @@ hero-text .desc {
 
   <!-- Step 3: Calendar & Time Slots for the matched provider -->
   <div id="appointmentFlow" hidden>
+    <button id="appointmentFlowClose" class="btn-sm">Close</button>
     <h3><i class="fas fa-calendar-alt"></i> Schedule with <span id="chosenProvider"></span></h3>
 
     <div class="month-nav">
@@ -755,6 +777,8 @@ hero-text .desc {
     <div id="timeSlots"></div>
 
     <form id="confirmForm" hidden class="module">
+      <button id="confirmStep4Close" class="btn-sm">Close</button>
+      <button id="confirmStep4Back" class="btn-sm">Back</button>
       <h4><i class="fas fa-check-circle"></i> Confirm Your Appointment</h4>
       <label>
         <i class="fas fa-user"></i> Your Name:
@@ -837,8 +861,23 @@ hero-text .desc {
   </footer>
 
 
-
 <script>
+    // On load, restore appointments & urgent draft
+    const stored = localStorage.getItem("appointments");
+    if (stored) {
+      appointments.push(...JSON.parse(stored));
+      renderUpcomingCalendarWidget();
+      appointments.forEach(addToRichDashboard);
+    }
+    // Urgent draft (concern, date, time, name, email)
+    const draft = JSON.parse(localStorage.getItem("urgentDraft")||"{}");
+    Object.entries(draft).forEach(([k,v])=>{
+      const el = document.getElementById("urgent"+k);
+      if (el) el.value = v;
+    });
+  </script>
+
+  <script>
 (function () {
 
     // Providers + availability
@@ -917,7 +956,60 @@ hero-text .desc {
      //  Initialize upcoming calendar widget state
     let widgetYear = new Date().getFullYear(), widgetMonth = new Date().getMonth();
 
-  
+// — URGENT flow navigation —
+
+// Step2 Back / Close
+document.getElementById("urgentStep2Back").onclick = () => {
+  document.getElementById("urgentMatchResults").hidden = true;
+  document.getElementById("urgentStep1").hidden       = false;
+};
+document.getElementById("urgentStep2Close").onclick = () => {
+  document.getElementById("urgentBooking").hidden    = true;
+};
+
+document.getElementById("urgentStep3Close").onclick = () => {
+  document.getElementById("urgentBooking").hidden        = true;
+};
+ // Step3 Back
+ document.getElementById("urgentStep3Back").onclick = () => {
+   document.getElementById("urgentCalendarFlow").hidden   = true;
+   document.getElementById("urgentMatchResults").hidden   = false;
+ };
+    
+// Step4 Back / Close
+document.getElementById("urgentStep4Back").onclick = () => {
+  document.getElementById("urgentDetailsForm").hidden   = true;
+  document.getElementById("urgentCalendarFlow").hidden  = false;
+};
+document.getElementById("urgentStep4Close").onclick = () => {
+  document.getElementById("urgentBooking").hidden       = true;
+};
+
+// — PROVIDER flow navigation —
+
+// Step2 Back / Close
+document.getElementById("matchResultsBack").onclick = () => {
+  document.getElementById("matchResults").hidden    = true;
+  document.getElementById("matchForm").hidden       = false;
+};
+document.getElementById("matchResultsClose").onclick = () => {
+  document.getElementById("matchResults").hidden    = true;
+};
+
+// Step3 (calendar) 
+ document.getElementById("appointmentFlowClose").onclick = () => {
+   document.getElementById("appointmentFlow").hidden = true;
+ };
+
+// Confirm step (Step4) Back / Close
+document.getElementById("confirmStep4Back").onclick = () => {
+  document.getElementById("confirmForm").hidden     = true;
+  document.getElementById("appointmentFlow").hidden = false;
+};
+document.getElementById("confirmStep4Close").onclick = () => {
+  document.getElementById("appointmentFlow").hidden = true;
+};
+
     // URGENT FLOW STATE
   let urgentProviderId, urgentProviderName;
   let uYear = new Date().getFullYear(), uMonth = new Date().getMonth();
@@ -986,7 +1078,7 @@ hero-text .desc {
     let pick = "";
     try {
       const sys = `You are an AI match. Providers:\n${providers.map(p=>`- ${p.name} – ${p.spec}`).join("\n")}`;
-      const usr = `Concern="${concern}". Pick best provider name only.`;
+              const usr = `Concern="${concern}". Pick best provider by exact name only.`;
       pick = await callOpenAI([ {role:"system",content:sys}, {role:"user",content:usr} ]);
       pick = pick.split("\n")[0].replace(/[^a-zA-Z\s]/g,"").trim();
     } catch {
@@ -1242,7 +1334,15 @@ hero-text .desc {
         <p><strong>Time:</strong> ${selectedTime}</p>
         <p><strong>Your Name:</strong> ${name}</p>
       `;
-      document.getElementById("confirmModal").hidden = false;
+     document.getElementById("confirmModal").hidden = false;
+    // save draft
+    localStorage.setItem("urgentDraft", JSON.stringify({
+      ConcernInput: document.getElementById("urgentConcernInput").value,
+      Date: uSelectedDate,
+      Time: uSelectedTime,
+      ClientName: document.getElementById("urgentClientName").value,
+      ClientEmail: document.getElementById("urgentClientEmail").value
+    }));
     });
 
     // modal controls
@@ -1256,7 +1356,7 @@ hero-text .desc {
     
     document.getElementById("modalConfirm").onclick = () => {
       if (urgentFlow) {
-        // 1) run payment
+        if (!urgentReschedule) {
         PaystackPop.setup({
           key: "pk_test_297586e51710e83d3c159bfe71ff45c7e23411fa",
           email: "guest@domain.com",
@@ -1268,8 +1368,9 @@ hero-text .desc {
             const d = document.getElementById("urgentDate").value;
             const t = document.getElementById("urgentTime").value;
             const id = "U" + Date.now();
-            appointments.push({ id, name: "Urgent Consult", date: d, time: t, urgent: true });
-            addToRichDashboard({ id, name: "Urgent Consult", date: d, time: t, urgent: true });
+            appointments.push({ id, name: urgentProviderName, date: d, time: t, urgent: true });
+            localStorage.setItem("appointments", JSON.stringify(appointments));
+            addToRichDashboard({ id, name: urgentProviderName, date: d, time: t, urgent: true });
             renderUpcomingCalendarWidget();
             showToast("Urgent appointment booked!");
           },
@@ -1277,6 +1378,9 @@ hero-text .desc {
             showToast("Payment cancelled.");
           }
         }).openIframe();
+           } else {
+          finalizeUrgent();
+        }
       } else {
         // normal flow (provider match)
         const name = document.getElementById("clientName").value.trim();
@@ -1286,12 +1390,19 @@ hero-text .desc {
         renderUpcomingCalendarWidget();
         showToast("Appointment confirmed!");
       }
+      function finalizeUrgent() {
+      localStorage.setItem("appointments", JSON.stringify(appointments));
+      renderUpcomingCalendarWidget();
+      showToast("Urgent appointment updated!");
+      urgentReschedule = false;
+    }
       // reset
       urgentFlow = false;
       document.getElementById("confirmModal").hidden = true;
     };
     // ─── URGENT FLOW ─────────────────────────────────────────
     let urgentFlow = false;  // flag for modalConfirm
+    let urgentReschedule = false;
 
     // Replace direct Paystack with “review” modal
     urgentPayBtn.onclick = () => {
@@ -1340,11 +1451,25 @@ hero-text .desc {
        // Reschedule button
       card.querySelector(".btn-reschedule").addEventListener("click", () => {
         // populate scheduling flow for this appt
-        providerName = appt.name;
-        document.getElementById("chosenProvider").textContent = appt.name;
-        selectedDate = appt.date;
-        selectedTime = appt.time;
-        document.getElementById("confirmModal").hidden = false;
+        if (appt.urgent) {
+         urgentProviderName = appt.name;
+         urgentBooking.hidden = false;
+         // skip AI-match, go directly to calendar
+         document.getElementById("urgentStep1").hidden = true;
+         document.getElementById("urgentMatchResults").hidden = true;
+         document.getElementById("urgentCalendarFlow").hidden = false;
+         uSelectedDate = appt.date;
+         uSelectedTime = appt.time;
+         // rebuild calendar for that provider
+         buildUrgentCalendar(uYear, uMonth);
+       } else {
+         providerId = providers.find(p=>p.name===appt.name).id;
+         providerName = appt.name;
+         matchResults.hidden = true;
+         appointmentFlow.hidden = false;
+         chosenProvider.textContent = providerName;
+        buildCalendar(year, month);
+       }
         document.getElementById("confirmDetails").innerHTML = `
           <p><strong>${appt.name}</strong></p>
           <p><strong>Date:</strong> ${appt.date}</p>
