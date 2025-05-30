@@ -619,7 +619,7 @@ hero-text .desc {
   <h2><i class="fas fa-exclamation-triangle"></i> Urgent Appointment</h2>
   <p class="desc">Select your date & time below. <strong>Urgent fee: ₵500.00</strong></p>
   <label>Date:
-    <input type="date" id="urgentDate" min="${new Date().toISOString().split("T")[0]}"/>
+    <input type="date" id="urgentDate"/>
   </label>
   <label>Time:
     <input type="time" id="urgentTime"/>
@@ -806,6 +806,11 @@ hero-text .desc {
   }
 
   document.addEventListener("DOMContentLoaded", () => {
+     // ensure urgentDate can’t be before today
+   document
+     .getElementById("urgentDate")
+     .setAttribute("min", new Date().toISOString().split("T")[0]);
+
     // ─── ELEMENT REFERENCES ─────────────────────────────────────────
     const bodyEl         = document.body;
     const sidebarBtn     = document.getElementById("shrinkSidebar");
@@ -845,9 +850,9 @@ hero-text .desc {
     const richFavorites  = document.getElementById("rich-favorites");
 
     // Upcoming calendar container
-    const upcomingContainer = document.getElementById("upcomingCalendarContainer");
-
-   // Providers + availability
+     const upcomingContainer = document.getElementById("upcomingCalendarWidget");
+   
+    // Providers + availability
     const providers = [
       { id: "p1",  name: "Dr. Kwame Asante", spec: "Pulmonologist, Korle Bu" },
       { id: "p2",  name: "Dr. Abena Owusu", spec: "Cardiologist, 37 Military" },
@@ -1121,24 +1126,24 @@ hero-text .desc {
             addToRichDashboard({ id, name: "Urgent Consult", date: d, time: t, urgent: true });
             renderUpcomingCalendarWidget();
             showToast("Urgent appointment booked!");
-+          },
-+          onClose() {
-+            showToast("Payment cancelled.");
-+          }
-+        }).openIframe();
-+      } else {
-+        // normal flow (provider match)
-+        const name = document.getElementById("clientName").value.trim();
-+        const id   = Date.now().toString();
-+        appointments.push({ id, name: providerName, date: selectedDate, time: selectedTime, urgent: false });
-+        addToRichDashboard({ id, name: providerName, date: selectedDate, time: selectedTime, urgent: false });
-+        renderUpcomingCalendarWidget();
-+        showToast("Appointment confirmed!");
-+      }
-+      // reset
-+      urgentFlow = false;
-+      document.getElementById("confirmModal").hidden = true;
-+    };
+          },
+          onClose() {
+            showToast("Payment cancelled.");
+          }
+        }).openIframe();
+      } else {
+        // normal flow (provider match)
+        const name = document.getElementById("clientName").value.trim();
+        const id   = Date.now().toString();
+        appointments.push({ id, name: providerName, date: selectedDate, time: selectedTime, urgent: false });
+        addToRichDashboard({ id, name: providerName, date: selectedDate, time: selectedTime, urgent: false });
+        renderUpcomingCalendarWidget();
+        showToast("Appointment confirmed!");
+      }
+      // reset
+      urgentFlow = false;
+      document.getElementById("confirmModal").hidden = true;
+    };
     // ─── URGENT FLOW ─────────────────────────────────────────
     let urgentFlow = false;  // flag for modalConfirm
 
@@ -1256,7 +1261,6 @@ hero-text .desc {
     }
     // initial render
     renderUpcomingCalendarWidget();
-   renderUpcomingCalendar();
 
     // Scroll‐helper
     function scrollToSection(id) {
