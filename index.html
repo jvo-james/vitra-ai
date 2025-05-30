@@ -455,8 +455,8 @@
       <h3>Sign In</h3>
       <div class="modal-msg" id="signInMsg"></div>
       <form id="signInForm">
-        <input type="email" id="signInEmail" placeholder="Email" required />
-        <input type="password" id="signInPass" placeholder="Password" required />
+        <input type="email" id="signInEmail" name="signInEmail" placeholder="Email" required />
+        <input type="password" id="signInPass" name="signInPass" placeholder="Password" required />
         <a href="#" id="forgotPass">Forgot password?</a>
         <button type="submit">Sign In</button>
       </form>
@@ -471,10 +471,10 @@
       <h3>Sign Up</h3>
             <div class="modal-msg" id="signUpMsg"></div>
         <form id="signUpForm">
-        <input type="text" id="signUpName" placeholder="Full Name" required />
-        <input type="email" id="signUpEmail" placeholder="Email" required />
-        <input type="password" id="signUpPass" placeholder="Password" required />
-        <input type="password" id="signUpPass2" placeholder="Confirm Password" required />
+<input type="text" id="signUpName" name="signUpName" placeholder="Full Name" required/>
+<input type="email" id="signUpEmail" name="signUpEmail" placeholder="Email" required/>
+<input type="password" id="signUpPass" name="signUpPass" placeholder="Password" required />
+<input type="password" id="signUpPass2" name="signUpPass2" placeholder="Confirm Password" required />
         <button type="submit">Create Account</button>
       </form>
       <p class="modal-switch">Have an account? <a href="#" id="toSignIn">Sign in</a></p>
@@ -717,8 +717,8 @@ const signUpModal = document.getElementById('signUpModal');
     signInForm.onsubmit = e => {
       e.preventDefault();
       signInMsg.textContent = '';
-      const email = e.target.signInEmail.value;
-      const pass  = e.target.signInPass.value;
+     const email = document.getElementById('signInEmail').value;
+     const pass  = document.getElementById('signInPass').value;
       firebase.auth().signInWithEmailAndPassword(email, pass)
         .then(({ user }) => {
           // redirect, Dashboard will pick up user.displayName
@@ -741,10 +741,10 @@ const signUpModal = document.getElementById('signUpModal');
     signUpForm.onsubmit = e => {
       e.preventDefault();
       signUpMsg.textContent = '';
-      const name = e.target.signUpName.value.trim();
-      const email= e.target.signUpEmail.value;
-      const pass = e.target.signUpPass.value;
-      const pass2= e.target.signUpPass2.value;
+      const name = document.getElementById('signUpName').value.trim();
+      const email = document.getElementById('signUpEmail').value;
+      const pass = document.getElementById('signUpPass').value;
+      const pass2 = document.getElementById('signUpPass2').value;
 
       // Password rule: min 8 chars, at least one digit
       if (pass.length < 8 || !/\d/.test(pass)) {
