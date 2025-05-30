@@ -644,24 +644,38 @@ hero-text .desc {
     </button>
   </div>
 
-  <!-- Step 2: Show matched specialists -->
+  <!-- Step 2: Display the AI-picked specialist -->
   <div id="urgentMatchResults" class="response" hidden>
-    <h4>Select Your Specialist</h4>
-    <ul id="urgentProvidersList"></ul>
-    <button id="urgentSelectProviderBtn" class="btn" disabled>
-      <i class="fas fa-arrow-right"></i> Next
+    <button class="close-btn"><i class="fas fa-times"></i></button>
+    <div class="card">
+      <i class="fas fa-user-md fa-2x"></i>
+      <div class="details">
+        <h4 id="urgentMatchedName"></h4>
+        <p id="urgentMatchedSpec"></p>
+      </div>
+    </div>
+    <button id="urgentScheduleBtn" class="btn">
+      <i class="fas fa-calendar-alt"></i> Schedule with this Specialist
     </button>
   </div>
 
   <!-- Step 3: Calendar & Time -->
-  <div id="urgentCalendarFlow" hidden>
-    <div class="month-nav">
-      <button id="urgentPrevMonth" class="btn-sm"><i class="fas fa-chevron-left"></i></button>
-      <div id="urgentCalendarHeader"></div>
-      <button id="urgentNextMonth" class="btn-sm"><i class="fas fa-chevron-right"></i></button>
-    </div>
-    <div id="urgentCalendar" class="calendar-grid"></div>
-    <div id="urgentTimeSlots"></div>
+ <div id="urgentCalendarFlow" hidden>
+    <label>
+      Date:
+      <input 
+        type="date" 
+        id="urgentDate" 
+        min="${new Date().toISOString().split('T')[0]}"
+      />
+    </label>
+    <label>
+      Time:
+      <input type="time" id="urgentTime" />
+    </label>
+    <button id="urgentNextToDetails" class="btn">
+      <i class="fas fa-arrow-right"></i> Next
+    </button>
   </div>
 
   <!-- Step 4: Your Details & Confirm (opens review-modal) -->
@@ -904,17 +918,16 @@ hero-text .desc {
     const richPast       = document.getElementById("rich-past");
     const richFavorites  = document.getElementById("rich-favorites");
 
-    const step1        = document.getElementById("urgentStep1");
-  const findBtn      = document.getElementById("urgentFindMatchBtn");
-  const resultsDiv   = document.getElementById("urgentMatchResults");
-  const provList     = document.getElementById("urgentProvidersList");
-  const nextProvBtn  = document.getElementById("urgentSelectProviderBtn");
-  const calFlow      = document.getElementById("urgentCalendarFlow");
-  const calHeaderU   = document.getElementById("urgentCalendarHeader");
-  const calGridU     = document.getElementById("urgentCalendar");
- const prevMonthU   = document.getElementById("urgentPrevMonth");
-  const nextMonthU   = document.getElementById("urgentNextMonth");
-  const timeSlotsU   = document.getElementById("urgentTimeSlots");
+   const step1             = document.getElementById("urgentStep1");
+  const findBtn          = document.getElementById("urgentFindMatchBtn");
+  const resultsDiv       = document.getElementById("urgentMatchResults");
+  const urgentNameEl     = document.getElementById("urgentMatchedName");
+  const urgentSpecEl     = document.getElementById("urgentMatchedSpec");
+  const scheduleBtn      = document.getElementById("urgentScheduleBtn");
+ const calFlow          = document.getElementById("urgentCalendarFlow");
+  const dateInput        = document.getElementById("urgentDate");
+  const timeInput        = document.getElementById("urgentTime");
+  const nextToDetailsBtn = document.getElementById("urgentNextToDetails");
   const detailsFormU = document.getElementById("urgentDetailsForm");
   const confirmU     = document.getElementById("urgentConfirmBtn");
 
@@ -935,64 +948,29 @@ hero-text .desc {
       /* ignore */ 
     }
     const found = providers.find(p=>p.name===pick) || providers[Math.floor(Math.random()*providers.length)];
-    // populate list
-    provList.innerHTML = "";
-    [found].forEach(p=>{
-      const li = document.createElement("li");
-      li.innerHTML = `<label><input type="radio" name="urgentProv" value="${p.id}"> ${p.name} – ${p.spec}</label>`;
-      provList.append(li);
-    });
+   urgentNameEl.textContent = found.name;
+    urgentSpecEl.textContent = found.spec;
     resultsDiv.hidden = false;
     step1.hidden = true;
     findBtn.disabled = false; findBtn.textContent = "Find Specialist";
   };
 
-  // 2) Select provider
-  provList.onchange = () => {
-    nextProvBtn.disabled = false;
-  };
-  nextProvBtn.onclick = () => {
-    const sel = document.querySelector('input[name="urgentProv"]:checked');
-    urgentProviderId = sel.value;
-    urgentProviderName = providers.find(p=>p.id===urgentProviderId).name;
-    resultsDiv.hidden = true;
-    calFlow.hidden = false;
-    buildUrgentCalendar(uYear, uMonth);
+ // 2) Schedule with this specialist
+  scheduleBtn.onclick = () => {
+    urgentProviderName = urgentNameEl.textContent;
+    resultsDiv.hidden  = true;
+    calFlow.hidden     = false;
   };
 
-  // 3) Calendar nav
-  prevMonthU.onclick = ()=>{ uMonth--; if(uMonth<0){uMonth=11;uYear--;} buildUrgentCalendar(uYear,uMonth); };
-  nextMonthU.onclick = ()=>{ uMonth++; if(uMonth>11){uMonth=0;uYear++;} buildUrgentCalendar(uYear,uMonth); };
-
-  function buildUrgentCalendar(y,m){
-    calHeaderU.textContent = new Date(y,m).toLocaleString('default',{month:'long',year:'numeric'});
-    calGridU.innerHTML = "";
-    // weekdays
-    ['Su','Mo','Tu','We','Th','Fr','Sa'].forEach(w=>{
-      const hd = document.createElement("div"); hd.className='cell'; hd.style.fontWeight='600'; hd.innerText=w;
-      calGridU.append(hd);
-    });
-    // blanks
-    for(let i=0;i<new Date(y,m,1).getDay();i++){
-      const b = document.createElement("div"); b.className='cell closed'; calGridU.append(b);
-    }
-    // days
-    const days = new Date(y,m+1,0).getDate();
-    const avail = availability[urgentProviderId]||{};
-    const today = new Date();
-    for(let d=1;d<=days;d++){
-      const key = `${y}-${String(m+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
-      const open = Array.isArray(avail[key]);
-      const cell = document.createElement("div");
-      cell.className = `cell ${open?'open':'closed'}`;
-      cell.innerText = d;
-      if(open) cell.onclick = ()=> pickUrgentDate(key);
-      if(y===today.getFullYear()&&m===today.getMonth()&&d===today.getDate()) cell.classList.add('today');
-      calGridU.append(cell);
-    }
-    timeSlotsU.innerHTML = "";
-    detailsFormU.hidden = true;
-  }
+// 3) Now pick any future date/time
+  nextToDetailsBtn.onclick = () => {
+    const d = dateInput.value, t = timeInput.value;
+    if (!d || !t) return showToast("Please select date and time.");
+    uSelectedDate = d;
+    uSelectedTime = t;
+    detailsFormU.hidden = false;
+    detailsFormU.scrollIntoView({ behavior: "smooth" });
+  };
 
   function pickUrgentDate(key){
     uSelectedDate = key;
