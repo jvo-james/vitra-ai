@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="en" aria-theme="light">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+  <title>Vitra AI – Dashboard</title>
+  <!-- Fonts & Icons -->
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"/>
+<!-- Firebase SDKs -->
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+  <script>
+    // ± Initialize Firebase (use your config)
+    const firebaseConfig = {
+      apiKey: "AIzaSyBhaYOcLMXuobCT-vaXr-zXTZnBfaheAIY",
+      authDomain: "vitra-ai-712ea.firebaseapp.com",
+      projectId: "vitra-ai-712ea",
+      storageBucket: "vitra-ai-712ea.appspot.com",
+      messagingSenderId: "306868103753",
+      appId: "1:306868103753:web:e2d7700f8ad34c1e17ed98"
+    };
+    firebase.initializeApp(firebaseConfig);
+  </script> 
+<style>
+    :root {
+      --yellow:    #FFF9C4;
+      --red:       #EF9A9A;
+      --blue:      #BBDEFB;
+      --green:     #C8E6C9;
+      --dark-green:#2E7D32;
+      --bg:        var(--yellow);
+      --surface:   var(--yellow);
+      --text:      #333;
+      --radius:    12px;
+      --gap:       1rem;
+      --padding:   1.25rem;
+      --transition:.3s;
+    }
+    html.dark {
+      --bg:      #1A1A1A;
+      --surface: #2A2A2A;
+      --text:    #EEE;
+    }
+    *, *::before, *::after { box-sizing:border-box; margin:0; padding:0}
+    body {
+      display: grid;
+      grid-template-columns: 250px 1fr;
+      grid-template-rows: auto 1fr;
+      min-height: 100vh;
+      font-family: 'Montserrat', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      transition: background var(--transition), color var(--transition);
+    }
+
+    /* SIDEBAR */
+    aside {
+      grid-row: 1 / span 2;
+      background: var(--green);
+      padding: var(--padding);
+      display: flex;
+      flex-direction: column;
+      gap: var(--gap);
+      transition: transform var(--transition);
+    }
+    aside h2 {
+      font-size: 1rem;
+      color: var(--dark-green);
+      display: flex; align-items:center; gap:.5rem;
+    }
+    aside a {
+      display: flex; align-items:center; gap:.75rem;
+      padding:.5rem; border-radius: var(--radius);
+      color: var(--dark-green); text-decoration:none;
+      transition: background var(--transition);
+    }
+    aside a:hover { background: var(--blue); }
+
+    /* HEADER BAR */
+    header {
+      grid-column: 2;
+      background: var(--blue);
+      padding: var(--padding);
+      display: flex; align-items:center; justify-content: space-between;
+    }
+    .logo {
+      display: flex; align-items:center; gap:.5rem;
+      font-size:1.25rem; font-weight:600; color: var(--dark-green);
+    }
+    .logo i { color: var(--red); }
+    .menu-btn, .theme-btn {
+      font-size:1.25rem; cursor:pointer; color: var(--dark-green);
+      margin-left: var(--gap);
+    }
+
+    /* MAIN */
+    main {
+      grid-column: 2;
+      grid-row: 2;
+      padding: var(--padding);
+      display: grid;
+      gap: var(--gap);
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    }
+    .card {
+      background: var(--surface);
+      border-radius: var(--radius);
+      padding: var(--padding);
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+      display: flex; flex-direction: column; gap:.75rem;
+      transition: background var(--transition), color var(--transition);
+    }
+    .card h3 {
+      display:flex; align-items:center; gap:.5rem;
+      font-size:1.1rem; color: var(--dark-green);
+    }
+    .card h3 i { color: var(--red); }
+    .item {
+      display:flex; align-items:center; gap:.75rem;
+      padding:.5rem; border-radius: var(--radius);
+      background: var(--yellow);
+    }
+    .item i { font-size:1.25rem; color: var(--dark-green); }
+
+    /* RESPONSIVE */
+    @media(max-width:768px){
+      body { grid-template-columns: 1fr; }
+      aside { position: fixed; top:0; left:0; bottom:0; transform: translateX(-100%); z-index:1000;}
+      aside.open { transform: translateX(0); }
+      header { grid-column:1; }
+      main   { grid-column:1; }
+      .menu-btn { display:inline-block; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Sidebar -->
+  <aside id="sidebar">
+    <h2><i class="fas fa-seedling"></i> Herbal Medicine</h2>
+    <a href="herbal.html"><i class="fas fa-leaf"></i> Explore Herbal AI</a>
+    <h2><i class="fas fa-brain"></i> Psychology & Mental Health</h2>
+    <a href="psychology.html"><i class="fas fa-comments"></i> AI Therapy Chat</a>
+    <h2><i class="fas fa-utensils"></i> Dietetics</h2>
+    <a href="dietetics.html"><i class="fas fa-apple-alt"></i> Build Meal Plans</a>
+    <h2><i class="fas fa-pills"></i> E-Pharmacy</h2>
+    <a href="epharmacy.html"><i class="fas fa-capsules"></i> Order Meds</a>
+    <h2><i class="fas fa-calendar-check"></i> Consult Booking</h2>
+    <a href="booking.html"><i class="fas fa-video"></i> Book a Consult</a>
+  </aside>
+
+  <!-- Header -->
+  <header>
+    <div class="logo">
+      <i class="fas fa-heartbeat"></i> Vitra AI
+    </div>
+    <div>
+      <i class="fas fa-bars menu-btn" id="menuBtn"></i>
+      <i class="fas fa-moon theme-btn" id="themeBtn"></i>
+    </div>
+  </header>
+
+  <!-- Main Dashboard -->
+  <main>
+    <!-- Greeting -->
+    <div id="greetingCard" class="card" style="grid-column:1/-1">
+      <h3><i class="fas fa-user-circle"></i> Loading your dashboard…</h3>
+      <p>Hang on while we set things up for you.</p>
+    </div>
+
+    <!-- My Health Hub -->
+    <div class="card">
+      <h3><i class="fas fa-chart-pie"></i> My Health Hub</h3>
+      <div class="item"><i class="fas fa-calendar-check"></i> Upcoming Appointment: June 3, 2025</div>
+      <div class="item"><i class="fas fa-notes-medical"></i> Active Plan: Immune Boost</div>
+      <div class="item"><i class="fas fa-comment-medical"></i> Recent Chat: AI Therapy Bot</div>
+    </div>
+
+    <!-- Notifications & Reminders -->
+    <div class="card">
+      <h3><i class="fas fa-bell"></i> Notifications & Reminders</h3>
+      <div class="item"><i class="fas fa-pills"></i> Zinc supplement @ 9 AM</div>
+      <div class="item"><i class="fas fa-leaf"></i> Day 3 Herb Regimen</div>
+      <div class="item"><i class="fas fa-calendar-day"></i> Yoga Class tomorrow @ 8 AM</div>
+    </div>
+
+    <!-- Profile & Preferences -->
+    <div class="card">
+      <h3><i class="fas fa-user-cog"></i> Profile & Preferences</h3>
+      <div class="item"><i class="fas fa-allergies"></i> Allergies: None</div>
+      <div class="item"><i class="fas fa-carrot"></i> Diet: Plant-Based</div>
+      <div class="item"><i class="fas fa-brain"></i> Triggers: Late-night Stress</div>
+    </div>
+
+    <!-- Extra Features (Stats) -->
+    <div class="card">
+      <h3><i class="fas fa-chart-line"></i> Quick Stats</h3>
+      <div class="item"><i class="fas fa-walking"></i> Steps Today: 6,200</div>
+      <div class="item"><i class="fas fa-bed"></i> Sleep Last Night: 7.5 hrs</div>
+      <div class="item"><i class="fas fa-weight"></i> Weight: 63 kg</div>
+    </div>
+  </main>
+
+  <script>
+    // Redirect to login if not authenticated, else render greeting
+    firebase.auth().onAuthStateChanged(user => {
+      const card = document.getElementById('greetingCard');
+      if (!user) {
+        // Not signed in → back to home
+        return window.location = 'index.html';
+      }
+
+      // Determine greeting type
+      const params = new URLSearchParams(location.search);
+      const mode = params.get('mode'); // 'signin' or 'signup'
+      const name = user.displayName || user.email.split('@')[0];
+      const greeting = mode === 'signup'
+        ? `Hello, ${name}!`
+        : `Welcome back, ${name}!`;
+
+      // Inject greeting
+      card.innerHTML = `
+        <h3><i class="fas fa-user-circle"></i> ${greeting}</h3>
+        <p>“I’m working on a project which says we should create a website which integrates AI into the following sectors of health: Herbal Medicine, Psychology & Mental Health, Dietetics, E-Pharmacy and Consultation Booking.”</p>
+      `;
+    });
+
+    // Sidebar toggle on mobile
+    document.getElementById('menuBtn').onclick = () =>
+      document.getElementById('sidebar').classList.toggle('open');
+
+    // Dark mode toggle
+    document.getElementById('themeBtn').onclick = () => {
+      document.documentElement.classList.toggle('dark');
+      document.getElementById('themeBtn').classList.toggle('fa-sun');
+    };
+  </script>
+</body>
+</html>
