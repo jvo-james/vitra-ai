@@ -12,7 +12,7 @@
     rel="stylesheet"
     href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
   />
-
+<script src="https://js.paystack.co/v1/inline.js"></script>
   <style>
     :root {
       --cb-primary: #3b3f88;
@@ -465,6 +465,97 @@ hero-text .desc {
         padding: 1.5rem;
       }
     }
+    /* ─── Upcoming Calendar Entries ───────────────────────── */
+#upcomingCalendarContainer .calendar-entry {
+  padding: .5rem;
+  margin-bottom: .5rem;
+  border-left: 4px solid var(--cb-accent);
+  background: var(--cb-bg);
+}
+/* ─── CSS for Provider Matching + Scheduling ─────────────────── */
+#providerMatch .response,
+#providerMatch #appointmentFlow {
+  margin-top: 1.5rem;
+}
+
+#matchResults {
+  position: relative;
+  padding: 1.5rem;
+  background: var(--cb-surface);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+}
+#matchResults .close-btn {
+  position: absolute;
+  top: 0.5rem; right: 0.5rem;
+  background: var(--cb-accent);
+  color: #fff;
+  border: none;
+  border-radius: 50%;
+  width: 2rem; height: 2rem;
+  display:flex; align-items:center; justify-content:center;
+  cursor: pointer;
+}
+#matchResults .card {
+  display:flex; align-items:center; gap:1rem;
+  margin-bottom:1rem;
+}
+#matchResults .details h4 { margin-bottom:0.25rem; }
+
+.month-nav {
+  display:flex; align-items:center; justify-content:center; gap:1rem;
+  margin-bottom:1rem;
+}
+.btn-sm {
+  background: var(--cb-primary-alt);
+  color:#fff;
+  border:none;
+  border-radius:var(--radius);
+  padding:0.5rem 1rem;
+  cursor:pointer;
+}
+
+.calendar-grid {
+  display:grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap:1px;
+  margin-bottom:1rem;
+}
+.calendar-grid .cell {
+  background: var(--cb-surface);
+  padding:0.5rem;
+  text-align:center;
+  cursor:pointer;
+  transition:transform 0.2s;
+}
+.calendar-grid .cell.closed {
+  background:#f0f0f0;
+  color:var(--cb-muted);
+  cursor:not-allowed;
+}
+.calendar-grid .cell.open {
+  background:var(--cb-accent);
+  color:#fff;
+  font-weight:600;
+}
+.calendar-grid .cell.today {
+  border:2px dashed var(--cb-primary);
+}
+.calendar-grid .cell.open:hover {
+  transform:scale(1.05);
+}
+
+#timeSlots h4 { margin-bottom:0.5rem; color:var(--cb-primary-alt); }
+#timeSlots ul { display:flex; flex-wrap:wrap; gap:0.5rem; padding:0; list-style:none; }
+#timeSlots ul li button {
+  background:var(--cb-primary-alt);
+  color:#fff;
+  border:none;
+  padding:0.5rem 1rem;
+  border-radius:var(--radius);
+  cursor:pointer;
+}
+
   </style>
 </head>
 
@@ -523,84 +614,101 @@ hero-text .desc {
       </div>
     </section>
 
-    <!-- Provider Matching -->
-    <section id="providerMatch" class="module">
-      <h2><i class="fas fa-user-md"></i> Personalized Provider Matching</h2>
-      <p class="desc">Answer a few questions and get instantly matched to the best in-network specialist.</p>
-      <form id="matchForm">
-        <label><i class="fas fa-notes-medical"></i> Chief Concern:
-          <input type="text" id="concernInput" placeholder="e.g. persistent cough" />
-        </label>
-        <label><i class="fas fa-exclamation-circle"></i> Urgency:
-          <select id="urgencyInput">
-            <option>Low</option>
-            <option>Medium</option>
-            <option>High</option>
-          </select>
-        </label>
-        <label><i class="fas fa-language"></i> Preferred Language:
-          <select id="languageInput">
-            <option>English</option>
-            <option>Twi</option>
-            <option>Ga</option>
-            <option>Ewe</option>
-          </select>
-        </label>
-        <button type="button" id="findMatch" class="btn">
-          <i class="fas fa-search"></i> Find My Specialist
-        </button>
-      </form>
+    <!-- Urgent Booking Module -->
+<section id="urgentBooking" class="module" hidden>
+  <h2><i class="fas fa-exclamation-triangle"></i> Urgent Appointment</h2>
+  <p class="desc">Select your date & time below. <strong>Urgent fee: ₵500.00</strong></p>
+  <label>Date:
+    <input type="date" id="urgentDate" min="${new Date().toISOString().split("T")[0]}"/>
+  </label>
+  <label>Time:
+    <input type="time" id="urgentTime"/>
+  </label>
+  <button id="urgentPayBtn" class="btn">
+    <i class="fas fa-bolt"></i> Pay ₵500 & Book Urgent
+  </button>
+</section>
+    <!-- ─── Provider Matching & Scheduling Section ─────────────────── -->
+<section id="providerMatch" class="module">
+  <h2><i class="fas fa-user-md"></i> Find Your Specialist</h2>
+  <p class="desc">
+    Describe your health concern and let our AI pick the best in-network professional for you.
+  </p>
 
-      <div id="matchResults" class="response" hidden>
-        <button class="close-btn"><i class="fas fa-times"></i></button>
-        <div class="result-content"></div>
-        <div id="chooseOwnSelect" hidden>
-          <label><i class="fas fa-user-circle"></i> Pick Your Provider:
-            <select id="ownProvider"></select>
-          </label>
-        </div>
-        <div class="match-actions">
-          <button id="proceedMatch" class="btn"><i class="fas fa-arrow-right"></i> Next</button>
-          <button id="chooseOwn" class="btn btn-outline"><i class="fas fa-list"></i> Choose Own</button>
-        </div>
+  <!-- Step 1: Gather user inputs -->
+  <form id="matchForm">
+    <label>
+      <i class="fas fa-notes-medical"></i> Chief Concern:
+      <input type="text" id="concernInput" placeholder="e.g. persistent cough" required />
+    </label>
+    <label>
+      <i class="fas fa-exclamation-circle"></i> Urgency:
+      <select id="urgencyInput">
+        <option>Low</option>
+        <option>Medium</option>
+        <option>High</option>
+      </select>
+    </label>
+    <label>
+      <i class="fas fa-language"></i> Preferred Language:
+      <select id="languageInput">
+        <option>English</option>
+        <option>Twi</option>
+        <option>Ga</option>
+      </select>
+    </label>
+    <button type="button" id="findMatchBtn" class="btn">
+      <i class="fas fa-search"></i> Predict Specialist
+    </button>
+  </form>
+
+  <!-- Step 2: Display the AI-picked specialist -->
+  <div id="matchResults" class="response" hidden>
+    <button class="close-btn"><i class="fas fa-times"></i></button>
+    <div class="card">
+      <i class="fas fa-user-md fa-2x"></i>
+      <div class="details">
+        <h4 id="matchedName"></h4>
+        <p id="matchedSpec"></p>
       </div>
-    </section>
+    </div>
+    <button id="scheduleMatchBtn" class="btn">
+      <i class="fas fa-calendar-alt"></i> Schedule with this Specialist
+    </button>
+  </div>
 
-    <!-- Schedule & Confirm -->
-    <section id="appointmentFlow" class="module" hidden>
-      <h2><i class="fas fa-calendar-alt"></i> Schedule with <span id="chosenProvider"></span></h2>
-      <p class="desc">Select an available date, then pick a time slot.</p>
-      <div class="month-nav">
-        <button type="button" id="prevMonth" class="btn-sm"><i class="fas fa-chevron-left"></i></button>
-        <div id="calendarHeader" class="calendar-header"></div>
-        <button type="button" id="nextMonth" class="btn-sm"><i class="fas fa-chevron-right"></i></button>
-      </div>
-      <div id="calendar"></div>
-      <div id="timeSlots"></div>
+  <!-- Step 3: Calendar & Time Slots for the matched provider -->
+  <div id="appointmentFlow" hidden>
+    <h3><i class="fas fa-calendar-alt"></i> Schedule with <span id="chosenProvider"></span></h3>
 
-      <form id="finalBookingForm" hidden style="margin-top:1.5rem;">
-        <h3><i class="fas fa-user"></i> Confirm Appointment</h3>
-        <label><i class="fas fa-id-badge"></i> Your Name:
-          <input id="clientNameFinal" placeholder="Full Name" required />
-        </label>
-        <label><i class="fas fa-envelope"></i> Email:
-          <input id="clientEmail" type="email" required />
-        </label>
-        <label><i class="fas fa-phone"></i> Phone:
-          <input id="clientPhone" type="tel" required />
-        </label>
-        <div id="summarySelection" style="margin-bottom:1rem;"></div>
-        <div class="summary-actions">
-          <button id="editSelection" type="button" class="btn btn-outline">
-            <i class="fas fa-arrow-left"></i> Back
-          </button>
-          <button id="confirmBookingFinal" type="button" class="btn">
-            <i class="fas fa-check"></i> Confirm Booking
-          </button>
-        </div>
-      </form>
-    </section>
+    <div class="month-nav">
+      <button id="prevMonth" class="btn-sm"><i class="fas fa-chevron-left"></i></button>
+      <div id="calendarHeader"></div>
+      <button id="nextMonth" class="btn-sm"><i class="fas fa-chevron-right"></i></button>
+    </div>
+    <div id="calendar" class="calendar-grid"></div>
+    <div id="timeSlots"></div>
 
+    <form id="confirmForm" hidden class="module">
+      <h4><i class="fas fa-check-circle"></i> Confirm Your Appointment</h4>
+      <label>
+        <i class="fas fa-user"></i> Your Name:
+        <input id="clientName" placeholder="Full Name" required />
+      </label>
+      <label>
+        <i class="fas fa-envelope"></i> Email:
+        <input id="clientEmail" type="email" required />
+      </label>
+      <p id="summaryText"></p>
+      <button id="confirmBtn" type="button" class="btn">
+        <i class="fas fa-check"></i> Confirm
+      </button>
+    </form>
+  </div>
+</section>
+
+    
+   
     <!-- Rich Dashboard -->
     <section id="feature-rich-dashboard" class="module">
       <h2><i class="fas fa-tachometer-alt"></i> Rich Dashboard</h2>
@@ -625,6 +733,15 @@ hero-text .desc {
         <!-- favorites -->
       </div>
     </section>
+
+    </section>  <!-- end rich-dashboard -->
+
+<!-- Upcoming Appointments Calendar -->
+<section id="upcomingCalendar" class="module">
+  <h2><i class="fas fa-calendar-alt"></i> Upcoming Appointments</h2>
+  <div id="upcomingCalendarContainer"></div>
+</section>
+
   </main>
 
   <footer>
@@ -663,6 +780,193 @@ hero-text .desc {
       return "";
     }
   }
+// ─── JS for AI Prediction + Scheduling ────────────────────────
+document.addEventListener('DOMContentLoaded', () => {
+  const matchForm     = document.getElementById('matchForm');
+  const findMatchBtn  = document.getElementById('findMatchBtn');
+  const matchResults  = document.getElementById('matchResults');
+  const scheduleBtn   = document.getElementById('scheduleMatchBtn');
+  const closeBtn      = matchResults.querySelector('.close-btn');
+  const matchedNameEl = document.getElementById('matchedName');
+  const matchedSpecEl = document.getElementById('matchedSpec');
+  const appointFlow   = document.getElementById('appointmentFlow');
+  const chosenProv    = document.getElementById('chosenProvider');
+
+  // Calendar elements
+  const calHeader     = document.getElementById('calendarHeader');
+  const calGrid       = document.getElementById('calendar');
+  const prevMonthBtn  = document.getElementById('prevMonth');
+  const nextMonthBtn  = document.getElementById('nextMonth');
+  const timeSlotsEl   = document.getElementById('timeSlots');
+  const confirmForm   = document.getElementById('confirmForm');
+  const summaryText   = document.getElementById('summaryText');
+  const confirmBtn    = document.getElementById('confirmBtn');
+
+  let providerId, providerName;
+  let year = new Date().getFullYear(), month = new Date().getMonth();
+  let selectedDate, selectedTime;
+
+  // Mock provider list & availability
+  const providers = [
+   { id: "p1",  name: "Dr. Kwame Asante", spec: "Pulmonologist, Korle Bu" },
+      { id: "p2",  name: "Dr. Abena Owusu", spec: "Cardiologist, 37 Military" },
+      { id: "p3",  name: "Dr. Kojo Mensah", spec: "Psychiatrist, Ridge" },
+      { id: "p4",  name: "Dr. Yaa Dufie", spec: "Dietitian, Nyaho Medical" },
+      { id: "p5",  name: "Dr. Nana Adjei", spec: "GP, Cape Coast" },
+      { id: "p6",  name: "Dr. Efua Amponsah", spec: "Endocrinologist, LEKMA" },
+      { id: "p7",  name: "Dr. Michael Addo", spec: "Neurologist, 37 Military" },
+      { id: "p8",  name: "Dr. Grace Ofori", spec: "Dermatologist, Accra Derm." },
+      { id: "p9",  name: "Dr. Joseph Kumi", spec: "Ortho Surgeon, Komfo Anokye" },
+      { id: "p10", name: "Dr. Ama Brew", spec: "Pediatrician, Trust Hosp." },
+      { id: "p11", name: "Ms. Akosua Baah", spec: "PT, Tema General" },
+      { id: "p12", name: "Mr. Daniel Boakye", spec: "Pharmacist, Ridge" },
+      { id: "p13", name: "Mrs. Esther Kumi", spec: "OT, Cape Coast" },
+      { id: "p14", name: "Ms. Joy Mensah", spec: "Speech Therapist, LEKMA" },
+      { id: "p15", name: "Dr. Paul Yeboah", spec: "Dermatologist, Korle Bu" },
+      { id: "p16", name: "Dr. Linda Frimpong", spec: "Nephrologist, 37 Military" },
+      { id: "p17", name: "Mr. Kwesi Owusu", spec: "Nutritionist, Nyaho Med." },
+      { id: "p18", name: "Ms. Abena Boateng", spec: "Psychologist, Accra Psych." }
+  ];
+  const availability = {
+   p1:  { "2025-06-10": ["09:00","10:00","11:00"], "2025-06-12": ["14:00","15:00"], "2025-06-15": ["08:30","09:30","10:30"] },
+      p2:  { "2025-06-03": ["10:00","13:00","16:00"], "2025-06-04": ["09:00","11:00"], "2025-06-15": ["12:00","14:00"] },
+      p3:  { "2025-06-08": ["08:00","09:00","10:00","11:00"], "2025-06-11": ["13:30","14:30"], "2025-06-16": ["15:00","16:00"] },
+      p4:  { "2025-06-05": ["09:30","10:30","11:30"], "2025-06-09": ["14:00","15:00","16:00"], "2025-06-18": ["08:00","09:00"] },
+      p5:  { "2025-06-07": ["08:15","09:15","10:15"], "2025-06-13": ["13:00","14:00"], "2025-06-17": ["10:00","11:00","12:00"] },
+      p6:  { "2025-06-02": ["09:00","10:00"], "2025-06-14": ["11:00","12:00","13:00"], "2025-06-19": ["14:00","15:00"] },
+      p7:  { "2025-06-06": ["08:30","09:30","10:30"], "2025-06-12": ["13:00","14:00","15:00"], "2025-06-20": ["09:00","10:00"] },
+      p8:  { "2025-06-01": ["10:00","11:00","12:00"], "2025-06-11": ["14:30","15:30"], "2025-06-16": ["08:00","09:00","10:00"] },
+      p9:  { "2025-06-04": ["09:00","10:00","11:00"], "2025-06-13": ["13:00","14:00"], "2025-06-18": ["15:00","16:00"] },
+      p10: { "2025-06-03": ["08:00","09:00","10:00"], "2025-06-10": ["11:00","12:00","13:00"], "2025-06-17": ["14:00","15:00"] },
+      p11: { "2025-06-05": ["09:30","10:30","11:30"], "2025-06-14": ["13:00","14:00","15:00"], "2025-06-19": ["08:00","09:00"] },
+      p12: { "2025-06-02": ["10:00","11:00","12:00"], "2025-06-08": ["14:00","15:00"], "2025-06-20": ["09:00","10:00","11:00"] },
+      p13: { "2025-06-07": ["08:00","09:00","10:00"], "2025-06-12": ["11:30","12:30","13:30"], "2025-06-18": ["14:00","15:00"] },
+      p14: { "2025-06-03": ["09:15","10:15","11:15"], "2025-06-09": ["13:00","14:00","15:00"], "2025-06-16": ["08:00","09:00"] },
+      p15: { "2025-06-05": ["08:30","09:30","10:30"], "2025-06-13": ["11:00","12:00","13:00"], "2025-06-19": ["14:30","15:30"] },
+      p16: { "2025-06-02": ["10:00","11:00","12:00"], "2025-06-11": ["13:15","14:15"], "2025-06-17": ["09:00","10:00","11:00"] },
+      p17: { "2025-06-04": ["09:00","10:00","11:00"], "2025-06-10": ["12:00","13:00","14:00"], "2025-06-15": ["15:00","16:00"] },
+      p18: { "2025-06-01": ["08:00","09:00","10:00"], "2025-06-08": ["11:30","12:30","13:30"], "2025-06-20": ["14:00","15:00","16:00"] }
+
+  };
+
+  // 1) AI call to predict best provider
+  findMatchBtn.onclick = async () => {
+    const concern = document.getElementById('concernInput').value.trim();
+    if(!concern) return alert('Enter your concern');
+
+    findMatchBtn.disabled = true;
+    findMatchBtn.textContent = 'Predicting…';
+
+    // Call your AI endpoint with system + user prompts
+    const res = await fetch('/.netlify/functions/openai-proxy', {
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({
+        messages: [
+          { role:'system', content:
+            'You are an AI match. Providers:\n' +
+            providers.map(p=>`- ${p.name} – ${p.spec}`).join('\n') },
+          { role:'user', content:
+            `Concern="${concern}". Pick the best provider name only.` }
+        ]
+      })
+    });
+    const data = await res.json();
+    let pick = data.choices?.[0]?.message?.content || '';
+    pick = pick.split('\n')[0].replace(/[^a-zA-Z\s]/g,'').trim();
+
+    // fallback to random
+    const found = providers.find(p=>p.name===pick) || 
+                  providers[Math.floor(Math.random()*providers.length)];
+
+    providerId   = found.id;
+    providerName = found.name;
+
+    matchedNameEl.textContent = found.name;
+    matchedSpecEl.textContent = found.spec;
+    matchResults.hidden = false;
+    findMatchBtn.disabled = false;
+    findMatchBtn.innerHTML = '<i class="fas fa-search"></i> Predict Specialist';
+  };
+
+  closeBtn.onclick = () => matchResults.hidden = true;
+
+  // 2) Move to scheduling
+  scheduleBtn.onclick = () => {
+    matchResults.hidden = true;
+    appointFlow.hidden = false;
+    chosenProv.textContent = providerName;
+    buildCalendar(year, month);
+  };
+
+  // Calendar generator
+  function buildCalendar(y, m) {
+    calHeader.textContent = new Date(y,m).toLocaleString('default',{month:'long',year:'numeric'});
+    calGrid.innerHTML = '';
+    // Weekdays
+    ['Su','Mo','Tu','We','Th','Fr','Sa'].forEach(w=>{
+      const hd=document.createElement('div');
+      hd.className='cell'; hd.style.fontWeight='600'; hd.innerText=w;
+      calGrid.append(hd);
+    });
+    // blanks
+    const firstDay = new Date(y,m,1).getDay();
+    for(let i=0;i<firstDay;i++){
+      const blank=document.createElement('div');
+      blank.className='cell closed'; calGrid.append(blank);
+    }
+    // days
+    const today = new Date();
+    const days = new Date(y, m+1,0).getDate();
+    const avail = availability[providerId]||{};
+    for(let d=1;d<=days;d++){
+      const dateKey = `${y}-${String(m+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+      const isPast = new Date(y,m,d) < new Date().setHours(0,0,0,0);
+      const open = !isPast && Array.isArray(avail[dateKey]);
+      const cell = document.createElement('div');
+      cell.className = `cell ${open?'open':'closed'}`;
+      cell.innerText = d;
+      if(open) cell.onclick = ()=> selectDate(dateKey);
+      if(y===today.getFullYear() && m===today.getMonth() && d===today.getDate()){
+        cell.classList.add('today');
+      }
+      calGrid.append(cell);
+    }
+    timeSlotsEl.innerHTML = '';
+    confirmForm.hidden = true;
+  }
+  prevMonthBtn.onclick = ()=>{ month--; if(month<0){month=11; year--;} buildCalendar(year,month); };
+  nextMonthBtn.onclick = ()=>{ month++; if(month>11){month=0; year++;} buildCalendar(year,month); };
+
+  function selectDate(key){
+    selectedDate = key;
+    const slots = availability[providerId][key]||[];
+    timeSlotsEl.innerHTML = `<h4>Available on ${key}:</h4>`;
+    const ul = document.createElement('ul');
+    ul.style.display='flex'; ul.style.gap='0.5rem';
+    slots.forEach(t=>{
+      const li = document.createElement('li');
+      const btn= document.createElement('button');
+      btn.type='button'; btn.textContent=t; btn.className='btn-sm';
+      btn.onclick = ()=> selectTime(t);
+      li.append(btn); ul.append(li);
+    });
+    timeSlotsEl.append(ul);
+  }
+
+  function selectTime(t){
+    selectedTime = t;
+    summaryText.textContent = `You selected ${selectedDate} at ${selectedTime}.`;
+    confirmForm.hidden = false;
+    confirmForm.scrollIntoView({behavior:'smooth'});
+  }
+
+  confirmBtn.onclick = ()=> {
+    if(!confirmForm.clientName.value) return alert('Enter your name');
+    alert(`Confirmed with ${providerName} on ${selectedDate} @ ${selectedTime}`);
+    // here you’d inject into the dashboard…
+  };
+});
 
   document.addEventListener("DOMContentLoaded", () => {
     // ─── ELEMENTS ─────────────────────────────────────────
@@ -773,8 +1077,57 @@ hero-text .desc {
       showRichTab("rich-past");
     });
     urgentLink.addEventListener("click", () => {
-      showToast("For immediate care, please call 112 or visit your nearest ER.");
-    });
+      // show urgent form
++  document.getElementById("urgentBooking").hidden = false;
++  scrollToSection("#urgentBooking");
+ });
+
+// handle Paystack urgent booking
+document.getElementById("urgentPayBtn").onclick = () => {
+  const d = document.getElementById("urgentDate").value;
+  const t = document.getElementById("urgentTime").value;
+  if (!d || !t) {
+    return showToast("Please select date and time.");
+  }
+  PaystackPop.setup({
+    key: "YOUR_PAYSTACK_PUBLIC_KEY",
+    email: document.getElementById("clientEmail")?.value || "guest@domain.com",
+    amount: 5000,            // in kobo
+    currency: "GHS",
+    ref: "URGENT_" + Date.now(),
+    callback(response) {
+      showToast("Payment successful!");
+      addUrgentAppointment(d, t);
+    },
+    onClose() {
+      showToast("Payment cancelled.");
+    }
+  }).openIframe();
+};
+
+function addUrgentAppointment(d, t) {
+  // identical to previous logic for urgent booking
+  const container = richUpcoming;
+  const card = document.createElement("div");
+  card.className = "card";
+  card.innerHTML = `
+    <i class="fas fa-user-md fa-2x"></i>
+    <div class="details">
+      <h4><strong>Urgent Consult</strong></h4>
+      <p>${d} • ${t}</p>
+    </div>
+    <div class="actions">
+      <button class="btn-cancel"><i class="fas fa-times"></i></button>
+    </div>`;
+  card.querySelector(".btn-cancel").onclick = () => {
+    card.remove();
+    renderUpcomingCalendar();
+    showToast("Urgent appointment canceled.");
+  };
+  container.append(card);
+  renderUpcomingCalendar();
+  document.getElementById("urgentBooking").hidden = true;
+}
 
     // ─── SIDEBAR & THEME TOGGLING ───────────────────────────
     sidebarBtn.addEventListener("click", () => {
@@ -965,7 +1318,7 @@ hero-text .desc {
             Your appointment with <strong>${currentProviderName}</strong><br>
             on <strong>${selectedDate}</strong> at <strong>${selectedTime}</strong> is confirmed.
           </div>`;
-        const card=document.createElement("div");
+      const card=document.createElement("div");
         card.className="card";
         card.innerHTML=`
           <i class="fas fa-user-md fa-2x"></i>
@@ -974,11 +1327,46 @@ hero-text .desc {
             <p>${selectedDate} • ${selectedTime}</p>
           </div>
           <div class="actions">
-            <button title="Reschedule"><i class="fas fa-sync-alt"></i></button>
-            <button title="Cancel"><i class="fas fa-times"></i></button>
-            <a title="Add to Calendar"><i class="fas fa-calendar-plus"></i></a>
+            <button class="btn-reschedule" title="Reschedule"><i class="fas fa-sync-alt"></i></button>
+            <button class="btn-cancel"     title="Cancel"><i class="fas fa-times"></i></button>
+            <button class="btn-addcal"     title="Add to Calendar"><i class="fas fa-calendar-plus"></i></button>
           </div>`;
+        // append card
         richUpcoming.append(card);
+
+        // Cancel: remove card and update calendar
+        card.querySelector(".btn-cancel").onclick = () => {
+          card.remove();
+          showToast("Appointment canceled.");
+         renderUpcomingCalendar();
+        };
+
+        // Reschedule: re-open scheduling flow with same provider
+        card.querySelector(".btn-reschedule").onclick = () => {
+          startAppointment(currentProviderName, currentProviderId);
+          scrollToSection("#appointmentFlow");
+          showToast("Reschedule your appointment below.");
+        };
+
+        // Add to Calendar: generate and download ICS
+        card.querySelector(".btn-addcal").onclick = () => {
+          const ics = [
+            "BEGIN:VCALENDAR",
+            "VERSION:2.0",
+            "BEGIN:VEVENT",
+            `SUMMARY:Consult with ${currentProviderName}`,
+            `DTSTART:${selectedDate.replace(/-/g,"") }T${selectedTime.replace(":","")}00`,
+            "END:VEVENT",
+            "END:VCALENDAR"
+          ].join("\r\n");
+          const blob = new Blob([ics], { type: "text/calendar" });
+          const url  = URL.createObjectURL(blob);
+          const a    = document.createElement("a");
+          a.href     = url;
+          a.download = "appointment.ics";
+          a.click();
+          showToast("Added to calendar.");
+        };
         scrollToSection("#feature-rich-dashboard");
       },1000);
     });
@@ -994,6 +1382,25 @@ hero-text .desc {
 
     // INITIALIZE
     showRichTab("rich-upcoming");
+    // Re-render the calendar of upcoming visits
+ function renderUpcomingCalendar(){
+   const container = document.getElementById("upcomingCalendarContainer");
+   container.innerHTML = "";
+   // find all cards in upcoming
+   richUpcoming.querySelectorAll(".card .details").forEach(det => {
+     const [nameLine, dateLine] = det.querySelectorAll("h4, p");
+     const entry = document.createElement("div");
+     entry.className = "calendar-entry";
+     entry.innerHTML = `
+       <strong>${nameLine.textContent}</strong><br/>
+       ${dateLine.textContent}
+     `;
+     container.append(entry);
+   });
+ }
+
+ // call once at load
+ renderUpcomingCalendar();
   });
 })();
 </script>
