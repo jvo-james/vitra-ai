@@ -511,65 +511,75 @@ html.dark .hero-bg-icon {
 }
 
 /*────────────────── AI HERBALIST CHAT ──────────────────*/
-#hero–chat .chat-controls {
-  display: flex;
-  justify-content: flex-end;
-  gap: .5rem;
-  margin-bottom: .5rem;
+ /* Chat timestamps */
+  .msg-ts { font-size:0.75rem; color:var(--pharm-muted); margin-top:0.25rem; }
+
+  /* History modal */
+  .modal {
+   position: fixed; top:0; left:0; width:100%; height:100%;
+    background: rgba(0,0,0,0.5); display:flex; align-items:center;
+    justify-content:center; z-index:2000; display:none;
+  }
+  .modal-content {
+    background: var(--pharm-surface); padding:1.5rem;
+    border-radius: var(--radius); width:90%; max-width:500px;
+    position:relative;
+  }
+  .close-modal {
+    position:absolute; top:0.5rem; right:0.75rem; font-size:1.5rem;
+   cursor:pointer;
+  }
+  .history-item { margin-bottom:1rem; }
+
+   .spinner {
+ width:24px; height:24px;
+border:4px solid rgba(0,0,0,0.1);
+ border-top-color: var(--pharm-primary);
+  border-radius:50%;
+  animation: spin 0.8s linear infinite;
+ }
+ .spinner, .spin-header {
+  display: inline-block;
+  vertical-align: middle;
+  }
+ .spin-header {
+   margin-right: 0.5rem;
+ }
+
+@keyframes spin {
+ to { transform: rotate(360deg); }
 }
-#hero–chat .chat-controls button {
-  background: var(--surface);
-  border: 1px solid var(--muted);
-  border-radius: 50%;
-  width: 36px;
-  height: 36px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: var(--secondary);
-  transition: background var(--transition), color var(--transition);
-}
-#hero–chat .chat-controls button:hover {
-  background: var(--primary);
-  color: #fff;
-}
-.chat-box {
-  background: var(--bg);
-  border: 1px solid #d1dce5;
-  border-radius: var(--radius);
-  padding: var(--padding);
-  min-height: 200px;
-  max-height: 300px;
-  overflow-y: auto;
-  display: flex;
-  flex-direction: column;
-}
-.user-msg, .bot-msg {
-  max-width: 80%;
-  margin: .5rem 0;
-  padding: .8rem 1rem;
-  border-radius: 1.2rem;
-  position: relative;
-}
-.user-msg {
-  background: var(--primary);
-  color: #fff;
-  align-self: flex-end;
-  border-bottom-right-radius: .2rem;
-}
-.bot-msg {
-  background: #e8f5f1;
-  color: var(--text);
-  align-self: flex-start;
-  border-bottom-left-radius: .2rem;
-}
-.timestamp {
-  font-size: .7rem;
-  position: absolute;
-  bottom: -1.2rem;
-  right: .8rem;
-  color: var(--muted);
-}
+    .chat-box {
+    background:var(--pharm-bg); border:2px solid var(--pharm-primary-alt);
+    border-radius:var(--radius); padding:var(--padding);
+    max-height:300px; overflow-y:auto; margin-bottom:0.5rem;
+  }
+  .chat-input { display:flex; gap:0.5rem; }
+  .chat-input input {
+    flex:1; border-radius:var(--radius) 0 0 var(--radius);
+  }
+  .chat-input button {
+    border-radius:0 var(--radius) var(--radius) 0;
+  }
+
+   #pharmaChatBox { display:flex; flex-direction:column; gap:0.5rem; }
+  .user-msg, .bot-msg {
+   max-width: 70%; padding:0.75rem; border-radius: var(--radius);
+    position: relative; word-wrap: break-word;
+  }
+  .user-msg {
+   align-self: flex-end; background: var(--pharm-primary); color:#fff;
+   border-bottom-right-radius:0;
+  }
+  .bot-msg {
+    align-self: flex-start; background: var(--pharm-surface); color:var(--pharm-text);
+    border-bottom-left-radius:0;
+  }
+  /* date separators */
+ .chat-date {
+    text-align:center; margin:1rem 0; font-size:0.8rem; color:var(--pharm-muted);
+  }
+
 html.dark .bot-msg {
   background: var(--surface-dark);
   color: var(--text-dark);
@@ -681,7 +691,9 @@ footer a {
     padding: 3rem 1rem;
   }
   #shrinkBtn {
-    bottom: .5rem;
+   bottom: 50%;
+  transform: translateY(50%);
+    left: 50%;
   }
   .charts {
     grid-template-columns: 1fr;
@@ -789,27 +801,21 @@ footer a {
 #sidebar.shrunk .brand span {
   display: none;
 }
-
+.hamburger { display: none; }  
+ @media (max-width: 1024px) {
+ header .hamburger { display: inline-block; }
+ }
 </style>
 
 </head>
 
 <body>
 
-  <!-- ONBOARDING MODAL -->
-  <div id="onboardModal" role="dialog" aria-modal="true" aria-labelledby="onboardTitle" style="position:fixed;inset:0;background:rgba(0,0,0,0.5);display:flex;align-items:center;justify-content:center;z-index:3000;">
-    <div style="background:var(--surface);padding:2rem;border-radius:var(--radius);max-width:400px;text-align:center;">
-      <h2 id="onboardTitle" style="color:var(--primary)">Welcome to Vitra AI Herbal Hub</h2>
-      <p>Empowering Traditional Healing with Artificial Intelligence.<br/>Explore plant IDs, custom blends, and more.</p>
-      <button onclick="onboardClose()">Get Started</button>
-    </div>
-  </div>
-
   <!-- SIDEBAR -->
   <aside id="sidebar">
     <div class="brand"><i class="fas fa-leaf"></i><span>Vitra AI</span></div>
     <nav role="navigation">
-     <a href="https://vitra-ai.netlify.app/" class="active"><i class="fas fa-seedling"></i><span>Herbal Medicine</span></a>
+    <a href="herbal.html" class="active"><i class="fas fa-seedling"></i><span>Herbal Medicine</span></a>
     <a href="mental.html"><i class="fas fa-brain"></i><span>Psychology & Mental Health</span></a>
     <a href="dietetics.html"><i class="fas fa-utensils"></i><span>Dietetics</span></a>
     <a href="pharmacy.html"><i class="fas fa-prescription-bottle-alt"></i><span>E-Pharmacy</span></a>
@@ -839,27 +845,17 @@ footer a {
   <i class="fas fa-flask    hero-bg-icon" style="bottom: 10%; left: 12%;"></i>   
   <i class="fas fa-stethoscope hero-bg-icon" style="bottom: 8%; right: 15%;"></i> 
   <i class="fas fa-chart-line  hero-bg-icon" style="top: 45%; left: 45%;"></i>  
-  <div class="hero-content">
-    <h1><i class="fas fa-leaf"></i> Empower Your Herbal Journey</h1>
-    <p class="hero-subtitle">
-      Discover AI-powered tools for plant ID, symptom analysis, custom blends, and real-time analytics—all in one place.
-    </p>
-
+ <div class="hero-image" data-aos="zoom-in">
+    <img src="herbs.webp" alt="AI-Powered Herbal Medicine">
+  </div>
+  <div class="hero-content" data-aos="fade-left">
+    <h1>AI-Powered Herbal Medicine Hub</h1>
+    <p>Discover plant ID, custom formulations, and more—all powered by AI.</p>
     <div class="hero-actions">
       <a href="#hero–identifier" class="btn-primary"><i class="fas fa-camera"></i> Scan a Plant</a>
-<a href="#hero-symptom" class="btn-secondary"><i class="fas fa-notes-medical"></i> Check Symptoms</a>
-  <a href="#hero–chat" class="btn-tertiary"><i class="fas fa-comments"></i> Chat with Herbalist</a>
-
+      <a href="#hero-symptom" class="btn-secondary"><i class="fas fa-notes-medical"></i> Check Symptoms</a>
+      <a href="#hero–chat" class="btn-tertiary"><i class="fas fa-comments"></i> Chat with Herbalist</a>
     </div>
-
-    <ul class="hero-features">
-      <li><i class="fas fa-seedling"></i> AI-Based Plant ID</li>
-      <li><i class="fas fa-stethoscope"></i> Symptom Diagnostics</li>
-      <li><i class="fas fa-flask"></i> Personalized Formulations</li>
-      <li><i class="fas fa-chart-line"></i> Live Analytics</li>
-      <li><i class="fas fa-shield-alt"></i> Safety Checker</li>
-      <li><i class="fas fa-globe"></i> Cultural Insights</li>
-    </ul>
   </div>
 </section>
 
@@ -933,7 +929,7 @@ footer a {
       <p class="desc">Enter a region, tradition or herb name to get practices, rituals & folklore.</p>
       <div class="culture-input-wrapper" style="display:flex; gap:0.5rem; align-items:flex-end; margin-bottom:1rem;">
         <input id="cultureQuery" type="text" placeholder="e.g. West African herbal uses…" />
-        <button onclick="getCulture()" class="btn-culture">Get Insights</button>
+        <button id="btnCulture" class="btn-culture">Get Insights</button>
       </div>
       <div id="cultureResult" class="response" hidden>
         <button class="close-btn">×</button>
@@ -958,22 +954,23 @@ footer a {
     </section>
 
     <!-- 5. AI Herbalist Chat -->
-    <section id="hero–chat" class="module">
-      <div style="display:flex; justify-content:space-between; align-items:center;">
-        <h2><i class="fas fa-comments"></i> AI Herbalist Chat</h2>
-        <div class="chat-controls">
-          <button id="viewHistory" title="View History"><i class="fas fa-history"></i></button>
-          <button id="clearChat" title="Clear Chat"><i>clear</i></button>
-        </div>
+     <section id="drugChatbot" class="module">
+      <h2><i class="fas fa-comments"></i> AI Herbalist Chat</h2>
+      <p class="desc">      <p class="desc">Ask about herbal remedies:</p>
+      <div class="chat-controls">
+        <button id="clearPharmaChat" class="btn-secondary"><i class="fas fa-trash"></i> Clear</button>
+         <button id="historyBtn" class="btn" style="margin-bottom:0.5rem;">
+      <i class="fas fa-history"></i> History
+         </button>
       </div>
-      <p class="desc">Ask about herbal remedies:</p>
-      <div id="chatBox" class="chat-box" role="log" aria-live="polite"></div>
-      <div class="chat-input-row">
-        <input id="chatInput" placeholder="Ask about herbal remedies…" aria-label="Type your question"/>
-        <button id="sendChat" aria-label="Send message"><i class="fas fa-paper-plane"></i></button>
-      </div>
-      <div id="chatHint" class="hint" hidden>Bot is thinking… <span class="spinner"></span></div>
+      <div id="pharmaChatBox" class="chat-box"></div>
+      <form id="pharma-form" class="chat-input">
+        <input id="pharmaInput" type="text" placeholder="Ask me anything about Herbal medicine…">
+        <button id="sendPharma" class="btn"><i class="fas fa-paper-plane"></i></button>
+      </form>
     </section>
+
+  
 
     <!-- 6. Personalized Formulations -->
     <section id="formulations" class="module">
@@ -1178,15 +1175,7 @@ footer a {
       </div>
     </section>
 
-    <!-- ADD-ONS -->
-    <section id="addons" class="module">
-      <h2><i class="fas fa-plus-circle"></i> Additional Features</h2>
-      <ul>
-        <li><strong>User Login/Signup</strong> to save herb history & personalized plans.</li>
-        <li><strong>Weekly AI-Generated Blog</strong> on herbal insights.</li>
-        <li><strong>Voice Assistant</strong> for elderly users (click-to-talk).</li>
-      </ul>
-    </section>
+  
 
     <!-- 12. ROI Calculator -->
     <section id="roi" class="module">
@@ -1261,14 +1250,7 @@ footer a {
  
   
 
-  <!-- JAVASCRIPT LOGIC -->
-<script>
-  // define this before the modal’s markup
-  function onboardClose() {
-    document.getElementById('onboardModal').style.display = 'none';
-  }
-
-</script>
+  
 <script>
  
   function onboardClose() {
@@ -1302,6 +1284,7 @@ footer a {
   // Simple markdown → HTML formatter
   function formatHTML(txt) {
     return txt
+      .replace(/^#+\s*(.*)$/gm,'$1') 
       .replace(/\*\*(.+?)\*\*/g,'<strong>$1</strong>')
       .replace(/\*(.+?)\*/g,'<em>$1</em>')
       .replace(/\[([^\]]+)\]/g,'<code>$1</code>')
@@ -1381,8 +1364,8 @@ footer a {
         }
       } }
     });
-    new Chart('chartAdoption', cfg('line', { labels:['Jan','Feb','Mar'], datasets:[{data:[50,75,100]}] }));
-    new Chart('chartEfficacy',  cfg('bar',  { labels:['Mild','Mod','High'],   datasets:[{data:[30,45,25]}] }));
+    new Chart('chartAdoption', cfg('line', { labels:['Jan','Feb','Mar'], datasets:[{data:[50,75,100]}], options: { grid:{ x:{display:false}, y:{display:false} } } }));
+    new Chart('chartEfficacy',  cfg('bar',  { labels:['Mild','Mod','High'],   datasets:[{data:[30,45,25]}], options: { scales:{ x:{grid:{display:false}}, y:{grid:{display:false}} } } }));
     new Chart('chartSupply',    cfg('pie',  { labels:['A','B','C'],         datasets:[{data:[200,150,300]}] }));
     new Chart('chartROI',       cfg('radar',{ labels:['Q1','Q2','Q3','Q4'],datasets:[{data:[5,7,6,8]}] }));
   }
@@ -1411,7 +1394,10 @@ footer a {
       e.preventDefault();
       const panel = document.getElementById(outId);
       panel.hidden = false;
-      panel.innerHTML = '<div class="result-content">Processing… <span class="spinner"></span></div>';
+ panel.innerHTML = `<div class="result-content">${sysPrompt.includes('summary') ? 'Summarizing…' :
+                        sysPrompt.includes('formulations') ? 'Formulating…' :
+                        sysPrompt.includes('forecast') ? 'Forecasting…' :
+                        'Generating…'} <span class="spinner"></span></div>`;
       try {
         const reply = await callOpenAI([
           { role: 'system', content: sysPrompt },
@@ -1493,13 +1479,7 @@ footer a {
     }
   };
 
-  // Cultural Knowledge
-  wireForm(
-    'cultureQuery',
-    'You are a cultural herbalist. Respond concisely.',
-    () => document.getElementById('cultureQuery').value.trim(),
-    'cultureResult'
-  );
+ 
 
   // Safety Checker
   wireForm(
@@ -1528,10 +1508,26 @@ footer a {
   // Inventory Forecast
   wireForm(
     'inventory-form',
-    'You forecast weekly herb demand with buffer stock.',
+    'You are an expert summarizer—return 3 concise bullet points without markdown or tables.',
     () => `Herb: ${document.getElementById('forecastHerb').value}; Weeks: ${document.getElementById('forecastPeriod').value}`,
     'inventoryResult'
   );
+
+   document.getElementById('btnCulture').addEventListener('click', async () => {
+    const panel = document.getElementById('cultureResult');
+    panel.hidden = false;
+    panel.innerHTML = '<div class="result-content">Fetching cultural insights… <span class="spinner"></span></div>';
+    try {
+      const reply = await callOpenAI([
+        { role:'system', content:'You are a cultural herbalist. Provide folklore and practices in bullet points.' },
+        { role:'user',   content: document.getElementById('cultureQuery').value.trim() }
+      ]);
+      panel.innerHTML = `<div class="result-content">${formatHTML(reply)}</div>`;
+      addClose(panel); addTools(panel);
+    } catch {
+      showFriendlyError(panel);
+    }
+  });
 
   // Genetics Match
   document.getElementById('genetics-form').onsubmit = async e => {
@@ -1601,7 +1597,7 @@ footer a {
     const cost = +document.getElementById('roiCost').value;
     try {
       const reply = await callOpenAI([
-        { role: 'system', content: 'You are a finance expert. Show equations and explain ROI step by step in plain HTML.' },
+      { role: 'system', content: 'You are a business analyst. Provide step-by-step ROI calc in simple language, no raw error messages.' },
         { role: 'user',   content: `Volume: ${rx}; Unit cost: ${cost}; Currency: ${document.getElementById('currency').value}` }
       ]);
       panel.innerHTML = `<div class="result-content">${formatHTML(reply)}</div>`;
@@ -1622,10 +1618,14 @@ footer a {
     // Sidebar shrink
     const sidebar     = document.getElementById('sidebar');
     const shrinkBtn   = document.getElementById('shrinkBtn');
-    shrinkBtn.addEventListener('click', () => {
+     shrinkBtn.addEventListener('click', () => {
       sidebar.classList.toggle('collapsed');
+      // swap arrow direction
+      shrinkBtn.querySelector('i').classList.toggle('fa-angle-double-left');
       shrinkBtn.querySelector('i').classList.toggle('fa-angle-double-right');
-    });
+      // hide/show brand text
+      document.querySelector('#sidebar .brand span').style.display = sidebar.classList.contains('collapsed') ? 'none' : 'inline';
+     });
 
     // Hamburger (mobile nav)
     const hamburger   = document.getElementById('hamburger');
@@ -1641,81 +1641,89 @@ footer a {
       themeToggle.classList.toggle('fa-moon');
     });
 
-    // AI Herbalist Chat enhancements
-    const chatBox   = document.getElementById('chatBox');
-    const savedChat = localStorage.getItem('chatHistory');
-    const history   = savedChat ? JSON.parse(savedChat) : [];
-    const sendChat  = document.getElementById('sendChat');
-    const chatHint  = document.getElementById('chatHint');
-    const chatInput = document.getElementById('chatInput');
-
-    history.forEach(m => addMessage(m.who, m.text));
-
-    function addMessage(who, text) {
-      const msg = document.createElement('div');
-      msg.className = who === 'You' ? 'user-msg' : 'bot-msg';
-      msg.innerHTML = `${formatHTML(text)}<div class="timestamp">${new Date().toLocaleTimeString()}</div>`;
-      chatBox.append(msg);
-      chatBox.scrollTop = chatBox.scrollHeight;
-    }
-
-    sendChat.onclick = async () => {
-      const txt = chatInput.value.trim();
-      if (!txt) return;
-      addMessage('You', txt);
-      history.push({ who: 'You', text: txt });
-      localStorage.setItem('chatHistory', JSON.stringify(history));  // ← persist after user message
-      chatInput.value = '';
-      chatHint.hidden = false;
-      try {
-        const reply = await callOpenAI([
-          { role: 'system', content: 'You are a friendly herbalist. Reply plainly.' },
-          { role: 'user',   content: txt }
-        ]);
-        addMessage('Herbalist', reply);
-        history.push({ who: 'Herbalist', text: reply });
-        localStorage.setItem('chatHistory', JSON.stringify(history));  // ← persist after bot response
-       } catch (err) {
-        addMessage('Herbalist', '⚠️ Oops! Something went wrong. Please try again.');
-      } finally {
-        chatHint.hidden = true;
-      }
-    };
-
-    // Clear chat (does NOT erase history)
-    document.getElementById('clearChat').onclick = () => {
-    chatBox.innerHTML = '';
-    history.length = 0;
-    localStorage.removeItem('chatHistory');  // ← also clear persisted history
   
-    };
 
-    // View history modal
-    document.getElementById('viewHistory').onclick = () => {
-      const modal = document.createElement('div');
-      modal.className = 'history-modal';
-      modal.innerHTML = `
-        <div class="history-content">
-          <h3>Chat History</h3>
-          <ul>
-            ${history.map((m,i) => `
-              <li>
-                <strong>${m.who}:</strong> ${m.text}
-                <button data-i="${i}" class="del-msg"><i class="fas fa-trash"></i></button>
-              </li>`).join('')}
-          </ul>
-          <button class="close-history">Close</button>
-        </div>`;
-      document.body.append(modal);
-      modal.querySelectorAll('.del-msg').forEach(btn => {
-        btn.onclick = () => {
-          history.splice(+btn.dataset.i,1);
-          modal.remove();
-          document.getElementById('viewHistory').click();
-        };
-      });
-      modal.querySelector('.close-history').onclick = () => modal.remove();
-    };
+    // ─────────────── Chatbot + History ───────────────
+  const chatBox = document.getElementById('pharmaChatBox');
+  let lastDateKey = null;
+  const history = [];
+
+  function formatDateHeader(date) {
+    const today = new Date(),
+          diff = (today - date)/(1000*60*60*24);
+    if (diff < 1) return 'Today';
+    if (diff < 2) return 'Yesterday';
+    return date.toLocaleDateString();
+  }
+
+  function addMessage(type, text) {
+    const now = new Date(),
+          key = now.toDateString();
+    if (key !== lastDateKey) {
+      const sep = document.createElement('div');
+      sep.className = 'chat-date';
+      sep.innerText = formatDateHeader(now);
+      chatBox.append(sep);
+      lastDateKey = key;
+    }
+    const ts = now.toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'}),
+          wrapper = document.createElement('div');
+    wrapper.className = type==='user'?'user-msg':'bot-msg';
+    wrapper.innerHTML = `
+      <div class="msg-text">${text}</div>
+      <div class="msg-ts">${ts}</div>`;
+    chatBox.append(wrapper);
+    chatBox.scrollTop = chatBox.scrollHeight;
+    history.push({ role:type, text, time: `${now.toDateString()} ${ts}` });
+  }
+
+  // Send
+  document.getElementById('sendPharma').onclick = async e => {
+    e.preventDefault();
+    const q = document.getElementById('pharmaInput').value.trim();
+    if (!q) return showToast('⚠️ Type a question');
+    addMessage('user', q);
+    document.getElementById('pharmaInput').value = '';
+    const spinner = document.createElement('div');
+    spinner.className = 'spinner'; chatBox.append(spinner);
+    const a = await callAI(q);
+    spinner.remove();
+    addMessage('bot', sanitizeAIContent(a));
+  };
+
+  // Clear chat
+  document.getElementById('clearPharmaChat').onclick = () => {
+    chatBox.innerHTML = '';
+    lastDateKey = null;
+    history.length = 0;
+  };
+
+  // History modal
+  const historyModal = document.getElementById('historyModal'),
+        historyList  = document.getElementById('historyList');
+
+  document.getElementById('historyBtn').addEventListener('click', e => {
+    e.preventDefault();
+    historyList.innerHTML = history.map((h,i)=>`
+      <div class="history-item">
+        <strong>${h.role==='user'?'You':'Bot'}:</strong> ${h.text}
+        <div class="msg-ts">${h.time}</div>
+        <button class="delete-history" data-index="${i}">×</button>
+      </div>`).join('');
+    historyModal.hidden = false;
+  });
+
+  document.querySelector('.close-modal').onclick = () => {
+    historyModal.hidden = true;
+  };
+
+  historyList.addEventListener('click', e => {
+    if (!e.target.matches('.delete-history')) return;
+    const idx = +e.target.dataset.index;
+    history.splice(idx,1);
+    e.target.closest('.history-item').remove();
+  });
+
   });
 </script>
 
