@@ -387,11 +387,7 @@
   font-size: 1.5rem;
   cursor: pointer;
 }
-.navbar .logo {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;            
-}
+
 .navbar .logo-text {
   font-size: 1.25rem;     
   font-weight: 600;        
@@ -436,6 +432,74 @@
     .navbar .logo-img {
   width: 2.5rem;
   height: 2.5rem;
+}
+/* Wrap & background */
+.services-section {
+  position: relative;
+  background: var(--primary);
+  color: var(--secondary);
+  overflow: hidden;
+}
+.services-inner {
+  max-width: var(--max-width);
+  margin: auto;
+  padding: 4rem var(--padding);
+  text-align: center;
+}
+
+/* Subtitle */
+.services-subtitle {
+  margin-bottom: 2rem;
+  color: var(--secondary);
+  font-size: 1.1rem;
+}
+
+/* “See All” button under the grid */
+.see-all {
+  display: inline-block;
+  margin-top: 2.5rem;
+  padding: .75rem 1.5rem;
+  border: 2px solid var(--secondary);
+  border-radius: var(--radius);
+  color: var(--secondary);
+  font-weight: 600;
+  transition: background .2s, color .2s;
+}
+.see-all:hover {
+  background: var(--secondary);
+  color: var(--primary);
+}
+
+/* Waves */
+.services-wave {
+  position: absolute;
+  left: 0; width: 100%;
+  line-height: 0;
+}
+.services-wave--top {
+  top: 0;
+  transform: translateY(-1px);
+}
+.services-wave--bottom {
+  bottom: 0;
+  transform: translateY(1px) rotate(180deg);
+}
+
+/* Floating icons */
+.services-section .deco-icon {
+  position: absolute;
+  font-size: 3rem;
+  opacity: .15;
+  color: var(--secondary);
+  animation: float 8s ease-in-out infinite;
+}
+.services-section .deco-icon:nth-child(1) { top: 20%; left: 10%; animation-delay: 0; }
+.services-section .deco-icon:nth-child(2) { top: 60%; right: 15%; animation-delay: 3s; }
+.services-section .deco-icon:nth-child(3) { bottom: 20%; left: 30%; animation-delay: 6s; }
+
+@keyframes float {
+  0%,100% { transform: translateY(0); }
+  50%   { transform: translateY(-10px); }
 }
 
 
@@ -540,9 +604,19 @@
     </section>
 
     <!-- SERVICES -->
-   <section id="services">
-  <h2 data-aos="fade-right">Our Services</h2>
-  <div class="services">
+  <section id="services" class="services-section" data-aos="fade-up">
+  <!-- Top decorative wave -->
+  <div class="services-wave services-wave--top">
+    <svg viewBox="0 0 1440 100" preserveAspectRatio="none">
+      <path d="M0,100 C360,0 1080,200 1440,100 L1440,0 L0,0 Z" fill="var(--surface)"/>
+    </svg>
+  </div>
+
+  <div class="services-inner">
+    <h2>Our Services</h2>
+    <p class="services-subtitle">Leveraging AI to transform every aspect of your wellbeing.</p>
+
+    <div class="services">
 
     <!-- Herbal Medicine -->
     <a href="herbal.html" class="service-card" data-aos="fade-up">
@@ -619,9 +693,16 @@
       </div>
     </a>
 
+ <a href="#services" class="btn btn-secondary see-all">See All Services</a>
+  </div>
+
+  <!-- Bottom decorative wave -->
+  <div class="services-wave services-wave--bottom">
+    <svg viewBox="0 0 1440 100" preserveAspectRatio="none">
+      <path d="M0,0 C360,100 1080,-100 1440,0 L1440,100 L0,100 Z" fill="var(--surface)"/>
+    </svg>
   </div>
 </section>
-
     <!-- FEATURES -->
     <section id="features">
       <h2 data-aos="fade-left">Why Vitra AI?</h2>
