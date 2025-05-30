@@ -150,15 +150,14 @@ body.sidebar-shrink aside#sidebar .brand {
     main,
     section,
     footer {
-      margin-left: var(--sidebar-width);
+      margin-left: calc(var(--sidebar-width) - 1rem);
       padding: var(--padding);
       transition: margin-left var(--transition);
     }
     body.sidebar-shrink main,
     body.sidebar-shrink section,
     body.sidebar-shrink footer {
-      margin-left: var(--sidebar-collapsed-width);
-    }
+ margin-left: calc(var(--sidebar-collapsed-width) - 1rem);    }
 
     /* ─── Module Base ────────────────────────────────────────────── */
     section.module {
@@ -466,6 +465,19 @@ hero-text .desc {
         padding: 1.5rem;
       }
     }
+    /* Consistent positioning for all step buttons */
+.response  .btn-sm,
+#urgentBooking .btn-sm {
+  position: absolute;
+  bottom: 1rem;
+  right: 1rem;
+  margin-left: 0.5rem;
+}
+#urgentBooking .btn-sm.back {
+  right: auto;
+  left: 1rem;
+}
+
     /* ─── Upcoming Calendar Entries ───────────────────────── */
 #upcomingCalendarContainer .calendar-entry {
   padding: .5rem;
@@ -581,6 +593,11 @@ hero-text .desc {
    display:flex; align-items:center; justify-content:center;
    cursor:pointer;
  }
+    @media (prefers-color-scheme: dark), html.dark {
+  #calendar .cell.closed { background: #3b3f88; color: #aaa; }
+  #calendar .cell.open   { background: #f08a5d; color: #111; }
+}
+
   </style>
 </head>
 
@@ -595,9 +612,6 @@ hero-text .desc {
       <ul>
         <li class="active">
           <a href="#providerMatch"><i class="fas fa-user-md"></i><span>Provider Match</span></a>
-        </li>
-        <li>
-          <a href="#appointmentFlow"><i class="fas fa-calendar-alt"></i><span>Schedule</span></a>
         </li>
         <li>
           <a href="#feature-rich-dashboard"><i class="fas fa-tachometer-alt"></i><span>Dashboard</span></a>
@@ -639,222 +653,168 @@ hero-text .desc {
       </div>
     </section>
 
-  <!-- Urgent Booking Module (AI-match → schedule → details → review → payment) -->
-<section id="urgentBooking" class="module" hidden>
-  <h2><i class="fas fa-exclamation-triangle"></i> Urgent Appointment</h2>
-  <p class="desc">Describe your concern, pick a specialist, then choose date/time. ₵500 non-refundable fee.</p>
+    <!-- Urgent Booking Module -->
+    <section id="urgentBooking" class="module" hidden>
+      <h2><i class="fas fa-exclamation-triangle"></i> Urgent Appointment</h2>
+      <p class="desc">Describe your concern, pick a specialist, then choose date/time. ₵500 non-refundable fee.</p>
 
-  <!-- Step 1: Concern input -->
-  <div id="urgentStep1">
-    <label>
-      <i class="fas fa-notes-medical"></i> Chief Concern:
-      <input type="text" id="urgentConcernInput" placeholder="e.g. severe headache" required />
-    </label>
-    <button type="button" id="urgentFindMatchBtn" class="btn">
-      <i class="fas fa-search"></i> Find Specialist
-    </button>
-    <button type="button" id="urgentStep1Back" class="btn-sm" hidden>Back</button>
-  </div>
-
-  <!-- Step 2: Display the AI-picked specialist -->
-  <div id="urgentMatchResults" class="response" hidden>
-    <button class="close-btn"><i class="fas fa-times"></i></button>
-    <div class="card">
-      <i class="fas fa-user-md fa-2x"></i>
-      <div class="details">
-        <h4 id="urgentMatchedName"></h4>
-        <p id="urgentMatchedSpec"></p>
-      </div>
-    </div>
-    <button id="urgentScheduleBtn" class="btn">
-      <i class="fas fa-calendar-alt"></i> Schedule with this Specialist
-    </button>
-    <button type="button" id="urgentStep2Back" class="btn-sm">Back</button>
-    <button type="button" id="urgentStep2Close" class="btn-sm">Close</button>
-
-  </div>
-
-  <!-- Step 3: Calendar & Time -->
- <div id="urgentCalendarFlow" hidden>
-    <label>
-      Date:
-     <input 
-      type="date" 
-      id="urgentDate" 
-    />
-    </label>
-    <label>
-      Time:
-      <input type="time" id="urgentTime" />
-    </label>
-    <button id="urgentNextToDetails" class="btn">
-      <i class="fas fa-arrow-right"></i> Next
-    </button>
-   <button type="button" id="urgentStep3Back" class="btn-sm">Back</button>
-    <button type="button" id="urgentStep3Close" class="btn-sm">Close</button>
-
-  </div>
-
-  <!-- Step 4: Your Details & Confirm (opens review-modal) -->
-  <form id="urgentDetailsForm" hidden class="module">
-    <label>
-      <i class="fas fa-user"></i> Your Name:
-      <input id="urgentClientName" placeholder="Full Name" required />
-    </label>
-    <label>
-      <i class="fas fa-envelope"></i> Email:
-      <input id="urgentClientEmail" type="email" required />
-    </label>
-    <button type="button" id="urgentConfirmBtn" class="btn">
-      <i class="fas fa-check"></i> Review & Pay ₵500
-    </button>
-     <button type="button" id="urgentStep4Back" class="btn-sm">Back</button>
-    <button type="button" id="urgentStep4Close" class="btn-sm">Close</button>
-  </form>
-</section>
-    
-    <!-- ─── Provider Matching & Scheduling Section ─────────────────── -->
-<section id="providerMatch" class="module">
-  <h2><i class="fas fa-user-md"></i> Find Your Specialist</h2>
-  <p class="desc">
-    Describe your health concern and let our AI pick the best in-network professional for you.
-  </p>
-
-  <!-- Step 1: Gather user inputs -->
-  <form id="matchForm">
-    <label>
-      <i class="fas fa-notes-medical"></i> Chief Concern:
-      <input type="text" id="concernInput" placeholder="e.g. persistent cough" required />
-    </label>
-    <label>
-      <i class="fas fa-exclamation-circle"></i> Urgency:
-      <select id="urgencyInput">
-        <option>Low</option>
-        <option>Medium</option>
-        <option>High</option>
-      </select>
-    </label>
-    <label>
-      <i class="fas fa-language"></i> Preferred Language:
-      <select id="languageInput">
-        <option>English</option>
-        <option>Twi</option>
-        <option>Ga</option>
-      </select>
-    </label>
-    <button type="button" id="findMatchBtn" class="btn">
-      <i class="fas fa-search"></i> Predict Specialist
-    </button>
-    </form>
-
-  <!-- Step 2: Display the AI-picked specialist -->
-  <div id="matchResults" class="response" hidden>
-    <button id="matchResultsClose" class="close-btn"><i class="fas fa-times"></i></button>
-    <button id="matchResultsBack" class="btn-sm">Back</button>
-    <div class="card">
-      <i class="fas fa-user-md fa-2x"></i>
-      <div class="details">
-        <h4 id="matchedName"></h4>
-        <p id="matchedSpec"></p>
-      </div>
-    </div>
-    <button id="scheduleMatchBtn" class="btn">
-      <i class="fas fa-calendar-alt"></i> Schedule with this Specialist
-    </button>
-  </div>
-
-  <!-- Step 3: Calendar & Time Slots for the matched provider -->
-  <div id="appointmentFlow" hidden>
-    <button id="appointmentFlowClose" class="btn-sm">Close</button>
-    <h3><i class="fas fa-calendar-alt"></i> Schedule with <span id="chosenProvider"></span></h3>
-
-    <div class="month-nav">
-      <button id="prevMonth" class="btn-sm"><i class="fas fa-chevron-left"></i></button>
-      <div id="calendarHeader"></div>
-      <button id="nextMonth" class="btn-sm"><i class="fas fa-chevron-right"></i></button>
-    </div>
-    <div id="calendar" class="calendar-grid"></div>
-    <div id="timeSlots"></div>
-
-    <form id="confirmForm" hidden class="module">
-      <button id="confirmStep4Close" class="btn-sm">Close</button>
-      <button id="confirmStep4Back" class="btn-sm">Back</button>
-      <h4><i class="fas fa-check-circle"></i> Confirm Your Appointment</h4>
-      <label>
-        <i class="fas fa-user"></i> Your Name:
-        <input id="clientName" placeholder="Full Name" required />
-      </label>
-      <label>
-        <i class="fas fa-envelope"></i> Email:
-        <input id="clientEmail" type="email" required />
-      </label>
-      <p id="summaryText"></p>
-      <button id="confirmBtn" type="button" class="btn">
-        <i class="fas fa-check"></i> Confirm
-      </button>
-    </form>
-  </div>
-</section>
-
-    
-   
-    <!-- Rich Dashboard -->
-    <section id="feature-rich-dashboard" class="module">
-      <h2><i class="fas fa-tachometer-alt"></i> Rich Dashboard</h2>
-      <div class="dashboard-tabs">
-        <button data-tab="rich-upcoming" class="active">
-          <i class="fas fa-calendar-check"></i> Upcoming
-        </button>
-        <button data-tab="rich-past">
-          <i class="fas fa-history"></i> Past
-        </button>
-        <button data-tab="rich-favorites">
-          <i class="fas fa-heart"></i> Favorites
+      <!-- Step 1 -->
+      <div id="urgentStep1">
+        <label>
+          <i class="fas fa-notes-medical"></i> Chief Concern:
+          <input type="text" id="urgentConcernInput" placeholder="e.g. severe headache" required />
+        </label>
+        <button type="button" id="urgentFindMatchBtn" class="btn">
+          <i class="fas fa-search"></i> Find Specialist
         </button>
       </div>
-      <div id="rich-upcoming" class="dashboard-cards">
-        <!-- upcoming cards injected here -->
+
+      <!-- Step 2 -->
+      <div id="urgentMatchResults" class="response" hidden>
+        <button class="close-btn" id="urgentStep2Close"><i class="fas fa-times"></i></button>
+        <div class="card">
+          <i class="fas fa-user-md fa-2x"></i>
+          <div class="details">
+            <h4 id="urgentMatchedName"></h4>
+            <p id="urgentMatchedSpec"></p>
+          </div>
+        </div>
+        <button id="urgentScheduleBtn" class="btn">
+          <i class="fas fa-calendar-alt"></i> Schedule
+        </button>
+        <button class="btn-sm back" id="urgentStep2Back">Back</button>
       </div>
-      <div id="rich-past" class="dashboard-cards" hidden>
-        <!-- past cards -->
+
+      <!-- Step 3 -->
+      <div id="urgentCalendarFlow" hidden>
+        <label>Date: <input type="date" id="urgentDate" /></label>
+        <label>Time: <input type="time" id="urgentTime" /></label>
+        <button id="urgentNextToDetails" class="btn"><i class="fas fa-arrow-right"></i> Next</button>
+        <button class="btn-sm back" id="urgentStep3Back">Back</button>
+        <button class="btn-sm close-btn" id="urgentStep3Close"><i class="fas fa-times"></i></button>
       </div>
-      <div id="rich-favorites" class="dashboard-cards" hidden>
-        <!-- favorites -->
+
+      <!-- Step 4 -->
+      <form id="urgentDetailsForm" hidden class="module">
+        <label><i class="fas fa-user"></i> Your Name:
+          <input id="urgentClientName" placeholder="Full Name" required />
+        </label>
+        <label><i class="fas fa-envelope"></i> Email:
+          <input id="urgentClientEmail" type="email" required />
+        </label>
+        <button type="button" id="urgentConfirmBtn" class="btn">
+          <i class="fas fa-check"></i> Review & Pay
+        </button>
+        <button class="btn-sm back" id="urgentStep4Back">Back</button>
+        <button class="btn-sm close-btn" id="urgentStep4Close"><i class="fas fa-times"></i></button>
+      </form>
+    </section>
+
+    <!-- Provider Matching -->
+    <section id="providerMatch" class="module">
+      <h2><i class="fas fa-user-md"></i> Find Your Specialist</h2>
+      <p class="desc">Describe your health concern and let our AI pick the best in-network professional.</p>
+
+      <!-- Step 1 -->
+      <form id="matchForm">
+        <label><i class="fas fa-notes-medical"></i> Chief Concern:
+          <input type="text" id="concernInput" placeholder="e.g. persistent cough" required />
+        </label>
+        <label><i class="fas fa-exclamation-circle"></i> Urgency:
+          <select id="urgencyInput"><option>Low</option><option>Medium</option><option>High</option></select>
+        </label>
+        <label><i class="fas fa-language"></i> Language:
+          <select id="languageInput"><option>English</option><option>Twi</option><option>Ga</option></select>
+        </label>
+        <button type="button" id="findMatchBtn" class="btn">
+          <i class="fas fa-search"></i> Predict Specialist
+        </button>
+      </form>
+
+      <!-- Step 2 -->
+      <div id="matchResults" class="response" hidden>
+        <button class="close-btn" id="matchResultsClose"><i class="fas fa-times"></i></button>
+        <div class="card">
+          <i class="fas fa-user-md fa-2x"></i>
+          <div class="details">
+            <h4 id="matchedName"></h4>
+            <p id="matchedSpec"></p>
+          </div>
+        </div>
+        <button id="scheduleMatchBtn" class="btn"><i class="fas fa-calendar-alt"></i> Schedule</button>
+        <button class="btn-sm back" id="matchResultsBack">Back</button>
+      </div>
+
+      <!-- Step 3 -->
+      <div id="appointmentFlow" hidden>
+        <button class="btn-sm close-btn" id="appointmentFlowClose"><i class="fas fa-times"></i></button>
+        <h3><i class="fas fa-calendar-alt"></i> Schedule with <span id="chosenProvider"></span></h3>
+        <div class="month-nav">
+          <button id="prevMonth" class="btn-sm"><i class="fas fa-chevron-left"></i></button>
+          <div id="calendarHeader"></div>
+          <button id="nextMonth" class="btn-sm"><i class="fas fa-chevron-right"></i></button>
+        </div>
+        <div id="calendar" class="calendar-grid"></div>
+        <div id="timeSlots"></div>
+
+        <!-- Step 4 -->
+        <form id="confirmForm" hidden class="module">
+          <button class="btn-sm close-btn" id="confirmStep4Close"><i class="fas fa-times"></i></button>
+          <button class="btn-sm back" id="confirmStep4Back">Back</button>
+          <h4><i class="fas fa-check-circle"></i> Confirm</h4>
+          <label><i class="fas fa-user"></i> Your Name:
+            <input id="clientName" placeholder="Full Name" required />
+          </label>
+          <label><i class="fas fa-envelope"></i> Email:
+            <input id="clientEmail" type="email" required />
+          </label>
+          <p id="summaryText"></p>
+          <button id="confirmBtn" type="button" class="btn"><i class="fas fa-check"></i> Confirm</button>
+        </form>
       </div>
     </section>
 
-    </section>  <!-- end rich-dashboard -->
+    <!-- Dashboard -->
+    <section id="feature-rich-dashboard" class="module">
+      <h2><i class="fas fa-tachometer-alt"></i> Rich Dashboard</h2>
+      <div class="dashboard-tabs">
+        <button data-tab="rich-upcoming" class="active"><i class="fas fa-calendar-check"></i> Upcoming</button>
+        <button data-tab="rich-past"><i class="fas fa-history"></i> Past</button>
+        <button data-tab="rich-favorites"><i class="fas fa-heart"></i> Favorites</button>
+      </div>
+      <div id="rich-upcoming" class="dashboard-cards"></div>
+      <div id="rich-past" class="dashboard-cards" hidden></div>
+      <div id="rich-favorites" class="dashboard-cards" hidden></div>
+    </section>
 
-
-<!-- Upcoming Appointments Overview -->
-<section id="upcomingCalendar" class="module">
-  <h2><i class="fas fa-calendar-alt"></i> Your Upcoming Appointments</h2>
-  <p class="desc">Below is a calendar view of all your confirmed appointments. Click a date to view details.</p>
-  <div id="upcomingCalendarWidget"></div> <!-- calendar will render here -->
-</section>
-
-<!-- Confirm‐Before‐Scheduling Modal -->
-<div id="confirmModal" class="modal" hidden>
-  <div class="modal-content">
-    <h3>Review Your Appointment</h3>
-    <div id="confirmDetails"></div>
-    <button id="modalEdit" class="btn-sm">Edit</button>
-    <button id="modalConfirm" class="btn">Confirm Booking</button>
-    <button id="modalClose" class="btn-sm">Cancel</button>
-  </div>
-</div>
-
-<!-- Cancel Appointment Modal -->
-<div id="cancelModal" class="modal" hidden>
-  <div class="modal-content">
-    <h3>Cancel Appointment?</h3>
-    <p id="cancelMsg"></p>
-    <button id="cancelNo" class="btn-sm">No, Keep It</button>
-    <button id="cancelYes" class="btn">Yes, Cancel</button>
-  </div>
-</div>
-
+    <!-- Upcoming Calendar -->
+    <section id="upcomingCalendar" class="module">
+      <h2><i class="fas fa-calendar-alt"></i> Your Upcoming Appointments</h2>
+      <p class="desc">Click any marked date to view details.</p>
+      <div id="upcomingCalendarWidget"></div>
+    </section>
   </main>
+
+  <!-- Review Modal -->
+  <div id="confirmModal" class="modal" hidden>
+    <div class="modal-content">
+      <h3>Review Your Appointment</h3>
+      <div id="confirmDetails"></div>
+      <button id="modalEdit" class="btn-sm">Edit</button>
+      <button id="modalConfirm" class="btn">Confirm Booking</button>
+      <button id="modalClose" class="btn-sm">Cancel</button>
+    </div>
+  </div>
+
+  <!-- Cancel Modal -->
+  <div id="cancelModal" class="modal" hidden>
+    <div class="modal-content">
+      <h3>Cancel Appointment?</h3>
+      <p id="cancelMsg"></p>
+      <button id="cancelNo" class="btn-sm">No, Keep It</button>
+      <button id="cancelYes" class="btn">Yes, Cancel</button>
+    </div>
+  </div>
 
   <footer>
     <small>© 2025 AI-Pharmacy Chain — All rights reserved</small>
@@ -862,25 +822,50 @@ hero-text .desc {
 
 
 <script>
-    // On load, restore appointments & urgent draft
-    const stored = localStorage.getItem("appointments");
-    if (stored) {
-      appointments.push(...JSON.parse(stored));
-      renderUpcomingCalendarWidget();
-      appointments.forEach(addToRichDashboard);
+  // ─── Persistence & Restore ─────────────────────────────────────────
+  const appointments = [];
+  // Restore saved appointments
+  const stored = localStorage.getItem("appointments");
+  if (stored) {
+    appointments.push(...JSON.parse(stored));
+    renderUpcomingCalendarWidget();
+    appointments.forEach(addToRichDashboard);
+  }
+  // Restore urgent draft fields
+  const draft = JSON.parse(localStorage.getItem("urgentDraft") || "{}");
+  for (let k in draft) {
+    const el = document.getElementById("urgent" + k);
+    if (el) el.value = draft[k];
+  }
+
+  document.addEventListener("DOMContentLoaded", () => {
+    // ─── Phases & Helpers ──────────────────────────────────────────────
+    const PHASE = { findMatch: "Matching…", confirmBooking: "Confirming…" };
+    function showToast(msg) {
+      const t = document.createElement("div");
+      t.className = "toast";
+      t.innerText = msg;
+      document.body.append(t);
+      requestAnimationFrame(() => t.classList.add("visible"));
+      setTimeout(() => t.remove(), 3000);
     }
-    // Urgent draft (concern, date, time, name, email)
-    const draft = JSON.parse(localStorage.getItem("urgentDraft")||"{}");
-    Object.entries(draft).forEach(([k,v])=>{
-      const el = document.getElementById("urgent"+k);
-      if (el) el.value = v;
-    });
-  </script>
+    async function callOpenAI(messages) {
+      try {
+        const res = await fetch("/.netlify/functions/openai-proxy", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ messages }),
+        });
+        if (!res.ok) throw new Error(await res.text());
+        const j = await res.json();
+        return j.choices?.[0]?.message?.content.trim() || "";
+      } catch (err) {
+        console.error("OpenAI error:", err);
+        return "";
+      }
+    }
 
-  <script>
-(function () {
-
-    // Providers + availability
+    // ─── Providers & Availability ──────────────────────────────────────
     const providers = [
       { id: "p1",  name: "Dr. Kwame Asante", spec: "Pulmonologist, Korle Bu" },
       { id: "p2",  name: "Dr. Abena Owusu", spec: "Cardiologist, 37 Military" },
@@ -914,7 +899,7 @@ hero-text .desc {
       p10: { "2025-05-31": ["09:30","10:30","12:00"], "2025-06-03": ["08:00","09:00","10:00"], "2025-06-10": ["11:00","12:00","13:00"], "2025-06-17": ["14:00","15:00"] },
       p11: { "2025-05-31": ["09:30","10:30","12:00"], "2025-06-05": ["09:30","10:30","11:30"], "2025-06-14": ["13:00","14:00","15:00"], "2025-06-19": ["08:00","09:00"] },
       p12: { "2025-05-31": ["09:30","10:30","12:00"], "2025-06-02": ["10:00","11:00","12:00"], "2025-06-08": ["14:00","15:00"], "2025-06-20": ["09:00","10:00","11:00"] },
-      p13: { "2025-05-31": ["09:30","10:30","12:00"], "2025-06-07": ["08:00","09:00","10:00"], "2025-06-12": ["11:30","12:30","13:30"], "2025-06-18": ["14:00","15:00"] },
+      p13: { "2025-05-31": ["09:30","10:30","12:00"], "2025-06-07": ["08:00","09:00","10:00"], "2025-06-12": ["11:30","12:30","13:30"], "2025-06-18": ["14:00","15:00"] },  
       p14: { "2025-05-31": ["09:30","10:30","12:00"], "2025-06-03": ["09:15","10:15","11:15"], "2025-06-09": ["13:00","14:00","15:00"], "2025-06-16": ["08:00","09:00"] },
       p15: { "2025-05-31": ["09:30","10:30","12:00"], "2025-06-05": ["08:30","09:30","10:30"], "2025-06-13": ["11:00","12:00","13:00"], "2025-06-19": ["14:30","15:30"] },
       p16: { "2025-05-31": ["09:30","10:30","12:00"], "2025-06-02": ["10:00","11:00","12:00"], "2025-06-11": ["13:15","14:15"], "2025-06-17": ["09:00","10:00","11:00"] },
@@ -922,517 +907,323 @@ hero-text .desc {
       p18: { "2025-05-31": ["09:30","10:30","12:00"], "2025-06-01": ["08:00","09:00","10:00"], "2025-06-08": ["11:30","12:30","13:30"], "2025-06-20": ["14:00","15:00","16:00"] }
     };
 
-  const PHASE = {
-    findMatch: "Matching…",
-    confirmBooking: "Confirming…",
-  };
+    // ─── Element References ─────────────────────────────────────────────
+    const urgentBooking      = document.getElementById("urgentBooking");
+    const urgentStep1        = document.getElementById("urgentStep1");
+    const urgentMatchResults = document.getElementById("urgentMatchResults");
+    const urgentCalendarFlow = document.getElementById("urgentCalendarFlow");
+    const urgentDetailsForm  = document.getElementById("urgentDetailsForm");
+    const urgentFindMatchBtn = document.getElementById("urgentFindMatchBtn");
+    const urgentMatchedName   = document.getElementById("urgentMatchedName");
+    const urgentMatchedSpec   = document.getElementById("urgentMatchedSpec");
+    const urgentScheduleBtn   = document.getElementById("urgentScheduleBtn");  
+    const urgentDate          = document.getElementById("urgentDate");
+    const urgentTime          = document.getElementById("urgentTime");
+    const urgentNextToDetails = document.getElementById("urgentNextToDetails");
+    const urgentClientName    = document.getElementById("urgentClientName");
+    const urgentClientEmail   = document.getElementById("urgentClientEmail");
+    const urgentConfirmBtn    = document.getElementById("urgentConfirmBtn");
 
-  function showToast(msg) {
-    const t = document.createElement("div");
-    t.className = "toast";
-    t.innerText = msg;
-    document.body.append(t);
-    requestAnimationFrame(() => t.classList.add("visible"));
-    setTimeout(() => t.remove(), 3000);
-  }
+    const matchForm         = document.getElementById("matchForm");
+    const findMatchBtn      = document.getElementById("findMatchBtn");
+    const matchResults      = document.getElementById("matchResults");
+    const scheduleMatchBtn  = document.getElementById("scheduleMatchBtn");
+    const matchedName       = document.getElementById("matchedName");
+    const matchedSpec       = document.getElementById("matchedSpec");
+    const appointmentFlow   = document.getElementById("appointmentFlow");
+    const chosenProvider    = document.getElementById("chosenProvider");
+    const prevMonthBtn      = document.getElementById("prevMonth");
+    const nextMonthBtn      = document.getElementById("nextMonth");
+    const calendarHeader    = document.getElementById("calendarHeader");
+    const calendarGrid      = document.getElementById("calendar");
+    const timeSlots         = document.getElementById("timeSlots");
+   	const confirmForm       = document.getElementById("confirmForm");
+    const summaryText       = document.getElementById("summaryText");
+    const confirmBtn        = document.getElementById("confirmBtn");
 
-  async function callOpenAI(messages) {
-    try {
-      const res = await fetch("/.netlify/functions/openai-proxy", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ messages }),
-      });
-      if (!res.ok) throw new Error(await res.text());
-      const j = await res.json();
-      return j.choices?.[0]?.message?.content.trim() || "";
-    } catch (err) {
-      console.error("OpenAI error:", err);
-      return "";
-    }
-  }
-
-  document.addEventListener("DOMContentLoaded", () => {
-     //  Initialize upcoming calendar widget state
-    let widgetYear = new Date().getFullYear(), widgetMonth = new Date().getMonth();
-
-// — URGENT flow navigation —
-
-// Step2 Back / Close
-document.getElementById("urgentStep2Back").onclick = () => {
-  document.getElementById("urgentMatchResults").hidden = true;
-  document.getElementById("urgentStep1").hidden       = false;
-};
-document.getElementById("urgentStep2Close").onclick = () => {
-  document.getElementById("urgentBooking").hidden    = true;
-};
-
-document.getElementById("urgentStep3Close").onclick = () => {
-  document.getElementById("urgentBooking").hidden        = true;
-};
- // Step3 Back
- document.getElementById("urgentStep3Back").onclick = () => {
-   document.getElementById("urgentCalendarFlow").hidden   = true;
-   document.getElementById("urgentMatchResults").hidden   = false;
- };
-    
-// Step4 Back / Close
-document.getElementById("urgentStep4Back").onclick = () => {
-  document.getElementById("urgentDetailsForm").hidden   = true;
-  document.getElementById("urgentCalendarFlow").hidden  = false;
-};
-document.getElementById("urgentStep4Close").onclick = () => {
-  document.getElementById("urgentBooking").hidden       = true;
-};
-
-// — PROVIDER flow navigation —
-
-// Step2 Back / Close
-document.getElementById("matchResultsBack").onclick = () => {
-  document.getElementById("matchResults").hidden    = true;
-  document.getElementById("matchForm").hidden       = false;
-};
-document.getElementById("matchResultsClose").onclick = () => {
-  document.getElementById("matchResults").hidden    = true;
-};
-
-// Step3 (calendar) 
- document.getElementById("appointmentFlowClose").onclick = () => {
-   document.getElementById("appointmentFlow").hidden = true;
- };
-
-// Confirm step (Step4) Back / Close
-document.getElementById("confirmStep4Back").onclick = () => {
-  document.getElementById("confirmForm").hidden     = true;
-  document.getElementById("appointmentFlow").hidden = false;
-};
-document.getElementById("confirmStep4Close").onclick = () => {
-  document.getElementById("appointmentFlow").hidden = true;
-};
-
-    // URGENT FLOW STATE
-  let urgentProviderId, urgentProviderName;
-  let uYear = new Date().getFullYear(), uMonth = new Date().getMonth();
-  let uSelectedDate, uSelectedTime;
-    
-    // ─── ELEMENT REFERENCES ─────────────────────────────────────────
-    const bodyEl         = document.body;
-    const sidebarBtn     = document.getElementById("shrinkSidebar");
-    const hamburger      = document.getElementById("hamburger");
-    const themeToggle    = document.getElementById("themeToggle");
-    const btnBookHero    = document.querySelector("#hero .hero-btn");
-    const btnBookQuick   = document.querySelector("#quickActions .btn");
-    const btnViewUpcoming= document.getElementById("viewUpcoming");
-    const btnViewPast    = document.getElementById("viewPast");
-    const urgentLink     = document.getElementById("urgentCare");
-    const urgentBooking  = document.getElementById("urgentBooking");
-
-    // Provider-match & calendar
-    const matchForm      = document.getElementById("matchForm");
-    const findMatchBtn   = document.getElementById("findMatchBtn");
-    const matchResults   = document.getElementById("matchResults");
-    const closeBtn       = matchResults.querySelector(".close-btn");
-    const scheduleBtn    = document.getElementById("scheduleMatchBtn");
-    const matchedNameEl  = document.getElementById("matchedName");
-    const matchedSpecEl  = document.getElementById("matchedSpec");
-    const appointFlow    = document.getElementById("appointmentFlow");
-    const chosenProv     = document.getElementById("chosenProvider");
-    const calHeader      = document.getElementById("calendarHeader");
-    const calGrid        = document.getElementById("calendar");
-    const prevMonthBtn   = document.getElementById("prevMonth");
-    const nextMonthBtn   = document.getElementById("nextMonth");
-    const timeSlotsEl    = document.getElementById("timeSlots");
-    const confirmForm    = document.getElementById("confirmForm");
-    const summaryText    = document.getElementById("summaryText");
-    const confirmBtn     = document.getElementById("confirmBtn");
-
-    // Rich Dashboard
-    const richTabs       = document.querySelectorAll("#feature-rich-dashboard .dashboard-tabs button");
-    const richUpcoming   = document.getElementById("rich-upcoming");
-    const richPast       = document.getElementById("rich-past");
-    const richFavorites  = document.getElementById("rich-favorites");
-
-   const step1             = document.getElementById("urgentStep1");
-  const findBtn          = document.getElementById("urgentFindMatchBtn");
-  const resultsDiv       = document.getElementById("urgentMatchResults");
-  const urgentNameEl     = document.getElementById("urgentMatchedName");
-  const urgentSpecEl     = document.getElementById("urgentMatchedSpec");
-  const urgentScheduleBtn= document.getElementById("urgentScheduleBtn");
-    const calFlow          = document.getElementById("urgentCalendarFlow");
- const dateInput        = document.getElementById("urgentDate");
-  const timeInput        = document.getElementById("urgentTime");
-  const nextToDetailsBtn = document.getElementById("urgentNextToDetails");
-  const detailsFormU = document.getElementById("urgentDetailsForm");
-  const confirmU     = document.getElementById("urgentConfirmBtn");
-
-    // ————— Initialize urgent date’s min to today —————
-  dateInput.min = new Date().toISOString().split("T")[0];
-    
-  // 1) Find match
-  findBtn.onclick = async () => {
-    const concern = document.getElementById("urgentConcernInput").value.trim();
-    if (!concern) return showToast("Please enter your concern.");
-    findBtn.disabled = true;
-    findBtn.textContent = "Matching…";
-    // AI call (or fallback random)
-    let pick = "";
-    try {
-      const sys = `You are an AI match. Providers:\n${providers.map(p=>`- ${p.name} – ${p.spec}`).join("\n")}`;
-              const usr = `Concern="${concern}". Pick best provider by exact name only.`;
-      pick = await callOpenAI([ {role:"system",content:sys}, {role:"user",content:usr} ]);
-      pick = pick.split("\n")[0].replace(/[^a-zA-Z\s]/g,"").trim();
-    } catch {
-      /* ignore */ 
-    }
-    const found = providers.find(p=>p.name===pick) || providers[Math.floor(Math.random()*providers.length)];
-   urgentNameEl.textContent = found.name;
-    urgentSpecEl.textContent = found.spec;
-    resultsDiv.hidden = false;
-    step1.hidden = true;
-    findBtn.disabled = false; findBtn.textContent = "Find Specialist";
-     resultsDiv.querySelector(".close-btn").onclick = () => {
-      resultsDiv.hidden = true;
-      step1.hidden = false;
+    // ─── Navigation Buttons ────────────────────────────────────────────
+    document.getElementById("urgentStep2Back").onclick = () => {
+      urgentMatchResults.hidden = true;
+      urgentStep1.hidden = false;
     };
-  };
+    document.getElementById("urgentStep2Close").onclick = () => {
+      urgentBooking.hidden = true;
+    };
+    document.getElementById("urgentStep3Back").onclick = () => {
+      urgentCalendarFlow.hidden = true;
+      urgentMatchResults.hidden = false;
+    };
+    document.getElementById("urgentStep3Close").onclick = () => {
+      urgentBooking.hidden = true;
+    };
+    document.getElementById("urgentStep4Back").onclick = () => {
+      urgentDetailsForm.hidden = true;
+      urgentCalendarFlow.hidden = false;
+    };
+    document.getElementById("urgentStep4Close").onclick = () => {
+      urgentBooking.hidden = true;
+    };
 
- // 2) Schedule with this specialist
- urgentScheduleBtn.onclick = () => {
-    urgentProviderName = urgentNameEl.textContent;
-    resultsDiv.hidden  = true;
-    calFlow.hidden     = false;
-  };
+    document.getElementById("matchResultsBack").onclick = () => {
+      matchResults.hidden = true;
+      matchForm.hidden = false;
+    };
+    document.getElementById("matchResultsClose").onclick = () => {
+      matchResults.hidden = true;
+    };
+    document.getElementById("appointmentFlowClose").onclick = () => {
+      appointmentFlow.hidden = true;
+    };
+    document.getElementById("confirmStep4Back").onclick = () => {
+      confirmForm.hidden = true;
+      appointmentFlow.hidden = false;
+    };
+    document.getElementById("confirmStep4Close").onclick = () => {
+      appointmentFlow.hidden = true;
+    };
 
-// 3) Now pick any future date/time
-  nextToDetailsBtn.onclick = () => {
-    const d = dateInput.value, t = timeInput.value;
-    if (!d || !t) return showToast("Please select date and time.");
-    uSelectedDate = d;
-    uSelectedTime = t;
-    detailsFormU.hidden = false;
-    detailsFormU.scrollIntoView({ behavior: "smooth" });
-  };
+    // ─── Urgent Flow State ─────────────────────────────────────────────
+    let urgentProviderName, uDate, uTime, urgentFlow = false;
 
-  function pickUrgentDate(key){
-    uSelectedDate = key;
-    const slots = availability[urgentProviderId][key]||[];
-   timeSlotsU.innerHTML = `<h4>Available on ${key}:</h4>`;
-    const ul = document.createElement("ul");
-    slots.forEach(t=>{
-      const li=document.createElement("li");
-      const b=document.createElement("button");
-      b.type='button'; b.className='btn-sm'; b.innerText=t; b.onclick=()=> pickUrgentTime(t);
-      li.append(b); ul.append(li);
-    });
-    timeSlotsU.append(ul);
-  }
+    urgentDate.min = new Date().toISOString().split("T")[0];
 
-  function pickUrgentTime(t){
-    uSelectedTime = t;
-    detailsFormU.hidden = false;
-    detailsFormU.scrollIntoView({behavior:'smooth'});
-  }
+    urgentFindMatchBtn.onclick = async () => {
+      const concern = document.getElementById("urgentConcernInput").value.trim();
+      if (!concern) return showToast("Please enter your concern.");
+      urgentFindMatchBtn.disabled = true;
+      urgentFindMatchBtn.textContent = PHASE.findMatch;
+      const sys = `You are a clinical AI. Providers:\n${providers.map(p=>`- ${p.name} – ${p.spec}`).join("\n")}`;
+      const usr = `Concern="${concern}". Pick exact provider name and spec.`;
+      let pick = await callOpenAI([ { role:"system", content:sys }, { role:"user", content:usr } ]);
+      pick = pick.split("\n")[0].trim();
+      const found = providers.find(p => p.name === pick) || providers[Math.floor(Math.random()*providers.length)];
+      urgentMatchedName.textContent = found.name;
+      urgentMatchedSpec.textContent = found.spec;
+      urgentProviderName = found.name;
+      urgentMatchResults.hidden = false;
+      urgentStep1.hidden = true;
+      urgentFindMatchBtn.disabled = false;
+      urgentFindMatchBtn.textContent = "Find Specialist";
+    };
 
-  // 4) Details → review-modal
-  confirmU.onclick = () => {
-    const name = document.getElementById("urgentClientName").value.trim();
-    const email= document.getElementById("urgentClientEmail").value.trim();
-    if(!name||!email) return showToast("Enter name & email");
-    urgentFlow = true;
-    document.getElementById("confirmDetails").innerHTML = `
-      <p><strong>Urgent Consult</strong></p>
-     <p><strong>Provider:</strong> ${urgentProviderName}</p>
-      <p><strong>Date:</strong> ${uSelectedDate}</p>
-      <p><strong>Time:</strong> ${uSelectedTime}</p>
-      <p><strong>Name:</strong> ${name}</p>
-      <p><strong>Email:</strong> ${email}</p>
-      <p><strong>Fee:</strong> ₵500 (non-refundable)</p>
-    `;
-    document.getElementById("confirmModal").hidden = false;
-  };
-    // Upcoming calendar container
-     const upcomingContainer = document.getElementById("upcomingCalendarWidget");
-   
-  
-    // State
-    let providerId, providerName;
-    const appointments = []; // { id, name, date, time, urgent }
-    let year = new Date().getFullYear(), month = new Date().getMonth();
-    let selectedDate, selectedTime;
+    urgentScheduleBtn.onclick = () => {
+      urgentMatchResults.hidden = true;
+      urgentCalendarFlow.hidden = false;
+    };
 
-    // ─── BUTTON LISTENERS ─────────────────────────────────────────
+    urgentNextToDetails.onclick = () => {
+      if (!urgentDate.value || !urgentTime.value) return showToast("Select date & time.");
+      uDate = urgentDate.value;
+      uTime = urgentTime.value;
+      urgentDetailsForm.hidden = false;
+      urgentDetailsForm.scrollIntoView({ behavior:"smooth" });
+    };
 
-    // Hero & Quick-action “Book appointment”
-    btnBookHero.addEventListener("click",  () => scrollToSection("#providerMatch"));
-    btnBookQuick.addEventListener("click", () => scrollToSection("#providerMatch"));
+    urgentConfirmBtn.onclick = () => {
+      const name = urgentClientName.value.trim();
+      const email = urgentClientEmail.value.trim();
+      if (!name || !email) return showToast("Enter name & email");
+      document.getElementById("confirmDetails").innerHTML = `
+        <p><strong>Urgent Consult</strong></p>
+        <p><strong>Provider:</strong> ${urgentProviderName}</p>
+        <p><strong>Date:</strong> ${uDate}</p>
+        <p><strong>Time:</strong> ${uTime}</p>
+        <p><strong>Name:</strong> ${name}</p>
+        <p><strong>Email:</strong> ${email}</p>
+        <p><strong>Fee:</strong> ₵500</p>
+      `;
+      document.getElementById("confirmModal").hidden = false;
+      localStorage.setItem("urgentDraft", JSON.stringify({
+        ConcernInput: document.getElementById("urgentConcernInput").value,
+        Date: uDate, Time: uTime,
+        ClientName: name, ClientEmail: email
+      }));
+      urgentFlow = true;
+    };
 
-    // View Upcoming / Past in Rich Dashboard
-    btnViewUpcoming.addEventListener("click", () => {
-      scrollToSection("#feature-rich-dashboard");
-      showRichTab("rich-upcoming");
-    });
-    btnViewPast.addEventListener("click", () => {
-      scrollToSection("#feature-rich-dashboard");
-      showRichTab("rich-past");
-    });
+    // ─── Provider Flow State ──────────────────────────────────────────
+    let providerId, providerName, year = new Date().getFullYear(), month = new Date().getMonth(), selDate, selTime;
 
-    // Urgent care toggle
-    urgentLink.addEventListener("click", () => {
-      urgentBooking.hidden = false;
-      scrollToSection("#urgentBooking");
-    });
-
-
-    // Sidebar toggle
-    sidebarBtn.addEventListener("click", () => {
-      bodyEl.classList.toggle("sidebar-shrink");
-      const icon = sidebarBtn.querySelector("i");
-      icon.classList.toggle("fa-chevron-left");
-      icon.classList.toggle("fa-chevron-right");
-    });
-
-    // Mobile hamburger
-    hamburger.addEventListener("click", () => {
-      bodyEl.classList.toggle("sidebar-open");
-      bodyEl.classList.remove("sidebar-shrink");
-    });
-
-    // Dark/light mode
-    themeToggle.addEventListener("click", () => {
-      const html = document.documentElement;
-      html.classList.toggle("dark");
-      html.setAttribute("aria-theme", html.classList.contains("dark") ? "dark" : "light");
-      themeToggle.classList.toggle("fa-sun");
-      themeToggle.classList.toggle("fa-moon");
-    });
-
-    // Match → AI prediction
-    findMatchBtn.addEventListener("click", async () => {
+    findMatchBtn.onclick = async () => {
       const concern = document.getElementById("concernInput").value.trim();
-      if (!concern) {
-        showToast("Please enter your chief concern.");
-        return;
-      }
+      if (!concern) return showToast("Enter your concern.");
       findMatchBtn.disabled = true;
       findMatchBtn.innerHTML = `${PHASE.findMatch} <span class="spinner"></span>`;
-
-      let provider = null;
-      try {
-        const sys = `You are AI match. Providers:\n${providers.map(p => `- ${p.name} – ${p.spec}`).join("\n")}`;
-        const usr = `Concern="${concern}", Urgency="${document.getElementById("urgencyInput").value}", Language="${document.getElementById("languageInput").value}". Pick best provider by exact name only.`;
-        const raw = await callOpenAI([
-          { role: "system", content: sys },
-          { role: "user",   content: usr }
-        ]);
-        const firstLine = raw.replace(/```[\s\S]*?```/g, "").split(/\r?\n/)[0].trim();
-        const matchName = firstLine.split("–")[0]?.trim();
-        provider = providers.find(p => p.name === matchName);
-      } catch (e) {
-        console.error(e);
-      }
-      if (!provider) {
-        provider = providers[Math.floor(Math.random() * providers.length)];
-      }
-
+      const sys = `You are AI match. Providers:\n${providers.map(p=>`- ${p.name} – ${p.spec}`).join("\n")}`;
+      const usr = `Concern="${concern}", Urgency="${document.getElementById("urgencyInput").value}".`;
+      let raw = await callOpenAI([ { role:"system", content:sys }, { role:"user", content:usr } ]);
+      let nameLine = raw.split("\n")[0].split("–")[0].trim();
+      let prov = providers.find(p=>p.name===nameLine) || providers[Math.floor(Math.random()*providers.length)];
+      matchedName.textContent = prov.name;
+      matchedSpec.textContent = prov.spec;
+      providerId = prov.id;
+      providerName = prov.name;
+      matchResults.hidden = false;
       findMatchBtn.disabled = false;
       findMatchBtn.innerHTML = '<i class="fas fa-search"></i> Predict Specialist';
+    };
 
-      matchedNameEl.textContent = provider.name;
-      matchedSpecEl.textContent = provider.spec;
-      providerId = provider.id;
-      providerName = provider.name;
-      matchResults.hidden = false;
-    });
-
-    // Close AI result
-    closeBtn.addEventListener("click", () => {
+    scheduleMatchBtn.onclick = () => {
       matchResults.hidden = true;
-    });
-
-    // Go to scheduling
-    scheduleBtn.addEventListener("click", () => {
-      matchResults.hidden = true;
-      appointFlow.hidden = false;
-      chosenProv.textContent = providerName;
+      appointmentFlow.hidden = false;
+      chosenProvider.textContent = providerName;
       buildCalendar(year, month);
-    });
+    };
 
-    // Calendar nav
-    prevMonthBtn.addEventListener("click", () => {
-      month--; if (month < 0) { month = 11; year--; }
+    prevMonthBtn.onclick = () => {
+      month = month > 0 ? month-1 : 11; if (month===11) year--;
       buildCalendar(year, month);
-    });
-    nextMonthBtn.addEventListener("click", () => {
-      month++; if (month > 11) { month = 0; year++; }
+    };
+    nextMonthBtn.onclick = () => {
+      month = month < 11 ? month+1 : 0; if (month===0) year++;
       buildCalendar(year, month);
-    });
+    };
 
-    function buildCalendar(y, m) {
-      calHeader.textContent = new Date(y, m).toLocaleString("default", { month: "long", year: "numeric" });
-      calGrid.innerHTML = "";
-      ["Su","Mo","Tu","We","Th","Fr","Sa"].forEach(w => {
-        const hd = document.createElement("div");
-        hd.className = "cell"; hd.style.fontWeight = "600"; hd.innerText = w;
-        calGrid.append(hd);
+    function buildCalendar(y,m) {
+      calendarHeader.textContent = new Date(y,m).toLocaleString("default",{month:"long",year:"numeric"});
+      calendarGrid.innerHTML = "";
+      ["Su","Mo","Tu","We","Th","Fr","Sa"].forEach(w=>{
+        const d=document.createElement("div"); d.className="cell"; d.style.fontWeight="600"; d.innerText=w;
+        calendarGrid.append(d);
       });
-      const firstDay = new Date(y, m, 1).getDay();
-      for (let i = 0; i < firstDay; i++) {
-        const blank = document.createElement("div");
-        blank.className = "cell closed"; calGrid.append(blank);
+      const first=new Date(y,m,1).getDay(), days=new Date(y,m+1,0).getDate();
+      for(let i=0;i<first;i++){ const b=document.createElement("div"); b.className="cell closed"; calendarGrid.append(b); }
+      const avail = availability[providerId]||{};
+      const today=new Date();
+      for(let d=1; d<=days; d++){
+        const key=`${y}-${String(m+1).padStart(2,"0")}-${String(d).padStart(2,"0")}`;
+        const past=new Date(y,m,d) < new Date().setHours(0,0,0,0);
+        const open= !past && Array.isArray(avail[key]);
+        const cell=document.createElement("div");
+        cell.className=`cell ${open?"open":"closed"}`; cell.innerText=d;
+        if(open) cell.onclick=()=> selectDate(key);
+        if(today.getFullYear()===y && today.getMonth()===m && today.getDate()===d) cell.classList.add("today");
+        calendarGrid.append(cell);
       }
-      const days = new Date(y, m + 1, 0).getDate();
-      const avail = availability[providerId] || {};
-      const today = new Date();
-      for (let d = 1; d <= days; d++) {
-        const dateKey = `${y}-${String(m + 1).padStart(2, "0")}-${String(d).padStart(2, "0")}`;
-        const isPast = new Date(y, m, d) < new Date().setHours(0,0,0,0);
-        const open = !isPast && Array.isArray(avail[dateKey]);
-        const cell = document.createElement("div");
-        cell.className = `cell ${open ? "open" : "closed"}`;
-        cell.innerText = d;
-        if (open) cell.addEventListener("click", () => selectDate(dateKey));
-        if (today.getFullYear() === y && today.getMonth() === m && today.getDate() === d) {
-          cell.classList.add("today");
-        }
-        calGrid.append(cell);
-      }
-      timeSlotsEl.innerHTML = "";
-      confirmForm.hidden = true;
+      timeSlots.innerHTML=""; confirmForm.hidden=true;
     }
 
-    function selectDate(key) {
-      selectedDate = key;
-      const slots = availability[providerId][key] || [];
-      timeSlotsEl.innerHTML = `<h4>Available on ${key}:</h4>`;
-      const ul = document.createElement("ul");
-      ul.style.display = "flex"; ul.style.gap = "0.5rem";
-      slots.forEach(t => {
-        const li = document.createElement("li");
-        const btn = document.createElement("button");
-        btn.type = "button"; btn.className = "btn-sm"; btn.innerText = t;
-        btn.addEventListener("click", () => selectTime(t));
+    function selectDate(key){
+      selDate=key;
+      const slots=availability[providerId][key]||[];
+      timeSlots.innerHTML=`<h4>Available on ${key}:</h4>`;
+      const ul=document.createElement("ul"); ul.style.display="flex"; ul.style.gap="0.5rem";
+      slots.forEach(t=>{
+        const li=document.createElement("li"), btn=document.createElement("button");
+        btn.type="button"; btn.className="btn-sm"; btn.innerText=t;
+        btn.onclick=()=> selectTime(t);
         li.append(btn); ul.append(li);
       });
-      timeSlotsEl.append(ul);
+      timeSlots.append(ul);
     }
 
-    function selectTime(t) {
-      selectedTime = t;
-      summaryText.textContent = `You selected ${selectedDate} at ${selectedTime}.`;
-      confirmForm.hidden = false;
-      confirmForm.scrollIntoView({ behavior: "smooth" });
+    function selectTime(t){
+      selTime=t;
+      summaryText.textContent=`You selected ${selDate} at ${selTime}.`;
+      confirmForm.hidden=false;
+      confirmForm.scrollIntoView({behavior:"smooth"});
     }
 
-   // 5) Instead of immediate confirm, open the review‐modal
-    confirmBtn.addEventListener("click", () => {
+    confirmBtn.onclick = () => {
       const name = document.getElementById("clientName").value.trim();
-      if (!name) { showToast("Enter your name"); return; }
-      // prepare modal
+      if (!name) return showToast("Enter your name");
       document.getElementById("confirmDetails").innerHTML = `
         <p><strong>Provider:</strong> ${providerName}</p>
-        <p><strong>Date:</strong> ${selectedDate}</p>
-        <p><strong>Time:</strong> ${selectedTime}</p>
+        <p><strong>Date:</strong> ${selDate}</p>
+        <p><strong>Time:</strong> ${selTime}</p>
         <p><strong>Your Name:</strong> ${name}</p>
       `;
-     document.getElementById("confirmModal").hidden = false;
-    // save draft
-    localStorage.setItem("urgentDraft", JSON.stringify({
-      ConcernInput: document.getElementById("urgentConcernInput").value,
-      Date: uSelectedDate,
-      Time: uSelectedTime,
-      ClientName: document.getElementById("urgentClientName").value,
-      ClientEmail: document.getElementById("urgentClientEmail").value
-    }));
-    });
+      document.getElementById("confirmModal").hidden = false;
+    };
 
-    // modal controls
+    // ─── Modal Controls ─────────────────────────────────────────────
     document.getElementById("modalClose").onclick = () => {
       document.getElementById("confirmModal").hidden = true;
     };
     document.getElementById("modalEdit").onclick = () => {
       document.getElementById("confirmModal").hidden = true;
-      document.getElementById("confirmForm").scrollIntoView();
+      confirmForm.scrollIntoView({behavior:"smooth"});
     };
-    
     document.getElementById("modalConfirm").onclick = () => {
       if (urgentFlow) {
-        if (!urgentReschedule) {
-        PaystackPop.setup({
-          key: "pk_test_297586e51710e83d3c159bfe71ff45c7e23411fa",
-          email: "guest@domain.com",
-          amount: 50000,
-          currency: "GHS",
-          ref: "URGENT_" + Date.now(),
-          callback() {
-            // 2) on success, push urgent appt
-            const d = document.getElementById("urgentDate").value;
-            const t = document.getElementById("urgentTime").value;
-            const id = "U" + Date.now();
-            appointments.push({ id, name: urgentProviderName, date: d, time: t, urgent: true });
-            localStorage.setItem("appointments", JSON.stringify(appointments));
-            addToRichDashboard({ id, name: urgentProviderName, date: d, time: t, urgent: true });
-            renderUpcomingCalendarWidget();
-            showToast("Urgent appointment booked!");
-          },
-          onClose() {
-            showToast("Payment cancelled.");
-          }
-        }).openIframe();
-           } else {
-          finalizeUrgent();
-        }
+        const id = "U"+Date.now();
+        appointments.push({ id, name: urgentProviderName, date: uDate, time: uTime, urgent: true });
+        localStorage.setItem("appointments", JSON.stringify(appointments));
+        addToRichDashboard({ id, name: urgentProviderName, date: uDate, time: uTime, urgent: true });
+        renderUpcomingCalendarWidget();
+        showToast("Urgent appointment saved!");
+        urgentFlow = false;
       } else {
-        // normal flow (provider match)
-        const name = document.getElementById("clientName").value.trim();
-        const id   = Date.now().toString();
-        appointments.push({ id, name: providerName, date: selectedDate, time: selectedTime, urgent: false });
-        addToRichDashboard({ id, name: providerName, date: selectedDate, time: selectedTime, urgent: false });
+        const id = Date.now().toString();
+        appointments.push({ id, name: providerName, date: selDate, time: selTime, urgent: false });
+        localStorage.setItem("appointments", JSON.stringify(appointments));
+        addToRichDashboard({ id, name: providerName, date: selDate, time: selTime, urgent: false });
         renderUpcomingCalendarWidget();
         showToast("Appointment confirmed!");
       }
-      function finalizeUrgent() {
-      localStorage.setItem("appointments", JSON.stringify(appointments));
-      renderUpcomingCalendarWidget();
-      showToast("Urgent appointment updated!");
-      urgentReschedule = false;
-    }
-      // reset
-      urgentFlow = false;
       document.getElementById("confirmModal").hidden = true;
     };
-    // ─── URGENT FLOW ─────────────────────────────────────────
-    let urgentFlow = false;  // flag for modalConfirm
-    let urgentReschedule = false;
 
-    // Replace direct Paystack with “review” modal
-    urgentPayBtn.onclick = () => {
-      const d = document.getElementById("urgentDate").value;
-      const t = document.getElementById("urgentTime").value;
-      if (!d || !t) {
-        return showToast("Please select date and time.");
+    // ─── Placeholder functions ───────────────────────────────────────
+    function renderUpcomingCalendarWidget() {
+      const container = document.getElementById("upcomingCalendarWidget");
+      container.innerHTML = ""; 
+       // add prev/next controls
+      const ctrl = document.createElement("div");
+      ctrl.style.display = "flex"; ctrl.style.justifyContent = "space-between"; ctrl.style.marginBottom = "0.5rem";
+      const prev = document.createElement("button");
+      prev.textContent = "‹ Prev"; prev.className = "btn-sm";
+      const next = document.createElement("button");
+      next.textContent = "Next ›"; next.className = "btn-sm";
+      ctrl.append(prev, next);
+      container.append(ctrl);
+
+      prev.onclick = () => { widgetMonth--; if (widgetMonth < 0) { widgetMonth = 11; widgetYear--; } render(); };
+      next.onclick = () => { widgetMonth++; if (widgetMonth > 11) { widgetMonth = 0; widgetYear++; } render(); };
+
+      function render() {
+        // header
+        const title = document.createElement("h4");
+        title.innerText = new Date(widgetYear, widgetMonth).toLocaleString("default",{month:'long',year:'numeric'});
+        // grid
+        const grid = document.createElement("div");
+        grid.className = "calendar-grid";
+        ["Su","Mo","Tu","We","Th","Fr","Sa"].forEach(w=>{
+          const hd = document.createElement("div"); hd.className="cell"; hd.style.fontWeight="600"; hd.innerText=w;
+          grid.append(hd);
+        });
+        const firstDay = new Date(widgetYear,widgetMonth,1).getDay();
+        for(let i=0;i<firstDay;i++){
+          const blank = document.createElement("div"); blank.className="cell"; grid.append(blank);
+        }
+        const days = new Date(widgetYear,widgetMonth+1,0).getDate();
+        const marks = new Set(appointments.filter(a=>
+          new Date(a.date).getFullYear()===widgetYear &&
+          new Date(a.date).getMonth()===widgetMonth
+        ).map(a=>new Date(a.date).getDate()));
+        for(let d=1; d<=days; d++){
+          const cell = document.createElement("div");
+          const isMarked = marks.has(d);
+          cell.className = isMarked ? "cell open" : "cell";
+          cell.innerText = d;
+          if(isMarked){
+            cell.onclick = () => {
+              const list = appointments.filter(a=>
+                new Date(a.date).getFullYear()===widgetYear &&
+                new Date(a.date).getMonth()===widgetMonth &&
+                new Date(a.date).getDate()===d
+              );
+              alert(list.map(a=>`${a.name}: ${a.time}`).join("\n"));
+            };
+          }
+          grid.append(cell);
+        }
+        container.querySelectorAll("h4, .calendar-grid").forEach(n=>n.remove());
+        container.append(title, grid);
       }
-      // prepare confirmModal for urgent
-      urgentFlow = true;
-      document.getElementById("confirmDetails").innerHTML = `
-        <p><strong>Urgent Consult</strong></p>
-        <p><strong>Date:</strong> ${d}</p>
-        <p><strong>Time:</strong> ${t}</p>
-        <p><strong>Urgent Fee:</strong> ₵500.00</p>
-      `;
-      document.getElementById("confirmModal").hidden = false;
-    };
-
-    // ─── Rich Dashboard Tabs ───────────────────────────────────
-    function showRichTab(tab) {
-      richUpcoming.hidden  = (tab !== "rich-upcoming");
-      richPast.hidden      = (tab !== "rich-past");
-      richFavorites.hidden = (tab !== "rich-favorites");
-      richTabs.forEach(b => b.classList.toggle("active", b.dataset.tab === tab));
+      render();
     }
-    richTabs.forEach(btn => btn.addEventListener("click", () => showRichTab(btn.dataset.tab)));
-    showRichTab("rich-upcoming");
-
-   // helper to inject into Rich Dashboard
+// helper to inject into Rich Dashboard
     function addToRichDashboard(appt) {
       const card = document.createElement("div");
       card.className = "card";
@@ -1501,75 +1292,9 @@ document.getElementById("confirmStep4Close").onclick = () => {
       richUpcoming.append(card);
     }
 
-  // 3) Build a month‐view calendar, highlighting appointment dates
-    function renderUpcomingCalendarWidget() {
-      const container = document.getElementById("upcomingCalendarWidget");
-      container.innerHTML = ""; 
-       // add prev/next controls
-      const ctrl = document.createElement("div");
-      ctrl.style.display = "flex"; ctrl.style.justifyContent = "space-between"; ctrl.style.marginBottom = "0.5rem";
-      const prev = document.createElement("button");
-      prev.textContent = "‹ Prev"; prev.className = "btn-sm";
-      const next = document.createElement("button");
-      next.textContent = "Next ›"; next.className = "btn-sm";
-      ctrl.append(prev, next);
-      container.append(ctrl);
-
-      prev.onclick = () => { widgetMonth--; if (widgetMonth < 0) { widgetMonth = 11; widgetYear--; } render(); };
-      next.onclick = () => { widgetMonth++; if (widgetMonth > 11) { widgetMonth = 0; widgetYear++; } render(); };
-
-      function render() {
-        // header
-        const title = document.createElement("h4");
-        title.innerText = new Date(widgetYear, widgetMonth).toLocaleString("default",{month:'long',year:'numeric'});
-        // grid
-        const grid = document.createElement("div");
-        grid.className = "calendar-grid";
-        ["Su","Mo","Tu","We","Th","Fr","Sa"].forEach(w=>{
-          const hd = document.createElement("div"); hd.className="cell"; hd.style.fontWeight="600"; hd.innerText=w;
-          grid.append(hd);
-        });
-        const firstDay = new Date(widgetYear,widgetMonth,1).getDay();
-        for(let i=0;i<firstDay;i++){
-          const blank = document.createElement("div"); blank.className="cell"; grid.append(blank);
-        }
-        const days = new Date(widgetYear,widgetMonth+1,0).getDate();
-        const marks = new Set(appointments.filter(a=>
-          new Date(a.date).getFullYear()===widgetYear &&
-          new Date(a.date).getMonth()===widgetMonth
-        ).map(a=>new Date(a.date).getDate()));
-        for(let d=1; d<=days; d++){
-          const cell = document.createElement("div");
-          const isMarked = marks.has(d);
-          cell.className = isMarked ? "cell open" : "cell";
-          cell.innerText = d;
-          if(isMarked){
-            cell.onclick = () => {
-              const list = appointments.filter(a=>
-                new Date(a.date).getFullYear()===widgetYear &&
-                new Date(a.date).getMonth()===widgetMonth &&
-                new Date(a.date).getDate()===d
-              );
-              alert(list.map(a=>`${a.name}: ${a.time}`).join("\n"));
-            };
-          }
-          grid.append(cell);
-        }
-        container.querySelectorAll("h4, .calendar-grid").forEach(n=>n.remove());
-        container.append(title, grid);
-      }
-      render();
-   
-    }
-   
-
-    // Scroll‐helper
-    function scrollToSection(id) {
-      document.querySelector(id).scrollIntoView({ behavior: "smooth" });
-    }
-  });
-})();
+    });
 </script>
 
 </body>
+
 </html>
