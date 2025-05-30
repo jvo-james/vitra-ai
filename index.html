@@ -609,88 +609,60 @@
   <!-- SCRIPTS -->
   <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
   <script>
-    // Initialize scroll animations
-    AOS.init({ duration: 800 });
+  // Initialize AOS (scroll animations)
+  AOS.init({ duration: 800 });
 
-    // Theme toggle
-   document.getElementById('themeToggle').onclick = () => {
-      const btn = document.getElementById('themeToggle');
-      document.documentElement.classList.toggle('dark');
-      btn.classList.toggle('fa-moon');
-      btn.classList.toggle('fa-sun');
-    };
   document.addEventListener('DOMContentLoaded', () => {
-  const hamburger = document.querySelector('.hamburger');
-  const sidebar = document.getElementById('sidebar');
-  const overlay = document.getElementById('sidebarOverlay');
-
-  const headerSignIn = document.getElementById('openSignIn');
-  const headerSignUp = document.getElementById('openSignUp');
-  const sidebarSignIn = document.getElementById('sidebarSignIn');
-  const sidebarSignUp = document.getElementById('sidebarSignUp');
-  const themeToggle = document.getElementById('themeToggle');
-  const sidebarTheme = document.getElementById('sidebarThemeToggle');
-
-  function openSidebar() {
-    sidebar.classList.add('show');
-    overlay.classList.add('show');
-  }
-  function closeSidebar() {
-    sidebar.classList.remove('show');
-    overlay.classList.remove('show');
-  }
-
-  // Hamburger => open
-  hamburger.addEventListener('click', openSidebar);
-  // Click outside => close
-  overlay.addEventListener('click', closeSidebar);
-
-  // Sidebar buttons proxy header modals
-  sidebarSignIn.addEventListener('click', () => {
-    closeSidebar();
-    headerSignIn.click();
-  });
-  sidebarSignUp.addEventListener('click', () => {
-    closeSidebar();
-    headerSignUp.click();
-  });
-
-  // Theme toggle in sidebar
-  sidebarTheme.addEventListener('click', () => themeToggle.click());
-});
-
- 
-
-    // Back to top
-    const back = document.getElementById('backToTop');
-    window.addEventListener('scroll', () => {
-      back.style.display = window.scrollY > 400 ? 'block' : 'none';
-    });
-    back.onclick = () => window.scrollTo({ top:0, behavior:'smooth' });
-
-   // hamburger toggle
-    document.getElementById('hamburger').onclick = () => {
-      document.querySelector('.navbar ul').classList.toggle('open');
-      document.querySelector('.auth').classList.toggle('open');
-    };
-
-    const signInModal = document.getElementById('signInModal');
-const signUpModal = document.getElementById('signUpModal');
-
-    // modal open/close
-    document.getElementById('openSignIn').onclick = () => {
-      document.getElementById('signInModal').style.display = 'flex';
-    };
-    document.getElementById('openSignUp').onclick = () => {
-      document.getElementById('signUpModal').style.display = 'flex';
-    };
-    document.querySelectorAll('[data-close]').forEach(el=>{
-      el.onclick = ()=> {
-        el.closest('.modal-backdrop').style.display='none';
-      };
+    // THEME TOGGLE
+    const themeToggle = document.getElementById('themeToggle');
+    themeToggle.addEventListener('click', () => {
+      document.documentElement.classList.toggle('dark');
+      themeToggle.classList.toggle('fa-moon');
+      themeToggle.classList.toggle('fa-sun');
     });
 
-    // ESC key closes sidebar & any open modal
+    // SIDEBAR
+    const hamburger = document.querySelector('.hamburger');
+    const sidebar   = document.getElementById('sidebar');
+    const overlay   = document.getElementById('sidebarOverlay');
+    const sidebarTheme = document.getElementById('sidebarThemeToggle');
+
+    function openSidebar() {
+      sidebar.classList.add('show');
+      overlay.classList.add('show');
+    }
+    function closeSidebar() {
+      sidebar.classList.remove('show');
+      overlay.classList.remove('show');
+    }
+
+    hamburger.addEventListener('click', openSidebar);
+    overlay.addEventListener('click', closeSidebar);
+    sidebarTheme.addEventListener('click', () => themeToggle.click());
+
+    // MODALS
+    const signInModal  = document.getElementById('signInModal');
+    const signUpModal  = document.getElementById('signUpModal');
+    const openSignIn   = document.getElementById('openSignIn');
+    const openSignUp   = document.getElementById('openSignUp');
+    const toSignUp     = document.getElementById('toSignUp');
+    const toSignIn     = document.getElementById('toSignIn');
+
+    openSignIn.addEventListener('click', () => {
+      signInModal.style.display = 'flex';
+    });
+    openSignUp.addEventListener('click', () => {
+      signUpModal.style.display = 'flex';
+    });
+
+    // close buttons (×)
+    document.querySelectorAll('[data-close]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        btn.closest('.modal-backdrop').style.display = 'none';
+      });
+    });
+
+    // ESC key closes sidebar and any open modal
     document.addEventListener('keydown', e => {
       if (e.key === 'Escape') {
         closeSidebar();
@@ -699,99 +671,100 @@ const signUpModal = document.getElementById('signUpModal');
       }
     });
 
-    // Swap between modals
-    document.getElementById('toSignUp').onclick = e => {
+    // Switch between Sign-In and Sign-Up
+    toSignUp.addEventListener('click', e => {
       e.preventDefault();
       signInModal.style.display = 'none';
       signUpModal.style.display = 'flex';
-    };
-    document.getElementById('toSignIn').onclick = e => {
+    });
+    toSignIn.addEventListener('click', e => {
       e.preventDefault();
       signUpModal.style.display = 'none';
       signInModal.style.display = 'flex';
-    };
+    });
 
-    // Sign In via Firebase
+    // BACK TO TOP
+    const backToTop = document.getElementById('backToTop');
+    window.addEventListener('scroll', () => {
+      backToTop.style.display = window.scrollY > 400 ? 'block' : 'none';
+    });
+    backToTop.addEventListener('click', () => {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    });
+
+    // AUTH — SIGN IN
     const signInForm = document.getElementById('signInForm');
     const signInMsg  = document.getElementById('signInMsg');
-    signInForm.onsubmit = e => {
+    signInForm.addEventListener('submit', e => {
       e.preventDefault();
       signInMsg.textContent = '';
-     const email = document.getElementById('signInEmail').value;
-     const pass  = document.getElementById('signInPass').value;
+      const email = document.getElementById('signInEmail').value;
+      const pass  = document.getElementById('signInPass').value;
+
       firebase.auth().signInWithEmailAndPassword(email, pass)
-      .then(({ user }) => {
-        if (!user.emailVerified) {
-          // ask them to verify before signing in
-          signInMsg.style.color = 'orange';
-          signInMsg.textContent = 'Please verify your email first. Check your inbox.';
-          return firebase.auth().signOut();
-        }
-        // proceed to dashboard
-        signInMsg.textContent = '';
-        signInModal.style.display = 'none';
-        overlay.classList.remove('show');
-        window.location.href = 'dashboard.html?mode=signin';
-      })
+        .then(({ user }) => {
+          if (!user.emailVerified) {
+            signInMsg.style.color = 'orange';
+            signInMsg.textContent = 'Please verify your email before signing in.';
+            return firebase.auth().signOut();
+          }
+          // success: go to dashboard
+          signInModal.style.display = 'none';
+          window.location.href = 'dashboard.html?mode=signin';
+        })
         .catch(err => {
-         signInMsg.style.color = 'red';
-        switch(err.code) {
-          case 'auth/user-not-found':
+          signInMsg.style.color = 'red';
+          if (err.code === 'auth/user-not-found') {
             signInMsg.textContent = 'No account found. Please sign up.';
-            break;
-          case 'auth/wrong-password':
+          } else if (err.code === 'auth/wrong-password') {
             signInMsg.textContent = 'Incorrect password. Try again.';
-            break;
-          default:
+          } else {
             signInMsg.textContent = err.message;
-        }
+          }
         });
-    };
-    
-    // Sign Up via Firebase w/ password criteria
+    });
+
+    // AUTH — SIGN UP
     const signUpForm = document.getElementById('signUpForm');
     const signUpMsg  = document.getElementById('signUpMsg');
-    signUpForm.onsubmit = e => {
+    signUpForm.addEventListener('submit', e => {
       e.preventDefault();
       signUpMsg.textContent = '';
-      const name = document.getElementById('signUpName').value.trim();
+      const name  = document.getElementById('signUpName').value.trim();
       const email = document.getElementById('signUpEmail').value;
-      const pass = document.getElementById('signUpPass').value;
+      const pass  = document.getElementById('signUpPass').value;
       const pass2 = document.getElementById('signUpPass2').value;
 
-      // Password rule: min 8 chars, at least one digit
       if (pass.length < 8 || !/\d/.test(pass)) {
-        signUpMsg.textContent = "Password must be ≥8 characters and include a number.";
-        return;
+        signUpMsg.style.color = 'red';
+        return signUpMsg.textContent = 'Password must be ≥8 characters and include a number.';
       }
       if (pass !== pass2) {
-        signUpMsg.textContent = "Passwords do not match.";
-        return;
+        signUpMsg.style.color = 'red';
+        return signUpMsg.textContent = 'Passwords do not match.';
       }
 
       firebase.auth().createUserWithEmailAndPassword(email, pass)
-        .then(({ user }) => {
-          // store displayName
-          return user.updateProfile({ displayName: name })
-            // send email verification
-            .then(() => user.sendEmailVerification());
+        .then(({ user }) =>
+          user.updateProfile({ displayName: name })
+              .then(() => user.sendEmailVerification())
+        )
+        .then(() => {
+          signUpMsg.style.color = 'green';
+          signUpMsg.textContent = 'Account created! Check your email to verify before signing in.';
+          signUpForm.querySelector('button[type="submit"]').disabled = true;
         })
-         .then(() => {
-        // keep modal open, prompt to verify
-        signUpMsg.style.color = 'green';
-        signUpMsg.textContent = 'Account created! Please check your email and verify your address before signing in.';
-        // optionally disable the button to prevent re-submit
-        signUpForm.querySelector('button[type="submit"]').disabled = true;
-      })
         .catch(err => {
           signUpMsg.style.color = 'red';
-        if (err.code === 'auth/email-already-in-use') {
-          signUpMsg.textContent = 'That email is already registered. Go to Sign In.';
-        } else {
-          signUpMsg.textContent = err.message;
-        }
+          if (err.code === 'auth/email-already-in-use') {
+            signUpMsg.textContent = 'Email already in use. Try signing in.';
+          } else {
+            signUpMsg.textContent = err.message;
+          }
         });
-    };
-  </script>
+    });
+  });
+</script>
+
 </body>
 </html>
