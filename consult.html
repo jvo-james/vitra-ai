@@ -70,9 +70,20 @@
       flex-direction: column;
       z-index: 1000;
     }
-    body.sidebar-shrink aside#sidebar {
-      width: var(--sidebar-collapsed-width);
-    }
+   body.sidebar-shrink aside#sidebar {
+  width: var(--sidebar-collapsed-width);
+}
+
+/* hide all link text when collapsed, keep icons */
+body.sidebar-shrink aside#sidebar nav li a span,
+body.sidebar-shrink aside#sidebar .brand span {
+  display: none;
+  overflow: hidden;
+}
+    body.sidebar-shrink aside#sidebar nav li a,
+body.sidebar-shrink aside#sidebar .brand {
+  justify-content: center;
+}
     aside#sidebar .brand {
       display: flex;
       align-items: center;
@@ -166,7 +177,10 @@
       color: var(--cb-primary-alt);
       margin-bottom: 1rem;
     }
-
+ #matchResults .response {
+ position: relative;
+  padding-top: 2rem; /* give room for close */
+ }
     /* ─── Hero & Quick Actions ─────────────────────────────────── */
     #hero {
       display: grid;
@@ -181,6 +195,10 @@
     #hero .hero-text h2 {
       font-size: 2.25rem;
     }
+    #hero .hero-text h2,
+hero-text .desc {
+ color: var(--secondary);
+}
     #hero .btn {
       background: var(--cb-accent);
       color: #fff;
@@ -271,7 +289,16 @@
       gap: 0.5rem;
       justify-content: flex-end;
     }
-
+#matchResults .close-btn {
+  position: absolute;
+  top: 0.5rem;
+  right: 0.5rem;
+  background: var(--cb-accent);
+  color: #fff;
+  border-radius: 50%;
+  width: 2rem; height: 2rem;
+  display: flex; align-items:center; justify-content:center;
+ }
     /* ─── Calendar & Time Slots ──────────────────────────────── */
     .month-nav {
       display: flex;
@@ -819,9 +846,23 @@
       matchPanel.hidden = false;
 
       chooseOwnBtn.onclick = () => {
-        resultContent.hidden = true;
-        document.getElementById("chooseOwnSelect").hidden = false;
-      };
+   // hide the AI result, show the dropdown
+   resultContent.hidden = true;
+   const ownContainer = document.getElementById("chooseOwnSelect");
+   ownContainer.hidden = false;
+   // populate dropdown if empty
+   const sel = document.getElementById("ownProvider");
+   if (!sel.options.length) {
+     providers.forEach(p => {
+       const o = document.createElement("option");
+       o.value = p.id; o.text = p.name + " – " + p.spec;
+       sel.add(o);
+     });
+   }
+   // focus it so user sees it
+   sel.focus();
+ };
+      
       proceedMatchBtn.onclick = () => startAppointment(provider.name, provider.id);
       ownSelect.onchange = e => {
         const sel = providers.find(p => p.id === e.target.value);
@@ -862,8 +903,12 @@
         const key = `${yr}-${String(mth+1).padStart(2,"0")}-${String(d).padStart(2,"0")}`;
         const open = Array.isArray(avail[key]);
         const cell = document.createElement("div");
-        cell.className = `cell ${open?"open":"closed"}`; cell.innerText=d;
-        if(open){
+        const dateObj = new Date(yr, mth, d);
+        const isPast = dateObj < new Date().setHours(0,0,0,0);
+        const state = isPast ? "closed" : (open ? "open" : "closed");
+        cell.className = `cell ${state}`;
+        cell.innerText = d;
+          if(open){
           cell.addEventListener("click", ()=>{
             calEl.querySelectorAll(".selected").forEach(c=>c.classList.remove("selected"));
             cell.classList.add("selected");
