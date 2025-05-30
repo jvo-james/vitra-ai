@@ -233,7 +233,8 @@ hero-text .desc {
     }
     #quickActions .tips a {
       text-decoration: underline;
-      color: var(--cb-bg);
+       color: var(--cb-accent);
+
       cursor: pointer;
     }
 
@@ -555,7 +556,17 @@ hero-text .desc {
   border-radius:var(--radius);
   cursor:pointer;
 }
-
+ .modal {
+    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+    background: rgba(0,0,0,0.6); display: flex; align-items: center; justify-content: center;
+    z-index: 2000;
+  }
+  .modal-content {
+    background: var(--cb-surface); padding: 1.5rem; border-radius: var(--radius);
+    max-width: 400px; width: 90%; box-shadow: var(--shadow);
+  }
+  .modal-content h3 { margin-top: 0; color: var(--cb-primary); }
+  .modal-content button { margin-right: 0.5rem; }
   </style>
 </head>
 
@@ -806,6 +817,9 @@ hero-text .desc {
   }
 
   document.addEventListener("DOMContentLoaded", () => {
+     //  Initialize upcoming calendar widget state
+    let widgetYear = new Date().getFullYear(), widgetMonth = new Date().getMonth();
+
      // ensure urgentDate can’t be before today
    document
      .getElementById("urgentDate")
@@ -1187,9 +1201,24 @@ hero-text .desc {
           <p>${appt.date} • ${appt.time}</p>
         </div>
         <div class="actions">
+<button class="btn-reschedule"><i class="fas fa-sync-alt"></i></button>
           <button class="btn-cancel"><i class="fas fa-times"></i></button>
         </div>
       `;
+       // Reschedule button
+      card.querySelector(".btn-reschedule").addEventListener("click", () => {
+        // populate scheduling flow for this appt
+        providerName = appt.name;
+        document.getElementById("chosenProvider").textContent = appt.name;
+        selectedDate = appt.date;
+        selectedTime = appt.time;
+        document.getElementById("confirmModal").hidden = false;
+        document.getElementById("confirmDetails").innerHTML = `
+          <p><strong>${appt.name}</strong></p>
+          <p><strong>Date:</strong> ${appt.date}</p>
+          <p><strong>Time:</strong> ${appt.time}</p>
+        `;
+      });
       // wire cancellation
       card.querySelector(".btn-cancel").onclick = () => {
         const modal = document.getElementById("cancelModal");
@@ -1219,48 +1248,63 @@ hero-text .desc {
     function renderUpcomingCalendarWidget() {
       const container = document.getElementById("upcomingCalendarWidget");
       container.innerHTML = ""; 
-      // use current month:
-      const today = new Date(), y = today.getFullYear(), m = today.getMonth();
-      // header
-      const title = document.createElement("h4");
-      title.innerText = today.toLocaleString("default",{month:'long',year:'numeric'});
-      container.append(title);
-      // grid
-      const grid = document.createElement("div");
-      grid.className = "calendar-grid";
-      ["Su","Mo","Tu","We","Th","Fr","Sa"].forEach(w => {
-        const hd = document.createElement("div"); hd.className="cell"; hd.style.fontWeight="600"; hd.innerText=w;
-        grid.append(hd);
-      });
-      const firstDay = new Date(y,m,1).getDay(), days = new Date(y,m+1,0).getDate();
-      for(let i=0;i<firstDay;i++){
-        const blank = document.createElement("div"); blank.className="cell"; grid.append(blank);
-      }
-      // map appointment dates
-      const marks = appointments.reduce((acc,a)=>{
-        if (new Date(a.date).getFullYear()===y && new Date(a.date).getMonth()===m) {
-          acc.add(new Date(a.date).getDate());
+       // add prev/next controls
+      const ctrl = document.createElement("div");
+      ctrl.style.display = "flex"; ctrl.style.justifyContent = "space-between"; ctrl.style.marginBottom = "0.5rem";
+      const prev = document.createElement("button");
+      prev.textContent = "‹ Prev"; prev.className = "btn-sm";
+      const next = document.createElement("button");
+      next.textContent = "Next ›"; next.className = "btn-sm";
+      ctrl.append(prev, next);
+      container.append(ctrl);
+
+      prev.onclick = () => { widgetMonth--; if (widgetMonth < 0) { widgetMonth = 11; widgetYear--; } render(); };
+      next.onclick = () => { widgetMonth++; if (widgetMonth > 11) { widgetMonth = 0; widgetYear++; } render(); };
+
+      function render() {
+        // header
+        const title = document.createElement("h4");
+        title.innerText = new Date(widgetYear, widgetMonth).toLocaleString("default",{month:'long',year:'numeric'});
+        // grid
+        const grid = document.createElement("div");
+        grid.className = "calendar-grid";
+        ["Su","Mo","Tu","We","Th","Fr","Sa"].forEach(w=>{
+          const hd = document.createElement("div"); hd.className="cell"; hd.style.fontWeight="600"; hd.innerText=w;
+          grid.append(hd);
+        });
+        const firstDay = new Date(widgetYear,widgetMonth,1).getDay();
+        for(let i=0;i<firstDay;i++){
+          const blank = document.createElement("div"); blank.className="cell"; grid.append(blank);
         }
-        return acc;
-      }, new Set());
-      for(let d=1; d<=days; d++){
-        const cell = document.createElement("div");
-        const isMarked = marks.has(d);
-        cell.className = isMarked ? "cell open" : "cell";
-        cell.innerText = d;
-        if(isMarked){
-          cell.title = "You have an appointment on this date.";
-          cell.onclick = () => {
-            const list = appointments.filter(a=>new Date(a.date).getDate()===d);
-            alert(list.map(a=>`${a.name}: ${a.time}`).join("\n"));
-          };
+        const days = new Date(widgetYear,widgetMonth+1,0).getDate();
+        const marks = new Set(appointments.filter(a=>
+          new Date(a.date).getFullYear()===widgetYear &&
+          new Date(a.date).getMonth()===widgetMonth
+        ).map(a=>new Date(a.date).getDate()));
+        for(let d=1; d<=days; d++){
+          const cell = document.createElement("div");
+          const isMarked = marks.has(d);
+          cell.className = isMarked ? "cell open" : "cell";
+          cell.innerText = d;
+          if(isMarked){
+            cell.onclick = () => {
+              const list = appointments.filter(a=>
+                new Date(a.date).getFullYear()===widgetYear &&
+                new Date(a.date).getMonth()===widgetMonth &&
+                new Date(a.date).getDate()===d
+              );
+              alert(list.map(a=>`${a.name}: ${a.time}`).join("\n"));
+            };
+          }
+          grid.append(cell);
         }
-        grid.append(cell);
+        container.querySelectorAll("h4, .calendar-grid").forEach(n=>n.remove());
+        container.append(title, grid);
       }
-      container.append(grid);
+      render();
+   
     }
-    // initial render
-    renderUpcomingCalendarWidget();
+   
 
     // Scroll‐helper
     function scrollToSection(id) {
