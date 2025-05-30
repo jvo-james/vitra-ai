@@ -628,20 +628,58 @@ hero-text .desc {
       </div>
     </section>
 
-    <!-- Urgent Booking Module -->
+  <!-- Urgent Booking Module (AI-match → schedule → details → review → payment) -->
 <section id="urgentBooking" class="module" hidden>
   <h2><i class="fas fa-exclamation-triangle"></i> Urgent Appointment</h2>
-  <p class="desc">Select your date & time below. <strong>Urgent fee: ₵500.00</strong></p>
-  <label>Date:
-    <input type="date" id="urgentDate"/>
-  </label>
-  <label>Time:
-    <input type="time" id="urgentTime"/>
-  </label>
-  <button id="urgentPayBtn" class="btn">
-    <i class="fas fa-bolt"></i> Pay ₵500 & Book Urgent
-  </button>
+  <p class="desc">Describe your concern, pick a specialist, then choose date/time. ₵500 non-refundable fee.</p>
+
+  <!-- Step 1: Concern input -->
+  <div id="urgentStep1">
+    <label>
+      <i class="fas fa-notes-medical"></i> Chief Concern:
+      <input type="text" id="urgentConcernInput" placeholder="e.g. severe headache" required />
+    </label>
+    <button type="button" id="urgentFindMatchBtn" class="btn">
+      <i class="fas fa-search"></i> Find Specialist
+    </button>
+  </div>
+
+  <!-- Step 2: Show matched specialists -->
+  <div id="urgentMatchResults" class="response" hidden>
+    <h4>Select Your Specialist</h4>
+    <ul id="urgentProvidersList"></ul>
+    <button id="urgentSelectProviderBtn" class="btn" disabled>
+      <i class="fas fa-arrow-right"></i> Next
+    </button>
+  </div>
+
+  <!-- Step 3: Calendar & Time -->
+  <div id="urgentCalendarFlow" hidden>
+    <div class="month-nav">
+      <button id="urgentPrevMonth" class="btn-sm"><i class="fas fa-chevron-left"></i></button>
+      <div id="urgentCalendarHeader"></div>
+      <button id="urgentNextMonth" class="btn-sm"><i class="fas fa-chevron-right"></i></button>
+    </div>
+    <div id="urgentCalendar" class="calendar-grid"></div>
+    <div id="urgentTimeSlots"></div>
+  </div>
+
+  <!-- Step 4: Your Details & Confirm (opens review-modal) -->
+  <form id="urgentDetailsForm" hidden class="module">
+    <label>
+      <i class="fas fa-user"></i> Your Name:
+      <input id="urgentClientName" placeholder="Full Name" required />
+    </label>
+    <label>
+      <i class="fas fa-envelope"></i> Email:
+      <input id="urgentClientEmail" type="email" required />
+    </label>
+    <button type="button" id="urgentConfirmBtn" class="btn">
+      <i class="fas fa-check"></i> Review & Pay ₵500
+    </button>
+  </form>
 </section>
+    
     <!-- ─── Provider Matching & Scheduling Section ─────────────────── -->
 <section id="providerMatch" class="module">
   <h2><i class="fas fa-user-md"></i> Find Your Specialist</h2>
@@ -823,11 +861,12 @@ hero-text .desc {
      //  Initialize upcoming calendar widget state
     let widgetYear = new Date().getFullYear(), widgetMonth = new Date().getMonth();
 
-     // ensure urgentDate can’t be before today
-   document
-     .getElementById("urgentDate")
-     .setAttribute("min", new Date().toISOString().split("T")[0]);
-
+  
+    // URGENT FLOW STATE
+  let urgentProviderId, urgentProviderName;
+  let uYear = new Date().getFullYear(), uMonth = new Date().getMonth();
+  let uSelectedDate, uSelectedTime;
+    
     // ─── ELEMENT REFERENCES ─────────────────────────────────────────
     const bodyEl         = document.body;
     const sidebarBtn     = document.getElementById("shrinkSidebar");
@@ -839,7 +878,6 @@ hero-text .desc {
     const btnViewPast    = document.getElementById("viewPast");
     const urgentLink     = document.getElementById("urgentCare");
     const urgentBooking  = document.getElementById("urgentBooking");
-    const urgentPayBtn   = document.getElementById("urgentPayBtn");
 
     // Provider-match & calendar
     const matchForm      = document.getElementById("matchForm");
@@ -866,6 +904,133 @@ hero-text .desc {
     const richPast       = document.getElementById("rich-past");
     const richFavorites  = document.getElementById("rich-favorites");
 
+    const step1        = document.getElementById("urgentStep1");
+  const findBtn      = document.getElementById("urgentFindMatchBtn");
+  const resultsDiv   = document.getElementById("urgentMatchResults");
+  const provList     = document.getElementById("urgentProvidersList");
+  const nextProvBtn  = document.getElementById("urgentSelectProviderBtn");
+  const calFlow      = document.getElementById("urgentCalendarFlow");
+  const calHeaderU   = document.getElementById("urgentCalendarHeader");
+  const calGridU     = document.getElementById("urgentCalendar");
+ const prevMonthU   = document.getElementById("urgentPrevMonth");
+  const nextMonthU   = document.getElementById("urgentNextMonth");
+  const timeSlotsU   = document.getElementById("urgentTimeSlots");
+  const detailsFormU = document.getElementById("urgentDetailsForm");
+  const confirmU     = document.getElementById("urgentConfirmBtn");
+
+  // 1) Find match
+  findBtn.onclick = async () => {
+    const concern = document.getElementById("urgentConcernInput").value.trim();
+    if (!concern) return showToast("Please enter your concern.");
+    findBtn.disabled = true;
+    findBtn.textContent = "Matching…";
+    // AI call (or fallback random)
+    let pick = "";
+    try {
+      const sys = `You are an AI match. Providers:\n${providers.map(p=>`- ${p.name} – ${p.spec}`).join("\n")}`;
+      const usr = `Concern="${concern}". Pick best provider name only.`;
+      pick = await callOpenAI([ {role:"system",content:sys}, {role:"user",content:usr} ]);
+      pick = pick.split("\n")[0].replace(/[^a-zA-Z\s]/g,"").trim();
+    } catch {
+      /* ignore */ 
+    }
+    const found = providers.find(p=>p.name===pick) || providers[Math.floor(Math.random()*providers.length)];
+    // populate list
+    provList.innerHTML = "";
+    [found].forEach(p=>{
+      const li = document.createElement("li");
+      li.innerHTML = `<label><input type="radio" name="urgentProv" value="${p.id}"> ${p.name} – ${p.spec}</label>`;
+      provList.append(li);
+    });
+    resultsDiv.hidden = false;
+    step1.hidden = true;
+    findBtn.disabled = false; findBtn.textContent = "Find Specialist";
+  };
+
+  // 2) Select provider
+  provList.onchange = () => {
+    nextProvBtn.disabled = false;
+  };
+  nextProvBtn.onclick = () => {
+    const sel = document.querySelector('input[name="urgentProv"]:checked');
+    urgentProviderId = sel.value;
+    urgentProviderName = providers.find(p=>p.id===urgentProviderId).name;
+    resultsDiv.hidden = true;
+    calFlow.hidden = false;
+    buildUrgentCalendar(uYear, uMonth);
+  };
+
+  // 3) Calendar nav
+  prevMonthU.onclick = ()=>{ uMonth--; if(uMonth<0){uMonth=11;uYear--;} buildUrgentCalendar(uYear,uMonth); };
+  nextMonthU.onclick = ()=>{ uMonth++; if(uMonth>11){uMonth=0;uYear++;} buildUrgentCalendar(uYear,uMonth); };
+
+  function buildUrgentCalendar(y,m){
+    calHeaderU.textContent = new Date(y,m).toLocaleString('default',{month:'long',year:'numeric'});
+    calGridU.innerHTML = "";
+    // weekdays
+    ['Su','Mo','Tu','We','Th','Fr','Sa'].forEach(w=>{
+      const hd = document.createElement("div"); hd.className='cell'; hd.style.fontWeight='600'; hd.innerText=w;
+      calGridU.append(hd);
+    });
+    // blanks
+    for(let i=0;i<new Date(y,m,1).getDay();i++){
+      const b = document.createElement("div"); b.className='cell closed'; calGridU.append(b);
+    }
+    // days
+    const days = new Date(y,m+1,0).getDate();
+    const avail = availability[urgentProviderId]||{};
+    const today = new Date();
+    for(let d=1;d<=days;d++){
+      const key = `${y}-${String(m+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+      const open = Array.isArray(avail[key]);
+      const cell = document.createElement("div");
+      cell.className = `cell ${open?'open':'closed'}`;
+      cell.innerText = d;
+      if(open) cell.onclick = ()=> pickUrgentDate(key);
+      if(y===today.getFullYear()&&m===today.getMonth()&&d===today.getDate()) cell.classList.add('today');
+      calGridU.append(cell);
+    }
+    timeSlotsU.innerHTML = "";
+    detailsFormU.hidden = true;
+  }
+
+  function pickUrgentDate(key){
+    uSelectedDate = key;
+    const slots = availability[urgentProviderId][key]||[];
+   timeSlotsU.innerHTML = `<h4>Available on ${key}:</h4>`;
+    const ul = document.createElement("ul");
+    slots.forEach(t=>{
+      const li=document.createElement("li");
+      const b=document.createElement("button");
+      b.type='button'; b.className='btn-sm'; b.innerText=t; b.onclick=()=> pickUrgentTime(t);
+      li.append(b); ul.append(li);
+    });
+    timeSlotsU.append(ul);
+  }
+
+  function pickUrgentTime(t){
+    uSelectedTime = t;
+    detailsFormU.hidden = false;
+    detailsFormU.scrollIntoView({behavior:'smooth'});
+  }
+
+  // 4) Details → review-modal
+  confirmU.onclick = () => {
+    const name = document.getElementById("urgentClientName").value.trim();
+    const email= document.getElementById("urgentClientEmail").value.trim();
+    if(!name||!email) return showToast("Enter name & email");
+    urgentFlow = true;
+    document.getElementById("confirmDetails").innerHTML = `
+      <p><strong>Urgent Consult</strong></p>
+     <p><strong>Provider:</strong> ${urgentProviderName}</p>
+      <p><strong>Date:</strong> ${uSelectedDate}</p>
+      <p><strong>Time:</strong> ${uSelectedTime}</p>
+      <p><strong>Name:</strong> ${name}</p>
+      <p><strong>Email:</strong> ${email}</p>
+      <p><strong>Fee:</strong> ₵500 (non-refundable)</p>
+    `;
+    document.getElementById("confirmModal").hidden = false;
+  };
     // Upcoming calendar container
      const upcomingContainer = document.getElementById("upcomingCalendarWidget");
    
@@ -939,28 +1104,6 @@ hero-text .desc {
       scrollToSection("#urgentBooking");
     });
 
-    // Paystack urgent booking
-    urgentPayBtn.addEventListener("click", () => {
-      const d = document.getElementById("urgentDate").value;
-      const t = document.getElementById("urgentTime").value;
-      if (!d || !t) {
-        return showToast("Please select date and time.");
-      }
-      PaystackPop.setup({
-        key: "pk_test_297586e51710e83d3c159bfe71ff45c7e23411fa",
-        email: document.getElementById("clientEmail")?.value || "guest@domain.com",
-        amount: 50000,
-        currency: "GHS",
-        ref: "URGENT_" + Date.now(),
-        callback() {
-          showToast("Payment successful!");
-          addUrgentAppointment(d, t);
-        },
-        onClose() {
-          showToast("Payment cancelled.");
-        }
-      }).openIframe();
-    });
 
     // Sidebar toggle
     sidebarBtn.addEventListener("click", () => {
