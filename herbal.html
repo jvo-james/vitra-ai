@@ -28,48 +28,46 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 </script>
 
-  <style>
+<style>
 /*───────────────────────────────────────────────────────────────────────────
-  RESET & BASE
+  1) RESET & BASE
 ────────────────────────────────────────────────────────────────────────────*/
 *, *::before, *::after {
-  margin: 0; padding: 0; box-sizing: border-box;
+  margin:0; padding:0; box-sizing:border-box;
 }
-html {
-  font-family: 'Montserrat', sans-serif;
-  font-size: 16px; scroll-behavior: smooth;
-}
+html { font-family: 'Montserrat', sans-serif; font-size:16px; scroll-behavior:smooth; }
 body {
-  display: flex; min-height: 100vh;
-  background: var(--bg); color: var(--text);
-  overflow-x: hidden; transition: background .3s, color .3s;
+  display:flex; min-height:100vh;
+  background:var(--bg); color:var(--text);
+  overflow-x:hidden; transition:background .3s, color .3s;
 }
-a { color: inherit; text-decoration: none; }
-ul { list-style: none; }
-button { font-family: inherit; cursor: pointer; }
+a { color:inherit; text-decoration:none; }
+ul { list-style:none; }
+img { max-width:100%; display:block; }
+button { font-family:inherit; }
 
 /*───────────────────────────────────────────────────────────────────────────
-  THEME VARIABLES
+  2) THEME VARIABLES
 ────────────────────────────────────────────────────────────────────────────*/
 :root {
-  /* palette */
+  /* Palette */
   --primary: #2a6f4e;
   --primary-light: #3b8562;
   --secondary: #8e6c4b;
   --accent: #d4c5a2;
   --bg: #f8f6f0;
-  --surface: #ffffff;
-  --text: #333333;
-  --muted: #6b6b6b;
-  /* dark mode overrides */
+  --surface: #fff;
+  --text: #333;
+  --muted: #666;
+  /* Dark overrides */
   --bg-dark: #1f1f1f;
   --surface-dark: #2a2a2a;
   --text-dark: #ececec;
-  --muted-dark: #888888;
-  /* layout */
-  --radius: 0.75rem;
+  --muted-dark: #888;
+  /* Layout */
+  --radius: .75rem;
   --padding: 1rem;
-  --transition: 0.3s ease;
+  --transition: .3s ease;
   --sidebar-w: 280px;
   --sidebar-collapsed-w: 80px;
   --header-h: 64px;
@@ -82,282 +80,254 @@ html.dark {
 }
 
 /*───────────────────────────────────────────────────────────────────────────
-  GLOBAL UTILITIES
-────────────────────────────────────────────────────────────────────────────*/
-.bg-surface { background: var(--surface); }
-.text-muted { color: var(--muted); }
-.rounded { border-radius: var(--radius); }
-.shadow { box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
-.p-1 { padding: var(--padding); }
-.m-b-1 { margin-bottom: 1rem; }
-.flex { display: flex; }
-.flex-col { flex-direction: column; }
-.items-center { align-items: center; }
-.justify-between { justify-content: space-between; }
-
-/*───────────────────────────────────────────────────────────────────────────
-  LAYOUT: SIDEBAR
+  3) SIDEBAR
 ────────────────────────────────────────────────────────────────────────────*/
 aside {
   width: var(--sidebar-w);
-  position: sticky; top: 0; height: 100vh;
-  background: var(--surface); transition: width var(--transition);
-  overflow: hidden; z-index: 1000; box-shadow: 2px 0 12px rgba(0,0,0,0.05);
+  background: linear-gradient(180deg, var(--primary) 0%, var(--primary-light) 100%);
+  color: #fff;
+  position: sticky; top:0; height:100vh;
+  transition: width var(--transition);
+  overflow:hidden; z-index:1000;
 }
 aside.collapsed { width: var(--sidebar-collapsed-w); }
 aside .brand {
-  display: flex; align-items: center; gap: .75rem;
-  padding: var(--padding); font-size: 1.25rem; font-weight: 700;
-  color: var(--primary);
+  display:flex; align-items:center; gap:.75rem;
+  padding:var(--padding);
+  font-size:1.4rem; font-weight:700;
 }
-aside nav { margin-top: 2rem; }
+aside .brand i { font-size:1.6rem; }
+aside .brand span { transition:opacity var(--transition); }
+aside.collapsed .brand span { opacity:0; }
+aside nav { margin-top:2rem; }
 aside nav a {
-  display: flex; align-items: center; gap: 1rem;
-  padding: .75rem var(--padding); border-radius: var(--radius);
-  color: var(--text); font-weight: 500;
-  transition: background var(--transition), padding-left var(--transition);
+  display:flex; align-items:center; gap:1rem;
+  padding:.75rem var(--padding);
+  color:#fff; opacity:.9;
+  transition: background var(--transition), padding-left var(--transition), opacity var(--transition);
 }
 aside nav a.active,
 aside nav a:hover {
-  background: var(--primary); color: #fff;
-  padding-left: calc(var(--padding) + 0.5rem);
+  background: rgba(255,255,255,0.15);
+  padding-left: calc(var(--padding)+.5rem);
+  opacity:1;
 }
-aside.collapsed nav a span { display: none; }
+aside nav a i { width:1.2rem; text-align:center; }
+aside.collapsed nav a span { display:none; }
 #shrinkBtn {
-  position: absolute; bottom: var(--padding); left: -18px;
-  width: 36px; height: 36px; background: var(--primary);
-  color: #fff; border: none; border-radius: 50%;
-  box-shadow: 0 3px 8px rgba(0,0,0,0.15);
+  position:absolute; bottom: var(--padding); right: -18px;
+  width:36px; height:36px; background: #fff; color: var(--primary);
+  border:none; border-radius:50%;
+  box-shadow:0 2px 6px rgba(0,0,0,0.2);
   transition: transform var(--transition);
 }
 #shrinkBtn:hover { transform: scale(1.1); }
 
 /*───────────────────────────────────────────────────────────────────────────
-  LAYOUT: HEADER
+  4) HEADER
 ────────────────────────────────────────────────────────────────────────────*/
 header {
-  position: fixed; top: 0; left: var(--sidebar-w); right: 0;
-  height: var(--header-h); background: var(--surface);
-  border-bottom: 1px solid rgba(0,0,0,0.05);
-  display: flex; align-items: center; justify-content: space-between;
-  padding: 0 var(--padding); z-index: 999;
-  transition: left var(--transition);
+  position: fixed; top:0; left:var(--sidebar-w); right:0;
+  height: var(--header-h);
+  background: var(--surface); box-shadow:0 2px 6px rgba(0,0,0,0.1);
+  display:flex; align-items:center; justify-content:space-between;
+  padding: 0 var(--padding); transition:left var(--transition);
+  z-index:900;
 }
 aside.collapsed + header { left: var(--sidebar-collapsed-w); }
-header h1 { font-size: 1.5rem; font-weight: 600; }
-header .hamburger,
-header .theme-toggle {
-  font-size: 1.4rem; color: var(--primary);
-  cursor: pointer; transition: transform var(--transition);
+header h1 { font-size:1.5rem; color:var(--text); }
+header .hamburger, header .theme-toggle {
+  font-size:1.4rem; color:var(--primary); cursor:pointer;
+  transition:transform var(--transition);
 }
-header .hamburger:hover,
-header .theme-toggle:hover { transform: scale(1.1); }
+header .hamburger:hover, header .theme-toggle:hover { transform: scale(1.1); }
 
 /*───────────────────────────────────────────────────────────────────────────
-  MAIN & MODULES
+  5) MAIN LAYOUT
 ────────────────────────────────────────────────────────────────────────────*/
 main {
-  flex: 1; padding: calc(var(--header-h) + var(--padding)) var(--padding);
+  flex:1; padding: calc(var(--header-h)+var(--padding)) var(--padding);
   background: var(--bg);
 }
-.module {
-  background: var(--surface); padding: var(--padding);
-  border-radius: var(--radius); box-shadow: 0 2px 8px rgba(0,0,0,0.03);
-  margin-bottom: 1.5rem; transition: transform var(--transition), box-shadow var(--transition);
-}
-.module:hover {
-  transform: translateY(-4px); box-shadow: 0 4px 16px rgba(0,0,0,0.06);
-}
-.module h2 {
-  display: flex; align-items: center; gap: .75rem;
-  font-size: 1.25rem; color: var(--primary); margin-bottom: .75rem;
-}
-.module p.desc {
-  color: var(--muted); margin-bottom: 1rem;
-}
 
 /*───────────────────────────────────────────────────────────────────────────
-  HERO
+  6) HERO
 ────────────────────────────────────────────────────────────────────────────*/
 .hero-module {
-  position: relative; overflow: hidden;
-  padding: 3rem 1rem; text-align: center;
-  background: var(--surface); border-radius: var(--radius);
+  display:grid; grid-template-columns: 1fr 1fr;
+  align-items:center; gap:2rem;
+  background: var(--surface); border-radius:var(--radius);
+  padding:3rem; position:relative; overflow:hidden;
+  box-shadow:0 4px 12px rgba(0,0,0,0.05);
 }
-.hero-bg-icon {
-  position: absolute; font-size: 9rem;
-  color: rgba(var(--primary-rgb), .08); pointer-events: none;
-  transition: color var(--transition);
+.hero-module .hero-bg-icon {
+  position:absolute; font-size:8rem; opacity:.1;
+  color: var(--primary); pointer-events:none;
 }
-html.dark .hero-bg-icon {
-  color: rgba(var(--accent-rgb), .08);
+html.dark .hero-bg-icon { color: var(--accent); opacity:.08; }
+.hero-module .hero-image { border-radius:var(--radius); overflow:hidden; }
+.hero-module .hero-image img {
+  width:100%; height:100%; object-fit:cover;
 }
-.hero-content h1 { font-size: 2.5rem; margin-bottom: .5rem; }
-.hero-content p { font-size: 1.1rem; color: var(--muted); margin-bottom: 2rem; }
+.hero-module .hero-content h1 {
+  font-size:2.75rem; margin-bottom:1rem; color:var(--primary);
+}
+.hero-module .hero-content p {
+  color:var(--muted); font-size:1.1rem; margin-bottom:2rem;
+}
 .hero-actions {
-  display: flex; gap: 1rem; flex-wrap: wrap; justify-content: center;
-  margin-bottom: 2rem;
+  display:flex; gap:1rem; flex-wrap:wrap;
 }
 .hero-actions a {
-  display: inline-flex; align-items: center; gap: .5rem;
-  padding: .75rem 1.5rem; border-radius: var(--radius);
-  font-weight: 600; transition: background var(--transition), transform var(--transition);
+  display:flex; align-items:center; gap:.5rem;
+  padding:.75rem 1.5rem; border-radius:var(--radius);
+  font-weight:600; transition:background var(--transition),transform var(--transition);
 }
-.hero-actions .btn-primary { background: var(--primary); color: #fff; }
-.hero-actions .btn-secondary { background: var(--primary-light); color: #fff; }
-.hero-actions .btn-tertiary { background: var(--surface); border: 2px solid var(--primary); color: var(--primary); }
-.hero-actions a:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
-.hero-features {
-  display: grid; grid-template-columns: repeat(auto-fit,minmax(160px,1fr));
-  gap: 1rem; max-width: 800px; margin: 0 auto;
+.hero-actions .btn-primary { background: var(--primary); color:#fff; }
+.hero-actions .btn-secondary { background: var(--secondary); color:#fff; }
+.hero-actions .btn-tertiary {
+  background: var(--bg); border:2px solid var(--primary); color:var(--primary);
 }
-.hero-features li {
-  display: flex; align-items: center; gap: .5rem;
-  padding: .75rem 1rem; border-radius: var(--radius);
-  background: var(--bg); box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-  font-size: .95rem; transition: transform var(--transition), box-shadow var(--transition);
+.hero-actions a:hover {
+  transform: translateY(-3px); box-shadow:0 6px 16px rgba(0,0,0,0.1);
 }
-.hero-features li:hover {
-  transform: translateY(-3px); box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-}
-html.dark .hero-features li {
-  background: var(--surface-dark); box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+@media(max-width:768px) {
+  .hero-module { grid-template-columns: 1fr; text-align:center; }
 }
 
 /*───────────────────────────────────────────────────────────────────────────
-  FORMS & BUTTONS
+  7) MODULE HEADINGS & DESCRIPTIONS
 ────────────────────────────────────────────────────────────────────────────*/
-form { display: flex; flex-wrap: wrap; gap: 1rem; align-items: flex-end; }
+.module h2 {
+  display:flex; align-items:center; gap:.75rem;
+  font-size:1.5rem; color:var(--primary);
+}
+.module p.desc { color:var(--muted); margin-bottom:1rem; }
+
+/*───────────────────────────────────────────────────────────────────────────
+  8) FORMS & CONTROLS
+────────────────────────────────────────────────────────────────────────────*/
+form { display:flex; flex-wrap:wrap; gap:1rem; align-items:flex-end; }
+form .field { display:flex; flex-direction:column; flex:1 1 200px; }
+label { margin-bottom:.5rem; font-weight:500; color:var(--text); }
 input, select, textarea {
-  flex: 1 1 200px; padding: .75rem; border: 1.5px solid #d1dce5;
-  border-radius: var(--radius); background: var(--bg); color: var(--text);
-  font-size: .95rem; transition: border-color var(--transition), box-shadow var(--transition);
+  padding:.75rem; border:1px solid #d1dce5; border-radius:var(--radius);
+  background:var(--bg); color:var(--text); transition:border-color var(--transition);
 }
 input:focus, select:focus, textarea:focus {
-  outline: none; border-color: var(--primary); box-shadow: 0 0 8px var(--primary);
+  border-color:var(--primary); box-shadow:0 0 6px var(--primary);
 }
-button {
-  background: var(--primary); color: #fff;
-  padding: .7rem 1.4rem; border: none; border-radius: var(--radius);
-  font-size: .95rem; font-weight: 600;
-  box-shadow: 0 3px 10px rgba(0,0,0,0.1);
-  transition: transform var(--transition), box-shadow var(--transition);
+button { 
+  background:var(--primary); color:#fff; border:none;
+  padding:.75rem 1.5rem; border-radius:var(--radius);
+  transition:transform var(--transition),box-shadow var(--transition);
 }
 button:hover:not([disabled]) {
-  transform: scale(1.03); box-shadow: 0 5px 14px rgba(0,0,0,0.12);
+  transform:scale(1.05); box-shadow:0 4px 14px rgba(0,0,0,0.1);
 }
-button[disabled] { opacity: .6; cursor: not-allowed; }
-.hint { width: 100%; color: var(--muted); font-size: .85rem; }
+.hint { width:100%; font-size:.85rem; color:var(--muted); }
 
 /*───────────────────────────────────────────────────────────────────────────
-  RESPONSES & TOOLS
-────────────────────────────────────────────────────────────────────────────*/
-.response {
-  position: relative; background: rgba(var(--secondary-rgb), .1);
-  border-left: 4px solid var(--secondary); padding: var(--padding);
-  border-radius: var(--radius); margin-top: 1rem;
-}
-.response .close-btn {
-  position: absolute; top: .5rem; right: .5rem;
-  background: none; color: var(--secondary); font-size: 1.2rem;
-  border: none; cursor: pointer;
-}
-.response .result-content { margin-top: .5rem; }
-.tool-row {
-  position: absolute; bottom: .5rem; right: .5rem;
-  display: flex; gap: .5rem;
-}
-.tool-row button { width: 1.6rem; height: 1.6rem; font-size: .85rem; }
-
-/*───────────────────────────────────────────────────────────────────────────
-  SYMPTOM CHECKER GRID
+  9) SYMPTOM CHECKER GRID
 ────────────────────────────────────────────────────────────────────────────*/
 .sym-form {
-  display: grid;
+  display:grid;
   grid-template:
-    "labels1 inputs1" auto
-    "labels2 inputs2" auto
-    "actions actions" auto
-    / 1fr 1fr;
-  gap: 1rem 1rem;
+    "a b" auto
+    "c d" auto
+    "e e" auto / 1fr 1fr;
+  gap:1rem;
 }
-.sym-form .field:nth-child(1) { grid-area: labels1; }
-.sym-form .field:nth-child(2) { grid-area: inputs1; }
-.range-field { grid-area: labels2 / inputs2; display: flex; align-items: center; }
-.sym-form button { grid-area: actions; justify-self: center; }
+.sym-form .field:nth-child(1) { grid-area:a; }
+.sym-form .field:nth-child(2) { grid-area:b; }
+.range-field { grid-area:c; display:flex; align-items:center; gap:.5rem; }
+.sym-form .field:nth-child(4) { grid-area:d; }
+.sym-form button { grid-area:e; justify-self:center; }
 
 /*───────────────────────────────────────────────────────────────────────────
-  CULTURAL, SAFETY, RESEARCH, FORECAST ETC — reuse .module styles above
+ 10) CULTURAL, SAFETY, RESEARCH, INVENTORY, ETC.
+     — they all inherit .module, form, button, .response styles above
 ────────────────────────────────────────────────────────────────────────────*/
 
 /*───────────────────────────────────────────────────────────────────────────
-  CHAT BOX
+ 11) RESPONSE PANELS & TOOLS
+────────────────────────────────────────────────────────────────────────────*/
+.response {
+  position:relative; background:rgba(142,108,75,0.1);
+  border-left:4px solid var(--secondary); padding:var(--padding);
+  border-radius:var(--radius); margin-top:1rem;
+}
+.response .close-btn {
+  position:absolute; top:.5rem; right:.5rem; background:none;
+  border:none; font-size:1.2rem; color:var(--secondary); cursor:pointer;
+}
+.tool-row {
+  position:absolute; bottom:.5rem; right:.5rem; display:flex; gap:.5rem;
+}
+.tool-row button { font-size:.85rem; width:1.6rem; height:1.6rem; }
+
+/*───────────────────────────────────────────────────────────────────────────
+ 12) CHAT
 ────────────────────────────────────────────────────────────────────────────*/
 .chat-box {
-  background: var(--bg); 
-  border: 1px solid #d1dce5;
-  border-radius: var(--radius); padding: var(--padding);
-  max-height: 300px; overflow-y: auto; display: flex; flex-direction: column; gap: .5rem;
+  background:var(--surface); border:1px solid #d1dce5;
+  border-radius:var(--radius); padding:var(--padding);
+  max-height:300px; overflow-y:auto; display:flex; flex-direction:column; gap:.5rem;
 }
 .user-msg, .bot-msg {
-  max-width: 70%; padding: .75rem; border-radius: var(--radius);
-  position: relative; word-wrap: break-word;
+  max-width:70%; padding:.75rem; border-radius:var(--radius);
+  position:relative; word-wrap:break-word;
 }
-.user-msg { align-self: flex-end; background: var(--primary); color: #fff; border-bottom-right-radius: 0; }
-.bot-msg  { align-self: flex-start; background: var(--surface); color: var(--text); border-bottom-left-radius: 0; }
-.timestamp {
-  font-size: .7rem; color: var(--muted);
-  position: absolute; bottom: -1.2rem; right: .8rem;
-}
-.spinner {
-  display: inline-block; width: 1em; height: 1em;
-  border: 2px solid var(--primary); border-top-color: transparent;
-  border-radius: 50%; animation: spin .8s linear infinite; vertical-align: middle; margin-left: .25em;
-}
-@keyframes spin { to { transform: rotate(360deg); } }
+.user-msg { align-self:flex-end; background:var(--primary); color:#fff; border-bottom-right-radius:0; }
+.bot-msg { align-self:flex-start; background:var(--surface); color:var(--text); border-bottom-left-radius:0; }
+.chat-controls { display:flex; gap:.5rem; margin-bottom:.5rem; }
+.chat-input { display:flex; gap:.5rem; }
+.chat-input input { flex:1; border-radius:var(--radius) 0 0 var(--radius); }
+.chat-input button { border-radius:0 var(--radius) var(--radius) 0; }
 
 /*───────────────────────────────────────────────────────────────────────────
-  CHARTS GRID
+ 13) CHARTS
 ────────────────────────────────────────────────────────────────────────────*/
 .charts {
-  display: grid; grid-template-columns: repeat(2,1fr); gap: 1rem;
+  display:grid; grid-template-columns: repeat(2,1fr); gap:1rem;
 }
 .chart-card {
-  display: flex; flex-direction: column;
-  border: 1px solid var(--muted); padding: .5rem;
+  display:flex; flex-direction:column;
+  border:1px solid var(--muted); border-radius:var(--radius);
+  overflow:hidden; height:250px;
 }
 .chart-card canvas {
-  flex: 1; width: 100%; height: auto;
+  flex:1; width:100%; height:100%;
 }
 
 /*───────────────────────────────────────────────────────────────────────────
-  FOOTER
+ 14) FOOTER
 ────────────────────────────────────────────────────────────────────────────*/
 footer {
-  background: var(--surface); text-align: center;
-  padding: var(--padding); border-top: 1px solid rgba(0,0,0,0.05);
-  color: var(--muted); font-size: .85rem;
+  background:var(--surface); text-align:center; padding:var(--padding);
+  border-top:1px solid rgba(0,0,0,0.05); color:var(--muted); font-size:.85rem;
 }
 
 /*───────────────────────────────────────────────────────────────────────────
-  RESPONSIVE
+ 15) RESPONSIVE
 ────────────────────────────────────────────────────────────────────────────*/
-@media (max-width: 1024px) {
-  aside { position: fixed; left: -100%; transition: left var(--transition); }
-  aside.open { left: 0; }
-  header { left: 0 !important; }
+@media(max-width:1024px) {
+  aside { position:fixed; left:-100%; }
+  aside.open { left:0; }
+  header { left:0;}
 }
-@media (max-width: 768px) { .sym-form { grid-template-columns: 1fr; } }
-@media (max-width: 640px) {
-  form { flex-direction: column; }
-  input, select, textarea, button { width: 100% !important; }
-  .charts { grid-template-columns: 1fr; }
+@media(max-width:768px) {
+  .hero-module { grid-template-columns:1fr; }
+  .charts { grid-template-columns:1fr; }
 }
-@media (max-width: 480px) {
-  .hero-content h1 { font-size: 2rem; }
-  button { font-size: .9rem; }
+@media(max-width:480px) {
+  header h1 { font-size:1.2rem; }
+  .hero-module h1 { font-size:2rem; }
+  .hero-module p { font-size:.95rem; }
+  button { padding:.6rem 1rem; }
 }
 </style>
+
 
 
 
