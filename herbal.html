@@ -28,423 +28,788 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 </script>
 
-<style>
-  /*──────────────────────────────────────────────────────────
-    1) RESET & GLOBAL
-  ──────────────────────────────────────────────────────────*/
-  *, *::before, *::after {
-    margin:0; padding:0; box-sizing:border-box;
-  }
-  html {
-    font-family:'Montserrat',sans-serif;
-    font-size:16px;
-    scroll-behavior:smooth;
-  }
-  body {
-    display:flex;
-    flex-direction:column;
-    min-height:100vh;
-    background:var(--bg);
-    color:var(--text);
-    transition: background .3s, color .3s;
-    overflow-x:hidden;
-  }
-  a { color:inherit; text-decoration:none; }
-  ul { list-style:none; }
-  img { max-width:100%; display:block; }
-  button { font-family:inherit; cursor:pointer; border:none; background:none; }
-  input, textarea, select { font-family:inherit; }
+  
+  <style>
+/*────────────────── RESET & BASE ──────────────────*/
+*, *::before, *::after {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+html {
+  font-family: 'Montserrat', sans-serif;
+  font-size: 16px;
+  scroll-behavior: smooth;
+}
+body {
+  display: flex;
+  min-height: 100vh;
+  background: var(--bg);
+  color: var(--text);
+  overflow-x: hidden;
+}
 
-  /*──────────────────────────────────────────────────────────
-    2) THEME VARIABLES
-  ──────────────────────────────────────────────────────────*/
-  :root {
-    --primary: #004d40;
-    --primary-light: #00695c;
-    --secondary: #ffb300;
-    --bg: #f4f4f4;
-    --surface: #ffffff;
-    --text: #212121;
-    --muted: #616161;
-    --bg-dark: #121212;
-    --surface-dark: #1e1e1e;
-    --text-dark: #e0e0e0;
-    --muted-dark: #8a8a8a;
-    --radius: .75rem;
-    --padding: 1rem;
-    --transition: .3s ease;
-    --sidebar-w: 240px;
-    --sidebar-collapsed-w: 64px;
-    --header-h: 64px;
+/*────────────────── THEME VARIABLES ──────────────────*/
+:root {
+  --primary: #2a6f4e;            /* deep green */
+  --secondary: #8e6c4b;          /* earthy brown */
+  --accent: #d4c5a2;             /* light gold/ivory */
+  --bg: #f8f6f0;                 /* ivory */
+  --surface: #ffffff;
+  --text: #333333;
+  --muted: #6b6b6b;
+  --bg-dark: #1f1f1f;
+  --surface-dark: #2a2a2a;
+  --text-dark: #ececec;
+  --muted-dark: #888888;
+  --radius: 0.75rem;
+  --padding: 1rem;
+  --transition: 0.3s ease;
+  --sidebar-w: 280px;
+  --sidebar-collapsed-w: 80px;
+  --header-h: 64px;
+}
+html.dark {
+  --bg: var(--bg-dark);
+  --surface: var(--surface-dark);
+  --text: var(--text-dark);
+  --muted: var(--muted-dark);
+}
+
+/*────────────────── LAYOUT ──────────────────*/
+aside {
+  flex: 0 0 var(--sidebar-w);
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  background: var(--surface);
+  box-shadow: 2px 0 12px rgba(0,0,0,0.05);
+  transition: flex var(--transition);
+  overflow: hidden;
+  z-index: 1000;
+}
+aside.collapsed {
+  flex: 0 0 var(--sidebar-collapsed-w);
+}
+aside .brand {
+  display: flex;
+  align-items: center;
+  gap: .75rem;
+  padding: var(--padding);
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: var(--primary);
+}
+aside nav {
+  margin-top: 2rem;
+}
+aside nav a {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: .75rem var(--padding);
+  border-radius: var(--radius);
+  color: var(--text);
+  font-weight: 500;
+  text-decoration: none;
+  transition: background var(--transition), padding-left var(--transition);
+}
+aside nav a i {
+  font-size: 1.2rem;
+}
+aside nav a:hover,
+aside nav a.active {
+  background: var(--primary);
+  color: #fff;
+  padding-left: calc(var(--padding) + 0.5rem);
+}
+aside.collapsed nav a span {
+  display: none;
+}
+#shrinkBtn {
+  position: absolute;
+  bottom: var(--padding);
+  left: -18px;
+  width: 36px;
+  height: 36px;
+  background: var(--primary);
+  color: #fff;
+  border: none;
+  border-radius: 50%;
+  cursor: pointer;
+  box-shadow: 0 3px 8px rgba(0,0,0,0.15);
+  transition: transform var(--transition);
+}
+#shrinkBtn:hover {
+  transform: scale(1.1);
+}
+
+header {
+  position: fixed;
+  top: 0;
+  left: var(--sidebar-w);
+  right: 0;
+  height: var(--header-h);
+  background: var(--surface);
+  border-bottom: 1px solid #e1e8ed;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 var(--padding);
+  z-index: 999;
+  transition: left var(--transition);
+}
+aside.collapsed ~ header {
+  left: var(--sidebar-collapsed-w);
+}
+header h1 {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: var(--text);
+}
+header .hamburger,
+header .theme-toggle {
+  font-size: 1.4rem;
+  color: var(--primary);
+  cursor: pointer;
+  transition: transform var(--transition);
+}
+header .hamburger:hover,
+header .theme-toggle:hover {
+  transform: scale(1.1);
+}
+
+main {
+  flex: 1;
+  padding: calc(var(--header-h) + var(--padding)) var(--padding) var(--padding);
+  background: var(--bg);
+}
+
+    /* Force exactly 2 columns, fixed height for each card */
+.charts {
+  display: grid !important;
+  grid-template-columns: repeat(2, 1fr) !important;
+  gap: 1rem !important;
+}
+
+.chart-card {
+  /* total card height including caption */
+  height: 250px; 
+  display: flex;
+  flex-direction: column;
+  border: 1px solid var(--muted);
+  padding: 0.5rem;
+}
+
+.chart-card canvas {
+  /* fill the remaining space in the card */
+  flex: 1 1 auto !important;
+  width: 100% !important;
+  height: auto !important;
+}
+
+/*────────────────── MODULES ──────────────────*/
+.module {
+  background: var(--surface);
+  border-radius: var(--radius);
+  padding: var(--padding);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.03);
+  margin-bottom: 1.5rem;
+  transition: transform var(--transition), box-shadow var(--transition);
+}
+.module:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 4px 16px rgba(0,0,0,0.06);
+}
+.module-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.module h2 {
+  display: flex;
+  align-items: center;
+  gap: .75rem;
+  margin-bottom: .75rem;
+  font-size: 1.25rem;
+  color: var(--primary);
+}
+.module p.desc {
+  font-size: .95rem;
+  color: var(--muted);
+  margin-bottom: 1rem;
+}
+
+/*────────────────── FORMS & BUTTONS ──────────────────*/
+form {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  align-items: flex-end;
+}
+input, select, textarea {
+  flex: 1 1 200px;
+  padding: .75rem;
+  border: 1.5px solid #d1dce5;
+  background: var(--bg);
+  color: var(--text);
+  font-size: .95rem;
+  border-radius: var(--radius);
+  transition: border-color var(--transition), box-shadow var(--transition);
+}
+input:focus, select:focus, textarea:focus {
+  outline: none;
+  border-color: var(--primary);
+  box-shadow: 0 0 8px var(--primary);
+}
+button {
+  background: var(--primary);
+  color: #fff;
+  padding: .7rem 1.4rem;
+  border: none;
+  font-size: .95rem;
+  font-weight: 600;
+  cursor: pointer;
+  border-radius: var(--radius);
+  box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+  transition: transform var(--transition), box-shadow var(--transition);
+}
+button:hover:not([disabled]) {
+  transform: scale(1.03);
+  box-shadow: 0 5px 14px rgba(0,0,0,0.12);
+}
+button[disabled] {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.hint {
+  width: 100%;
+  font-size: .85rem;
+  color: var(--muted);
+}
+
+/*────────────────── RESPONSES ──────────────────*/
+.response {
+  background: rgba(142,108,75,0.1);
+  border-left: 4px solid var(--secondary);
+  padding: var(--padding);
+  border-radius: var(--radius);
+  margin-top: 1rem;
+  position: relative;
+}
+.response .close-btn {
+  background: var(--secondary);
+  color: #fff;
+  border: none;
+  border-radius: 50%;
+  font-size: 1.1rem;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+.response:hover .close-btn {
+  opacity: 1;
+  transform: scale(1);
+}
+.response .close-btn {
+ position: absolute;
+  top: 0.5rem;
+  right: 0.5rem;
+  background: none;
+  color: var(--secondary);
+  font-size: 1.2rem;
+  width: auto; height: auto;
+  padding: 0;
+}
+.response .result-content {
+  margin-top: 0.5rem;            /* avoid collision */
+}
+    .tool-row button {
+  font-size:0.85rem;
+  width:1.6rem; height:1.6rem;
+  padding:0.2rem;
+ }
+    .tool-row {
+ position: absolute;
+  bottom: 0.5rem;
+  right: 0.5rem;
+  display: flex;
+  gap: 0.5rem;
+}
+ /* HERO MODULE */
+  .hero-module {
+   background: var(--surface);
+    color: var(--text);
+    border-radius: var(--radius);
+    padding: 3rem 1rem;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
   }
-  html.dark {
-    --bg: var(--bg-dark);
-    --surface: var(--surface-dark);
-    --text: var(--text-dark);
-    --muted: var(--muted-dark);
+ /* background icons in hero */
+.hero-bg-icon {
+  position: absolute;
+  font-size: 9rem;
+  color: rgba(42, 111, 78, 0.08);   /* subtle green */
+  pointer-events: none;
+  user-select: none;
+  transition: color 0.3s;
+}
+html.dark .hero-bg-icon {
+  color: rgba(212, 197, 162, 0.08); /* subtle ivory in dark mode */
+}
+
+  html.dark .hero-module {
+    background: var(--surface);
+    color: var(--text);
+  }
+  html.dark .hero-module::before {
+    color: rgba(255,255,255,0.05);
   }
 
-  /*──────────────────────────────────────────────────────────
-    3) SIDEBAR
-  ──────────────────────────────────────────────────────────*/
-  aside {
-    position:sticky;
-    top:0; left:0;
-    width: var(--sidebar-w);
-    height:100vh;
-    background: #263238;
-    color: #eceff1;
-    display:flex; flex-direction:column; justify-content:space-between;
-    transition: width var(--transition);
-    z-index:1000;
+  .hero-content h1 {
+    font-size: 2.5rem;
+    margin-bottom: 0.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
   }
-  aside.collapsed { width: var(--sidebar-collapsed-w); }
-  aside .brand {
-    display:flex; align-items:center; gap:1rem; padding:var(--padding);
-  }
-  aside .brand i { font-size:1.5rem; color:var(--secondary); }
-  aside .brand span {
-    font-size:1.25rem; font-weight:700;
-    transition: opacity var(--transition);
-  }
-  aside.collapsed .brand span { opacity:0; }
-  aside nav {
-    flex:1; margin-top:1rem; display:flex; flex-direction:column;
-  }
-  aside nav a {
-    display:flex; align-items:center; gap:1rem;
-    padding:.75rem var(--padding);
-    color:#cfd8dc;
-    transition: background var(--transition), padding-left var(--transition);
-  }
-  aside nav a.active, aside nav a:hover {
-    background: var(--primary-light);
-    color:#fff;
-    padding-left: calc(var(--padding) + .5rem);
-  }
-  aside nav a i { width:1.2rem; text-align:center; }
-  aside.collapsed nav a span { display:none; }
-  #shrinkBtn {
-    position:absolute; bottom:1.5rem; left:50%;
-    transform:translateX(-50%);
-    width:36px; height:36px;
-    background:var(--secondary);
-    color:#263238;
-    border-radius:50%;
-    box-shadow:0 2px 6px rgba(0,0,0,0.3);
-    transition: transform var(--transition);
-  }
-  #shrinkBtn:hover { transform: translateX(-50%) scale(1.1); }
-
-  /*──────────────────────────────────────────────────────────
-    4) HEADER
-  ──────────────────────────────────────────────────────────*/
-  header {
-    position:fixed;
-    top:0; left:var(--sidebar-w); right:0;
-    height:var(--header-h);
-    background:var(--surface);
-    border-bottom:1px solid #e0e0e0;
-    display:flex; align-items:center;
-    justify-content:space-between;
-    padding:0 var(--padding);
-    transition: left var(--transition);
-    z-index:900;
-  }
-  aside.collapsed + header { left:var(--sidebar-collapsed-w); }
-  header h1 {
-    font-size:1.5rem;
-    color:var(--text);
-  }
-  header .hamburger, header .theme-toggle {
-    font-size:1.4rem;
-    color:var(--primary);
-    cursor:pointer;
-    transition: transform var(--transition);
-  }
-  header .hamburger:hover, header .theme-toggle:hover {
-    transform: scale(1.1);
-  }
-  main { margin-top:var(--header-h); }
-
-  /*──────────────────────────────────────────────────────────
-    5) MAIN GRID
-  ──────────────────────────────────────────────────────────*/
-  main {
-    flex:1;
-    padding:var(--padding);
-    display:grid;
-    grid-template-columns: repeat(auto-fit, minmax(300px,1fr));
-    gap:1.5rem;
-    background:var(--bg);
-  }
-  /* Make full-width modules */
-  #hero, #hero-symptom {
-    grid-column: 1 / -1;
-  }
-  /* Side-by-side only when there’s room */
-  #hero-cultural { /* fixed dash */
-    grid-column: auto;
-  }
-  #drugChatbot {
-    grid-column: auto;
+  .hero-subtitle {
+    font-size: 1.1rem;
+    margin-bottom: 2rem;
+    color: var(--muted);
   }
 
-  /*──────────────────────────────────────────────────────────
-    6) MODULE CARD
-  ──────────────────────────────────────────────────────────*/
-  .module {
-    background:var(--surface);
-    border-radius:var(--radius);
-    box-shadow:0 2px 8px rgba(0,0,0,0.05);
-    padding:var(--padding);
-    display:flex; flex-direction:column;
+  .hero-actions {
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+    justify-content: center;
+    margin-bottom: 2rem;
+  }
+  .hero-actions .btn-primary,
+  .hero-actions .btn-secondary,
+  .hero-actions .btn-tertiary {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    border-radius: var(--radius);
+    padding: 0.75rem 1.5rem;
+    font-weight: 600;
+    cursor: pointer;
+    border: none;
     transition: transform var(--transition), box-shadow var(--transition);
   }
-  .module:hover {
-    transform: translateY(-4px);
-    box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+  .hero-actions .btn-primary {
+    background: var(--primary);
+    color: #fff;
   }
-  .module h2 {
-    font-size:1.5rem;
+  .hero-actions .btn-secondary {
+    background: var(--secondary);
+    color: #fff;
+  }
+  .hero-actions .btn-tertiary {
+    background: var(--bg);
     color: var(--primary);
-    margin-bottom: .5rem;
-    display:flex; align-items:center; gap:.5rem;
+    border: 2px solid var(--primary);
   }
-  .module .desc {
-    color:var(--muted);
-    margin-bottom:1rem;
-  }
-
-  /*──────────────────────────────────────────────────────────
-    7) HERO SECTION
-  ──────────────────────────────────────────────────────────*/
-  #hero {
-    display:grid;
-    grid-template-columns:repeat(auto-fit, minmax(320px,1fr));
-    gap:2rem;
-    position:relative; overflow:hidden;
-    border-radius:var(--radius);
-  }
-  #hero .hero-bg-icon {
-    position:absolute;
-    font-size:8rem;
-    opacity:.05;
-    color:var(--primary);
-    pointer-events:none;
-  }
-  #hero .hero-image {
-    border-radius:var(--radius);
-    overflow:hidden;
-  }
-  #hero .hero-content h1 {
-    font-size:2.5rem;
-    color:var(--primary);
-    margin-bottom:.5rem;
-  }
-  #hero .hero-content p {
-    color:var(--muted);
-    margin-bottom:1.5rem;
-  }
-  #hero .hero-actions {
-    display:flex; flex-wrap:wrap; gap:1rem;
-  }
-  #hero .hero-actions a {
-    flex:1 1 calc(33% - 1rem);
-    text-align:center;
-    padding:.75rem;
-    border-radius:var(--radius);
-    transition: transform var(--transition), box-shadow var(--transition);
-  }
-  #hero .btn-primary { background:var(--primary); color:#fff; }
-  #hero .btn-secondary { background:var(--secondary); color:#263238; }
-  #hero .btn-tertiary {
-    background:transparent;
-    border:2px solid var(--primary);
-    color:var(--primary);
-  }
-  #hero .hero-actions a:hover {
+  .hero-actions button:hover {
     transform: translateY(-2px);
     box-shadow: 0 4px 12px rgba(0,0,0,0.1);
   }
 
-  /*──────────────────────────────────────────────────────────
-    8) FORMS & FIELDS
-  ──────────────────────────────────────────────────────────*/
-  .module form {
-    display:flex; flex-wrap:wrap; gap:1rem;
+  .hero-features {
+    list-style: none;
+    display: grid;
+    grid-template-columns: repeat(auto-fit,minmax(160px,1fr));
+    gap: 1rem;
+    padding: 0;
+    margin: 0 auto;
+    max-width: 800px;
   }
-  .module label {
-    display:block; margin-bottom:.25rem; color:var(--text);
+  .hero-features li {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.75rem 1rem;
+    transition: transform var(--transition), box-shadow var(--transition);
+    border-radius: var(--radius);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    font-size: 0.95rem;
+    background: var(--bg);
   }
-  .module input,
-  .module select,
-  .module textarea {
-    width:100%;
-    padding:.75rem;
-    border:1px solid #ccc;
-    border-radius:var(--radius);
-    transition: border var(--transition);
+    .hero-features li:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+ }
+  html.dark .hero-features li {
+    background: var(--surface-dark);
+    box-shadow: 0 2px 6px rgba(0,0,0,0.2);
   }
-  .module input:focus,
-  .module select:focus,
-  .module textarea:focus {
-    border-color:var(--primary);
-    outline:none;
-  }
-  .module button {
-    align-self:flex-start;
-    background:var(--primary);
-    color:#fff;
-    padding:.75rem 1.5rem;
-    border-radius:var(--radius);
-  }
-  .module .hint {
-    font-size:.85rem;
-    color:var(--muted);
-    margin-top:.5rem;
-  }
+/*────────────────── SYMPTOM CHECKER ──────────────────*/
 
-  /*──────────────────────────────────────────────────────────
-    9) SYMPTOM LAYOUT
-  ──────────────────────────────────────────────────────────*/
-  #hero-symptom form {
-    display:grid; gap:1rem;
-    grid-template-columns: repeat(auto-fit, minmax(200px,1fr));
-  }
-  #hero-symptom .field:nth-child(1) { grid-column:1/-1; }
-  #hero-symptom .range-field {
-    display:flex; align-items:center; gap:.5rem;
-  }
-  #hero-symptom button {
-    grid-column:1/-1; justify-self:center;
-  }
+#hero-symptom .sym-form {
+  display: grid;
+  grid-template:
+    "labels1 inputs1" auto
+    "labels2 inputs2" auto
+    "actions actions" auto / 1fr 1fr;
+  gap: 0.75rem 1rem;
+  gap: 1rem;
+}
+ #hero-symptom .field:nth-child(1) { grid-area: labels1; }
+ #hero-symptom .field:nth-child(2) { grid-area: inputs1; }
+ #hero-symptom .range-field       { grid-area: labels2 / inputs2; display:flex; }
+ #hero-symptom button.btn-primary { grid-area: actions; justify-self:center; }
 
-  /*──────────────────────────────────────────────────────────
-    10) CHATBOX & RESPONSES
-  ──────────────────────────────────────────────────────────*/
-  .chat-box {
-    flex:1; overflow-y:auto;
-    padding:var(--padding);
-    background:var(--surface);
-    border:1px solid #ccc;
-    border-radius:var(--radius);
-    display:flex; flex-direction:column; gap:.5rem;
-  }
-  .chat-controls { display:flex; gap:.5rem; }
-  .chat-input {
-    display:flex; gap:.5rem; margin-top:.5rem;
-  }
-  .chat-input input {
-    flex:1;
-    border-radius:var(--radius) 0 0 var(--radius);
-  }
-  .chat-input button {
-    border-radius:0 var(--radius) var(--radius) 0;
-  }
-  .user-msg .msg-text {
-    align-self:flex-end;
-    background:var(--primary-light);
-    color:#fff;
-    padding:.5rem .75rem;
-    border-radius:12px 12px 0 12px;
-  }
-  .bot-msg .msg-text {
-    align-self:flex-start;
-    background:var(--surface);
-    color:var(--text);
-    padding:.5rem .75rem;
-    border-radius:12px 12px 12px 0;
-  }
-  .msg-ts {
-    font-size:.75rem;
-    color:var(--muted);
-    margin-top:.25rem;
-  }
-  .chat-date {
-    text-align:center;
-    font-size:.85rem;
-    color:var(--muted);
-    margin:1rem 0 .5rem;
-  }
-  .response {
-    position:relative;
-    padding:var(--padding);
-    border-left:4px solid var(--primary);
-    background:rgba(0,77,64,0.05);
-    border-radius:var(--radius);
-    margin-top:1rem;
-  }
-  .response .close-btn {
-    position:absolute; top:.5rem; right:.5rem;
-    font-size:1.2rem; color:var(--primary);
-  }
-  .tool-row {
-    position:absolute; bottom:.5rem; right:.5rem;
-    display:flex; gap:.5rem;
-  }
+#hero-symptom .field {
+  margin-bottom: 1rem;
+}
+#hero-symptom textarea,
+#hero-symptom select,
+#hero-symptom input[type="number"],
+#hero-symptom input[type="range"] {
+  min-width: 280px;
+  width: 100%;
+  padding: .6rem;
+  font-size: .9rem;
+}
+#hero-symptom button.btn-primary {
+  grid-column: span 2;
+  justify-self: center;
+  background: #2a6f4e !important;
+  color: #fff !important;
+  padding: .75rem 1.5rem;
+}
+#hero-symptom .response.sym-response {
+  margin-top: 1.5rem;
+}
 
-  /*──────────────────────────────────────────────────────────
-    11) CHARTS
-  ──────────────────────────────────────────────────────────*/
+/*────────────────── CULTURAL KNOWLEDGE ──────────────────*/
+.culture-input-wrapper {
+  display: flex;
+  gap: .5rem;
+  align-items: flex-end;
+}
+#hero–cultural .culture-input-wrapper input {
+  flex: 1 1 250px;
+  padding: .6rem;
+  border: 1px solid #d1dce5;
+  border-radius: var(--radius);
+}
+#hero–cultural .btn-culture {
+  background: var(--primary);
+  color: #fff;
+  padding: .7rem 1.2rem;
+  border: none;
+  border-radius: var(--radius);
+  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+}
+
+/*────────────────── AI HERBALIST CHAT ──────────────────*/
+#hero–chat .chat-controls {
+  display: flex;
+  justify-content: flex-end;
+  gap: .5rem;
+  margin-bottom: .5rem;
+}
+#hero–chat .chat-controls button {
+  background: var(--surface);
+  border: 1px solid var(--muted);
+  border-radius: 50%;
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--secondary);
+  transition: background var(--transition), color var(--transition);
+}
+#hero–chat .chat-controls button:hover {
+  background: var(--primary);
+  color: #fff;
+}
+.chat-box {
+  background: var(--bg);
+  border: 1px solid #d1dce5;
+  border-radius: var(--radius);
+  padding: var(--padding);
+  min-height: 200px;
+  max-height: 300px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+}
+.user-msg, .bot-msg {
+  max-width: 80%;
+  margin: .5rem 0;
+  padding: .8rem 1rem;
+  border-radius: 1.2rem;
+  position: relative;
+}
+.user-msg {
+  background: var(--primary);
+  color: #fff;
+  align-self: flex-end;
+  border-bottom-right-radius: .2rem;
+}
+.bot-msg {
+  background: #e8f5f1;
+  color: var(--text);
+  align-self: flex-start;
+  border-bottom-left-radius: .2rem;
+}
+.timestamp {
+  font-size: .7rem;
+  position: absolute;
+  bottom: -1.2rem;
+  right: .8rem;
+  color: var(--muted);
+}
+html.dark .bot-msg {
+  background: var(--surface-dark);
+  color: var(--text-dark);
+}
+/*────────────────── PERSONALIZED FORMULATIONS & INVENTORY ──────────────────*/
+#formulations select,
+#inventory select {
+  max-width: 200px;
+}
+#formulations select option,
+#inventory select option {
+  padding: .4rem;
+}
+
+/*────────────────── INTERACTION CHECKER ──────────────────*/
+#interaction select {
+  max-width: 180px;
+}
+#interaction select option {
+  padding: .4rem;
+}
+
+/*────────────────── ROI CALCULATOR ──────────────────*/
+#roi-form .field {
+  display: flex;
+  flex-direction: column;
+  gap: .25rem;
+}
+#roi-form .field input,
+#roi-form .field select {
+  max-width: 180px;
+    padding: .7rem 1.3rem;
+  border: 1px solid #d1dce5;
+}
+#roi-form button {
+  background: var(--secondary);
+  color: #fff;
+  padding: .7rem 1.3rem;
+  border-radius: var(--radius);
+  margin-top: .5rem;
+}
+#roiResult .result-content {
+  margin-top: 1rem;
+  padding: 1rem;
+  background: #fff;
+  border-radius: var(--radius);
+  box-shadow: 0 1px 6px rgba(0,0,0,0.05);
+}
+
+/*────────────────── FOOTER ──────────────────*/
+footer {
+  background: var(--surface);
+  padding: var(--padding);
+  text-align: center;
+  font-size: .85rem;
+  color: var(--muted);
+  margin-top: 2rem;
+  border-top: 1px solid #e1e8ed;
+}
+footer a {
+  color: var(--primary);
+  text-decoration: none;
+  margin: 0 .5rem;
+}
+
+/*────────────────── SPINNER ──────────────────*/
+.spinner {
+  display: inline-block;
+  width: 1em;
+  height: 1em;
+  border: 2px solid var(--primary);
+  border-top-color: transparent;
+  border-radius: 50%;
+  animation: spin .8s linear infinite;
+  vertical-align: middle;
+  margin-left: .25em;
+}
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/*────────────────── RESPONSIVE ──────────────────*/
+@media (max-width: 1024px) {
+  aside {
+    position: fixed;
+    transform: translateX(-100%);
+    z-index: 900;
+  }
+  aside.open {
+    transform: translateX(0);
+  }
+  header {
+    left: 0 !important;
+  }
+}
+@media (max-width: 768px) {
+  #hero-symptom .sym-form {
+    grid-template-columns: 1fr;
+  }
+}
+@media (max-width: 640px) {
+  form {
+    flex-direction: column;
+  }
+  input, select, textarea, button {
+    width: 100% !important;
+  }
+  #hero {
+    padding: 3rem 1rem;
+  }
+  #shrinkBtn {
+    bottom: .5rem;
+  }
   .charts {
-    display:grid;
-    grid-template-columns: repeat(auto-fit, minmax(240px,1fr));
-    gap:1rem;
-  }
-  .chart-card {
-    background:var(--surface);
-    border:1px solid #ccc;
-    border-radius:var(--radius);
-    overflow:hidden;
-    display:flex; flex-direction:column;
+    grid-template-columns: 1fr;
   }
   .chart-card canvas {
-    flex:1; width:100% !important; height:150px !important;
+    height: 180px !important;
   }
-  .chart-card figcaption {
-    padding:.5rem; font-size:.85rem; color:var(--muted);
+}
+@media (max-width: 480px) {
+  input, select, textarea, button {
+    font-size: .9rem;
+  }
+  #hero h1 {
+    font-size: 2rem;
+  }
+}
+    .chart-card canvas {
+  max-height: 180px !important;
+}
+    
+.copy-toast {
+  position: fixed;
+  bottom: 1rem; right: 1rem;
+  background: var(--primary);
+  color: #fff;
+  padding: 0.5rem 1rem;
+  border-radius: var(--radius);
+  box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+}
+.history-modal { position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem; }
+.history-content { background: var(--surface);
+  border-radius: var(--radius);
+  width: 100%;
+  max-width: 360px;
+  max-height: 80vh;
+  overflow-y: auto;
+  padding: 1.5rem; }
+.history-content h3::before { content:'\f017'; font-family:'FontAwesome'; margin-right:.5rem; }
+.history-content .del-msg { background:none; border:none; color:var(--secondary); font-size:1.2rem; }
+
+     .chat-input-row input {
+ flex: 1 1 100%;
+  padding: 0.8rem 1rem;
+  border: 1px solid var(--muted);
+  border-radius: var(--radius);
+ }
+/* add this after your generic input rule */
+#roi-form input,
+#roi-form select {
+  flex: none;       /* cancel the generic flex:1 rule */
+}
+/* iPhone 11–level responsiveness and up */
+@media (max-width: 414px) {
+  .hero-content h1 {
+    font-size: 1.8rem;
+    flex-direction: column;
   }
 
-  /*──────────────────────────────────────────────────────────
-    12) FOOTER
-  ──────────────────────────────────────────────────────────*/
-  footer {
-    text-align:center;
-    padding:var(--padding);
-    background:var(--surface);
-    border-top:1px solid #e0e0e0;
-    color:var(--muted);
-    font-size:.85rem;
+  .hero-subtitle,
+  .module p.desc {
+    font-size: 0.95rem;
   }
 
-  /*──────────────────────────────────────────────────────────
-    13) RESPONSIVE
-  ──────────────────────────────────────────────────────────*/
-  @media(max-width:1024px) {
-    aside { position:fixed; left:-100%; }
-    aside.open { left:0; }
-    header { left:0!important; }
-    main { grid-template-columns:1fr!important; }
+  .hero-actions {
+    flex-direction: column;
   }
-  @media(max-width:640px) {
-    #hero { grid-template-columns:1fr!important; text-align:center; }
-    #hero-symptom form { grid-template-columns:1fr!important; }
+
+  .hero-actions a {
+    width: 100%;
+    justify-content: center;
   }
+
+  form, .chat-input-row {
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+
+  input, select, textarea, button {
+    font-size: 0.9rem;
+    width: 100% !important;
+  }
+
+  .chat-box {
+    max-height: 220px;
+  }
+
+  .chart-card {
+    height: auto;
+  }
+
+  .charts {
+    grid-template-columns: 1fr !important;
+  }
+
+  aside:not(.open) {
+    display: none;
+  }
+}
+#sidebar.shrunk .brand span {
+  display: none;
+}
+
 </style>
-
-
-
 
 </head>
 
 <body>
 
+  <!-- ONBOARDING MODAL -->
+  <div id="onboardModal" role="dialog" aria-modal="true" aria-labelledby="onboardTitle" style="position:fixed;inset:0;background:rgba(0,0,0,0.5);display:flex;align-items:center;justify-content:center;z-index:3000;">
+    <div style="background:var(--surface);padding:2rem;border-radius:var(--radius);max-width:400px;text-align:center;">
+      <h2 id="onboardTitle" style="color:var(--primary)">Welcome to Vitra AI Herbal Hub</h2>
+      <p>Empowering Traditional Healing with Artificial Intelligence.<br/>Explore plant IDs, custom blends, and more.</p>
+      <button onclick="onboardClose()">Get Started</button>
+    </div>
+  </div>
+
   <!-- SIDEBAR -->
   <aside id="sidebar">
     <div class="brand"><i class="fas fa-leaf"></i><span>Vitra AI</span></div>
     <nav role="navigation">
-    <a href="herbal.html" class="active"><i class="fas fa-seedling"></i><span>Herbal Medicine</span></a>
+     <a href="https://vitra-ai.netlify.app/" class="active"><i class="fas fa-seedling"></i><span>Herbal Medicine</span></a>
     <a href="mental.html"><i class="fas fa-brain"></i><span>Psychology & Mental Health</span></a>
     <a href="dietetics.html"><i class="fas fa-utensils"></i><span>Dietetics</span></a>
     <a href="pharmacy.html"><i class="fas fa-prescription-bottle-alt"></i><span>E-Pharmacy</span></a>
@@ -474,17 +839,27 @@ document.addEventListener("DOMContentLoaded", () => {
   <i class="fas fa-flask    hero-bg-icon" style="bottom: 10%; left: 12%;"></i>   
   <i class="fas fa-stethoscope hero-bg-icon" style="bottom: 8%; right: 15%;"></i> 
   <i class="fas fa-chart-line  hero-bg-icon" style="top: 45%; left: 45%;"></i>  
- <div class="hero-image" data-aos="zoom-in">
-    <img src="herbs.webp" alt="AI-Powered Herbal Medicine">
-  </div>
-  <div class="hero-content" data-aos="fade-left">
-    <h1>AI-Powered Herbal Medicine Hub</h1>
-    <p>Discover plant ID, custom formulations, and more—all powered by AI.</p>
+  <div class="hero-content">
+    <h1><i class="fas fa-leaf"></i> Empower Your Herbal Journey</h1>
+    <p class="hero-subtitle">
+      Discover AI-powered tools for plant ID, symptom analysis, custom blends, and real-time analytics—all in one place.
+    </p>
+
     <div class="hero-actions">
       <a href="#hero–identifier" class="btn-primary"><i class="fas fa-camera"></i> Scan a Plant</a>
-      <a href="#hero-symptom" class="btn-secondary"><i class="fas fa-notes-medical"></i> Check Symptoms</a>
-      <a href="#hero–chat" class="btn-tertiary"><i class="fas fa-comments"></i> Chat with Herbalist</a>
+<a href="#hero-symptom" class="btn-secondary"><i class="fas fa-notes-medical"></i> Check Symptoms</a>
+  <a href="#hero–chat" class="btn-tertiary"><i class="fas fa-comments"></i> Chat with Herbalist</a>
+
     </div>
+
+    <ul class="hero-features">
+      <li><i class="fas fa-seedling"></i> AI-Based Plant ID</li>
+      <li><i class="fas fa-stethoscope"></i> Symptom Diagnostics</li>
+      <li><i class="fas fa-flask"></i> Personalized Formulations</li>
+      <li><i class="fas fa-chart-line"></i> Live Analytics</li>
+      <li><i class="fas fa-shield-alt"></i> Safety Checker</li>
+      <li><i class="fas fa-globe"></i> Cultural Insights</li>
+    </ul>
   </div>
 </section>
 
@@ -558,7 +933,7 @@ document.addEventListener("DOMContentLoaded", () => {
       <p class="desc">Enter a region, tradition or herb name to get practices, rituals & folklore.</p>
       <div class="culture-input-wrapper" style="display:flex; gap:0.5rem; align-items:flex-end; margin-bottom:1rem;">
         <input id="cultureQuery" type="text" placeholder="e.g. West African herbal uses…" />
-        <button id="btnCulture" class="btn-culture">Get Insights</button>
+        <button onclick="getCulture()" class="btn-culture">Get Insights</button>
       </div>
       <div id="cultureResult" class="response" hidden>
         <button class="close-btn">×</button>
@@ -583,23 +958,22 @@ document.addEventListener("DOMContentLoaded", () => {
     </section>
 
     <!-- 5. AI Herbalist Chat -->
-     <section id="drugChatbot" class="module">
-      <h2><i class="fas fa-comments"></i> AI Herbalist Chat</h2>
-      <p class="desc">      <p class="desc">Ask about herbal remedies:</p>
-      <div class="chat-controls">
-        <button id="clearPharmaChat" class="btn-secondary"><i class="fas fa-trash"></i> Clear</button>
-         <button id="historyBtn" class="btn" style="margin-bottom:0.5rem;">
-      <i class="fas fa-history"></i> History
-         </button>
+    <section id="hero–chat" class="module">
+      <div style="display:flex; justify-content:space-between; align-items:center;">
+        <h2><i class="fas fa-comments"></i> AI Herbalist Chat</h2>
+        <div class="chat-controls">
+          <button id="viewHistory" title="View History"><i class="fas fa-history"></i></button>
+          <button id="clearChat" title="Clear Chat"><i>clear</i></button>
+        </div>
       </div>
-      <div id="pharmaChatBox" class="chat-box"></div>
-      <form id="pharma-form" class="chat-input">
-        <input id="pharmaInput" type="text" placeholder="Ask me anything about Herbal medicine…">
-        <button id="sendPharma" class="btn"><i class="fas fa-paper-plane"></i></button>
-      </form>
+      <p class="desc">Ask about herbal remedies:</p>
+      <div id="chatBox" class="chat-box" role="log" aria-live="polite"></div>
+      <div class="chat-input-row">
+        <input id="chatInput" placeholder="Ask about herbal remedies…" aria-label="Type your question"/>
+        <button id="sendChat" aria-label="Send message"><i class="fas fa-paper-plane"></i></button>
+      </div>
+      <div id="chatHint" class="hint" hidden>Bot is thinking… <span class="spinner"></span></div>
     </section>
-
-  
 
     <!-- 6. Personalized Formulations -->
     <section id="formulations" class="module">
@@ -804,7 +1178,15 @@ document.addEventListener("DOMContentLoaded", () => {
       </div>
     </section>
 
-  
+    <!-- ADD-ONS -->
+    <section id="addons" class="module">
+      <h2><i class="fas fa-plus-circle"></i> Additional Features</h2>
+      <ul>
+        <li><strong>User Login/Signup</strong> to save herb history & personalized plans.</li>
+        <li><strong>Weekly AI-Generated Blog</strong> on herbal insights.</li>
+        <li><strong>Voice Assistant</strong> for elderly users (click-to-talk).</li>
+      </ul>
+    </section>
 
     <!-- 12. ROI Calculator -->
     <section id="roi" class="module">
@@ -879,7 +1261,14 @@ document.addEventListener("DOMContentLoaded", () => {
  
   
 
-  
+  <!-- JAVASCRIPT LOGIC -->
+<script>
+  // define this before the modal’s markup
+  function onboardClose() {
+    document.getElementById('onboardModal').style.display = 'none';
+  }
+
+</script>
 <script>
  
   function onboardClose() {
@@ -913,7 +1302,6 @@ document.addEventListener("DOMContentLoaded", () => {
   // Simple markdown → HTML formatter
   function formatHTML(txt) {
     return txt
-      .replace(/^#+\s*(.*)$/gm,'$1') 
       .replace(/\*\*(.+?)\*\*/g,'<strong>$1</strong>')
       .replace(/\*(.+?)\*/g,'<em>$1</em>')
       .replace(/\[([^\]]+)\]/g,'<code>$1</code>')
@@ -993,8 +1381,8 @@ document.addEventListener("DOMContentLoaded", () => {
         }
       } }
     });
-    new Chart('chartAdoption', cfg('line', { labels:['Jan','Feb','Mar'], datasets:[{data:[50,75,100]}], options: { grid:{ x:{display:false}, y:{display:false} } } }));
-    new Chart('chartEfficacy',  cfg('bar',  { labels:['Mild','Mod','High'],   datasets:[{data:[30,45,25]}], options: { scales:{ x:{grid:{display:false}}, y:{grid:{display:false}} } } }));
+    new Chart('chartAdoption', cfg('line', { labels:['Jan','Feb','Mar'], datasets:[{data:[50,75,100]}] }));
+    new Chart('chartEfficacy',  cfg('bar',  { labels:['Mild','Mod','High'],   datasets:[{data:[30,45,25]}] }));
     new Chart('chartSupply',    cfg('pie',  { labels:['A','B','C'],         datasets:[{data:[200,150,300]}] }));
     new Chart('chartROI',       cfg('radar',{ labels:['Q1','Q2','Q3','Q4'],datasets:[{data:[5,7,6,8]}] }));
   }
@@ -1023,10 +1411,7 @@ document.addEventListener("DOMContentLoaded", () => {
       e.preventDefault();
       const panel = document.getElementById(outId);
       panel.hidden = false;
- panel.innerHTML = `<div class="result-content">${sysPrompt.includes('summary') ? 'Summarizing…' :
-                        sysPrompt.includes('formulations') ? 'Formulating…' :
-                        sysPrompt.includes('forecast') ? 'Forecasting…' :
-                        'Generating…'} <span class="spinner"></span></div>`;
+      panel.innerHTML = '<div class="result-content">Processing… <span class="spinner"></span></div>';
       try {
         const reply = await callOpenAI([
           { role: 'system', content: sysPrompt },
@@ -1108,7 +1493,13 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   };
 
- 
+  // Cultural Knowledge
+  wireForm(
+    'cultureQuery',
+    'You are a cultural herbalist. Respond concisely.',
+    () => document.getElementById('cultureQuery').value.trim(),
+    'cultureResult'
+  );
 
   // Safety Checker
   wireForm(
@@ -1137,26 +1528,10 @@ document.addEventListener("DOMContentLoaded", () => {
   // Inventory Forecast
   wireForm(
     'inventory-form',
-    'You are an expert summarizer—return 3 concise bullet points without markdown or tables.',
+    'You forecast weekly herb demand with buffer stock.',
     () => `Herb: ${document.getElementById('forecastHerb').value}; Weeks: ${document.getElementById('forecastPeriod').value}`,
     'inventoryResult'
   );
-
-   document.getElementById('btnCulture').addEventListener('click', async () => {
-    const panel = document.getElementById('cultureResult');
-    panel.hidden = false;
-    panel.innerHTML = '<div class="result-content">Fetching cultural insights… <span class="spinner"></span></div>';
-    try {
-      const reply = await callOpenAI([
-        { role:'system', content:'You are a cultural herbalist. Provide folklore and practices in bullet points.' },
-        { role:'user',   content: document.getElementById('cultureQuery').value.trim() }
-      ]);
-      panel.innerHTML = `<div class="result-content">${formatHTML(reply)}</div>`;
-      addClose(panel); addTools(panel);
-    } catch {
-      showFriendlyError(panel);
-    }
-  });
 
   // Genetics Match
   document.getElementById('genetics-form').onsubmit = async e => {
@@ -1226,7 +1601,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const cost = +document.getElementById('roiCost').value;
     try {
       const reply = await callOpenAI([
-      { role: 'system', content: 'You are a business analyst. Provide step-by-step ROI calc in simple language, no raw error messages.' },
+        { role: 'system', content: 'You are a finance expert. Show equations and explain ROI step by step in plain HTML.' },
         { role: 'user',   content: `Volume: ${rx}; Unit cost: ${cost}; Currency: ${document.getElementById('currency').value}` }
       ]);
       panel.innerHTML = `<div class="result-content">${formatHTML(reply)}</div>`;
@@ -1247,14 +1622,10 @@ document.addEventListener("DOMContentLoaded", () => {
     // Sidebar shrink
     const sidebar     = document.getElementById('sidebar');
     const shrinkBtn   = document.getElementById('shrinkBtn');
-     shrinkBtn.addEventListener('click', () => {
+    shrinkBtn.addEventListener('click', () => {
       sidebar.classList.toggle('collapsed');
-      // swap arrow direction
-      shrinkBtn.querySelector('i').classList.toggle('fa-angle-double-left');
       shrinkBtn.querySelector('i').classList.toggle('fa-angle-double-right');
-      // hide/show brand text
-      document.querySelector('#sidebar .brand span').style.display = sidebar.classList.contains('collapsed') ? 'none' : 'inline';
-     });
+    });
 
     // Hamburger (mobile nav)
     const hamburger   = document.getElementById('hamburger');
@@ -1270,89 +1641,81 @@ document.addEventListener("DOMContentLoaded", () => {
       themeToggle.classList.toggle('fa-moon');
     });
 
-  
+    // AI Herbalist Chat enhancements
+    const chatBox   = document.getElementById('chatBox');
+    const savedChat = localStorage.getItem('chatHistory');
+    const history   = savedChat ? JSON.parse(savedChat) : [];
+    const sendChat  = document.getElementById('sendChat');
+    const chatHint  = document.getElementById('chatHint');
+    const chatInput = document.getElementById('chatInput');
 
-    // ─────────────── Chatbot + History ───────────────
-  const chatBox = document.getElementById('pharmaChatBox');
-  let lastDateKey = null;
-  const history = [];
+    history.forEach(m => addMessage(m.who, m.text));
 
-  function formatDateHeader(date) {
-    const today = new Date(),
-          diff = (today - date)/(1000*60*60*24);
-    if (diff < 1) return 'Today';
-    if (diff < 2) return 'Yesterday';
-    return date.toLocaleDateString();
-  }
-
-  function addMessage(type, text) {
-    const now = new Date(),
-          key = now.toDateString();
-    if (key !== lastDateKey) {
-      const sep = document.createElement('div');
-      sep.className = 'chat-date';
-      sep.innerText = formatDateHeader(now);
-      chatBox.append(sep);
-      lastDateKey = key;
+    function addMessage(who, text) {
+      const msg = document.createElement('div');
+      msg.className = who === 'You' ? 'user-msg' : 'bot-msg';
+      msg.innerHTML = `${formatHTML(text)}<div class="timestamp">${new Date().toLocaleTimeString()}</div>`;
+      chatBox.append(msg);
+      chatBox.scrollTop = chatBox.scrollHeight;
     }
-    const ts = now.toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'}),
-          wrapper = document.createElement('div');
-    wrapper.className = type==='user'?'user-msg':'bot-msg';
-    wrapper.innerHTML = `
-      <div class="msg-text">${text}</div>
-      <div class="msg-ts">${ts}</div>`;
-    chatBox.append(wrapper);
-    chatBox.scrollTop = chatBox.scrollHeight;
-    history.push({ role:type, text, time: `${now.toDateString()} ${ts}` });
-  }
 
-  // Send
-  document.getElementById('sendPharma').onclick = async e => {
-    e.preventDefault();
-    const q = document.getElementById('pharmaInput').value.trim();
-    if (!q) return showToast('⚠️ Type a question');
-    addMessage('user', q);
-    document.getElementById('pharmaInput').value = '';
-    const spinner = document.createElement('div');
-    spinner.className = 'spinner'; chatBox.append(spinner);
-    const a = await callAI(q);
-    spinner.remove();
-    addMessage('bot', sanitizeAIContent(a));
-  };
+    sendChat.onclick = async () => {
+      const txt = chatInput.value.trim();
+      if (!txt) return;
+      addMessage('You', txt);
+      history.push({ who: 'You', text: txt });
+      localStorage.setItem('chatHistory', JSON.stringify(history));  // ← persist after user message
+      chatInput.value = '';
+      chatHint.hidden = false;
+      try {
+        const reply = await callOpenAI([
+          { role: 'system', content: 'You are a friendly herbalist. Reply plainly.' },
+          { role: 'user',   content: txt }
+        ]);
+        addMessage('Herbalist', reply);
+        history.push({ who: 'Herbalist', text: reply });
+        localStorage.setItem('chatHistory', JSON.stringify(history));  // ← persist after bot response
+       } catch (err) {
+        addMessage('Herbalist', '⚠️ Oops! Something went wrong. Please try again.');
+      } finally {
+        chatHint.hidden = true;
+      }
+    };
 
-  // Clear chat
-  document.getElementById('clearPharmaChat').onclick = () => {
+    // Clear chat (does NOT erase history)
+    document.getElementById('clearChat').onclick = () => {
     chatBox.innerHTML = '';
-    lastDateKey = null;
     history.length = 0;
-  };
+    localStorage.removeItem('chatHistory');  // ← also clear persisted history
+  
+    };
 
-  // History modal
-  const historyModal = document.getElementById('historyModal'),
-        historyList  = document.getElementById('historyList');
-
-  document.getElementById('historyBtn').addEventListener('click', e => {
-    e.preventDefault();
-    historyList.innerHTML = history.map((h,i)=>`
-      <div class="history-item">
-        <strong>${h.role==='user'?'You':'Bot'}:</strong> ${h.text}
-        <div class="msg-ts">${h.time}</div>
-        <button class="delete-history" data-index="${i}">×</button>
-      </div>`).join('');
-    historyModal.hidden = false;
-  });
-
-  document.querySelector('.close-modal').onclick = () => {
-    historyModal.hidden = true;
-  };
-
-  historyList.addEventListener('click', e => {
-    if (!e.target.matches('.delete-history')) return;
-    const idx = +e.target.dataset.index;
-    history.splice(idx,1);
-    e.target.closest('.history-item').remove();
-  });
-
+    // View history modal
+    document.getElementById('viewHistory').onclick = () => {
+      const modal = document.createElement('div');
+      modal.className = 'history-modal';
+      modal.innerHTML = `
+        <div class="history-content">
+          <h3>Chat History</h3>
+          <ul>
+            ${history.map((m,i) => `
+              <li>
+                <strong>${m.who}:</strong> ${m.text}
+                <button data-i="${i}" class="del-msg"><i class="fas fa-trash"></i></button>
+              </li>`).join('')}
+          </ul>
+          <button class="close-history">Close</button>
+        </div>`;
+      document.body.append(modal);
+      modal.querySelectorAll('.del-msg').forEach(btn => {
+        btn.onclick = () => {
+          history.splice(+btn.dataset.i,1);
+          modal.remove();
+          document.getElementById('viewHistory').click();
+        };
+      });
+      modal.querySelector('.close-history').onclick = () => modal.remove();
+    };
   });
 </script>
 
