@@ -410,7 +410,7 @@ button[disabled] {
   background: var(--secondary);
   color: #fff;
 }
-
+   #shrinkBtn { top: var(--padding); bottom: auto; }
 .hero-actions .btn-tertiary {
   background: var(--bg);
   color: var(--primary);
@@ -509,6 +509,10 @@ html.dark .hero-bg-icon {
   border-radius: var(--radius);
   box-shadow: 0 2px 6px rgba(0,0,0,0.1);
 }
+#hero–cultural form.culture-form {
+  display: flex; gap: .5rem; align-items: flex-end; margin-bottom:1rem;
+}
+#hero–cultural .culture-input-wrapper { display: none; }
 
 /*────────────────── AI HERBALIST CHAT ──────────────────*/
 #hero–chat .chat-controls {
@@ -569,7 +573,15 @@ html.dark .hero-bg-icon {
   bottom: -1.2rem;
   right: .8rem;
   color: var(--muted);
+  padding-bottom: 1.5rem;
 }
+    .chat-date-separator {
+  text-align: center;
+  margin: .75rem 0;
+  font-weight: bold;
+  color: var(--muted);
+}
+    
 html.dark .bot-msg {
   background: var(--surface-dark);
   color: var(--text-dark);
@@ -789,7 +801,14 @@ footer a {
 #sidebar.shrunk .brand span {
   display: none;
 }
-
+.user-msg, .bot-msg { padding-bottom: 1.8rem; }
+    .chat-date-separator {
+  text-align: center;
+  margin: .75rem 0;
+  font-weight: bold;
+  color: var(--muted);
+  user-select: none;
+    }
 
 </style>
 
@@ -920,10 +939,10 @@ footer a {
         <h2>🌍 Cultural Knowledge</h2>
       </div>
       <p class="desc">Enter a region, tradition or herb name to get practices, rituals & folklore.</p>
-      <div class="culture-input-wrapper" style="display:flex; gap:0.5rem; align-items:flex-end; margin-bottom:1rem;">
-        <input id="cultureQuery" type="text" placeholder="e.g. West African herbal uses…" />
-        <button onclick="getCulture()" class="btn-culture">Get Insights</button>
-      </div>
+      <form id="culture-form" class="culture-input-wrapper" style="display:flex; gap:0.5rem; align-items:flex-end; margin-bottom:1rem;">
+       <input id="cultureQuery" name="q" type="text" placeholder="e.g. West African herbal uses…" required/>
+        <button type="submit" class="btn-culture">Get Insights</button>
+      </form>
       <div id="cultureResult" class="response" hidden>
         <button class="close-btn">×</button>
         <div class="result-content"></div>
@@ -952,7 +971,7 @@ footer a {
         <h2><i class="fas fa-comments"></i> AI Herbalist Chat</h2>
         <div class="chat-controls">
           <button id="viewHistory" title="View History"><i class="fas fa-history"></i></button>
-          <button id="clearChat" title="Clear Chat"><i>clear</i></button>
+          <button id="clearChat" title="Clear Chat"><i class="fas fa-trash-alt"></i></button>
         </div>
       </div>
       <p class="desc">Ask about herbal remedies:</p>
@@ -1250,14 +1269,19 @@ footer a {
  
   
 
-  <!-- JAVASCRIPT LOGIC -->
 <script>
-  // define this before the modal’s markup
-  function onboardClose() {
-    document.getElementById('onboardModal').style.display = 'none';
-  }
-
-</script>
+    function previewImage(input) {
+      const preview = document.getElementById('idenPreview');
+      if (input.files && input.files[0]) {
+        const reader = new FileReader();
+        reader.onload = e => {
+          preview.src = e.target.result;
+          preview.style.display = 'block';
+        };
+        reader.readAsDataURL(input.files[0]);
+      }
+    }
+  </script>
 <script>
  
   function onboardClose() {
@@ -1291,6 +1315,12 @@ footer a {
   // Simple markdown → HTML formatter
   function formatHTML(txt) {
     return txt
+     .replace(/^######\s*(.+)$/gm,'<h6>$1</h6>')
+      .replace(/^#####\s*(.+)$/gm,'<h5>$1</h5>')
+      .replace(/^####\s*(.+)$/gm,'<h4>$1</h4>')
+      .replace(/^###\s*(.+)$/gm,'<h3>$1</h3>')
+      .replace(/^##\s*(.+)$/gm,'<h2>$1</h2>')
+      .replace(/^#\s*(.+)$/gm,'<h1>$1</h1>')
       .replace(/\*\*(.+?)\*\*/g,'<strong>$1</strong>')
       .replace(/\*(.+?)\*/g,'<em>$1</em>')
       .replace(/\[([^\]]+)\]/g,'<code>$1</code>')
@@ -1442,10 +1472,15 @@ footer a {
     }
   };
 
-  //──────────────────────────────────────────────────────────────────────────────
-  // INDIVIDUAL FORM WIRINGS
-  //──────────────────────────────────────────────────────────────────────────────
-
+  // show hamburger only on mobile
+    document.querySelector('.hamburger').style.display = 'none';
+    const mq = window.matchMedia('(max-width:1024px)');
+    function updateHamb() {
+      document.querySelector('.hamburger').style.display = mq.matches ? 'block' : 'none';
+    }
+    mq.addListener(updateHamb);
+    updateHamb();
+  
   // Plant Identifier
   document.getElementById('iden-form').onsubmit = async e => {
     e.preventDefault();
@@ -1484,7 +1519,7 @@ footer a {
 
   // Cultural Knowledge
   wireForm(
-    'cultureQuery',
+    'culture-form',
     'You are a cultural herbalist. Respond concisely.',
     () => document.getElementById('cultureQuery').value.trim(),
     'cultureResult'
@@ -1509,7 +1544,7 @@ footer a {
   // Research Summaries
   wireForm(
     'research-form',
-    'You summarize clinical research with citations.',
+   'You are an expert researcher. Provide concise summaries in plain HTML paragraphs, including citations where appropriate.',
     () => document.getElementById('researchQuery').value.trim(),
     'researchResults'
   );
@@ -1590,7 +1625,7 @@ footer a {
     const cost = +document.getElementById('roiCost').value;
     try {
       const reply = await callOpenAI([
-        { role: 'system', content: 'You are a finance expert. Show equations and explain ROI step by step in plain HTML.' },
+        { role: 'system', content: 'You are a finance expert. Explain ROI step by step with clear equations in plain HTML.' },
         { role: 'user',   content: `Volume: ${rx}; Unit cost: ${cost}; Currency: ${document.getElementById('currency').value}` }
       ]);
       panel.innerHTML = `<div class="result-content">${formatHTML(reply)}</div>`;
@@ -1616,6 +1651,9 @@ footer a {
       shrinkBtn.querySelector('i').classList.toggle('fa-angle-double-right');
     });
 
+    Chart.defaults.scales.x.grid.display = false;
+    Chart.defaults.scales.y.grid.display = false;
+    
     // Hamburger (mobile nav)
     const hamburger   = document.getElementById('hamburger');
     hamburger.addEventListener('click', () => {
@@ -1640,10 +1678,31 @@ footer a {
 
     history.forEach(m => addMessage(m.who, m.text));
 
-    function addMessage(who, text) {
+    let lastDate = null;
+    function formatDateHeader(date) {
+      const today = new Date();
+      const diff = (today.setHours(0,0,0,0) - date.setHours(0,0,0,0)) / 86400000;
+      if (diff === 0) return 'Today';
+      if (diff === 1) return 'Yesterday';
+      return date.toLocaleDateString();
+    }
+    function addMessage(who, text, timestamp = new Date()) {
+      // insert date separator if day changed
+      const msgDate = new Date(timestamp);
+      const msgDay = msgDate.toDateString();
+      if (msgDay !== lastDate) {
+        const sep = document.createElement('div');
+        sep.className = 'chat-date-separator';
+        sep.textContent = formatDateHeader(msgDate);
+        chatBox.append(sep);
+        lastDate = msgDay;
+      }
+      // create message bubble
       const msg = document.createElement('div');
       msg.className = who === 'You' ? 'user-msg' : 'bot-msg';
-      msg.innerHTML = `${formatHTML(text)}<div class="timestamp">${new Date().toLocaleTimeString()}</div>`;
+      msg.innerHTML = `
+        ${formatHTML(text)}
+        <div class="timestamp">${msgDate.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</div>`;
       chatBox.append(msg);
       chatBox.scrollTop = chatBox.scrollHeight;
     }
@@ -1687,13 +1746,18 @@ footer a {
         <div class="history-content">
           <h3>Chat History</h3>
           <ul>
-            ${history.map((m,i) => `
+            ${history.map((m,i) => {
+              // format each item’s date header
+              const dt = new Date(m.timestamp || Date.now());
+              return `
               <li>
+                <div class="chat-date-separator">${formatDateHeader(new Date(dt))}</div>
                 <strong>${m.who}:</strong> ${m.text}
-                <button data-i="${i}" class="del-msg"><i class="fas fa-trash"></i></button>
-              </li>`).join('')}
+                <button data-i="${i}" class="del-msg" title="Delete"><i class="fas fa-trash-alt"></i></button>
+              </li>`;
+            }).join('')}
           </ul>
-          <button class="close-history">Close</button>
+          <button class="close-history"><i class="fas fa-times"></i> Close</button>
         </div>`;
       document.body.append(modal);
       modal.querySelectorAll('.del-msg').forEach(btn => {
