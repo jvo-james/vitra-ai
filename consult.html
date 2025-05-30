@@ -663,11 +663,10 @@ hero-text .desc {
  <div id="urgentCalendarFlow" hidden>
     <label>
       Date:
-      <input 
-        type="date" 
-        id="urgentDate" 
-        min="${new Date().toISOString().split('T')[0]}"
-      />
+     <input 
+      type="date" 
+      id="urgentDate" 
+    />
     </label>
     <label>
       Time:
@@ -925,12 +924,15 @@ hero-text .desc {
   const urgentSpecEl     = document.getElementById("urgentMatchedSpec");
   const scheduleBtn      = document.getElementById("urgentScheduleBtn");
  const calFlow          = document.getElementById("urgentCalendarFlow");
-  const dateInput        = document.getElementById("urgentDate");
+ const dateInput        = document.getElementById("urgentDate");
   const timeInput        = document.getElementById("urgentTime");
   const nextToDetailsBtn = document.getElementById("urgentNextToDetails");
   const detailsFormU = document.getElementById("urgentDetailsForm");
   const confirmU     = document.getElementById("urgentConfirmBtn");
 
+    // ————— Initialize urgent date’s min to today —————
+  dateInput.min = new Date().toISOString().split("T")[0];
+    
   // 1) Find match
   findBtn.onclick = async () => {
     const concern = document.getElementById("urgentConcernInput").value.trim();
@@ -953,6 +955,10 @@ hero-text .desc {
     resultsDiv.hidden = false;
     step1.hidden = true;
     findBtn.disabled = false; findBtn.textContent = "Find Specialist";
+     resultsDiv.querySelector(".close-btn").onclick = () => {
+      resultsDiv.hidden = true;
+      step1.hidden = false;
+    };
   };
 
  // 2) Schedule with this specialist
