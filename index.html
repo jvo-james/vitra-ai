@@ -637,7 +637,23 @@
     }
 
     hamburger.addEventListener('click', openSidebar);
-    overlay.addEventListener('click', closeSidebar);
+    overlay.addEventListener('click', () => {
+      closeSidebar();
+      signInModal.style.display = 'none';
+      signUpModal.style.display = 'none';
+    });
+
+    // sidebar buttons should also open the modals
+    const sidebarSignIn = document.getElementById('sidebarSignIn');
+    const sidebarSignUp = document.getElementById('sidebarSignUp');
+    sidebarSignIn.addEventListener('click', () => {
+      closeSidebar();
+      signInModal.style.display = 'flex';
+    });
+    sidebarSignUp.addEventListener('click', () => {
+      closeSidebar();
+      signUpModal.style.display = 'flex';
+    });
     sidebarTheme.addEventListener('click', () => themeToggle.click());
 
     // MODALS
@@ -712,18 +728,57 @@
           signInModal.style.display = 'none';
           window.location.href = 'dashboard.html?mode=signin';
         })
-        .catch(err => {
+       .catch(err => {
           signInMsg.style.color = 'red';
-          if (err.code === 'auth/user-not-found') {
-            signInMsg.textContent = 'No account found. Please sign up.';
-          } else if (err.code === 'auth/wrong-password') {
-            signInMsg.textContent = 'Incorrect password. Try again.';
-          } else {
-            signInMsg.textContent = err.message;
+          switch (err.code) {
+            case 'auth/invalid-email':
+              signInMsg.textContent = 'Please enter a valid email address.';
+              break;
+            case 'auth/user-disabled':
+              signInMsg.textContent = 'This account has been disabled. Contact support.';
+              break;
+            case 'auth/user-not-found':
+              signInMsg.textContent = 'No account found with that email. Please sign up.';
+              break;
+            case 'auth/wrong-password':
+            case 'auth/invalid-login-credentials':
+              signInMsg.textContent = 'Incorrect password. Please try again.';
+              break;
+            default:
+              signInMsg.textContent = 'Error signing in: ' + err.message;
           }
         });
     });
 
+    // ——— FORGOT PASSWORD ———
+    const forgotPassLink = document.getElementById('forgotPass');
+    forgotPassLink.addEventListener('click', e => {
+      e.preventDefault();
+      const email = document.getElementById('signInEmail').value.trim();
+      if (!email) {
+        signInMsg.style.color = 'red';
+        return signInMsg.textContent = 'Please enter your email above to reset your password.';
+      }
+      firebase.auth().sendPasswordResetEmail(email)
+        .then(() => {
+          signInMsg.style.color = 'green';
+          signInMsg.textContent = 'Password reset email sent! Check your inbox.';
+        })
+        .catch(err => {
+          signInMsg.style.color = 'red';
+          switch (err.code) {
+            case 'auth/invalid-email':
+              signInMsg.textContent = 'That doesn’t look like a valid email address.';
+              break;
+            case 'auth/user-not-found':
+              signInMsg.textContent = 'No account found with that email.';
+              break;
+            default:
+              signInMsg.textContent = 'Error sending reset email: ' + err.message;
+          }
+        });
+    });
+   
     // AUTH — SIGN UP
     const signUpForm = document.getElementById('signUpForm');
     const signUpMsg  = document.getElementById('signUpMsg');
@@ -754,12 +809,20 @@
           signUpMsg.textContent = 'Account created! Check your email to verify before signing in.';
           signUpForm.querySelector('button[type="submit"]').disabled = true;
         })
-        .catch(err => {
+       .catch(err => {
           signUpMsg.style.color = 'red';
-          if (err.code === 'auth/email-already-in-use') {
-            signUpMsg.textContent = 'Email already in use. Try signing in.';
-          } else {
-            signUpMsg.textContent = err.message;
+          switch (err.code) {
+            case 'auth/email-already-in-use':
+              signUpMsg.textContent = 'That email is already registered. Please sign in instead.';
+              break;
+            case 'auth/invalid-email':
+              signUpMsg.textContent = 'Please enter a valid email address.';
+              break;
+            case 'auth/weak-password':
+              signUpMsg.textContent = 'Password is too weak. Use at least 8 characters, including numbers.';
+              break;
+            default:
+              signUpMsg.textContent = 'Error creating account: ' + err.message;
           }
         });
     });
