@@ -720,18 +720,31 @@ const signUpModal = document.getElementById('signUpModal');
      const email = document.getElementById('signInEmail').value;
      const pass  = document.getElementById('signInPass').value;
       firebase.auth().signInWithEmailAndPassword(email, pass)
-        .then(({ user }) => {
-          // redirect, Dashboard will pick up user.displayName
-         signInModal.style.display = 'none';
-          overlay.classList.remove('show');
-          window.location = 'dashboard.html?mode=signin';
-        })
+      .then(({ user }) => {
+        if (!user.emailVerified) {
+          // ask them to verify before signing in
+          signInMsg.style.color = 'orange';
+          signInMsg.textContent = 'Please verify your email first. Check your inbox.';
+          return firebase.auth().signOut();
+        }
+        // proceed to dashboard
+        signInMsg.textContent = '';
+        signInModal.style.display = 'none';
+        overlay.classList.remove('show');
+        window.location.href = 'dashboard.html?mode=signin';
+      })
         .catch(err => {
-          if (err.code === 'auth/user-not-found') {
-            signInMsg.textContent = "No account found. Please sign up.";
-          } else {
+         signInMsg.style.color = 'red';
+        switch(err.code) {
+          case 'auth/user-not-found':
+            signInMsg.textContent = 'No account found. Please sign up.';
+            break;
+          case 'auth/wrong-password':
+            signInMsg.textContent = 'Incorrect password. Try again.';
+            break;
+          default:
             signInMsg.textContent = err.message;
-          }
+        }
         });
     };
     
@@ -763,20 +776,20 @@ const signUpModal = document.getElementById('signUpModal');
             // send email verification
             .then(() => user.sendEmailVerification());
         })
-        .then(() => {
-          // success message color & close
-          signUpMsg.style.color = 'green';
-          signUpMsg.textContent = 'Account created!';
-          signUpModal.style.display = 'none';
-          overlay.classList.remove('show');
-          window.location = 'dashboard.html?mode=signup';
-        })
+         .then(() => {
+        // keep modal open, prompt to verify
+        signUpMsg.style.color = 'green';
+        signUpMsg.textContent = 'Account created! Please check your email and verify your address before signing in.';
+        // optionally disable the button to prevent re-submit
+        signUpForm.querySelector('button[type="submit"]').disabled = true;
+      })
         .catch(err => {
-          if (err.code === 'auth/email-already-in-use') {
-            signUpMsg.textContent = "Email already in use. Please sign in.";
-          } else {
-            signUpMsg.textContent = err.message;
-          }
+          signUpMsg.style.color = 'red';
+        if (err.code === 'auth/email-already-in-use') {
+          signUpMsg.textContent = 'That email is already registered. Go to Sign In.';
+        } else {
+          signUpMsg.textContent = err.message;
+        }
         });
     };
   </script>
