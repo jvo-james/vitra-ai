@@ -789,6 +789,85 @@ footer a {
 #sidebar.shrunk .brand span {
   display: none;
 }
+:root {
+  --padding: 1rem;
+  --card-radius: 1rem;
+  --card-bg: #fff;
+  --card-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* Grid container */
+.dashboard-grid {
+  display: grid;
+  grid-template-columns: repeat(12, 1fr);
+  grid-template-rows: auto;
+  gap: var(--padding);
+  grid-template-areas:
+    "diagnostics diagnostics formulations formulations formulations identification identification identification predictive predictive predictive predictive"
+    "chatbot chatbot chatbot calculator calculator calculator interactions interactions encyclopedia encyclopedia encyclopedia encyclopedia";
+  padding: var(--padding);
+}
+
+/* Shared module style */
+.module {
+  background: var(--card-bg);
+  border-radius: var(--card-radius);
+  box-shadow: var(--card-shadow);
+  padding: var(--padding);
+  overflow: hidden;
+}
+
+/* Grid-area assignments */
+.diagnostics     { grid-area: diagnostics; }
+.formulations    { grid-area: formulations; }
+.identification  { grid-area: identification; }
+.predictive      { grid-area: predictive; }
+.chatbot         { grid-area: chatbot; max-height: 400px; overflow-y: auto; }
+.calculator      { grid-area: calculator; }
+.interactions    { grid-area: interactions; }
+.encyclopedia    { grid-area: encyclopedia; }
+
+/* Responsive */
+@media (max-width: 1024px) {
+  .dashboard-grid {
+    grid-template-columns: repeat(6, 1fr);
+    grid-template-areas:
+      "diagnostics diagnostics formulations formulations formulations formulations"
+      "identification identification predictive predictive predictive predictive"
+      "chatbot chatbot chatbot calculator calculator calculator"
+      "interactions interactions encyclopedia encyclopedia encyclopedia encyclopedia";
+  }
+}
+
+@media (max-width: 768px) {
+  .dashboard-grid {
+    grid-template-columns: repeat(2, 1fr);
+    grid-template-areas:
+      "diagnostics diagnostics"
+      "formulations formulations"
+      "identification identification"
+      "predictive predictive"
+      "chatbot chatbot"
+      "calculator calculator"
+      "interactions interactions"
+      "encyclopedia encyclopedia";
+  }
+}
+
+@media (max-width: 480px) {
+  .dashboard-grid {
+    grid-template-columns: 1fr;
+    grid-template-areas:
+      "diagnostics"
+      "formulations"
+      "identification"
+      "predictive"
+      "chatbot"
+      "calculator"
+      "interactions"
+      "encyclopedia";
+  }
+}
 
 </style>
 
