@@ -833,6 +833,8 @@ hero-text .desc {
 
 <script>
 document.addEventListener("DOMContentLoaded", () => {
+  console.log("📣 DOMContentLoaded fired, main JS is running.");
+
   // ─── 1) GLOBALS & ELEMENT REFERENCES ─────────────────────────────────
 
   // Calendar widget state
@@ -879,6 +881,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const urgentStep2Back    = document.getElementById("urgentStep2Back");
   const urgentStep2Close   = document.getElementById("urgentStep2Close");
   const urgentStep3Close   = document.getElementById("urgentStep3Close");
+  const urgentStep3Back    = document.getElementById("urgentStep3Back");
   const urgentStep4Back    = document.getElementById("urgentStep4Back");
   const urgentStep4Close   = document.getElementById("urgentStep4Close");
 
@@ -1046,282 +1049,380 @@ document.addEventListener("DOMContentLoaded", () => {
   // ─── 5) UI TOGGLE FUNCTIONS ──────────────────────────────────────────
 
   // 5a) Sidebar toggle (hamburger for mobile)
-  hamburger.addEventListener("click", () => {
-    document.body.classList.toggle("sidebar-open");
-  });
+  if (hamburger) {
+    hamburger.addEventListener("click", () => {
+      document.body.classList.toggle("sidebar-open");
+    });
+  } else {
+    console.error("hamburger element not found");
+  }
 
   // 5b) Sidebar shrink/collapse
-  shrinkSidebarBtn.addEventListener("click", () => {
-    document.body.classList.toggle("sidebar-shrink");
-    const icon = shrinkSidebarBtn.querySelector("i");
-    icon.classList.toggle("fa-chevron-left");
-    icon.classList.toggle("fa-chevron-right");
-  });
+  if (shrinkSidebarBtn) {
+    shrinkSidebarBtn.addEventListener("click", () => {
+      document.body.classList.toggle("sidebar-shrink");
+      const icon = shrinkSidebarBtn.querySelector("i");
+      icon.classList.toggle("fa-chevron-left");
+      icon.classList.toggle("fa-chevron-right");
+    });
+  } else {
+    console.error("shrinkSidebarBtn element not found");
+  }
 
   // 5c) Theme toggle
-  themeToggle.addEventListener("click", () => {
-    document.documentElement.classList.toggle("dark");
-    themeToggle.classList.toggle("fa-moon");
-    themeToggle.classList.toggle("fa-sun");
-  });
+  if (themeToggle) {
+    themeToggle.addEventListener("click", () => {
+      document.documentElement.classList.toggle("dark");
+      themeToggle.classList.toggle("fa-moon");
+      themeToggle.classList.toggle("fa-sun");
+    });
+  } else {
+    console.error("themeToggle element not found");
+  }
 
   // 5d) Show urgent booking section
-  urgentCareLink.addEventListener("click", () => {
-    urgentBooking.hidden = false;
-  });
+  if (urgentCareLink) {
+    urgentCareLink.addEventListener("click", () => {
+      urgentBooking.hidden = false;
+    });
+  } else {
+    console.error("urgentCare element not found");
+  }
 
   // ─── 6) URGENT FLOW NAVIGATION ───────────────────────────────────────
 
   // Step 2 → Back to Step 1
-  urgentStep2Back.onclick = () => {
-    urgentMatchResults.hidden = true;
-    urgentStep1.hidden = false;
-  };
-  // Step 2 → Close urgent flow
-  urgentStep2Close.onclick = () => {
-    urgentBooking.hidden = true;
-  };
-  // Step 3 → Close urgent flow
-  urgentStep3Close.onclick = () => {
-    urgentBooking.hidden = true;
-  };
+  if (urgentStep2Back) {
+    urgentStep2Back.onclick = () => {
+      urgentMatchResults.hidden = true;
+      urgentStep1.hidden = false;
+    };
+  } else {
+    console.error("urgentStep2Back element not found");
+  }
 
- // Step 3 → Back to Step 2
-  document.getElementById("urgentStep3Back").onclick = () => {
-   urgentCalendarFlow.hidden = true;
-   urgentMatchResults.hidden = false;
-  };
+  // Step 2 → Close urgent flow
+  if (urgentStep2Close) {
+    urgentStep2Close.onclick = () => {
+      urgentBooking.hidden = true;
+    };
+  } else {
+    console.error("urgentStep2Close element not found");
+  }
+
+  // Step 3 → Close urgent flow
+  if (urgentStep3Close) {
+    urgentStep3Close.onclick = () => {
+      urgentBooking.hidden = true;
+    };
+  } else {
+    console.error("urgentStep3Close element not found");
+  }
+
+  // Step 3 → Back to Step 2
+  if (urgentStep3Back) {
+    urgentStep3Back.onclick = () => {
+      urgentCalendarFlow.hidden = true;
+      urgentMatchResults.hidden = false;
+    };
+  } else {
+    console.error("urgentStep3Back element not found");
+  }
 
   // Step 4 → Back to Step 3
-  urgentStep4Back.onclick = () => {
-    urgentDetailsForm.hidden = true;
-    urgentCalendarFlow.hidden = false;
-  };
+  if (urgentStep4Back) {
+    urgentStep4Back.onclick = () => {
+      urgentDetailsForm.hidden = true;
+      urgentCalendarFlow.hidden = false;
+    };
+  } else {
+    console.error("urgentStep4Back element not found");
+  }
+
   // Step 4 → Close urgent flow
-  urgentStep4Close.onclick = () => {
-    urgentBooking.hidden = true;
-  };
+  if (urgentStep4Close) {
+    urgentStep4Close.onclick = () => {
+      urgentBooking.hidden = true;
+    };
+  } else {
+    console.error("urgentStep4Close element not found");
+  }
 
   // ─── 7) NORMAL MATCH FLOW NAVIGATION ─────────────────────────────────
 
   // Match Results → Back to Step 1
-  matchResultsBack.addEventListener("click", () => {
-   matchResults.hidden = true;
-   matchForm.hidden = false;
- });
+  if (matchResultsBack) {
+    matchResultsBack.addEventListener("click", () => {
+      matchResults.hidden = true;
+      matchForm.hidden = false;
+    });
+  } else {
+    console.error("matchResultsBack element not found");
+  }
 
   // Match Results → Close panel
-matchResultsClose.onclick = () => {
-  matchResults.hidden = true;
-  matchForm.hidden = false;
- };
+  if (matchResultsClose) {
+    matchResultsClose.onclick = () => {
+      matchResults.hidden = true;
+      matchForm.hidden = false;
+    };
+  } else {
+    console.error("matchResultsClose element not found");
+  }
 
   // Appointment Flow → Close panel
-  appointmentFlowClose.onclick = () => {
-    appointmentFlow.hidden = true;
-  };
-  // Confirm Form → Back to Step 3
-  confirmStep4Back.addEventListener("click", () => {
-   confirmForm.hidden = true;
-    appointmentFlow.hidden = false;
-  });
-  // Confirm Form → Close panel
-  confirmStep4Close.addEventListener("click", () => {
-    appointmentFlow.hidden = true;
-  });
+  if (appointmentFlowClose) {
+    appointmentFlowClose.onclick = () => {
+      appointmentFlow.hidden = true;
+    };
+  } else {
+    console.error("appointmentFlowClose element not found");
+  }
 
+  // Confirm Form → Back to Step 3
+  if (confirmStep4Back) {
+    confirmStep4Back.addEventListener("click", () => {
+      confirmForm.hidden = true;
+      appointmentFlow.hidden = false;
+    });
+  } else {
+    console.error("confirmStep4Back element not found");
+  }
+
+  // Confirm Form → Close panel
+  if (confirmStep4Close) {
+    confirmStep4Close.addEventListener("click", () => {
+      appointmentFlow.hidden = true;
+    });
+  } else {
+    console.error("confirmStep4Close element not found");
+  }
 
   // ─── 8) URGENT FLOW LOGIC ─────────────────────────────────────────────
 
   // Prevent past dates
-  urgentDate.min = new Date().toISOString().split("T")[0];
+  if (urgentDate) {
+    urgentDate.min = new Date().toISOString().split("T")[0];
+  }
 
   // Urgent: Find Specialist (rule‐based + GPT fallback)
-  urgentFindMatchBtn.onclick = async () => {
-    const rawConcern = document.getElementById("urgentConcernInput").value.trim();
-    if (!rawConcern) return showToast("Please enter your concern.");
-    const lower = rawConcern.toLowerCase();
+  if (urgentFindMatchBtn) {
+    urgentFindMatchBtn.onclick = async () => {
+      const rawConcern = document.getElementById("urgentConcernInput").value.trim();
+      if (!rawConcern) return showToast("Please enter your concern.");
+      const lower = rawConcern.toLowerCase();
 
-    // 1) Keyword scan
-    let matchedProviderId = null;
-    for (let keyword in symptomMap) {
-      if (lower.includes(keyword)) {
-        matchedProviderId = symptomMap[keyword];
-        break;
+      // 1) Keyword scan
+      let matchedProviderId = null;
+      for (let keyword in symptomMap) {
+        if (lower.includes(keyword)) {
+          matchedProviderId = symptomMap[keyword];
+          break;
+        }
       }
-    }
 
-    // 2) If found, pick that provider
-    let chosenProviderObj = null;
-    if (matchedProviderId) {
-      chosenProviderObj = providers.find(p => p.id === matchedProviderId);
-    }
+      // 2) If found, pick that provider
+      let chosenProviderObj = null;
+      if (matchedProviderId) {
+        chosenProviderObj = providers.find(p => p.id === matchedProviderId);
+      }
 
-    // 3) Otherwise, call GPT (force ID‐only)
-    if (!chosenProviderObj) {
-      urgentFindMatchBtn.disabled = true;
-      urgentFindMatchBtn.textContent = "Matching…";
+      // 3) Otherwise, call GPT (force ID‐only)
+      if (!chosenProviderObj) {
+        urgentFindMatchBtn.disabled = true;
+        urgentFindMatchBtn.textContent = "Matching…";
 
-      const sys = `
+        const sys = `
 You are an expert medical triage AI. 
 Choose exactly one provider ID from the list below. Respond ONLY with the ID (e.g. "p3"), no extra text.
 Providers:
 ${providers.map(p => `- ${p.id}: ${p.name} — ${p.specialty} at ${p.facility}`).join("\n")}
-      `.trim();
+        `.trim();
 
-      const usr = `Concern="${rawConcern}". Return exactly one provider ID (p1…p18).`;
-      let rawGPT = await callOpenAI([
-        { role: "system", content: sys },
-        { role: "user",   content: usr }
-      ]);
+        const usr = \`Concern="\${rawConcern}". Return exactly one provider ID (p1…p18).\`;
+        let rawGPT = await callOpenAI([
+          { role: "system", content: sys },
+          { role: "user",   content: usr }
+        ]);
 
-      const clean = rawGPT.split(/\s+/)[0].trim();
-      const isValid = providers.some(p => p.id === clean);
-      if (isValid) {
-        chosenProviderObj = providers.find(p => p.id === clean);
-      } else {
-        // Rare fallback
-        chosenProviderObj = providers[Math.floor(Math.random() * providers.length)];
+        const clean = rawGPT.split(/\s+/)[0].trim();
+        const isValid = providers.some(p => p.id === clean);
+        if (isValid) {
+          chosenProviderObj = providers.find(p => p.id === clean);
+        } else {
+          // Rare fallback
+          chosenProviderObj = providers[Math.floor(Math.random() * providers.length)];
+        }
+
+        urgentFindMatchBtn.disabled = false;
+        urgentFindMatchBtn.textContent = "Find Specialist";
       }
 
-      urgentFindMatchBtn.disabled = false;
-      urgentFindMatchBtn.textContent = "Find Specialist";
-    }
+      // 4) Display result
+      urgentMatchedName.textContent = chosenProviderObj.name;
+      urgentMatchedSpec.textContent = \`\${chosenProviderObj.specialty}, \${chosenProviderObj.facility}\`;
+      urgentProviderName = chosenProviderObj.name;
 
-    // 4) Display result
-    urgentMatchedName.textContent = chosenProviderObj.name;
-    urgentMatchedSpec.textContent = `${chosenProviderObj.specialty}, ${chosenProviderObj.facility}`;
-    urgentProviderName = chosenProviderObj.name;
-
-    // 5) Show Step 2, hide Step 1
-    urgentMatchResults.hidden = false;
-    urgentStep1.hidden = true;
-  };
+      // 5) Show Step 2, hide Step 1
+      urgentMatchResults.hidden = false;
+      urgentStep1.hidden = true;
+    };
+  } else {
+    console.error("urgentFindMatchBtn element not found");
+  }
 
   // Urgent: Schedule → show calendar inputs
-  urgentScheduleBtn.onclick = () => {
-    urgentMatchResults.hidden = true;
-    urgentCalendarFlow.hidden = false;
-  };
+  if (urgentScheduleBtn) {
+    urgentScheduleBtn.onclick = () => {
+      urgentMatchResults.hidden = true;
+      urgentCalendarFlow.hidden = false;
+    };
+  } else {
+    console.error("urgentScheduleBtn element not found");
+  }
 
   // Urgent: Next → show details form
-  urgentNextToDetails.onclick = () => {
-    if (!urgentDate.value || !urgentTime.value) return showToast("Select date & time.");
-    uDate = urgentDate.value;
-   uTime = urgentTime.value;
-    // Hide the calendar before showing the “Details” form
-    urgentCalendarFlow.hidden = true;
-    urgentDetailsForm.hidden = false;
-    urgentDetailsForm.scrollIntoView({ behavior: "smooth" });
-  };
-  
+  if (urgentNextToDetails) {
+    urgentNextToDetails.onclick = () => {
+      if (!urgentDate.value || !urgentTime.value) return showToast("Select date & time.");
+      uDate = urgentDate.value;
+      uTime = urgentTime.value;
+      // Hide the calendar before showing the “Details” form
+      urgentCalendarFlow.hidden = true;
+      urgentDetailsForm.hidden = false;
+      urgentDetailsForm.scrollIntoView({ behavior: "smooth" });
+    };
+  } else {
+    console.error("urgentNextToDetails element not found");
+  }
+
   // Urgent: Confirm → open review modal (then payment)
-  urgentConfirmBtn.onclick = () => {
-    const name = urgentClientName.value.trim();
-    const email = urgentClientEmail.value.trim();
-    if (!name || !email) return showToast("Enter name & email");
-    document.getElementById("confirmDetails").innerHTML = `
-      <p><strong>Urgent Consult</strong></p>
-      <p><strong>Provider:</strong> ${urgentProviderName}</p>
-      <p><strong>Date:</strong> ${uDate}</p>
-      <p><strong>Time:</strong> ${uTime}</p>
-      <p><strong>Name:</strong> ${name}</p>
-      <p><strong>Email:</strong> ${email}</p>
-      <p><strong>Fee:</strong> ₵500</p>
-    `;
-    confirmModal.hidden = false;
-    localStorage.setItem("urgentDraft", JSON.stringify({
-      ConcernInput: document.getElementById("urgentConcernInput").value,
-      Date: uDate, Time: uTime,
-      ClientName: name, ClientEmail: email
-    }));
-    urgentFlow = true;
-  };
+  if (urgentConfirmBtn) {
+    urgentConfirmBtn.onclick = () => {
+      const name = urgentClientName.value.trim();
+      const email = urgentClientEmail.value.trim();
+      if (!name || !email) return showToast("Enter name & email");
+      document.getElementById("confirmDetails").innerHTML = `
+        <p><strong>Urgent Consult</strong></p>
+        <p><strong>Provider:</strong> ${urgentProviderName}</p>
+        <p><strong>Date:</strong> ${uDate}</p>
+        <p><strong>Time:</strong> ${uTime}</p>
+        <p><strong>Name:</strong> ${name}</p>
+        <p><strong>Email:</strong> ${email}</p>
+        <p><strong>Fee:</strong> ₵500</p>
+      `;
+      confirmModal.hidden = false;
+      localStorage.setItem("urgentDraft", JSON.stringify({
+        ConcernInput: document.getElementById("urgentConcernInput").value,
+        Date: uDate, Time: uTime,
+        ClientName: name, ClientEmail: email
+      }));
+      urgentFlow = true;
+    };
+  } else {
+    console.error("urgentConfirmBtn element not found");
+  }
 
   // ─── 9) NORMAL MATCH FLOW LOGIC ─────────────────────────────────────
 
   // Normal: Find Specialist (rule‐based + GPT fallback)
-  findMatchBtn.onclick = async () => {
-    const rawConcern = document.getElementById("concernInput").value.trim();
-    if (!rawConcern) return showToast("Enter your concern.");
-    const lower = rawConcern.toLowerCase();
+  if (findMatchBtn) {
+    findMatchBtn.onclick = async () => {
+      const rawConcern = document.getElementById("concernInput").value.trim();
+      if (!rawConcern) return showToast("Enter your concern.");
+      const lower = rawConcern.toLowerCase();
 
-    // 1) Keyword scan
-    let matchedProviderId = null;
-    for (let keyword in symptomMap) {
-      if (lower.includes(keyword)) {
-        matchedProviderId = symptomMap[keyword];
-        break;
+      // 1) Keyword scan
+      let matchedProviderId = null;
+      for (let keyword in symptomMap) {
+        if (lower.includes(keyword)) {
+          matchedProviderId = symptomMap[keyword];
+          break;
+        }
       }
-    }
 
-    // 2) If found, pick that provider
-    let chosenProviderObj = null;
-    if (matchedProviderId) {
-      chosenProviderObj = providers.find(p => p.id === matchedProviderId);
-    }
+      // 2) If found, pick that provider
+      let chosenProviderObj = null;
+      if (matchedProviderId) {
+        chosenProviderObj = providers.find(p => p.id === matchedProviderId);
+      }
 
-    // 3) Otherwise, call GPT (force ID‐only)
-    if (!chosenProviderObj) {
-      findMatchBtn.disabled = true;
-      findMatchBtn.innerHTML = `Matching… <span class="spinner"></span>`;
+      // 3) Otherwise, call GPT (force ID‐only)
+      if (!chosenProviderObj) {
+        findMatchBtn.disabled = true;
+        findMatchBtn.innerHTML = `Matching… <span class="spinner"></span>`;
 
-      const sys = `
+        const sys = `
 You are an expert medical triage AI. 
 Choose exactly one provider ID from the list below. Respond ONLY with the ID (e.g. "p5"), no extra text.
 Providers:
 ${providers.map(p => `- ${p.id}: ${p.name} — ${p.specialty} at ${p.facility}`).join("\n")}
-      `.trim();
+        `.trim();
 
-      const usr = `Concern="${rawConcern}", Urgency="${document.getElementById("urgencyInput").value}". Return exactly one provider ID (p1…p18).`;
-      let rawGPT = await callOpenAI([
-        { role: "system", content: sys },
-        { role: "user",   content: usr }
-      ]);
+        const usr = \`Concern="\${rawConcern}", Urgency="\${document.getElementById("urgencyInput").value}". Return exactly one provider ID (p1…p18).\`;
+        let rawGPT = await callOpenAI([
+          { role: "system", content: sys },
+          { role: "user",   content: usr }
+        ]);
 
-      const clean = rawGPT.split(/\s+/)[0].trim();
-      const isValid = providers.some(p => p.id === clean);
-      if (isValid) {
-        chosenProviderObj = providers.find(p => p.id === clean);
-      } else {
-        // Rare fallback
-        chosenProviderObj = providers[Math.floor(Math.random() * providers.length)];
+        const clean = rawGPT.split(/\s+/)[0].trim();
+        const isValid = providers.some(p => p.id === clean);
+        if (isValid) {
+          chosenProviderObj = providers.find(p => p.id === clean);
+        } else {
+          // Rare fallback
+          chosenProviderObj = providers[Math.floor(Math.random() * providers.length)];
+        }
+
+        findMatchBtn.disabled = false;
+        findMatchBtn.innerHTML = '<i class="fas fa-search"></i> Predict Specialist';
       }
 
-      findMatchBtn.disabled = false;
-      findMatchBtn.innerHTML = '<i class="fas fa-search"></i> Predict Specialist';
-    }
+      // 4) Display result
+      matchedName.textContent = chosenProviderObj.name;
+      matchedSpec.textContent = `${chosenProviderObj.specialty}, ${chosenProviderObj.facility}`;
+      providerId = chosenProviderObj.id;
+      providerName = chosenProviderObj.name;
 
-    // 4) Display result
-    matchedName.textContent = chosenProviderObj.name;
-   matchedSpec.textContent = `${chosenProviderObj.specialty}, ${chosenProviderObj.facility}`;
-    providerId = chosenProviderObj.id;
-    providerName = chosenProviderObj.name;
-
-   // 5) Show Step 2 (hide the match‐form, show the results panel)
-    matchResults.hidden = false;
-    matchForm.hidden = true;
-  };
+      // 5) Show Step 2 (hide the match‐form, show the results panel)
+      matchResults.hidden = false;
+      matchForm.hidden = true;
+    };
+  } else {
+    console.error("findMatchBtn element not found");
+  }
 
   // Normal: Schedule → show calendar widget
-  scheduleMatchBtn.onclick = () => {
-    matchResults.hidden = true;
-    appointmentFlow.hidden = false;
-    chosenProvider.textContent = providerName;
-    buildCalendar(year, month);
-  };
+  if (scheduleMatchBtn) {
+    scheduleMatchBtn.onclick = () => {
+      matchResults.hidden = true;
+      appointmentFlow.hidden = false;
+      chosenProvider.textContent = providerName;
+      buildCalendar(year, month);
+    };
+  } else {
+    console.error("scheduleMatchBtn element not found");
+  }
 
   // Change month in main calendar
-  prevMonthBtn.onclick = () => {
-    month = month > 0 ? month - 1 : 11;
-    if (month === 11) year--;
-    buildCalendar(year, month);
-  };
-  nextMonthBtn.onclick = () => {
-    month = month < 11 ? month + 1 : 0;
-    if (month === 0) year++;
-    buildCalendar(year, month);
-  };
+  if (prevMonthBtn) {
+    prevMonthBtn.onclick = () => {
+      month = month > 0 ? month - 1 : 11;
+      if (month === 11) year--;
+      buildCalendar(year, month);
+    };
+  } else {
+    console.error("prevMonthBtn element not found");
+  }
+  if (nextMonthBtn) {
+    nextMonthBtn.onclick = () => {
+      month = month < 11 ? month + 1 : 0;
+      if (month === 0) year++;
+      buildCalendar(year, month);
+    };
+  } else {
+    console.error("nextMonthBtn element not found");
+  }
 
   // Build main calendar grid
   function buildCalendar(y, m) {
@@ -1345,16 +1446,18 @@ ${providers.map(p => `- ${p.id}: ${p.name} — ${p.specialty} at ${p.facility}`)
     }
     // Day cells
     const avail = availability[providerId] || {};
-    const today = new Date();
+    const todayMidnightTs = new Date().setHours(0, 0, 0, 0);
     for (let d = 1; d <= days; d++) {
       const key = `${y}-${String(m + 1).padStart(2, "0")}-${String(d).padStart(2, "0")}`;
-      const past = new Date(y, m, d) < new Date().setHours(0, 0, 0, 0);
+      const thisDayTs = new Date(y, m, d).getTime();
+      const past = thisDayTs < todayMidnightTs;
       const open = !past && Array.isArray(avail[key]);
       const cell = document.createElement("div");
       cell.className = `cell ${open ? "open" : "closed"}`;
       cell.dataset.date = key;
       cell.innerText = d;
       if (open) cell.addEventListener("click", () => selectDate(key));
+      const today = new Date();
       if (today.getFullYear() === y && today.getMonth() === m && today.getDate() === d) {
         cell.classList.add("today");
       }
@@ -1367,7 +1470,8 @@ ${providers.map(p => `- ${p.id}: ${p.name} — ${p.specialty} at ${p.facility}`)
   // Select a date → show available time slots
   function selectDate(key) {
     selDate = key;
-    const slots = availability[providerId][key] || [];
+    const avail = availability[providerId] || {};
+    const slots = avail[key] || [];
     timeSlots.innerHTML = `<h4>Available on ${key}:</h4>`;
     const ul = document.createElement("ul");
     ul.style.display = "flex";
@@ -1394,95 +1498,121 @@ ${providers.map(p => `- ${p.id}: ${p.name} — ${p.specialty} at ${p.facility}`)
   }
 
   // Normal: Confirm → open review modal
-  confirmBtn.onclick = () => {
-    const name = document.getElementById("clientName").value.trim();
-    if (!name) return showToast("Enter your name");
-    document.getElementById("confirmDetails").innerHTML = `
-      <p><strong>Provider:</strong> ${providerName}</p>
-      <p><strong>Date:</strong> ${selDate}</p>
-      <p><strong>Time:</strong> ${selTime}</p>
-      <p><strong>Your Name:</strong> ${name}</p>
-    `;
-    confirmModal.hidden = false;
-  };
+  if (confirmBtn) {
+    confirmBtn.onclick = () => {
+      const name = document.getElementById("clientName").value.trim();
+      if (!name) return showToast("Enter your name");
+      document.getElementById("confirmDetails").innerHTML = `
+        <p><strong>Provider:</strong> ${providerName}</p>
+        <p><strong>Date:</strong> ${selDate}</p>
+        <p><strong>Time:</strong> ${selTime}</p>
+        <p><strong>Your Name:</strong> ${name}</p>
+      `;
+      confirmModal.hidden = false;
+    };
+  } else {
+    console.error("confirmBtn element not found");
+  }
 
   // ─── 10) MODAL CONTROLS & PAYMENT LOGIC ──────────────────────────────
 
   // Close review modal
- modalClose.addEventListener("click", () => {
-    confirmModal.hidden = true;
-  });
+  if (modalClose) {
+    modalClose.addEventListener("click", () => {
+      confirmModal.hidden = true;
+    });
+  } else {
+    console.error("modalClose element not found");
+  }
 
   // Edit from modal → scroll back to form
-  modalEdit.addEventListener("click", () => {
-   confirmModal.hidden = true;
-   confirmForm.scrollIntoView({ behavior: "smooth" });
-});
-
-
+  if (modalEdit) {
+    modalEdit.addEventListener("click", () => {
+      confirmModal.hidden = true;
+      confirmForm.scrollIntoView({ behavior: "smooth" });
+    });
+  } else {
+    console.error("modalEdit element not found");
+  }
 
   // Confirm booking (handles both urgent & normal, with Paystack for urgent)
-  modalConfirm.addEventListener("click", () => {
-
-    if (urgentFlow) {
-      // Urgent: Launch Paystack inline payment
-      const email = urgentClientEmail.value.trim();
-      const handler = PaystackPop.setup({
-        key: "pk_test_297586e51710e83d3c159bfe71ff45c7e23411fa", 
-        email: email,
-        amount: URGENT_FEE_KOBO,
-        currency: "GHS",
-        ref: generateId("U"), // Unique reference
-        onClose: function() {
-          // If user closes the payment popup, do nothing
-        },
-        callback: function(response) {
-          // Payment successful → save appointment
-          const id = generateId("U");
-          appointments.push({ id, name: urgentProviderName, date: uDate, time: uTime, urgent: true });
-          localStorage.setItem("appointments", JSON.stringify(appointments));
-          addToRichDashboard({ id, name: urgentProviderName, date: uDate, time: uTime, urgent: true });
-          renderUpcomingCalendarWidget();
-          showToast("Urgent appointment saved!");
-          urgentFlow = false;
-          confirmModal.hidden = true;
+  if (modalConfirm) {
+    modalConfirm.addEventListener("click", () => {
+      if (urgentFlow) {
+        // ─── Check that PaystackPop exists ─────────────────────────────────
+        if (typeof PaystackPop === "undefined") {
+          console.error("PaystackPop is not loaded. Cannot launch payment.");
+          showToast("Payment library failed to load. Please try again.");
+          return;
         }
-      });
-      handler.openIframe();
-    } else {
-      // Normal: No payment → save directly
-      const id = generateId();
-      appointments.push({ id, name: providerName, date: selDate, time: selTime, urgent: false });
-      localStorage.setItem("appointments", JSON.stringify(appointments));
-      addToRichDashboard({ id, name: providerName, date: selDate, time: selTime, urgent: false });
-      renderUpcomingCalendarWidget();
-      showToast("Appointment confirmed!");
-      confirmModal.hidden = true;
-    }
-  };
+        // Urgent: Launch Paystack inline payment
+        const email = urgentClientEmail.value.trim();
+        const handler = PaystackPop.setup({
+          key: "pk_test_297586e51710e83d3c159bfe71ff45c7e23411fa",
+          email: email,
+          amount: URGENT_FEE_KOBO,
+          currency: "GHS",
+          ref: generateId("U"), // Unique reference
+          onClose: function() {
+            // If user closes the payment popup, do nothing
+          },
+          callback: function(response) {
+            // Payment successful → save appointment
+            const id = generateId("U");
+            appointments.push({ id, name: urgentProviderName, date: uDate, time: uTime, urgent: true });
+            localStorage.setItem("appointments", JSON.stringify(appointments));
+            addToRichDashboard({ id, name: urgentProviderName, date: uDate, time: uTime, urgent: true });
+            renderUpcomingCalendarWidget();
+            showToast("Urgent appointment saved!");
+            urgentFlow = false;
+            confirmModal.hidden = true;
+          }
+        });
+        handler.openIframe();
+      } else {
+        // Normal: No payment → save directly
+        const id = generateId();
+        appointments.push({ id, name: providerName, date: selDate, time: selTime, urgent: false });
+        localStorage.setItem("appointments", JSON.stringify(appointments));
+        addToRichDashboard({ id, name: providerName, date: selDate, time: selTime, urgent: false });
+        renderUpcomingCalendarWidget();
+        showToast("Appointment confirmed!");
+        confirmModal.hidden = true;
+      }
+    });
+  } else {
+    console.error("modalConfirm element not found");
+  }
 
   // ─── 11) CANCELLATION MODAL ───────────────────────────────────────────
 
-  cancelYes.addEventListener("click", () => {
-   // Find the appointment with matching ID and remove
-    const id = cancelYes.dataset.apptId;
-    const idx = appointments.findIndex(a => a.id === id);
-    if (idx > -1) {
-      appointments.splice(idx, 1);
-      localStorage.setItem("appointments", JSON.stringify(appointments));
-   }
-    // Remove card from Rich Dashboard
-    const card = document.querySelector(`.card[data-id="${id}"]`);
-    if (card) card.remove();
-    renderUpcomingCalendarWidget();
-    showToast("Appointment canceled.");
-    cancelModal.hidden = true;
-  });
+  if (cancelYes) {
+    cancelYes.addEventListener("click", () => {
+      // Find the appointment with matching ID and remove
+      const id = cancelYes.dataset.apptId;
+      const idx = appointments.findIndex(a => a.id === id);
+      if (idx > -1) {
+        appointments.splice(idx, 1);
+        localStorage.setItem("appointments", JSON.stringify(appointments));
+      }
+      // Remove card from Rich Dashboard
+      const card = document.querySelector(`.card[data-id="${id}"]`);
+      if (card) card.remove();
+      renderUpcomingCalendarWidget();
+      showToast("Appointment canceled.");
+      cancelModal.hidden = true;
+    });
+  } else {
+    console.error("cancelYes element not found");
+  }
 
- cancelNo.addEventListener("click", () => {
-    cancelModal.hidden = true;
-  });
-
+  if (cancelNo) {
+    cancelNo.addEventListener("click", () => {
+      cancelModal.hidden = true;
+    });
+  } else {
+    console.error("cancelNo element not found");
+  }
 
   // ─── 12) RENDER UPCOMING CALENDAR WIDGET ─────────────────────────────
 
@@ -1589,41 +1719,56 @@ ${providers.map(p => `- ${p.id}: ${p.name} — ${p.specialty} at ${p.facility}`)
     `;
 
     // Reschedule logic
-    card.querySelector(".btn-reschedule").addEventListener("click", () => {
-      if (appt.urgent) {
-        // Urgent: open urgent flow at calendar step
-        urgentProviderName = appt.name;
-        urgentBooking.hidden = false;
-        urgentStep1.hidden = true;
-        urgentMatchResults.hidden = true;
-        urgentCalendarFlow.hidden = false;
-        urgentDate.value = appt.date;
-        urgentTime.value = appt.time;
-        uDate = appt.date;
-        uTime = appt.time;
-      } else {
-        // Normal: open scheduling for this provider
-        providerId = providers.find(p => p.name === appt.name).id;
-        providerName = appt.name;
-        appointmentFlow.hidden = false;
-        chosenProvider.textContent = providerName;
-        buildCalendar(year, month);
-      }
-      document.getElementById("confirmDetails").innerHTML = `
-        <p><strong>${appt.name}</strong></p>
-        <p><strong>Date:</strong> ${appt.date}</p>
-        <p><strong>Time:</strong> ${appt.time}</p>
-      `;
-    });
+    const btnReschedule = card.querySelector(".btn-reschedule");
+    if (btnReschedule) {
+      btnReschedule.addEventListener("click", () => {
+        if (appt.urgent) {
+          // Urgent: open urgent flow at calendar step
+          urgentProviderName = appt.name;
+          urgentBooking.hidden = false;
+          urgentStep1.hidden = true;
+          urgentMatchResults.hidden = true;
+          urgentCalendarFlow.hidden = false;
+          urgentDate.value = appt.date;
+          urgentTime.value = appt.time;
+          uDate = appt.date;
+          uTime = appt.time;
+        } else {
+          // Normal: open scheduling for this provider
+          const found = providers.find(p => p.name === appt.name);
+          if (found) {
+            providerId = found.id;
+            providerName = appt.name;
+            appointmentFlow.hidden = false;
+            chosenProvider.textContent = providerName;
+            buildCalendar(year, month);
+          } else {
+            console.error("Provider not found for reschedule:", appt.name);
+          }
+        }
+        document.getElementById("confirmDetails").innerHTML = `
+          <p><strong>${appt.name}</strong></p>
+          <p><strong>Date:</strong> ${appt.date}</p>
+          <p><strong>Time:</strong> ${appt.time}</p>
+        `;
+      });
+    } else {
+      console.error("btn-reschedule element not found inside card");
+    }
 
     // Cancel logic
-    card.querySelector(".btn-cancel").onclick = () => {
-      cancelMsg.innerText = appt.urgent
-        ? "This was an urgent booking (₵500 non-refundable). Cancel anyway?"
-        : "Are you sure you want to cancel this appointment?";
-      cancelYes.dataset.apptId = appt.id;
-      cancelModal.hidden = false;
-    };
+    const btnCancel = card.querySelector(".btn-cancel");
+    if (btnCancel) {
+      btnCancel.onclick = () => {
+        cancelMsg.innerText = appt.urgent
+          ? "This was an urgent booking (₵500 non-refundable). Cancel anyway?"
+          : "Are you sure you want to cancel this appointment?";
+        cancelYes.dataset.apptId = appt.id;
+        cancelModal.hidden = false;
+      };
+    } else {
+      console.error("btn-cancel element not found inside card");
+    }
 
     richUpcoming.append(card);
   }
@@ -1639,8 +1784,10 @@ ${providers.map(p => `- ${p.id}: ${p.name} — ${p.specialty} at ${p.facility}`)
     });
   });
 
-
-
+  // If you’re using Animate On Scroll (AOS), initialize it here:
+  if (typeof AOS !== "undefined") {
+    AOS.init();
+  }
 });
 </script>
   
