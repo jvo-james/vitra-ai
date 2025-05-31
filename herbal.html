@@ -157,6 +157,11 @@ document.addEventListener("DOMContentLoaded", () => {
     color: #fff;
     padding-left: calc(var(--padding) + 0.5rem);
   }
+    aside#sidebar nav a.active {
+   background: var(--primary);
+   color: #fff;
+    font-weight: 700;
+  }
   aside#sidebar.collapsed {
     flex: 0 0 var(--sidebar-collapsed-w);
   }
@@ -936,20 +941,6 @@ document.addEventListener("DOMContentLoaded", () => {
     margin-top: 1rem;
   }
 
-  /*──────────────────────────────────────────────────────────────────────────────
-    12. ADDITIONAL FEATURES (LIST)
-  ──────────────────────────────────────────────────────────────────────────────*/
-  #addons ul {
-    margin-top: 1rem;
-    padding-left: 1rem;
-  }
-  #addons ul li {
-    margin-bottom: 0.5rem;
-    line-height: 1.4;
-  }
-  #addons ul li strong {
-    color: var(--primary);
-  }
 
   /*──────────────────────────────────────────────────────────────────────────────
     13. ROI CALCULATOR
@@ -1001,6 +992,26 @@ document.addEventListener("DOMContentLoaded", () => {
     color: var(--text);
   }
 
+    .copy-toast {
+    position: fixed;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--primary);
+    color: #fff;
+    padding: 0.5rem 1rem;
+    border-radius: var(--radius);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+    font-size: 0.95rem;
+    animation: fade-in-out 2s ease forwards;
+    z-index: 2000;
+  }
+  @keyframes fade-in-out {
+    0% { opacity: 0; transform: translateX(-50%) translateY(20px); }
+    10% { opacity: 1; transform: translateX(-50%) translateY(0); }
+    90% { opacity: 1; }
+    100% { opacity: 0; transform: translateX(-50%) translateY(20px); }
+  }
   /*──────────────────────────────────────────────────────────────────────────────
     14. EXECUTIVE ANALYTICS DASHBOARD
   ──────────────────────────────────────────────────────────────────────────────*/
@@ -1051,52 +1062,6 @@ document.addEventListener("DOMContentLoaded", () => {
     background: var(--secondary);
   }
 
-  /*──────────────────────────────────────────────────────────────────────────────
-    15. CONTACT & DISCLAIMER
-  ──────────────────────────────────────────────────────────────────────────────*/
-  #contact-form input,
-  #contact-form textarea {
-    padding: 0.75rem;
-    border: 1px solid rgba(0, 0, 0, 0.1);
-    border-radius: var(--radius);
-    background: var(--bg);
-    color: var(--text);
-    font-size: 0.95rem;
-    transition: border-color var(--transition), box-shadow var(--transition);
-  }
-  #contact-form input:focus,
-  #contact-form textarea:focus {
-    outline: none;
-    border-color: var(--primary);
-    box-shadow: 0 0 8px var(--primary);
-  }
-  #contact-form button {
-    background: var(--primary);
-    color: #fff;
-    padding: 0.7rem 1.4rem;
-    font-weight: 600;
-    border-radius: var(--radius);
-    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
-    transition: transform var(--transition), box-shadow var(--transition), background var(--transition);
-  }
-  #contact-form button:hover {
-    transform: scale(1.03);
-    box-shadow: 0 5px 14px rgba(0, 0, 0, 0.12);
-    background: var(--secondary);
-  }
-  #contact .hint {
-    margin-top: 1rem;
-    font-size: 0.85rem;
-    color: var(--muted);
-  }
-  #contact a {
-    color: var(--primary);
-    font-weight: 500;
-    transition: color var(--transition);
-  }
-  #contact a:hover {
-    color: var(--secondary);
-  }
 
   /*──────────────────────────────────────────────────────────────────────────────
     FOOTER
@@ -1272,7 +1237,88 @@ document.addEventListener("DOMContentLoaded", () => {
     color: var(--muted);
     border-top-color: rgba(255, 255, 255, 0.1);
   }
-</style>
+    /*────────────────── HISTORY MODAL STYLING ──────────────────*/
+  .history-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 3000;
+  }
+  .history-content {
+    background: var(--surface);
+    padding: 2rem;
+    border-radius: var(--radius);
+    width: 90%;
+    max-width: 600px;
+    max-height: 80%;
+    overflow-y: auto;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+    position: relative;
+  }
+  .history-content h3 {
+    margin-bottom: 1rem;
+    color: var(--primary);
+    font-size: 1.5rem;
+    border-bottom: 2px solid var(--accent);
+    padding-bottom: 0.5rem;
+  }
+  .history-content ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+  .history-content li {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.75rem 0;
+    border-bottom: 1px solid #eee;
+  }
+  .history-content li:last-child {
+    border-bottom: none;
+  }
+  .history-content .del-msg {
+    background: none;
+    border: none;
+    color: var(--secondary);
+    font-size: 1.1rem;
+    cursor: pointer;
+    transition: color var(--transition);
+  }
+  .history-content .del-msg:hover {
+    color: var(--primary);
+  }
+  .history-content .close-history {
+    display: block;
+    margin: 1.5rem auto 0;
+    background: var(--primary);
+    color: #fff;
+    border: none;
+    padding: 0.6rem 1.2rem;
+    border-radius: var(--radius);
+    cursor: pointer;
+    font-size: 1rem;
+    transition: background var(--transition), transform var(--transition);
+  }
+  .history-content .close-history:hover {
+    background: var(--secondary);
+    transform: translateY(-2px);
+  }
+     #roi-form input,
+      #roi-form select {
+          padding: 0.75rem;
+          font-size: 0.95rem;
+          border: 1.5px solid #d1dce5;
+          border-radius: var(--radius);
+        }
+
+ </style>
 
 
 </head>
@@ -1467,13 +1513,11 @@ document.addEventListener("DOMContentLoaded", () => {
           <button id="clearChat" title="Clear Chat"><i class="fas fa-trash-alt"></i></button>
         </div>
       </div>
-      <p class="desc">Have a conversation with our AI herbalist—ask about remedies, dosages, or plant facts.</p>
-      <div id="chatBox" class="chat-box" role="log" aria-live="polite"></div>
+       <div id="chatBox" class="chat-box" role="log" aria-live="polite"></div>
       <div class="chat-input-row">
         <input id="chatInput" placeholder="Ask about herbal remedies…" aria-label="Type your question"/>
         <button id="sendChat" aria-label="Send message"><i class="fas fa-paper-plane"></i></button>
       </div>
-      <div id="chatHint" class="hint" hidden>Bot is thinking… <span class="spinner"></span></div>
     </section>
 
     <!-- 6. Personalized Formulations -->
@@ -1690,6 +1734,17 @@ document.addEventListener("DOMContentLoaded", () => {
     </section>
 
 
+      <!-- 12. Meet a Herbal Health Expert -->
+  <section id="meet-professional" class="module">
+    <h2><i class="fas fa-user-md"></i> Meet a Herbal Health Expert</h2>
+    <p class="desc">
+      Connect with one of our trusted herbal health professionals for personalized guidance and consultation.
+    </p>
+    <a href="consult.html" class="btn-primary">
+      <i class="fas fa-calendar-check"></i> Schedule an Appointment
+    </a>
+  </section>
+    
     <!-- 13. ROI Calculator -->
     <section id="roi" class="module">
       <h2><i class="fas fa-dollar-sign"></i> Business Insights &amp; ROI Calculator</h2>
@@ -1745,19 +1800,10 @@ document.addEventListener("DOMContentLoaded", () => {
           <figcaption><strong>Financial ROI:</strong> Quarterly returns.</figcaption>
         </figure>
       </div>
-      <button onclick="exportAnalytics()">Export Full CSV</button>
+ <button id="exportCSV" class="btn-primary">Export Full CSV</button>
     </section>
 
-  <!-- 12. Meet a Herbal Health Expert -->
-  <section id="meet-professional" class="module">
-    <h2><i class="fas fa-user-md"></i> Meet a Herbal Health Expert</h2>
-    <p class="desc">
-      Connect with one of our trusted herbal health professionals for personalized guidance and consultation.
-    </p>
-    <a href="consult.html" class="btn-primary">
-      <i class="fas fa-calendar-check"></i> Schedule an Appointment
-    </a>
-  </section>
+
      <!-- FOOTER -->
   <footer>
     <p>&copy; 2025 Vitra AI. <a href="#privacy">Privacy Policy</a> | <a href="#terms">Terms &amp; Conditions</a></p>
@@ -2218,8 +2264,6 @@ You are a friendly, knowledgeable herbalist. A user will ask questions about her
     // Clear chat box (history cleared)
     clearChatBtn.onclick = () => {
       chatBox.innerHTML = "";
-      chatHistory = [];
-      localStorage.removeItem("chatHistory");
       lastDateHeader = null;
     };
 
@@ -2424,8 +2468,7 @@ You are a financial analyst specializing in healthcare ROI. Given monthly prescr
     }
 
     function initCharts() {
-      const colorText = getCSSVar("--text");
-      const colorMuted = getCSSVar("--muted");
+const colorText = getCSSVar("--text");
       const baseConfig = (type, data) => ({
         type: type,
         data: data,
@@ -2437,11 +2480,11 @@ You are a financial analyst specializing in healthcare ROI. Given monthly prescr
           scales: {
             x: {
               ticks: { color: colorText },
-              grid: { color: colorMuted }
+              grid: { display: false }
             },
             y: {
               ticks: { color: colorText },
-              grid: { color: colorMuted }
+              grid: { display: false }
             }
           },
           plugins: {
@@ -2473,15 +2516,12 @@ You are a financial analyst specializing in healthcare ROI. Given monthly prescr
         datasets: [{ data: [5, 7, 6, 8] }]
       }));
 
-      // Remove grid lines for aesthetic
-      Chart.defaults.scales.x.grid.display = false;
-      Chart.defaults.scales.y.grid.display = false;
     }
 
     initCharts();
 
-    // Export charts data as CSV
-    window.exportAnalytics = () => {
+   // Export charts data as CSV
+    document.getElementById("exportCSV").onclick = () => {
       const chartIds = ["Adoption", "Efficacy", "Supply", "ROI"];
       let csvContent = "Chart,Label,Value\n";
       chartIds.forEach((id) => {
