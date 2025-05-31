@@ -1652,20 +1652,36 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // Send an image file to Vision API via proxy
   async function callVision(file) {
+   // Build FormData
+    const fd = new FormData();
+    fd.append("file", file);
+
+    // Send to Netlify function
+    const res = await fetch("/.netlify/functions/vision-proxy", {
+      method: "POST",
+      body: fd,
+    });
+
+    // Grab raw text (in case the function returned non‐JSON or JSON with { error: ... })
+    const rawText = await res.text();
+    let payload = null;
     try {
-      const formData = new FormData();
-      formData.append("file", file);
-      const response = await fetch("/.netlify/functions/vision-proxy", {
-        method: "POST",
-        body: formData
-      });
-      if (!response.ok) throw new Error("Vision API request failed");
-      return await response.json();
-    } catch (err) {
-      console.error(err);
-      throw err;
+      payload = JSON.parse(rawText);
+    } catch {
+      // Not valid JSON → keep raw text
+      payload = null;
     }
-  }
+
+    if (!res.ok) {
+      // If payload.error exists, show it. Otherwise show raw text.
+      const errMsg = payload && payload.error ? payload.error : rawText;
+      throw new Error("Vision API error: " + errMsg);
+    }
+
+    // At this point, res.ok is true. Return parsed JSON (or raw text if JSON.parse failed).
+    return payload !== null ? payload : rawText;
+   }
+ 
 
   // Convert simple markdown to HTML paragraphs and headers
   function formatHTML(text) {
@@ -1845,40 +1861,61 @@ document.addEventListener("DOMContentLoaded", () => {
       return;
     }
 
-    try {
-      let htmlContent = "";
+try {
+      let html = '';
 
-      // If file present, call vision
       if (file) {
-        const visionData = await callVision(file);
-        htmlContent += `
-          <p><strong>Identified Plant:</strong> ${visionData.name || "N/A"}</p>
-          <p><strong>Medicinal Uses:</strong> ${visionData.uses || "N/A"}</p>
-          <p><strong>Cautions:</strong> ${visionData.cautions || "N/A"}</p>
-          <p><strong>Regions:</strong> ${visionData.regions?.join(", ") || "N/A"}</p>
-          <hr/>
+        // Call your Vision‐proxy function
+        const data = await callVision(file);
+        html += `
+          <p><strong>Plant Name:</strong> ${escapeHtml(data.name)}</p>
+          <p><strong>Medicinal Uses:</strong> ${escapeHtml(data.uses)}</p>
+          <p><strong>Cautions:</strong> ${escapeHtml(data.cautions)}</p>
+          <p><strong>Native Regions:</strong> ${Array.isArray(data.regions) ? escapeHtml(data.regions.join(', ')) : 'N/A'}</p>
+          <hr/>`;
+      }
+
+      if (desc) {
+        // If user typed a description, also send it to OpenAI
+        panel.innerHTML = `<div class="result-content">Consulting AI about your text… <span class="spinner"></span></div>`;
+        const sys = 'You are a plant expert. Given a description, respond with name, uses, cautions, and regions as JSON.';
+        const rawGPT = await callOpenAI([
+          { role: 'system', content: sys },
+          { role: 'user',   content: `Describe plant: "${desc}"` }
+        ]);
+        // Expecting rawGPT to be a JSON string
+        let parsed;
+        try {
+          parsed = JSON.parse(rawGPT.trim());
+        } catch (parseErr) {
+          throw new Error('OpenAI did not return valid JSON: ' + rawGPT);
+        }
+        html += `
+          <p><strong>(From text description)</strong></p>
+          <p><strong>Plant Name:</strong> ${escapeHtml(parsed.name)}</p>
+          <p><strong>Uses:</strong> ${escapeHtml(parsed.uses)}</p>
+          <p><strong>Cautions:</strong> ${escapeHtml(parsed.cautions)}</p>
+          <p><strong>Regions:</strong> ${Array.isArray(parsed.regions) ? escapeHtml(parsed.regions.join(', ')) : '–'}</p>
         `;
       }
 
-      // If description present, call OpenAI
-      if (desc) {
-        const aiReply = await callOpenAI([
-          {
-            role: "system",
-            content: "You are a plant taxonomy expert. When given a textual description, identify the plant and provide its common name, scientific name, and brief medicinal profile."
-          },
-          { role: "user", content: `Describe plant: ${desc}` }
-        ]);
-        htmlContent += formatHTML(aiReply);
-      }
-
-      panel.innerHTML = `<div class="result-content">${htmlContent}</div>`;
+      panel.innerHTML = `<div class="result-content">${html}</div>`;
       addClose(panel);
       addTools(panel);
     } catch (err) {
-      showFriendlyError(panel);
+      // 1) Log full error in console for debugging
+     console.error('Vision or AI call failed:', err);
+
+      // 2) Show the actual message (or full error) in the UI
+      const msg = err.message || JSON.stringify(err);
+      panel.innerHTML = `
+        <div class="result-content">
+          😕 Something went wrong.<br>
+          <em>${escapeHtml(msg)}</em>
+        </div>`;
+      addClose(panel);
     }
-  };
+ };
 
   // ─── SYMPTOM CHECKER ─────────────────────────────────────────────────────
 
