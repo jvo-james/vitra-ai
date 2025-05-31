@@ -1111,9 +1111,11 @@ document.addEventListener("DOMContentLoaded", () => {
  });
 
   // Match Results → Close panel
-  matchResultsClose.onclick = () => {
-    matchResults.hidden = true;
-  };
+matchResultsClose.onclick = () => {
+  matchResults.hidden = true;
+  matchForm.hidden = false;
+ };
+
   // Appointment Flow → Close panel
   appointmentFlowClose.onclick = () => {
     appointmentFlow.hidden = true;
@@ -1206,11 +1208,13 @@ ${providers.map(p => `- ${p.id}: ${p.name} — ${p.specialty} at ${p.facility}`)
   urgentNextToDetails.onclick = () => {
     if (!urgentDate.value || !urgentTime.value) return showToast("Select date & time.");
     uDate = urgentDate.value;
-    uTime = urgentTime.value;
+   uTime = urgentTime.value;
+    // Hide the calendar before showing the “Details” form
+    urgentCalendarFlow.hidden = true;
     urgentDetailsForm.hidden = false;
     urgentDetailsForm.scrollIntoView({ behavior: "smooth" });
   };
-
+  
   // Urgent: Confirm → open review modal (then payment)
   urgentConfirmBtn.onclick = () => {
     const name = urgentClientName.value.trim();
@@ -1290,13 +1294,13 @@ ${providers.map(p => `- ${p.id}: ${p.name} — ${p.specialty} at ${p.facility}`)
 
     // 4) Display result
     matchedName.textContent = chosenProviderObj.name;
-    matchedSpec.textContent = `${chosenProviderObj.specialty}, ${chosenProviderObj.facility}`;
+   matchedSpec.textContent = `${chosenProviderObj.specialty}, ${chosenProviderObj.facility}`;
     providerId = chosenProviderObj.id;
     providerName = chosenProviderObj.name;
 
-    // 5) Show Step 2
+   // 5) Show Step 2 (hide the match‐form, show the results panel)
     matchResults.hidden = false;
-    matchForm.hidden = false; // ensure form stays visible if hidden
+    matchForm.hidden = true;
   };
 
   // Normal: Schedule → show calendar widget
