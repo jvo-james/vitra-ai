@@ -1,144 +1,106 @@
-import Busboy from "busboy";
-import { Storage } from "@google-cloud/storage";
-import { Vision } from "@google-cloud/vision";
+// netlify/functions/vision-proxy.js
 
-export async function handler(event, context) {
-  // 1) Only allow POST
-  if (event.httpMethod !== "POST") {
+/**
+ * A Netlify Function that accepts an HTTP POST with a single image file (multipart/form-data),
+ * runs Google Cloud Vision API’s textDetection on it, and returns the detected text.
+ *
+ * This version uses Busboy to parse out the uploaded file buffer entirely in memory,
+ * then feeds it directly to @google-cloud/vision. No @google-cloud/storage is required.
+ */
+
+const Busboy = require('busboy');
+const vision = require('@google-cloud/vision');
+
+exports.handler = async (event, context) => {
+  // Only allow POST
+  if (event.httpMethod !== 'POST') {
     return {
       statusCode: 405,
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ error: "Method Not Allowed. Use POST." }),
+      headers: { "Allow": "POST" },
+      body: "Method Not Allowed. Use POST with multipart/form-data.",
     };
   }
 
-  // 2) Check credentials env var
-  const base64Key = process.env.VISION_CREDENTIALS_BASE64;
-  if (!base64Key) {
-    console.error("Missing VISION_CREDENTIALS_BASE64");
-    return {
-      statusCode: 500,
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ error: "Missing VISION_CREDENTIALS_BASE64 env var." }),
-    };
-  }
-
-  let credentials;
   try {
-    credentials = JSON.parse(Buffer.from(base64Key, "base64").toString("utf-8"));
-  } catch (e) {
-    console.error("Invalid base64 JSON for credentials:", e);
+    // event.headers contains content-type like "multipart/form-data; boundary=----WebKitFormBoundary..."
+    const contentType = event.headers['content-type'] || event.headers['Content-Type'];
+    if (!contentType || !contentType.startsWith("multipart/form-data")) {
+      return {
+        statusCode: 400,
+        body: JSON.stringify({ error: "Invalid Content-Type. Use multipart/form-data" }),
+      };
+    }
+
+    // Busboy requires raw headers and a Buffer of the full body. Netlify Functions
+    // base64-encodes incoming binary/multipart data, so event.isBase64Encoded is true.
+    const bb = new Busboy({ headers: { "content-type": contentType } });
+
+    // We'll collect all data chunks from the file field into this array
+    const bufferChunks = [];
+
+    // Convert the base64-encoded body back into a Buffer
+    const bodyBuffer = Buffer.from(event.body, event.isBase64Encoded ? 'base64' : 'utf8');
+
+    // Wrap parsing in a Promise so we can await it easily
+    const filePromise = new Promise((resolve, reject) => {
+      // When Busboy emits a 'file' event, we get the file stream
+      bb.on('file', (fieldname, fileStream, filename, encoding, mimetype) => {
+        // Only process the first file field; ignore any others
+        fileStream.on('data', (chunk) => {
+          bufferChunks.push(chunk);
+        });
+        fileStream.on('end', () => {
+          // once file is fully read, continue
+        });
+      });
+
+      bb.on('error', (err) => {
+        reject(err);
+      });
+
+      bb.on('finish', () => {
+        // All fields/file streams have been processed
+        if (bufferChunks.length === 0) {
+          return reject(new Error("No file data received"));
+        }
+        // Combine all buffered chunks into a single Buffer
+        const fileBuffer = Buffer.concat(bufferChunks);
+        resolve(fileBuffer);
+      });
+
+      // Feed the raw buffer into Busboy to start parsing
+      bb.end(bodyBuffer);
+    });
+
+    // Wait for Busboy to finish reading the file into a Buffer
+    const imageBuffer = await filePromise;
+
+    // Instantiate a Vision client
+    const client = new vision.ImageAnnotatorClient();
+
+    // Call textDetection (you could choose labelDetection, objectLocalization, etc. if you prefer)
+    const [visionResult] = await client.textDetection({
+      image: { content: imageBuffer }
+    });
+
+    // visionResult.textAnnotations is an array; return the full array as JSON
+    return {
+      statusCode: 200,
+      body: JSON.stringify({
+        textAnnotations: visionResult.textAnnotations || [],
+        fullText: visionResult.fullTextAnnotation ? visionResult.fullTextAnnotation.text : ""
+      })
+    };
+  } catch (err) {
+    // If anything goes wrong—Busboy parse error, Vision error, etc.—return a 500 with details
     return {
       statusCode: 500,
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ error: "Invalid JSON in VISION_CREDENTIALS_BASE64." }),
+      body: JSON.stringify({
+        errorType: err.name,
+        errorMessage: err.message || "Unknown error",
+        stack: err.stack || null
+      })
     };
   }
+};
 
-  // 3) Initialize Google Cloud clients
-  const storage = new Storage({ credentials });
-  const vision = new Vision({ credentials });
-
-  return new Promise((resolve) => {
-    const busboy = new Busboy({ headers: event.headers });
-
-    let uploadFileBuffer = null;
-    let uploadFileName = null;
-
-    // 4) Listen for the “file” field
-    busboy.on("file", (fieldname, fileStream, filename, encoding, mimetype) => {
-      if (fieldname !== "file") {
-        // Skip any unexpected fields
-        fileStream.resume();
-        return;
-      }
-      uploadFileName = filename;
-      const chunks = [];
-      fileStream.on("data", (chunk) => {
-        chunks.push(chunk);
-      });
-      fileStream.on("end", () => {
-        uploadFileBuffer = Buffer.concat(chunks);
-      });
-    });
-
-    // 5) Handle Busboy errors
-    busboy.on("error", (err) => {
-      console.error("Busboy parsing error:", err);
-      resolve({
-        statusCode: 400,
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ error: "Invalid multipart/form-data." }),
-      });
-    });
-
-    // 6) When Busboy finishes parsing
-    busboy.on("finish", async () => {
-      if (!uploadFileBuffer) {
-        console.error("No file uploaded under field 'file'");
-        resolve({
-          statusCode: 400,
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ error: "No file uploaded under field ‘file’." }),
-        });
-        return;
-      }
-
-      try {
-        // 7) Ensure a bucket exists (use project_id + "-vision-temp")
-        const bucketName = `${credentials.project_id}-vision-temp`;
-        const bucket = storage.bucket(bucketName);
-
-        // Check if bucket exists; if not, create it
-        const [exists] = await bucket.exists();
-        if (!exists) {
-          await storage.createBucket(bucketName);
-        }
-
-        // 8) Upload the buffer into a temporary file
-        const timestamp = Date.now();
-        const tempFilePath = `uploads/${timestamp}-${uploadFileName}`;
-        const tempFile = bucket.file(tempFilePath);
-        await tempFile.save(uploadFileBuffer);
-
-        // 9) Call Vision API (we do a simple labelDetection demo)
-        const [labelResult] = await vision.labelDetection({
-          source: { imageUri: `gs://${bucketName}/${tempFilePath}` },
-        });
-
-        // 10) Parse labels into name/uses/cautions/regions
-        const labels = (labelResult.labelAnnotations || []).map((l) => l.description);
-        const name = labels[0] || "Unknown Plant";
-        const uses = labels.slice(1, 4).join(", ") || "N/A";
-        const cautions = labels.slice(4, 7).join(", ") || "N/A";
-        const regions = []; // or you could try a regionDetection request
-
-        // 11) Clean up: delete the temp file from bucket
-        await tempFile.delete().catch((err) => {
-          console.warn("Could not delete temp file:", err);
-        });
-
-        // 12) Return success JSON
-        resolve({
-          statusCode: 200,
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ name, uses, cautions, regions }),
-        });
-      } catch (e) {
-        console.error("Vision or Storage error:", e);
-        resolve({
-          statusCode: 500,
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ error: "Vision API request failed: " + e.message }),
-        });
-      }
-    });
-
-    // 13) Kick off Busboy with the raw body
-    busboy.end(
-      Buffer.from(event.body, event.isBase64Encoded ? "base64" : "utf8")
-    );
-  });
-}
-
-// EOF
