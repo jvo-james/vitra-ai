@@ -1,106 +1,76 @@
-// netlify/functions/vision-proxy.js
+// File: netlify/functions/vision-proxy.js
 
-/**
- * A Netlify Function that accepts an HTTP POST with a single image file (multipart/form-data),
- * runs Google Cloud Vision API’s textDetection on it, and returns the detected text.
- *
- * This version uses Busboy to parse out the uploaded file buffer entirely in memory,
- * then feeds it directly to @google-cloud/vision. No @google-cloud/storage is required.
- */
-
-const Busboy = require('busboy').default || require('busboy');
 const vision = require('@google-cloud/vision');
+const Busboy = require('busboy');
 
 exports.handler = async (event, context) => {
-  // Only allow POST
+  // Only accept POST
   if (event.httpMethod !== 'POST') {
     return {
       statusCode: 405,
-      headers: { "Allow": "POST" },
-      body: "Method Not Allowed. Use POST with multipart/form-data.",
+      body: JSON.stringify({ error: 'Method Not Allowed' }),
     };
   }
 
-  try {
-    // event.headers contains content-type like "multipart/form-data; boundary=----WebKitFormBoundary..."
-    const contentType = event.headers['content-type'] || event.headers['Content-Type'];
-    if (!contentType || !contentType.startsWith("multipart/form-data")) {
-      return {
-        statusCode: 400,
-        body: JSON.stringify({ error: "Invalid Content-Type. Use multipart/form-data" }),
-      };
-    }
+  // We return a Promise because Busboy is callback-based
+  return new Promise((resolve, reject) => {
+    // Reconstruct the raw buffer from event.body (base64 or binary)
+    const buffer = event.isBase64Encoded
+      ? Buffer.from(event.body, 'base64')
+      : Buffer.from(event.body, 'binary');
 
-    // Busboy requires raw headers and a Buffer of the full body. Netlify Functions
-    // base64-encodes incoming binary/multipart data, so event.isBase64Encoded is true.
-    const bb = new Busboy({ headers: { "content-type": contentType } });
+    // Busboy expects actual HTTP headers, so pull them from event.headers:
+    const bb = new Busboy({ headers: event.headers });
 
-    // We'll collect all data chunks from the file field into this array
-    const bufferChunks = [];
+    let fileBuffer = Buffer.alloc(0);
 
-    // Convert the base64-encoded body back into a Buffer
-    const bodyBuffer = Buffer.from(event.body, event.isBase64Encoded ? 'base64' : 'utf8');
-
-    // Wrap parsing in a Promise so we can await it easily
-    const filePromise = new Promise((resolve, reject) => {
-      // When Busboy emits a 'file' event, we get the file stream
-      bb.on('file', (fieldname, fileStream, filename, encoding, mimetype) => {
-        // Only process the first file field; ignore any others
-        fileStream.on('data', (chunk) => {
-          bufferChunks.push(chunk);
-        });
-        fileStream.on('end', () => {
-          // once file is fully read, continue
-        });
+    // When Busboy parses the file field, accumulate the chunks into fileBuffer
+    bb.on('file', (fieldname, fileStream, filename, encoding, mimetype) => {
+      fileStream.on('data', (data) => {
+        fileBuffer = Buffer.concat([fileBuffer, data]);
       });
-
-      bb.on('error', (err) => {
-        reject(err);
-      });
-
-      bb.on('finish', () => {
-        // All fields/file streams have been processed
-        if (bufferChunks.length === 0) {
-          return reject(new Error("No file data received"));
-        }
-        // Combine all buffered chunks into a single Buffer
-        const fileBuffer = Buffer.concat(bufferChunks);
-        resolve(fileBuffer);
-      });
-
-      // Feed the raw buffer into Busboy to start parsing
-      bb.end(bodyBuffer);
     });
 
-    // Wait for Busboy to finish reading the file into a Buffer
-    const imageBuffer = await filePromise;
+    // When parsing is finished, call Vision API
+    bb.on('finish', async () => {
+      try {
+        // Instantiate a Vision client using the environment variables
+        // Make sure you have set the following in Netlify UI (or via CLI):
+        //   GCP_PROJECT_ID
+        //   GOOGLE_CLIENT_EMAIL
+        //   GOOGLE_PRIVATE_KEY  (with newline characters encoded as actual \n)
+        const client = new vision.ImageAnnotatorClient({
+          projectId: process.env.GCP_PROJECT_ID,
+          credentials: {
+            client_email: process.env.GOOGLE_CLIENT_EMAIL,
+            private_key: process.env.GOOGLE_PRIVATE_KEY.replace(/\\n/g, '\n'),
+          },
+        });
 
-    // Instantiate a Vision client
-    const client = new vision.ImageAnnotatorClient();
+        // Call labelDetection (you can swap to faceDetection, textDetection, etc. as desired)
+        const [result] = await client.labelDetection({ image: { content: fileBuffer } });
 
-    // Call textDetection (you could choose labelDetection, objectLocalization, etc. if you prefer)
-    const [visionResult] = await client.textDetection({
-      image: { content: imageBuffer }
+        // Build a simple JSON response containing the top 5 labels
+        const labels = (result.labelAnnotations || [])
+          .slice(0, 5)
+          .map((annotation) => annotation.description);
+
+        return resolve({
+          statusCode: 200,
+          body: JSON.stringify({ labels }),
+        });
+      } catch (err) {
+        console.error('Vision API error', err);
+        return resolve({
+          statusCode: 500,
+          body: JSON.stringify({ error: err.message || 'Vision failed' }),
+        });
+      }
     });
 
-    // visionResult.textAnnotations is an array; return the full array as JSON
-    return {
-      statusCode: 200,
-      body: JSON.stringify({
-        textAnnotations: visionResult.textAnnotations || [],
-        fullText: visionResult.fullTextAnnotation ? visionResult.fullTextAnnotation.text : ""
-      })
-    };
-  } catch (err) {
-    // If anything goes wrong—Busboy parse error, Vision error, etc.—return a 500 with details
-    return {
-      statusCode: 500,
-      body: JSON.stringify({
-        errorType: err.name,
-        errorMessage: err.message || "Unknown error",
-        stack: err.stack || null
-      })
-    };
-  }
+    // Kick off Busboy parsing by writing the raw buffer
+    bb.end(buffer);
+  });
 };
+
 
