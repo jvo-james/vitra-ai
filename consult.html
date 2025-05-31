@@ -733,6 +733,7 @@ hero-text .desc {
       <!-- Step 2 -->
       <div id="matchResults" class="response" hidden>
         <button class="close-btn" id="matchResultsClose"><i class="fas fa-times"></i></button>
+         <button class="btn-sm back" id="matchResultsBack">Back</button>
         <div class="card">
           <i class="fas fa-user-md fa-2x"></i>
           <div class="details">
@@ -758,16 +759,18 @@ hero-text .desc {
         <!-- Step 4 -->
         <form id="confirmForm" hidden class="module">
           
-          <h4><i class="fas fa-check-circle"></i> Confirm</h4>
-          <label><i class="fas fa-user"></i> Your Name:
-            <input id="clientName" placeholder="Full Name" required />
-          </label>
-          <label><i class="fas fa-envelope"></i> Email:
-            <input id="clientEmail" type="email" required />
-          </label>
-          <p id="summaryText"></p>
-          <button id="confirmBtn" type="button" class="btn"><i class="fas fa-check"></i> Confirm</button>
-        </form>
+            <button class="btn-sm close-btn" id="confirmStep4Close"><i class="fas fa-times"></i></button>
+       <button class="btn-sm back" id="confirmStep4Back">Back</button>
+        <h4><i class="fas fa-check-circle"></i> Confirm</h4>
+        <label><i class="fas fa-user"></i> Your Name:
+          <input id="clientName" placeholder="Full Name" required />
+       </label>
+        <label><i class="fas fa-envelope"></i> Email:
+          <input id="clientEmail" type="email" required />
+        </label>
+        <p id="summaryText"></p>
+       <button id="confirmBtn" type="button" class="btn"><i class="fas fa-check"></i> Confirm</button>
+     </form>
       </div>
     </section>
 
@@ -1076,6 +1079,13 @@ document.addEventListener("DOMContentLoaded", () => {
   urgentStep3Close.onclick = () => {
     urgentBooking.hidden = true;
   };
+
+ // Step 3 → Back to Step 2
+  document.getElementById("urgentStep3Back").onclick = () => {
+   urgentCalendarFlow.hidden = true;
+   urgentMatchResults.hidden = false;
+  };
+
   // Step 4 → Back to Step 3
   urgentStep4Back.onclick = () => {
     urgentDetailsForm.hidden = true;
@@ -1089,10 +1099,11 @@ document.addEventListener("DOMContentLoaded", () => {
   // ─── 7) NORMAL MATCH FLOW NAVIGATION ─────────────────────────────────
 
   // Match Results → Back to Step 1
-  matchResultsBack.onclick = () => {
-    matchResults.hidden = true;
-    matchForm.hidden = false;
-  };
+  matchResultsBack.addEventListener("click", () => {
+   matchResults.hidden = true;
+   matchForm.hidden = false;
+ });
+
   // Match Results → Close panel
   matchResultsClose.onclick = () => {
     matchResults.hidden = true;
@@ -1102,14 +1113,15 @@ document.addEventListener("DOMContentLoaded", () => {
     appointmentFlow.hidden = true;
   };
   // Confirm Form → Back to Step 3
-  confirmStep4Back.onclick = () => {
-    confirmForm.hidden = true;
+  confirmStep4Back.addEventListener("click", () => {
+   confirmForm.hidden = true;
     appointmentFlow.hidden = false;
-  };
+  });
   // Confirm Form → Close panel
-  confirmStep4Close.onclick = () => {
+  confirmStep4Close.addEventListener("click", () => {
     appointmentFlow.hidden = true;
-  };
+  });
+
 
   // ─── 8) URGENT FLOW LOGIC ─────────────────────────────────────────────
 
@@ -1387,18 +1399,21 @@ ${providers.map(p => `- ${p.id}: ${p.name} — ${p.specialty} at ${p.facility}`)
   // ─── 10) MODAL CONTROLS & PAYMENT LOGIC ──────────────────────────────
 
   // Close review modal
-  modalClose.onclick = () => {
+ modalClose.addEventListener("click", () => {
     confirmModal.hidden = true;
-  };
+  });
 
   // Edit from modal → scroll back to form
-  modalEdit.onclick = () => {
-    confirmModal.hidden = true;
-    confirmForm.scrollIntoView({ behavior: "smooth" });
-  };
+  modalEdit.addEventListener("click", () => {
+   confirmModal.hidden = true;
+   confirmForm.scrollIntoView({ behavior: "smooth" });
+});
+
+
 
   // Confirm booking (handles both urgent & normal, with Paystack for urgent)
-  modalConfirm.onclick = () => {
+  modalConfirm.addEventListener("click", () => {
+
     if (urgentFlow) {
       // Urgent: Launch Paystack inline payment
       const email = urgentClientEmail.value.trim();
@@ -1438,25 +1453,26 @@ ${providers.map(p => `- ${p.id}: ${p.name} — ${p.specialty} at ${p.facility}`)
 
   // ─── 11) CANCELLATION MODAL ───────────────────────────────────────────
 
-  cancelYes.onclick = () => {
-    // Find the appointment with matching ID and remove
+  cancelYes.addEventListener("click", () => {
+   // Find the appointment with matching ID and remove
     const id = cancelYes.dataset.apptId;
     const idx = appointments.findIndex(a => a.id === id);
     if (idx > -1) {
       appointments.splice(idx, 1);
       localStorage.setItem("appointments", JSON.stringify(appointments));
-    }
+   }
     // Remove card from Rich Dashboard
     const card = document.querySelector(`.card[data-id="${id}"]`);
     if (card) card.remove();
     renderUpcomingCalendarWidget();
     showToast("Appointment canceled.");
     cancelModal.hidden = true;
-  };
+  });
 
-  cancelNo.onclick = () => {
+ cancelNo.addEventListener("click", () => {
     cancelModal.hidden = true;
-  };
+  });
+
 
   // ─── 12) RENDER UPCOMING CALENDAR WIDGET ─────────────────────────────
 
