@@ -1630,742 +1630,754 @@ document.addEventListener("DOMContentLoaded", () => {
   </footer>
 </body>
 <script>
-   // ───── Utility: sanitize user‐provided strings ─────
-    function escapeHtml(unsafe) {
-      return unsafe
-        .replace(/&/g, "&amp;")
-        .replace(/</g, "&lt;")
-        .replace(/>/g, "&gt;")
-        .replace(/"/g, "&quot;")
-        .replace(/'/g, "&#039;");
-    }
-document.addEventListener("DOMContentLoaded", () => {
-  // ─── UTILITY FUNCTIONS ─────────────────────────────────────────────────
-
-  // Send messages to OpenAI via proxy
-  async function callOpenAI(messages) {
-    try {
-      const response = await fetch("/.netlify/functions/openai-proxy", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ messages })
-      });
-      if (!response.ok) throw new Error("OpenAI request failed");
-      const data = await response.json();
-      return data.choices?.[0]?.message?.content.trim() || "";
-    } catch (err) {
-      console.error(err);
-      throw err;
-    }
+  // ───── Utility: sanitize user-provided strings ─────
+  function escapeHtml(unsafe) {
+    return unsafe
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;")
+      .replace(/'/g, "&#039;");
   }
 
-  // Send an image file to Vision API via proxy
-  async function callVision(file) {
-   // Build FormData
-    const fd = new FormData();
-    fd.append("file", file);
+  document.addEventListener("DOMContentLoaded", () => {
+    // ─── UTILITY FUNCTIONS ─────────────────────────────────────────────────
 
-    // Send to Netlify function
-    const res = await fetch("/.netlify/functions/vision-proxy", {
-      method: "POST",
-      body: fd,
+    // Send messages to OpenAI via proxy
+    async function callOpenAI(messages) {
+      try {
+        const response = await fetch("/.netlify/functions/openai-proxy", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ messages })
+        });
+        if (!response.ok) throw new Error("OpenAI request failed");
+        const data = await response.json();
+        return data.choices?.[0]?.message?.content.trim() || "";
+      } catch (err) {
+        console.error(err);
+        throw err;
+      }
+    }
+
+    // Send an image file to Vision API via proxy
+    async function callVision(file) {
+      // Build FormData
+      const fd = new FormData();
+      fd.append("file", file);
+
+      // Send to Netlify function
+      const res = await fetch("/.netlify/functions/vision-proxy", {
+        method: "POST",
+        body: fd,
+      });
+
+      // Grab raw text (in case the function returned non-JSON or JSON with { error: ... })
+      const rawText = await res.text();
+      let payload = null;
+      try {
+        payload = JSON.parse(rawText);
+      } catch {
+        // Not valid JSON → keep raw text
+        payload = null;
+      }
+
+      if (!res.ok) {
+        // If payload.error exists, show it. Otherwise show raw text.
+        const errMsg = payload && payload.error ? payload.error : rawText;
+        throw new Error("Vision API error: " + errMsg);
+      }
+
+      // At this point, res.ok is true. Return parsed JSON (or raw text if JSON.parse failed).
+      return payload !== null ? payload : rawText;
+    }
+
+    // Convert simple markdown to HTML paragraphs and headers
+    function formatHTML(text) {
+      if (!text) return "";
+      return text
+        .replace(/^######\s*(.+)$/gm, "<h6>$1</h6>")
+        .replace(/^#####\s*(.+)$/gm, "<h5>$1</h5>")
+        .replace(/^####\s*(.+)$/gm, "<h4>$1</h4>")
+        .replace(/^###\s*(.+)$/gm, "<h3>$1</h3>")
+        .replace(/^##\s*(.+)$/gm, "<h2>$1</h2>")
+        .replace(/^#\s*(.+)$/gm, "<h1>$1</h1>")
+        .replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>")
+        .replace(/\*(.+?)\*/g, "<em>$1</em>")
+        .replace(/`([^`]+)`/g, "<code>$1</code>")
+        .split(/\n{2,}/)
+        .map(p => `<p>${p.trim()}</p>`)
+        .join("");
+    }
+
+    // Append a close ("×") button to a response panel
+    function addClose(panel) {
+      if (panel.querySelector(".close-btn")) return;
+      const btn = document.createElement("button");
+      btn.className = "close-btn";
+      btn.setAttribute("aria-label", "Close result");
+      btn.textContent = "×";
+      btn.onclick = () => (panel.hidden = true);
+      panel.prepend(btn);
+    }
+
+    // Add copy and download tools below the result-content
+    function addTools(panel) {
+      if (panel.querySelector(".tool-row")) return;
+      const tools = document.createElement("div");
+      tools.className = "tool-row";
+      tools.innerHTML = `
+        <button class="copy-btn" title="Copy"><i class="fas fa-copy"></i></button>
+        <button class="dl-btn" title="Download"><i class="fas fa-download"></i></button>`;
+      panel.append(tools);
+
+      const copyBtn = tools.querySelector(".copy-btn");
+      const dlBtn = tools.querySelector(".dl-btn");
+      const contentDiv = panel.querySelector(".result-content");
+
+      copyBtn.onclick = () => {
+        if (!contentDiv) return;
+        navigator.clipboard.writeText(contentDiv.innerText || "");
+        const toast = document.createElement("div");
+        toast.className = "copy-toast";
+        toast.textContent = "Copied!";
+        document.body.append(toast);
+        setTimeout(() => toast.remove(), 1500);
+      };
+
+      dlBtn.onclick = () => {
+        if (!contentDiv) return;
+        const text = contentDiv.innerText || "";
+        const blob = new Blob([text], { type: "text/plain" });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = "response.txt";
+        document.body.append(a);
+        a.click();
+        URL.revokeObjectURL(url);
+        a.remove();
+      };
+    }
+
+    // Show a friendly error in a panel
+    function showFriendlyError(panel) {
+      panel.innerHTML = '<div class="result-content">😕 Oops! Something went wrong. Please try again.</div>';
+      addClose(panel);
+    }
+
+    // Helper to wire up form submissions with AI calls
+    function wireForm({ formId, systemPrompt, inputExtractor, resultPanelId }) {
+      const form = document.getElementById(formId);
+      const panel = document.getElementById(resultPanelId);
+      form.onsubmit = async (e) => {
+        e.preventDefault();
+        panel.hidden = false;
+        panel.innerHTML = '<div class="result-content">Processing… <span class="spinner"></span></div>';
+        try {
+          const userContent = inputExtractor();
+          const reply = await callOpenAI([
+            { role: "system", content: systemPrompt },
+            { role: "user", content: userContent }
+          ]);
+          panel.innerHTML = `<div class="result-content">${formatHTML(reply)}</div>`;
+          addClose(panel);
+          addTools(panel);
+        } catch (err) {
+          showFriendlyError(panel);
+        }
+      };
+    }
+
+    // ─── SIDEBAR & THEME TOGGLES ─────────────────────────────────────────────
+
+    const sidebar = document.getElementById("sidebar");
+    const shrinkBtn = document.getElementById("shrinkBtn");
+    const hamburger = document.getElementById("hamburger");
+    const themeToggle = document.getElementById("themeToggle");
+
+    // Toggle collapsed sidebar
+    shrinkBtn.addEventListener("click", () => {
+      sidebar.classList.toggle("collapsed");
+      const icon = shrinkBtn.querySelector("i");
+      icon.classList.toggle("fa-angle-double-right");
     });
 
-    // Grab raw text (in case the function returned non‐JSON or JSON with { error: ... })
-    const rawText = await res.text();
-    let payload = null;
-    try {
-      payload = JSON.parse(rawText);
-    } catch {
-      // Not valid JSON → keep raw text
-      payload = null;
+    // Toggle sidebar visibility on mobile
+    hamburger.addEventListener("click", () => {
+      sidebar.classList.toggle("open");
+    });
+
+    // Toggle dark mode
+    themeToggle.addEventListener("click", () => {
+      const htmlEl = document.documentElement;
+      const isDark = htmlEl.classList.toggle("dark");
+      themeToggle.classList.toggle("fa-sun", isDark);
+      themeToggle.classList.toggle("fa-moon", !isDark);
+      htmlEl.setAttribute("aria-theme", isDark ? "dark" : "light");
+    });
+
+    // Show hamburger icon only under 1024px
+    const mq = window.matchMedia("(max-width: 1024px)");
+    function updateHamburgerVisibility() {
+      hamburger.style.display = mq.matches ? "block" : "none";
     }
+    mq.addListener(updateHamburgerVisibility);
+    updateHamburgerVisibility();
 
-    if (!res.ok) {
-      // If payload.error exists, show it. Otherwise show raw text.
-      const errMsg = payload && payload.error ? payload.error : rawText;
-      throw new Error("Vision API error: " + errMsg);
+    // ─── PLANT IDENTIFIER ─────────────────────────────────────────────────
+
+    const idenForm = document.getElementById("iden-form");
+    const idenResult = document.getElementById("idenResult");
+    const idenPreview = document.getElementById("idenPreview");
+    const idenClear = document.getElementById("idenClear");
+
+    function previewImage(input) {
+      if (input.files && input.files[0]) {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          idenPreview.src = e.target.result;
+          idenPreview.style.display = "block";
+          idenClear.style.display = "block";
+        };
+        reader.readAsDataURL(input.files[0]);
+      }
     }
+    window.previewImage = previewImage; // expose to onchange
 
-    // At this point, res.ok is true. Return parsed JSON (or raw text if JSON.parse failed).
-    return payload !== null ? payload : rawText;
-   }
- 
+    function clearPreview() {
+      idenPreview.style.display = "none";
+      idenPreview.src = "";
+      idenClear.style.display = "none";
+      document.querySelector("#iden-form input[type=file]").value = "";
+      document.getElementById("idenDesc").value = "";
+    }
+    window.clearPreview = clearPreview; // expose to onclick
 
-  // Convert simple markdown to HTML paragraphs and headers
-  function formatHTML(text) {
-    if (!text) return "";
-    return text
-      .replace(/^######\s*(.+)$/gm, "<h6>$1</h6>")
-      .replace(/^#####\s*(.+)$/gm, "<h5>$1</h5>")
-      .replace(/^####\s*(.+)$/gm, "<h4>$1</h4>")
-      .replace(/^###\s*(.+)$/gm, "<h3>$1</h3>")
-      .replace(/^##\s*(.+)$/gm, "<h2>$1</h2>")
-      .replace(/^#\s*(.+)$/gm, "<h1>$1</h1>")
-      .replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>")
-      .replace(/\*(.+?)\*/g, "<em>$1</em>")
-      .replace(/`([^`]+)`/g, "<code>$1</code>")
-      .split(/\n{2,}/)
-      .map(p => `<p>${p.trim()}</p>`)
-      .join("");
-  }
-
-  // Append a close ("×") button to a response panel
-  function addClose(panel) {
-    if (panel.querySelector(".close-btn")) return;
-    const btn = document.createElement("button");
-    btn.className = "close-btn";
-    btn.setAttribute("aria-label", "Close result");
-    btn.textContent = "×";
-    btn.onclick = () => (panel.hidden = true);
-    panel.prepend(btn);
-  }
-
-  // Add copy and download tools below the result-content
-  function addTools(panel) {
-    if (panel.querySelector(".tool-row")) return;
-    const tools = document.createElement("div");
-    tools.className = "tool-row";
-    tools.innerHTML = `
-      <button class="copy-btn" title="Copy"><i class="fas fa-copy"></i></button>
-      <button class="dl-btn" title="Download"><i class="fas fa-download"></i></button>`;
-    panel.append(tools);
-
-    const copyBtn = tools.querySelector(".copy-btn");
-    const dlBtn = tools.querySelector(".dl-btn");
-    const contentDiv = panel.querySelector(".result-content");
-
-    copyBtn.onclick = () => {
-      if (!contentDiv) return;
-      navigator.clipboard.writeText(contentDiv.innerText || "");
-      const toast = document.createElement("div");
-      toast.className = "copy-toast";
-      toast.textContent = "Copied!";
-      document.body.append(toast);
-      setTimeout(() => toast.remove(), 1500);
-    };
-
-    dlBtn.onclick = () => {
-      if (!contentDiv) return;
-      const text = contentDiv.innerText || "";
-      const blob = new Blob([text], { type: "text/plain" });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = "response.txt";
-      document.body.append(a);
-      a.click();
-      URL.revokeObjectURL(url);
-      a.remove();
-    };
-  }
-
-  // Show a friendly error in a panel
-  function showFriendlyError(panel) {
-    panel.innerHTML = '<div class="result-content">😕 Oops! Something went wrong. Please try again.</div>';
-    addClose(panel);
-  }
-
-  // Helper to wire up form submissions with AI calls
-  function wireForm({ formId, systemPrompt, inputExtractor, resultPanelId }) {
-    const form = document.getElementById(formId);
-    const panel = document.getElementById(resultPanelId);
-    form.onsubmit = async (e) => {
+    idenForm.onsubmit = async (e) => {
       e.preventDefault();
+      const panel = idenResult;
       panel.hidden = false;
       panel.innerHTML = '<div class="result-content">Processing… <span class="spinner"></span></div>';
+
+      const fileInput = idenForm.querySelector('input[type="file"]');
+      const file = fileInput.files[0];
+      const desc = document.getElementById("idenDesc").value.trim();
+
+      if (!file && !desc) {
+        panel.innerHTML = '<div class="result-content">⚠️ Please upload an image or provide a description.</div>';
+        addClose(panel);
+        return;
+      }
+
       try {
-        const userContent = inputExtractor();
-        const reply = await callOpenAI([
-          { role: "system", content: systemPrompt },
-          { role: "user", content: userContent }
+        let html = "";
+
+        if (file) {
+          // Call your Vision-proxy function
+          const data = await callVision(file);
+          html += `
+            <p><strong>Plant Name:</strong> ${escapeHtml(data.name)}</p>
+            <p><strong>Medicinal Uses:</strong> ${escapeHtml(data.uses)}</p>
+            <p><strong>Cautions:</strong> ${escapeHtml(data.cautions)}</p>
+            <p><strong>Native Regions:</strong> ${Array.isArray(data.regions) ? escapeHtml(data.regions.join(", ")) : "N/A"}</p>
+            <hr/>`;
+        }
+
+        if (desc) {
+          // If user typed a description, also send it to OpenAI
+          panel.innerHTML = `<div class="result-content">Consulting AI about your text… <span class="spinner"></span></div>`;
+          const sys = `
+You are a plant expert. Given a description, respond with name, uses, cautions, and regions as JSON, for example:
+{
+  "name": "Moringa oleifera",
+  "uses": "Anti-inflammatory, antioxidant, nutritional supplement",
+  "cautions": "May lower blood sugar in diabetics",
+  "regions": ["West Africa", "India", "Southeast Asia"]
+}
+          `.trim();
+          const rawGPT = await callOpenAI([
+            { role: "system", content: sys },
+            { role: "user", content: `Describe plant: "${desc}"` }
+          ]);
+          // Expecting rawGPT to be a JSON string
+          let parsed;
+          try {
+            parsed = JSON.parse(rawGPT.trim());
+          } catch (parseErr) {
+            throw new Error("OpenAI did not return valid JSON: " + rawGPT);
+          }
+          html += `
+            <p><strong>(From text description)</strong></p>
+            <p><strong>Plant Name:</strong> ${escapeHtml(parsed.name)}</p>
+            <p><strong>Uses:</strong> ${escapeHtml(parsed.uses)}</p>
+            <p><strong>Cautions:</strong> ${escapeHtml(parsed.cautions)}</p>
+            <p><strong>Regions:</strong> ${Array.isArray(parsed.regions) ? escapeHtml(parsed.regions.join(", ")) : "–"}</p>
+          `;
+        }
+
+        panel.innerHTML = `<div class="result-content">${html}</div>`;
+        addClose(panel);
+        addTools(panel);
+      } catch (err) {
+        // 1) Log full error in console for debugging
+        console.error("Vision or AI call failed:", err);
+
+        // 2) Show the actual message (or full error) in the UI
+        const msg = err.message || JSON.stringify(err);
+        panel.innerHTML = `
+          <div class="result-content">
+            😕 Something went wrong.<br>
+            <em>${escapeHtml(msg)}</em>
+          </div>`;
+        addClose(panel);
+      }
+    };
+
+    // ─── SYMPTOM CHECKER ─────────────────────────────────────────────────────
+
+    const severitySlider = document.getElementById("severity");
+    const sevValueSpan = document.getElementById("sevValue");
+    severitySlider.oninput = (e) => {
+      sevValueSpan.textContent = e.target.value;
+    };
+
+    document.getElementById("sym-form").onsubmit = async (e) => {
+      e.preventDefault();
+      const panel = document.getElementById("symResult");
+      panel.hidden = false;
+      panel.innerHTML = '<div class="result-content">Processing… <span class="spinner"></span></div>';
+
+      const symptoms = document.getElementById("symInput").value.trim();
+      const categories = Array.from(
+        document.getElementById("symCategories").selectedOptions
+      ).map(o => o.value).join(", ");
+      const severity = document.getElementById("severity").value;
+      const duration = document.getElementById("symDuration").value || "0";
+
+      try {
+        const aiReply = await callOpenAI([
+          {
+            role: "system",
+            content: `
+You are a highly knowledgeable herbal diagnostician. A user will provide their symptoms, categories, severity, and duration.
+Your task is to recommend a list of herbs, specify dosages, and list possible precautions. Provide the answer in plain-text bullet points.
+            `.trim()
+          },
+          {
+            role: "user",
+            content: `Symptoms: ${symptoms}
+Categories: ${categories}
+Severity (1-10): ${severity}
+Duration (days): ${duration}`
+          }
         ]);
-        panel.innerHTML = `<div class="result-content">${formatHTML(reply)}</div>`;
+        panel.innerHTML = `<div class="result-content">${formatHTML(aiReply)}</div>`;
         addClose(panel);
         addTools(panel);
       } catch (err) {
         showFriendlyError(panel);
       }
     };
-  }
 
-  // ─── SIDEBAR & THEME TOGGLES ─────────────────────────────────────────────
+    // ─── CULTURAL KNOWLEDGE ─────────────────────────────────────────────────
 
-  const sidebar = document.getElementById("sidebar");
-  const shrinkBtn = document.getElementById("shrinkBtn");
-  const hamburger = document.getElementById("hamburger");
-  const themeToggle = document.getElementById("themeToggle");
-
-  // Toggle collapsed sidebar
-  shrinkBtn.addEventListener("click", () => {
-    sidebar.classList.toggle("collapsed");
-    const icon = shrinkBtn.querySelector("i");
-    icon.classList.toggle("fa-angle-double-right");
-  });
-
-  // Toggle sidebar visibility on mobile
-  hamburger.addEventListener("click", () => {
-    sidebar.classList.toggle("open");
-  });
-
-  // Toggle dark mode
-  themeToggle.addEventListener("click", () => {
-    const htmlEl = document.documentElement;
-    const isDark = htmlEl.classList.toggle("dark");
-    themeToggle.classList.toggle("fa-sun", isDark);
-    themeToggle.classList.toggle("fa-moon", !isDark);
-    htmlEl.setAttribute("aria-theme", isDark ? "dark" : "light");
-  });
-
-  // Show hamburger icon only under 1024px
-  const mq = window.matchMedia("(max-width: 1024px)");
-  function updateHamburgerVisibility() {
-    hamburger.style.display = mq.matches ? "block" : "none";
-  }
-  mq.addListener(updateHamburgerVisibility);
-  updateHamburgerVisibility();
-
-  // ─── PLANT IDENTIFIER ─────────────────────────────────────────────────
-
-  const idenForm = document.getElementById("iden-form");
-  const idenResult = document.getElementById("idenResult");
-  const idenPreview = document.getElementById("idenPreview");
-  const idenClear = document.getElementById("idenClear");
-
-  function previewImage(input) {
-    if (input.files && input.files[0]) {
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        idenPreview.src = e.target.result;
-        idenPreview.style.display = "block";
-        idenClear.style.display = "block";
-      };
-      reader.readAsDataURL(input.files[0]);
-    }
-  }
-  window.previewImage = previewImage; // expose to onchange
-
-  function clearPreview() {
-    idenPreview.style.display = "none";
-    idenPreview.src = "";
-    idenClear.style.display = "none";
-    document.querySelector("#iden-form input[type=file]").value = "";
-    document.getElementById("idenDesc").value = "";
-  }
-  window.clearPreview = clearPreview; // expose to onclick
-
-  idenForm.onsubmit = async (e) => {
-    e.preventDefault();
-    const panel = idenResult;
-    panel.hidden = false;
-    panel.innerHTML = '<div class="result-content">Processing… <span class="spinner"></span></div>';
-
-    const fileInput = idenForm.querySelector('input[type="file"]');
-    const file = fileInput.files[0];
-    const desc = document.getElementById("idenDesc").value.trim();
-
-    if (!file && !desc) {
-      panel.innerHTML = '<div class="result-content">⚠️ Please upload an image or provide a description.</div>';
-      addClose(panel);
-      return;
-    }
-
-try {
-      let html = '';
-
-      if (file) {
-        // Call your Vision‐proxy function
-        const data = await callVision(file);
-        html += `
-          <p><strong>Plant Name:</strong> ${escapeHtml(data.name)}</p>
-          <p><strong>Medicinal Uses:</strong> ${escapeHtml(data.uses)}</p>
-          <p><strong>Cautions:</strong> ${escapeHtml(data.cautions)}</p>
-          <p><strong>Native Regions:</strong> ${Array.isArray(data.regions) ? escapeHtml(data.regions.join(', ')) : 'N/A'}</p>
-          <hr/>`;
-      }
-
-      if (desc) {
-        // If user typed a description, also send it to OpenAI
-        panel.innerHTML = `<div class="result-content">Consulting AI about your text… <span class="spinner"></span></div>`;
-        const sys = 'You are a plant expert. Given a description, respond with name, uses, cautions, and regions as JSON.';
-        const rawGPT = await callOpenAI([
-          { role: 'system', content: sys },
-          { role: 'user',   content: `Describe plant: "${desc}"` }
-        ]);
-        // Expecting rawGPT to be a JSON string
-        let parsed;
-        try {
-          parsed = JSON.parse(rawGPT.trim());
-        } catch (parseErr) {
-          throw new Error('OpenAI did not return valid JSON: ' + rawGPT);
-        }
-        html += `
-          <p><strong>(From text description)</strong></p>
-          <p><strong>Plant Name:</strong> ${escapeHtml(parsed.name)}</p>
-          <p><strong>Uses:</strong> ${escapeHtml(parsed.uses)}</p>
-          <p><strong>Cautions:</strong> ${escapeHtml(parsed.cautions)}</p>
-          <p><strong>Regions:</strong> ${Array.isArray(parsed.regions) ? escapeHtml(parsed.regions.join(', ')) : '–'}</p>
-        `;
-      }
-
-      panel.innerHTML = `<div class="result-content">${html}</div>`;
-      addClose(panel);
-      addTools(panel);
-    } catch (err) {
-      // 1) Log full error in console for debugging
-     console.error('Vision or AI call failed:', err);
-
-      // 2) Show the actual message (or full error) in the UI
-      const msg = err.message || JSON.stringify(err);
-      panel.innerHTML = `
-        <div class="result-content">
-          😕 Something went wrong.<br>
-          <em>${escapeHtml(msg)}</em>
-        </div>`;
-      addClose(panel);
-    }
- };
-
-  // ─── SYMPTOM CHECKER ─────────────────────────────────────────────────────
-
-  const severitySlider = document.getElementById("severity");
-  const sevValueSpan = document.getElementById("sevValue");
-  severitySlider.oninput = (e) => {
-    sevValueSpan.textContent = e.target.value;
-  };
-
-  document.getElementById("sym-form").onsubmit = async (e) => {
-    e.preventDefault();
-    const panel = document.getElementById("symResult");
-    panel.hidden = false;
-    panel.innerHTML = '<div class="result-content">Processing… <span class="spinner"></span></div>';
-
-    const symptoms = document.getElementById("symInput").value.trim();
-    const categories = Array.from(document.getElementById("symCategories").selectedOptions).map(o => o.value).join(", ");
-    const severity = document.getElementById("severity").value;
-    const duration = document.getElementById("symDuration").value || "0";
-
-    try {
-      const aiReply = await callOpenAI([
-        {
-          role: "system",
-          content: `
-You are a highly knowledgeable herbal diagnostician. A user will provide their symptoms, categories, severity, and duration. Your task is to recommend a list of herbs, specify dosages, and list possible precautions. Provide the answer in plain-text bullet points.
-`
-        },
-        {
-          role: "user",
-          content: `Symptoms: ${symptoms}
-Categories: ${categories}
-Severity (1-10): ${severity}
-Duration (days): ${duration}`
-        }
-      ]);
-      panel.innerHTML = `<div class="result-content">${formatHTML(aiReply)}</div>`;
-      addClose(panel);
-      addTools(panel);
-    } catch (err) {
-      showFriendlyError(panel);
-    }
-  };
-
-  // ─── CULTURAL KNOWLEDGE ─────────────────────────────────────────────────
-
-  wireForm({
-    formId: "culture-form",
-    systemPrompt: `
+    wireForm({
+      formId: "culture-form",
+      systemPrompt: `
 You are an expert in cultural herbalism and folklore. A user will give you a region, tradition, or herb name. Provide concise, culturally relevant practices, rituals, and folklore associated with that input. Format as short paragraphs or bullet points.
-    `.trim(),
-    inputExtractor: () => document.getElementById("cultureQuery").value.trim(),
-    resultPanelId: "cultureResult"
-  });
+      `.trim(),
+      inputExtractor: () => document.getElementById("cultureQuery").value.trim(),
+      resultPanelId: "cultureResult"
+    });
 
-  // ─── SAFETY CHECKER ─────────────────────────────────────────────────────
+    // ─── SAFETY CHECKER ─────────────────────────────────────────────────────
 
-  wireForm({
-    formId: "safety-form",
-    systemPrompt: `
+    wireForm({
+      formId: "safety-form",
+      systemPrompt: `
 You are a safety expert in herbal and pharmaceutical interactions. Given two herbs or medications (Item A and Item B), determine if there are any known adverse interactions or contraindications. Respond with clear explanations, including references to known compounds if relevant.
-    `.trim(),
-    inputExtractor: () => {
-      const a = document.getElementById("safetyA").value.trim();
-      const b = document.getElementById("safetyB").value.trim();
-      return `Item A: ${a}\nItem B: ${b}`;
-    },
-    resultPanelId: "safetyResult"
-  });
+      `.trim(),
+      inputExtractor: () => {
+        const a = document.getElementById("safetyA").value.trim();
+        const b = document.getElementById("safetyB").value.trim();
+        return `Item A: ${a}\nItem B: ${b}`;
+      },
+      resultPanelId: "safetyResult"
+    });
 
-  // ─── AI HERBALIST CHAT ──────────────────────────────────────────────────
+    // ─── AI HERBALIST CHAT ──────────────────────────────────────────────────
 
-  const chatBox = document.getElementById("chatBox");
-  const sendChatBtn = document.getElementById("sendChat");
-  const chatInput = document.getElementById("chatInput");
-  const chatHint = document.getElementById("chatHint");
-  const viewHistoryBtn = document.getElementById("viewHistory");
-  const clearChatBtn = document.getElementById("clearChat");
-  let lastDateHeader = null;
+    const chatBox = document.getElementById("chatBox");
+    const sendChatBtn = document.getElementById("sendChat");
+    const chatInput = document.getElementById("chatInput");
+    const chatHint = document.getElementById("chatHint");
+    const viewHistoryBtn = document.getElementById("viewHistory");
+    const clearChatBtn = document.getElementById("clearChat");
+    let lastDateHeader = null;
 
-  // Load persisted history
-  let chatHistory = JSON.parse(localStorage.getItem("chatHistory") || "[]");
-  function formatDateSeparator(date) {
-    const today = new Date();
-    const diffDays = Math.floor((today.setHours(0,0,0,0) - date.setHours(0,0,0,0)) / 86400000);
-    if (diffDays === 0) return "Today";
-    if (diffDays === 1) return "Yesterday";
-    return date.toLocaleDateString();
-  }
-
-  function addMessage(who, text, timestamp = new Date()) {
-    const msgDate = new Date(timestamp);
-    const msgDay = msgDate.toDateString();
-    if (msgDay !== lastDateHeader) {
-      const sep = document.createElement("div");
-      sep.className = "chat-date-separator";
-      sep.textContent = formatDateSeparator(msgDate);
-      chatBox.append(sep);
-      lastDateHeader = msgDay;
+    // Load persisted history
+    let chatHistory = JSON.parse(localStorage.getItem("chatHistory") || "[]");
+    function formatDateSeparator(date) {
+      const today = new Date();
+      const diffDays = Math.floor((today.setHours(0, 0, 0, 0) - date.setHours(0, 0, 0, 0)) / 86400000);
+      if (diffDays === 0) return "Today";
+      if (diffDays === 1) return "Yesterday";
+      return date.toLocaleDateString();
     }
-    const msgDiv = document.createElement("div");
-    msgDiv.className = who === "You" ? "user-msg" : "bot-msg";
-    msgDiv.innerHTML = `
-      ${formatHTML(text)}
-      <div class="timestamp">${msgDate.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}</div>
-    `;
-    chatBox.append(msgDiv);
-    chatBox.scrollTop = chatBox.scrollHeight;
-  }
 
-  // Render saved history
-  chatHistory.forEach(m => addMessage(m.who, m.text, new Date(m.timestamp)));
+    function addMessage(who, text, timestamp = new Date()) {
+      const msgDate = new Date(timestamp);
+      const msgDay = msgDate.toDateString();
+      if (msgDay !== lastDateHeader) {
+        const sep = document.createElement("div");
+        sep.className = "chat-date-separator";
+        sep.textContent = formatDateSeparator(msgDate);
+        chatBox.append(sep);
+        lastDateHeader = msgDay;
+      }
+      const msgDiv = document.createElement("div");
+      msgDiv.className = who === "You" ? "user-msg" : "bot-msg";
+      msgDiv.innerHTML = `
+        ${formatHTML(text)}
+        <div class="timestamp">${msgDate.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}</div>
+      `;
+      chatBox.append(msgDiv);
+      chatBox.scrollTop = chatBox.scrollHeight;
+    }
 
-  // Send user message and get AI response
-  sendChatBtn.onclick = async () => {
-    const userText = chatInput.value.trim();
-    if (!userText) return;
-    addMessage("You", userText);
-    chatHistory.push({ who: "You", text: userText, timestamp: new Date().toISOString() });
-    localStorage.setItem("chatHistory", JSON.stringify(chatHistory));
-    chatInput.value = "";
-    chatHint.hidden = false;
-    try {
-      const aiReply = await callOpenAI([
-        {
-          role: "system",
-          content: `
-You are a friendly, knowledgeable herbalist. A user will ask questions about herbs, remedies, dosages, or plant facts. Respond in plain language, giving clear instructions or information about herbal care.
-`
-        },
-        { role: "user", content: userText }
-      ]);
-      addMessage("Herbalist", aiReply);
-      chatHistory.push({ who: "Herbalist", text: aiReply, timestamp: new Date().toISOString() });
+    // Render saved history
+    chatHistory.forEach(m => addMessage(m.who, m.text, new Date(m.timestamp)));
+
+    // Send user message and get AI response
+    sendChatBtn.onclick = async () => {
+      const userText = chatInput.value.trim();
+      if (!userText) return;
+      addMessage("You", userText);
+      chatHistory.push({ who: "You", text: userText, timestamp: new Date().toISOString() });
       localStorage.setItem("chatHistory", JSON.stringify(chatHistory));
-    } catch (err) {
-      addMessage("Herbalist", "⚠️ Oops! Something went wrong. Please try again.");
-    } finally {
-      chatHint.hidden = true;
-    }
-  };
-
-  // Clear chat box (history cleared)
-  clearChatBtn.onclick = () => {
-    chatBox.innerHTML = "";
-    chatHistory = [];
-    localStorage.removeItem("chatHistory");
-    lastDateHeader = null;
-  };
-
-  // View chat history in a modal
-  viewHistoryBtn.onclick = () => {
-    const modal = document.createElement("div");
-    modal.className = "history-modal";
-    modal.innerHTML = `
-      <div class="history-content">
-        <h3>Chat History</h3>
-        <ul>
-          ${chatHistory
-            .map((m, i) => {
-              const dt = new Date(m.timestamp);
-              return `
-              <li>
-                <div class="chat-date-separator">${formatDateSeparator(dt)}</div>
-                <strong>${m.who}:</strong> ${m.text}
-                <button data-index="${i}" class="del-msg" title="Delete"><i class="fas fa-trash-alt"></i></button>
-              </li>`;
-            })
-            .join("")}
-        </ul>
-        <button class="close-history"><i class="fas fa-times"></i> Close</button>
-      </div>`;
-    document.body.append(modal);
-
-    // Hook up delete buttons
-    modal.querySelectorAll(".del-msg").forEach(btn => {
-      btn.onclick = () => {
-        const idx = +btn.dataset.index;
-        chatHistory.splice(idx, 1);
+      chatInput.value = "";
+      chatHint.hidden = false;
+      try {
+        const aiReply = await callOpenAI([
+          {
+            role: "system",
+            content: `
+You are a friendly, knowledgeable herbalist. A user will ask questions about herbs, remedies, dosages, or plant facts. Respond in plain language, giving clear instructions or information about herbal care.
+            `.trim()
+          },
+          { role: "user", content: userText }
+        ]);
+        addMessage("Herbalist", aiReply);
+        chatHistory.push({ who: "Herbalist", text: aiReply, timestamp: new Date().toISOString() });
         localStorage.setItem("chatHistory", JSON.stringify(chatHistory));
-        modal.remove();
-        viewHistoryBtn.click(); // reopen to refresh
+      } catch (err) {
+        addMessage("Herbalist", "⚠️ Oops! Something went wrong. Please try again.");
+      } finally {
+        chatHint.hidden = true;
+      }
+    };
+
+    // Clear chat box (history cleared)
+    clearChatBtn.onclick = () => {
+      chatBox.innerHTML = "";
+      chatHistory = [];
+      localStorage.removeItem("chatHistory");
+      lastDateHeader = null;
+    };
+
+    // View chat history in a modal
+    viewHistoryBtn.onclick = () => {
+      const modal = document.createElement("div");
+      modal.className = "history-modal";
+      modal.innerHTML = `
+        <div class="history-content">
+          <h3>Chat History</h3>
+          <ul>
+            ${chatHistory
+              .map((m, i) => {
+                const dt = new Date(m.timestamp);
+                return `
+                <li>
+                  <div class="chat-date-separator">${formatDateSeparator(dt)}</div>
+                  <strong>${m.who}:</strong> ${m.text}
+                  <button data-index="${i}" class="del-msg" title="Delete"><i class="fas fa-trash-alt"></i></button>
+                </li>`;
+              })
+              .join("")}
+          </ul>
+          <button class="close-history"><i class="fas fa-times"></i> Close</button>
+        </div>`;
+      document.body.append(modal);
+
+      // Hook up delete buttons
+      modal.querySelectorAll(".del-msg").forEach(btn => {
+        btn.onclick = () => {
+          const idx = +btn.dataset.index;
+          chatHistory.splice(idx, 1);
+          localStorage.setItem("chatHistory", JSON.stringify(chatHistory));
+          modal.remove();
+          viewHistoryBtn.click(); // reopen to refresh
+        };
+      });
+      modal.querySelector(".close-history").onclick = () => modal.remove();
+    };
+
+    // ─── PERSONALIZED FORMULATIONS ────────────────────────────────────────────
+
+    wireForm({
+      formId: "pf-form",
+      systemPrompt: `
+You are an expert herbal pharmacist. A user will provide one herb, age, and weight. Create a safe, personalized herbal formulation. Specify dosage, preparation method (e.g., tea, tincture), and any safety precautions. Use plain text bullet points.
+      `.trim(),
+      inputExtractor: () => {
+        const herb = document.getElementById("pfHerbs").value;
+        const age = document.getElementById("pfAge").value;
+        const weight = document.getElementById("pfWeight").value;
+        return `Herb: ${herb}\nAge: ${age}\nWeight: ${weight} kg`;
+      },
+      resultPanelId: "pfResult"
+    });
+
+    // ─── RESEARCH SUMMARIES ───────────────────────────────────────────────────
+
+    wireForm({
+      formId: "research-form",
+      systemPrompt: `
+You are an expert researcher specializing in herbal clinical studies. The user will provide study titles, abstracts, or keywords. Provide a concise, plain-text summary of the research, highlighting methodology, results, and conclusions. Include citations where appropriate.
+      `.trim(),
+      inputExtractor: () => document.getElementById("researchQuery").value.trim(),
+      resultPanelId: "researchResults"
+    });
+
+    // ─── INVENTORY FORECAST ───────────────────────────────────────────────────
+
+    wireForm({
+      formId: "inventory-form",
+      systemPrompt: `
+You are an experienced inventory analyst for herbal dispensaries. Given a herb name and a number of weeks, forecast weekly stock needs with buffer stock recommendations. Provide the answer as a short report with bullet points.
+      `.trim(),
+      inputExtractor: () => {
+        const herb = document.getElementById("forecastHerb").value;
+        const weeks = document.getElementById("forecastPeriod").value;
+        return `Herb: ${herb}\nWeeks Ahead: ${weeks}`;
+      },
+      resultPanelId: "inventoryResult"
+    });
+
+    // ─── GENETICS MATCH ───────────────────────────────────────────────────────
+
+    document.getElementById("genetics-form").onsubmit = async (e) => {
+      e.preventDefault();
+      const panel = document.getElementById("geneticResult");
+      panel.hidden = false;
+      panel.innerHTML = '<div class="result-content">Processing… <span class="spinner"></span></div>';
+
+      const fileInput = document.getElementById("geneticUpload");
+      const file = fileInput.files[0];
+      if (!file) {
+        panel.innerHTML = '<div class="result-content">⚠️ Please upload a CSV or JSON file containing genetic SNP data.</div>';
+        addClose(panel);
+        return;
+      }
+      const allowedTypes = ["application/json", "text/csv"];
+      if (!allowedTypes.includes(file.type)) {
+        panel.innerHTML = '<div class="result-content">⚠️ Invalid file type. Upload a .csv or .json file.</div>';
+        addClose(panel);
+        return;
+      }
+
+      try {
+        const fileText = await file.text();
+        const aiReply = await callOpenAI([
+          {
+            role: "system",
+            content: `
+You are a genetics expert in herbal medicine. The user will upload a genetic report as CSV or JSON containing SNP data. Analyze the SNPs and recommend herbs tailored to their genetic profile. Provide evidence-level details: Tier 1 (strong evidence), Tier 2 (emerging). Format as bullet points.
+            `.trim()
+          },
+          { role: "user", content: fileText }
+        ]);
+        panel.innerHTML = `<div class="result-content">${formatHTML(aiReply)}</div>`;
+        addClose(panel);
+        addTools(panel);
+      } catch (err) {
+        showFriendlyError(panel);
+      }
+    };
+
+    // ─── DOSAGE CALCULATOR ───────────────────────────────────────────────────
+
+    wireForm({
+      formId: "dose-form",
+      systemPrompt: `
+You are a dosage calculation expert for herbal preparations. Given a user’s weight (in kg), symptom (e.g., headache), and extract form (powder, tincture, or capsule), calculate a safe daily dosage range. Provide the answer in plain text, specifying units (e.g., mg, ml) and any relevant safety notes.
+      `.trim(),
+      inputExtractor: () => {
+        const weight = document.getElementById("weight").value;
+        const symptom = document.getElementById("symptom").value.trim();
+        const formType = document.getElementById("formType").value;
+        return `Weight: ${weight} kg\nSymptom: ${symptom}\nForm Type: ${formType}`;
+      },
+      resultPanelId: "dosageResult"
+    });
+
+    // ─── INTERACTION CHECKER ───────────────────────────────────────────────────
+
+    wireForm({
+      formId: "int-form",
+      systemPrompt: `
+You are a qualified pharmacologist specialized in herb-herb interactions. Given two herbs, evaluate if any known harmful interactions exist. Provide a clear explanation, including mechanisms if known, and any safety advice.
+      `.trim(),
+      inputExtractor: () => {
+        const a = document.getElementById("herbA").value;
+        const b = document.getElementById("herbB").value;
+        if (a === b) throw new Error("Please select two distinct herbs.");
+        return `Herb A: ${a}\nHerb B: ${b}`;
+      },
+      resultPanelId: "interactionResult"
+    });
+
+    // ─── ROI CALCULATOR ───────────────────────────────────────────────────────
+
+    document.getElementById("currency").onchange = (e) => {
+      const symbolMap = { GHS: "₵", USD: "$", EUR: "€" };
+      document.getElementById("curSym").textContent = symbolMap[e.target.value] || "";
+    };
+
+    document.getElementById("roi-form").onsubmit = async (e) => {
+      e.preventDefault();
+      const panel = document.getElementById("roiResult");
+      panel.hidden = false;
+      panel.innerHTML = '<div class="result-content">Calculating… <span class="spinner"></span></div>';
+
+      const rxCount = +document.getElementById("roiRx").value;
+      const cost = +document.getElementById("roiCost").value;
+      const currency = document.getElementById("currency").value;
+      if (!(rxCount > 0 && cost > 0)) {
+        panel.innerHTML = '<div class="result-content">⚠️ Please enter positive numbers for prescriptions and cost.</div>';
+        return;
+      }
+
+      try {
+        const aiReply = await callOpenAI([
+          {
+            role: "system",
+            content: `
+You are a financial analyst specializing in healthcare ROI. Given monthly prescription volume and average herb cost, calculate the return on investment for implementing an AI-driven herbal prescription system. Show step-by-step equations in plain text and provide final ROI percentage. Use currency: ${currency}.
+            `.trim()
+          },
+          {
+            role: "user",
+            content: `Monthly Prescriptions: ${rxCount}\nAverage Herb Cost: ${cost}`
+          }
+        ]);
+        panel.innerHTML = `<div class="result-content">${formatHTML(aiReply)}</div>`;
+        addClose(panel);
+        addTools(panel);
+      } catch (err) {
+        showFriendlyError(panel);
+      }
+    };
+
+    // ─── EXECUTIVE ANALYTICS DASHBOARD ───────────────────────────────────────
+
+    function getCSSVar(name) {
+      return getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+    }
+
+    function initCharts() {
+      const colorText = getCSSVar("--text");
+      const colorMuted = getCSSVar("--muted");
+      const baseConfig = (type, data) => ({
+        type: type,
+        data: data,
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          aspectRatio: 1.8,
+          color: colorText,
+          scales: {
+            x: {
+              ticks: { color: colorText },
+              grid: { color: colorMuted }
+            },
+            y: {
+              ticks: { color: colorText },
+              grid: { color: colorMuted }
+            }
+          },
+          plugins: {
+            legend: {
+              display: false,
+              labels: { color: colorText }
+            }
+          }
+        }
+      });
+
+      new Chart("chartAdoption", baseConfig("line", {
+        labels: ["Jan", "Feb", "Mar", "Apr", "May"],
+        datasets: [{ data: [50, 75, 100, 125, 150] }]
+      }));
+
+      new Chart("chartEfficacy", baseConfig("bar", {
+        labels: ["Mild", "Moderate", "High"],
+        datasets: [{ data: [30, 45, 25] }]
+      }));
+
+      new Chart("chartSupply", baseConfig("pie", {
+        labels: ["Herb A", "Herb B", "Herb C"],
+        datasets: [{ data: [200, 150, 300] }]
+      }));
+
+      new Chart("chartROI", baseConfig("radar", {
+        labels: ["Q1", "Q2", "Q3", "Q4"],
+        datasets: [{ data: [5, 7, 6, 8] }]
+      }));
+
+      // Remove grid lines for aesthetic
+      Chart.defaults.scales.x.grid.display = false;
+      Chart.defaults.scales.y.grid.display = false;
+    }
+
+    initCharts();
+
+    // Export charts data as CSV
+    window.exportAnalytics = () => {
+      const chartIds = ["Adoption", "Efficacy", "Supply", "ROI"];
+      let csvContent = "Chart,Label,Value\n";
+      chartIds.forEach((id) => {
+        const chart = Chart.getChart("chart" + id);
+        if (!chart) return;
+        chart.data.labels.forEach((label, idx) => {
+          const value = chart.data.datasets[0].data[idx];
+          csvContent += `${id},${label},${value}\n`;
+        });
+      });
+      const blob = new Blob([csvContent], { type: "text/csv" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "analytics.csv";
+      document.body.append(a);
+      a.click();
+      URL.revokeObjectURL(url);
+      a.remove();
+    };
+
+    // ─── RESPONSE PANEL CLOSE BUTTONS ─────────────────────────────────────────
+
+    // Ensure all static panels have close behavior
+    document.querySelectorAll(".response .close-btn").forEach((btn) => {
+      btn.onclick = () => {
+        const panel = btn.closest(".response");
+        if (panel) panel.hidden = true;
       };
     });
-    modal.querySelector(".close-history").onclick = () => modal.remove();
-  };
-
-  // ─── PERSONALIZED FORMULATIONS ────────────────────────────────────────────
-
-  wireForm({
-    formId: "pf-form",
-    systemPrompt: `
-You are an expert herbal pharmacist. A user will provide one herb, age, and weight. Create a safe, personalized herbal formulation. Specify dosage, preparation method (e.g., tea, tincture), and any safety precautions. Use plain text bullet points.
-    `.trim(),
-    inputExtractor: () => {
-      const herb = document.getElementById("pfHerbs").value;
-      const age = document.getElementById("pfAge").value;
-      const weight = document.getElementById("pfWeight").value;
-      return `Herb: ${herb}\nAge: ${age}\nWeight: ${weight} kg`;
-    },
-    resultPanelId: "pfResult"
   });
-
-  // ─── RESEARCH SUMMARIES ───────────────────────────────────────────────────
-
-  wireForm({
-    formId: "research-form",
-    systemPrompt: `
-You are an expert researcher specializing in herbal clinical studies. The user will provide study titles, abstracts, or keywords. Provide a concise, plain-text summary of the research, highlighting methodology, results, and conclusions. Include citations where appropriate.
-    `.trim(),
-    inputExtractor: () => document.getElementById("researchQuery").value.trim(),
-    resultPanelId: "researchResults"
-  });
-
-  // ─── INVENTORY FORECAST ───────────────────────────────────────────────────
-
-  wireForm({
-    formId: "inventory-form",
-    systemPrompt: `
-You are an experienced inventory analyst for herbal dispensaries. Given a herb name and a number of weeks, forecast weekly stock needs with buffer stock recommendations. Provide the answer as a short report with bullet points.
-    `.trim(),
-    inputExtractor: () => {
-      const herb = document.getElementById("forecastHerb").value;
-      const weeks = document.getElementById("forecastPeriod").value;
-      return `Herb: ${herb}\nWeeks Ahead: ${weeks}`;
-    },
-    resultPanelId: "inventoryResult"
-  });
-
-  // ─── GENETICS MATCH ───────────────────────────────────────────────────────
-
-  document.getElementById("genetics-form").onsubmit = async (e) => {
-    e.preventDefault();
-    const panel = document.getElementById("geneticResult");
-    panel.hidden = false;
-    panel.innerHTML = '<div class="result-content">Processing… <span class="spinner"></span></div>';
-
-    const fileInput = document.getElementById("geneticUpload");
-    const file = fileInput.files[0];
-    if (!file) {
-      panel.innerHTML = '<div class="result-content">⚠️ Please upload a CSV or JSON file containing genetic SNP data.</div>';
-      addClose(panel);
-      return;
-    }
-    const allowedTypes = ["application/json", "text/csv"];
-    if (!allowedTypes.includes(file.type)) {
-      panel.innerHTML = '<div class="result-content">⚠️ Invalid file type. Upload a .csv or .json file.</div>';
-      addClose(panel);
-      return;
-    }
-
-    try {
-      const fileText = await file.text();
-      const aiReply = await callOpenAI([
-        {
-          role: "system",
-          content: `
-You are a genetics expert in herbal medicine. The user will upload a genetic report as CSV or JSON containing SNP data. Analyze the SNPs and recommend herbs tailored to their genetic profile. Provide evidence-level details: Tier 1 (strong evidence), Tier 2 (emerging). Format as bullet points.
-`
-        },
-        { role: "user", content: fileText }
-      ]);
-      panel.innerHTML = `<div class="result-content">${formatHTML(aiReply)}</div>`;
-      addClose(panel);
-      addTools(panel);
-    } catch (err) {
-      showFriendlyError(panel);
-    }
-  };
-
-  // ─── DOSAGE CALCULATOR ───────────────────────────────────────────────────
-
-  wireForm({
-    formId: "dose-form",
-    systemPrompt: `
-You are a dosage calculation expert for herbal preparations. Given a user’s weight (in kg), symptom (e.g., headache), and extract form (powder, tincture, or capsule), calculate a safe daily dosage range. Provide the answer in plain text, specifying units (e.g., mg, ml) and any relevant safety notes.
-    `.trim(),
-    inputExtractor: () => {
-      const weight = document.getElementById("weight").value;
-      const symptom = document.getElementById("symptom").value.trim();
-      const formType = document.getElementById("formType").value;
-      return `Weight: ${weight} kg\nSymptom: ${symptom}\nForm Type: ${formType}`;
-    },
-    resultPanelId: "dosageResult"
-  });
-
-  // ─── INTERACTION CHECKER ───────────────────────────────────────────────────
-
-  wireForm({
-    formId: "int-form",
-    systemPrompt: `
-You are a qualified pharmacologist specialized in herb-herb interactions. Given two herbs, evaluate if any known harmful interactions exist. Provide a clear explanation, including mechanisms if known, and any safety advice.
-    `.trim(),
-    inputExtractor: () => {
-      const a = document.getElementById("herbA").value;
-      const b = document.getElementById("herbB").value;
-      if (a === b) throw new Error("Please select two distinct herbs.");
-      return `Herb A: ${a}\nHerb B: ${b}`;
-    },
-    resultPanelId: "interactionResult"
-  });
-
-  // ─── ROI CALCULATOR ───────────────────────────────────────────────────────
-
-  document.getElementById("currency").onchange = (e) => {
-    const symbolMap = { GHS: "₵", USD: "$", EUR: "€" };
-    document.getElementById("curSym").textContent = symbolMap[e.target.value] || "";
-  };
-
-  document.getElementById("roi-form").onsubmit = async (e) => {
-    e.preventDefault();
-    const panel = document.getElementById("roiResult");
-    panel.hidden = false;
-    panel.innerHTML = '<div class="result-content">Calculating… <span class="spinner"></span></div>';
-
-    const rxCount = +document.getElementById("roiRx").value;
-    const cost = +document.getElementById("roiCost").value;
-    const currency = document.getElementById("currency").value;
-    if (!(rxCount > 0 && cost > 0)) {
-      panel.innerHTML = '<div class="result-content">⚠️ Please enter positive numbers for prescriptions and cost.</div>';
-      return;
-    }
-
-    try {
-      const aiReply = await callOpenAI([
-        {
-          role: "system",
-          content: `
-You are a financial analyst specializing in healthcare ROI. Given monthly prescription volume and average herb cost, calculate the return on investment for implementing an AI-driven herbal prescription system. Show step-by-step equations in plain text and provide final ROI percentage. Use currency: ${currency}.
-`
-        },
-        {
-          role: "user",
-          content: `Monthly Prescriptions: ${rxCount}\nAverage Herb Cost: ${cost}`
-        }
-      ]);
-      panel.innerHTML = `<div class="result-content">${formatHTML(aiReply)}</div>`;
-      addClose(panel);
-      addTools(panel);
-    } catch (err) {
-      showFriendlyError(panel);
-    }
-  };
-
-  // ─── EXECUTIVE ANALYTICS DASHBOARD ───────────────────────────────────────
-
-  function getCSSVar(name) {
-    return getComputedStyle(document.documentElement).getPropertyValue(name).trim();
-  }
-
-  function initCharts() {
-    const colorText = getCSSVar("--text");
-    const colorMuted = getCSSVar("--muted");
-    const baseConfig = (type, data) => ({
-      type: type,
-      data: data,
-      options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        aspectRatio: 1.8,
-        color: colorText,
-        scales: {
-          x: {
-            ticks: { color: colorText },
-            grid: { color: colorMuted }
-          },
-          y: {
-            ticks: { color: colorText },
-            grid: { color: colorMuted }
-          }
-        },
-        plugins: {
-          legend: {
-            display: false,
-            labels: { color: colorText }
-          }
-        }
-      }
-    });
-
-    new Chart("chartAdoption", baseConfig("line", {
-      labels: ["Jan", "Feb", "Mar", "Apr", "May"],
-      datasets: [{ data: [50, 75, 100, 125, 150] }]
-    }));
-
-    new Chart("chartEfficacy", baseConfig("bar", {
-      labels: ["Mild", "Moderate", "High"],
-      datasets: [{ data: [30, 45, 25] }]
-    }));
-
-    new Chart("chartSupply", baseConfig("pie", {
-      labels: ["Herb A", "Herb B", "Herb C"],
-      datasets: [{ data: [200, 150, 300] }]
-    }));
-
-    new Chart("chartROI", baseConfig("radar", {
-      labels: ["Q1", "Q2", "Q3", "Q4"],
-      datasets: [{ data: [5, 7, 6, 8] }]
-    }));
-
-    // Remove grid lines for aesthetic
-    Chart.defaults.scales.x.grid.display = false;
-    Chart.defaults.scales.y.grid.display = false;
-  }
-
-  initCharts();
-
-  // Export charts data as CSV
-  window.exportAnalytics = () => {
-    const chartIds = ["Adoption", "Efficacy", "Supply", "ROI"];
-    let csvContent = "Chart,Label,Value\n";
-    chartIds.forEach((id) => {
-      const chart = Chart.getChart("chart" + id);
-      if (!chart) return;
-      chart.data.labels.forEach((label, idx) => {
-        const value = chart.data.datasets[0].data[idx];
-        csvContent += `${id},${label},${value}\n`;
-      });
-    });
-    const blob = new Blob([csvContent], { type: "text/csv" });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = "analytics.csv";
-    document.body.append(a);
-    a.click();
-    URL.revokeObjectURL(url);
-    a.remove();
-  };
-
-  // ─── RESPONSE PANEL CLOSE BUTTONS ─────────────────────────────────────────
-
-  // Ensure all static panels have close behavior
-  document.querySelectorAll(".response .close-btn").forEach((btn) => {
-    btn.onclick = () => {
-      const panel = btn.closest(".response");
-      if (panel) panel.hidden = true;
-    };
-  });
-});
 </script>
+
 
 
 </body>
