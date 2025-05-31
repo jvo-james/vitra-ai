@@ -172,31 +172,33 @@ document.addEventListener("DOMContentLoaded", () => {
   aside#sidebar.collapsed nav a {
     justify-content: center;
   }
-  #shrinkBtn {
-    position: absolute;
-    bottom: var(--padding);
-    left: -18px;
-    width: 36px;
-    height: 36px;
-    background: var(--primary);
-    color: #fff;
-    border: none;
-    border-radius: 50%;
-    cursor: pointer;
-    box-shadow: 0 3px 8px rgba(0, 0, 0, 0.15);
-    transition: transform var(--transition), background var(--transition);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-  }
+
   #shrinkBtn i {
     font-size: 1.2rem;
   }
-  #shrinkBtn:hover {
-    transform: scale(1.1);
-    background: var(--secondary);
+  #shrinkBtn {
+    position: absolute;
+    bottom: var(--padding);
+    left: 50%;
+    transform: translateX(-50%);
+    width: 36px;
+    height: 36px;
+    background: none;
+    color: var(--primary);
+    border: 2px solid var(--primary);
+    border-radius: 50%;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: color var(--transition), border-color var(--transition), transform var(--transition);
   }
-
+  #shrinkBtn:hover {
+    color: var(--secondary);
+    border-color: var(--secondary);
+    transform: translateX(-50%) scale(1.1);
+  }
+   
   /*──────────────────────────────────────────────────────────────────────────────
     HEADER
   ──────────────────────────────────────────────────────────────────────────────*/
@@ -1188,6 +1190,22 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   }
 
+   .other-input {
+    display: none;
+    margin-top: 0.5rem;
+    padding: 0.75rem;
+    border: 1.5px solid #d1dce5;
+    background: var(--bg);
+    color: var(--text);
+    font-size: 0.95rem;
+    border-radius: var(--radius);
+    transition: border-color var(--transition), box-shadow var(--transition);
+  }
+  .other-input:focus {
+    outline: none;
+    border-color: var(--primary);
+    box-shadow: 0 0 8px var(--primary);
+  }
   /*──────────────────────────────────────────────────────────────────────────────
     DARK MODE OVERRIDES
   ──────────────────────────────────────────────────────────────────────────────*/
@@ -1451,7 +1469,10 @@ document.addEventListener("DOMContentLoaded", () => {
             <option value="skin">Skin</option>
             <option value="mental">Mental</option>
             <option value="cardio">Cardiovascular</option>
+           <option value="Other">Other</option>
           </select>
+          <input type="text" id="symCategoryOther" placeholder="Please specify…" class="other-input hidden"/>
+        </div>
         </div>
         <div class="field range-field">
           <label for="severity">Severity</label>
@@ -1553,7 +1574,10 @@ document.addEventListener("DOMContentLoaded", () => {
           <option>Ginger</option>
           <option>Hibiscus</option>
           <option>Holy Basil</option>
+         <option value="Other">Other</option>
         </select>
+        <input type="text" id="pfHerbsOther" placeholder="Please specify herb…" class="other-input hidden"/>
+
         <input id="pfAge" type="number" min="1" max="120" placeholder="Age (years)" required/>
         <input id="pfWeight" type="number" min="10" max="300" placeholder="Weight (kg)" required/>
         <button type="submit">Generate Formulation</button>
@@ -1617,8 +1641,11 @@ document.addEventListener("DOMContentLoaded", () => {
           <option>Ginger</option>
           <option>Hibiscus</option>
           <option>Holy Basil</option>
+         <option value="Other">Other</option>
         </select>
-        <input id="forecastPeriod" type="number" min="1" max="52" value="4" placeholder="Weeks ahead" required/>
+        <input type="text" id="forecastHerbOther" placeholder="Please specify herb…" class="other-input hidden"/>
+
+       <input id="forecastPeriod" type="number" min="1" max="52" value="4" placeholder="Weeks ahead" required/>
         <button type="submit">Forecast Inventory</button>
         <div class="hint">Enter number of weeks (1–52) for demand prediction.</div>
       </form>
@@ -1659,7 +1686,10 @@ document.addEventListener("DOMContentLoaded", () => {
           <option value="powder">Powder</option>
           <option value="tincture">Tincture</option>
           <option value="capsule">Capsule</option>
+        <option value="Other">Other</option>
         </select>
+        <input type="text" id="formTypeOther" placeholder="Please specify form…" class="other-input hidden"/>
+
         <button type="submit">Calculate Dosage</button>
         <div class="hint">Specify extract form for precise calculations.</div>
       </form>
@@ -1748,8 +1778,11 @@ document.addEventListener("DOMContentLoaded", () => {
     <!-- 13. ROI Calculator -->
     <section id="roi" class="module">
       <h2><i class="fas fa-dollar-sign"></i> Business Insights &amp; ROI Calculator</h2>
-      <p class="desc">
-        Calculate your practice’s return on investment from AI-driven herbal prescription automation. Enter your currency, monthly prescription volume, and average herb cost.
+     <p class="desc">
+        Calculate the financial return on investment (ROI) of integrating our AI‐driven herbal prescription system into your practice. 
+        <br>1) Choose your currency. 2) Enter your average monthly number of AI‐generated herb prescriptions. 
+        <br>3) Enter your average cost per herb prescription. 
+        <br><strong>The result will show estimated monthly savings vs. traditional methods and ROI percentage.</strong>
       </p>
       <form id="roi-form">
         <div class="field">
@@ -1785,19 +1818,24 @@ document.addEventListener("DOMContentLoaded", () => {
       <div class="charts">
         <figure class="chart-card">
           <canvas id="chartAdoption"></canvas>
-          <figcaption><strong>Adoption Over Time:</strong> Monthly new users.</figcaption>
+ <figcaption><strong>Adoption Over Time:</strong> Number of new users subscribing to the AI Herbalist each month.</figcaption>
+          <p class="chart-desc">This line chart shows how many unique practitioners started using AI‐based prescriptions from Jan to May.</p>
+
         </figure>
         <figure class="chart-card">
           <canvas id="chartEfficacy"></canvas>
-          <figcaption><strong>Efficacy Outcomes:</strong> Positive feedback rates.</figcaption>
+ <figcaption><strong>Adoption Over Time:</strong> Number of new users subscribing to the AI Herbalist each month.</figcaption>
+          <p class="chart-desc">This line chart shows how many unique practitioners started using AI‐based prescriptions from Jan to May.</p>
         </figure>
         <figure class="chart-card">
           <canvas id="chartSupply"></canvas>
-          <figcaption><strong>Supply Impact:</strong> Inventory usage trends.</figcaption>
+  <figcaption><strong>Supply Impact:</strong> Proportion of top‐three herbs used weekly.</figcaption>
+          <p class="chart-desc">This pie chart shows how inventory usage is split among Herb A, Herb B, and Herb C.</p>
         </figure>
         <figure class="chart-card">
           <canvas id="chartROI"></canvas>
-          <figcaption><strong>Financial ROI:</strong> Quarterly returns.</figcaption>
+<figcaption><strong>Financial ROI:</strong> Quarterly return on investment percentages.</figcaption>
+         <p class="chart-desc">This radar chart displays ROI metrics for Q1–Q4.</p>
         </figure>
       </div>
  <button id="exportCSV" class="btn-primary">Export Full CSV</button>
@@ -2008,6 +2046,19 @@ document.addEventListener("DOMContentLoaded", () => {
     mq.addListener(updateHamburgerVisibility);
     updateHamburgerVisibility();
 
+    // Whenever a <select> gets value “Other”, reveal its corresponding .other-input
+    document.querySelectorAll("select").forEach((sel) => {
+      sel.addEventListener("change", (e) => {
+        const otherField = document.getElementById(sel.id + "Other");
+        if (!otherField) return;
+        if (sel.value === "Other" || Array.from(sel.selectedOptions).some(opt => opt.value === "Other")) {
+          otherField.style.display = "block";
+        } else {
+          otherField.style.display = "none";
+        }
+      });
+    });
+    
     // ─── PLANT IDENTIFIER ─────────────────────────────────────────────────
 
     const idenForm = document.getElementById("iden-form");
@@ -2068,36 +2119,37 @@ document.addEventListener("DOMContentLoaded", () => {
         }
 
         if (desc) {
-          // If user typed a description, also send it to OpenAI
-          panel.innerHTML = `<div class="result-content">Consulting AI about your text… <span class="spinner"></span></div>`;
-          const sys = `
-You are a plant expert. Given a description, respond with name, uses, cautions, and regions as JSON, for example:
+         // If user typed a description, also send it to OpenAI
+            panel.innerHTML = `<div class="result-content">Consulting AI about your text… <span class="spinner"></span></div>`;
+            const sys = `
+You are a plant expert. Given a description, respond with name, uses, cautions, and regions as JSON ONLY, for example:
 {
   "name": "Moringa oleifera",
   "uses": "Anti-inflammatory, antioxidant, nutritional supplement",
   "cautions": "May lower blood sugar in diabetics",
   "regions": ["West Africa", "India", "Southeast Asia"]
 }
-          `.trim();
-          const rawGPT = await callOpenAI([
-            { role: "system", content: sys },
-            { role: "user", content: `Describe plant: "${desc}"` }
-          ]);
-          // Expecting rawGPT to be a JSON string
-          let parsed;
-          try {
-            parsed = JSON.parse(rawGPT.trim());
-          } catch (parseErr) {
-            throw new Error("OpenAI did not return valid JSON: " + rawGPT);
-          }
-          html += `
-            <p><strong>(From text description)</strong></p>
-            <p><strong>Plant Name:</strong> ${escapeHtml(parsed.name)}</p>
-            <p><strong>Uses:</strong> ${escapeHtml(parsed.uses)}</p>
-            <p><strong>Cautions:</strong> ${escapeHtml(parsed.cautions)}</p>
-            <p><strong>Regions:</strong> ${Array.isArray(parsed.regions) ? escapeHtml(parsed.regions.join(", ")) : "–"}</p>
-          `;
-        }
+            `.trim();
+            const rawGPT = await callOpenAI([
+              { role: "system", content: sys },
+              { role: "user", content: `Describe plant: "${desc}"` }
+            ]);
+            // Strip triple backticks if present, then parse
+            const cleaned = rawGPT.replace(/```json|```/g, "").trim();
+            let parsed;
+            try {
+              parsed = JSON.parse(cleaned);
+            } catch (parseErr) {
+              throw new Error("OpenAI did not return valid JSON: ```json " + rawGPT + " ```");
+            }
+            html += `
+              <p><strong>(From text description)</strong></p>
+              <p><strong>Plant Name:</strong> ${escapeHtml(parsed.name)}</p>
+              <p><strong>Uses:</strong> ${escapeHtml(parsed.uses)}</p>
+              <p><strong>Cautions:</strong> ${escapeHtml(parsed.cautions)}</p>
+              <p><strong>Regions:</strong> ${Array.isArray(parsed.regions) ? escapeHtml(parsed.regions.join(", ")) : "–"}</p>
+            `;
+       }
 
         panel.innerHTML = `<div class="result-content">${html}</div>`;
         addClose(panel);
@@ -2194,7 +2246,6 @@ You are a safety expert in herbal and pharmaceutical interactions. Given two her
     const chatBox = document.getElementById("chatBox");
     const sendChatBtn = document.getElementById("sendChat");
     const chatInput = document.getElementById("chatInput");
-    const chatHint = document.getElementById("chatHint");
     const viewHistoryBtn = document.getElementById("viewHistory");
     const clearChatBtn = document.getElementById("clearChat");
     let lastDateHeader = null;
@@ -2233,32 +2284,46 @@ You are a safety expert in herbal and pharmaceutical interactions. Given two her
     chatHistory.forEach(m => addMessage(m.who, m.text, new Date(m.timestamp)));
 
     // Send user message and get AI response
-    sendChatBtn.onclick = async () => {
+   sendChatBtn.onclick = async () => {
       const userText = chatInput.value.trim();
       if (!userText) return;
+      // 1) Display user’s message
       addMessage("You", userText);
       chatHistory.push({ who: "You", text: userText, timestamp: new Date().toISOString() });
       localStorage.setItem("chatHistory", JSON.stringify(chatHistory));
       chatInput.value = "";
-      chatHint.hidden = false;
+
+      // 2) Create a “bot-msg” placeholder with a spinner
+      const spinnerDiv = document.createElement("div");
+      spinnerDiv.className = "bot-msg";
+      spinnerDiv.innerHTML = `<div class="spinner"></div>`;
+      chatBox.append(spinnerDiv);
+      chatBox.scrollTop = chatBox.scrollHeight;
+
+      // 3) Call OpenAI
       try {
         const aiReply = await callOpenAI([
           {
             role: "system",
             content: `
 You are a friendly, knowledgeable herbalist. A user will ask questions about herbs, remedies, dosages, or plant facts. Respond in plain language, giving clear instructions or information about herbal care.
-            `.trim()
+          `.trim()
           },
           { role: "user", content: userText }
-        ]);
-        addMessage("Herbalist", aiReply);
-        chatHistory.push({ who: "Herbalist", text: aiReply, timestamp: new Date().toISOString() });
+       ]);
+
+        // 4) Replace spinnerDiv with actual message
+       const msgDate = new Date();
+        spinnerDiv.innerHTML = `
+          ${formatHTML(aiReply)}
+          <div class="timestamp">${msgDate.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}</div>
+        `;
+        chatHistory.push({ who: "Herbalist", text: aiReply, timestamp: msgDate.toISOString() });
         localStorage.setItem("chatHistory", JSON.stringify(chatHistory));
       } catch (err) {
-        addMessage("Herbalist", "⚠️ Oops! Something went wrong. Please try again.");
-      } finally {
-        chatHint.hidden = true;
+        spinnerDiv.innerHTML = `<div class="result-content">⚠️ Oops! Something went wrong. Please try again.</div>`;
       }
+      chatBox.scrollTop = chatBox.scrollHeight;
     };
 
     // Clear chat box (history cleared)
@@ -2426,7 +2491,7 @@ You are a qualified pharmacologist specialized in herb-herb interactions. Given 
       document.getElementById("curSym").textContent = symbolMap[e.target.value] || "";
     };
 
-    document.getElementById("roi-form").onsubmit = async (e) => {
+     document.getElementById("roi-form").onsubmit = async (e) => {
       e.preventDefault();
       const panel = document.getElementById("roiResult");
       panel.hidden = false;
@@ -2445,12 +2510,24 @@ You are a qualified pharmacologist specialized in herb-herb interactions. Given 
           {
             role: "system",
             content: `
-You are a financial analyst specializing in healthcare ROI. Given monthly prescription volume and average herb cost, calculate the return on investment for implementing an AI-driven herbal prescription system. Show step-by-step equations in plain text and provide final ROI percentage. Use currency: ${currency}.
+You are a healthcare financial analyst. A user will provide:
+1) Monthly AI-generated herb prescriptions (rxCount)
+2) Average cost per prescription (cost)
+3) Currency symbol (currency)
+
+Calculate:
+- Total monthly cost using AI (rxCount × cost)
+- Estimate the cost if done via traditional manual methods (e.g., 25% higher than AI).
+- Monthly savings = Traditional cost – AI cost
+- ROI (%) = (Monthly savings / AI cost) × 100
+
+Provide step-by-step calculations in plain text, using currency: ${currency}. 
+Conclude with final ROI percentage and a short summary line.
             `.trim()
           },
           {
             role: "user",
-            content: `Monthly Prescriptions: ${rxCount}\nAverage Herb Cost: ${cost}`
+            content: `Monthly Prescriptions: ${rxCount}\nAverage Cost: ${cost}`
           }
         ]);
         panel.innerHTML = `<div class="result-content">${formatHTML(aiReply)}</div>`;
@@ -2522,21 +2599,26 @@ const colorText = getCSSVar("--text");
 
    // Export charts data as CSV
     document.getElementById("exportCSV").onclick = () => {
-      const chartIds = ["Adoption", "Efficacy", "Supply", "ROI"];
-      let csvContent = "Chart,Label,Value\n";
-      chartIds.forEach((id) => {
-        const chart = Chart.getChart("chart" + id);
+      const chartIds = [
+        { id: "Adoption", desc: "Adoption Over Time: Number of new users subscribing monthly." },
+        { id: "Efficacy", desc: "Efficacy Outcomes: Positive feedback percentage by severity." },
+        { id: "Supply",   desc: "Supply Impact: Inventory usage distribution." },
+        { id: "ROI",      desc: "Financial ROI: Quarterly return percentages." }
+      ];
+      let csvContent = "Chart,Description,Label,Value\n";
+      chartIds.forEach((obj) => {
+        const chart = Chart.getChart("chart" + obj.id);
         if (!chart) return;
         chart.data.labels.forEach((label, idx) => {
           const value = chart.data.datasets[0].data[idx];
-          csvContent += `${id},${label},${value}\n`;
+          csvContent += `"${obj.id}","${obj.desc}","${label}",${value}\n`;
         });
       });
       const blob = new Blob([csvContent], { type: "text/csv" });
       const url = URL.createObjectURL(blob);
       const a = document.createElement("a");
       a.href = url;
-      a.download = "analytics.csv";
+      a.download = "analytics_full.csv";
       document.body.append(a);
       a.click();
       URL.revokeObjectURL(url);
