@@ -1052,6 +1052,181 @@
 .link-style:hover {
   color: #ffffff;
 }
+  #feature-rich-dashboard .card .actions .btn-reschedule,
+#feature-rich-dashboard .card .actions .btn-cancel {
+  background: var(--cb-primary);        
+  color: #fff;                         
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  border: none;
+  transition: background var(--transition), transform var(--transition);
+  margin-left: 0.25rem;               
+}
+
+#feature-rich-dashboard .card .actions .btn-reschedule i,
+#feature-rich-dashboard .card .actions .btn-cancel i {
+  font-size: 1rem;                     
+}
+
+#feature-rich-dashboard .card .actions .btn-reschedule:hover {
+  background: var(--cb-accent);        
+  transform: translateY(-2px);
+}
+
+#feature-rich-dashboard .card .actions .btn-cancel:hover {
+  background: #d4724f;                  
+  transform: translateY(-2px);
+}
+#feature-rich-dashboard .card .actions .btn-reschedule:hover::after,
+#feature-rich-dashboard .card .actions .btn-cancel:hover::after {
+  content: attr(data-tooltip);
+  position: absolute;
+  bottom: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(0,0,0,0.75);
+  color: #fff;
+  padding: 0.25rem 0.5rem;
+  font-size: 0.75rem;
+  border-radius: 0.25rem;
+  white-space: nowrap;
+  pointer-events: none;
+}
+  .modal .modal-content {
+  background: var(--cb-surface);
+  padding: 2rem;                          
+  border-radius: var(--radius);
+  max-width: 480px;                       
+  width: 90%;
+  box-shadow: var(--shadow);
+  text-align: center;                      
+  position: relative;
+}
+
+.modal .modal-content h3 {
+  font-size: 1.75rem;
+  margin-bottom: 1rem;
+  color: var(--cb-primary);
+}
+
+.modal .modal-content p {
+  margin-bottom: 1.25rem;
+  color: var(--cb-text);
+  font-size: 1rem;
+}
+
+.modal .modal-content button {
+  margin: 0.5rem 0.25rem;
+  padding: 0.75rem 1.25rem;
+  font-size: 1rem;
+  border-radius: var(--radius);
+  border: none;
+  cursor: pointer;
+  transition: background var(--transition), transform var(--transition);
+}
+
+.modal .modal-content button.btn-sm {
+  background: var(--cb-primary-alt);
+  color: #fff;
+  font-size: 0.9rem;
+}
+
+.modal .modal-content button.btn-sm:hover {
+  background: var(--cb-accent);
+  transform: translateY(-2px);
+}
+
+.modal .modal-content button.btn {
+  background: var(--cb-accent);
+  color: #fff;
+}
+
+.modal .modal-content button.btn:hover {
+  background: #d4724f;
+  transform: translateY(-2px);
+}
+
+.modal .modal-content .btn-close {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  background: transparent;
+  color: var(--cb-text);
+  font-size: 1.25rem;
+  line-height: 1;
+  border: none;
+}
+
+.modal .modal-content .btn-close:hover {
+  color: var(--cb-accent);
+  transform: scale(1.1);
+}
+  #hamburger {
+  display: none;
+}
+
+@media (max-width: 768px) {
+  #hamburger {
+    display: block;
+    font-size: 1.5rem;
+    cursor: pointer;
+  }
+  #shrinkSidebar {
+    display: none;
+  }
+
+  aside#sidebar {
+    transform: translateX(-100%);
+    position: absolute;
+    transition: transform var(--transition);
+  }
+
+  body.sidebar-open aside#sidebar {
+    transform: translateX(0);
+  }
+
+  header {
+    margin-left: 0 !important;
+  }
+  main,
+  footer {
+    margin-left: 0 !important;
+    padding: 0.5rem;
+  }
+}
+  hamburger.addEventListener("click", () => {
+  document.body.classList.toggle("sidebar-open");
+});
+html.dark a,
+html.dark a:hover,
+html.dark .link-style {
+  color: var(--cb-accent) !important;
+  text-decoration: underline;
+}
+
+html.dark button,
+html.dark input,
+html.dark select,
+html.dark textarea,
+html.dark .modal .modal-content p,
+html.dark .modal .modal-content h3 {
+  color: var(--text-dark) !important;
+}
+
+html.dark .some-blue-class {
+  color: #f08a5d !important; 
+}
+
+html.dark .fa,
+html.dark .fas,
+html.dark .far,
+html.dark .fab {
+  color: var(--cb-text) !important;
+}
 </style>
 </head>
 
@@ -1093,7 +1268,7 @@
         <p class="desc">From instant provider match to one-click appointment, powered by AI.</p>
         <button id="heroBookBtn" data-target="#providerMatch" class="btn hero-btn">
           <i class="fas fa-book-medical"></i> Book an Appointment
-        </button>
+        </button> <br>
          <p class="tips">
           <i class="fas fa-info-circle"></i>
           Need urgent care? <button id="urgentCare" type="button" class="link-style">Click here</button>
@@ -1138,12 +1313,12 @@
         <button id="urgentScheduleBtn" class="btn">
           <i class="fas fa-calendar-alt"></i> Schedule
         </button>
-        <button class="btn-sm back" id="urgentStep2Back">Back</button>
+        <button class="btn-sm back" id="urgentStep2Back" style="display: none;">Back</button>
       </div>
 
       <!-- Step 3 -->
       <div id="urgentCalendarFlow" hidden>
-        <button class="btn-sm back" id="urgentStep3Back">
+        <button class="btn-sm back" id="urgentStep3Back" style="display: none;">
           <i class="fas fa-arrow-left"></i> Back
         </button>
         <label>Date: <input type="date" id="urgentDate" /></label>
