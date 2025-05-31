@@ -1316,979 +1316,811 @@
  <script defer src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
   
 <script defer>
-  // Immediately log to confirm this inline script is running after HTML parsing
-  console.log("🔍 Inline script has begun execution (after DOM parsing).");
+document.addEventListener("DOMContentLoaded", () => {
+  // ─── 1) GLOBALS & ELEMENT REFERENCES ─────────────────────────────────
 
-  document.addEventListener("DOMContentLoaded", () => {
-    console.log("📣 DOMContentLoaded fired, main JS is running.");
+  // Calendar widget state
+  let widgetYear  = new Date().getFullYear();
+  let widgetMonth = new Date().getMonth();
 
-    // ─── 1) GLOBALS & ELEMENT REFERENCES ─────────────────────────────────
+  // Flags & temporary variables
+  let urgentProviderName = "";
+  let uDate = "";
+  let uTime = "";
+  let urgentFlow = false;
+  let providerId = "";
+  let providerName = "";
+  let year = new Date().getFullYear();
+  let month = new Date().getMonth();
+  let selDate = "";
+  let selTime = "";
 
-    // Calendar widget state
-    let widgetYear  = new Date().getFullYear();
-    let widgetMonth = new Date().getMonth();
+  // Appointment storage
+  const appointments = [];
 
-    // Flags & temporary variables
-    let urgentProviderName = "";
-    let uDate = "";
-    let uTime = "";
-    let urgentFlow = false;
-    let providerId = "";
-    let providerName = "";
-    let year = new Date().getFullYear();
-    let month = new Date().getMonth();
-    let selDate = "";
-    let selTime = "";
+  // Providers & their specialties
+  const providers = [
+    { id: "p1",  name: "Dr. Kwame Asante", specialty: "Pulmonologist",               facility: "Korle Bu Teaching Hospital" },
+    { id: "p2",  name: "Dr. Abena Owusu",   specialty: "Cardiologist",                 facility: "37 Military Hospital" },
+    { id: "p3",  name: "Dr. Kojo Mensah",   specialty: "Psychiatrist",                 facility: "Ridge Hospital" },
+    { id: "p4",  name: "Dr. Yaa Dufie",     specialty: "Clinical Dietitian",           facility: "Nyaho Medical Centre" },
+    { id: "p5",  name: "Dr. Nana Adjei",    specialty: "General Practitioner",         facility: "Cape Coast Teaching Hospital" },
+    { id: "p6",  name: "Dr. Efua Amponsah", specialty: "Endocrinologist",              facility: "LEKMA Hospital" },
+    { id: "p7",  name: "Dr. Michael Addo",  specialty: "Neurologist",                  facility: "37 Military Hospital" },
+    { id: "p8",  name: "Dr. Grace Ofori",   specialty: "Dermatologist",                facility: "Accra Dermatology Centre" },
+    { id: "p9",  name: "Dr. Joseph Kumi",   specialty: "Orthopedic Surgeon",           facility: "Komfo Anokye Teaching Hospital" },
+    { id: "p10", name: "Dr. Ama Brew",      specialty: "Pediatrician",                 facility: "The Trust Hospital" },
+    { id: "p11", name: "Ms. Akosua Baah",   specialty: "Physiotherapist",              facility: "Tema General Hospital" },
+    { id: "p12", name: "Mr. Daniel Boakye", specialty: "Pharmacist",                   facility: "Ridge Hospital Pharmacy" },
+    { id: "p13", name: "Mrs. Esther Kumi",  specialty: "Occupational Therapist",       facility: "Cape Coast Teaching Hospital" },
+    { id: "p14", name: "Ms. Joy Mensah",    specialty: "Speech and Language Therapist",facility: "LEKMA Hospital" },
+    { id: "p15", name: "Dr. Paul Yeboah",   specialty: "Dermatologist",                facility: "Korle Bu Teaching Hospital" },
+    { id: "p16", name: "Dr. Linda Frimpong",specialty: "Nephrologist",                 facility: "37 Military Hospital" },
+    { id: "p17", name: "Mr. Kwesi Owusu",   specialty: "Nutritionist",                 facility: "Nyaho Medical Centre" },
+    { id: "p18", name: "Ms. Abena Boateng", specialty: "Psychologist",                 facility: "Accra Psychology & Counselling Centre" }
+  ];
 
-    // Main containers
-    const richUpcoming = document.getElementById("rich-upcoming");
-    const appointments  = [];
-    const sidebar       = document.getElementById("sidebar");
-    const hamburger     = document.getElementById("hamburger");
-    const shrinkSidebarBtn = document.getElementById("shrinkSidebar");
-    const themeToggle   = document.getElementById("themeToggle");
-    const heroBookBtn   = document.getElementById("heroBookBtn");
-    const urgentCareLink = document.getElementById("urgentCare");
+  // Availability for each provider (YYYY-MM-DD → [times])
+  const availability = {
+    p1:  { "2025-05-31": ["09:30","10:30","12:00"], "2025-06-10": ["09:00","10:00","11:00"], "2025-06-12": ["14:00","15:00"], "2025-06-15": ["08:30","09:30","10:30"] },
+    p2:  { "2025-05-31": ["09:30","10:30","12:00"], "2025-06-03": ["10:00","13:00","16:00"], "2025-06-04": ["09:00","11:00"], "2025-06-15": ["12:00","14:00"] },
+    p3:  { "2025-05-31": ["09:30","10:30","12:00"], "2025-06-08": ["08:00","09:00","10:00","11:00"], "2025-06-11": ["13:30","14:30"], "2025-06-16": ["15:00","16:00"] },
+    p4:  { "2025-05-31": ["09:30","10:30","12:00"], "2025-06-05": ["09:30","10:30","11:30"], "2025-06-09": ["14:00","15:00","16:00"], "2025-06-18": ["08:00","09:00"] },
+    p5:  { "2025-05-31": ["09:30","10:30","12:00"], "2025-06-07": ["08:15","09:15","10:15"], "2025-06-13": ["13:00","14:00"], "2025-06-17": ["10:00","11:00","12:00"] },
+    p6:  { "2025-05-31": ["09:30","10:30","12:00"], "2025-06-02": ["09:00","10:00"], "2025-06-14": ["11:00","12:00","13:00"], "2025-06-19": ["14:00","15:00"] },
+    p7:  { "2025-05-31": ["09:30","10:30","12:00"], "2025-06-06": ["08:30","09:30","10:30"], "2025-06-12": ["13:00","14:00","15:00"], "2025-06-20": ["09:00","10:00"] },
+    p8:  { "2025-05-31": ["09:30","10:30","12:00"], "2025-06-01": ["10:00","11:00","12:00"], "2025-06-11": ["14:30","15:30"], "2025-06-16": ["08:00","09:00","10:00"] },
+    p9:  { "2025-05-31": ["09:30","10:30","12:00"], "2025-06-04": ["09:00","10:00","11:00"], "2025-06-13": ["13:00","14:00"], "2025-06-18": ["15:00","16:00"] },
+    p10: { "2025-05-31": ["09:30","10:30","12:00"], "2025-06-03": ["08:00","09:00","10:00"], "2025-06-10": ["11:00","12:00","13:00"], "2025-06-17": ["14:00","15:00"] },
+    p11: { "2025-05-31": ["09:30","10:30","12:00"], "2025-06-05": ["09:30","10:30","11:30"], "2025-06-14": ["13:00","14:00","15:00"], "2025-06-19": ["08:00","09:00"] },
+    p12: { "2025-05-31": ["09:30","10:30","12:00"], "2025-06-02": ["10:00","11:00","12:00"], "2025-06-08": ["14:00","15:00"], "2025-06-20": ["09:00","10:00","11:00"] },
+    p13: { "2025-05-31": ["09:30","10:30","12:00"], "2025-06-07": ["08:00","09:00","10:00"], "2025-06-12": ["11:30","12:30","13:30"], "2025-06-18": ["14:00","15:00"] },
+    p14: { "2025-05-31": ["09:30","10:30","12:00"], "2025-06-03": ["09:15","10:15","11:15"], "2025-06-09": ["13:00","14:00","15:00"], "2025-06-16": ["08:00","09:00"] },
+    p15: { "2025-05-31": ["09:30","10:30","12:00"], "2025-06-05": ["08:30","09:30","10:30"], "2025-06-13": ["11:00","12:00","13:00"], "2025-06-19": ["14:30","15:30"] },
+    p16: { "2025-05-31": ["09:30","10:30","12:00"], "2025-06-02": ["10:00","11:00","12:00"], "2025-06-11": ["13:15","14:15"], "2025-06-17": ["09:00","10:00","11:00"] },
+    p17: { "2025-05-31": ["09:30","10:30","12:00"], "2025-06-04": ["09:00","10:00","11:00"], "2025-06-10": ["12:00","13:00","14:00"], "2025-06-15": ["15:00","16:00"] },
+    p18: { "2025-05-31": ["09:30","10:30","12:00"], "2025-06-01": ["08:00","09:00","10:00"], "2025-06-08": ["11:30","12:30","13:30"], "2025-06-20": ["14:00","15:00","16:00"] }
+  };
 
-    // Urgent‐flow elements
-    const urgentBooking      = document.getElementById("urgentBooking");
-    const urgentStep1        = document.getElementById("urgentStep1");
-    const urgentMatchResults = document.getElementById("urgentMatchResults");
-    const urgentCalendarFlow = document.getElementById("urgentCalendarFlow");
-    const urgentDetailsForm  = document.getElementById("urgentDetailsForm");
-    const urgentFindMatchBtn = document.getElementById("urgentFindMatchBtn");
-    const urgentMatchedName  = document.getElementById("urgentMatchedName");
-    const urgentMatchedSpec  = document.getElementById("urgentMatchedSpec");
-    const urgentScheduleBtn  = document.getElementById("urgentScheduleBtn");
-    const urgentDate         = document.getElementById("urgentDate");
-    const urgentTime         = document.getElementById("urgentTime");
-    const urgentNextToDetails= document.getElementById("urgentNextToDetails");
-    const urgentClientName   = document.getElementById("urgentClientName");
-    const urgentClientEmail  = document.getElementById("urgentClientEmail");
-    const urgentConfirmBtn   = document.getElementById("urgentConfirmBtn");
-    const urgentStep2Back    = document.getElementById("urgentStep2Back");
-    const urgentStep2Close   = document.getElementById("urgentStep2Close");
-    const urgentStep3Close   = document.getElementById("urgentStep3Close");
-    const urgentStep3Back    = document.getElementById("urgentStep3Back");
-    const urgentStep4Back    = document.getElementById("urgentStep4Back");
-    const urgentStep4Close   = document.getElementById("urgentStep4Close");
+  // Symptom keyword → provider ID
+  const symptomMap = {
+    cough: "p1", wheeze: "p1", asthma: "p1", pneumonia: "p1", bronchitis: "p1",
+    chestpain: "p2", "chest pain": "p2", palpitations: "p2", "shortness of breath": "p2",
+    anxiety: "p3", depression: "p3", insomnia: "p3", schizophrenia: "p3",
+    diabetes: "p4", weight: "p4", nutrition: "p4",
+    fatigue: "p5", weakness: "p5", fever: "p5", pain: "p5",
+    thyroid: "p6", endocrine: "p6", "blood sugar": "p6",
+    headache: "p7", migraine: "p7", seizure: "p7", nerve: "p7",
+    rash: "p8", acne: "p8", eczema: "p8", skin: "p8",
+    fracture: "p9", joint: "p9", bone: "p9",
+    child: "p10", kids: "p10", pediatric: "p10",
+    rehab: "p11", mobility: "p11",
+    medication: "p12", drug: "p12",
+    occupational: "p13",
+    speech: "p14",
+    kidney: "p16", renal: "p16",
+    diet: "p17",
+    psychologist: "p18", counsel: "p18"
+  };
 
-    // Provider‐match elements
-    const matchForm         = document.getElementById("matchForm");
-    const findMatchBtn      = document.getElementById("findMatchBtn");
-    const matchResults      = document.getElementById("matchResults");
-    const scheduleMatchBtn  = document.getElementById("scheduleMatchBtn");
-    const matchedName       = document.getElementById("matchedName");
-    const matchedSpec       = document.getElementById("matchedSpec");
-    const appointmentFlow   = document.getElementById("appointmentFlow");
-    const chosenProvider    = document.getElementById("chosenProvider");
-    const prevMonthBtn      = document.getElementById("prevMonth");
-    const nextMonthBtn      = document.getElementById("nextMonth");
-    const calendarHeader    = document.getElementById("calendarHeader");
-    const calendarGrid      = document.getElementById("calendar");
-    const timeSlots         = document.getElementById("timeSlots");
-    const confirmForm       = document.getElementById("confirmForm");
-    const summaryText       = document.getElementById("summaryText");
-    const confirmBtn        = document.getElementById("confirmBtn");
-    const matchResultsBack  = document.getElementById("matchResultsBack");
-    const matchResultsClose = document.getElementById("matchResultsClose");
-    const appointmentFlowClose = document.getElementById("appointmentFlowClose");
-    const confirmStep4Back  = document.getElementById("confirmStep4Back");
-    const confirmStep4Close = document.getElementById("confirmStep4Close");
+  // URGENT_FEE in kobo for Paystack (₵500 → 50000 kobo)
+  const URGENT_FEE_KOBO = 500 * 100;
 
-    // Modal elements
-    const confirmModal = document.getElementById("confirmModal");
-    const cancelModal  = document.getElementById("cancelModal");
-    const modalEdit    = document.getElementById("modalEdit");
-    const modalConfirm = document.getElementById("modalConfirm");
-    const modalClose   = document.getElementById("modalClose");
-    const cancelYes    = document.getElementById("cancelYes");
-    const cancelNo     = document.getElementById("cancelNo");
-    const cancelMsg    = document.getElementById("cancelMsg");
+  // Element references
+  const sidebar             = document.getElementById("sidebar");
+  const hamburger           = document.getElementById("hamburger");
+  const shrinkSidebarBtn    = document.getElementById("shrinkSidebar");
+  const themeToggle         = document.getElementById("themeToggle");
+  const heroBookBtn         = document.getElementById("heroBookBtn");
+  const urgentCareLink      = document.getElementById("urgentCare");
 
-    // Upcoming calendar container
-    const upcomingCalendarWidget = document.getElementById("upcomingCalendarWidget");
+  // Urgent‐flow elements
+  const urgentBooking       = document.getElementById("urgentBooking");
+  const urgentStep1         = document.getElementById("urgentStep1");
+  const urgentMatchResults  = document.getElementById("urgentMatchResults");
+  const urgentCalendarFlow  = document.getElementById("urgentCalendarFlow");
+  const urgentDetailsForm   = document.getElementById("urgentDetailsForm");
+  const urgentFindMatchBtn  = document.getElementById("urgentFindMatchBtn");
+  const urgentMatchedName   = document.getElementById("urgentMatchedName");
+  const urgentMatchedSpec   = document.getElementById("urgentMatchedSpec");
+  const urgentScheduleBtn   = document.getElementById("urgentScheduleBtn");
+  const urgentDate          = document.getElementById("urgentDate");
+  const urgentTime          = document.getElementById("urgentTime");
+  const urgentNextToDetails = document.getElementById("urgentNextToDetails");
+  const urgentClientName    = document.getElementById("urgentClientName");
+  const urgentClientEmail   = document.getElementById("urgentClientEmail");
+  const urgentConfirmBtn    = document.getElementById("urgentConfirmBtn");
+  const urgentStep2Back     = document.getElementById("urgentStep2Back");
+  const urgentStep2Close    = document.getElementById("urgentStep2Close");
+  const urgentStep3Close    = document.getElementById("urgentStep3Close");
+  const urgentStep3Back     = document.getElementById("urgentStep3Back");
+  const urgentStep4Back     = document.getElementById("urgentStep4Back");
+  const urgentStep4Close    = document.getElementById("urgentStep4Close");
 
-    // Rich Dashboard tabs
-    const dashTabs     = document.querySelectorAll("#feature-rich-dashboard .dashboard-tabs button");
-    const richUpcomingSection = document.getElementById("rich-upcoming");
-    const richPastSection     = document.getElementById("rich-past");
-    const richFavoritesSection= document.getElementById("rich-favorites");
+  // Provider‐match elements
+  const matchForm           = document.getElementById("matchForm");
+  const findMatchBtn        = document.getElementById("findMatchBtn");
+  const matchResults        = document.getElementById("matchResults");
+  const scheduleMatchBtn    = document.getElementById("scheduleMatchBtn");
+  const matchedName         = document.getElementById("matchedName");
+  const matchedSpec         = document.getElementById("matchedSpec");
+  const appointmentFlow     = document.getElementById("appointmentFlow");
+  const chosenProvider      = document.getElementById("chosenProvider");
+  const prevMonthBtn        = document.getElementById("prevMonth");
+  const nextMonthBtn        = document.getElementById("nextMonth");
+  const calendarHeader      = document.getElementById("calendarHeader");
+  const calendarGrid        = document.getElementById("calendar");
+  const timeSlots           = document.getElementById("timeSlots");
+  const confirmForm         = document.getElementById("confirmForm");
+  const summaryText         = document.getElementById("summaryText");
+  const confirmBtn          = document.getElementById("confirmBtn");
+  const matchResultsBack    = document.getElementById("matchResultsBack");
+  const matchResultsClose   = document.getElementById("matchResultsClose");
+  const appointmentFlowClose= document.getElementById("appointmentFlowClose");
+  const confirmStep4Back    = document.getElementById("confirmStep4Back");
+  const confirmStep4Close   = document.getElementById("confirmStep4Close");
 
-    // ─── 2) STORAGE & RESTORE ────────────────────────────────────────────
+  // Modal elements
+  const confirmModal        = document.getElementById("confirmModal");
+  const cancelModal         = document.getElementById("cancelModal");
+  const modalEdit           = document.getElementById("modalEdit");
+  const modalConfirm        = document.getElementById("modalConfirm");
+  const modalClose          = document.getElementById("modalClose");
+  const cancelYes           = document.getElementById("cancelYes");
+  const cancelNo            = document.getElementById("cancelNo");
+  const cancelMsg           = document.getElementById("cancelMsg");
 
-    // Load appointments from localStorage
-    const stored = localStorage.getItem("appointments");
-    if (stored) {
-      appointments.push(...JSON.parse(stored));
-      renderUpcomingCalendarWidget();
-      appointments.forEach(addToRichDashboard);
+  // Upcoming calendar container
+  const upcomingCalendarWidget = document.getElementById("upcomingCalendarWidget");
+
+  // Rich Dashboard tabs
+  const dashTabs             = document.querySelectorAll("#feature-rich-dashboard .dashboard-tabs button");
+  const richUpcomingSection  = document.getElementById("rich-upcoming");
+  const richPastSection      = document.getElementById("rich-past");
+  const richFavoritesSection = document.getElementById("rich-favorites");
+
+  // ─── 2) LOAD STORED APPOINTMENTS & URGENT DRAFT ────────────────────────
+
+  const stored = localStorage.getItem("appointments");
+  if (stored) {
+    const arr = JSON.parse(stored);
+    arr.forEach(a => { appointments.push(a); addToRichDashboard(a); });
+    renderUpcomingCalendarWidget();
+  }
+
+  const draft = JSON.parse(localStorage.getItem("urgentDraft") || "{}");
+  for (let key in draft) {
+    const el = document.getElementById("urgent" + key);
+    if (el) el.value = draft[key];
+  }
+
+  // ─── 3) HELPER FUNCTIONS ─────────────────────────────────────────────
+
+  // Generate unique ID
+  function generateId(prefix = "") {
+    return prefix + Date.now().toString();
+  }
+
+  // Show toast notification
+  function showToast(msg) {
+    const t = document.createElement("div");
+    t.className = "toast";
+    t.innerText = msg;
+    document.body.append(t);
+    requestAnimationFrame(() => t.classList.add("visible"));
+    setTimeout(() => t.remove(), 3000);
+  }
+
+  // Call OpenAI proxy
+  async function callOpenAI(messages) {
+    const res = await fetch("/.netlify/functions/openai-proxy", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ messages })
+    });
+    const j = await res.json();
+    return j.choices?.[0]?.message?.content.trim() || "";
+  }
+
+  // ─── 4) UI TOGGLES ──────────────────────────────────────────────────
+
+  // Sidebar (mobile open)
+  hamburger.addEventListener("click", () => {
+    document.body.classList.toggle("sidebar-open");
+  });
+
+  // Sidebar shrink/collapse
+  shrinkSidebarBtn.addEventListener("click", () => {
+    document.body.classList.toggle("sidebar-shrink");
+    const icon = shrinkSidebarBtn.querySelector("i");
+    icon.classList.toggle("fa-chevron-left");
+    icon.classList.toggle("fa-chevron-right");
+  });
+
+  // Theme toggle
+  themeToggle.addEventListener("click", () => {
+    document.documentElement.classList.toggle("dark");
+    themeToggle.classList.toggle("fa-moon");
+    themeToggle.classList.toggle("fa-sun");
+  });
+
+  // Hero “Book an Appointment” scroll
+  heroBookBtn.addEventListener("click", () => {
+    const target = document.querySelector(heroBookBtn.dataset.target);
+    if (target) {
+      target.scrollIntoView({ behavior: "smooth" });
     }
+  });
 
-    // Load urgent draft
-    const draft = JSON.parse(localStorage.getItem("urgentDraft") || "{}");
-    for (let k in draft) {
-      const el = document.getElementById("urgent" + k);
-      if (el) el.value = draft[k];
+  // Show Urgent Booking section
+  urgentCareLink.addEventListener("click", () => {
+    urgentBooking.hidden = false;
+  });
+
+  // ─── 5) URGENT FLOW NAVIGATION & LOGIC ───────────────────────────────
+
+  // Step 1 → Step 2 (Find Specialist)
+  urgentFindMatchBtn.addEventListener("click", async () => {
+    const rawConcern = document.getElementById("urgentConcernInput").value.trim();
+    if (!rawConcern) {
+      showToast("Please enter your concern.");
+      return;
     }
+    const lower = rawConcern.toLowerCase();
 
-    // ─── 3) HELPER FUNCTIONS ─────────────────────────────────────────────
-
-    // Toast notification
-    function showToast(msg) {
-      const t = document.createElement("div");
-      t.className = "toast";
-      t.innerText = msg;
-      document.body.append(t);
-      requestAnimationFrame(() => t.classList.add("visible"));
-      setTimeout(() => t.remove(), 3000);
-    }
-
-    // Call OpenAI proxy
-    async function callOpenAI(messages) {
-      try {
-        const res = await fetch("/.netlify/functions/openai-proxy", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ messages }),
-        });
-        if (!res.ok) throw new Error(await res.text());
-        const j = await res.json();
-        return j.choices?.[0]?.message?.content.trim() || "";
-      } catch (err) {
-        console.error("OpenAI error:", err);
-        return "";
+    // Keyword scan
+    let matchedProviderId = null;
+    Object.keys(symptomMap).forEach(keyword => {
+      if (!matchedProviderId && lower.includes(keyword)) {
+        matchedProviderId = symptomMap[keyword];
       }
-    }
+    });
 
-    // Generate a unique ID
-    function generateId(prefix = "") {
-      return prefix + Date.now().toString();
-    }
+    // Pick provider object
+    let chosenProviderObj = matchedProviderId
+      ? providers.find(p => p.id === matchedProviderId)
+      : null;
 
-    // Format amount in kobo (Paystack)
-    const URGENT_FEE_KOBO = 500 * 100; // ₵500 → 50000 kobo
+    // GPT fallback if no match
+    if (!chosenProviderObj) {
+      urgentFindMatchBtn.disabled = true;
+      urgentFindMatchBtn.innerText = "Matching…";
 
-    // ─── 4) PROVIDERS & AVAILABILITY ────────────────────────────────────
-
-    const providers = [
-      { id: "p1",  name: "Dr. Kwame Asante", specialty: "Pulmonologist",               facility: "Korle Bu Teaching Hospital" },
-      { id: "p2",  name: "Dr. Abena Owusu",   specialty: "Cardiologist",                 facility: "37 Military Hospital" },
-      { id: "p3",  name: "Dr. Kojo Mensah",   specialty: "Psychiatrist",                 facility: "Ridge Hospital" },
-      { id: "p4",  name: "Dr. Yaa Dufie",     specialty: "Clinical Dietitian",           facility: "Nyaho Medical Centre" },
-      { id: "p5",  name: "Dr. Nana Adjei",    specialty: "General Practitioner",         facility: "Cape Coast Teaching Hospital" },
-      { id: "p6",  name: "Dr. Efua Amponsah", specialty: "Endocrinologist",              facility: "LEKMA Hospital" },
-      { id: "p7",  name: "Dr. Michael Addo",  specialty: "Neurologist",                  facility: "37 Military Hospital" },
-      { id: "p8",  name: "Dr. Grace Ofori",   specialty: "Dermatologist",                facility: "Accra Dermatology Centre" },
-      { id: "p9",  name: "Dr. Joseph Kumi",   specialty: "Orthopedic Surgeon",           facility: "Komfo Anokye Teaching Hospital" },
-      { id: "p10", name: "Dr. Ama Brew",      specialty: "Pediatrician",                 facility: "The Trust Hospital" },
-      { id: "p11", name: "Ms. Akosua Baah",   specialty: "Physiotherapist",              facility: "Tema General Hospital" },
-      { id: "p12", name: "Mr. Daniel Boakye", specialty: "Pharmacist",                   facility: "Ridge Hospital Pharmacy" },
-      { id: "p13", name: "Mrs. Esther Kumi",  specialty: "Occupational Therapist",       facility: "Cape Coast Teaching Hospital" },
-      { id: "p14", name: "Ms. Joy Mensah",    specialty: "Speech and Language Therapist",facility: "LEKMA Hospital" },
-      { id: "p15", name: "Dr. Paul Yeboah",   specialty: "Dermatologist",                facility: "Korle Bu Teaching Hospital" },
-      { id: "p16", name: "Dr. Linda Frimpong",specialty: "Nephrologist",                 facility: "37 Military Hospital" },
-      { id: "p17", name: "Mr. Kwesi Owusu",   specialty: "Nutritionist",                 facility: "Nyaho Medical Centre" },
-      { id: "p18", name: "Ms. Abena Boateng", specialty: "Psychologist",                 facility: "Accra Psychology & Counselling Centre" }
-    ];
-
-    const availability = {
-      p1:  { "2025-05-31": ["09:30","10:30","12:00"], "2025-06-10": ["09:00","10:00","11:00"], "2025-06-12": ["14:00","15:00"], "2025-06-15": ["08:30","09:30","10:30"] },
-      p2:  { "2025-05-31": ["09:30","10:30","12:00"], "2025-06-03": ["10:00","13:00","16:00"], "2025-06-04": ["09:00","11:00"], "2025-06-15": ["12:00","14:00"] },
-      p3:  { "2025-05-31": ["09:30","10:30","12:00"], "2025-06-08": ["08:00","09:00","10:00","11:00"], "2025-06-11": ["13:30","14:30"], "2025-06-16": ["15:00","16:00"] },
-      p4:  { "2025-05-31": ["09:30","10:30","12:00"], "2025-06-05": ["09:30","10:30","11:30"], "2025-06-09": ["14:00","15:00","16:00"], "2025-06-18": ["08:00","09:00"] },
-      p5:  { "2025-05-31": ["09:30","10:30","12:00"], "2025-06-07": ["08:15","09:15","10:15"], "2025-06-13": ["13:00","14:00"], "2025-06-17": ["10:00","11:00","12:00"] },
-      p6:  { "2025-05-31": ["09:30","10:30","12:00"], "2025-06-02": ["09:00","10:00"], "2025-06-14": ["11:00","12:00","13:00"], "2025-06-19": ["14:00","15:00"] },
-      p7:  { "2025-05-31": ["09:30","10:30","12:00"], "2025-06-06": ["08:30","09:30","10:30"], "2025-06-12": ["13:00","14:00","15:00"], "2025-06-20": ["09:00","10:00"] },
-      p8:  { "2025-05-31": ["09:30","10:30","12:00"], "2025-06-01": ["10:00","11:00","12:00"], "2025-06-11": ["14:30","15:30"], "2025-06-16": ["08:00","09:00","10:00"] },
-      p9:  { "2025-05-31": ["09:30","10:30","12:00"], "2025-06-04": ["09:00","10:00","11:00"], "2025-06-13": ["13:00","14:00"], "2025-06-18": ["15:00","16:00"] },
-      p10: { "2025-05-31": ["09:30","10:30","12:00"], "2025-06-03": ["08:00","09:00","10:00"], "2025-06-10": ["11:00","12:00","13:00"], "2025-06-17": ["14:00","15:00"] },
-      p11: { "2025-05-31": ["09:30","10:30","12:00"], "2025-06-05": ["09:30","10:30","11:30"], "2025-06-14": ["13:00","14:00","15:00"], "2025-06-19": ["08:00","09:00"] },
-      p12: { "2025-05-31": ["09:30","10:30","12:00"], "2025-06-02": ["10:00","11:00","12:00"], "2025-06-08": ["14:00","15:00"], "2025-06-20": ["09:00","10:00","11:00"] },
-      p13: { "2025-05-31": ["09:30","10:30","12:00"], "2025-06-07": ["08:00","09:00","10:00"], "2025-06-12": ["11:30","12:30","13:30"], "2025-06-18": ["14:00","15:00"] },
-      p14: { "2025-05-31": ["09:30","10:30","12:00"], "2025-06-03": ["09:15","10:15","11:15"], "2025-06-09": ["13:00","14:00","15:00"], "2025-06-16": ["08:00","09:00"] },
-      p15: { "2025-05-31": ["09:30","10:30","12:00"], "2025-06-05": ["08:30","09:30","10:30"], "2025-06-13": ["11:00","12:00","13:00"], "2025-06-19": ["14:30","15:30"] },
-      p16: { "2025-05-31": ["09:30","10:30","12:00"], "2025-06-02": ["10:00","11:00","12:00"], "2025-06-11": ["13:15","14:15"], "2025-06-17": ["09:00","10:00","11:00"] },
-      p17: { "2025-05-31": ["09:30","10:30","12:00"], "2025-06-04": ["09:00","10:00","11:00"], "2025-06-10": ["12:00","13:00","14:00"], "2025-06-15": ["15:00","16:00"] },
-      p18: { "2025-05-31": ["09:30","10:30","12:00"], "2025-06-01": ["08:00","09:00","10:00"], "2025-06-08": ["11:30","12:30","13:30"], "2025-06-20": ["14:00","15:00","16:00"] }
-    };
-
-    // Keyword → provider ID map for rule‐based matching
-    const symptomMap = {
-      cough: "p1", wheeze: "p1", asthma: "p1", pneumonia: "p1", bronchitis: "p1",
-      chestpain: "p2", "chest pain": "p2", palpitations: "p2", "shortness of breath": "p2",
-      anxiety: "p3", depression: "p3", insomnia: "p3", schizophrenia: "p3",
-      diabetes: "p4", weight: "p4", nutrition: "p4",
-      fatigue: "p5", weakness: "p5", fever: "p5", pain: "p5",
-      thyroid: "p6", endocrine: "p6", "blood sugar": "p6",
-      headache: "p7", migraine: "p7", seizure: "p7", nerve: "p7",
-      rash: "p8", acne: "p8", eczema: "p8", skin: "p8",
-      fracture: "p9", joint: "p9", bone: "p9",
-      child: "p10", kids: "p10", pediatric: "p10",
-      rehab: "p11", mobility: "p11",
-      medication: "p12", drug: "p12",
-      occupational: "p13",
-      speech: "p14",
-      kidney: "p16", renal: "p16",
-      diet: "p17",
-      psychologist: "p18", counsel: "p18"
-    };
-
-    // ─── 5) UI TOGGLE FUNCTIONS ──────────────────────────────────────────
-
-    // 5a) Sidebar toggle (hamburger for mobile)
-    if (hamburger) {
-      hamburger.addEventListener("click", () => {
-        document.body.classList.toggle("sidebar-open");
-      });
-    } else {
-      console.error("hamburger element not found");
-    }
-
-    // 5b) Sidebar shrink/collapse
-    if (shrinkSidebarBtn) {
-      shrinkSidebarBtn.addEventListener("click", () => {
-        document.body.classList.toggle("sidebar-shrink");
-        const icon = shrinkSidebarBtn.querySelector("i");
-        icon.classList.toggle("fa-chevron-left");
-        icon.classList.toggle("fa-chevron-right");
-      });
-    } else {
-      console.error("shrinkSidebarBtn element not found");
-    }
-
-    // 5c) Theme toggle
-    if (themeToggle) {
-      themeToggle.addEventListener("click", () => {
-        document.documentElement.classList.toggle("dark");
-        themeToggle.classList.toggle("fa-moon");
-        themeToggle.classList.toggle("fa-sun");
-      });
-    } else {
-      console.error("themeToggle element not found");
-    }
-
-    // 5d) Show urgent booking section
-    if (urgentCareLink) {
-      urgentCareLink.addEventListener("click", () => {
-        urgentBooking.hidden = false;
-      });
-    } else {
-      console.error("urgentCare element not found");
-    }
-
-    // 5e) Hero “Book an Appointment” scroll‐to‐form button
-    if (heroBookBtn) {
-      heroBookBtn.addEventListener("click", () => {
-        const target = document.querySelector(heroBookBtn.dataset.target);
-        if (target) {
-          target.scrollIntoView({ behavior: "smooth" });
-        }
-      });
-    } else {
-      console.error("heroBookBtn element not found");
-    }
-
-    // ─── 6) URGENT FLOW NAVIGATION ───────────────────────────────────────
-
-    // Step 2 → Back to Step 1
-    if (urgentStep2Back) {
-      urgentStep2Back.onclick = () => {
-        urgentMatchResults.hidden = true;
-        urgentStep1.hidden = false;
-      };
-    } else {
-      console.error("urgentStep2Back element not found");
-    }
-
-    // Step 2 → Close urgent flow
-    if (urgentStep2Close) {
-      urgentStep2Close.onclick = () => {
-        urgentBooking.hidden = true;
-      };
-    } else {
-      console.error("urgentStep2Close element not found");
-    }
-
-    // Step 3 → Close urgent flow
-    if (urgentStep3Close) {
-      urgentStep3Close.onclick = () => {
-        urgentBooking.hidden = true;
-      };
-    } else {
-      console.error("urgentStep3Close element not found");
-    }
-
-    // Step 3 → Back to Step 2
-    if (urgentStep3Back) {
-      urgentStep3Back.onclick = () => {
-        urgentCalendarFlow.hidden = true;
-        urgentMatchResults.hidden = false;
-      };
-    } else {
-      console.error("urgentStep3Back element not found");
-    }
-
-    // Step 4 → Back to Step 3
-    if (urgentStep4Back) {
-      urgentStep4Back.onclick = () => {
-        urgentDetailsForm.hidden = true;
-        urgentCalendarFlow.hidden = false;
-      };
-    } else {
-      console.error("urgentStep4Back element not found");
-    }
-
-    // Step 4 → Close urgent flow
-    if (urgentStep4Close) {
-      urgentStep4Close.onclick = () => {
-        urgentBooking.hidden = true;
-      };
-    } else {
-      console.error("urgentStep4Close element not found");
-    }
-
-    // ─── 7) NORMAL MATCH FLOW NAVIGATION ─────────────────────────────────
-
-    // Match Results → Back to Step 1
-    if (matchResultsBack) {
-      matchResultsBack.addEventListener("click", () => {
-        matchResults.hidden = true;
-        matchForm.hidden = false;
-      });
-    } else {
-      console.error("matchResultsBack element not found");
-    }
-
-    // Match Results → Close panel
-    if (matchResultsClose) {
-      matchResultsClose.onclick = () => {
-        matchResults.hidden = true;
-        matchForm.hidden = false;
-      };
-    } else {
-      console.error("matchResultsClose element not found");
-    }
-
-    // Appointment Flow → Close panel
-    if (appointmentFlowClose) {
-      appointmentFlowClose.onclick = () => {
-        appointmentFlow.hidden = true;
-      };
-    } else {
-      console.error("appointmentFlowClose element not found");
-    }
-
-    // Confirm Form → Back to Step 3
-    if (confirmStep4Back) {
-      confirmStep4Back.addEventListener("click", () => {
-        confirmForm.hidden = true;
-        appointmentFlow.hidden = false;
-      });
-    } else {
-      console.error("confirmStep4Back element not found");
-    }
-
-    // Confirm Form → Close panel
-    if (confirmStep4Close) {
-      confirmStep4Close.addEventListener("click", () => {
-        appointmentFlow.hidden = true;
-      });
-    } else {
-      console.error("confirmStep4Close element not found");
-    }
-
-    // ─── 8) URGENT FLOW LOGIC ─────────────────────────────────────────────
-
-    // Prevent past dates
-    if (urgentDate) {
-      urgentDate.min = new Date().toISOString().split("T")[0];
-    }
-
-    // Urgent: Find Specialist (rule‐based + GPT fallback)
-    if (urgentFindMatchBtn) {
-      urgentFindMatchBtn.onclick = async () => {
-        const rawConcern = document.getElementById("urgentConcernInput").value.trim();
-        if (!rawConcern) return showToast("Please enter your concern.");
-        const lower = rawConcern.toLowerCase();
-
-        // 1) Keyword scan
-        let matchedProviderId = null;
-        for (let keyword in symptomMap) {
-          if (lower.includes(keyword)) {
-            matchedProviderId = symptomMap[keyword];
-            break;
-          }
-        }
-
-        // 2) If found, pick that provider
-        let chosenProviderObj = null;
-        if (matchedProviderId) {
-          chosenProviderObj = providers.find(p => p.id === matchedProviderId);
-        }
-
-        // 3) Otherwise, call GPT (force ID‐only)
-        if (!chosenProviderObj) {
-          urgentFindMatchBtn.disabled = true;
-          urgentFindMatchBtn.textContent = "Matching…";
-
-          const sys = `
-You are an expert medical triage AI. 
+      const sys = `
+You are an expert medical triage AI.
 Choose exactly one provider ID from the list below. Respond ONLY with the ID (e.g. "p3"), no extra text.
 Providers:
 ${providers.map(p => `- ${p.id}: ${p.name} — ${p.specialty} at ${p.facility}`).join("\n")}
-          `.trim();
+      `.trim();
 
-          const usr = \`Concern="\${rawConcern}". Return exactly one provider ID (p1…p18).\`;
-          let rawGPT = await callOpenAI([
-            { role: "system", content: sys },
-            { role: "user",   content: usr }
-          ]);
+      const usr = `Concern="${rawConcern}". Return exactly one provider ID (p1…p18).`;
+      const rawGPT = await callOpenAI([
+        { role: "system", content: sys },
+        { role: "user",   content: usr }
+      ]);
 
-          const clean = rawGPT.split(/\s+/)[0].trim();
-          const isValid = providers.some(p => p.id === clean);
-          if (isValid) {
-            chosenProviderObj = providers.find(p => p.id === clean);
-          } else {
-            // Rare fallback
-            chosenProviderObj = providers[Math.floor(Math.random() * providers.length)];
-          }
+      const clean = rawGPT.split(/\s+/)[0].trim();
+      const isValid = providers.some(p => p.id === clean);
+      chosenProviderObj = isValid
+        ? providers.find(p => p.id === clean)
+        : providers[Math.floor(Math.random() * providers.length)];
 
-          urgentFindMatchBtn.disabled = false;
-          urgentFindMatchBtn.textContent = "Find Specialist";
-        }
-
-        // 4) Display result
-        urgentMatchedName.textContent = chosenProviderObj.name;
-        urgentMatchedSpec.textContent = \`\${chosenProviderObj.specialty}, \${chosenProviderObj.facility}\`;
-        urgentProviderName = chosenProviderObj.name;
-
-        // 5) Show Step 2, hide Step 1
-        urgentMatchResults.hidden = false;
-        urgentStep1.hidden = true;
-      };
-    } else {
-      console.error("urgentFindMatchBtn element not found");
+      urgentFindMatchBtn.disabled = false;
+      urgentFindMatchBtn.innerHTML = `<i class="fas fa-search"></i> Find Specialist`;
     }
 
-    // Urgent: Schedule → show calendar inputs
-    if (urgentScheduleBtn) {
-      urgentScheduleBtn.onclick = () => {
-        urgentMatchResults.hidden = true;
-        urgentCalendarFlow.hidden = false;
-      };
-    } else {
-      console.error("urgentScheduleBtn element not found");
+    urgentMatchedName.textContent = chosenProviderObj.name;
+    urgentMatchedSpec.textContent = `${chosenProviderObj.specialty}, ${chosenProviderObj.facility}`;
+    urgentProviderName = chosenProviderObj.name;
+
+    urgentMatchResults.hidden = false;
+    urgentStep1.hidden = true;
+  });
+
+  // Step 2 → Back to Step 1
+  urgentStep2Back.addEventListener("click", () => {
+    urgentMatchResults.hidden = true;
+    urgentStep1.hidden = false;
+  });
+
+  // Step 2 → Close entire urgent flow
+  urgentStep2Close.addEventListener("click", () => {
+    urgentBooking.hidden = true;
+  });
+
+  // Step 2 → Step 3 (Schedule)
+  urgentScheduleBtn.addEventListener("click", () => {
+    urgentMatchResults.hidden = true;
+    urgentCalendarFlow.hidden = false;
+  });
+
+  // Prevent past dates in urgentDate
+  urgentDate.min = new Date().toISOString().split("T")[0];
+
+  // Step 3 → Back to Step 2
+  urgentStep3Back.addEventListener("click", () => {
+    urgentCalendarFlow.hidden = true;
+    urgentMatchResults.hidden = false;
+  });
+
+  // Step 3 → Close entire urgent flow
+  urgentStep3Close.addEventListener("click", () => {
+    urgentBooking.hidden = true;
+  });
+
+  // Step 3 → Step 4 (Details)
+  urgentNextToDetails.addEventListener("click", () => {
+    if (!urgentDate.value || !urgentTime.value) {
+      showToast("Select date & time.");
+      return;
     }
+    uDate = urgentDate.value;
+    uTime = urgentTime.value;
+    urgentCalendarFlow.hidden = true;
+    urgentDetailsForm.hidden = false;
+    urgentDetailsForm.scrollIntoView({ behavior: "smooth" });
+  });
 
-    // Urgent: Next → show details form
-    if (urgentNextToDetails) {
-      urgentNextToDetails.onclick = () => {
-        if (!urgentDate.value || !urgentTime.value) return showToast("Select date & time.");
-        uDate = urgentDate.value;
-        uTime = urgentTime.value;
-        // Hide the calendar before showing the “Details” form
-        urgentCalendarFlow.hidden = true;
-        urgentDetailsForm.hidden = false;
-        urgentDetailsForm.scrollIntoView({ behavior: "smooth" });
-      };
-    } else {
-      console.error("urgentNextToDetails element not found");
+  // Step 4 → Back to Step 3
+  urgentStep4Back.addEventListener("click", () => {
+    urgentDetailsForm.hidden = true;
+    urgentCalendarFlow.hidden = false;
+  });
+
+  // Step 4 → Close entire urgent flow
+  urgentStep4Close.addEventListener("click", () => {
+    urgentBooking.hidden = true;
+  });
+
+  // Step 4 → Confirm & Review Modal
+  urgentConfirmBtn.addEventListener("click", () => {
+    const name = urgentClientName.value.trim();
+    const email = urgentClientEmail.value.trim();
+    if (!name || !email) {
+      showToast("Enter name & email");
+      return;
     }
+    document.getElementById("confirmDetails").innerHTML = `
+      <p><strong>Urgent Consult</strong></p>
+      <p><strong>Provider:</strong> ${urgentProviderName}</p>
+      <p><strong>Date:</strong> ${uDate}</p>
+      <p><strong>Time:</strong> ${uTime}</p>
+      <p><strong>Name:</strong> ${name}</p>
+      <p><strong>Email:</strong> ${email}</p>
+      <p><strong>Fee:</strong> ₵500</p>
+    `;
+    confirmModal.hidden = false;
+    localStorage.setItem("urgentDraft", JSON.stringify({
+      ConcernInput: document.getElementById("urgentConcernInput").value,
+      Date: uDate, Time: uTime,
+      ClientName: name, ClientEmail: email
+    }));
+    urgentFlow = true;
+  });
 
-    // Urgent: Confirm → open review modal (then payment)
-    if (urgentConfirmBtn) {
-      urgentConfirmBtn.onclick = () => {
-        const name = urgentClientName.value.trim();
-        const email = urgentClientEmail.value.trim();
-        if (!name || !email) return showToast("Enter name & email");
-        document.getElementById("confirmDetails").innerHTML = `
-          <p><strong>Urgent Consult</strong></p>
-          <p><strong>Provider:</strong> ${urgentProviderName}</p>
-          <p><strong>Date:</strong> ${uDate}</p>
-          <p><strong>Time:</strong> ${uTime}</p>
-          <p><strong>Name:</strong> ${name}</p>
-          <p><strong>Email:</strong> ${email}</p>
-          <p><strong>Fee:</strong> ₵500</p>
-        `;
-        confirmModal.hidden = false;
-        localStorage.setItem("urgentDraft", JSON.stringify({
-          ConcernInput: document.getElementById("urgentConcernInput").value,
-          Date: uDate, Time: uTime,
-          ClientName: name, ClientEmail: email
-        }));
-        urgentFlow = true;
-      };
-    } else {
-      console.error("urgentConfirmBtn element not found");
+  // ─── 6) NORMAL MATCH FLOW NAVIGATION & LOGIC ──────────────────────────
+
+  // Step 1 → Step 2 (Predict Specialist)
+  findMatchBtn.addEventListener("click", async () => {
+    const rawConcern = document.getElementById("concernInput").value.trim();
+    if (!rawConcern) {
+      showToast("Enter your concern.");
+      return;
     }
+    const lower = rawConcern.toLowerCase();
 
-    // ─── 9) NORMAL MATCH FLOW LOGIC ─────────────────────────────────────
+    // Keyword scan
+    let matchedProviderId = null;
+    Object.keys(symptomMap).forEach(keyword => {
+      if (!matchedProviderId && lower.includes(keyword)) {
+        matchedProviderId = symptomMap[keyword];
+      }
+    });
 
-    // Normal: Find Specialist (rule‐based + GPT fallback)
-    if (findMatchBtn) {
-      findMatchBtn.onclick = async () => {
-        const rawConcern = document.getElementById("concernInput").value.trim();
-        if (!rawConcern) return showToast("Enter your concern.");
-        const lower = rawConcern.toLowerCase();
+    let chosenProviderObj = matchedProviderId
+      ? providers.find(p => p.id === matchedProviderId)
+      : null;
 
-        // 1) Keyword scan
-        let matchedProviderId = null;
-        for (let keyword in symptomMap) {
-          if (lower.includes(keyword)) {
-            matchedProviderId = symptomMap[keyword];
-            break;
-          }
-        }
+    // GPT fallback
+    if (!chosenProviderObj) {
+      findMatchBtn.disabled = true;
+      findMatchBtn.innerHTML = `Matching… <span class="spinner"></span>`;
 
-        // 2) If found, pick that provider
-        let chosenProviderObj = null;
-        if (matchedProviderId) {
-          chosenProviderObj = providers.find(p => p.id === matchedProviderId);
-        }
-
-        // 3) Otherwise, call GPT (force ID‐only)
-        if (!chosenProviderObj) {
-          findMatchBtn.disabled = true;
-          findMatchBtn.innerHTML = `Matching… <span class="spinner"></span>`;
-
-          const sys = `
-You are an expert medical triage AI. 
+      const sys = `
+You are an expert medical triage AI.
 Choose exactly one provider ID from the list below. Respond ONLY with the ID (e.g. "p5"), no extra text.
 Providers:
 ${providers.map(p => `- ${p.id}: ${p.name} — ${p.specialty} at ${p.facility}`).join("\n")}
-          `.trim();
+      `.trim();
 
-          const usr = \`Concern="\${rawConcern}", Urgency="\${document.getElementById("urgencyInput").value}". Return exactly one provider ID (p1…p18).\`;
-          let rawGPT = await callOpenAI([
-            { role: "system", content: sys },
-            { role: "user",   content: usr }
-          ]);
+      const usr = `Concern="${rawConcern}", Urgency="${document.getElementById("urgencyInput").value}". Return exactly one provider ID (p1…p18).`;
+      const rawGPT = await callOpenAI([
+        { role: "system", content: sys },
+        { role: "user",   content: usr }
+      ]);
 
-          const clean = rawGPT.split(/\s+/)[0].trim();
-          const isValid = providers.some(p => p.id === clean);
-          if (isValid) {
-            chosenProviderObj = providers.find(p => p.id === clean);
-          } else {
-            // Rare fallback
-            chosenProviderObj = providers[Math.floor(Math.random() * providers.length)];
-          }
+      const clean = rawGPT.split(/\s+/)[0].trim();
+      const isValid = providers.some(p => p.id === clean);
+      chosenProviderObj = isValid
+        ? providers.find(p => p.id === clean)
+        : providers[Math.floor(Math.random() * providers.length)];
 
-          findMatchBtn.disabled = false;
-          findMatchBtn.innerHTML = '<i class="fas fa-search"></i> Predict Specialist';
-        }
-
-        // 4) Display result
-        matchedName.textContent = chosenProviderObj.name;
-        matchedSpec.textContent = `${chosenProviderObj.specialty}, ${chosenProviderObj.facility}`;
-        providerId = chosenProviderObj.id;
-        providerName = chosenProviderObj.name;
-
-        // 5) Show Step 2 (hide the match‐form, show the results panel)
-        matchResults.hidden = false;
-        matchForm.hidden = true;
-      };
-    } else {
-      console.error("findMatchBtn element not found");
+      findMatchBtn.disabled = false;
+      findMatchBtn.innerHTML = '<i class="fas fa-search"></i> Predict Specialist';
     }
 
-    // Normal: Schedule → show calendar widget
-    if (scheduleMatchBtn) {
-      scheduleMatchBtn.onclick = () => {
-        matchResults.hidden = true;
-        appointmentFlow.hidden = false;
-        chosenProvider.textContent = providerName;
-        buildCalendar(year, month);
-      };
-    } else {
-      console.error("scheduleMatchBtn element not found");
+    matchedName.textContent = chosenProviderObj.name;
+    matchedSpec.textContent = `${chosenProviderObj.specialty}, ${chosenProviderObj.facility}`;
+    providerId = chosenProviderObj.id;
+    providerName = chosenProviderObj.name;
+
+    matchResults.hidden = false;
+    matchForm.hidden = true;
+  });
+
+  // Step 2 → Back to Step 1
+  matchResultsBack.addEventListener("click", () => {
+    matchResults.hidden = true;
+    matchForm.hidden = false;
+  });
+
+  // Step 2 → Close panel
+  matchResultsClose.addEventListener("click", () => {
+    matchResults.hidden = true;
+    matchForm.hidden = false;
+  });
+
+  // Step 2 → Step 3 (Schedule)
+  scheduleMatchBtn.addEventListener("click", () => {
+    matchResults.hidden = true;
+    appointmentFlow.hidden = false;
+    chosenProvider.textContent = providerName;
+    buildCalendar(year, month);
+  });
+
+  // Appointment Flow → Close panel
+  appointmentFlowClose.addEventListener("click", () => {
+    appointmentFlow.hidden = true;
+  });
+
+  // ─── 7) CALENDAR BUILDING & SELECTION ─────────────────────────────────
+
+  prevMonthBtn.addEventListener("click", () => {
+    month = month > 0 ? month - 1 : 11;
+    if (month === 11) year--;
+    buildCalendar(year, month);
+  });
+
+  nextMonthBtn.addEventListener("click", () => {
+    month = month < 11 ? month + 1 : 0;
+    if (month === 0) year++;
+    buildCalendar(year, month);
+  });
+
+  function buildCalendar(y, m) {
+    calendarHeader.textContent = new Date(y, m).toLocaleString("default", { month: "long", year: "numeric" });
+    calendarGrid.innerHTML = "";
+
+    // Weekday headers
+    ["Su","Mo","Tu","We","Th","Fr","Sa"].forEach(w => {
+      const d = document.createElement("div");
+      d.className = "cell";
+      d.style.fontWeight = "600";
+      d.innerText = w;
+      calendarGrid.append(d);
+    });
+
+    const first = new Date(y, m, 1).getDay();
+    const days = new Date(y, m + 1, 0).getDate();
+    // Blank cells before day 1
+    for (let i = 0; i < first; i++) {
+      const b = document.createElement("div");
+      b.className = "cell closed";
+      calendarGrid.append(b);
     }
 
-    // Change month in main calendar
-    if (prevMonthBtn) {
-      prevMonthBtn.onclick = () => {
-        month = month > 0 ? month - 1 : 11;
-        if (month === 11) year--;
-        buildCalendar(year, month);
-      };
-    } else {
-      console.error("prevMonthBtn element not found");
-    }
-    if (nextMonthBtn) {
-      nextMonthBtn.onclick = () => {
-        month = month < 11 ? month + 1 : 0;
-        if (month === 0) year++;
-        buildCalendar(year, month);
-      };
-    } else {
-      console.error("nextMonthBtn element not found");
-    }
+    const avail = availability[providerId] || {};
+    const todayMidnight = new Date().setHours(0,0,0,0);
 
-    // Build main calendar grid
-    function buildCalendar(y, m) {
-      calendarHeader.textContent = new Date(y, m).toLocaleString("default", { month: "long", year: "numeric" });
-      calendarGrid.innerHTML = "";
-      // Weekday headers
-      ["Su", "Mo", "Tu", "We", "Th", "Fr", "Sa"].forEach(w => {
-        const d = document.createElement("div");
-        d.className = "cell";
-        d.style.fontWeight = "600";
-        d.innerText = w;
-        calendarGrid.append(d);
-      });
-      const first = new Date(y, m, 1).getDay();
-      const days = new Date(y, m + 1, 0).getDate();
-      // Blank cells
-      for (let i = 0; i < first; i++) {
-        const b = document.createElement("div");
-        b.className = "cell closed";
-        calendarGrid.append(b);
+    for (let d = 1; d <= days; d++) {
+      const key = `${y}-${String(m+1).padStart(2,"0")}-${String(d).padStart(2,"0")}`;
+      const thisDayTs = new Date(y, m, d).getTime();
+      const past = thisDayTs < todayMidnight;
+      const open = !past && Array.isArray(avail[key]);
+      const cell = document.createElement("div");
+      cell.className = `cell ${open ? "open" : "closed"}`;
+      cell.dataset.date = key;
+      cell.innerText = d;
+      if (open) {
+        cell.addEventListener("click", () => selectDate(key));
       }
-      // Day cells
-      const avail = availability[providerId] || {};
-      const todayMidnightTs = new Date().setHours(0, 0, 0, 0);
-      for (let d = 1; d <= days; d++) {
-        const key = `${y}-${String(m + 1).padStart(2, "0")}-${String(d).padStart(2, "0")}`;
-        const thisDayTs = new Date(y, m, d).getTime();
-        const past = thisDayTs < todayMidnightTs;
-        const open = !past && Array.isArray(avail[key]);
-        const cell = document.createElement("div");
-        cell.className = `cell ${open ? "open" : "closed"}`;
-        cell.dataset.date = key;
-        cell.innerText = d;
-        if (open) cell.addEventListener("click", () => selectDate(key));
-        const today = new Date();
-        if (today.getFullYear() === y && today.getMonth() === m && today.getDate() === d) {
-          cell.classList.add("today");
-        }
-        calendarGrid.append(cell);
+      const today = new Date();
+      if (today.getFullYear() === y && today.getMonth() === m && today.getDate() === d) {
+        cell.classList.add("today");
       }
-      timeSlots.innerHTML = "";
-      confirmForm.hidden = true;
+      calendarGrid.append(cell);
     }
 
-    // Select a date → show available time slots
-    function selectDate(key) {
-      selDate = key;
-      const avail = availability[providerId] || {};
-      const slots = avail[key] || [];
-      timeSlots.innerHTML = `<h4>Available on ${key}:</h4>`;
-      const ul = document.createElement("ul");
-      ul.style.display = "flex";
-      ul.style.gap = "0.5rem";
-      slots.forEach(t => {
-        const li = document.createElement("li");
-        const btn = document.createElement("button");
-        btn.type = "button";
-        btn.className = "btn-sm";
-        btn.innerText = t;
-        btn.addEventListener("click", () => selectTime(t));
-        li.append(btn);
-        ul.append(li);
-      });
-      timeSlots.append(ul);
+    timeSlots.innerHTML = "";
+    confirmForm.hidden = true;
+  }
+
+  function selectDate(key) {
+    selDate = key;
+    const avail = availability[providerId] || {};
+    const slots = avail[key] || [];
+    timeSlots.innerHTML = `<h4>Available on ${key}:</h4>`;
+    const ul = document.createElement("ul");
+    ul.style.display = "flex";
+    ul.style.gap = "0.5rem";
+    slots.forEach(t => {
+      const li = document.createElement("li");
+      const btn = document.createElement("button");
+      btn.type = "button";
+      btn.className = "btn-sm";
+      btn.innerText = t;
+      btn.addEventListener("click", () => selectTime(t));
+      li.append(btn);
+      ul.append(li);
+    });
+    timeSlots.append(ul);
+  }
+
+  function selectTime(t) {
+    selTime = t;
+    summaryText.textContent = `You selected ${selDate} at ${selTime}.`;
+    confirmForm.hidden = false;
+    confirmForm.scrollIntoView({ behavior: "smooth" });
+  }
+
+  // Step 4 (Confirm) → open review modal
+  confirmBtn.addEventListener("click", () => {
+    const name = document.getElementById("clientName").value.trim();
+    if (!name) {
+      showToast("Enter your name");
+      return;
     }
+    document.getElementById("confirmDetails").innerHTML = `
+      <p><strong>Provider:</strong> ${providerName}</p>
+      <p><strong>Date:</strong> ${selDate}</p>
+      <p><strong>Time:</strong> ${selTime}</p>
+      <p><strong>Your Name:</strong> ${name}</p>
+    `;
+    confirmModal.hidden = false;
+  });
 
-    // Select a time → show confirm form
-    function selectTime(t) {
-      selTime = t;
-      summaryText.textContent = `You selected ${selDate} at ${selTime}.`;
-      confirmForm.hidden = false;
-      confirmForm.scrollIntoView({ behavior: "smooth" });
-    }
+  // ─── 8) MODAL CONTROLS & PAYMENT HANDLING ─────────────────────────────
 
-    // Normal: Confirm → open review modal
-    if (confirmBtn) {
-      confirmBtn.onclick = () => {
-        const name = document.getElementById("clientName").value.trim();
-        if (!name) return showToast("Enter your name");
-        document.getElementById("confirmDetails").innerHTML = `
-          <p><strong>Provider:</strong> ${providerName}</p>
-          <p><strong>Date:</strong> ${selDate}</p>
-          <p><strong>Time:</strong> ${selTime}</p>
-          <p><strong>Your Name:</strong> ${name}</p>
-        `;
-        confirmModal.hidden = false;
-      };
-    } else {
-      console.error("confirmBtn element not found");
-    }
+  // Close review modal
+  modalClose.addEventListener("click", () => {
+    confirmModal.hidden = true;
+  });
 
-    // ─── 10) MODAL CONTROLS & PAYMENT LOGIC ──────────────────────────────
+  // Edit from modal → return to form
+  modalEdit.addEventListener("click", () => {
+    confirmModal.hidden = true;
+    confirmForm.scrollIntoView({ behavior: "smooth" });
+  });
 
-    // Close review modal
-    if (modalClose) {
-      modalClose.addEventListener("click", () => {
-        confirmModal.hidden = true;
-      });
-    } else {
-      console.error("modalClose element not found");
-    }
-
-    // Edit from modal → scroll back to form
-    if (modalEdit) {
-      modalEdit.addEventListener("click", () => {
-        confirmModal.hidden = true;
-        confirmForm.scrollIntoView({ behavior: "smooth" });
-      });
-    } else {
-      console.error("modalEdit element not found");
-    }
-
-    // Confirm booking (handles both urgent & normal, with Paystack for urgent)
-    if (modalConfirm) {
-      modalConfirm.addEventListener("click", () => {
-        if (urgentFlow) {
-          // ─── Check that PaystackPop exists ─────────────────────────────────
-          if (typeof PaystackPop === "undefined") {
-            console.error("PaystackPop is not loaded. Cannot launch payment.");
-            showToast("Payment library failed to load. Please try again.");
-            return;
-          }
-          // Urgent: Launch Paystack inline payment
-          const email = urgentClientEmail.value.trim();
-          const handler = PaystackPop.setup({
-            key: "pk_test_297586e51710e83d3c159bfe71ff45c7e23411fa",
-            email: email,
-            amount: URGENT_FEE_KOBO,
-            currency: "GHS",
-            ref: generateId("U"), // Unique reference
-            onClose: function() {
-              // If user closes the payment popup, do nothing
-            },
-            callback: function(response) {
-              // Payment successful → save appointment
-              const id = generateId("U");
-              appointments.push({ id, name: urgentProviderName, date: uDate, time: uTime, urgent: true });
-              localStorage.setItem("appointments", JSON.stringify(appointments));
-              addToRichDashboard({ id, name: urgentProviderName, date: uDate, time: uTime, urgent: true });
-              renderUpcomingCalendarWidget();
-              showToast("Urgent appointment saved!");
-              urgentFlow = false;
-              confirmModal.hidden = true;
-            }
-          });
-          handler.openIframe();
-        } else {
-          // Normal: No payment → save directly
-          const id = generateId();
-          appointments.push({ id, name: providerName, date: selDate, time: selTime, urgent: false });
+  // Confirm booking (urgent vs normal)
+  modalConfirm.addEventListener("click", () => {
+    if (urgentFlow) {
+      // Urgent: Payment via Paystack
+      const email = urgentClientEmail.value.trim();
+      const handler = PaystackPop.setup({
+        key: "pk_test_297586e51710e83d3c159bfe71ff45c7e23411fa",
+        email: email,
+        amount: URGENT_FEE_KOBO,
+        currency: "GHS",
+        ref: generateId("U"),
+        onClose: function() {
+          // Do nothing if closed
+        },
+        callback: function(response) {
+          const id = generateId("U");
+          appointments.push({ id, name: urgentProviderName, date: uDate, time: uTime, urgent: true });
           localStorage.setItem("appointments", JSON.stringify(appointments));
-          addToRichDashboard({ id, name: providerName, date: selDate, time: selTime, urgent: false });
+          addToRichDashboard({ id, name: urgentProviderName, date: uDate, time: uTime, urgent: true });
           renderUpcomingCalendarWidget();
-          showToast("Appointment confirmed!");
+          urgentFlow = false;
           confirmModal.hidden = true;
         }
       });
+      handler.openIframe();
     } else {
-      console.error("modalConfirm element not found");
-    }
-
-    // ─── 11) CANCELLATION MODAL ───────────────────────────────────────────
-
-    if (cancelYes) {
-      cancelYes.addEventListener("click", () => {
-        // Find the appointment with matching ID and remove
-        const id = cancelYes.dataset.apptId;
-        const idx = appointments.findIndex(a => a.id === id);
-        if (idx > -1) {
-          appointments.splice(idx, 1);
-          localStorage.setItem("appointments", JSON.stringify(appointments));
-        }
-        // Remove card from Rich Dashboard
-        const card = document.querySelector(`.card[data-id="${id}"]`);
-        if (card) card.remove();
-        renderUpcomingCalendarWidget();
-        showToast("Appointment canceled.");
-        cancelModal.hidden = true;
-      });
-    } else {
-      console.error("cancelYes element not found");
-    }
-
-    if (cancelNo) {
-      cancelNo.addEventListener("click", () => {
-        cancelModal.hidden = true;
-      });
-    } else {
-      console.error("cancelNo element not found");
-    }
-
-    // ─── 12) RENDER UPCOMING CALENDAR WIDGET ─────────────────────────────
-
-    function renderUpcomingCalendarWidget() {
-      upcomingCalendarWidget.innerHTML = "";
-      const ctrl = document.createElement("div");
-      ctrl.style.display = "flex";
-      ctrl.style.justifyContent = "space-between";
-      ctrl.style.marginBottom = "0.5rem";
-      const prev = document.createElement("button");
-      prev.textContent = "‹ Prev";
-      prev.className = "btn-sm";
-      const next = document.createElement("button");
-      next.textContent = "Next ›";
-      next.className = "btn-sm";
-      ctrl.append(prev, next);
-      upcomingCalendarWidget.append(ctrl);
-
-      prev.onclick = () => {
-        widgetMonth--;
-        if (widgetMonth < 0) {
-          widgetMonth = 11;
-          widgetYear--;
-        }
-        renderWidget();
-      };
-      next.onclick = () => {
-        widgetMonth++;
-        if (widgetMonth > 11) {
-          widgetMonth = 0;
-          widgetYear++;
-        }
-        renderWidget();
-      };
-
-      function renderWidget() {
-        // Header
-        const title = document.createElement("h4");
-        title.innerText = new Date(widgetYear, widgetMonth).toLocaleString("default", { month: "long", year: "numeric" });
-        // Grid
-        const grid = document.createElement("div");
-        grid.className = "calendar-grid";
-        ["Su", "Mo", "Tu", "We", "Th", "Fr", "Sa"].forEach(w => {
-          const hd = document.createElement("div");
-          hd.className = "cell";
-          hd.style.fontWeight = "600";
-          hd.innerText = w;
-          grid.append(hd);
-        });
-        const firstDay = new Date(widgetYear, widgetMonth, 1).getDay();
-        for (let i = 0; i < firstDay; i++) {
-          const blank = document.createElement("div");
-          blank.className = "cell";
-          grid.append(blank);
-        }
-        const days = new Date(widgetYear, widgetMonth + 1, 0).getDate();
-        const marks = new Set(
-          appointments
-            .filter(a => {
-              const d = new Date(a.date);
-              return d.getFullYear() === widgetYear && d.getMonth() === widgetMonth;
-            })
-            .map(a => new Date(a.date).getDate())
-        );
-        for (let d = 1; d <= days; d++) {
-          const cell = document.createElement("div");
-          const isMarked = marks.has(d);
-          cell.className = isMarked ? "cell open" : "cell";
-          cell.innerText = d;
-          if (isMarked) {
-            cell.addEventListener("click", () => {
-              const list = appointments.filter(a => {
-                const ad = new Date(a.date);
-                return ad.getFullYear() === widgetYear && ad.getMonth() === widgetMonth && ad.getDate() === d;
-              });
-              alert(list.map(a => `${a.name}: ${a.time}`).join("\n"));
-            });
-          }
-          grid.append(cell);
-        }
-        upcomingCalendarWidget.querySelectorAll("h4, .calendar-grid").forEach(n => n.remove());
-        upcomingCalendarWidget.append(title, grid);
-      }
-      renderWidget();
-    }
-
-    // ─── 13) RICH DASHBOARD (CARDS + TABS) ───────────────────────────────
-
-    // Add card to the “Upcoming” dashboard
-    function addToRichDashboard(appt) {
-      const card = document.createElement("div");
-      card.className = "card";
-      card.dataset.id = appt.id;
-      card.innerHTML = `
-        <i class="fas fa-user-md fa-2x"></i>
-        <div class="details">
-          <h4><strong>${appt.name}</strong></h4>
-          <p>${appt.date} • ${appt.time}</p>
-        </div>
-        <div class="actions">
-          <button class="btn-reschedule"><i class="fas fa-sync-alt"></i></button>
-          <button class="btn-cancel"><i class="fas fa-times"></i></button>
-        </div>
-      `;
-
-      // Reschedule logic
-      const btnReschedule = card.querySelector(".btn-reschedule");
-      if (btnReschedule) {
-        btnReschedule.addEventListener("click", () => {
-          if (appt.urgent) {
-            // Urgent: open urgent flow at calendar step
-            urgentProviderName = appt.name;
-            urgentBooking.hidden = false;
-            urgentStep1.hidden = true;
-            urgentMatchResults.hidden = true;
-            urgentCalendarFlow.hidden = false;
-            urgentDate.value = appt.date;
-            urgentTime.value = appt.time;
-            uDate = appt.date;
-            uTime = appt.time;
-          } else {
-            // Normal: open scheduling for this provider
-            const found = providers.find(p => p.name === appt.name);
-            if (found) {
-              providerId = found.id;
-              providerName = appt.name;
-              appointmentFlow.hidden = false;
-              chosenProvider.textContent = providerName;
-              buildCalendar(year, month);
-            } else {
-              console.error("Provider not found for reschedule:", appt.name);
-            }
-          }
-          document.getElementById("confirmDetails").innerHTML = `
-            <p><strong>${appt.name}</strong></p>
-            <p><strong>Date:</strong> ${appt.date}</p>
-            <p><strong>Time:</strong> ${appt.time}</p>
-          `;
-        });
-      } else {
-        console.error("btn-reschedule element not found inside card");
-      }
-
-      // Cancel logic
-      const btnCancel = card.querySelector(".btn-cancel");
-      if (btnCancel) {
-        btnCancel.onclick = () => {
-          cancelMsg.innerText = appt.urgent
-            ? "This was an urgent booking (₵500 non-refundable). Cancel anyway?"
-            : "Are you sure you want to cancel this appointment?";
-          cancelYes.dataset.apptId = appt.id;
-          cancelModal.hidden = false;
-        };
-      } else {
-        console.error("btn-cancel element not found inside card");
-      }
-
-      richUpcoming.append(card);
-    }
-
-    // Tab switching
-    dashTabs.forEach(btn => {
-      btn.addEventListener("click", () => {
-        dashTabs.forEach(b => b.classList.remove("active"));
-        btn.classList.add("active");
-        richUpcomingSection.hidden = (btn.dataset.tab !== "rich-upcoming");
-        richPastSection.hidden     = (btn.dataset.tab !== "rich-past");
-        richFavoritesSection.hidden= (btn.dataset.tab !== "rich-favorites");
-      });
-    });
-
-    // If you’re using Animate On Scroll (AOS), initialize it here:
-    if (typeof AOS !== "undefined") {
-      AOS.init();
+      // Normal: Save appointment directly
+      const id = generateId();
+      appointments.push({ id, name: providerName, date: selDate, time: selTime, urgent: false });
+      localStorage.setItem("appointments", JSON.stringify(appointments));
+      addToRichDashboard({ id, name: providerName, date: selDate, time: selTime, urgent: false });
+      renderUpcomingCalendarWidget();
+      confirmModal.hidden = true;
     }
   });
+
+  // ─── 9) CANCELLATION MODAL ────────────────────────────────────────────
+
+  // Yes → Cancel appointment
+  cancelYes.addEventListener("click", () => {
+    const id = cancelYes.dataset.apptId;
+    const idx = appointments.findIndex(a => a.id === id);
+    if (idx > -1) {
+      appointments.splice(idx, 1);
+      localStorage.setItem("appointments", JSON.stringify(appointments));
+    }
+    const card = document.querySelector(`.card[data-id="${id}"]`);
+    if (card) card.remove();
+    renderUpcomingCalendarWidget();
+    cancelModal.hidden = true;
+  });
+
+  // No → Close cancel modal
+  cancelNo.addEventListener("click", () => {
+    cancelModal.hidden = true;
+  });
+
+  // ─── 10) RENDER UPCOMING CALENDAR WIDGET ─────────────────────────────
+
+  function renderUpcomingCalendarWidget() {
+    upcomingCalendarWidget.innerHTML = "";
+    const ctrl = document.createElement("div");
+    ctrl.style.display = "flex";
+    ctrl.style.justifyContent = "space-between";
+    ctrl.style.marginBottom = "0.5rem";
+    const prev = document.createElement("button");
+    prev.textContent = "‹ Prev";
+    prev.className = "btn-sm";
+    const next = document.createElement("button");
+    next.textContent = "Next ›";
+    next.className = "btn-sm";
+    ctrl.append(prev, next);
+    upcomingCalendarWidget.append(ctrl);
+
+    prev.addEventListener("click", () => {
+      widgetMonth--;
+      if (widgetMonth < 0) {
+        widgetMonth = 11;
+        widgetYear--;
+      }
+      renderWidget();
+    });
+
+    next.addEventListener("click", () => {
+      widgetMonth++;
+      if (widgetMonth > 11) {
+        widgetMonth = 0;
+        widgetYear++;
+      }
+      renderWidget();
+    });
+
+    function renderWidget() {
+      const title = document.createElement("h4");
+      title.innerText = new Date(widgetYear, widgetMonth).toLocaleString("default", { month: "long", year: "numeric" });
+      const grid = document.createElement("div");
+      grid.className = "calendar-grid";
+
+      ["Su","Mo","Tu","We","Th","Fr","Sa"].forEach(w => {
+        const hd = document.createElement("div");
+        hd.className = "cell";
+        hd.style.fontWeight = "600";
+        hd.innerText = w;
+        grid.append(hd);
+      });
+
+      const firstDay = new Date(widgetYear, widgetMonth, 1).getDay();
+      for (let i = 0; i < firstDay; i++) {
+        const blank = document.createElement("div");
+        blank.className = "cell";
+        grid.append(blank);
+      }
+
+      const days = new Date(widgetYear, widgetMonth + 1, 0).getDate();
+      const marks = new Set(
+        appointments
+          .filter(a => {
+            const d = new Date(a.date);
+            return d.getFullYear() === widgetYear && d.getMonth() === widgetMonth;
+          })
+          .map(a => new Date(a.date).getDate())
+      );
+
+      for (let d = 1; d <= days; d++) {
+        const cell = document.createElement("div");
+        const isMarked = marks.has(d);
+        cell.className = isMarked ? "cell open" : "cell";
+        cell.innerText = d;
+        if (isMarked) {
+          cell.addEventListener("click", () => {
+            const list = appointments.filter(a => {
+              const ad = new Date(a.date);
+              return ad.getFullYear() === widgetYear && ad.getMonth() === widgetMonth && ad.getDate() === d;
+            });
+            alert(list.map(a => `${a.name}: ${a.time}`).join("\n"));
+          });
+        }
+        grid.append(cell);
+      }
+
+      upcomingCalendarWidget.querySelectorAll("h4, .calendar-grid").forEach(n => n.remove());
+      upcomingCalendarWidget.append(title, grid);
+    }
+
+    renderWidget();
+  }
+
+  // ─── 11) RICH DASHBOARD (CARDS & TABS) ───────────────────────────────
+
+  function addToRichDashboard(appt) {
+    const card = document.createElement("div");
+    card.className = "card";
+    card.dataset.id = appt.id;
+    card.innerHTML = `
+      <i class="fas fa-user-md fa-2x"></i>
+      <div class="details">
+        <h4><strong>${appt.name}</strong></h4>
+        <p>${appt.date} • ${appt.time}</p>
+      </div>
+      <div class="actions">
+        <button class="btn-reschedule"><i class="fas fa-sync-alt"></i></button>
+        <button class="btn-cancel"><i class="fas fa-times"></i></button>
+      </div>
+    `;
+
+    // Reschedule logic
+    const btnReschedule = card.querySelector(".btn-reschedule");
+    btnReschedule.addEventListener("click", () => {
+      if (appt.urgent) {
+        urgentProviderName = appt.name;
+        urgentBooking.hidden = false;
+        urgentStep1.hidden = true;
+        urgentMatchResults.hidden = true;
+        urgentCalendarFlow.hidden = false;
+        urgentDate.value = appt.date;
+        urgentTime.value = appt.time;
+        uDate = appt.date;
+        uTime = appt.time;
+      } else {
+        const found = providers.find(p => p.name === appt.name);
+        if (found) {
+          providerId = found.id;
+          providerName = appt.name;
+          appointmentFlow.hidden = false;
+          chosenProvider.textContent = providerName;
+          buildCalendar(year, month);
+        }
+      }
+      document.getElementById("confirmDetails").innerHTML = `
+        <p><strong>${appt.name}</strong></p>
+        <p><strong>Date:</strong> ${appt.date}</p>
+        <p><strong>Time:</strong> ${appt.time}</p>
+      `;
+    });
+
+    // Cancel logic
+    const btnCancel = card.querySelector(".btn-cancel");
+    btnCancel.addEventListener("click", () => {
+      cancelMsg.innerText = appt.urgent
+        ? "This was an urgent booking (₵500 non-refundable). Cancel anyway?"
+        : "Are you sure you want to cancel this appointment?";
+      cancelYes.dataset.apptId = appt.id;
+      cancelModal.hidden = false;
+    });
+
+    richUpcomingSection.append(card);
+  }
+
+  // Dashboard tab switching
+  dashTabs.forEach(btn => {
+    btn.addEventListener("click", () => {
+      dashTabs.forEach(b => b.classList.remove("active"));
+      btn.classList.add("active");
+      richUpcomingSection.hidden  = (btn.dataset.tab !== "rich-upcoming");
+      richPastSection.hidden      = (btn.dataset.tab !== "rich-past");
+      richFavoritesSection.hidden = (btn.dataset.tab !== "rich-favorites");
+    });
+  });
+});
 </script>
   
 </body>
