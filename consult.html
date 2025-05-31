@@ -1094,24 +1094,13 @@
         <button id="heroBookBtn" data-target="#providerMatch" class="btn hero-btn">
           <i class="fas fa-book-medical"></i> Book an Appointment
         </button>
-      </div>
-      <div class="hero-graphic">
-        <img src="9E2CDE35-303A-4C5F-A4A9-1B0420CF8B0C.png" alt="Consultation illustration" />
-      </div>
-    </section>
-
-    <!-- Quick Actions -->
-    <section id="quickActions" class="module">
-      <div class="quick-actions">
-        <button class="btn"><i class="fas fa-calendar-plus"></i> Book an Appointment</button>
-        <div class="view-tabs">
-          <button id="viewUpcoming" class="btn-sm"><i class="fas fa-calendar-check"></i> View Upcoming</button>
-          <button id="viewPast"    class="btn-sm"><i class="fas fa-history"></i> View Past</button>
-        </div>
-        <p class="tips">
+         <p class="tips">
           <i class="fas fa-info-circle"></i>
           Need urgent care? <button id="urgentCare" type="button" class="link-style">Click here</button>
         </p>
+      </div>
+      <div class="hero-graphic">
+        <img src="9E2CDE35-303A-4C5F-A4A9-1B0420CF8B0C.png" alt="Consultation illustration" />
       </div>
     </section>
 
@@ -1138,7 +1127,7 @@
 
       <!-- Step 2 -->
       <div id="urgentMatchResults" class="response" hidden>
-        <button class="close-btn" id="urgentStep2Close"><i class="fas fa-times"></i></button>
+        <button class="close-btn" id="urgentStep2Close" style="display: none;"><i class="fas fa-times"></i></button>
         <div class="card">
           <i class="fas fa-user-md fa-2x"></i>
           <div class="details">
@@ -1160,13 +1149,13 @@
         <label>Date: <input type="date" id="urgentDate" /></label>
         <label>Time: <input type="time" id="urgentTime" /></label>
         <button id="urgentNextToDetails" class="btn"><i class="fas fa-arrow-right"></i> Next</button>
-        <button class="btn-sm close-btn" id="urgentStep3Close"><i class="fas fa-times"></i></button>
+        <button class="btn-sm close-btn" id="urgentStep3Close" style="display: none;"><i class="fas fa-times"></i></button>
       </div>
 
       <!-- Step 4 -->
       <form id="urgentDetailsForm" class="module" hidden>
         <button type="button" class="btn-sm back" id="urgentStep4Back">
-          <i class="fas fa-arrow-left"></i> Back
+          <i class="fas fa-arrow-left" style="dispaly: none;"></i> Back
         </button>
         <button type="button" class="btn-sm close-btn" id="urgentStep4Close"><i class="fas fa-times"></i></button>
         <label>
@@ -1223,7 +1212,6 @@
       <!-- Step 2 -->
       <div id="matchResults" class="response" hidden>
         <button class="close-btn" id="matchResultsClose"><i class="fas fa-times"></i></button>
-        <button class="btn-sm back" id="matchResultsBack">Back</button>
         <div class="card">
           <i class="fas fa-user-md fa-2x"></i>
           <div class="details">
@@ -1317,52 +1305,227 @@
   
 <script defer>
 document.addEventListener("DOMContentLoaded", () => {
-  // ─── 1) GLOBALS & ELEMENT REFERENCES ─────────────────────────────────
-
-  // Calendar widget state
-  let widgetYear  = new Date().getFullYear();
-  let widgetMonth = new Date().getMonth();
-
-  // Flags & temporary variables
-  let urgentProviderName = "";
-  let uDate = "";
-  let uTime = "";
-  let urgentFlow = false;
-  let providerId = "";
-  let providerName = "";
-  let year = new Date().getFullYear();
-  let month = new Date().getMonth();
-  let selDate = "";
-  let selTime = "";
-
-  // Appointment storage
-  const appointments = [];
-
-  // Providers & their specialties
+  // ─── PROVIDERS ARRAY (with descriptions) ──────────────────────────────
   const providers = [
-    { id: "p1",  name: "Dr. Kwame Asante", specialty: "Pulmonologist",               facility: "Korle Bu Teaching Hospital" },
-    { id: "p2",  name: "Dr. Abena Owusu",   specialty: "Cardiologist",                 facility: "37 Military Hospital" },
-    { id: "p3",  name: "Dr. Kojo Mensah",   specialty: "Psychiatrist",                 facility: "Ridge Hospital" },
-    { id: "p4",  name: "Dr. Yaa Dufie",     specialty: "Clinical Dietitian",           facility: "Nyaho Medical Centre" },
-    { id: "p5",  name: "Dr. Nana Adjei",    specialty: "General Practitioner",         facility: "Cape Coast Teaching Hospital" },
-    { id: "p6",  name: "Dr. Efua Amponsah", specialty: "Endocrinologist",              facility: "LEKMA Hospital" },
-    { id: "p7",  name: "Dr. Michael Addo",  specialty: "Neurologist",                  facility: "37 Military Hospital" },
-    { id: "p8",  name: "Dr. Grace Ofori",   specialty: "Dermatologist",                facility: "Accra Dermatology Centre" },
-    { id: "p9",  name: "Dr. Joseph Kumi",   specialty: "Orthopedic Surgeon",           facility: "Komfo Anokye Teaching Hospital" },
-    { id: "p10", name: "Dr. Ama Brew",      specialty: "Pediatrician",                 facility: "The Trust Hospital" },
-    { id: "p11", name: "Ms. Akosua Baah",   specialty: "Physiotherapist",              facility: "Tema General Hospital" },
-    { id: "p12", name: "Mr. Daniel Boakye", specialty: "Pharmacist",                   facility: "Ridge Hospital Pharmacy" },
-    { id: "p13", name: "Mrs. Esther Kumi",  specialty: "Occupational Therapist",       facility: "Cape Coast Teaching Hospital" },
-    { id: "p14", name: "Ms. Joy Mensah",    specialty: "Speech and Language Therapist",facility: "LEKMA Hospital" },
-    { id: "p15", name: "Dr. Paul Yeboah",   specialty: "Dermatologist",                facility: "Korle Bu Teaching Hospital" },
-    { id: "p16", name: "Dr. Linda Frimpong",specialty: "Nephrologist",                 facility: "37 Military Hospital" },
-    { id: "p17", name: "Mr. Kwesi Owusu",   specialty: "Nutritionist",                 facility: "Nyaho Medical Centre" },
-    { id: "p18", name: "Ms. Abena Boateng", specialty: "Psychologist",                 facility: "Accra Psychology & Counselling Centre" }
+    {
+      id: "p1",
+      name: "Dr. Kwame Asante",
+      specialty: "Pulmonologist",
+      facility: "Korle Bu Teaching Hospital",
+      description: `
+        Dr. Kwame Asante is a consultant pulmonologist with 15 years of experience 
+        treating complex lung conditions (e.g. COPD, asthma, pneumonia). He focuses 
+        on diagnostic bronchoscopy and long‐term management of chronic respiratory diseases. 
+        He has published research on tuberculosis diagnosis in Ghanaian adults.
+      `
+    },
+    {
+      id: "p2",
+      name: "Dr. Abena Owusu",
+      specialty: "Cardiologist",
+      facility: "37 Military Hospital",
+      description: `
+        Dr. Abena Owusu is a board‐certified cardiologist with 10 years’ experience 
+        managing ischemic heart disease, heart failure, and arrhythmias. She routinely 
+        performs echocardiograms and stress tests, and excels at hypertensive emergencies 
+        and advanced heart failure therapies.
+      `
+    },
+    {
+      id: "p3",
+      name: "Dr. Kojo Mensah",
+      specialty: "Psychiatrist",
+      facility: "Ridge Hospital",
+      description: `
+        Dr. Kojo Mensah is a consultant psychiatrist specializing in mood disorders 
+        (depression, bipolar), anxiety, and schizophrenia. He has 12 years of experience 
+        in both inpatient and outpatient psychiatric care. He leads CBT groups for depression 
+        and treats resistant cases as well as early‐onset psychosis.
+      `
+    },
+    {
+      id: "p4",
+      name: "Dr. Yaa Dufie",
+      specialty: "Clinical Dietitian",
+      facility: "Nyaho Medical Centre",
+      description: `
+        Dr. Yaa Dufie is a registered clinical dietitian with expertise in diabetes 
+        management, obesity treatment, and renal nutrition. With 8 years in hospital 
+        practice, she designs personalized meal plans, counsels on weight management, 
+        and monitors nutrition for renal failure patients.
+      `
+    },
+    {
+      id: "p5",
+      name: "Dr. Nana Adjei",
+      specialty: "General Practitioner",
+      facility: "Cape Coast Teaching Hospital",
+      description: `
+        Dr. Nana Adjei is a general practitioner with 10 years of experience in primary 
+        care. He diagnoses and treats a wide range of common illnesses (hypertension, diabetes, 
+        viral infections) and refers patients to specialists as needed. He also runs a minor surgery 
+        clinic for wound care and suturing.
+      `
+    },
+    {
+      id: "p6",
+      name: "Dr. Efua Amponsah",
+      specialty: "Endocrinologist",
+      facility: "LEKMA Hospital",
+      description: `
+        Dr. Efua Amponsah is an endocrinologist with 12 years’ experience in managing 
+        diabetes, thyroid disorders, and adrenal diseases. She conducts thyroid ultrasounds, 
+        manages insulin pump therapy, and provides ongoing education for diabetic patients.
+      `
+    },
+    {
+      id: "p7",
+      name: "Dr. Michael Addo",
+      specialty: "Neurologist",
+      facility: "37 Military Hospital",
+      description: `
+        Dr. Michael Addo is a neurologist specializing in stroke, epilepsy, and migraines. 
+        With 9 years of experience, he interprets EEGs, orders and reads MRIs, and manages 
+        seizure disorders. He also handles acute stroke thrombolysis and outpatient follow-up.
+      `
+    },
+    {
+      id: "p8",
+      name: "Dr. Grace Ofori",
+      specialty: "Dermatologist",
+      facility: "Accra Dermatology Centre",
+      description: `
+        Dr. Grace Ofori is a dermatologist who treats acne, eczema, psoriasis, and skin infections. 
+        With 7 years in practice, she performs skin biopsies, patch testing for allergies, 
+        and cosmetic procedures like chemical peels. She also manages chronic dermatologic conditions 
+        in both adults and children.
+      `
+    },
+    {
+      id: "p9",
+      name: "Dr. Joseph Kumi",
+      specialty: "Orthopedic Surgeon",
+      facility: "Komfo Anokye Teaching Hospital",
+      description: `
+        Dr. Joseph Kumi is an orthopedic surgeon specializing in fractures, joint replacements, 
+        and sports injuries. With 11 years’ experience, he performs hip and knee arthroplasties, 
+        arthroscopic ACL repairs, and fracture fixations. He also leads a sports medicine clinic 
+        for athletes and active adults.
+      `
+    },
+    {
+      id: "p10",
+      name: "Dr. Ama Brew",
+      specialty: "Pediatrician",
+      facility: "The Trust Hospital",
+      description: `
+        Dr. Ama Brew is a pediatrician with expertise in neonatal care, childhood infections, 
+        and developmental monitoring. Over 8 years, she has managed NICU patients, vaccine 
+        schedules, and common pediatric illnesses (bronchiolitis, pneumonia). She also runs growth and 
+        nutrition assessments for children under five.
+      `
+    },
+    {
+      id: "p11",
+      name: "Ms. Akosua Baah",
+      specialty: "Physiotherapist",
+      facility: "Tema General Hospital",
+      description: `
+        Ms. Akosua Baah is a physiotherapist focusing on orthopedic rehabilitation, 
+        post-surgical mobility, and sports injury recovery. With 6 years of experience, 
+        she guides patients through exercises for back pain, knee replacement rehab, 
+        and sports injury prevention.
+      `
+    },
+    {
+      id: "p12",
+      name: "Mr. Daniel Boakye",
+      specialty: "Pharmacist",
+      facility: "Ridge Hospital Pharmacy",
+      description: `
+        Mr. Daniel Boakye is a clinical pharmacist specializing in medication therapy 
+        management, drug interactions, and patient counseling. He has 5 years of experience 
+        overseeing dispensation of antibiotics, chronic disease medications (antihypertensives, 
+        antidiabetics), and advising on OTC vs prescription use.
+      `
+    },
+    {
+      id: "p13",
+      name: "Mrs. Esther Kumi",
+      specialty: "Occupational Therapist",
+      facility: "Cape Coast Teaching Hospital",
+      description: `
+        Mrs. Esther Kumi is an occupational therapist with 7 years in pediatric and adult 
+        rehab. She helps stroke survivors relearn daily tasks, provides adaptive equipment 
+        for spinal cord injury patients, and runs sensory integration sessions for children 
+        with autism.
+      `
+    },
+    {
+      id: "p14",
+      name: "Ms. Joy Mensah",
+      specialty: "Speech & Language Therapist",
+      facility: "LEKMA Hospital",
+      description: `
+        Ms. Joy Mensah is a speech and language therapist who treats communication disorders, 
+        swallowing difficulties, and developmental speech delays. In her 6 years of practice, 
+        she has worked with post-stroke aphasia patients, pediatric speech delay, and voice 
+        therapy for singers.
+      `
+    },
+    {
+      id: "p15",
+      name: "Dr. Paul Yeboah",
+      specialty: "Dermatologist",
+      facility: "Korle Bu Teaching Hospital",
+      description: `
+        Dr. Paul Yeboah is a senior dermatologist focusing on surgical dermatology, 
+        malignant melanoma, and chronic skin diseases. With 14 years’ experience, he 
+        performs excisions of suspicious lesions, manages phototherapy for psoriasis, 
+        and leads a melanoma screening program.
+      `
+    },
+    {
+      id: "p16",
+      name: "Dr. Linda Frimpong",
+      specialty: "Nephrologist",
+      facility: "37 Military Hospital",
+      description: `
+        Dr. Linda Frimpong is a nephrologist specializing in chronic kidney disease, 
+        dialysis, and hypertension management. Over 10 years, she has managed CKD clinics, 
+        initiated hemodialysis programs, and treated acute renal failure in ICU settings.
+      `
+    },
+    {
+      id: "p17",
+      name: "Mr. Kwesi Owusu",
+      specialty: "Nutritionist",
+      facility: "Nyaho Medical Centre",
+      description: `
+        Mr. Kwesi Owusu is a nutritionist specializing in sports nutrition, pediatric 
+        nutrition, and weight management. He has 5 years of experience developing meal 
+        plans for athletes, counseling diabetic children, and creating community 
+        nutrition workshops on healthy eating.
+      `
+    },
+    {
+      id: "p18",
+      name: "Ms. Abena Boateng",
+      specialty: "Psychologist",
+      facility: "Accra Psychology & Counselling Centre",
+      description: `
+        Ms. Abena Boateng is a clinical psychologist focusing on cognitive behavioral 
+        therapy (CBT), trauma counseling, and stress management. With 8 years in practice, 
+        she works with PTSD survivors, adolescent depression, and provides group therapy 
+        for anxiety disorders.
+      `
+    }
   ];
 
-  // Availability for each provider (YYYY-MM-DD → [times])
+  // ─── URGENT AVAILABILITY ──────────────────────────────────────────────
   const availability = {
     p1:  { "2025-05-31": ["09:30","10:30","12:00"], "2025-06-10": ["09:00","10:00","11:00"], "2025-06-12": ["14:00","15:00"], "2025-06-15": ["08:30","09:30","10:30"] },
+    // … replicate for p2 → p18 as before …
     p2:  { "2025-05-31": ["09:30","10:30","12:00"], "2025-06-03": ["10:00","13:00","16:00"], "2025-06-04": ["09:00","11:00"], "2025-06-15": ["12:00","14:00"] },
     p3:  { "2025-05-31": ["09:30","10:30","12:00"], "2025-06-08": ["08:00","09:00","10:00","11:00"], "2025-06-11": ["13:30","14:30"], "2025-06-16": ["15:00","16:00"] },
     p4:  { "2025-05-31": ["09:30","10:30","12:00"], "2025-06-05": ["09:30","10:30","11:30"], "2025-06-09": ["14:00","15:00","16:00"], "2025-06-18": ["08:00","09:00"] },
@@ -1403,88 +1566,90 @@ document.addEventListener("DOMContentLoaded", () => {
     psychologist: "p18", counsel: "p18"
   };
 
-  // URGENT_FEE in kobo for Paystack (₵500 → 50000 kobo)
+  // URGENT fee in kobo (₵500)
   const URGENT_FEE_KOBO = 500 * 100;
 
-  // Element references
-  const sidebar             = document.getElementById("sidebar");
-  const hamburger           = document.getElementById("hamburger");
-  const shrinkSidebarBtn    = document.getElementById("shrinkSidebar");
-  const themeToggle         = document.getElementById("themeToggle");
-  const heroBookBtn         = document.getElementById("heroBookBtn");
-  const urgentCareLink      = document.getElementById("urgentCare");
+  // Appointment storage
+  const appointments = [];
 
-  // Urgent‐flow elements
-  const urgentBooking       = document.getElementById("urgentBooking");
-  const urgentStep1         = document.getElementById("urgentStep1");
-  const urgentMatchResults  = document.getElementById("urgentMatchResults");
-  const urgentCalendarFlow  = document.getElementById("urgentCalendarFlow");
-  const urgentDetailsForm   = document.getElementById("urgentDetailsForm");
-  const urgentFindMatchBtn  = document.getElementById("urgentFindMatchBtn");
-  const urgentMatchedName   = document.getElementById("urgentMatchedName");
-  const urgentMatchedSpec   = document.getElementById("urgentMatchedSpec");
-  const urgentScheduleBtn   = document.getElementById("urgentScheduleBtn");
-  const urgentDate          = document.getElementById("urgentDate");
-  const urgentTime          = document.getElementById("urgentTime");
-  const urgentNextToDetails = document.getElementById("urgentNextToDetails");
-  const urgentClientName    = document.getElementById("urgentClientName");
-  const urgentClientEmail   = document.getElementById("urgentClientEmail");
-  const urgentConfirmBtn    = document.getElementById("urgentConfirmBtn");
-  const urgentStep2Back     = document.getElementById("urgentStep2Back");
-  const urgentStep2Close    = document.getElementById("urgentStep2Close");
-  const urgentStep3Close    = document.getElementById("urgentStep3Close");
-  const urgentStep3Back     = document.getElementById("urgentStep3Back");
-  const urgentStep4Back     = document.getElementById("urgentStep4Back");
-  const urgentStep4Close    = document.getElementById("urgentStep4Close");
+  // ─── ELEMENT REFERENCES ─────────────────────────────────────────────
 
-  // Provider‐match elements
-  const matchForm           = document.getElementById("matchForm");
-  const findMatchBtn        = document.getElementById("findMatchBtn");
-  const matchResults        = document.getElementById("matchResults");
-  const scheduleMatchBtn    = document.getElementById("scheduleMatchBtn");
-  const matchedName         = document.getElementById("matchedName");
-  const matchedSpec         = document.getElementById("matchedSpec");
-  const appointmentFlow     = document.getElementById("appointmentFlow");
-  const chosenProvider      = document.getElementById("chosenProvider");
-  const prevMonthBtn        = document.getElementById("prevMonth");
-  const nextMonthBtn        = document.getElementById("nextMonth");
-  const calendarHeader      = document.getElementById("calendarHeader");
-  const calendarGrid        = document.getElementById("calendar");
-  const timeSlots           = document.getElementById("timeSlots");
-  const confirmForm         = document.getElementById("confirmForm");
-  const summaryText         = document.getElementById("summaryText");
-  const confirmBtn          = document.getElementById("confirmBtn");
-  const matchResultsBack    = document.getElementById("matchResultsBack");
-  const matchResultsClose   = document.getElementById("matchResultsClose");
-  const appointmentFlowClose= document.getElementById("appointmentFlowClose");
-  const confirmStep4Back    = document.getElementById("confirmStep4Back");
-  const confirmStep4Close   = document.getElementById("confirmStep4Close");
+  const sidebar               = document.getElementById("sidebar");
+  const hamburger             = document.getElementById("hamburger");
+  const shrinkSidebarBtn      = document.getElementById("shrinkSidebar");
+  const themeToggle           = document.getElementById("themeToggle");
+  const heroBookBtn           = document.getElementById("heroBookBtn");
+  const urgentCareLink        = document.getElementById("urgentCare");
 
-  // Modal elements
-  const confirmModal        = document.getElementById("confirmModal");
-  const cancelModal         = document.getElementById("cancelModal");
-  const modalEdit           = document.getElementById("modalEdit");
-  const modalConfirm        = document.getElementById("modalConfirm");
-  const modalClose          = document.getElementById("modalClose");
-  const cancelYes           = document.getElementById("cancelYes");
-  const cancelNo            = document.getElementById("cancelNo");
-  const cancelMsg           = document.getElementById("cancelMsg");
+  const urgentBooking         = document.getElementById("urgentBooking");
+  const urgentStep1           = document.getElementById("urgentStep1");
+  const urgentMatchResults    = document.getElementById("urgentMatchResults");
+  const urgentCalendarFlow    = document.getElementById("urgentCalendarFlow");
+  const urgentDetailsForm     = document.getElementById("urgentDetailsForm");
+  const urgentFindMatchBtn    = document.getElementById("urgentFindMatchBtn");
+  const urgentMatchedName     = document.getElementById("urgentMatchedName");
+  const urgentMatchedSpec     = document.getElementById("urgentMatchedSpec");
+  const urgentScheduleBtn     = document.getElementById("urgentScheduleBtn");
+  const urgentDate            = document.getElementById("urgentDate");
+  const urgentTime            = document.getElementById("urgentTime");
+  const urgentNextToDetails   = document.getElementById("urgentNextToDetails");
+  const urgentClientName      = document.getElementById("urgentClientName");
+  const urgentClientEmail     = document.getElementById("urgentClientEmail");
+  const urgentConfirmBtn      = document.getElementById("urgentConfirmBtn");
+  const urgentStep2Back       = document.getElementById("urgentStep2Back");
+  const urgentStep2Close      = document.getElementById("urgentStep2Close");
+  const urgentStep3Close      = document.getElementById("urgentStep3Close");
+  const urgentStep3Back       = document.getElementById("urgentStep3Back");
+  const urgentStep4Back       = document.getElementById("urgentStep4Back");
+  const urgentStep4Close      = document.getElementById("urgentStep4Close");
 
-  // Upcoming calendar container
-  const upcomingCalendarWidget = document.getElementById("upcomingCalendarWidget");
+  const matchForm             = document.getElementById("matchForm");
+  const findMatchBtn          = document.getElementById("findMatchBtn");
+  const matchResults          = document.getElementById("matchResults");
+  const scheduleMatchBtn      = document.getElementById("scheduleMatchBtn");
+  const matchedName           = document.getElementById("matchedName");
+  const matchedSpec           = document.getElementById("matchedSpec");
+  const appointmentFlow       = document.getElementById("appointmentFlow");
+  const chosenProvider        = document.getElementById("chosenProvider");
+  const prevMonthBtn          = document.getElementById("prevMonth");
+  const nextMonthBtn          = document.getElementById("nextMonth");
+  const calendarHeader        = document.getElementById("calendarHeader");
+  const calendarGrid          = document.getElementById("calendar");
+  const timeSlots             = document.getElementById("timeSlots");
+  const confirmForm           = document.getElementById("confirmForm");
+  const summaryText           = document.getElementById("summaryText");
+  const confirmBtn            = document.getElementById("confirmBtn");
+  const matchResultsBack      = document.getElementById("matchResultsBack");
+  const matchResultsClose     = document.getElementById("matchResultsClose");
+  const appointmentFlowClose  = document.getElementById("appointmentFlowClose");
+  const confirmStep4Back      = document.getElementById("confirmStep4Back");
+  const confirmStep4Close     = document.getElementById("confirmStep4Close");
 
-  // Rich Dashboard tabs
-  const dashTabs             = document.querySelectorAll("#feature-rich-dashboard .dashboard-tabs button");
-  const richUpcomingSection  = document.getElementById("rich-upcoming");
-  const richPastSection      = document.getElementById("rich-past");
-  const richFavoritesSection = document.getElementById("rich-favorites");
+  const confirmModal          = document.getElementById("confirmModal");
+  const cancelModal           = document.getElementById("cancelModal");
+  const modalEdit             = document.getElementById("modalEdit");
+  const modalConfirm          = document.getElementById("modalConfirm");
+  const modalClose            = document.getElementById("modalClose");
+  const cancelYes             = document.getElementById("cancelYes");
+  const cancelNo              = document.getElementById("cancelNo");
+  const cancelMsg             = document.getElementById("cancelMsg");
 
-  // ─── 2) LOAD STORED APPOINTMENTS & URGENT DRAFT ────────────────────────
+  const upcomingCalendarWidget= document.getElementById("upcomingCalendarWidget");
+
+  const dashTabs              = document.querySelectorAll("#feature-rich-dashboard .dashboard-tabs button");
+  const richUpcomingSection   = document.getElementById("rich-upcoming");
+  const richPastSection       = document.getElementById("rich-past");
+  const richFavoritesSection  = document.getElementById("rich-favorites");
+
+  // ─── LOAD LOCAL STORAGE ─────────────────────────────────────────────
 
   const stored = localStorage.getItem("appointments");
   if (stored) {
     const arr = JSON.parse(stored);
-    arr.forEach(a => { appointments.push(a); addToRichDashboard(a); });
+    arr.forEach(a => {
+      appointments.push(a);
+      addToRichDashboard(a);
+    });
     renderUpcomingCalendarWidget();
   }
 
@@ -1494,14 +1659,12 @@ document.addEventListener("DOMContentLoaded", () => {
     if (el) el.value = draft[key];
   }
 
-  // ─── 3) HELPER FUNCTIONS ─────────────────────────────────────────────
+  // ─── HELPER FUNCTIONS ────────────────────────────────────────────────
 
-  // Generate unique ID
   function generateId(prefix = "") {
     return prefix + Date.now().toString();
   }
 
-  // Show toast notification
   function showToast(msg) {
     const t = document.createElement("div");
     t.className = "toast";
@@ -1511,7 +1674,6 @@ document.addEventListener("DOMContentLoaded", () => {
     setTimeout(() => t.remove(), 3000);
   }
 
-  // Call OpenAI proxy
   async function callOpenAI(messages) {
     const res = await fetch("/.netlify/functions/openai-proxy", {
       method: "POST",
@@ -1522,14 +1684,12 @@ document.addEventListener("DOMContentLoaded", () => {
     return j.choices?.[0]?.message?.content.trim() || "";
   }
 
-  // ─── 4) UI TOGGLES ──────────────────────────────────────────────────
+  // ─── UI TOGGLES ─────────────────────────────────────────────────────
 
-  // Sidebar (mobile open)
   hamburger.addEventListener("click", () => {
     document.body.classList.toggle("sidebar-open");
   });
 
-  // Sidebar shrink/collapse
   shrinkSidebarBtn.addEventListener("click", () => {
     document.body.classList.toggle("sidebar-shrink");
     const icon = shrinkSidebarBtn.querySelector("i");
@@ -1537,14 +1697,12 @@ document.addEventListener("DOMContentLoaded", () => {
     icon.classList.toggle("fa-chevron-right");
   });
 
-  // Theme toggle
   themeToggle.addEventListener("click", () => {
     document.documentElement.classList.toggle("dark");
     themeToggle.classList.toggle("fa-moon");
     themeToggle.classList.toggle("fa-sun");
   });
 
-  // Hero “Book an Appointment” scroll
   heroBookBtn.addEventListener("click", () => {
     const target = document.querySelector(heroBookBtn.dataset.target);
     if (target) {
@@ -1552,14 +1710,12 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   });
 
-  // Show Urgent Booking section
   urgentCareLink.addEventListener("click", () => {
     urgentBooking.hidden = false;
   });
 
-  // ─── 5) URGENT FLOW NAVIGATION & LOGIC ───────────────────────────────
+  // ─── URGENT FLOW ─────────────────────────────────────────────────────
 
-  // Step 1 → Step 2 (Find Specialist)
   urgentFindMatchBtn.addEventListener("click", async () => {
     const rawConcern = document.getElementById("urgentConcernInput").value.trim();
     if (!rawConcern) {
@@ -1568,7 +1724,6 @@ document.addEventListener("DOMContentLoaded", () => {
     }
     const lower = rawConcern.toLowerCase();
 
-    // Keyword scan
     let matchedProviderId = null;
     Object.keys(symptomMap).forEach(keyword => {
       if (!matchedProviderId && lower.includes(keyword)) {
@@ -1576,21 +1731,26 @@ document.addEventListener("DOMContentLoaded", () => {
       }
     });
 
-    // Pick provider object
     let chosenProviderObj = matchedProviderId
       ? providers.find(p => p.id === matchedProviderId)
       : null;
 
-    // GPT fallback if no match
     if (!chosenProviderObj) {
       urgentFindMatchBtn.disabled = true;
       urgentFindMatchBtn.innerText = "Matching…";
 
       const sys = `
-You are an expert medical triage AI.
-Choose exactly one provider ID from the list below. Respond ONLY with the ID (e.g. "p3"), no extra text.
+You are an AI‐powered medical triage system. A patient will describe their symptoms, and your job is to pick exactly ONE provider ID (p1…p18) who best matches that patient’s needs. Respond only with the provider ID (e.g. "p3"), with no extra commentary.
+
+Below is the detailed profile of each provider. Use the entire description—specialty, experience, procedural skills, patient focus—when deciding.
+
 Providers:
-${providers.map(p => `- ${p.id}: ${p.name} — ${p.specialty} at ${p.facility}`).join("\n")}
+${providers.map(p => `
+- ${p.id}: ${p.name}
+  • Specialty: ${p.specialty}
+  • Facility: ${p.facility}
+  • Profile: ${p.description.trim()}
+`).join("\n")}
       `.trim();
 
       const usr = `Concern="${rawConcern}". Return exactly one provider ID (p1…p18).`;
@@ -1617,38 +1777,31 @@ ${providers.map(p => `- ${p.id}: ${p.name} — ${p.specialty} at ${p.facility}`)
     urgentStep1.hidden = true;
   });
 
-  // Step 2 → Back to Step 1
   urgentStep2Back.addEventListener("click", () => {
     urgentMatchResults.hidden = true;
     urgentStep1.hidden = false;
   });
 
-  // Step 2 → Close entire urgent flow
   urgentStep2Close.addEventListener("click", () => {
     urgentBooking.hidden = true;
   });
 
-  // Step 2 → Step 3 (Schedule)
   urgentScheduleBtn.addEventListener("click", () => {
     urgentMatchResults.hidden = true;
     urgentCalendarFlow.hidden = false;
   });
 
-  // Prevent past dates in urgentDate
   urgentDate.min = new Date().toISOString().split("T")[0];
 
-  // Step 3 → Back to Step 2
   urgentStep3Back.addEventListener("click", () => {
     urgentCalendarFlow.hidden = true;
     urgentMatchResults.hidden = false;
   });
 
-  // Step 3 → Close entire urgent flow
   urgentStep3Close.addEventListener("click", () => {
     urgentBooking.hidden = true;
   });
 
-  // Step 3 → Step 4 (Details)
   urgentNextToDetails.addEventListener("click", () => {
     if (!urgentDate.value || !urgentTime.value) {
       showToast("Select date & time.");
@@ -1661,18 +1814,15 @@ ${providers.map(p => `- ${p.id}: ${p.name} — ${p.specialty} at ${p.facility}`)
     urgentDetailsForm.scrollIntoView({ behavior: "smooth" });
   });
 
-  // Step 4 → Back to Step 3
   urgentStep4Back.addEventListener("click", () => {
     urgentDetailsForm.hidden = true;
     urgentCalendarFlow.hidden = false;
   });
 
-  // Step 4 → Close entire urgent flow
   urgentStep4Close.addEventListener("click", () => {
     urgentBooking.hidden = true;
   });
 
-  // Step 4 → Confirm & Review Modal
   urgentConfirmBtn.addEventListener("click", () => {
     const name = urgentClientName.value.trim();
     const email = urgentClientEmail.value.trim();
@@ -1698,9 +1848,8 @@ ${providers.map(p => `- ${p.id}: ${p.name} — ${p.specialty} at ${p.facility}`)
     urgentFlow = true;
   });
 
-  // ─── 6) NORMAL MATCH FLOW NAVIGATION & LOGIC ──────────────────────────
+  // ─── NORMAL MATCH FLOW ─────────────────────────────────────────────────
 
-  // Step 1 → Step 2 (Predict Specialist)
   findMatchBtn.addEventListener("click", async () => {
     const rawConcern = document.getElementById("concernInput").value.trim();
     if (!rawConcern) {
@@ -1709,7 +1858,6 @@ ${providers.map(p => `- ${p.id}: ${p.name} — ${p.specialty} at ${p.facility}`)
     }
     const lower = rawConcern.toLowerCase();
 
-    // Keyword scan
     let matchedProviderId = null;
     Object.keys(symptomMap).forEach(keyword => {
       if (!matchedProviderId && lower.includes(keyword)) {
@@ -1721,19 +1869,25 @@ ${providers.map(p => `- ${p.id}: ${p.name} — ${p.specialty} at ${p.facility}`)
       ? providers.find(p => p.id === matchedProviderId)
       : null;
 
-    // GPT fallback
     if (!chosenProviderObj) {
       findMatchBtn.disabled = true;
       findMatchBtn.innerHTML = `Matching… <span class="spinner"></span>`;
 
       const sys = `
-You are an expert medical triage AI.
-Choose exactly one provider ID from the list below. Respond ONLY with the ID (e.g. "p5"), no extra text.
+You are an AI‐powered medical triage system. A patient will describe their symptoms, urgency level, and language preference. Your job is to pick exactly ONE provider ID (p1…p18) who best matches that patient’s needs. Respond only with the provider ID (e.g. "p7"), with no extra commentary.
+
+Below is the detailed profile of each provider. Use the entire description—specialty, experience, procedural skills, patient focus—when deciding.
+
 Providers:
-${providers.map(p => `- ${p.id}: ${p.name} — ${p.specialty} at ${p.facility}`).join("\n")}
+${providers.map(p => `
+- ${p.id}: ${p.name}
+  • Specialty: ${p.specialty}
+  • Facility: ${p.facility}
+  • Profile: ${p.description.trim()}
+`).join("\n")}
       `.trim();
 
-      const usr = `Concern="${rawConcern}", Urgency="${document.getElementById("urgencyInput").value}". Return exactly one provider ID (p1…p18).`;
+      const usr = `Concern="${rawConcern}", Urgency="${document.getElementById("urgencyInput").value}", Language="${document.getElementById("languageInput").value}". Return exactly one provider ID (p1…p18).`;
       const rawGPT = await callOpenAI([
         { role: "system", content: sys },
         { role: "user",   content: usr }
@@ -1758,19 +1912,16 @@ ${providers.map(p => `- ${p.id}: ${p.name} — ${p.specialty} at ${p.facility}`)
     matchForm.hidden = true;
   });
 
-  // Step 2 → Back to Step 1
   matchResultsBack.addEventListener("click", () => {
     matchResults.hidden = true;
     matchForm.hidden = false;
   });
 
-  // Step 2 → Close panel
   matchResultsClose.addEventListener("click", () => {
     matchResults.hidden = true;
     matchForm.hidden = false;
   });
 
-  // Step 2 → Step 3 (Schedule)
   scheduleMatchBtn.addEventListener("click", () => {
     matchResults.hidden = true;
     appointmentFlow.hidden = false;
@@ -1778,12 +1929,11 @@ ${providers.map(p => `- ${p.id}: ${p.name} — ${p.specialty} at ${p.facility}`)
     buildCalendar(year, month);
   });
 
-  // Appointment Flow → Close panel
   appointmentFlowClose.addEventListener("click", () => {
     appointmentFlow.hidden = true;
   });
 
-  // ─── 7) CALENDAR BUILDING & SELECTION ─────────────────────────────────
+  // ─── CALENDAR BUILDING ───────────────────────────────────────────────
 
   prevMonthBtn.addEventListener("click", () => {
     month = month > 0 ? month - 1 : 11;
@@ -1801,7 +1951,6 @@ ${providers.map(p => `- ${p.id}: ${p.name} — ${p.specialty} at ${p.facility}`)
     calendarHeader.textContent = new Date(y, m).toLocaleString("default", { month: "long", year: "numeric" });
     calendarGrid.innerHTML = "";
 
-    // Weekday headers
     ["Su","Mo","Tu","We","Th","Fr","Sa"].forEach(w => {
       const d = document.createElement("div");
       d.className = "cell";
@@ -1811,14 +1960,13 @@ ${providers.map(p => `- ${p.id}: ${p.name} — ${p.specialty} at ${p.facility}`)
     });
 
     const first = new Date(y, m, 1).getDay();
-    const days = new Date(y, m + 1, 0).getDate();
-    // Blank cells before day 1
     for (let i = 0; i < first; i++) {
       const b = document.createElement("div");
       b.className = "cell closed";
       calendarGrid.append(b);
     }
 
+    const days = new Date(y, m + 1, 0).getDate();
     const avail = availability[providerId] || {};
     const todayMidnight = new Date().setHours(0,0,0,0);
 
@@ -1831,9 +1979,7 @@ ${providers.map(p => `- ${p.id}: ${p.name} — ${p.specialty} at ${p.facility}`)
       cell.className = `cell ${open ? "open" : "closed"}`;
       cell.dataset.date = key;
       cell.innerText = d;
-      if (open) {
-        cell.addEventListener("click", () => selectDate(key));
-      }
+      if (open) cell.addEventListener("click", () => selectDate(key));
       const today = new Date();
       if (today.getFullYear() === y && today.getMonth() === m && today.getDate() === d) {
         cell.classList.add("today");
@@ -1873,7 +2019,6 @@ ${providers.map(p => `- ${p.id}: ${p.name} — ${p.specialty} at ${p.facility}`)
     confirmForm.scrollIntoView({ behavior: "smooth" });
   }
 
-  // Step 4 (Confirm) → open review modal
   confirmBtn.addEventListener("click", () => {
     const name = document.getElementById("clientName").value.trim();
     if (!name) {
@@ -1889,23 +2034,19 @@ ${providers.map(p => `- ${p.id}: ${p.name} — ${p.specialty} at ${p.facility}`)
     confirmModal.hidden = false;
   });
 
-  // ─── 8) MODAL CONTROLS & PAYMENT HANDLING ─────────────────────────────
+  // ─── MODAL CONTROLS & PAYMENTS ───────────────────────────────────────
 
-  // Close review modal
   modalClose.addEventListener("click", () => {
     confirmModal.hidden = true;
   });
 
-  // Edit from modal → return to form
   modalEdit.addEventListener("click", () => {
     confirmModal.hidden = true;
     confirmForm.scrollIntoView({ behavior: "smooth" });
   });
 
-  // Confirm booking (urgent vs normal)
   modalConfirm.addEventListener("click", () => {
     if (urgentFlow) {
-      // Urgent: Payment via Paystack
       const email = urgentClientEmail.value.trim();
       const handler = PaystackPop.setup({
         key: "pk_test_297586e51710e83d3c159bfe71ff45c7e23411fa",
@@ -1913,9 +2054,7 @@ ${providers.map(p => `- ${p.id}: ${p.name} — ${p.specialty} at ${p.facility}`)
         amount: URGENT_FEE_KOBO,
         currency: "GHS",
         ref: generateId("U"),
-        onClose: function() {
-          // Do nothing if closed
-        },
+        onClose: function() {},
         callback: function(response) {
           const id = generateId("U");
           appointments.push({ id, name: urgentProviderName, date: uDate, time: uTime, urgent: true });
@@ -1928,7 +2067,6 @@ ${providers.map(p => `- ${p.id}: ${p.name} — ${p.specialty} at ${p.facility}`)
       });
       handler.openIframe();
     } else {
-      // Normal: Save appointment directly
       const id = generateId();
       appointments.push({ id, name: providerName, date: selDate, time: selTime, urgent: false });
       localStorage.setItem("appointments", JSON.stringify(appointments));
@@ -1938,9 +2076,8 @@ ${providers.map(p => `- ${p.id}: ${p.name} — ${p.specialty} at ${p.facility}`)
     }
   });
 
-  // ─── 9) CANCELLATION MODAL ────────────────────────────────────────────
+  // ─── CANCELLATION MODAL ─────────────────────────────────────────────
 
-  // Yes → Cancel appointment
   cancelYes.addEventListener("click", () => {
     const id = cancelYes.dataset.apptId;
     const idx = appointments.findIndex(a => a.id === id);
@@ -1954,12 +2091,11 @@ ${providers.map(p => `- ${p.id}: ${p.name} — ${p.specialty} at ${p.facility}`)
     cancelModal.hidden = true;
   });
 
-  // No → Close cancel modal
   cancelNo.addEventListener("click", () => {
     cancelModal.hidden = true;
   });
 
-  // ─── 10) RENDER UPCOMING CALENDAR WIDGET ─────────────────────────────
+  // ─── UPCOMING CALENDAR WIDGET ───────────────────────────────────────
 
   function renderUpcomingCalendarWidget() {
     upcomingCalendarWidget.innerHTML = "";
@@ -2049,7 +2185,7 @@ ${providers.map(p => `- ${p.id}: ${p.name} — ${p.specialty} at ${p.facility}`)
     renderWidget();
   }
 
-  // ─── 11) RICH DASHBOARD (CARDS & TABS) ───────────────────────────────
+  // ─── RICH DASHBOARD (CARDS & TABS) ─────────────────────────────────
 
   function addToRichDashboard(appt) {
     const card = document.createElement("div");
@@ -2067,7 +2203,6 @@ ${providers.map(p => `- ${p.id}: ${p.name} — ${p.specialty} at ${p.facility}`)
       </div>
     `;
 
-    // Reschedule logic
     const btnReschedule = card.querySelector(".btn-reschedule");
     btnReschedule.addEventListener("click", () => {
       if (appt.urgent) {
@@ -2097,7 +2232,6 @@ ${providers.map(p => `- ${p.id}: ${p.name} — ${p.specialty} at ${p.facility}`)
       `;
     });
 
-    // Cancel logic
     const btnCancel = card.querySelector(".btn-cancel");
     btnCancel.addEventListener("click", () => {
       cancelMsg.innerText = appt.urgent
@@ -2110,18 +2244,18 @@ ${providers.map(p => `- ${p.id}: ${p.name} — ${p.specialty} at ${p.facility}`)
     richUpcomingSection.append(card);
   }
 
-  // Dashboard tab switching
   dashTabs.forEach(btn => {
     btn.addEventListener("click", () => {
       dashTabs.forEach(b => b.classList.remove("active"));
       btn.classList.add("active");
-      richUpcomingSection.hidden  = (btn.dataset.tab !== "rich-upcoming");
-      richPastSection.hidden      = (btn.dataset.tab !== "rich-past");
-      richFavoritesSection.hidden = (btn.dataset.tab !== "rich-favorites");
+      richUpcomingSection.hidden   = (btn.dataset.tab !== "rich-upcoming");
+      richPastSection.hidden       = (btn.dataset.tab !== "rich-past");
+      richFavoritesSection.hidden  = (btn.dataset.tab !== "rich-favorites");
     });
   });
 });
 </script>
+
   
 </body>
 
