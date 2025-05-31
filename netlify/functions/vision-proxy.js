@@ -8,7 +8,7 @@
  * then feeds it directly to @google-cloud/vision. No @google-cloud/storage is required.
  */
 
-const Busboy = require('busboy');
+const Busboy = require('busboy').default || require('busboy');
 const vision = require('@google-cloud/vision');
 
 exports.handler = async (event, context) => {
