@@ -1155,7 +1155,7 @@
       <!-- Step 4 -->
       <form id="urgentDetailsForm" class="module" hidden>
         <button type="button" class="btn-sm back" id="urgentStep4Back">
-          <i class="fas fa-arrow-left" style="dispaly: none;"></i> Back
+          <i class="fas fa-arrow-left" style="display: none;"></i> Back
         </button>
         <button type="button" class="btn-sm close-btn" id="urgentStep4Close"><i class="fas fa-times"></i></button>
         <label>
@@ -1211,7 +1211,8 @@
 
       <!-- Step 2 -->
       <div id="matchResults" class="response" hidden>
-        <button class="close-btn" id="matchResultsClose"><i class="fas fa-times"></i></button>
+<button class="close-btn" id="matchResultsClose"><i class="fas fa-times"></i></button>
+    <button class="btn-sm back" id="matchResultsBack" style="display: none;">Back</button>
         <div class="card">
           <i class="fas fa-user-md fa-2x"></i>
           <div class="details">
@@ -1525,7 +1526,6 @@ document.addEventListener("DOMContentLoaded", () => {
   // ─── URGENT AVAILABILITY ──────────────────────────────────────────────
   const availability = {
     p1:  { "2025-05-31": ["09:30","10:30","12:00"], "2025-06-10": ["09:00","10:00","11:00"], "2025-06-12": ["14:00","15:00"], "2025-06-15": ["08:30","09:30","10:30"] },
-    // … replicate for p2 → p18 as before …
     p2:  { "2025-05-31": ["09:30","10:30","12:00"], "2025-06-03": ["10:00","13:00","16:00"], "2025-06-04": ["09:00","11:00"], "2025-06-15": ["12:00","14:00"] },
     p3:  { "2025-05-31": ["09:30","10:30","12:00"], "2025-06-08": ["08:00","09:00","10:00","11:00"], "2025-06-11": ["13:30","14:30"], "2025-06-16": ["15:00","16:00"] },
     p4:  { "2025-05-31": ["09:30","10:30","12:00"], "2025-06-05": ["09:30","10:30","11:30"], "2025-06-09": ["14:00","15:00","16:00"], "2025-06-18": ["08:00","09:00"] },
@@ -1571,6 +1571,20 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // Appointment storage
   const appointments = [];
+
+    // ─── STATE & DATE VARIABLES ───────────────────────────────────────────
+  let year               = new Date().getFullYear();
+  let month              = new Date().getMonth();
+  let selDate            = "";    // selected date for normal flow
+  let selTime            = "";    // selected time for normal flow
+  let urgentProviderName = "";    // chosen provider name in urgent flow
+  let uDate              = "";    // chosen date in urgent flow
+  let uTime              = "";    // chosen time in urgent flow
+  let urgentFlow         = false; // flag to indicate we're in urgent flow
+  let providerId         = "";    // chosen provider ID for normal flow
+  let providerName       = "";    // chosen provider name for normal flow
+  let widgetYear         = new Date().getFullYear(); // for upcoming calendar widget
+  let widgetMonth        = new Date().getMonth();    // for upcoming calendar widget
 
   // ─── ELEMENT REFERENCES ─────────────────────────────────────────────
 
