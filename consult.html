@@ -209,12 +209,21 @@
   /* ─────────────────────────────────────────────────────────────────────────────
      Main Content & Sections
      ───────────────────────────────────────────────────────────────────────────── */
-  main,
-  section,
-  footer {
-    margin-left: calc(var(--sidebar-width) - 1rem);
+   main, footer {
+   /* Only push <main> & <footer> to the right; sections inside <main> will flow normally. */
+    margin-left: var(--sidebar-width);
     padding: var(--padding);
-    transition: margin-left var(--transition);
+     transition: margin-left var(--transition);
+ }
+ section.module {
+   /* Sections inside <main> should not have an extra margin-left; they are already inside <main>. */
+    margin-left: 0;
+ }
+
+ /* When sidebar is collapsed: shift main/footer */
+  body.sidebar-shrink main,
+  body.sidebar-shrink footer {
+    margin-left: var(--sidebar-collapsed-width);
   }
 
   body.sidebar-shrink main,
@@ -1305,10 +1314,8 @@
 
 
  <script defer src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
-  <script defer src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
- <script defer src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
-
-<script>
+  
+<script defer>
   // Immediately log to confirm this inline script is running after HTML parsing
   console.log("🔍 Inline script has begun execution (after DOM parsing).");
 
