@@ -30,7 +30,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
   
  <style>
-  /*────────────────── RESET & BASE ──────────────────*/
+  /*──────────────────────────────────────────────────────────────────────────────
+    RESET & BASE STYLES
+  ──────────────────────────────────────────────────────────────────────────────*/
   *, *::before, *::after {
     margin: 0;
     padding: 0;
@@ -84,20 +86,30 @@ document.addEventListener("DOMContentLoaded", () => {
     max-width: 100%;
     display: block;
   }
+  button {
+    font-family: inherit;
+  }
+  ul, ol {
+    list-style: none;
+  }
 
-  /*────────────────── SIDEBAR ──────────────────*/
+  /*──────────────────────────────────────────────────────────────────────────────
+    SIDEBAR
+  ──────────────────────────────────────────────────────────────────────────────*/
   aside#sidebar {
     flex: 0 0 var(--sidebar-w);
     position: sticky;
     top: 0;
     height: 100vh;
     background: var(--surface);
-    box-shadow: 2px 0 12px rgba(0,0,0,0.05);
+    box-shadow: 2px 0 12px rgba(0, 0, 0, 0.05);
     transition: flex var(--transition), background var(--transition);
     overflow: hidden;
     z-index: 1000;
+    display: flex;
+    flex-direction: column;
   }
-  aside#sidebar .brand {
+  aside#sidebar .logo {
     display: flex;
     align-items: center;
     gap: 0.75rem;
@@ -106,13 +118,23 @@ document.addEventListener("DOMContentLoaded", () => {
     font-weight: 700;
     color: var(--primary);
   }
-  aside#sidebar .brand i {
-    font-size: 1.6rem;
+  aside#sidebar .logo svg {
+    width: 1.8rem;
+    height: 1.8rem;
+    fill: var(--primary);
+    transition: transform var(--transition);
+  }
+  aside#sidebar .logo:hover svg {
+    transform: scale(1.1);
+  }
+  aside#sidebar .logo .logo-text {
+    font-size: 1.4rem;
   }
   aside#sidebar nav {
     margin-top: 2rem;
     display: flex;
     flex-direction: column;
+    flex: 1;
   }
   aside#sidebar nav a {
     display: flex;
@@ -138,7 +160,7 @@ document.addEventListener("DOMContentLoaded", () => {
   aside#sidebar.collapsed {
     flex: 0 0 var(--sidebar-collapsed-w);
   }
-  aside#sidebar.collapsed .brand span,
+  aside#sidebar.collapsed .logo .logo-text,
   aside#sidebar.collapsed nav a span {
     display: none;
   }
@@ -156,18 +178,23 @@ document.addEventListener("DOMContentLoaded", () => {
     border: none;
     border-radius: 50%;
     cursor: pointer;
-    box-shadow: 0 3px 8px rgba(0,0,0,0.15);
+    box-shadow: 0 3px 8px rgba(0, 0, 0, 0.15);
     transition: transform var(--transition), background var(--transition);
     display: flex;
     align-items: center;
     justify-content: center;
+  }
+  #shrinkBtn i {
+    font-size: 1.2rem;
   }
   #shrinkBtn:hover {
     transform: scale(1.1);
     background: var(--secondary);
   }
 
-  /*────────────────── HEADER ──────────────────*/
+  /*──────────────────────────────────────────────────────────────────────────────
+    HEADER
+  ──────────────────────────────────────────────────────────────────────────────*/
   header {
     position: fixed;
     top: 0;
@@ -175,7 +202,7 @@ document.addEventListener("DOMContentLoaded", () => {
     right: 0;
     height: var(--header-h);
     background: var(--surface);
-    border-bottom: 1px solid #e1e8ed;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.05);
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -204,7 +231,9 @@ document.addEventListener("DOMContentLoaded", () => {
     color: var(--secondary);
   }
 
-  /*────────────────── MAIN CONTENT ──────────────────*/
+  /*──────────────────────────────────────────────────────────────────────────────
+    MAIN CONTENT
+  ──────────────────────────────────────────────────────────────────────────────*/
   main {
     flex: 1;
     padding: calc(var(--header-h) + var(--padding)) var(--padding) var(--padding);
@@ -212,18 +241,20 @@ document.addEventListener("DOMContentLoaded", () => {
     transition: background var(--transition);
   }
 
-  /*────────────────── MODULES ──────────────────*/
+  /*──────────────────────────────────────────────────────────────────────────────
+    MODULE BASE (PANELS, CARDS)
+  ──────────────────────────────────────────────────────────────────────────────*/
   .module {
     background: var(--surface);
     border-radius: var(--radius);
     padding: var(--padding);
-    box-shadow: 0 2px 8px rgba(0,0,0,0.03);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.03);
     margin-bottom: 1.5rem;
     transition: transform var(--transition), box-shadow var(--transition), background var(--transition);
   }
   .module:hover {
     transform: translateY(-4px);
-    box-shadow: 0 4px 16px rgba(0,0,0,0.06);
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
   }
   .module h2 {
     display: flex;
@@ -238,18 +269,29 @@ document.addEventListener("DOMContentLoaded", () => {
     color: var(--muted);
     margin-bottom: 1rem;
   }
+
+  /*──────────────────────────────────────────────────────────────────────────────
+    FORMS & INPUTS (GLOBAL)
+  ──────────────────────────────────────────────────────────────────────────────*/
   .module form {
     display: flex;
     flex-wrap: wrap;
     gap: 1rem;
     align-items: flex-end;
   }
+  .module form label {
+    font-size: 0.95rem;
+    color: var(--text);
+    margin-bottom: 0.25rem;
+    display: block;
+    font-weight: 500;
+  }
   .module form input,
   .module form select,
   .module form textarea {
     flex: 1 1 200px;
     padding: 0.75rem;
-    border: 1.5px solid #d1dce5;
+    border: 1.5px solid rgba(0, 0, 0, 0.1);
     background: var(--bg);
     color: var(--text);
     font-size: 0.95rem;
@@ -272,12 +314,12 @@ document.addEventListener("DOMContentLoaded", () => {
     font-weight: 600;
     cursor: pointer;
     border-radius: var(--radius);
-    box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
     transition: transform var(--transition), box-shadow var(--transition), background var(--transition);
   }
   .module form button:hover:not([disabled]) {
     transform: scale(1.03);
-    box-shadow: 0 5px 14px rgba(0,0,0,0.12);
+    box-shadow: 0 5px 14px rgba(0, 0, 0, 0.12);
     background: var(--secondary);
   }
   .module form button[disabled] {
@@ -290,9 +332,11 @@ document.addEventListener("DOMContentLoaded", () => {
     color: var(--muted);
   }
 
-  /*────────────────── RESPONSE PANELS ──────────────────*/
+  /*──────────────────────────────────────────────────────────────────────────────
+    RESPONSE PANELS
+  ──────────────────────────────────────────────────────────────────────────────*/
   .response {
-    background: rgba(142,108,75,0.1);
+    background: rgba(42, 111, 78, 0.1);
     border-left: 4px solid var(--secondary);
     padding: var(--padding);
     border-radius: var(--radius);
@@ -317,6 +361,8 @@ document.addEventListener("DOMContentLoaded", () => {
   }
   .response .result-content {
     margin-top: 0.5rem;
+    color: var(--text);
+    line-height: 1.5;
   }
   .tool-row {
     position: absolute;
@@ -345,7 +391,9 @@ document.addEventListener("DOMContentLoaded", () => {
     transform: scale(1.1);
   }
 
-  /*────────────────── HERO SECTION ──────────────────*/
+  /*──────────────────────────────────────────────────────────────────────────────
+    HERO SECTION
+  ──────────────────────────────────────────────────────────────────────────────*/
   .hero-module {
     background: var(--surface);
     display: flex;
@@ -356,11 +404,11 @@ document.addEventListener("DOMContentLoaded", () => {
     padding: 4rem 2rem;
     position: relative;
     overflow: hidden;
-    box-shadow: 0 4px 16px rgba(0,0,0,0.05);
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.05);
     transition: background var(--transition), box-shadow var(--transition);
   }
   .hero-module:hover {
-    box-shadow: 0 6px 24px rgba(0,0,0,0.08);
+    box-shadow: 0 6px 24px rgba(0, 0, 0, 0.08);
   }
   .hero-inner {
     display: flex;
@@ -421,7 +469,7 @@ document.addEventListener("DOMContentLoaded", () => {
   }
   .hero-actions a:hover {
     transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
   }
   .hero-image {
     flex: 1;
@@ -431,12 +479,12 @@ document.addEventListener("DOMContentLoaded", () => {
     max-width: 100%;
     height: auto;
     border-radius: var(--radius);
-    box-shadow: 0 4px 16px rgba(0,0,0,0.05);
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.05);
     transition: transform var(--transition), box-shadow var(--transition);
   }
   .hero-image img:hover {
     transform: translateY(-4px);
-    box-shadow: 0 6px 24px rgba(0,0,0,0.08);
+    box-shadow: 0 6px 24px rgba(0, 0, 0, 0.08);
   }
   .hero-bg-icon {
     position: absolute;
@@ -450,7 +498,39 @@ document.addEventListener("DOMContentLoaded", () => {
     color: rgba(212, 197, 162, 0.05);
   }
 
-  /*────────────────── SYMPTOM CHECKER ──────────────────*/
+  /*──────────────────────────────────────────────────────────────────────────────
+    1. AI PLANT SCANNER
+  ──────────────────────────────────────────────────────────────────────────────*/
+  #hero–identifier form {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+    align-items: flex-start;
+  }
+  #hero–identifier textarea,
+  #hero–identifier input[type="file"] {
+    flex: 1 1 200px;
+  }
+  #hero–identifier button {
+    flex: 0 0 auto;
+  }
+  #idenPreview {
+    margin-top: 1rem;
+    border-radius: var(--radius);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+  }
+  #idenClear a {
+    color: var(--primary);
+    font-size: 0.9rem;
+    transition: color var(--transition);
+  }
+  #idenClear a:hover {
+    color: var(--secondary);
+  }
+
+  /*──────────────────────────────────────────────────────────────────────────────
+    2. SYMPTOM CHECKER
+  ──────────────────────────────────────────────────────────────────────────────*/
   #hero-symptom .sym-form {
     display: grid;
     grid-template:
@@ -461,10 +541,18 @@ document.addEventListener("DOMContentLoaded", () => {
   }
   #hero-symptom .field:nth-child(1) { grid-area: labels1; }
   #hero-symptom .field:nth-child(2) { grid-area: inputs1; }
-  #hero-symptom .range-field       { grid-area: labels2 / inputs2; display: flex; align-items: center; gap: 0.5rem; }
-  #hero-symptom button.btn-primary { grid-area: actions; justify-self: center; background: var(--primary); color: #fff; padding: 0.75rem 1.5rem; }
-  #hero-symptom .field {
-    margin-bottom: 1rem;
+  #hero-symptom .range-field {
+    grid-area: labels2 / inputs2;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+  #hero-symptom button.btn-primary {
+    grid-area: actions;
+    justify-self: center;
+    background: var(--primary);
+    color: #fff;
+    padding: 0.75rem 1.5rem;
   }
   #hero-symptom textarea,
   #hero-symptom select,
@@ -475,7 +563,7 @@ document.addEventListener("DOMContentLoaded", () => {
     padding: 0.6rem;
     font-size: 0.9rem;
     border-radius: var(--radius);
-    border: 1px solid #d1dce5;
+    border: 1px solid rgba(0, 0, 0, 0.1);
     background: var(--bg);
     color: var(--text);
     transition: border-color var(--transition), box-shadow var(--transition);
@@ -497,7 +585,9 @@ document.addEventListener("DOMContentLoaded", () => {
     position: relative;
   }
 
-  /*────────────────── CULTURAL KNOWLEDGE ──────────────────*/
+  /*──────────────────────────────────────────────────────────────────────────────
+    3. CULTURAL KNOWLEDGE
+  ──────────────────────────────────────────────────────────────────────────────*/
   #hero–cultural .culture-input-wrapper {
     display: flex;
     gap: 0.5rem;
@@ -507,7 +597,7 @@ document.addEventListener("DOMContentLoaded", () => {
   #hero–cultural input {
     flex: 1 1 250px;
     padding: 0.6rem;
-    border: 1px solid #d1dce5;
+    border: 1px solid rgba(0, 0, 0, 0.1);
     border-radius: var(--radius);
     background: var(--bg);
     color: var(--text);
@@ -525,24 +615,26 @@ document.addEventListener("DOMContentLoaded", () => {
     padding: 0.7rem 1.2rem;
     border: none;
     border-radius: var(--radius);
-    box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
     transition: transform var(--transition), box-shadow var(--transition), background var(--transition);
     font-weight: 600;
   }
   #hero–cultural .btn-culture:hover {
     transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
     background: var(--secondary);
   }
   #hero–cultural .response {
     margin-top: 1rem;
   }
 
-  /*────────────────── SAFETY CHECKER ──────────────────*/
+  /*──────────────────────────────────────────────────────────────────────────────
+    4. SAFETY CHECKER
+  ──────────────────────────────────────────────────────────────────────────────*/
   #hero–safety input {
     flex: 1 1 200px;
     padding: 0.75rem;
-    border: 1px solid #d1dce5;
+    border: 1px solid rgba(0, 0, 0, 0.1);
     border-radius: var(--radius);
     background: var(--bg);
     color: var(--text);
@@ -560,19 +652,21 @@ document.addEventListener("DOMContentLoaded", () => {
     padding: 0.7rem 1.4rem;
     font-weight: 600;
     border-radius: var(--radius);
-    box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
     transition: transform var(--transition), box-shadow var(--transition), background var(--transition);
   }
   #hero–safety button:hover {
     transform: scale(1.03);
-    box-shadow: 0 5px 14px rgba(0,0,0,0.12);
+    box-shadow: 0 5px 14px rgba(0, 0, 0, 0.12);
     background: var(--secondary);
   }
   #hero–safety .response {
     margin-top: 1rem;
   }
 
-  /*────────────────── AI HERBALIST CHAT ──────────────────*/
+  /*──────────────────────────────────────────────────────────────────────────────
+    5. AI HERBALIST CHAT
+  ──────────────────────────────────────────────────────────────────────────────*/
   #hero–chat {
     display: flex;
     flex-direction: column;
@@ -602,7 +696,7 @@ document.addEventListener("DOMContentLoaded", () => {
   }
   .chat-box {
     background: var(--bg);
-    border: 1px solid #d1dce5;
+    border: 1px solid rgba(0, 0, 0, 0.1);
     border-radius: var(--radius);
     padding: var(--padding);
     min-height: 200px;
@@ -697,7 +791,9 @@ document.addEventListener("DOMContentLoaded", () => {
     gap: 0.5rem;
   }
 
-  /*────────────────── PERSONALIZED FORMULATIONS ──────────────────*/
+  /*──────────────────────────────────────────────────────────────────────────────
+    6. PERSONALIZED FORMULATIONS
+  ──────────────────────────────────────────────────────────────────────────────*/
   #formulations select,
   #inventory select,
   #int-form select,
@@ -726,6 +822,10 @@ document.addEventListener("DOMContentLoaded", () => {
   #pfResult {
     margin-top: 1rem;
   }
+
+  /*──────────────────────────────────────────────────────────────────────────────
+    7. RESEARCH SUMMARIES
+  ──────────────────────────────────────────────────────────────────────────────*/
   #research-form input,
   #research-form button {
     padding: 0.75rem 1.2rem;
@@ -740,6 +840,20 @@ document.addEventListener("DOMContentLoaded", () => {
     background: var(--secondary);
     transform: translateY(-2px);
   }
+  #researchResults a {
+    display: inline-block;
+    margin-top: 0.5rem;
+    color: var(--primary);
+    font-weight: 500;
+    transition: color var(--transition);
+  }
+  #researchResults a:hover {
+    color: var(--secondary);
+  }
+
+  /*──────────────────────────────────────────────────────────────────────────────
+    8. INVENTORY FORECAST
+  ──────────────────────────────────────────────────────────────────────────────*/
   #inventory select,
   #inventory input,
   #inventory button {
@@ -755,6 +869,10 @@ document.addEventListener("DOMContentLoaded", () => {
     background: var(--secondary);
     transform: translateY(-2px);
   }
+
+  /*──────────────────────────────────────────────────────────────────────────────
+    9. GENETICS MATCH
+  ──────────────────────────────────────────────────────────────────────────────*/
   #genetics-form input,
   #genetics-form button {
     padding: 0.75rem 1.2rem;
@@ -769,27 +887,37 @@ document.addEventListener("DOMContentLoaded", () => {
     background: var(--secondary);
     transform: translateY(-2px);
   }
-  #geneticResult {
-    margin-top: 1rem;
+  #geneticResult .hint {
+    margin-top: 0.5rem;
+    font-size: 0.85rem;
+    color: var(--muted);
   }
-  #dose-form input,
-  #dose-form select,
-  #dose-form button {
+
+  /*──────────────────────────────────────────────────────────────────────────────
+    10. DOSAGE CALCULATOR
+  ──────────────────────────────────────────────────────────────────────────────*/
+  #dosage input,
+  #dosage select,
+  #dosage button {
     padding: 0.75rem 1.2rem;
   }
-  #dose-form button {
+  #dosage button {
     background: var(--primary);
     color: #fff;
     font-weight: 600;
     transition: background var(--transition), transform var(--transition);
   }
-  #dose-form button:hover {
+  #dosage button:hover {
     background: var(--secondary);
     transform: translateY(-2px);
   }
   #dosageResult {
     margin-top: 1rem;
   }
+
+  /*──────────────────────────────────────────────────────────────────────────────
+    11. INTERACTION CHECKER
+  ──────────────────────────────────────────────────────────────────────────────*/
   #int-form select,
   #int-form button {
     padding: 0.75rem 1.2rem;
@@ -807,6 +935,25 @@ document.addEventListener("DOMContentLoaded", () => {
   #interactionResult {
     margin-top: 1rem;
   }
+
+  /*──────────────────────────────────────────────────────────────────────────────
+    12. ADDITIONAL FEATURES (LIST)
+  ──────────────────────────────────────────────────────────────────────────────*/
+  #addons ul {
+    margin-top: 1rem;
+    padding-left: 1rem;
+  }
+  #addons ul li {
+    margin-bottom: 0.5rem;
+    line-height: 1.4;
+  }
+  #addons ul li strong {
+    color: var(--primary);
+  }
+
+  /*──────────────────────────────────────────────────────────────────────────────
+    13. ROI CALCULATOR
+  ──────────────────────────────────────────────────────────────────────────────*/
   #roi-form .field {
     display: flex;
     flex-direction: column;
@@ -816,7 +963,7 @@ document.addEventListener("DOMContentLoaded", () => {
   #roi-form input {
     max-width: 180px;
     padding: 0.7rem 1rem;
-    border: 1px solid #d1dce5;
+    border: 1px solid rgba(0, 0, 0, 0.1);
     border-radius: var(--radius);
     background: var(--bg);
     color: var(--text);
@@ -847,13 +994,16 @@ document.addEventListener("DOMContentLoaded", () => {
     background: var(--surface);
     padding: var(--padding);
     border-radius: var(--radius);
-    box-shadow: 0 1px 6px rgba(0,0,0,0.05);
+    box-shadow: 0 1px 6px rgba(0, 0, 0, 0.05);
   }
   #roiResult .result-content {
     font-size: 0.95rem;
+    color: var(--text);
   }
 
-  /*────────────────── EXECUTIVE ANALYTICS ──────────────────*/
+  /*──────────────────────────────────────────────────────────────────────────────
+    14. EXECUTIVE ANALYTICS DASHBOARD
+  ──────────────────────────────────────────────────────────────────────────────*/
   .charts {
     display: grid !important;
     grid-template-columns: repeat(2, 1fr) !important;
@@ -864,14 +1014,14 @@ document.addEventListener("DOMContentLoaded", () => {
     height: 250px;
     display: flex;
     flex-direction: column;
-    border: 1px solid var(--muted);
+    border: 1px solid rgba(0, 0, 0, 0.1);
     border-radius: var(--radius);
     overflow: hidden;
     background: var(--surface);
     transition: box-shadow var(--transition);
   }
   .chart-card:hover {
-    box-shadow: 0 4px 16px rgba(0,0,0,0.06);
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
   }
   .chart-card canvas {
     flex: 1 1 auto !important;
@@ -892,20 +1042,22 @@ document.addEventListener("DOMContentLoaded", () => {
     border: none;
     border-radius: var(--radius);
     font-weight: 600;
-    box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
     transition: transform var(--transition), box-shadow var(--transition), background var(--transition);
   }
   #analytics button:hover {
     transform: scale(1.03);
-    box-shadow: 0 5px 14px rgba(0,0,0,0.12);
+    box-shadow: 0 5px 14px rgba(0, 0, 0, 0.12);
     background: var(--secondary);
   }
 
-  /*────────────────── CONTACT & DISCLAIMER ──────────────────*/
+  /*──────────────────────────────────────────────────────────────────────────────
+    15. CONTACT & DISCLAIMER
+  ──────────────────────────────────────────────────────────────────────────────*/
   #contact-form input,
   #contact-form textarea {
     padding: 0.75rem;
-    border: 1px solid #d1dce5;
+    border: 1px solid rgba(0, 0, 0, 0.1);
     border-radius: var(--radius);
     background: var(--bg);
     color: var(--text);
@@ -924,12 +1076,12 @@ document.addEventListener("DOMContentLoaded", () => {
     padding: 0.7rem 1.4rem;
     font-weight: 600;
     border-radius: var(--radius);
-    box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
     transition: transform var(--transition), box-shadow var(--transition), background var(--transition);
   }
   #contact-form button:hover {
     transform: scale(1.03);
-    box-shadow: 0 5px 14px rgba(0,0,0,0.12);
+    box-shadow: 0 5px 14px rgba(0, 0, 0, 0.12);
     background: var(--secondary);
   }
   #contact .hint {
@@ -939,12 +1091,16 @@ document.addEventListener("DOMContentLoaded", () => {
   }
   #contact a {
     color: var(--primary);
+    font-weight: 500;
+    transition: color var(--transition);
   }
   #contact a:hover {
     color: var(--secondary);
   }
 
-  /*────────────────── FOOTER ──────────────────*/
+  /*──────────────────────────────────────────────────────────────────────────────
+    FOOTER
+  ──────────────────────────────────────────────────────────────────────────────*/
   footer {
     background: var(--surface);
     padding: var(--padding);
@@ -952,7 +1108,7 @@ document.addEventListener("DOMContentLoaded", () => {
     font-size: 0.85rem;
     color: var(--muted);
     margin-top: 2rem;
-    border-top: 1px solid #e1e8ed;
+    border-top: 1px solid rgba(0, 0, 0, 0.05);
     transition: background var(--transition), border-color var(--transition), color var(--transition);
   }
   footer a {
@@ -965,7 +1121,9 @@ document.addEventListener("DOMContentLoaded", () => {
     color: var(--secondary);
   }
 
-  /*────────────────── SPINNER ──────────────────*/
+  /*──────────────────────────────────────────────────────────────────────────────
+    SPINNER ICON
+  ──────────────────────────────────────────────────────────────────────────────*/
   .spinner {
     display: inline-block;
     width: 1em;
@@ -981,7 +1139,9 @@ document.addEventListener("DOMContentLoaded", () => {
     to { transform: rotate(360deg); }
   }
 
-  /*────────────────── RESPONSIVE ──────────────────*/
+  /*──────────────────────────────────────────────────────────────────────────────
+    RESPONSIVE
+  ──────────────────────────────────────────────────────────────────────────────*/
   @media (max-width: 1024px) {
     aside#sidebar {
       position: fixed !important;
@@ -1012,6 +1172,15 @@ document.addEventListener("DOMContentLoaded", () => {
     .hero-content h1 {
       font-size: 2.2rem;
     }
+    .charts {
+      grid-template-columns: 1fr !important;
+    }
+    .chart-card {
+      height: auto;
+    }
+    .hero-subtitle, .module p.desc {
+      font-size: 0.95rem;
+    }
   }
   @media (max-width: 640px) {
     form, .chat-input-row {
@@ -1020,9 +1189,6 @@ document.addEventListener("DOMContentLoaded", () => {
     }
     input, select, textarea, button {
       width: 100% !important;
-    }
-    .charts {
-      grid-template-columns: 1fr !important;
     }
     .chart-card canvas {
       height: 180px !important;
@@ -1033,6 +1199,9 @@ document.addEventListener("DOMContentLoaded", () => {
     #shrinkBtn {
       bottom: 0.5rem;
     }
+    aside#sidebar:not(.open) {
+      display: none;
+    }
   }
   @media (max-width: 480px) {
     input, select, textarea, button {
@@ -1041,9 +1210,6 @@ document.addEventListener("DOMContentLoaded", () => {
     .hero-content h1 {
       font-size: 1.8rem;
       flex-direction: column;
-    }
-    .hero-subtitle, .module p.desc {
-      font-size: 0.95rem;
     }
     .hero-actions {
       flex-direction: column;
@@ -1055,24 +1221,21 @@ document.addEventListener("DOMContentLoaded", () => {
     .chat-box {
       max-height: 220px;
     }
-    .chart-card {
-      height: auto;
-    }
-    aside#sidebar:not(.open) {
-      display: none;
-    }
   }
-  /*────────────────── DARK MODE OVERRIDES ──────────────────*/
+
+  /*──────────────────────────────────────────────────────────────────────────────
+    DARK MODE OVERRIDES
+  ──────────────────────────────────────────────────────────────────────────────*/
   html.dark aside#sidebar {
     background: var(--surface);
   }
   html.dark header {
     background: var(--surface);
-    border-bottom-color: #444;
+    border-bottom-color: rgba(255, 255, 255, 0.1);
   }
   html.dark .module {
     background: var(--surface);
-    box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
   }
   html.dark input,
   html.dark select,
@@ -1089,7 +1252,7 @@ document.addEventListener("DOMContentLoaded", () => {
     background: var(--primary);
   }
   html.dark .response {
-    background: rgba(142,108,75,0.15);
+    background: rgba(142, 108, 75, 0.15);
     border-color: var(--accent);
   }
   html.dark .chat-box {
@@ -1107,7 +1270,7 @@ document.addEventListener("DOMContentLoaded", () => {
   html.dark footer {
     background: var(--surface);
     color: var(--muted);
-    border-top-color: #444;
+    border-top-color: rgba(255, 255, 255, 0.1);
   }
 </style>
 
