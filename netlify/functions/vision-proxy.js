@@ -1,135 +1,144 @@
-// .netlify/functions/vision-proxy.js
+import Busboy from "busboy";
+import { Storage } from "@google-cloud/storage";
+import { Vision } from "@google-cloud/vision";
 
-/**
- * Netlify Function: vision-proxy
- *
- * 1) Expects a POST request with Content-Type: multipart/form-data (key: "file").
- * 2) Decodes the base64 GOOGLE Service Account JSON from VISION_CREDENTIALS_BASE64.
- * 3) Initializes Google Vision client, runs LABEL_DETECTION on the uploaded image buffer.
- * 4) Returns {
- *       name: "<top_label>",
- *       uses: "…",
- *       cautions: "…",
- *       regions: []
- *    }
- *
- * Before deploying, make sure:
- *  - You set the Netlify env var VISION_CREDENTIALS_BASE64 to a base64‐encoded
- *    version of your service account key file.
- */
-
-const Busboy = require('busboy');
-const vision = require('@google-cloud/vision');
-
-exports.handler = async function (event, context) {
-  try {
-    // Only allow POST
-    if (event.httpMethod !== 'POST') {
-      return {
-        statusCode: 405,
-        headers: { 'Allow': 'POST' },
-        body: JSON.stringify({ error: 'Method Not Allowed. Use POST.' }),
-      };
-    }
-
-    // Content-Type must be multipart/form-data
-    const contentType =
-      event.headers['content-type'] || event.headers['Content-Type'];
-    if (!contentType || !contentType.startsWith('multipart/form-data')) {
-      return {
-        statusCode: 400,
-        body: JSON.stringify({ error: 'Content-Type must be multipart/form-data' }),
-      };
-    }
-
-    // Decode the base64 service account JSON from environment
-    const base64Creds = process.env.VISION_CREDENTIALS_BASE64;
-    if (!base64Creds) {
-      return {
-        statusCode: 500,
-        body: JSON.stringify({
-          error:
-            'Server misconfiguration: missing VISION_CREDENTIALS_BASE64 environment variable.',
-        }),
-      };
-    }
-    // Convert base64 → Buffer → string → JSON
-    const serviceAccountJson = JSON.parse(
-      Buffer.from(base64Creds, 'base64').toString('utf8')
-    );
-
-    // Initialize Google Vision client with those credentials
-    const client = new vision.ImageAnnotatorClient({
-      credentials: serviceAccountJson,
-    });
-
-    // Parse multipart/form-data via Busboy to extract the uploaded file
-    let fileBuffer = null;
-    let fileName = null;
-
-    // Return a promise that resolves when Busboy finishes parsing
-    await new Promise((resolve, reject) => {
-      const busboy = new Busboy({ headers: { 'content-type': contentType } });
-
-      busboy.on(
-        'file',
-        (fieldname, fileStream, info /* { filename, mimeType } */) => {
-          fileName = info.filename || 'upload';
-          const chunks = [];
-          fileStream.on('data', (data) => chunks.push(data));
-          fileStream.on('end', () => {
-            fileBuffer = Buffer.concat(chunks);
-          });
-        }
-      );
-
-      busboy.on('error', (err) => reject(err));
-      busboy.on('finish', () => {
-        if (!fileBuffer) {
-          reject(new Error('No file uploaded.'));
-        } else {
-          resolve();
-        }
-      });
-
-      // Netlify passes the body as base64, so convert back
-      const decoded = Buffer.from(event.body, 'base64');
-      busboy.end(decoded);
-    });
-
-    // If we reach here, fileBuffer contains the image bytes
-    // Call Google Vision labelDetection
-    const [visionResult] = await client.labelDetection({
-      image: { content: fileBuffer },
-    });
-
-    const labels = (visionResult.labelAnnotations || []).map((label) => ({
-      description: label.description,
-      score: label.score,
-    }));
-
-    // Take the top‐scoring label
-    const topLabel = labels.length > 0 ? labels[0].description : 'Unknown Plant';
-
-    // Placeholder response – you can hook in your own “uses/cautions/regions” lookup.
-    const out = {
-      name: topLabel,
-      uses: `Medicinal uses for "${topLabel}" to be populated from your database.`,
-      cautions: `Cautions for "${topLabel}" to be populated from your database.`,
-      regions: [], // e.g. ["West Africa", "Southeast Asia"], etc.
-    };
-
+export async function handler(event, context) {
+  // 1) Only allow POST
+  if (event.httpMethod !== "POST") {
     return {
-      statusCode: 200,
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(out),
-    };
-  } catch (err) {
-    console.error('vision-proxy error:', err);
-    return {
-      statusCode: 500,
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ error: 'Vision API call failed.' }),
+      statusCode: 405,
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ error: "Method Not Allowed. Use POST." }),
     };
   }
-};
+
+  // 2) Check credentials env var
+  const base64Key = process.env.VISION_CREDENTIALS_BASE64;
+  if (!base64Key) {
+    console.error("Missing VISION_CREDENTIALS_BASE64");
+    return {
+      statusCode: 500,
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ error: "Missing VISION_CREDENTIALS_BASE64 env var." }),
+    };
+  }
+
+  let credentials;
+  try {
+    credentials = JSON.parse(Buffer.from(base64Key, "base64").toString("utf-8"));
+  } catch (e) {
+    console.error("Invalid base64 JSON for credentials:", e);
+    return {
+      statusCode: 500,
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ error: "Invalid JSON in VISION_CREDENTIALS_BASE64." }),
+    };
+  }
+
+  // 3) Initialize Google Cloud clients
+  const storage = new Storage({ credentials });
+  const vision = new Vision({ credentials });
+
+  return new Promise((resolve) => {
+    const busboy = new Busboy({ headers: event.headers });
+
+    let uploadFileBuffer = null;
+    let uploadFileName = null;
+
+    // 4) Listen for the “file” field
+    busboy.on("file", (fieldname, fileStream, filename, encoding, mimetype) => {
+      if (fieldname !== "file") {
+        // Skip any unexpected fields
+        fileStream.resume();
+        return;
+      }
+      uploadFileName = filename;
+      const chunks = [];
+      fileStream.on("data", (chunk) => {
+        chunks.push(chunk);
+      });
+      fileStream.on("end", () => {
+        uploadFileBuffer = Buffer.concat(chunks);
+      });
+    });
+
+    // 5) Handle Busboy errors
+    busboy.on("error", (err) => {
+      console.error("Busboy parsing error:", err);
+      resolve({
+        statusCode: 400,
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ error: "Invalid multipart/form-data." }),
+      });
+    });
+
+    // 6) When Busboy finishes parsing
+    busboy.on("finish", async () => {
+      if (!uploadFileBuffer) {
+        console.error("No file uploaded under field 'file'");
+        resolve({
+          statusCode: 400,
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ error: "No file uploaded under field ‘file’." }),
+        });
+        return;
+      }
+
+      try {
+        // 7) Ensure a bucket exists (use project_id + "-vision-temp")
+        const bucketName = `${credentials.project_id}-vision-temp`;
+        const bucket = storage.bucket(bucketName);
+
+        // Check if bucket exists; if not, create it
+        const [exists] = await bucket.exists();
+        if (!exists) {
+          await storage.createBucket(bucketName);
+        }
+
+        // 8) Upload the buffer into a temporary file
+        const timestamp = Date.now();
+        const tempFilePath = `uploads/${timestamp}-${uploadFileName}`;
+        const tempFile = bucket.file(tempFilePath);
+        await tempFile.save(uploadFileBuffer);
+
+        // 9) Call Vision API (we do a simple labelDetection demo)
+        const [labelResult] = await vision.labelDetection({
+          source: { imageUri: `gs://${bucketName}/${tempFilePath}` },
+        });
+
+        // 10) Parse labels into name/uses/cautions/regions
+        const labels = (labelResult.labelAnnotations || []).map((l) => l.description);
+        const name = labels[0] || "Unknown Plant";
+        const uses = labels.slice(1, 4).join(", ") || "N/A";
+        const cautions = labels.slice(4, 7).join(", ") || "N/A";
+        const regions = []; // or you could try a regionDetection request
+
+        // 11) Clean up: delete the temp file from bucket
+        await tempFile.delete().catch((err) => {
+          console.warn("Could not delete temp file:", err);
+        });
+
+        // 12) Return success JSON
+        resolve({
+          statusCode: 200,
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ name, uses, cautions, regions }),
+        });
+      } catch (e) {
+        console.error("Vision or Storage error:", e);
+        resolve({
+          statusCode: 500,
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ error: "Vision API request failed: " + e.message }),
+        });
+      }
+    });
+
+    // 13) Kick off Busboy with the raw body
+    busboy.end(
+      Buffer.from(event.body, event.isBase64Encoded ? "base64" : "utf8")
+    );
+  });
+}
+
+// EOF
