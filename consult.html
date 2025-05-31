@@ -1031,8 +1031,21 @@
     background: #f08a5d;
     color: #111;
   }
+  .link-style {
+  background: none;
+  border: none;
+  color: var(--cb-accent);
+  text-decoration: underline;
+  cursor: pointer;
+  padding: 0;
+  font: inherit;
+}
+.link-style:hover {
+  color: #ffffff;
+}
 </style>
 </head>
+
 
 <body>
   <!-- Sidebar -->
@@ -1051,7 +1064,9 @@
         </li>
       </ul>
     </nav>
-    <button id="shrinkSidebar" title="Toggle sidebar"><i class="fas fa-chevron-left"></i></button>
+    <button id="shrinkSidebar" title="Toggle sidebar">
+      <i class="fas fa-chevron-left"></i>
+    </button>
   </aside>
 
   <!-- Header -->
@@ -1067,7 +1082,9 @@
       <div class="hero-text">
         <h2><i class="fas fa-stethoscope"></i> Seamless Consultation Booking</h2>
         <p class="desc">From instant provider match to one-click appointment, powered by AI.</p>
-        <button class="btn hero-btn"><i class="fas fa-book-medical"></i> Book an Appointment</button>
+        <button id="heroBookBtn" data-target="#providerMatch" class="btn hero-btn">
+          <i class="fas fa-book-medical"></i> Book an Appointment
+        </button>
       </div>
       <div class="hero-graphic">
         <img src="9E2CDE35-303A-4C5F-A4A9-1B0420CF8B0C.png" alt="Consultation illustration" />
@@ -1080,9 +1097,12 @@
         <button class="btn"><i class="fas fa-calendar-plus"></i> Book an Appointment</button>
         <div class="view-tabs">
           <button id="viewUpcoming" class="btn-sm"><i class="fas fa-calendar-check"></i> View Upcoming</button>
-          <button id="viewPast" class="btn-sm"><i class="fas fa-history"></i> View Past</button>
+          <button id="viewPast"    class="btn-sm"><i class="fas fa-history"></i> View Past</button>
         </div>
-        <p class="tips"><i class="fas fa-info-circle"></i> Need urgent care? <a id="urgentCare">Click here</a></p>
+        <p class="tips">
+          <i class="fas fa-info-circle"></i>
+          Need urgent care? <button id="urgentCare" type="button" class="link-style">Click here</button>
+        </p>
       </div>
     </section>
 
@@ -1095,7 +1115,12 @@
       <div id="urgentStep1">
         <label>
           <i class="fas fa-notes-medical"></i> Chief Concern:
-          <input type="text" id="urgentConcernInput" placeholder="e.g. severe headache" required />
+          <input
+            type="text"
+            id="urgentConcernInput"
+            placeholder="e.g. severe headache"
+            required
+          />
         </label>
         <button type="button" id="urgentFindMatchBtn" class="btn">
           <i class="fas fa-search"></i> Find Specialist
@@ -1120,7 +1145,9 @@
 
       <!-- Step 3 -->
       <div id="urgentCalendarFlow" hidden>
-        <button class="btn-sm back" id="urgentStep3Back"><i class="fas fa-arrow-left"></i> Back</button>
+        <button class="btn-sm back" id="urgentStep3Back">
+          <i class="fas fa-arrow-left"></i> Back
+        </button>
         <label>Date: <input type="date" id="urgentDate" /></label>
         <label>Time: <input type="time" id="urgentTime" /></label>
         <button id="urgentNextToDetails" class="btn"><i class="fas fa-arrow-right"></i> Next</button>
@@ -1128,13 +1155,17 @@
       </div>
 
       <!-- Step 4 -->
-      <form id="urgentDetailsForm" hidden class="module">
-        <button type="button" class="btn-sm back" id="urgentStep4Back"><i class="fas fa-arrow-left"></i> Back</button>
+      <form id="urgentDetailsForm" class="module" hidden>
+        <button type="button" class="btn-sm back" id="urgentStep4Back">
+          <i class="fas fa-arrow-left"></i> Back
+        </button>
         <button type="button" class="btn-sm close-btn" id="urgentStep4Close"><i class="fas fa-times"></i></button>
-        <label><i class="fas fa-user"></i> Your Name:
+        <label>
+          <i class="fas fa-user"></i> Your Name:
           <input id="urgentClientName" placeholder="Full Name" required />
         </label>
-        <label><i class="fas fa-envelope"></i> Email:
+        <label>
+          <i class="fas fa-envelope"></i> Email:
           <input id="urgentClientEmail" type="email" required />
         </label>
         <button type="button" id="urgentConfirmBtn" class="btn">
@@ -1150,14 +1181,30 @@
 
       <!-- Step 1 -->
       <form id="matchForm">
-        <label><i class="fas fa-notes-medical"></i> Chief Concern:
-          <input type="text" id="concernInput" placeholder="e.g. persistent cough" required />
+        <label>
+          <i class="fas fa-notes-medical"></i> Chief Concern:
+          <input
+            type="text"
+            id="concernInput"
+            placeholder="e.g. persistent cough"
+            required
+          />
         </label>
-        <label><i class="fas fa-exclamation-circle"></i> Urgency:
-          <select id="urgencyInput"><option>Low</option><option>Medium</option><option>High</option></select>
+        <label>
+          <i class="fas fa-exclamation-circle"></i> Urgency:
+          <select id="urgencyInput">
+            <option>Low</option>
+            <option>Medium</option>
+            <option>High</option>
+          </select>
         </label>
-        <label><i class="fas fa-language"></i> Language:
-          <select id="languageInput"><option>English</option><option>Twi</option><option>Ga</option></select>
+        <label>
+          <i class="fas fa-language"></i> Language:
+          <select id="languageInput">
+            <option>English</option>
+            <option>Twi</option>
+            <option>Ga</option>
+          </select>
         </label>
         <button type="button" id="findMatchBtn" class="btn">
           <i class="fas fa-search"></i> Predict Specialist
@@ -1191,14 +1238,16 @@
         <div id="timeSlots"></div>
 
         <!-- Step 4 -->
-        <form id="confirmForm" hidden class="module">
+        <form id="confirmForm" class="module" hidden>
           <button class="btn-sm close-btn" id="confirmStep4Close"><i class="fas fa-times"></i></button>
           <button class="btn-sm back" id="confirmStep4Back">Back</button>
           <h4><i class="fas fa-check-circle"></i> Confirm</h4>
-          <label><i class="fas fa-user"></i> Your Name:
+          <label>
+            <i class="fas fa-user"></i> Your Name:
             <input id="clientName" placeholder="Full Name" required />
           </label>
-          <label><i class="fas fa-envelope"></i> Email:
+          <label>
+            <i class="fas fa-envelope"></i> Email:
             <input id="clientEmail" type="email" required />
           </label>
           <p id="summaryText"></p>
@@ -1254,6 +1303,7 @@
   </footer>
 
 
+
  <script defer src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
   <script defer src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
  <script defer src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
@@ -1262,31 +1312,33 @@
 document.addEventListener("DOMContentLoaded", () => {
   console.log("📣 DOMContentLoaded fired, main JS is running.");
 
+
   // ─── 1) GLOBALS & ELEMENT REFERENCES ─────────────────────────────────
 
   // Calendar widget state
-  let widgetYear  = new Date().getFullYear();
+  let widgetYear = new Date().getFullYear();
   let widgetMonth = new Date().getMonth();
 
   // Flags & temporary variables
   let urgentProviderName = "";
-  let uDate = "";
-  let uTime = "";
-  let urgentFlow = false;
-  let providerId = "";
-  let providerName = "";
-  let year = new Date().getFullYear();
-  let month = new Date().getMonth();
-  let selDate = "";
-  let selTime = "";
+   let uDate = "";
+   let uTime = "";
+   let urgentFlow = false;
+   let providerId = "";
+   let providerName = "";
+    let year = new Date().getFullYear();
+   let month = new Date().getMonth();
+   let selDate = "";
+   let selTime = "";
 
   // Main containers
   const richUpcoming = document.getElementById("rich-upcoming");
-  const appointments  = [];
+  const appointments = [];
   const sidebar       = document.getElementById("sidebar");
   const hamburger     = document.getElementById("hamburger");
   const shrinkSidebarBtn = document.getElementById("shrinkSidebar");
   const themeToggle   = document.getElementById("themeToggle");
+  const heroBookBtn = document.getElementById("heroBookBtn");
   const urgentCareLink = document.getElementById("urgentCare");
 
   // Urgent‐flow elements
@@ -1515,6 +1567,18 @@ document.addEventListener("DOMContentLoaded", () => {
   } else {
     console.error("urgentCare element not found");
   }
+
+  // 5e) Hero “Book an Appointment” scroll‐to‐form button
+   if (heroBookBtn) {
+     heroBookBtn.addEventListener("click", () => {
+       const target = document.querySelector(heroBookBtn.dataset.target);
+       if (target) {
+          target.scrollIntoView({ behavior: "smooth" });
+        }
+     });
+    } else {
+      console.error("heroBookBtn element not found");
+   }
 
   // ─── 6) URGENT FLOW NAVIGATION ───────────────────────────────────────
 
