@@ -11,19 +11,19 @@
 
 </head>
 
-<style>
+  <style>
   /*──────────────────────── Theme & Reset ─────────────────────────────────*/
   :root {
     /* Color Palette */
-    --primary: #5A8DEE;
-    --primary-alt: #7DA4E8;
-    --secondary: #FF758C;
-    --secondary-alt: #FF9CA8;
+    --primary: #4A90E2;           /* Bright Blue */
+    --primary-alt: #6AAEF5;       /* Lighter Blue */
+    --secondary: #E24A4A;         /* Vivid Red */
+    --secondary-alt: #F27575;     /* Lighter Red */
     --accent: rgba(255, 255, 255, 0.4);
-    --bg: #F0F4F8;
-    --surface: #FFFFFF;
-    --text: #1F2937;
-    --muted: #546E7A;
+    --bg: #F3F6FB;                /* Very light grayish blue */
+    --surface: #FFFFFF;           /* White panels */
+    --text: #1E2A38;              /* Dark slate */
+    --muted: #6B7C8A;             /* Mid-gray slate */
 
     /* Spacing & Typography */
     --radius: 0.75rem;
@@ -38,10 +38,10 @@
   }
 
   html.dark {
-    --bg: #111827;
+    --bg: #1A202C;               /* Dark slate */
     --surface: rgba(30, 35, 54, 0.85);
-    --text: #E0E6F0;
-    --muted: #9AA5B1;
+    --text: #E0E6F0;              /* Light gray */
+    --muted: #9AA5B1;             /* Soft gray */
     --accent: rgba(30, 35, 54, 0.5);
   }
 
@@ -101,7 +101,7 @@
     height: 100vh;
     display: flex;
     flex-direction: column;
-    transition: transform var(--transition);
+    transition: transform var(--transition), background var(--transition);
     z-index: 1000;
   }
 
@@ -113,7 +113,7 @@
     flex: 0 0 72px;
   }
 
-  .brand {
+  .logo, .brand {
     display: flex;
     align-items: center;
     gap: 0.75rem;
@@ -122,6 +122,7 @@
     color: var(--primary);
   }
 
+  aside.collapsed .logo span,
   aside.collapsed .brand span {
     opacity: 0;
   }
@@ -268,13 +269,13 @@
     text-decoration: none;
   }
 
-  .hero .actions a:first-child { background: var(--primary); }
-  .hero .actions a:nth-child(2) { background: var(--secondary); }
-  .hero .actions a:nth-child(3) { background: var(--primary); }
-  .hero .actions a:nth-child(4) { background: var(--secondary); }
-  .hero .actions a:nth-child(5) { background: var(--primary); }
-  .hero .actions a:nth-child(6) { background: var(--secondary); }
-  .hero .actions a:nth-child(7) { background: var(--primary); }
+  .hero .actions a:nth-child(odd) {
+    background: var(--primary);
+  }
+
+  .hero .actions a:nth-child(even) {
+    background: var(--secondary);
+  }
 
   .hero .actions a:hover {
     transform: translateY(-3px);
@@ -535,11 +536,11 @@
 
   /*──────────────────────── Neurotransmitter Section ─────────────────────────────────*/
   #neurotransmitter {
-    background: linear-gradient(135deg, rgba(90, 142, 238, 0.15), rgba(255, 117, 140, 0.1));
+    background: linear-gradient(135deg, rgba(74, 144, 226, 0.15), rgba(226, 74, 74, 0.1));
     border: 2px solid var(--primary);
     padding: calc(var(--padding) * 1.5);
     border-radius: var(--radius);
-    box-shadow: 0 8px 30px rgba(90, 142, 238, 0.2);
+    box-shadow: 0 8px 30px rgba(74, 144, 226, 0.2);
     margin-bottom: 1.5rem;
   }
 
@@ -573,7 +574,7 @@
     border: none;
     padding: 0.75rem 1.5rem;
     border-radius: var(--radius);
-    box-shadow: 0 4px 14px rgba(125, 164, 232, 0.4);
+    box-shadow: 0 4px 14px rgba(106, 174, 245, 0.4);
     cursor: pointer;
     transition: background var(--transition), transform var(--transition), box-shadow var(--transition);
     margin-top: 0.5rem;
@@ -581,17 +582,17 @@
 
   #neurotransmitter button:hover {
     background: var(--primary);
-    box-shadow: 0 6px 20px rgba(90, 142, 238, 0.3);
+    box-shadow: 0 6px 20px rgba(74, 144, 226, 0.3);
     transform: translateY(-2px);
   }
 
   /*──────────────────────── Pharmacogenomics Section ─────────────────────────────────*/
   #pharmacogenomics {
-    background: linear-gradient(145deg, rgba(255, 117, 140, 0.1), rgba(90, 142, 238, 0.1));
+    background: linear-gradient(145deg, rgba(226, 74, 74, 0.1), rgba(74, 144, 226, 0.1));
     border: 2px dashed var(--secondary);
     padding: calc(var(--padding) * 1.5);
     border-radius: var(--radius);
-    box-shadow: 0 8px 30px rgba(255, 117, 140, 0.2);
+    box-shadow: 0 8px 30px rgba(226, 74, 74, 0.2);
     margin-bottom: 1.5rem;
   }
 
@@ -619,7 +620,7 @@
     border: none;
     padding: 0.75rem 1.5rem;
     border-radius: var(--radius);
-    box-shadow: 0 4px 14px rgba(255, 117, 140, 0.4);
+    box-shadow: 0 4px 14px rgba(242, 117, 117, 0.4);
     cursor: pointer;
     transition: background var(--transition), transform var(--transition), box-shadow var(--transition);
     margin-top: 0.5rem;
@@ -627,13 +628,13 @@
 
   #pharmacogenomics button:hover {
     background: var(--secondary-alt);
-    box-shadow: 0 6px 20px rgba(255, 117, 140, 0.3);
+    box-shadow: 0 6px 20px rgba(226, 74, 74, 0.3);
     transform: translateY(-2px);
   }
 
   /*──────────────────────── Drug Interaction Section ─────────────────────────────────*/
   #interactions {
-    background: rgba(90, 142, 238, 0.05);
+    background: rgba(74, 144, 226, 0.05);
     border-left: 6px solid var(--primary);
     padding: calc(var(--padding) * 1.5);
     border-radius: var(--radius);
@@ -675,7 +676,7 @@
     border: none;
     padding: 0.75rem 1.5rem;
     border-radius: var(--radius);
-    box-shadow: 0 4px 14px rgba(90, 142, 238, 0.4);
+    box-shadow: 0 4px 14px rgba(74, 144, 226, 0.4);
     cursor: pointer;
     transition: background var(--transition), transform var(--transition), box-shadow var(--transition);
     margin-top: 0.5rem;
@@ -683,17 +684,17 @@
 
   #interactions button:hover {
     background: var(--primary-alt);
-    box-shadow: 0 6px 20px rgba(90, 142, 238, 0.3);
+    box-shadow: 0 6px 20px rgba(74, 144, 226, 0.3);
     transform: translateY(-2px);
   }
 
   /*──────────────────────── EEG Section ─────────────────────────────────*/
   #eeg {
-    background: linear-gradient(135deg, rgba(125, 164, 232, 0.1), rgba(255, 117, 140, 0.1));
+    background: linear-gradient(135deg, rgba(106, 174, 245, 0.1), rgba(242, 117, 117, 0.1));
     border: 2px solid var(--primary-alt);
     padding: calc(var(--padding) * 1.5);
     border-radius: var(--radius);
-    box-shadow: 0 8px 30px rgba(125, 164, 232, 0.2);
+    box-shadow: 0 8px 30px rgba(106, 174, 245, 0.2);
     margin-bottom: 1.5rem;
   }
 
@@ -721,7 +722,7 @@
     border: none;
     padding: 0.75rem 1.5rem;
     border-radius: var(--radius);
-    box-shadow: 0 4px 14px rgba(125, 164, 232, 0.4);
+    box-shadow: 0 4px 14px rgba(106, 174, 245, 0.4);
     cursor: pointer;
     transition: background var(--transition), transform var(--transition), box-shadow var(--transition);
     margin-top: 0.5rem;
@@ -729,7 +730,7 @@
 
   #eeg button:hover {
     background: var(--primary);
-    box-shadow: 0 6px 20px rgba(125, 164, 232, 0.3);
+    box-shadow: 0 6px 20px rgba(106, 174, 245, 0.3);
     transform: translateY(-2px);
   }
 
@@ -766,15 +767,31 @@
 
   #moodTracker textarea {
     min-height: 80px;
+    margin-bottom: 1rem;
   }
 
   #moodTracker button {
     margin-top: 1rem;
     background: var(--primary);
     color: #fff;
+    padding: 0.75rem 1.5rem;
+    border: none;
+    border-radius: var(--radius);
+    box-shadow: var(--shadow-light);
+    cursor: pointer;
+    transition: background var(--transition), transform var(--transition);
+  }
+
+  #moodTracker button:hover {
+    background: var(--primary-alt);
+    transform: translateY(-2px);
   }
 
   /*──────────────────────── Trial Matcher Section ─────────────────────────────────*/
+  #trialmatch {
+    margin-bottom: 1.5rem;
+  }
+
   #trialmatch h2 {
     color: var(--secondary);
     margin-bottom: 0.5rem;
@@ -794,40 +811,28 @@
 
   #trialmatch input[type="text"] {
     margin-top: 0.5rem;
+    margin-bottom: 1rem;
+  }
+
+  #trialmatch select {
+    margin-bottom: 1rem;
   }
 
   #trialmatch button {
     margin-top: 1rem;
     background: var(--secondary);
     color: #fff;
+    padding: 0.75rem 1.5rem;
+    border: none;
+    border-radius: var(--radius);
+    box-shadow: var(--shadow-light);
+    cursor: pointer;
+    transition: background var(--transition), transform var(--transition);
   }
 
-  /*──────────────────────── Creative Section ─────────────────────────────────*/
-  #creative h2 {
-    color: var(--secondary);
-    margin-bottom: 0.5rem;
-  }
-
-  #creative .desc {
-    color: var(--muted);
-    margin-bottom: 1rem;
-  }
-
-  #creative label {
-    display: block;
-    margin-bottom: 0.5rem;
-    color: var(--text);
-    font-weight: 500;
-  }
-
-  #creative input[type="range"] {
-    margin-bottom: 1rem;
-  }
-
-  #creative button {
-    margin-top: 1rem;
-    background: var(--secondary);
-    color: #fff;
+  #trialmatch button:hover {
+    background: var(--secondary-alt);
+    transform: translateY(-2px);
   }
 
   /*──────────────────────── Clinical Trial Matcher ─────────────────────────────────*/
@@ -841,6 +846,7 @@
   #trial-form input[type="text"],
   #trial-form select {
     margin-top: 0.5rem;
+    margin-bottom: 1rem;
   }
 
   /*──────────────────────── Charts ─────────────────────────────────*/
@@ -979,7 +985,7 @@
     }
   }
 </style>
-  
+
 <body>
   <!-- SIDEBAR -->
   <aside id="sidebar">
