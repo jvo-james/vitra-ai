@@ -1068,7 +1068,7 @@
           </div>
         </div>
         <div class="hero-image">
-          <img src="neuro_health.webp" alt="Neuro and mental wellness illustration">
+          <img src="mental.jpg" alt="Neuro and mental wellness illustration">
         </div>
       </div>
       <i class="fas fa-microscope hero-bg-icon" style="top: 8%; left: 7%;"></i>
@@ -1604,7 +1604,7 @@
  <!-- Chart.js + OpenAI Proxy + App Logic -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
-  // ───── Utility Functions ─────
+  //──────────────────────── Utility Functions ────────────────────────────────
   // Sanitize user-provided strings
   function escapeHtml(unsafe) {
     return unsafe
@@ -1706,19 +1706,17 @@
     }
   }
 
-  // Retrieve select value or its "Other" input if selected
+  // Helper: get select value or the corresponding other-input if "Other"
   function getSelectValue(select) {
-    const otherInput = select.parentElement.querySelector('.other-input');
-    if (otherInput && select.value === "Other") {
-      return otherInput.value.trim();
+    const other = select.parentElement.querySelector(".other-input");
+    if (other && select.value === "Other") {
+      return other.value.trim();
     }
     return select.value;
   }
 
   document.addEventListener("DOMContentLoaded", () => {
-    const body = document.body;
-
-    // ───── Persisted Theme ─────
+    //──────────────────────── Persisted Theme ────────────────────────────────
     const savedTheme = localStorage.getItem("vitra-theme");
     if (savedTheme === "dark") {
       document.documentElement.classList.add("dark");
@@ -1726,7 +1724,7 @@
       document.getElementById("themeToggle").classList.replace("fa-moon", "fa-sun");
     }
 
-    // ───── Sidebar & Hamburger ─────
+    //──────────────────────── Sidebar & Hamburger ─────────────────────────────
     const sidebar = document.getElementById("sidebar");
     const shrinkBtn = document.getElementById("shrinkBtn");
     const hamburger = document.getElementById("hamburger");
@@ -1736,13 +1734,10 @@
       const icon = shrinkBtn.querySelector("i");
       icon.classList.toggle("fa-angle-double-left");
       icon.classList.toggle("fa-angle-double-right");
-      // Persist collapsed state
       localStorage.setItem("sidebar-collapsed", sidebar.classList.contains("collapsed"));
-      // Header shift
       document.querySelector("header").classList.toggle("sidebar-collapsed");
     });
 
-    // Restore sidebar collapsed state
     if (localStorage.getItem("sidebar-collapsed") === "true") {
       sidebar.classList.add("collapsed");
       shrinkBtn.querySelector("i").classList.replace("fa-angle-double-left", "fa-angle-double-right");
@@ -1753,14 +1748,12 @@
       sidebar.classList.toggle("open");
     });
 
-    // Close sidebar on outside click
     document.addEventListener("click", (e) => {
       if (!sidebar.classList.contains("open")) return;
       if (sidebar.contains(e.target) || hamburger.contains(e.target)) return;
       sidebar.classList.remove("open");
     });
 
-    // Only show hamburger under 1024px
     const mq = window.matchMedia("(max-width: 1024px)");
     function updateHamburgerVisibility() {
       hamburger.style.display = mq.matches ? "block" : "none";
@@ -1768,7 +1761,7 @@
     mq.addListener(updateHamburgerVisibility);
     updateHamburgerVisibility();
 
-    // ───── Theme Toggle ─────
+    //──────────────────────── Theme Toggle ───────────────────────────────────
     const themeToggle = document.getElementById("themeToggle");
     themeToggle.addEventListener("click", () => {
       const htmlEl = document.documentElement;
@@ -1779,9 +1772,9 @@
       localStorage.setItem("vitra-theme", isDark ? "dark" : "light");
     });
 
-    // ───── "Other" Select Handler ─────
+    //──────────────────────── "Other" Select Handler ─────────────────────────
     document.querySelectorAll("select").forEach((sel) => {
-      sel.addEventListener("change", (e) => {
+      sel.addEventListener("change", () => {
         const otherField = sel.parentElement.querySelector(".other-input");
         if (!otherField) return;
         if (sel.value === "Other") {
@@ -1792,49 +1785,34 @@
           otherField.required = false;
         }
       });
-      // Trigger once on load in case persisted value is "Other"
       sel.dispatchEvent(new Event("change"));
     });
 
-    // ───── PANEL UTILITY ─────
-    function getPanel(sectionId) {
-      const sec = document.getElementById(sectionId);
-      const panel = sec.querySelector(".response");
-      panel.hidden = false;
-      return panel;
-    }
-
-    // Restore any persisted panel contents
-    [
-      "therapybot",
-      "moodTracker", 
-      "neurotransmitter", 
-      "pharmacogenomics", 
-      "interactions", 
-      "eeg", 
-      "trialmatch"
-    ].forEach((secId) => {
-      const panelId = {
-        therapybot: "therapybotPanel",
-        moodTracker: "moodPanel",
-        neurotransmitter: "neurotransmitterPanel",
-        pharmacogenomics: "pharmacogenomicsPanel",
-        interactions: "interactionsPanel",
-        eeg: "eegPanel",
-        trialmatch: "trialmatchPanel"
-      }[secId];
-      const saved = localStorage.getItem(panelId);
+    //──────────────────────── Restore Persisted Panels ────────────────────────
+    const panelMap = {
+      therapybot: "therapybotPanel",
+      moodTracker: "moodPanel",
+      neurotransmitter: "neurotransmitterPanel",
+      pharmacogenomics: "pharmacogenomicsPanel",
+      interactions: "interactionsPanel",
+      eeg: "eegPanel",
+      trialmatch: "trialmatchPanel"
+    };
+    Object.values(panelMap).forEach((pid) => {
+      const saved = localStorage.getItem(pid);
       if (saved) {
-        const panel = document.getElementById(panelId);
+        const panel = document.getElementById(pid);
         panel.innerHTML = saved;
         panel.hidden = false;
         addClose(panel);
         addTools(panel);
-        panel.querySelectorAll(".close-btn").forEach(btn => btn.onclick = () => panel.hidden = true);
+        panel.querySelectorAll(".close-btn").forEach(btn => {
+          btn.onclick = () => panel.hidden = true;
+        });
       }
     });
 
-    // ───── Therapy Bot ─────
+    //──────────────────────── Therapy Bot ─────────────────────────────────────
     (function() {
       const chatBox = document.getElementById("chatBox");
       const chatInput = document.getElementById("therapyInput");
@@ -1844,7 +1822,6 @@
       const chatHint = document.getElementById("chatHint");
       let lastDateHeader = null;
 
-      // Load persisted history
       let chatHistory = JSON.parse(localStorage.getItem("therapyChatHistory") || "[]");
 
       function formatDateSeparator(date) {
@@ -1875,7 +1852,6 @@
         chatBox.scrollTop = chatBox.scrollHeight;
       }
 
-      // Render saved history
       chatHistory.forEach(m => addMessage(m.who, m.text, new Date(m.timestamp)));
 
       document.getElementById("sendChat").addEventListener("click", async (e) => {
@@ -1888,7 +1864,6 @@
         localStorage.setItem("therapyChatHistory", JSON.stringify(chatHistory));
         chatInput.value = "";
 
-        // Show spinner
         const spinnerDiv = document.createElement("div");
         spinnerDiv.className = "bot-msg";
         spinnerDiv.innerHTML = `<div class="spinner"></div>`;
@@ -1896,18 +1871,17 @@
         chatBox.scrollTop = chatBox.scrollHeight;
         chatHint.style.display = "none";
 
-        // Build system prompt
         const modality = getSelectValue(therapyModality);
         const length = getSelectValue(therapyLength);
         const language = getSelectValue(therapyLang);
-        const sys = `
+        const systemPrompt = `
 You are a licensed therapist. Modality: ${escapeHtml(modality)}; Length: ${escapeHtml(length)}; Language: ${escapeHtml(language)}.
-Respond empathetically, providing clear guidance and techniques relevant to the user's request.
+Respond empathetically, providing clear guidance, CBT techniques, mindfulness exercises or emotional support steps tailored to the user's request.
         `.trim();
 
         try {
           const aiReply = await callOpenAI([
-            { role: "system", content: sys },
+            { role: "system", content: systemPrompt },
             { role: "user", content: userText }
           ]);
           const replyTime = new Date();
@@ -1998,79 +1972,24 @@ Respond empathetically, providing clear guidance and techniques relevant to the 
       });
     })();
 
-    // ───── Live Therapist Request ─────
-    (function() {
-      const form = document.getElementById("liveTherapyForm");
-      const panel = document.getElementById("liveTherapistPanel");
-      const contactSelect = document.getElementById("ltContactMethod");
-      const otherInput = form.querySelector(".other-input");
-
-      contactSelect.addEventListener("change", (e) => {
-        if (e.target.value === "Other") {
-          otherInput.style.display = "block";
-          otherInput.required = true;
-        } else {
-          otherInput.style.display = "none";
-          otherInput.required = false;
-        }
-      });
-      contactSelect.dispatchEvent(new Event("change"));
-
-      form.onsubmit = async (e) => {
-        e.preventDefault();
-        panel.hidden = false;
-        panel.innerHTML = '<div class="result-content">Submitting… <span class="spinner"></span></div>';
-        const data = {
-          name: document.getElementById("ltName").value.trim(),
-          email: document.getElementById("ltEmail").value.trim(),
-          phone: document.getElementById("ltPhone").value.trim(),
-          contact: getSelectValue(contactSelect),
-          message: document.getElementById("ltMessage").value.trim()
-        };
-        panel.innerHTML = `
-          <div class="result-content">
-            Thank you, <strong>${escapeHtml(data.name)}</strong>!<br>
-            We will reach you at <strong>${escapeHtml(data.contact === "Email" ? data.email : data.phone)}</strong> shortly.<br>
-            — Your Therapist Team
-          </div>`;
-        addClose(panel);
-        addTools(panel);
-        localStorage.setItem("liveTherapistPanel", panel.innerHTML);
-      };
-
-      document.getElementById("ltClear").onclick = () => {
-        form.reset();
-        otherInput.style.display = "none";
-      };
-
-      // Restore if existed
-      const savedLive = localStorage.getItem("liveTherapistPanel");
-      if (savedLive) {
-        panel.innerHTML = savedLive;
-        panel.hidden = false;
-        addClose(panel);
-        addTools(panel);
-      }
-    })();
-
-    // ───── Mood Tracker ─────
+    //──────────────────────── Mood Tracker ────────────────────────────────────
     (function() {
       const form = document.getElementById("mood-form");
       const panel = document.getElementById("moodPanel");
       const moodRange = document.getElementById("moodRange");
       const moodValue = document.getElementById("moodValue");
-      const triggersSelects = document.querySelectorAll('#moodTracker input[name="triggers"][value="Other"]');
       const triggersOther = document.getElementById("moodTriggersOther");
       const selfCare = document.getElementById("selfCare");
       const selfCareOther = document.getElementById("selfCareOther");
 
       moodRange.oninput = () => {
-        document.getElementById("moodValue").textContent = moodRange.value;
+        moodValue.textContent = moodRange.value;
       };
 
-      triggersSelects.forEach((cb) => {
+      document.querySelectorAll('#moodTracker input[name="triggers"]').forEach((cb) => {
         cb.addEventListener("change", () => {
-          if (cb.checked) {
+          if (Array.from(document.querySelectorAll('#moodTracker input[name="triggers"]:checked'))
+                    .some(c => c.value === "Other")) {
             triggersOther.style.display = "block";
             triggersOther.required = true;
           } else {
@@ -2095,19 +2014,20 @@ Respond empathetically, providing clear guidance and techniques relevant to the 
         e.preventDefault();
         panel.hidden = false;
         panel.innerHTML = '<div class="result-content">Analyzing… <span class="spinner"></span></div>';
+
         const data = {
           mood: moodRange.value,
           emotions: [...document.querySelectorAll('#moodTracker input[name="emotions"]:checked')].map(c => c.value),
-          triggers: [
-            ...[...document.querySelectorAll('#moodTracker input[name="triggers"]:checked')]
-              .map(c => c.value === "Other" ? document.getElementById("moodTriggersOther").value.trim() : c.value)
-          ],
+          triggers: [...document.querySelectorAll('#moodTracker input[name="triggers"]:checked')].map(c =>
+            c.value === "Other" ? triggersOther.value.trim() : c.value
+          ),
           note: document.getElementById("moodNote").value.trim(),
           selfCare: getSelectValue(selfCare)
         };
+
         try {
           const aiReply = await callOpenAI([
-            { role: "system", content: "You are an AI mental health assistant analyzing daily mood logs." },
+            { role: "system", content: "You are an AI mental health assistant analyzing daily mood logs. Provide personalized feedback, identify patterns, and suggest self-care strategies." },
             { role: "user", content: `Daily Mood Entry:\n${JSON.stringify(data)}` }
           ]);
           panel.innerHTML = `<div class="result-content">${formatHTML(aiReply)}</div>`;
@@ -2129,7 +2049,7 @@ Respond empathetically, providing clear guidance and techniques relevant to the 
       }
     })();
 
-    // ───── Neurotransmitter Balance ─────
+    //──────────────────────── Neurotransmitter Balance ────────────────────────
     (function() {
       const form = document.getElementById("nt-form");
       const panel = document.getElementById("neurotransmitterPanel");
@@ -2143,9 +2063,9 @@ Respond empathetically, providing clear guidance and techniques relevant to the 
       const ntFocusOther = document.getElementById("ntFocusOther");
 
       [ntSleep, ntAppetite, ntAdherence, ntFocus].forEach(sel => {
-        sel.addEventListener("change", (e) => {
-          const other = e.target.parentElement.querySelector(".other-input");
-          if (e.target.value === "Other") {
+        sel.addEventListener("change", () => {
+          const other = sel.parentElement.querySelector(".other-input");
+          if (sel.value === "Other") {
             other.style.display = "block";
             other.required = true;
           } else {
@@ -2169,7 +2089,7 @@ Respond empathetically, providing clear guidance and techniques relevant to the 
         };
         try {
           const aiReply = await callOpenAI([
-            { role: "system", content: "You are a neuroscientist analyzing neurotransmitter balance based on user inputs." },
+            { role: "system", content: "You are a neuroscientist analyzing neurotransmitter balance based on user inputs. Provide neurochemical insights, suggest lifestyle or dietary adjustments to optimize balance, and explain impacts." },
             { role: "user", content: `Neuro Profile Data:\n${JSON.stringify(data)}` }
           ]);
           panel.innerHTML = `<div class="result-content">${formatHTML(aiReply)}</div>`;
@@ -2191,46 +2111,31 @@ Respond empathetically, providing clear guidance and techniques relevant to the 
       }
     })();
 
-    // ───── Pharmacogenomics & Dosing ─────
+    //──────────────────────── Pharmacogenomics & Dosing ─────────────────────
     (function() {
       const form = document.getElementById("pgx-form");
       const panel = document.getElementById("pharmacogenomicsPanel");
+      const pgxSex = document.getElementById("pgxSex");
+      const pgxSexOther = document.getElementById("pgxSexOther");
       const pgxDrug = document.getElementById("pgxDrug");
       const pgxDrugOther = document.getElementById("pgxDrugOther");
       const pgxGene = document.getElementById("pgxGene");
       const pgxGeneOther = document.getElementById("pgxGeneOther");
-      const pgxSex = document.getElementById("pgxSex");
-      const pgxSexOther = document.getElementById("pgxSexOther");
       const pgxUpload = document.getElementById("pgxUpload");
 
-      pgxDrug.addEventListener("change", () => {
-        if (pgxDrug.value === "Other") {
-          pgxDrugOther.style.display = "block";
-          pgxDrugOther.required = true;
-        } else {
-          pgxDrugOther.style.display = "none";
-          pgxDrugOther.required = false;
-        }
+      [pgxSex, pgxDrug, pgxGene].forEach(sel => {
+        sel.addEventListener("change", () => {
+          const other = sel.parentElement.querySelector(".other-input");
+          if (sel.value === "Other") {
+            other.style.display = "block";
+            other.required = true;
+          } else {
+            other.style.display = "none";
+            other.required = false;
+          }
+        });
+        sel.dispatchEvent(new Event("change"));
       });
-      pgxGene.addEventListener("change", () => {
-        if (pgxGene.value === "Other") {
-          pgxGeneOther.style.display = "block";
-          pgxGeneOther.required = true;
-        } else {
-          pgxGeneOther.style.display = "none";
-          pgxGeneOther.required = false;
-        }
-      });
-      pgxSex.addEventListener("change", () => {
-        if (pgxSex.value === "Other") {
-          pgxSexOther.style.display = "block";
-          pgxSexOther.required = true;
-        } else {
-          pgxSexOther.style.display = "none";
-          pgxSexOther.required = false;
-        }
-      });
-      [pgxDrug, pgxGene, pgxSex].forEach(sel => sel.dispatchEvent(new Event("change")));
 
       form.onsubmit = async (e) => {
         e.preventDefault();
@@ -2256,7 +2161,7 @@ Respond empathetically, providing clear guidance and techniques relevant to the 
         }
         try {
           const aiReply = await callOpenAI([
-            { role: "system", content: "You are a pharmacogenomics expert providing dosing recommendations." },
+            { role: "system", content: "You are a pharmacogenomics expert providing personalized dosing recommendations based on genotype and clinical data. Consider drug-gene interactions, phenotype, and safety guidelines." },
             { role: "user", content: `Patient Data:\n${JSON.stringify(data)}` }
           ]);
           panel.innerHTML = `<div class="result-content">${formatHTML(aiReply)}</div>`;
@@ -2278,7 +2183,7 @@ Respond empathetically, providing clear guidance and techniques relevant to the 
       }
     })();
 
-    // ───── Drug Interaction Profiler ─────
+    //──────────────────────── Drug Interaction Profiler ──────────────────────
     (function() {
       const form = document.getElementById("int-form");
       const panel = document.getElementById("interactionsPanel");
@@ -2287,25 +2192,19 @@ Respond empathetically, providing clear guidance and techniques relevant to the 
       const intComorbid = document.getElementById("intComorbid");
       const intComorbidOther = document.getElementById("intComorbidOther");
 
-      intListSelect.addEventListener("change", () => {
-        if (intListSelect.value === "Other") {
-          intListOther.style.display = "block";
-          intListOther.required = true;
-        } else {
-          intListOther.style.display = "none";
-          intListOther.required = false;
-        }
+      [intListSelect, intComorbid].forEach(sel => {
+        sel.addEventListener("change", () => {
+          const other = sel.parentElement.querySelector(".other-input");
+          if (sel.value === "Other") {
+            other.style.display = "block";
+            other.required = true;
+          } else {
+            other.style.display = "none";
+            other.required = false;
+          }
+        });
+        sel.dispatchEvent(new Event("change"));
       });
-      intComorbid.addEventListener("change", () => {
-        if (intComorbid.value === "Other") {
-          intComorbidOther.style.display = "block";
-          intComorbidOther.required = true;
-        } else {
-          intComorbidOther.style.display = "none";
-          intComorbidOther.required = false;
-        }
-      });
-      [intListSelect, intComorbid].forEach(sel => sel.dispatchEvent(new Event("change")));
 
       form.onsubmit = async (e) => {
         e.preventDefault();
@@ -2314,13 +2213,14 @@ Respond empathetically, providing clear guidance and techniques relevant to the 
         const meds = getSelectValue(intListSelect);
         const cond = getSelectValue(intComorbid);
         if (!meds) {
-          panel.innerHTML = '';
+          panel.innerHTML = '<div class="result-content">⚠️ Please select at least one medication.</div>';
+          addClose(panel);
           return;
         }
         try {
           const aiReply = await callOpenAI([
-            { role: "system", content: "You are a drug interaction profiler specialized in psych meds." },
-            { role: "user", content: `Medications: ${meds}\nComorbid: ${cond}` }
+            { role: "system", content: "You are a drug interaction profiler specialized in psychotropic medications. Evaluate medication–condition and medication–medication interactions, cite mechanisms and safety advice." },
+            { role: "user", content: `Medications: ${meds}\nComorbid Conditions: ${cond}` }
           ]);
           panel.innerHTML = `<div class="result-content">${formatHTML(aiReply)}</div>`;
           addClose(panel);
@@ -2341,7 +2241,7 @@ Respond empathetically, providing clear guidance and techniques relevant to the 
       }
     })();
 
-    // ───── EEG & Brainwave Interpreter ─────
+    //──────────────────────── EEG & Brainwave Interpreter ───────────────────
     (function() {
       const form = document.getElementById("eeg-form");
       const panel = document.getElementById("eegPanel");
@@ -2372,8 +2272,8 @@ Respond empathetically, providing clear guidance and techniques relevant to the 
         const cond = getSelectValue(eegCondition);
         try {
           const aiReply = await callOpenAI([
-            { role: "system", content: "You are an EEG & brainwave interpreter specializing in mental health." },
-            { role: "user", content: `EEG Analysis Request:\nCondition: ${cond}` }
+            { role: "system", content: "You are an EEG & brainwave interpreter specializing in mental health. Analyze common patterns (alpha, beta, theta, delta) and suggest cognitive insights or interventions." },
+            { role: "user", content: `EEG Analysis:\nCondition/Task: ${cond}` }
           ]);
           panel.innerHTML = `<div class="result-content">${formatHTML(aiReply)}</div>`;
           addClose(panel);
@@ -2394,7 +2294,7 @@ Respond empathetically, providing clear guidance and techniques relevant to the 
       }
     })();
 
-    // ───── Clinical Trial Matcher ─────
+    //──────────────────────── Clinical Trial Matcher ─────────────────────────
     (function() {
       const form = document.getElementById("trial-form");
       const panel = document.getElementById("trialmatchPanel");
@@ -2402,42 +2302,36 @@ Respond empathetically, providing clear guidance and techniques relevant to the 
       const trialDxOther = document.getElementById("trialDxOther");
       const trialPhase = document.getElementById("trialPhase");
       const trialPhaseOther = document.getElementById("trialPhaseOther");
-      const trialLoc = document.getElementById("trialLoc");
 
-      trialDx.addEventListener("change", () => {
-        if (trialDx.value === "Other") {
-          trialDxOther.style.display = "block";
-          trialDxOther.required = true;
-        } else {
-          trialDxOther.style.display = "none";
-          trialDxOther.required = false;
-        }
+      [trialDx, trialPhase].forEach(sel => {
+        sel.addEventListener("change", () => {
+          const other = sel.parentElement.querySelector(".other-input");
+          if (sel.value === "Other") {
+            other.style.display = "block";
+            other.required = true;
+          } else {
+            other.style.display = "none";
+            other.required = false;
+          }
+        });
+        sel.dispatchEvent(new Event("change"));
       });
-      trialPhase.addEventListener("change", () => {
-        if (trialPhase.value === "Other") {
-          trialPhaseOther.style.display = "block";
-          trialPhaseOther.required = true;
-        } else {
-          trialPhaseOther.style.display = "none";
-          trialPhaseOther.required = false;
-        }
-      });
-      [trialDx, trialPhase].forEach(sel => sel.dispatchEvent(new Event("change")));
 
       form.onsubmit = async (e) => {
         e.preventDefault();
         panel.hidden = false;
         panel.innerHTML = '<div class="result-content">Searching… <span class="spinner"></span></div>';
         const dx = getSelectValue(trialDx);
-        const loc = trialLoc.value.trim();
+        const loc = document.getElementById("trialLoc").value.trim();
         const ph = getSelectValue(trialPhase);
         if (!dx || !loc) {
-          panel.innerHTML = '';
+          panel.innerHTML = '<div class="result-content">⚠️ Please specify diagnosis and location.</div>';
+          addClose(panel);
           return;
         }
         try {
           const aiReply = await callOpenAI([
-            { role: "system", content: "You are a clinical trial matching engine specialized in psychiatry." },
+            { role: "system", content: "You are a clinical trial matching engine specialized in psychiatry. Suggest relevant trials by phase, location, and eligibility. Provide trial names, phases, brief inclusion criteria, and contact information if available." },
             { role: "user", content: `Diagnosis: ${dx}\nLocation: ${loc}\nPhase: ${ph}` }
           ]);
           panel.innerHTML = `<div class="result-content">${formatHTML(aiReply)}</div>`;
@@ -2459,7 +2353,7 @@ Respond empathetically, providing clear guidance and techniques relevant to the 
       }
     })();
 
-    // ───── Data Analytics & Charts ─────
+    //──────────────────────── Data Analytics & Charts ───────────────────────
     (function() {
       const engCtx = document.getElementById("engagementChart").getContext("2d");
       const outCtx = document.getElementById("outcomeChart").getContext("2d");
@@ -2472,6 +2366,7 @@ Respond empathetically, providing clear guidance and techniques relevant to the 
       const primary = getCSSVar("--primary");
       const secondary = getCSSVar("--secondary");
 
+      // Engagement Over Time (line)
       const engChart = new Chart(engCtx, {
         type: "line",
         data: {
@@ -2480,7 +2375,7 @@ Respond empathetically, providing clear guidance and techniques relevant to the 
             label: "Sessions",
             data: [12, 9, 14, 11, 13, 10, 15],
             borderColor: primary,
-            backgroundColor: "rgba(90,142,238,0.1)",
+            backgroundColor: "rgba(74,144,226,0.1)",
             fill: true
           }]
         },
@@ -2495,6 +2390,7 @@ Respond empathetically, providing clear guidance and techniques relevant to the 
         }
       });
 
+      // Outcome Metrics (bar)
       const outChart = new Chart(outCtx, {
         type: "bar",
         data: {
