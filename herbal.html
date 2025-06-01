@@ -1648,7 +1648,47 @@
     padding: 0.4rem;
   }
 }
+/*──────────────────────────────────────────────────────────────────────────────
+  OVERRIDES FOR TABLETS (≤768px) AND PHONES (≤640px)
+──────────────────────────────────────────────────────────────────────────────*/
 
+/* 1) SYMPTOM CHECKER: remove that 280px min-width and force one-column on tablets */
+@media (max-width: 768px) {
+  /* Turn the two-column grid into a simple vertical stack */
+  #hero-symptom .sym-form {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+  /* Make every control fill its parent */
+  #hero-symptom textarea,
+  #hero-symptom select,
+  #hero-symptom input[type="number"],
+  #hero-symptom input[type="range"] {
+    width: 100% !important;
+    /* remove any min-width */
+    min-width: 0 !important;
+  }
+}
+
+/* 2) FORCE ALL INPUTS / TEXTAREAS / SELECTS / BUTTONS TO 100% WIDTH ON PHONES */
+@media (max-width: 640px) {
+  /* Any control inside any module now fills 100% of its container */
+  input,
+  select,
+  textarea,
+  button {
+    width: 100% !important;
+  }
+  /* If you have any “other-input” fields, make sure they also span full width */
+  .other-input {
+    width: 100% !important;
+  }
+  /* Slightly reduce chart heights so they don’t overflow on narrow phones */
+  .chart-card canvas {
+    height: 180px !important;
+  }
+}
  </style>
 
 
@@ -3285,6 +3325,141 @@ Conclude with final ROI percentage and a short summary line.
     });
   });
 </script>
+<!-- … your existing HTML above … -->
 
+<script>
+  // ─── EXECUTIVE ANALYTICS DASHBOARD ───────────────────────────────────────── 
+
+  function getCSSVar(name) {
+    return getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+  }
+
+  function initRealCharts() {
+    const colorText = getCSSVar("--text");
+    const colorMuted = getCSSVar("--muted");
+
+    // 1) Adoption Over Time (line)
+    new Chart("chartAdoption", {
+      type: "line",
+      data: {
+        labels: ["January","February","March","April","May","June","July"],
+        datasets: [{
+          label: "New Users",
+          data: [45, 60, 80, 95, 120, 135, 150],
+          borderColor: getCSSVar("--primary"),
+          backgroundColor: "rgba(58,118,84,0.1)",
+          fill: true
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        scales: {
+          x: { 
+            ticks: { color: colorText },
+            grid: { display: false }
+          },
+          y: {
+            ticks: { color: colorText },
+            grid: { color: colorMuted }
+          }
+        },
+        plugins: {
+          legend: { display: false }
+        }
+      }
+    });
+
+    // 2) Efficacy Outcomes (bar)
+    new Chart("chartEfficacy", {
+      type: "bar",
+      data: {
+        labels: ["Ashwagandha","Turmeric","Ginger","Chamomile"],
+        datasets: [{
+          data: [78, 85, 72, 90],
+          backgroundColor: [
+            "rgba(42,111,78,0.7)",
+            "rgba(142,108,75,0.7)",
+            "rgba(212,197,162,0.7)",
+            "rgba(42,111,78,0.4)"
+          ]
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        scales: {
+          x: { ticks: { color: colorText }, grid: { display: false } },
+          y: { ticks: { color: colorText }, grid: { color: colorMuted }, beginAtZero: true, max: 100 }
+        },
+        plugins: {
+          legend: { display: false }
+        }
+      }
+    });
+
+    // 3) Inventory Impact (pie)
+    new Chart("chartSupply", {
+      type: "pie",
+      data: {
+        labels: ["Turmeric","Moringa","Ginger","Hibiscus"],
+        datasets: [{
+          data: [120, 95, 80, 60],
+          backgroundColor: [
+            "rgba(142,108,75,0.7)",
+            "rgba(42,111,78,0.7)",
+            "rgba(212,197,162,0.7)",
+            "rgba(42,111,78,0.4)"
+          ]
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: {
+            position: "bottom",
+            labels: { color: colorText }
+          }
+        }
+      }
+    });
+
+    // 4) Financial ROI (radar)
+    new Chart("chartROI", {
+      type: "radar",
+      data: {
+        labels: ["Q1","Q2","Q3","Q4"],
+        datasets: [{
+          label: "ROI (%)",
+          data: [12, 18, 22, 15],
+          borderColor: getCSSVar("--secondary"),
+          backgroundColor: "rgba(142,108,75,0.2)"
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        scales: {
+          r: {
+            angleLines: { color: colorMuted },
+            grid: { color: colorMuted },
+            pointLabels: { color: colorText }
+          }
+        },
+        plugins: {
+          legend: { display: false }
+        }
+      }
+    });
+  }
+
+  // Only initialize after Chart.js is fully loaded and DOM is ready:
+  window.addEventListener("load", () => {
+    if (typeof Chart !== "undefined" && document.getElementById("chartAdoption")) {
+      initRealCharts();
+    }
+  });
+</script>
 </body>
 </html>
