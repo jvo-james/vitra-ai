@@ -1560,6 +1560,33 @@
     font-size: 0.85rem;
   }
 }
+   /*──────────────────────────────────────────────────────────────────────────────
+  OVERRIDE: Phone (≤600px) sidebar as a left‐drawer instead of a bottom bar
+──────────────────────────────────────────────────────────────────────────────*/
+@media (max-width: 600px) {
+  aside#sidebar {
+    /* Undo the bottom‐aligned nav */
+    position: fixed !important;
+    top: 0 !important;
+    bottom: auto !important;
+    width: var(--sidebar-w) !important;
+    height: 100vh !important;
+    flex-direction: column !important;
+
+    /* Start off‐canvas to the left */
+    transform: translateX(-100%);
+    transition: transform var(--transition);
+    z-index: 900;
+  }
+  /* When “.open” is added, bring it in from the left */
+  aside#sidebar.open {
+    transform: translateX(0) !important;
+  }
+  /* Ensure header shifts over when sidebar is open */
+  aside#sidebar.open ~ header {
+    left: var(--sidebar-w) !important;
+  }
+}
 /*──────────────────────────────────────────────────────────────────────────────
   MOBILE LAYOUT TWEAKS (phones ≤ 600px)
 ──────────────────────────────────────────────────────────────────────────────*/
@@ -2249,6 +2276,34 @@
   }
 </script>
 
+  <script>
+  // 1) Close sidebar if user taps/clicks outside it
+  document.addEventListener("click", (e) => {
+    const sidebar = document.getElementById("sidebar");
+    const hamburger = document.getElementById("hamburger");
+
+    // If sidebar is not open, do nothing
+    if (!sidebar.classList.contains("open")) return;
+
+    // If click happened inside the sidebar or on the hamburger icon, do nothing
+    if (
+      sidebar.contains(e.target) ||
+      hamburger.contains(e.target)
+    ) {
+      return;
+    }
+
+    // Otherwise, remove the “open” class to slide it back out
+    sidebar.classList.remove("open");
+  });
+
+  // 2) Also ensure that tapping the hamburger toggles “open” as before:
+  //    (You likely already have something like this, but just in case:)
+  document.getElementById("hamburger").addEventListener("click", () => {
+    document.getElementById("sidebar").classList.toggle("open");
+  });
+</script>
+  
 <script>
   // ───── Utility: sanitize user-provided strings ─────
   function escapeHtml(unsafe) {
