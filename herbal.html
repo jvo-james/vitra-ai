@@ -3048,129 +3048,121 @@ Conclude with final ROI percentage and a short summary line.
     const colorText = getCSSVar("--text");
     const colorMuted = getCSSVar("--muted");
 
-   
     // 1) Adoption Over Time (line)
-  const ctxAdoption = document.getElementById("chartAdoption").getContext("2d");
-  new Chart(ctxAdoption, {
-    type: "line",
-    data: {
-     labels: ["January","February","March","April","May","June","July"],
-      datasets: [{
-       label: "New Users",
-       data: [45, 60, 80, 95, 120, 135, 150],
-       borderColor: getCSSVar("--primary"),
-        backgroundColor: "rgba(58,118,84,0.1)",
-        fill: true
-      }]
-   },
-    options: {
-     responsive: true,
-      maintainAspectRatio: false,
-      scales: {
-        x: { 
-            ticks: { color: colorText },
-          grid: { display: false }
-        },
-        y: {
-          ticks: { color: colorText },
-          grid: { color: colorMuted }
-        }
+    new Chart("chartAdoption", {
+      type: "line",
+      data: {
+        labels: ["January","February","March","April","May","June","July"],
+        datasets: [{
+          label: "New Users",
+          data: [45, 60, 80, 95, 120, 135, 150],
+          borderColor: getCSSVar("--primary"),
+          backgroundColor: "rgba(58,118,84,0.1)",
+          fill: true
+        }]
       },
-      plugins: {
-       legend: { display: false }
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        scales: {
+          x: { 
+            ticks: { color: colorText },
+            grid: { display: false }
+          },
+          y: {
+            ticks: { color: colorText },
+            grid: { color: colorMuted }
+          }
+        },
+        plugins: {
+          legend: { display: false }
+        }
       }
-    }
- });
-
+    });
 
     // 2) Efficacy Outcomes (bar): positive feedback % per herb
-    const ctxEfficacy = document.getElementById("chartEfficacy").getContext("2d");
-  new Chart(ctxEfficacy, {
-   type: "bar",
-   data: {
-      labels: ["Ashwagandha","Turmeric","Ginger","Chamomile"],
-     datasets: [{
-        data: [78, 85, 72, 90],
-       backgroundColor: [
-          "rgba(42,111,78,0.7)",
-         "rgba(142,108,75,0.7)",
-         "rgba(212,197,162,0.7)",
-        "rgba(42,111,78,0.4)"
-       ]
-     }]
-    },
-    options: {
-      responsive: true,
-     maintainAspectRatio: false,
-     scales: {
-        x: { ticks: { color: colorText }, grid: { display: false } },
-       y: { ticks: { color: colorText }, grid: { color: colorMuted }, beginAtZero: true, max: 100 }
-     },
-     plugins: {
-        legend: { display: false }
+    new Chart("chartEfficacy", {
+      type: "bar",
+      data: {
+        labels: ["Ashwagandha","Turmeric","Ginger","Chamomile"],
+        datasets: [{
+          data: [78, 85, 72, 90],
+          backgroundColor: [
+            "rgba(42,111,78,0.7)",
+            "rgba(142,108,75,0.7)",
+            "rgba(212,197,162,0.7)",
+            "rgba(42,111,78,0.4)"
+          ]
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        scales: {
+          x: { ticks: { color: colorText }, grid: { display: false } },
+          y: { ticks: { color: colorText }, grid: { color: colorMuted }, beginAtZero: true, max: 100 }
+        },
+        plugins: {
+          legend: { display: false }
+        }
       }
-    }
-  });
-
+    });
 
     // 3) Inventory Impact (pie): usage (kg) of top herbs this week
-    const ctxSupply = document.getElementById("chartSupply").getContext("2d");
-  new Chart(ctxSupply, {
-    type: "pie",
-   data: {
-     labels: ["Turmeric","Moringa","Ginger","Hibiscus"],
-      datasets: [{
-        data: [120, 95, 80, 60],
-       backgroundColor: [
-         "rgba(142,108,75,0.7)",
-         "rgba(42,111,78,0.7)",
-          "rgba(212,197,162,0.7)",
-         "rgba(42,111,78,0.4)"
-       ]
-     }]
-   },
-    options: {
-     responsive: true,
-     maintainAspectRatio: false,
-     plugins: {
-        legend: {
-          position: "bottom",
-         labels: { color: colorText }
-       }
+    new Chart("chartSupply", {
+      type: "pie",
+      data: {
+        labels: ["Turmeric","Moringa","Ginger","Hibiscus"],
+        datasets: [{
+          data: [120, 95, 80, 60],
+          backgroundColor: [
+            "rgba(142,108,75,0.7)",
+            "rgba(42,111,78,0.7)",
+            "rgba(212,197,162,0.7)",
+            "rgba(42,111,78,0.4)"
+          ]
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: {
+            position: "bottom",
+            labels: { color: colorText }
+          }
+        }
       }
-   }
-  });
-
+    });
 
     // 4) Financial ROI (radar) for Q1–Q4
-    const ctxROI = document.getElementById("chartROI").getContext("2d");
- new Chart(ctxROI, {
-    type: "radar",
-    data: {
-      labels: ["Q1","Q2","Q3","Q4"],
-      datasets: [{
-        label: "ROI (%)",
-        data: [12, 18, 22, 15],
-       borderColor: getCSSVar("--secondary"),
-        backgroundColor: "rgba(142,108,75,0.2)"
-      }]
-    },
-   options: {
-      responsive: true,
-     maintainAspectRatio: false,
-     scales: {
-       r: {
-         angleLines: { color: colorMuted },
-          grid: { color: colorMuted },
-         pointLabels: { color: colorText }
-        }
+    new Chart("chartROI", {
+      type: "radar",
+      data: {
+        labels: ["Q1","Q2","Q3","Q4"],
+        datasets: [{
+          label: "ROI (%)",
+          data: [12, 18, 22, 15],
+          borderColor: getCSSVar("--secondary"),
+          backgroundColor: "rgba(142,108,75,0.2)"
+        }]
       },
-      plugins: {
-       legend: { display: false }
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        scales: {
+          r: {
+            angleLines: { color: colorMuted },
+            grid: { color: colorMuted },
+            pointLabels: { color: colorText }
+          }
+        },
+        plugins: {
+          legend: { display: false }
+        }
       }
-    }
-  });
-
+    });
+  }
 
   // ─── Export all charts + descriptions as CSV ─────────────────────────
   document.getElementById("exportCSV").addEventListener("click", () => {
