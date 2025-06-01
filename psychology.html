@@ -11,21 +11,27 @@
 
 </head>
 
-  <style>
-  /*──────────────────────── Theme & Reset ─────────────────────────────────*/
+<style>
+  /*──────────────────────── Theme & Variables ─────────────────────────────────*/
   :root {
-    /* Color Palette */
-    --primary: #4A90E2;           /* Bright Blue */
-    --primary-alt: #6AAEF5;       /* Lighter Blue */
-    --secondary: #E24A4A;         /* Vivid Red */
-    --secondary-alt: #F27575;     /* Lighter Red */
-    --accent: rgba(255, 255, 255, 0.4);
-    --bg: #F3F6FB;                /* Very light grayish blue */
-    --surface: #FFFFFF;           /* White panels */
-    --text: #1E2A38;              /* Dark slate */
-    --muted: #6B7C8A;             /* Mid-gray slate */
+    /* Color Palette: Blue & Red */
+    --blue: #4A90E2;
+    --blue-light: #6AAEF5;
+    --red: #E24A4A;
+    --red-light: #F27575;
+    --bg-light: #F3F6FB;
+    --bg-dark: #1A202C;
+    --surface-light: #FFFFFF;
+    --surface-dark: rgba(30, 35, 54, 0.85);
+    --text-light: #1E2A38;
+    --text-dark: #E0E6F0;
+    --muted-light: #6B7C8A;
+    --muted-dark: #9AA5B1;
+    --accent-light: rgba(255, 255, 255, 0.4);
+    --accent-dark: rgba(30, 35, 54, 0.5);
 
-    /* Spacing & Typography */
+    /* Typography & Spacing */
+    --font-family: 'Montserrat', sans-serif;
     --radius: 0.75rem;
     --padding: 1rem;
     --transition: 0.3s ease;
@@ -33,16 +39,16 @@
 
     /* Layout */
     --sidebar-width: 260px;
-    --sidebar-hidden-width: 0;
     --header-height: 60px;
+    --chart-height: 200px;
   }
 
   html.dark {
-    --bg: #1A202C;               /* Dark slate */
-    --surface: rgba(30, 35, 54, 0.85);
-    --text: #E0E6F0;              /* Light gray */
-    --muted: #9AA5B1;             /* Soft gray */
-    --accent: rgba(30, 35, 54, 0.5);
+    --bg-light: var(--bg-dark);
+    --surface-light: var(--surface-dark);
+    --text-light: var(--text-dark);
+    --muted-light: var(--muted-dark);
+    --accent-light: var(--accent-dark);
   }
 
   *, *::before, *::after {
@@ -52,15 +58,15 @@
   }
 
   html {
-    font-family: 'Montserrat', sans-serif;
+    font-family: var(--font-family);
     scroll-behavior: smooth;
   }
 
   body {
     display: flex;
     min-height: 100vh;
-    background: var(--bg);
-    color: var(--text);
+    background: var(--bg-light);
+    color: var(--text-light);
     overflow-x: hidden;
     transition: background var(--transition), color var(--transition);
   }
@@ -77,7 +83,7 @@
   }
 
   :focus {
-    outline: 2px solid var(--primary);
+    outline: 2px solid var(--blue);
     outline-offset: 2px;
   }
 
@@ -93,7 +99,7 @@
   /*──────────────────────── Sidebar ─────────────────────────────────*/
   aside {
     flex: 0 0 var(--sidebar-width);
-    background: var(--surface);
+    background: var(--surface-light);
     backdrop-filter: blur(12px);
     box-shadow: var(--shadow-light);
     position: sticky;
@@ -113,17 +119,18 @@
     flex: 0 0 72px;
   }
 
-  .logo, .brand {
+  .logo {
     display: flex;
     align-items: center;
     gap: 0.75rem;
     padding: var(--padding);
-    font-size: 1.2rem;
-    color: var(--primary);
+    font-size: 1.3rem;
+    color: var(--blue);
+    background: linear-gradient(135deg, var(--blue-light), var(--red-light));
+    border-bottom: 2px solid var(--red);
   }
 
-  aside.collapsed .logo span,
-  aside.collapsed .brand span {
+  aside.collapsed .logo span {
     opacity: 0;
   }
 
@@ -139,13 +146,13 @@
     gap: 1rem;
     padding: 0.75rem var(--padding);
     border-radius: var(--radius);
-    color: var(--text);
+    color: var(--text-light);
     transition: background var(--transition), transform var(--transition), color var(--transition);
   }
 
   nav a:hover,
   nav a.active {
-    background: var(--primary);
+    background: linear-gradient(135deg, var(--blue), var(--red));
     color: #fff;
     transform: translateX(4px);
   }
@@ -155,7 +162,7 @@
     width: 36px;
     height: 36px;
     border-radius: 50%;
-    background: var(--primary);
+    background: var(--blue);
     color: #fff;
     box-shadow: 0 8px 40px rgba(0, 0, 0, 0.1);
     cursor: pointer;
@@ -165,6 +172,7 @@
 
   #shrinkBtn:hover {
     transform: scale(1.1);
+    background: var(--blue-light);
   }
 
   /*──────────────────────── Header ─────────────────────────────────*/
@@ -174,7 +182,7 @@
     left: var(--sidebar-width);
     right: 0;
     height: var(--header-height);
-    background: var(--surface);
+    background: var(--surface-light);
     backdrop-filter: blur(12px);
     display: flex;
     align-items: center;
@@ -190,19 +198,21 @@
   }
 
   header h1 {
-    font-size: 1.4rem;
-    color: var(--text);
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: var(--blue);
   }
 
   .hamburger, .theme-toggle {
-    font-size: 1.5rem;
-    color: var(--primary);
+    font-size: 1.6rem;
+    color: var(--blue);
     cursor: pointer;
     transition: transform var(--transition), color var(--transition);
   }
 
   .hamburger:hover, .theme-toggle:hover {
     transform: scale(1.1);
+    color: var(--red);
   }
 
   /*──────────────────────── Main & Hero ─────────────────────────────────*/
@@ -212,7 +222,7 @@
     margin-left: var(--sidebar-width);
     padding: var(--padding);
     transition: margin-left var(--transition);
-    background: var(--bg);
+    background: var(--bg-light);
   }
 
   @media (max-width: 1024px) {
@@ -227,37 +237,38 @@
 
   .hero {
     position: relative;
-    background: var(--surface);
-    backdrop-filter: blur(12px);
+    background: linear-gradient(145deg, rgba(74,144,226,0.2), rgba(226,74,74,0.2));
     border-radius: var(--radius);
     padding: 3rem var(--padding);
     text-align: center;
-    box-shadow: 0 8px 40px rgba(0, 0, 0, 0.1);
-    margin-bottom: 2rem;
+    box-shadow: 0 10px 50px rgba(0, 0, 0, 0.1);
+    margin-bottom: 2.5rem;
+    overflow: hidden;
   }
 
   .hero h1 {
-    font-size: 2.75rem;
-    color: var(--primary);
+    font-size: 3rem;
+    color: var(--blue);
     margin-bottom: 1rem;
   }
 
-  .hero p {
-    font-size: 1.2rem;
-    color: var(--muted);
+  .hero p.hero-subtitle {
+    font-size: 1.25rem;
+    color: var(--muted-light);
     margin-bottom: 2rem;
     max-width: 600px;
     margin-inline: auto;
   }
 
-  .hero .actions {
+  .hero-actions {
     display: flex;
     flex-wrap: wrap;
     gap: 1rem;
     justify-content: center;
+    margin-top: 1.5rem;
   }
 
-  .hero .actions a {
+  .hero-actions a {
     display: inline-flex;
     align-items: center;
     gap: 0.5rem;
@@ -269,58 +280,74 @@
     text-decoration: none;
   }
 
-  .hero .actions a:nth-child(odd) {
-    background: var(--primary);
+  .hero-actions a:nth-child(odd) {
+    background: var(--blue);
   }
 
-  .hero .actions a:nth-child(even) {
-    background: var(--secondary);
+  .hero-actions a:nth-child(even) {
+    background: var(--red);
   }
 
-  .hero .actions a:hover {
+  .hero-actions a:hover {
     transform: translateY(-3px);
-    box-shadow: 0 8px 40px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
   }
 
-  .hero-icons {
+  .hero-image {
+    margin-top: 2rem;
+  }
+
+  .hero-image img {
+    max-width: 80%;
+    border-radius: var(--radius);
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.1);
+  }
+
+  .hero-bg-icon {
     position: absolute;
-    top: 1rem;
-    right: 1rem;
-    display: flex;
-    flex-direction: column;
-    gap: 0.5rem;
-    font-size: 2rem;
-    opacity: 0.15;
-    color: var(--primary);
+    font-size: 3rem;
+    opacity: 0.1;
+    color: var(--blue);
+    transition: transform var(--transition);
+  }
+
+  .hero-bg-icon:nth-child(2) { color: var(--red); }
+  .hero-bg-icon:hover {
+    transform: scale(1.2) rotate(20deg);
+    opacity: 0.2;
   }
 
   /*──────────────────────── Modules ─────────────────────────────────*/
   section.module {
-    background: var(--surface);
+    background: var(--surface-light);
     backdrop-filter: blur(8px);
     border-radius: var(--radius);
     padding: var(--padding);
     margin-bottom: 1.5rem;
     box-shadow: var(--shadow-light);
     transition: transform var(--transition), box-shadow var(--transition), background var(--transition);
+    border-left: 6px solid var(--red);
   }
 
   section.module:hover {
-    transform: translateY(-4px);
-    box-shadow: 0 12px 48px rgba(0, 0, 0, 0.15);
+    transform: translateY(-5px);
+    box-shadow: 0 14px 60px rgba(0, 0, 0, 0.15);
   }
 
   section.module h2 {
     display: flex;
     align-items: center;
     gap: 0.5rem;
-    font-size: 1.5rem;
-    color: var(--primary);
+    font-size: 1.75rem;
+    color: var(--blue);
     margin-bottom: 0.75rem;
+    background: linear-gradient(90deg, var(--blue), var(--red));
+    -webkit-background-clip: text;
+    color: transparent;
   }
 
   section.module p.desc {
-    color: var(--muted);
+    color: var(--muted-light);
     font-size: 1rem;
     margin-bottom: 1rem;
   }
@@ -334,11 +361,11 @@
   textarea {
     width: 100%;
     padding: 0.75rem;
-    border: 1.5px solid var(--muted);
+    border: 1.5px solid var(--muted-light);
     border-radius: var(--radius);
-    background: var(--accent);
-    color: var(--text);
-    font-size: 0.95rem;
+    background: var(--accent-light);
+    color: var(--text-light);
+    font-size: 1rem;
     transition: border-color var(--transition), box-shadow var(--transition), background var(--transition);
   }
 
@@ -346,15 +373,15 @@
   textarea:focus,
   select:focus {
     outline: none;
-    border-color: var(--primary);
-    box-shadow: 0 0 8px var(--primary);
-    background: var(--surface);
+    border-color: var(--red);
+    box-shadow: 0 0 8px var(--red);
+    background: var(--surface-light);
   }
 
   input[type="range"] {
     width: 100%;
-    accent-color: var(--primary);
-    margin: 0.5rem 0 1rem;
+    accent-color: var(--blue);
+    margin: 0.5rem 0 1.5rem;
   }
 
   input[type="file"] {
@@ -363,42 +390,52 @@
     background: none;
   }
 
+  .other-input {
+    display: none;
+    margin-top: 0.5rem;
+  }
+
   .checkbox-group {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
-    gap: 0.5rem;
+    gap: 0.75rem;
   }
 
   fieldset {
-    border: 1px solid var(--muted);
+    border: 1px solid var(--muted-light);
     border-radius: var(--radius);
-    padding: 0.75rem;
+    padding: 1rem;
     margin-bottom: 1rem;
+    background: var(--accent-light);
   }
 
   legend {
     padding: 0 0.5rem;
     font-weight: 600;
-    color: var(--secondary);
+    color: var(--red);
   }
 
-  button.btn {
+  button.btn, button.btn-secondary, button.btn-tertiary {
     display: inline-flex;
     align-items: center;
     gap: 0.5rem;
-    padding: 0.75rem 1.25rem;
+    padding: 0.75rem 1.5rem;
     border: none;
     border-radius: var(--radius);
-    background: var(--primary);
     color: #fff;
     font-weight: 600;
     box-shadow: var(--shadow-light);
     cursor: pointer;
     transition: background var(--transition), transform var(--transition), box-shadow var(--transition);
+    background: var(--blue);
   }
 
   button.btn-secondary {
-    background: var(--secondary);
+    background: var(--red);
+  }
+
+  button.btn-tertiary {
+    background: linear-gradient(135deg, var(--blue-light), var(--red-light));
   }
 
   button.btn:hover {
@@ -407,14 +444,18 @@
   }
 
   button.btn-secondary:hover {
-    background: var(--secondary-alt);
+    background: var(--red-light);
+  }
+
+  button.btn-tertiary:hover {
+    filter: brightness(1.1);
   }
 
   /*──────────────────────── Response Panels ─────────────────────────────────*/
   .response {
-    background: var(--surface);
+    background: var(--surface-light);
     backdrop-filter: blur(8px);
-    border-left: 4px solid var(--secondary);
+    border-left: 6px solid var(--blue);
     padding: var(--padding);
     border-radius: var(--radius);
     margin-top: 1rem;
@@ -425,7 +466,8 @@
 
   .response .result-content {
     white-space: pre-wrap;
-    line-height: 1.5;
+    line-height: 1.6;
+    color: var(--text-light);
   }
 
   .tool-row {
@@ -442,34 +484,34 @@
     background: none;
     border: none;
     cursor: pointer;
-    color: var(--muted);
-    font-size: 1.1rem;
+    color: var(--muted-light);
+    font-size: 1.2rem;
     transition: color var(--transition), transform var(--transition);
   }
 
   .close-btn:hover,
   .copy-btn:hover,
   .dl-btn:hover {
-    color: var(--primary);
-    transform: scale(1.1);
+    color: var(--red);
+    transform: scale(1.2);
   }
 
   .copy-btn,
   .dl-btn {
-    border: 1px solid var(--muted);
+    border: 1px solid var(--muted-light);
     border-radius: 50%;
     width: 1.6rem;
     height: 1.6rem;
     display: flex;
     align-items: center;
     justify-content: center;
-    background: var(--surface);
+    background: var(--surface-light);
   }
 
   /*──────────────────────── Chat UI ─────────────────────────────────*/
   .chat-box {
-    background: var(--bg);
-    border: 1px solid var(--muted);
+    background: var(--bg-light);
+    border: 1px solid var(--muted-light);
     border-radius: var(--radius);
     padding: var(--padding);
     max-height: 300px;
@@ -487,31 +529,32 @@
     border-radius: 1rem;
     position: relative;
     transition: background var(--transition), color var(--transition);
-    line-height: 1.4;
+    line-height: 1.5;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
   }
 
   .user-msg {
-    background: var(--primary);
+    background: var(--blue);
     color: #fff;
     align-self: flex-end;
     border-bottom-right-radius: 0.2rem;
   }
 
   .bot-msg {
-    background: var(--accent);
-    color: var(--text);
+    background: var(--accent-light);
+    color: var(--text-light);
     align-self: flex-start;
     border-bottom-left-radius: 0.2rem;
   }
 
   html.dark .bot-msg {
-    background: var(--surface);
-    color: var(--text);
+    background: var(--surface-light);
+    color: var(--text-light);
   }
 
   .timestamp {
     font-size: 0.7rem;
-    color: var(--muted);
+    color: var(--muted-light);
     position: absolute;
     bottom: -1.2rem;
     right: 0.8rem;
@@ -521,23 +564,136 @@
     text-align: center;
     margin: 0.75rem 0;
     font-weight: bold;
-    color: var(--muted);
+    color: var(--muted-light);
     user-select: none;
   }
 
   #chatHint {
     font-size: 0.9rem;
-    color: var(--muted);
+    color: var(--muted-light);
     margin-top: 0.5rem;
-    display: flex;
+    display: none;
     align-items: center;
     gap: 0.5rem;
   }
 
+  #chatHint .fa-spinner {
+    animation: spin 1s linear infinite;
+  }
+  @keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+  }
+
+  /*──────────────────────── History Modal ─────────────────────────────────*/
+  .history-modal {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.6);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 2000;
+  }
+
+  .history-content {
+    background: var(--surface-light);
+    border-radius: var(--radius);
+    padding: 1.5rem;
+    width: 90%;
+    max-width: 700px;
+    max-height: 80vh;
+    overflow-y: auto;
+    box-shadow: 0 12px 60px rgba(0, 0, 0, 0.2);
+    position: relative;
+  }
+
+  .history-content h3 {
+    font-size: 1.8rem;
+    margin-bottom: 1rem;
+    color: var(--blue);
+  }
+
+  .history-table-wrapper {
+    overflow-x: auto;
+    margin-bottom: 1rem;
+  }
+
+  .history-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.95rem;
+  }
+
+  .history-table th,
+  .history-table td {
+    border: 1px solid var(--muted-light);
+    padding: 0.5rem;
+    text-align: left;
+  }
+
+  .history-table th {
+    background: var(--blue-light);
+    color: #fff;
+    position: sticky;
+    top: 0;
+  }
+
+  .history-table thead tr:first-child th {
+    background: var(--red);
+  }
+
+  .history-table tbody tr:hover {
+    background: var(--accent-light);
+  }
+
+  .del-msg {
+    background: none;
+    border: none;
+    color: var(--muted-light);
+    cursor: pointer;
+    font-size: 1.1rem;
+    transition: color var(--transition);
+  }
+
+  .del-msg:hover {
+    color: var(--red);
+  }
+
+  .history-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 1rem;
+    margin-top: 1rem;
+  }
+
+  .history-actions button {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 1rem;
+    border: none;
+    border-radius: var(--radius);
+    background: var(--blue);
+    color: #fff;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background var(--transition), transform var(--transition);
+  }
+
+  .history-actions .clear-history {
+    background: var(--red);
+  }
+
+  .history-actions button:hover {
+    transform: translateY(-2px);
+    filter: brightness(1.1);
+  }
+
   /*──────────────────────── Neurotransmitter Section ─────────────────────────────────*/
   #neurotransmitter {
-    background: linear-gradient(135deg, rgba(74, 144, 226, 0.15), rgba(226, 74, 74, 0.1));
-    border: 2px solid var(--primary);
+    background: linear-gradient(135deg, rgba(74,144,226,0.15), rgba(226,74,74,0.15));
+    border: 2px solid var(--blue);
     padding: calc(var(--padding) * 1.5);
     border-radius: var(--radius);
     box-shadow: 0 8px 30px rgba(74, 144, 226, 0.2);
@@ -545,31 +701,27 @@
   }
 
   #neurotransmitter h2 {
-    color: var(--primary-alt);
-    background: var(--primary);
-    -webkit-background-clip: text;
-    background-clip: text;
-    color: transparent;
-    font-size: 1.7rem;
-    text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.1);
+    color: var(--blue-light);
+    font-size: 2rem;
     margin-bottom: 0.5rem;
+    text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.1);
   }
 
   #neurotransmitter .desc {
     font-style: italic;
     margin-bottom: 1rem;
-    color: var(--text);
+    color: var(--text-light);
   }
 
   #neurotransmitter form label {
     display: block;
     margin-bottom: 1rem;
-    color: var(--text);
+    color: var(--text-light);
     font-weight: 500;
   }
 
   #neurotransmitter button {
-    background: var(--primary-alt);
+    background: var(--blue-light);
     color: #fff;
     border: none;
     padding: 0.75rem 1.5rem;
@@ -581,15 +733,15 @@
   }
 
   #neurotransmitter button:hover {
-    background: var(--primary);
+    background: var(--blue);
     box-shadow: 0 6px 20px rgba(74, 144, 226, 0.3);
     transform: translateY(-2px);
   }
 
   /*──────────────────────── Pharmacogenomics Section ─────────────────────────────────*/
   #pharmacogenomics {
-    background: linear-gradient(145deg, rgba(226, 74, 74, 0.1), rgba(74, 144, 226, 0.1));
-    border: 2px dashed var(--secondary);
+    background: linear-gradient(145deg, rgba(226,74,74,0.1), rgba(74,144,226,0.1));
+    border: 2px dashed var(--red);
     padding: calc(var(--padding) * 1.5);
     border-radius: var(--radius);
     box-shadow: 0 8px 30px rgba(226, 74, 74, 0.2);
@@ -597,25 +749,26 @@
   }
 
   #pharmacogenomics h2 {
-    color: var(--secondary);
-    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.1);
+    color: var(--red);
+    font-size: 2rem;
     margin-bottom: 0.5rem;
+    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.1);
   }
 
   #pharmacogenomics .desc {
     margin-bottom: 1rem;
-    color: var(--text);
+    color: var(--text-light);
   }
 
   #pharmacogenomics form label {
     display: block;
     margin-bottom: 1rem;
-    color: var(--text);
+    color: var(--text-light);
     font-weight: 500;
   }
 
   #pharmacogenomics button {
-    background: var(--secondary);
+    background: var(--red);
     color: #fff;
     border: none;
     padding: 0.75rem 1.5rem;
@@ -627,7 +780,7 @@
   }
 
   #pharmacogenomics button:hover {
-    background: var(--secondary-alt);
+    background: var(--red-light);
     box-shadow: 0 6px 20px rgba(226, 74, 74, 0.3);
     transform: translateY(-2px);
   }
@@ -635,7 +788,7 @@
   /*──────────────────────── Drug Interaction Section ─────────────────────────────────*/
   #interactions {
     background: rgba(74, 144, 226, 0.05);
-    border-left: 6px solid var(--primary);
+    border-left: 6px solid var(--blue);
     padding: calc(var(--padding) * 1.5);
     border-radius: var(--radius);
     box-shadow: 0 8px 30px rgba(0, 0, 0, 0.05);
@@ -643,35 +796,36 @@
   }
 
   #interactions h2 {
-    color: var(--primary);
+    color: var(--blue);
     position: relative;
+    font-size: 2rem;
     margin-bottom: 0.5rem;
   }
 
   #interactions h2::after {
     content: '';
     display: block;
-    width: 40px;
+    width: 50px;
     height: 4px;
-    background: var(--primary-alt);
-    margin-top: 4px;
+    background: var(--blue-light);
+    margin-top: 6px;
     border-radius: 2px;
   }
 
   #interactions .desc {
     margin-bottom: 1rem;
-    color: var(--text);
+    color: var(--text-light);
   }
 
   #interactions form label {
     display: block;
     margin-bottom: 1rem;
-    color: var(--text);
+    color: var(--text-light);
     font-weight: 500;
   }
 
   #interactions button {
-    background: var(--primary);
+    background: var(--blue);
     color: #fff;
     border: none;
     padding: 0.75rem 1.5rem;
@@ -683,7 +837,7 @@
   }
 
   #interactions button:hover {
-    background: var(--primary-alt);
+    background: var(--blue-light);
     box-shadow: 0 6px 20px rgba(74, 144, 226, 0.3);
     transform: translateY(-2px);
   }
@@ -691,7 +845,7 @@
   /*──────────────────────── EEG Section ─────────────────────────────────*/
   #eeg {
     background: linear-gradient(135deg, rgba(106, 174, 245, 0.1), rgba(242, 117, 117, 0.1));
-    border: 2px solid var(--primary-alt);
+    border: 2px solid var(--blue-light);
     padding: calc(var(--padding) * 1.5);
     border-radius: var(--radius);
     box-shadow: 0 8px 30px rgba(106, 174, 245, 0.2);
@@ -699,25 +853,26 @@
   }
 
   #eeg h2 {
-    color: var(--primary-alt);
-    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.1);
+    color: var(--blue-light);
+    font-size: 2rem;
     margin-bottom: 0.5rem;
+    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.1);
   }
 
   #eeg .desc {
     margin-bottom: 1rem;
-    color: var(--text);
+    color: var(--text-light);
   }
 
   #eeg form label {
     display: block;
     margin-bottom: 1rem;
-    color: var(--text);
+    color: var(--text-light);
     font-weight: 500;
   }
 
   #eeg button {
-    background: var(--primary-alt);
+    background: var(--blue-light);
     color: #fff;
     border: none;
     padding: 0.75rem 1.5rem;
@@ -729,7 +884,7 @@
   }
 
   #eeg button:hover {
-    background: var(--primary);
+    background: var(--blue);
     box-shadow: 0 6px 20px rgba(106, 174, 245, 0.3);
     transform: translateY(-2px);
   }
@@ -740,19 +895,20 @@
   }
 
   #moodTracker h2 {
-    color: var(--primary);
+    color: var(--blue);
+    font-size: 2rem;
     margin-bottom: 0.5rem;
   }
 
   #moodTracker .desc {
-    color: var(--muted);
+    color: var(--muted-light);
     margin-bottom: 1rem;
   }
 
   #moodTracker label {
     display: block;
     margin-bottom: 0.5rem;
-    color: var(--text);
+    color: var(--text-light);
     font-weight: 500;
   }
 
@@ -762,7 +918,7 @@
 
   #moodTracker .checkbox-group label {
     font-size: 0.9rem;
-    color: var(--text);
+    color: var(--text-light);
   }
 
   #moodTracker textarea {
@@ -772,7 +928,7 @@
 
   #moodTracker button {
     margin-top: 1rem;
-    background: var(--primary);
+    background: var(--blue);
     color: #fff;
     padding: 0.75rem 1.5rem;
     border: none;
@@ -783,7 +939,7 @@
   }
 
   #moodTracker button:hover {
-    background: var(--primary-alt);
+    background: var(--blue-light);
     transform: translateY(-2px);
   }
 
@@ -793,34 +949,31 @@
   }
 
   #trialmatch h2 {
-    color: var(--secondary);
+    color: var(--red);
+    font-size: 2rem;
     margin-bottom: 0.5rem;
   }
 
   #trialmatch .desc {
-    color: var(--muted);
+    color: var(--muted-light);
     margin-bottom: 1rem;
   }
 
   #trialmatch label {
     display: block;
     margin-bottom: 1rem;
-    color: var(--text);
+    color: var(--text-light);
     font-weight: 500;
   }
 
-  #trialmatch input[type="text"] {
-    margin-top: 0.5rem;
-    margin-bottom: 1rem;
-  }
-
+  #trialmatch input[type="text"],
   #trialmatch select {
     margin-bottom: 1rem;
   }
 
   #trialmatch button {
     margin-top: 1rem;
-    background: var(--secondary);
+    background: var(--red);
     color: #fff;
     padding: 0.75rem 1.5rem;
     border: none;
@@ -831,22 +984,8 @@
   }
 
   #trialmatch button:hover {
-    background: var(--secondary-alt);
+    background: var(--red-light);
     transform: translateY(-2px);
-  }
-
-  /*──────────────────────── Clinical Trial Matcher ─────────────────────────────────*/
-  #trial-form label {
-    display: block;
-    margin-bottom: 1rem;
-    color: var(--text);
-    font-weight: 500;
-  }
-
-  #trial-form input[type="text"],
-  #trial-form select {
-    margin-top: 0.5rem;
-    margin-bottom: 1rem;
   }
 
   /*──────────────────────── Charts ─────────────────────────────────*/
@@ -854,11 +993,11 @@
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
     gap: 1.5rem;
-    margin-top: 1rem;
+    margin-top: 1.5rem;
   }
 
   .chart-card {
-    background: var(--surface);
+    background: var(--surface-light);
     backdrop-filter: blur(8px);
     border-radius: var(--radius);
     padding: var(--padding);
@@ -866,24 +1005,103 @@
     display: flex;
     flex-direction: column;
     transition: box-shadow var(--transition), transform var(--transition);
+    border-top: 6px solid var(--red);
+    overflow: hidden;
   }
 
   .chart-card:hover {
-    transform: translateY(-4px);
-    box-shadow: 0 12px 48px rgba(0, 0, 0, 0.15);
+    transform: translateY(-5px);
+    box-shadow: 0 14px 60px rgba(0, 0, 0, 0.15);
   }
 
   .chart-card canvas {
     flex: 1;
     width: 100% !important;
-    height: 200px !important;
+    height: var(--chart-height) !important;
   }
 
   .chart-card figcaption {
-    padding: 0.5rem 0.75rem;
-    background: var(--bg);
+    padding: 0.75rem 1rem;
+    background: var(--bg-light);
+    font-size: 0.95rem;
+    color: var(--text-light);
+    border-top: 1px solid var(--muted-light);
+  }
+
+  /*──────────────────────── Meet Expert Section ─────────────────────────────────*/
+  #meet-expert {
+    background: linear-gradient(135deg, rgba(226,74,74,0.1), rgba(74,144,226,0.1));
+    border: 2px solid var(--blue-light);
+    border-radius: var(--radius);
+    padding: var(--padding);
+    margin-bottom: 1.5rem;
+    box-shadow: var(--shadow-light);
+  }
+
+  .meet-content {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+    flex-wrap: wrap;
+  }
+
+  .meet-icon {
+    font-size: 4rem;
+    color: var(--blue);
+    background: var(--accent-light);
+    border-radius: 50%;
+    padding: 1rem;
+  }
+
+  .meet-text h2 {
+    font-size: 2rem;
+    color: var(--red);
+    line-height: 1.2;
+    margin-bottom: 0.5rem;
+  }
+
+  .meet-text p {
+    font-size: 1rem;
+    color: var(--text-light);
+    margin-bottom: 1rem;
+  }
+
+  .btn-schedule {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    background: var(--blue);
+    color: #fff;
+    padding: 0.75rem 1.5rem;
+    border-radius: var(--radius);
+    box-shadow: var(--shadow-light);
+    transition: background var(--transition), transform var(--transition);
+  }
+
+  .btn-schedule:hover {
+    background: var(--blue-light);
+    transform: translateY(-2px);
+  }
+
+  /*──────────────────────── Footer ─────────────────────────────────*/
+  footer {
+    padding: var(--padding);
+    text-align: center;
     font-size: 0.9rem;
-    color: var(--text);
+    color: var(--muted-light);
+    background: var(--surface-light);
+    border-top: 1px solid var(--muted-light);
+    margin-top: 2rem;
+  }
+
+  footer a {
+    color: var(--blue);
+    margin: 0 0.25rem;
+    transition: color var(--transition);
+  }
+
+  footer a:hover {
+    color: var(--red);
   }
 
   /*──────────────────────── Copy Toast ─────────────────────────────────*/
@@ -892,7 +1110,7 @@
     bottom: 20px;
     left: 50%;
     transform: translateX(-50%);
-    background: var(--primary);
+    background: var(--blue);
     color: #fff;
     padding: 0.5rem 1rem;
     border-radius: var(--radius);
@@ -926,62 +1144,77 @@
   }
 
   @media (max-width: 768px) {
-    #trialmatch .charts {
-      grid-template-columns: 1fr !important;
-    }
     .hero {
       padding: 2rem var(--padding);
     }
     .hero h1 {
       font-size: 2.2rem;
     }
-    section.module {
-      padding: 0.75rem;
-      margin-bottom: 1rem;
-    }
-    section.module h2 {
-      font-size: 1.1rem;
-    }
-    input, select, textarea, button {
-      width: 100% !important;
-      font-size: 0.9rem;
-    }
-    .chart-card canvas {
-      height: 180px !important;
-    }
-    .chat-box {
-      max-height: 220px;
-    }
-    .chat-input-row, form {
-      flex-direction: column;
-      gap: 0.5rem;
-    }
-    .checkbox-group {
-      grid-template-columns: 1fr;
-    }
-    .hero-icons {
-      display: none;
-    }
-  }
-
-  @media (max-width: 640px) {
-    .hero h1 {
-      font-size: 1.8rem;
-      flex-direction: column;
+    .hero p.hero-subtitle {
+      font-size: 1rem;
     }
     .hero .actions {
       flex-direction: column;
       gap: 0.75rem;
     }
     .hero .actions a {
+      width: 100%;
       justify-content: center;
+    }
+    section.module {
+      padding: 1rem;
+      margin-bottom: 1rem;
+    }
+    section.module h2 {
+      font-size: 1.4rem;
+    }
+    input, select, textarea, button {
+      width: 100% !important;
+      font-size: 0.95rem;
+    }
+    .chart-card canvas {
+      height: 160px !important;
+    }
+    .chat-box {
+      max-height: 240px;
+    }
+    .chat-date-separator {
+      font-size: 0.85rem;
+    }
+    .checkbox-group {
+      grid-template-columns: 1fr;
+    }
+    .meet-content {
+      flex-direction: column;
+      text-align: center;
+    }
+    .meet-icon {
+      margin: 0 auto;
+    }
+    #meet-expert .btn-schedule {
       width: 100%;
     }
-    aside:not(.open) {
-      display: none;
+  }
+
+  @media (max-width: 576px) {
+    .hero h1 {
+      font-size: 1.8rem;
     }
-    #shrinkBtn {
-      bottom: 0.5rem;
+    .hero p.hero-subtitle {
+      font-size: 0.9rem;
+    }
+    .hero-image img {
+      max-width: 100%;
+    }
+    .history-content {
+      width: 95%;
+      padding: 1rem;
+    }
+    .history-content h3 {
+      font-size: 1.4rem;
+    }
+    .history-table {
+      font-size: 0.85rem;
     }
   }
 </style>
@@ -1002,7 +1235,7 @@
       </a>
       <a href="psychology.html" class="active">
         <i class="fas fa-brain"></i>
-        <span>Psych &amp; Mental Health</span>
+        <span>Psych & Mental Health</span>
       </a>
       <a href="dietetics.html">
         <i class="fas fa-utensils"></i>
@@ -1024,11 +1257,11 @@
 
   <!-- HEADER -->
   <header>
-    <div style="display:flex; align-items:center; gap:1rem;">
+    <div class="header-left">
       <i id="hamburger" class="fas fa-bars hamburger" aria-label="Toggle navigation"></i>
       <h1>Neuropharma Command Center</h1>
     </div>
-    <div>
+    <div class="header-right">
       <i id="themeToggle" class="fas fa-moon theme-toggle" aria-label="Toggle theme"></i>
     </div>
   </header>
@@ -1041,7 +1274,7 @@
         <div class="hero-content">
           <h1><i class="fas fa-brain"></i> Empower Your Mental Wellness</h1>
           <p class="hero-subtitle">
-            Access AI-driven therapy, mood tracking, neurochemical insights, and pharmacogenomics—all in one place.
+            Combine AI-driven therapy, mood tracking, neurochemical insights, and pharmacogenomics—all in one place.
           </p>
           <div class="hero-actions">
             <a href="#therapybot" class="btn-primary">
@@ -1081,64 +1314,75 @@
     <section id="therapybot" class="module">
       <h2><i class="fas fa-robot"></i> Conversational Therapy Bot</h2>
       <p class="desc">
-        Guided CBT, mindfulness, or emotional support—AI adapts to your chosen modality, duration, and language.
+        Choose a modality, duration, and language—then chat with our AI-powered therapist.  
+        Spinners show when the AI is thinking.
       </p>
-      <form id="therapy-form">
-        <label for="therapyModality">Modality</label>
-        <select id="therapyModality" required>
-          <option value="CBT">CBT Exercises</option>
-          <option value="mindfulness">Mindfulness</option>
-          <option value="emotional">Emotional Support</option>
-          <option value="guidedImagery">Guided Imagery</option>
-          <option value="Other">Other</option>
-        </select>
-        <input type="text" id="therapyModalityOther" class="other-input" placeholder="Please specify modality…">
-
-        <label for="therapyLength">Length</label>
-        <select id="therapyLength" required>
-          <option>5 minutes</option>
-          <option>10 minutes</option>
-          <option>20 minutes</option>
-          <option value="Other">Other</option>
-        </select>
-        <input type="text" id="therapyLengthOther" class="other-input" placeholder="Please specify length…">
-
-        <label for="therapyLang">Language</label>
-        <select id="therapyLang" required>
-          <option>English</option>
-          <option>Spanish</option>
-          <option>French</option>
-          <option value="Other">Other</option>
-        </select>
-        <input type="text" id="therapyLangOther" class="other-input" placeholder="Please specify language…">
-
-        <label for="therapyInput">Your Topic</label>
-        <input id="therapyInput" type="text" placeholder="Describe what you need…" required>
-        <button id="sendChat" class="btn-primary" type="submit"><i class="fas fa-paper-plane"></i> Send</button>
+      <form id="therapy-form" class="chat-form">
+        <div class="form-row">
+          <label for="therapyModality">Modality</label>
+          <select id="therapyModality" required>
+            <option value="CBT">CBT Exercises</option>
+            <option value="Mindfulness">Mindfulness</option>
+            <option value="Emotional">Emotional Support</option>
+            <option value="GuidedImagery">Guided Imagery</option>
+            <option value="Other">Other</option>
+          </select>
+          <input type="text" id="therapyModalityOther" class="other-input" placeholder="Please specify modality…" style="display:none;">
+        </div>
+        <div class="form-row">
+          <label for="therapyLength">Length</label>
+          <select id="therapyLength" required>
+            <option>5 minutes</option>
+            <option>10 minutes</option>
+            <option>20 minutes</option>
+            <option value="Other">Other</option>
+          </select>
+          <input type="text" id="therapyLengthOther" class="other-input" placeholder="Please specify length…" style="display:none;">
+        </div>
+        <div class="form-row">
+          <label for="therapyLang">Language</label>
+          <select id="therapyLang" required>
+            <option>English</option>
+            <option>Spanish</option>
+            <option>French</option>
+            <option value="Other">Other</option>
+          </select>
+          <input type="text" id="therapyLangOther" class="other-input" placeholder="Please specify language…" style="display:none;">
+        </div>
+        <div class="form-row">
+          <label for="therapyInput">Your Topic</label>
+          <input id="therapyInput" type="text" placeholder="Describe what you need…" required>
+        </div>
+        <button id="sendChat" class="btn-primary" type="submit">
+          <i class="fas fa-paper-plane"></i> Send
+        </button>
       </form>
 
-      <div class="tool-row">
+      <div class="tool-row chat-tools">
         <button id="viewHistory" class="copy-btn" title="View History"><i class="fas fa-history"></i></button>
         <button id="clearChat" class="dl-btn" title="Clear Chat"><i class="fas fa-trash"></i></button>
       </div>
 
       <div id="chatBox" class="chat-box" role="log" aria-live="polite"></div>
-      <div id="chatHint" class="desc" style="display:none;">AI is thinking… <span class="spinner"></span></div>
+      <div id="chatHint" class="chat-spinner" style="display:none;">
+        <i class="fas fa-spinner fa-spin"></i> AI is thinking…
+      </div>
     </section>
 
     <!-- 2. Daily Mood Tracker -->
     <section id="moodTracker" class="module">
       <h2><i class="fas fa-sliders-h"></i> Daily Mood Tracker</h2>
       <p class="desc">
-        Log mood, emotions, triggers, and journal entries—AI spots patterns and suggests personalized self-care tips.
+        Log your mood, emotions, triggers, and journal entry—AI spots patterns and suggests self-care tips.
       </p>
       <form id="mood-form">
-        <label for="moodRange">Mood Score: <strong><span id="moodValue">5</span>/10</strong></label>
-        <input type="range" id="moodRange" min="1" max="10" value="5">
-
+        <div class="form-row">
+          <label for="moodRange">Mood Score: <strong><span id="moodValue">5</span>/10</strong></label>
+          <input type="range" id="moodRange" min="1" max="10" value="5">
+        </div>
         <fieldset>
           <legend>Emotions (select up to 20)</legend>
-          <div class="checkbox-group">
+          <div class="checkbox-group emotions-group">
             <label><input type="checkbox" name="emotions" value="Happy"> Happy</label>
             <label><input type="checkbox" name="emotions" value="Sad"> Sad</label>
             <label><input type="checkbox" name="emotions" value="Anxious"> Anxious</label>
@@ -1161,10 +1405,9 @@
             <label><input type="checkbox" name="emotions" value="Tired"> Tired</label>
           </div>
         </fieldset>
-
         <fieldset>
           <legend>Triggers (select up to 20)</legend>
-          <div class="checkbox-group">
+          <div class="checkbox-group triggers-group">
             <label><input type="checkbox" name="triggers" value="Work"> Work</label>
             <label><input type="checkbox" name="triggers" value="Relationships"> Relationships</label>
             <label><input type="checkbox" name="triggers" value="Finance"> Finance</label>
@@ -1186,37 +1429,39 @@
             <label><input type="checkbox" name="triggers" value="Finances"> Finances</label>
             <label><input type="checkbox" name="triggers" value="Other"> Other</label>
           </div>
-          <input type="text" id="moodTriggersOther" class="other-input" placeholder="Please specify…">
+          <input type="text" id="moodTriggersOther" class="other-input" placeholder="Please specify…" style="display:none;">
         </fieldset>
-
-        <label for="moodNote">Journal Entry</label>
-        <textarea id="moodNote" rows="3" placeholder="What happened today?"></textarea>
-
-        <label for="selfCare">Self-Care Focus</label>
-        <select id="selfCare" required>
-          <optgroup label="Breathing &amp; Relaxation">
-            <option>Guided Breathing</option>
-            <option>Progressive Muscle Relaxation</option>
-          </optgroup>
-          <optgroup label="Movement">
-            <option>Stretch &amp; Walk</option>
-            <option>Yoga Flow</option>
-          </optgroup>
-          <optgroup label="Mindfulness">
-            <option>Body Scan</option>
-            <option>Sound Meditation</option>
-          </optgroup>
-          <optgroup label="Creative">
-            <option>Music Break</option>
-            <option>Art Prompt</option>
-          </optgroup>
-          <option value="Other">Other</option>
-        </select>
-        <input type="text" id="selfCareOther" class="other-input" placeholder="Please specify…">
-
-        <button type="submit" class="btn-primary"><i class="fas fa-chart-line"></i> Analyze Mood</button>
+        <div class="form-row">
+          <label for="moodNote">Journal Entry</label>
+          <textarea id="moodNote" rows="3" placeholder="What happened today?" style="margin-bottom:1rem;"></textarea>
+        </div>
+        <div class="form-row">
+          <label for="selfCare">Self-Care Focus</label>
+          <select id="selfCare" required>
+            <optgroup label="Breathing & Relaxation">
+              <option>Guided Breathing</option>
+              <option>Progressive Muscle Relaxation</option>
+            </optgroup>
+            <optgroup label="Movement">
+              <option>Stretch & Walk</option>
+              <option>Yoga Flow</option>
+            </optgroup>
+            <optgroup label="Mindfulness">
+              <option>Body Scan</option>
+              <option>Sound Meditation</option>
+            </optgroup>
+            <optgroup label="Creative">
+              <option>Music Break</option>
+              <option>Art Prompt</option>
+            </optgroup>
+            <option value="Other">Other</option>
+          </select>
+          <input type="text" id="selfCareOther" class="other-input" placeholder="Please specify…" style="display:none;">
+        </div>
+        <button type="submit" class="btn-primary">
+          <i class="fas fa-chart-line"></i> Analyze Mood
+        </button>
       </form>
-
       <div id="moodPanel" class="response" hidden>
         <button class="close-btn" aria-label="Close result">×</button>
         <div class="result-content"></div>
@@ -1234,67 +1479,73 @@
         Integrate mood, sleep, appetite, and medication adherence—AI reveals neurochemical insights.
       </p>
       <form id="nt-form">
-        <label for="ntMood">Mood (1–10)</label>
-        <input type="range" id="ntMood" min="1" max="10" value="5">
-
-        <label for="ntSleep">Sleep Quality</label>
-        <select id="ntSleep" required>
-          <option>Poor</option>
-          <option>Fair</option>
-          <option>Good</option>
-          <option>Excellent</option>
-          <option value="Other">Other</option>
-        </select>
-        <input type="text" id="ntSleepOther" class="other-input" placeholder="Please specify…">
-
-        <label for="ntAppetite">Appetite</label>
-        <select id="ntAppetite" required>
-          <option>Low</option>
-          <option>Normal</option>
-          <option>High</option>
-          <option value="Other">Other</option>
-        </select>
-        <input type="text" id="ntAppetiteOther" class="other-input" placeholder="Please specify…">
-
-        <label for="ntAdherence">Medication Adherence</label>
-        <select id="ntAdherence" required>
-          <option>Poor</option>
-          <option>Fair</option>
-          <option>Good</option>
-          <option>Excellent</option>
-          <option value="Other">Other</option>
-        </select>
-        <input type="text" id="ntAdherenceOther" class="other-input" placeholder="Please specify…">
-
-        <label for="ntFocus">Focus Neurotransmitter</label>
-        <select id="ntFocus" required>
-          <option>Serotonin</option>
-          <option>Dopamine</option>
-          <option>GABA</option>
-          <option>Glutamate</option>
-          <option>Acetylcholine</option>
-          <option>Histamine</option>
-          <option>Oxytocin</option>
-          <option>Vasopressin</option>
-          <option>Endorphins</option>
-          <option>Melatonin</option>
-          <option>Cortisol</option>
-          <option>Adrenaline</option>
-          <option>Noradrenaline</option>
-          <option>Enkephalins</option>
-          <option>Substance P</option>
-          <option>Dynorphin</option>
-          <option>Glycine</option>
-          <option>Aspartate</option>
-          <option>Endocannabinoids</option>
-          <option>Neuropeptide Y</option>
-          <option value="Other">Other</option>
-        </select>
-        <input type="text" id="ntFocusOther" class="other-input" placeholder="Please specify…">
-
-        <button id="analyzeNeuro" class="btn-primary" type="submit"><i class="fas fa-brain"></i> Analyze Balance</button>
+        <div class="form-row">
+          <label for="ntMood">Mood (1–10)</label>
+          <input type="range" id="ntMood" min="1" max="10" value="5">
+        </div>
+        <div class="form-row">
+          <label for="ntSleep">Sleep Quality</label>
+          <select id="ntSleep" required>
+            <option>Poor</option>
+            <option>Fair</option>
+            <option>Good</option>
+            <option>Excellent</option>
+            <option value="Other">Other</option>
+          </select>
+          <input type="text" id="ntSleepOther" class="other-input" placeholder="Please specify…" style="display:none;">
+        </div>
+        <div class="form-row">
+          <label for="ntAppetite">Appetite</label>
+          <select id="ntAppetite" required>
+            <option>Low</option>
+            <option>Normal</option>
+            <option>High</option>
+            <option value="Other">Other</option>
+          </select>
+          <input type="text" id="ntAppetiteOther" class="other-input" placeholder="Please specify…" style="display:none;">
+        </div>
+        <div class="form-row">
+          <label for="ntAdherence">Medication Adherence</label>
+          <select id="ntAdherence" required>
+            <option>Poor</option>
+            <option>Fair</option>
+            <option>Good</option>
+            <option>Excellent</option>
+            <option value="Other">Other</option>
+          </select>
+          <input type="text" id="ntAdherenceOther" class="other-input" placeholder="Please specify…" style="display:none;">
+        </div>
+        <div class="form-row">
+          <label for="ntFocus">Focus Neurotransmitter</label>
+          <select id="ntFocus" required>
+            <option>Serotonin</option>
+            <option>Dopamine</option>
+            <option>GABA</option>
+            <option>Glutamate</option>
+            <option>Acetylcholine</option>
+            <option>Histamine</option>
+            <option>Oxytocin</option>
+            <option>Vasopressin</option>
+            <option>Endorphins</option>
+            <option>Melatonin</option>
+            <option>Cortisol</option>
+            <option>Adrenaline</option>
+            <option>Noradrenaline</option>
+            <option>Enkephalins</option>
+            <option>Substance P</option>
+            <option>Dynorphin</option>
+            <option>Glycine</option>
+            <option>Aspartate</option>
+            <option>Endocannabinoids</option>
+            <option>Neuropeptide Y</option>
+            <option value="Other">Other</option>
+          </select>
+          <input type="text" id="ntFocusOther" class="other-input" placeholder="Please specify…" style="display:none;">
+        </div>
+        <button id="analyzeNeuro" class="btn-primary" type="submit">
+          <i class="fas fa-brain"></i> Analyze Balance
+        </button>
       </form>
-
       <div id="neurotransmitterPanel" class="response" hidden>
         <button class="close-btn" aria-label="Close result">×</button>
         <div class="tool-row">
@@ -1309,62 +1560,69 @@
     <section id="pharmacogenomics" class="module">
       <h2><i class="fas fa-dna"></i> Pharmacogenomics &amp; Dosing</h2>
       <p class="desc">
-        Upload your genotype and clinical info for AI-optimized medication dosing recommendations.
+        Upload your genotype file and enter clinical details—AI provides personalized dosing recommendations.
       </p>
       <form id="pgx-form">
-        <label for="pgxUpload">Upload Genotype (VCF)</label>
-        <input type="file" id="pgxUpload" accept=".vcf,.txt" required>
-
-        <label for="pgxSex">Sex</label>
-        <select id="pgxSex" required>
-          <option>Male</option>
-          <option>Female</option>
-          <option value="Other">Other</option>
-        </select>
-        <input type="text" id="pgxSexOther" class="other-input" placeholder="Please specify…">
-
-        <label for="pgxAge">Age</label>
-        <input type="number" id="pgxAge" min="0" required placeholder="Years">
-
-        <label for="pgxWeight">Weight (kg)</label>
-        <input type="number" id="pgxWeight" min="1" placeholder="kg">
-
-        <label for="pgxDrug">Drug</label>
-        <select id="pgxDrug" required>
-          <option>Clopidogrel</option>
-          <option>Warfarin</option>
-          <option>Codeine</option>
-          <option>Citalopram</option>
-          <option>Sertraline</option>
-          <option>Fluoxetine</option>
-          <option>Risperidone</option>
-          <option>Lithium</option>
-          <option>Valproate</option>
-          <option>Lamotrigine</option>
-          <option value="Other">Other</option>
-        </select>
-        <input type="text" id="pgxDrugOther" class="other-input" placeholder="Enter drug…">
-
-        <label for="pgxGene">Gene Variant</label>
-        <select id="pgxGene" required>
-          <option>CYP2C19*1</option>
-          <option>CYP2C19*2</option>
-          <option>CYP2C19*3</option>
-          <option>CYP2D6*1</option>
-          <option>CYP2D6*4</option>
-          <option>TPMT*1</option>
-          <option>UGT1A1*28</option>
-          <option>VKORC1</option>
-          <option>MTHFR C677T</option>
-          <option>HLA-B*57:01</option>
-          <option>SLCO1B1*5</option>
-          <option value="Other">Other</option>
-        </select>
-        <input type="text" id="pgxGeneOther" class="other-input" placeholder="Enter variant…">
-
-        <button id="runPGx" class="btn-primary" type="submit"><i class="fas fa-flask"></i> Run Analysis</button>
+        <div class="form-row">
+          <label for="pgxUpload">Upload Genotype (VCF)</label>
+          <input type="file" id="pgxUpload" accept=".vcf,.txt" required>
+        </div>
+        <div class="form-row">
+          <label for="pgxSex">Sex</label>
+          <select id="pgxSex" required>
+            <option>Male</option>
+            <option>Female</option>
+            <option value="Other">Other</option>
+          </select>
+          <input type="text" id="pgxSexOther" class="other-input" placeholder="Please specify…" style="display:none;">
+        </div>
+        <div class="form-row">
+          <label for="pgxAge">Age</label>
+          <input type="number" id="pgxAge" min="0" required placeholder="Years">
+        </div>
+        <div class="form-row">
+          <label for="pgxWeight">Weight (kg)</label>
+          <input type="number" id="pgxWeight" min="1" placeholder="kg">
+        </div>
+        <div class="form-row">
+          <label for="pgxDrug">Drug</label>
+          <select id="pgxDrug" required>
+            <option>Clopidogrel</option>
+            <option>Warfarin</option>
+            <option>Codeine</option>
+            <option>Citalopram</option>
+            <option>Sertraline</option>
+            <option>Fluoxetine</option>
+            <option>Risperidone</option>
+            <option>Lithium</option>
+            <option>Valproate</option>
+            <option>Lamotrigine</option>
+            <option value="Other">Other</option>
+          </select>
+          <input type="text" id="pgxDrugOther" class="other-input" placeholder="Enter drug…" style="display:none;">
+        </div>
+        <div class="form-row">
+          <label for="pgxGene">Gene Variant</label>
+          <select id="pgxGene" required>
+            <option>CYP2C19*1</option>
+            <option>CYP2C19*2</option>
+            <option>CYP2C19*3</option>
+            <option>CYP2D6*1</option>
+            <option>CYP2D6*4</option>
+            <option>TPMT*1</option>
+            <option>UGT1A1*28</option>
+            <option>VKORC1</option>
+            <option>MTHFR C677T</option>
+            <option>HLA-B*57:01</option>
+            <option>SLCO1B1*5</option>
+            <option value="Other">Other</option>
+          </select>
+          <input type="text" id="pgxGeneOther" class="other-input" placeholder="Enter variant…" style="display:none;">
+        </div>
+        <button id="runPGx" class="btn-primary" type="submit">
+          <i class="fas fa-flask"></i> Run Analysis
+        </button>
       </form>
-
       <div id="pharmacogenomicsPanel" class="response" hidden>
         <button class="close-btn" aria-label="Close result">×</button>
         <div class="tool-row">
@@ -1379,61 +1637,64 @@
     <section id="interactions" class="module">
       <h2><i class="fas fa-exchange-alt"></i> Drug Interaction Profiler</h2>
       <p class="desc">
-        Enter your current medications and comorbid conditions—AI checks for interaction risks.
+        Enter current medications and comorbid conditions—AI checks for interaction risks.
       </p>
       <form id="int-form">
-        <label for="intListSelect">Medications</label>
-        <select id="intListSelect" required>
-          <option>Sertraline</option>
-          <option>Fluoxetine</option>
-          <option>Paroxetine</option>
-          <option>Escitalopram</option>
-          <option>Venlafaxine</option>
-          <option>Duloxetine</option>
-          <option>Risperidone</option>
-          <option>Quetiapine</option>
-          <option>Lithium</option>
-          <option>Valproate</option>
-          <option>Lamotrigine</option>
-          <option>Carbamazepine</option>
-          <option>Topiramate</option>
-          <option>Gabapentin</option>
-          <option>Pregabalin</option>
-          <option>Clonazepam</option>
-          <option>Diazepam</option>
-          <option>Alprazolam</option>
-          <option>Buspirone</option>
-          <option value="Other">Other</option>
-        </select>
-        <input type="text" id="intListOther" class="other-input" placeholder="Enter medication…">
-
-        <label for="intComorbid">Comorbid Conditions</label>
-        <select id="intComorbid" required>
-          <option>Schizophrenia</option>
-          <option>Bipolar Disorder</option>
-          <option>Depression</option>
-          <option>OCD</option>
-          <option>Anxiety</option>
-          <option>Autism</option>
-          <option>ADHD</option>
-          <option>Dementia</option>
-          <option>Alzheimer’s</option>
-          <option>Parkinson’s</option>
-          <option>PTSD</option>
-          <option>Epilepsy</option>
-          <option>Insomnia</option>
-          <option>Substance Use</option>
-          <option>Anorexia</option>
-          <option>Bulimia</option>
-          <option>Phobia</option>
-          <option>Psychosis</option>
-          <option value="Other">Other</option>
-        </select>
-        <input type="text" id="intComorbidOther" class="other-input" placeholder="Enter condition…">
-
-        <button id="checkInt" class="btn-primary" type="submit"><i class="fas fa-pills"></i> Check Interactions</button>
+        <div class="form-row">
+          <label for="intListSelect">Medications</label>
+          <select id="intListSelect" required>
+            <option>Sertraline</option>
+            <option>Fluoxetine</option>
+            <option>Paroxetine</option>
+            <option>Escitalopram</option>
+            <option>Venlafaxine</option>
+            <option>Duloxetine</option>
+            <option>Risperidone</option>
+            <option>Quetiapine</option>
+            <option>Lithium</option>
+            <option>Valproate</option>
+            <option>Lamotrigine</option>
+            <option>Carbamazepine</option>
+            <option>Topiramate</option>
+            <option>Gabapentin</option>
+            <option>Pregabalin</option>
+            <option>Clonazepam</option>
+            <option>Diazepam</option>
+            <option>Alprazolam</option>
+            <option>Buspirone</option>
+            <option value="Other">Other</option>
+          </select>
+          <input type="text" id="intListOther" class="other-input" placeholder="Enter medication…" style="display:none;">
+        </div>
+        <div class="form-row">
+          <label for="intComorbid">Comorbid Conditions</label>
+          <select id="intComorbid" required>
+            <option>Schizophrenia</option>
+            <option>Bipolar Disorder</option>
+            <option>Depression</option>
+            <option>OCD</option>
+            <option>Anxiety</option>
+            <option>Autism</option>
+            <option>ADHD</option>
+            <option>Dementia</option>
+            <option>Alzheimer’s</option>
+            <option>Parkinson’s</option>
+            <option>PTSD</option>
+            <option>Epilepsy</option>
+            <option>Insomnia</option>
+            <option>Substance Use</option>
+            <option>Anorexia</option>
+            <option>Bulimia</option>
+            <option>Phobia</option>
+            <option>Psychosis</option>
+            <option value="Other">Other</option>
+          </select>
+          <input type="text" id="intComorbidOther" class="other-input" placeholder="Enter condition…" style="display:none;">
+        </div>
+        <button id="checkInt" class="btn-primary" type="submit">
+          <i class="fas fa-pills"></i> Check Interactions
+        </button>
       </form>
-
       <div id="interactionsPanel" class="response" hidden>
         <button class="close-btn" aria-label="Close result">×</button>
         <div class="tool-row">
@@ -1451,28 +1712,31 @@
         Upload EEG data—AI decodes patterns and suggests cognitive insights.
       </p>
       <form id="eeg-form">
-        <label for="eegFile">Upload EEG File (EDF/CSV)</label>
-        <input type="file" id="eegFile" accept=".edf,.csv" required>
-
-        <label for="eegCondition">Condition</label>
-        <select id="eegCondition" required>
-          <option>Resting Eyes Closed</option>
-          <option>Resting Eyes Open</option>
-          <option>Sleep Stage 1</option>
-          <option>Sleep Stage 2</option>
-          <option>REM Sleep</option>
-          <option>Meditation</option>
-          <option>Reading</option>
-          <option>Stress Task</option>
-          <option>Typing</option>
-          <option>Video Watching</option>
-          <option value="Other">Other</option>
-        </select>
-        <input type="text" id="eegConditionOther" class="other-input" placeholder="Please specify…">
-
-        <button id="analyzeEEG" class="btn-primary" type="submit"><i class="fas fa-microchip"></i> Analyze EEG</button>
+        <div class="form-row">
+          <label for="eegFile">Upload EEG File (EDF/CSV)</label>
+          <input type="file" id="eegFile" accept=".edf,.csv" required>
+        </div>
+        <div class="form-row">
+          <label for="eegCondition">Condition/Task</label>
+          <select id="eegCondition" required>
+            <option>Resting Eyes Closed</option>
+            <option>Resting Eyes Open</option>
+            <option>Sleep Stage 1</option>
+            <option>Sleep Stage 2</option>
+            <option>REM Sleep</option>
+            <option>Meditation</option>
+            <option>Reading</option>
+            <option>Stress Task</option>
+            <option>Typing</option>
+            <option>Video Watching</option>
+            <option value="Other">Other</option>
+          </select>
+          <input type="text" id="eegConditionOther" class="other-input" placeholder="Please specify…" style="display:none;">
+        </div>
+        <button id="analyzeEEG" class="btn-primary" type="submit">
+          <i class="fas fa-microchip"></i> Analyze EEG
+        </button>
       </form>
-
       <div id="eegPanel" class="response" hidden>
         <button class="close-btn" aria-label="Close result">×</button>
         <div class="tool-row">
@@ -1490,62 +1754,66 @@
         Describe your diagnosis and location—AI suggests relevant clinical trials.
       </p>
       <form id="trial-form">
-        <label for="trialDx">Diagnosis</label>
-        <select id="trialDx" required>
-          <option>Anxiety</option>
-          <option>Depression</option>
-          <option>Schizophrenia</option>
-          <option>Bipolar Disorder</option>
-          <option>ADHD</option>
-          <option>PTSD</option>
-          <option>OCD</option>
-          <option>Insomnia</option>
-          <option>Autism</option>
-          <option>Parkinson’s</option>
-          <option>Alzheimer’s</option>
-          <option>Epilepsy</option>
-          <option>Migraine</option>
-          <option>Dementia</option>
-          <option>Substance Use</option>
-          <option>Phobia</option>
-          <option>Anorexia</option>
-          <option>Bulimia</option>
-          <option>Borderline Personality</option>
-          <option value="Other">Other</option>
-        </select>
-        <input type="text" id="trialDxOther" class="other-input" placeholder="Please specify…">
-
-        <label for="trialLoc">Location</label>
-        <input id="trialLoc" type="text" placeholder="City, Country" required>
-
-        <label for="trialPhase">Trial Phase</label>
-        <select id="trialPhase" required>
-          <option>Phase I</option>
-          <option>Phase II</option>
-          <option>Phase III</option>
-          <option>Phase IV</option>
-          <option>First-in-Human</option>
-          <option>Proof-of-Concept</option>
-          <option>Open-Label</option>
-          <option>Randomized</option>
-          <option>Double-Blind</option>
-          <option>Placebo-Controlled</option>
-          <option>Adaptive Design</option>
-          <option>Dose-Escalation</option>
-          <option>Biomarker Study</option>
-          <option>Observational</option>
-          <option>Longitudinal</option>
-          <option>Cross-Over</option>
-          <option>Basket Trial</option>
-          <option>Umbrella Trial</option>
-          <option>N-of-1 Trial</option>
-          <option value="Other">Other</option>
-        </select>
-        <input type="text" id="trialPhaseOther" class="other-input" placeholder="Please specify…">
-
-        <button id="findTrials" class="btn-primary" type="submit"><i class="fas fa-search"></i> Find Trials</button>
+        <div class="form-row">
+          <label for="trialDx">Diagnosis</label>
+          <select id="trialDx" required>
+            <option>Anxiety</option>
+            <option>Depression</option>
+            <option>Schizophrenia</option>
+            <option>Bipolar Disorder</option>
+            <option>ADHD</option>
+            <option>PTSD</option>
+            <option>OCD</option>
+            <option>Insomnia</option>
+            <option>Autism</option>
+            <option>Parkinson’s</option>
+            <option>Alzheimer’s</option>
+            <option>Epilepsy</option>
+            <option>Migraine</option>
+            <option>Dementia</option>
+            <option>Substance Use</option>
+            <option>Phobia</option>
+            <option>Anorexia</option>
+            <option>Bulimia</option>
+            <option>Borderline Personality</option>
+            <option value="Other">Other</option>
+          </select>
+          <input type="text" id="trialDxOther" class="other-input" placeholder="Please specify…" style="display:none;">
+        </div>
+        <div class="form-row">
+          <label for="trialLoc">Location</label>
+          <input id="trialLoc" type="text" placeholder="City, Country" required>
+        </div>
+        <div class="form-row">
+          <label for="trialPhase">Trial Phase</label>
+          <select id="trialPhase" required>
+            <option>Phase I</option>
+            <option>Phase II</option>
+            <option>Phase III</option>
+            <option>Phase IV</option>
+            <option>First-in-Human</option>
+            <option>Proof-of-Concept</option>
+            <option>Open-Label</option>
+            <option>Randomized</option>
+            <option>Double-Blind</option>
+            <option>Placebo-Controlled</option>
+            <option>Adaptive Design</option>
+            <option>Dose-Escalation</option>
+            <option>Biomarker Study</option>
+            <option>Observational</option>
+            <option>Longitudinal</option>
+            <option>Cross-Over</option>
+            <option>Basket Trial</option>
+            <option>Umbrella Trial</option>
+            <option>N-of-1 Trial</option>
+            <option value="Other">Other</option>
+          </select>
+          <input type="text" id="trialPhaseOther" class="other-input" placeholder="Please specify…" style="display:none;">
+        </div>
+        <button id="findTrials" class="btn-primary" type="submit">
+          <i class="fas fa-search"></i> Find Trials
+        </button>
       </form>
-
       <div id="trialmatchPanel" class="response" hidden>
         <button class="close-btn" aria-label="Close result">×</button>
         <div class="tool-row">
@@ -1587,8 +1855,7 @@
             Get one-on-one guidance from our licensed therapists. Discover personalized treatment plans, expert medication advice, and evidence-based strategies.
           </p>
           <a href="consult.html" class="btn-schedule">
-            <i class="fas fa-calendar-check"></i>
-            Schedule Consultation
+            <i class="fas fa-calendar-check"></i> Schedule Consultation
           </a>
         </div>
       </div>
@@ -1596,12 +1863,10 @@
 
     <!-- FOOTER -->
     <footer>
-      <p>&copy; 2025 Vitra AI – Neuropharma Command Center. <a href="#privacy">Privacy Policy</a> | <a href="#terms">Terms &amp; Conditions</a></p>
+      <p>&copy; 2025 Vitra AI – Neuropharma Command Center. <a href="#privacy">Privacy Policy</a> | <a href="#terms">Terms & Conditions</a></p>
     </footer>
   </main>
-</body>
 
- <!-- Chart.js + OpenAI Proxy + App Logic -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
   //──────────────────────── Utility Functions ────────────────────────────────
@@ -1631,12 +1896,6 @@
       .split(/\n{2,}/)
       .map(p => `<p>${p.trim()}</p>`)
       .join("");
-  }
-
-  // Show a friendly error in a panel
-  function showFriendlyError(panel) {
-    panel.innerHTML = '<div class="result-content">😕 Oops! Something went wrong. Please try again.</div>';
-    addClose(panel);
   }
 
   // Append a close button to a response panel
@@ -1773,24 +2032,66 @@
     });
 
     //──────────────────────── "Other" Select Handler ─────────────────────────
-    document.querySelectorAll("select").forEach((sel) => {
+    function setupOtherField(selectId, otherInputId) {
+      const sel = document.getElementById(selectId);
+      const other = document.getElementById(otherInputId);
       sel.addEventListener("change", () => {
-        const otherField = sel.parentElement.querySelector(".other-input");
-        if (!otherField) return;
         if (sel.value === "Other") {
-          otherField.style.display = "block";
-          otherField.required = true;
+          other.style.display = "block";
+          other.required = true;
         } else {
-          otherField.style.display = "none";
-          otherField.required = false;
+          other.style.display = "none";
+          other.required = false;
         }
       });
       sel.dispatchEvent(new Event("change"));
+    }
+    // Therapy Bot selects
+    setupOtherField("therapyModality", "therapyModalityOther");
+    setupOtherField("therapyLength", "therapyLengthOther");
+    setupOtherField("therapyLang", "therapyLangOther");
+    // Mood Tracker self-care
+    setupOtherField("selfCare", "selfCareOther");
+    // Mood Tracker triggers single "Other" input
+    const triggersGroup = document.querySelectorAll('#moodTracker input[name="triggers"]');
+    const moodTriggersOther = document.getElementById("moodTriggersOther");
+    triggersGroup.forEach(cb => {
+      cb.addEventListener("change", () => {
+        if ([...document.querySelectorAll('#moodTracker input[name="triggers"]:checked')]
+              .some(c => c.value === "Other")) {
+          moodTriggersOther.style.display = "block";
+          moodTriggersOther.required = true;
+        } else {
+          moodTriggersOther.style.display = "none";
+          moodTriggersOther.required = false;
+        }
+      });
     });
+
+    // Neurotransmitter selects
+    ["ntSleep", "ntAppetite", "ntAdherence", "ntFocus"].forEach(id => {
+      setupOtherField(id, id + "Other");
+    });
+
+    // PGx selects
+    ["pgxSex", "pgxDrug", "pgxGene"].forEach(id => {
+      setupOtherField(id, id + "Other");
+    });
+
+    // Interaction selects
+    setupOtherField("intListSelect", "intListOther");
+    setupOtherField("intComorbid", "intComorbidOther");
+
+    // EEG select
+    setupOtherField("eegCondition", "eegConditionOther");
+
+    // Trial Matcher selects
+    setupOtherField("trialDx", "trialDxOther");
+    setupOtherField("trialPhase", "trialPhaseOther");
 
     //──────────────────────── Restore Persisted Panels ────────────────────────
     const panelMap = {
-      therapybot: "therapybotPanel",
+      therapybot: "therapybotPanel", // not used as ID; therapy bot panel is chat, no panel to restore
       moodTracker: "moodPanel",
       neurotransmitter: "neurotransmitterPanel",
       pharmacogenomics: "pharmacogenomicsPanel",
@@ -1852,6 +2153,7 @@
         chatBox.scrollTop = chatBox.scrollHeight;
       }
 
+      // Render saved history
       chatHistory.forEach(m => addMessage(m.who, m.text, new Date(m.timestamp)));
 
       document.getElementById("sendChat").addEventListener("click", async (e) => {
@@ -1864,19 +2166,15 @@
         localStorage.setItem("therapyChatHistory", JSON.stringify(chatHistory));
         chatInput.value = "";
 
-        const spinnerDiv = document.createElement("div");
-        spinnerDiv.className = "bot-msg";
-        spinnerDiv.innerHTML = `<div class="spinner"></div>`;
-        chatBox.append(spinnerDiv);
-        chatBox.scrollTop = chatBox.scrollHeight;
-        chatHint.style.display = "none";
+        // Show spinner
+        chatHint.style.display = "flex";
 
         const modality = getSelectValue(therapyModality);
         const length = getSelectValue(therapyLength);
         const language = getSelectValue(therapyLang);
         const systemPrompt = `
 You are a licensed therapist. Modality: ${escapeHtml(modality)}; Length: ${escapeHtml(length)}; Language: ${escapeHtml(language)}.
-Respond empathetically, providing clear guidance, CBT techniques, mindfulness exercises or emotional support steps tailored to the user's request.
+Respond empathetically, providing CBT techniques, mindfulness exercises, or emotional support steps tailored to the user's request.
         `.trim();
 
         try {
@@ -1885,16 +2183,14 @@ Respond empathetically, providing clear guidance, CBT techniques, mindfulness ex
             { role: "user", content: userText }
           ]);
           const replyTime = new Date();
-          spinnerDiv.innerHTML = `
-            ${formatHTML(aiReply)}
-            <div class="timestamp">${replyTime.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}</div>
-          `;
+          chatHint.style.display = "none";
+          addMessage("Therapist", aiReply, replyTime);
           chatHistory.push({ who: "Therapist", text: aiReply, timestamp: replyTime.toISOString() });
           localStorage.setItem("therapyChatHistory", JSON.stringify(chatHistory));
         } catch (err) {
-          spinnerDiv.innerHTML = `<div class="result-content">⚠️ Something went wrong. Please try again.</div>`;
+          chatHint.style.display = "none";
+          addMessage("Therapist", "⚠️ Something went wrong. Please try again.", new Date());
         }
-        chatBox.scrollTop = chatBox.scrollHeight;
       });
 
       document.getElementById("clearChat").addEventListener("click", () => {
@@ -1986,34 +2282,10 @@ Respond empathetically, providing clear guidance, CBT techniques, mindfulness ex
         moodValue.textContent = moodRange.value;
       };
 
-      document.querySelectorAll('#moodTracker input[name="triggers"]').forEach((cb) => {
-        cb.addEventListener("change", () => {
-          if (Array.from(document.querySelectorAll('#moodTracker input[name="triggers"]:checked'))
-                    .some(c => c.value === "Other")) {
-            triggersOther.style.display = "block";
-            triggersOther.required = true;
-          } else {
-            triggersOther.style.display = "none";
-            triggersOther.required = false;
-          }
-        });
-      });
-
-      selfCare.addEventListener("change", (e) => {
-        if (e.target.value === "Other") {
-          selfCareOther.style.display = "block";
-          selfCareOther.required = true;
-        } else {
-          selfCareOther.style.display = "none";
-          selfCareOther.required = false;
-        }
-      });
-      selfCare.dispatchEvent(new Event("change"));
-
       form.onsubmit = async (e) => {
         e.preventDefault();
         panel.hidden = false;
-        panel.innerHTML = '<div class="result-content">Analyzing… <span class="spinner"></span></div>';
+        panel.innerHTML = '<div class="result-content">Analyzing… <i class="fas fa-spinner fa-spin"></i></div>';
 
         const data = {
           mood: moodRange.value,
@@ -2062,24 +2334,10 @@ Respond empathetically, providing clear guidance, CBT techniques, mindfulness ex
       const ntFocus = document.getElementById("ntFocus");
       const ntFocusOther = document.getElementById("ntFocusOther");
 
-      [ntSleep, ntAppetite, ntAdherence, ntFocus].forEach(sel => {
-        sel.addEventListener("change", () => {
-          const other = sel.parentElement.querySelector(".other-input");
-          if (sel.value === "Other") {
-            other.style.display = "block";
-            other.required = true;
-          } else {
-            other.style.display = "none";
-            other.required = false;
-          }
-        });
-        sel.dispatchEvent(new Event("change"));
-      });
-
       form.onsubmit = async (e) => {
         e.preventDefault();
         panel.hidden = false;
-        panel.innerHTML = '<div class="result-content">Analyzing… <span class="spinner"></span></div>';
+        panel.innerHTML = '<div class="result-content">Analyzing… <i class="fas fa-spinner fa-spin"></i></div>';
         const data = {
           mood: document.getElementById("ntMood").value,
           sleep: getSelectValue(ntSleep),
@@ -2123,24 +2381,10 @@ Respond empathetically, providing clear guidance, CBT techniques, mindfulness ex
       const pgxGeneOther = document.getElementById("pgxGeneOther");
       const pgxUpload = document.getElementById("pgxUpload");
 
-      [pgxSex, pgxDrug, pgxGene].forEach(sel => {
-        sel.addEventListener("change", () => {
-          const other = sel.parentElement.querySelector(".other-input");
-          if (sel.value === "Other") {
-            other.style.display = "block";
-            other.required = true;
-          } else {
-            other.style.display = "none";
-            other.required = false;
-          }
-        });
-        sel.dispatchEvent(new Event("change"));
-      });
-
       form.onsubmit = async (e) => {
         e.preventDefault();
         panel.hidden = false;
-        panel.innerHTML = '<div class="result-content">Processing… <span class="spinner"></span></div>';
+        panel.innerHTML = '<div class="result-content">Processing… <i class="fas fa-spinner fa-spin"></i></div>';
         const file = pgxUpload.files[0];
         if (!file) {
           panel.innerHTML = '<div class="result-content">⚠️ Please upload a genotype file.</div>';
@@ -2192,24 +2436,10 @@ Respond empathetically, providing clear guidance, CBT techniques, mindfulness ex
       const intComorbid = document.getElementById("intComorbid");
       const intComorbidOther = document.getElementById("intComorbidOther");
 
-      [intListSelect, intComorbid].forEach(sel => {
-        sel.addEventListener("change", () => {
-          const other = sel.parentElement.querySelector(".other-input");
-          if (sel.value === "Other") {
-            other.style.display = "block";
-            other.required = true;
-          } else {
-            other.style.display = "none";
-            other.required = false;
-          }
-        });
-        sel.dispatchEvent(new Event("change"));
-      });
-
       form.onsubmit = async (e) => {
         e.preventDefault();
         panel.hidden = false;
-        panel.innerHTML = '<div class="result-content">Checking… <span class="spinner"></span></div>';
+        panel.innerHTML = '<div class="result-content">Checking… <i class="fas fa-spinner fa-spin"></i></div>';
         const meds = getSelectValue(intListSelect);
         const cond = getSelectValue(intComorbid);
         if (!meds) {
@@ -2249,17 +2479,6 @@ Respond empathetically, providing clear guidance, CBT techniques, mindfulness ex
       const eegConditionOther = document.getElementById("eegConditionOther");
       const eegFile = document.getElementById("eegFile");
 
-      eegCondition.addEventListener("change", () => {
-        if (eegCondition.value === "Other") {
-          eegConditionOther.style.display = "block";
-          eegConditionOther.required = true;
-        } else {
-          eegConditionOther.style.display = "none";
-          eegConditionOther.required = false;
-        }
-      });
-      eegCondition.dispatchEvent(new Event("change"));
-
       form.onsubmit = async (e) => {
         e.preventDefault();
         panel.hidden = false;
@@ -2268,7 +2487,7 @@ Respond empathetically, providing clear guidance, CBT techniques, mindfulness ex
           addClose(panel);
           return;
         }
-        panel.innerHTML = '<div class="result-content">Analyzing… <span class="spinner"></span></div>';
+        panel.innerHTML = '<div class="result-content">Analyzing… <i class="fas fa-spinner fa-spin"></i></div>';
         const cond = getSelectValue(eegCondition);
         try {
           const aiReply = await callOpenAI([
@@ -2302,27 +2521,14 @@ Respond empathetically, providing clear guidance, CBT techniques, mindfulness ex
       const trialDxOther = document.getElementById("trialDxOther");
       const trialPhase = document.getElementById("trialPhase");
       const trialPhaseOther = document.getElementById("trialPhaseOther");
-
-      [trialDx, trialPhase].forEach(sel => {
-        sel.addEventListener("change", () => {
-          const other = sel.parentElement.querySelector(".other-input");
-          if (sel.value === "Other") {
-            other.style.display = "block";
-            other.required = true;
-          } else {
-            other.style.display = "none";
-            other.required = false;
-          }
-        });
-        sel.dispatchEvent(new Event("change"));
-      });
+      const trialLoc = document.getElementById("trialLoc");
 
       form.onsubmit = async (e) => {
         e.preventDefault();
         panel.hidden = false;
-        panel.innerHTML = '<div class="result-content">Searching… <span class="spinner"></span></div>';
+        panel.innerHTML = '<div class="result-content">Searching… <i class="fas fa-spinner fa-spin"></i></div>';
         const dx = getSelectValue(trialDx);
-        const loc = document.getElementById("trialLoc").value.trim();
+        const loc = trialLoc.value.trim();
         const ph = getSelectValue(trialPhase);
         if (!dx || !loc) {
           panel.innerHTML = '<div class="result-content">⚠️ Please specify diagnosis and location.</div>';
@@ -2354,109 +2560,92 @@ Respond empathetically, providing clear guidance, CBT techniques, mindfulness ex
     })();
 
     //──────────────────────── Data Analytics & Charts ───────────────────────
-  (function() {
-      // Persist chart instances so we can destroy them if needed
-      let engChart = null;
-      let outChart = null;
+    (function() {
+      const engCtx = document.getElementById("engagementChart").getContext("2d");
+      const outCtx = document.getElementById("outcomeChart").getContext("2d");
 
-      function renderCharts() {
-        const engCtx = document.getElementById("engagementChart").getContext("2d");
-        const outCtx = document.getElementById("outcomeChart").getContext("2d");
-
-        function getCSSVar(name) {
-          return getComputedStyle(document.documentElement).getPropertyValue(name).trim();
-       }
-        const colorText = getCSSVar("--text");
-        const colorMuted = getCSSVar("--muted");
-        const primary = getCSSVar("--primary");
-       const secondary = getCSSVar("--secondary");
-
-       // If charts already exist, destroy them before re-creating
-        if (engChart) {
-          engChart.destroy();
-        }
-        if (outChart) {
-         outChart.destroy();
-       }
-
-        // Engagement Over Time (line)
-        engChart = new Chart(engCtx, {
-          type: "line",
-         data: {
-           labels: ["Mon","Tue","Wed","Thu","Fri","Sat","Sun"],
-            datasets: [{
-              label: "Sessions",
-              data: [12, 9, 14, 11, 13, 10, 15],
-             borderColor: primary,
-              backgroundColor: "rgba(74,144,226,0.1)",
-             fill: true
-           }]
-         },
-          options: {
-           responsive: true,
-           maintainAspectRatio: false,
-           scales: {
-             x: { ticks: { color: colorText }, grid: { display: false } },
-             y: { ticks: { color: colorText }, grid: { color: colorMuted }, beginAtZero: true }
-           },
-           plugins: { legend: { display: false } }
-         }
-       });
-        
-       // Outcome Metrics (bar)
-       outChart = new Chart(outCtx, {
-         type: "bar",
-          data: {
-            labels: ["Week 1","Week 2","Week 3","Week 4"],
-            datasets: [{
-              label: "Outcome Score",
-              data: [3.2, 4.1, 4.5, 4.8],
-              backgroundColor: secondary
-            }]
-          },
-         options: {
-            responsive: true,
-           maintainAspectRatio: false,
-           scales: {
-             x: { ticks: { color: colorText }, grid: { display: false } },
-             y: { ticks: { color: colorText }, grid: { color: colorMuted }, beginAtZero: true, max: 5 }
-           },
-            plugins: { legend: { display: false } }
-          }
-        });
+      function getCSSVar(name) {
+        return getComputedStyle(document.documentElement).getPropertyValue(name).trim();
       }
+      const colorText = getCSSVar("--text");
+      const colorMuted = getCSSVar("--muted");
+      const primary = getCSSVar("--primary");
+      const secondary = getCSSVar("--secondary");
 
-     // Initial render
-      renderCharts();
+      // Ensure canvas containers have fixed height so charts don't grow infinitely
+      engCtx.canvas.parentElement.style.height = "200px";
+      outCtx.canvas.parentElement.style.height = "200px";
 
-     document.getElementById("exportCharts").addEventListener("click", () => {
-       let csv = "Chart,Label,Value\n";
+      // Engagement Over Time (line)
+      const engChart = new Chart(engCtx, {
+        type: "line",
+        data: {
+          labels: ["Mon","Tue","Wed","Thu","Fri","Sat","Sun"],
+          datasets: [{
+            label: "Sessions",
+            data: [12, 9, 14, 11, 13, 10, 15],
+            borderColor: primary,
+            backgroundColor: "rgba(74,144,226,0.1)",
+            fill: "start"
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          scales: {
+            x: { ticks: { color: colorText }, grid: { display: false } },
+            y: { ticks: { color: colorText }, grid: { color: colorMuted }, beginAtZero: true }
+          },
+          plugins: { legend: { display: false } }
+        }
+      });
+
+      // Outcome Metrics (bar)
+      const outChart = new Chart(outCtx, {
+        type: "bar",
+        data: {
+          labels: ["Week 1","Week 2","Week 3","Week 4"],
+          datasets: [{
+            label: "Outcome Score",
+            data: [3.2, 4.1, 4.5, 4.8],
+            backgroundColor: secondary
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          scales: {
+            x: { ticks: { color: colorText }, grid: { display: false } },
+            y: { ticks: { color: colorText }, grid: { color: colorMuted }, beginAtZero: true, max: 5 }
+          },
+          plugins: { legend: { display: false } }
+        }
+      });
+
+      document.getElementById("exportCharts").addEventListener("click", () => {
+        let csv = "Chart,Label,Value\n";
         [
-         ["Sessions", engChart],
-         ["Outcome", outChart]
+          ["Sessions", engChart],
+          ["Outcome", outChart]
         ].forEach(([name, ch]) => {
           ch.data.labels.forEach((lab, i) => {
             csv += `"${name}","${lab}",${ch.data.datasets[0].data[i]}\n`;
           });
-       });
+        });
         const blob = new Blob([csv], { type: "text/csv" });
-     const url = URL.createObjectURL(blob);
+        const url = URL.createObjectURL(blob);
         const a = document.createElement("a");
         a.href = url;
         a.download = "analytics.csv";
-       document.body.append(a);
-       a.click();
-       URL.revokeObjectURL(url);
-       a.remove();
-     });
-
-     // If you ever need to re-render charts (e.g. on data update), call renderCharts() again.
-      // renderCharts();
+        document.body.append(a);
+        a.click();
+        URL.revokeObjectURL(url);
+        a.remove();
+      });
     })();
-
-    
   });
 </script>
   
 </body>
+
 </html>
