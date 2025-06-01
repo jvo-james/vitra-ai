@@ -2354,85 +2354,107 @@ Respond empathetically, providing clear guidance, CBT techniques, mindfulness ex
     })();
 
     //──────────────────────── Data Analytics & Charts ───────────────────────
-    (function() {
-      const engCtx = document.getElementById("engagementChart").getContext("2d");
-      const outCtx = document.getElementById("outcomeChart").getContext("2d");
+  (function() {
+      // Persist chart instances so we can destroy them if needed
+      let engChart = null;
+      let outChart = null;
 
-      function getCSSVar(name) {
-        return getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+      function renderCharts() {
+        const engCtx = document.getElementById("engagementChart").getContext("2d");
+        const outCtx = document.getElementById("outcomeChart").getContext("2d");
+
+        function getCSSVar(name) {
+          return getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+       }
+        const colorText = getCSSVar("--text");
+        const colorMuted = getCSSVar("--muted");
+        const primary = getCSSVar("--primary");
+       const secondary = getCSSVar("--secondary");
+
+       // If charts already exist, destroy them before re-creating
+        if (engChart) {
+          engChart.destroy();
+        }
+        if (outChart) {
+         outChart.destroy();
+       }
+
+        // Engagement Over Time (line)
+        engChart = new Chart(engCtx, {
+          type: "line",
+         data: {
+           labels: ["Mon","Tue","Wed","Thu","Fri","Sat","Sun"],
+            datasets: [{
+              label: "Sessions",
+              data: [12, 9, 14, 11, 13, 10, 15],
+             borderColor: primary,
+              backgroundColor: "rgba(74,144,226,0.1)",
+             fill: true
+           }]
+         },
+          options: {
+           responsive: true,
+           maintainAspectRatio: false,
+           scales: {
+             x: { ticks: { color: colorText }, grid: { display: false } },
+             y: { ticks: { color: colorText }, grid: { color: colorMuted }, beginAtZero: true }
+           },
+           plugins: { legend: { display: false } }
+         }
+       });
+        
+       // Outcome Metrics (bar)
+       outChart = new Chart(outCtx, {
+         type: "bar",
+          data: {
+            labels: ["Week 1","Week 2","Week 3","Week 4"],
+            datasets: [{
+              label: "Outcome Score",
+              data: [3.2, 4.1, 4.5, 4.8],
+              backgroundColor: secondary
+            }]
+          },
+         options: {
+            responsive: true,
+           maintainAspectRatio: false,
+           scales: {
+             x: { ticks: { color: colorText }, grid: { display: false } },
+             y: { ticks: { color: colorText }, grid: { color: colorMuted }, beginAtZero: true, max: 5 }
+           },
+            plugins: { legend: { display: false } }
+          }
+        });
       }
-      const colorText = getCSSVar("--text");
-      const colorMuted = getCSSVar("--muted");
-      const primary = getCSSVar("--primary");
-      const secondary = getCSSVar("--secondary");
 
-      // Engagement Over Time (line)
-      const engChart = new Chart(engCtx, {
-        type: "line",
-        data: {
-          labels: ["Mon","Tue","Wed","Thu","Fri","Sat","Sun"],
-          datasets: [{
-            label: "Sessions",
-            data: [12, 9, 14, 11, 13, 10, 15],
-            borderColor: primary,
-            backgroundColor: "rgba(74,144,226,0.1)",
-            fill: true
-          }]
-        },
-        options: {
-          responsive: true,
-          maintainAspectRatio: false,
-          scales: {
-            x: { ticks: { color: colorText }, grid: { display: false } },
-            y: { ticks: { color: colorText }, grid: { color: colorMuted }, beginAtZero: true }
-          },
-          plugins: { legend: { display: false } }
-        }
-      });
+     // Initial render
+      renderCharts();
 
-      // Outcome Metrics (bar)
-      const outChart = new Chart(outCtx, {
-        type: "bar",
-        data: {
-          labels: ["Week 1","Week 2","Week 3","Week 4"],
-          datasets: [{
-            label: "Outcome Score",
-            data: [3.2, 4.1, 4.5, 4.8],
-            backgroundColor: secondary
-          }]
-        },
-        options: {
-          responsive: true,
-          maintainAspectRatio: false,
-          scales: {
-            x: { ticks: { color: colorText }, grid: { display: false } },
-            y: { ticks: { color: colorText }, grid: { color: colorMuted }, beginAtZero: true, max: 5 }
-          },
-          plugins: { legend: { display: false } }
-        }
-      });
-
-      document.getElementById("exportCharts").addEventListener("click", () => {
-        let csv = "Chart,Label,Value\n";
+     document.getElementById("exportCharts").addEventListener("click", () => {
+       let csv = "Chart,Label,Value\n";
         [
-          ["Sessions", engChart],
-          ["Outcome", outChart]
+         ["Sessions", engChart],
+         ["Outcome", outChart]
         ].forEach(([name, ch]) => {
           ch.data.labels.forEach((lab, i) => {
             csv += `"${name}","${lab}",${ch.data.datasets[0].data[i]}\n`;
           });
-        });
+       });
         const blob = new Blob([csv], { type: "text/csv" });
-        const url = URL.createObjectURL(blob);
+     const url = URL.createObjectURL(blob);
         const a = document.createElement("a");
         a.href = url;
         a.download = "analytics.csv";
-        document.body.append(a);
-        a.click();
-        URL.revokeObjectURL(url);
-        a.remove();
-      });
+       document.body.append(a);
+       a.click();
+       URL.revokeObjectURL(url);
+       a.remove();
+     });
+
+     // If you ever need to re-render charts (e.g. on data update), call renderCharts() again.
+      // renderCharts();
     })();
+
+    
   });
 </script>
   
