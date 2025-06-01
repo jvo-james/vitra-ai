@@ -2276,31 +2276,32 @@
   }
 </script>
 
-  <script>
-  // 1) Close sidebar if user taps/clicks outside it
-  document.addEventListener("click", (e) => {
+<script>
+  document.addEventListener("DOMContentLoaded", () => {
     const sidebar = document.getElementById("sidebar");
     const hamburger = document.getElementById("hamburger");
 
-    // If sidebar is not open, do nothing
-    if (!sidebar.classList.contains("open")) return;
+    // 1) When you tap/click anywhere on the page:
+    document.addEventListener("click", (e) => {
+      // If the sidebar is NOT open, do nothing
+      if (!sidebar.classList.contains("open")) return;
 
-    // If click happened inside the sidebar or on the hamburger icon, do nothing
-    if (
-      sidebar.contains(e.target) ||
-      hamburger.contains(e.target)
-    ) {
-      return;
-    }
+      // If you clicked inside the sidebar OR on the hamburger icon, do nothing
+      if (sidebar.contains(e.target) || hamburger.contains(e.target)) {
+        return;
+      }
 
-    // Otherwise, remove the “open” class to slide it back out
-    sidebar.classList.remove("open");
-  });
+      // Otherwise, you clicked “outside” → remove .open to slide the sidebar closed
+      sidebar.classList.remove("open");
+    });
 
-  // 2) Also ensure that tapping the hamburger toggles “open” as before:
-  //    (You likely already have something like this, but just in case:)
-  document.getElementById("hamburger").addEventListener("click", () => {
-    document.getElementById("sidebar").classList.toggle("open");
+    // 2) Tapping the hamburger toggles the “open” class on the sidebar
+    //    (Since this is inside DOMContentLoaded, both elements now definitely exist.)
+    hamburger.addEventListener("click", (e) => {
+      // Prevent the click from bubbling up and immediately closing the sidebar
+      e.stopPropagation();
+      sidebar.classList.toggle("open");
+    });
   });
 </script>
   
