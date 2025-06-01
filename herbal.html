@@ -5,7 +5,6 @@
   <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
   <title>Vitra AI – Herbal Medicine Hub</title>
   
-<!-- Montserrat + FontAwesome -->
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;600;700&display=swap" rel="stylesheet"/>
 <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
   <link rel="stylesheet"
@@ -13,27 +12,9 @@
   
   <!-- Chart.js -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<script>
-document.addEventListener("DOMContentLoaded", () => {
-  const links = document.querySelectorAll("aside nav a[href^='#']");
-  const sections = [...links].map(link => document.querySelector(link.getAttribute("href")));
-
-  window.addEventListener("scroll", () => {
-    let index = sections.findIndex(section => section.offsetTop > window.scrollY + 100);
-    if (index === -1) index = sections.length;
-    document.querySelectorAll("aside nav a").forEach(a => a.classList.remove("active"));
-    if (sections[index - 1])
-      document.querySelector(`aside nav a[href="#${sections[index - 1].id}"]`)?.classList.add("active");
-  });
-});
-</script>
-
   
  <style>
-  /*──────────────────────────────────────────────────────────────────────────────
-    RESET & BASE STYLES
-  ──────────────────────────────────────────────────────────────────────────────*/
-  *, *::before, *::after {
+   *, *::before, *::after {
     margin: 0;
     padding: 0;
     box-sizing: border-box;
@@ -42,10 +23,10 @@ document.addEventListener("DOMContentLoaded", () => {
     font-family: 'Montserrat', sans-serif;
     font-size: 16px;
     scroll-behavior: smooth;
-    --primary: #2a6f4e;            /* deep green */
-    --secondary: #8e6c4b;          /* earthy brown */
-    --accent: #d4c5a2;             /* light gold/ivory */
-    --bg: #f8f6f0;                 /* ivory */
+    --primary: #2a6f4e;            
+    --secondary: #8e6c4b;        
+    --accent: #d4c5a2;            
+    --bg: #f8f6f0;                
     --surface: #ffffff;
     --text: #333333;
     --muted: #6b6b6b;
@@ -93,9 +74,6 @@ document.addEventListener("DOMContentLoaded", () => {
     list-style: none;
   }
 
-  /*──────────────────────────────────────────────────────────────────────────────
-    SIDEBAR
-  ──────────────────────────────────────────────────────────────────────────────*/
   aside#sidebar {
     flex: 0 0 var(--sidebar-w);
     position: sticky;
@@ -199,9 +177,6 @@ document.addEventListener("DOMContentLoaded", () => {
     transform: translateX(-50%) scale(1.1);
   }
    
-  /*──────────────────────────────────────────────────────────────────────────────
-    HEADER
-  ──────────────────────────────────────────────────────────────────────────────*/
   header {
     position: fixed;
     top: 0;
@@ -238,20 +213,14 @@ document.addEventListener("DOMContentLoaded", () => {
     color: var(--secondary);
   }
 
-  /*──────────────────────────────────────────────────────────────────────────────
-    MAIN CONTENT
-  ──────────────────────────────────────────────────────────────────────────────*/
-  main {
+   main {
     flex: 1;
     padding: calc(var(--header-h) + var(--padding)) var(--padding) var(--padding);
     background: var(--bg);
     transition: background var(--transition);
   }
 
-  /*──────────────────────────────────────────────────────────────────────────────
-    MODULE BASE (PANELS, CARDS)
-  ──────────────────────────────────────────────────────────────────────────────*/
-  .module {
+   .module {
     background: var(--surface);
     border-radius: var(--radius);
     padding: var(--padding);
@@ -277,9 +246,6 @@ document.addEventListener("DOMContentLoaded", () => {
     margin-bottom: 1rem;
   }
 
-  /*──────────────────────────────────────────────────────────────────────────────
-    FORMS & INPUTS (GLOBAL)
-  ──────────────────────────────────────────────────────────────────────────────*/
   .module form {
     display: flex;
     flex-wrap: wrap;
@@ -339,9 +305,6 @@ document.addEventListener("DOMContentLoaded", () => {
     color: var(--muted);
   }
 
-  /*──────────────────────────────────────────────────────────────────────────────
-    RESPONSE PANELS
-  ──────────────────────────────────────────────────────────────────────────────*/
   .response {
     background: rgba(42, 111, 78, 0.1);
     border-left: 4px solid var(--secondary);
@@ -372,9 +335,9 @@ document.addEventListener("DOMContentLoaded", () => {
     line-height: 1.5;
   }
   .tool-row {
-    position: absolute;
-    bottom: 0.5rem;
-    right: 0.5rem;
+    position: static;                
+    margin-top: 1rem;              
+    display: flex;
     display: flex;
     gap: 0.5rem;
   }
@@ -398,9 +361,6 @@ document.addEventListener("DOMContentLoaded", () => {
     transform: scale(1.1);
   }
 
-  /*──────────────────────────────────────────────────────────────────────────────
-    HERO SECTION
-  ──────────────────────────────────────────────────────────────────────────────*/
   .hero-module {
     background: var(--surface);
     display: flex;
@@ -1454,6 +1414,80 @@ document.addEventListener("DOMContentLoaded", () => {
           border-radius: var(--radius);
         }
 
+   .other-input {
+  display: none;
+  margin-top: 0.5rem;
+  padding: 0.75rem;
+  border: 1.5px solid #d1dce5;
+  background: var(--bg);
+  color: var(--text);
+  font-size: 0.95rem;
+  border-radius: var(--radius);
+  transition: border-color var(--transition), box-shadow var(--transition);
+}
+.other-input:focus {
+  outline: none;
+  border-color: var(--primary);
+  box-shadow: 0 0 8px var(--primary);
+}
+   
+.meet-module {
+  background: linear-gradient(135deg, rgba(42,111,78,0.1), rgba(212,197,162,0.1));
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 2rem;
+  border-radius: var(--radius);
+  margin-bottom: 2rem;
+}
+.meet-content {
+  display: flex;
+  align-items: center;
+  max-width: 900px;
+  width: 100%;
+  gap: 2rem;
+}
+.meet-icon {
+  flex: 0 0 80px;
+  height: 80px;
+  background: var(--primary);
+  color: #fff;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2.5rem;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+.meet-text h2 {
+  font-size: 2rem;
+  margin-bottom: 0.5rem;
+  color: var(--secondary);
+  line-height: 1.2;
+}
+.meet-text p {
+  font-size: 1rem;
+  margin-bottom: 1rem;
+  color: var(--text);
+  line-height: 1.4;
+}
+.btn-schedule {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: linear-gradient(45deg, var(--primary), var(--secondary));
+  color: #fff;
+  padding: 0.75rem 1.5rem;
+  border-radius: var(--radius);
+  font-weight: 600;
+  font-size: 1rem;
+  transition: transform var(--transition), box-shadow var(--transition);
+}
+.btn-schedule:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(0,0,0,0.1);
+}
+
  </style>
 
 
@@ -1469,7 +1503,7 @@ document.addEventListener("DOMContentLoaded", () => {
       <span class="logo-text">Vitra AI</span>
     </div>
     <nav role="navigation">
-      <a href="herbal.html" class="active">
+      <a href="herbal.html" id="link-herbal" class="active">
         <i class="fas fa-seedling"></i>
         <span>Herbal Medicine</span>
       </a>
@@ -1563,51 +1597,69 @@ document.addEventListener("DOMContentLoaded", () => {
     </section>
 
     <!-- 2. Symptom Checker -->
-    <section id="hero-symptom" class="module">
-      <h2><i class="fas fa-notes-medical"></i> Symptom Checker</h2>
-      <p class="desc">
-        Describe your symptoms and duration, choose severity, and our AI will recommend herbs, dosages, and precautions.
-      </p>
-      <form id="sym-form" class="sym-form">
-        <div class="field">
-          <label for="symInput">Your Symptoms</label>
-          <textarea id="symInput" required placeholder="e.g. headache, nausea…"></textarea>
-        </div>
-        <div class="field">
-          <label for="symCategories">Category</label>
-          <select id="symCategories" multiple size="4" required>
-            <option disabled>Select category…</option>
-            <option value="pain">Pain</option>
-            <option value="digestive">Digestive</option>
-            <option value="respiratory">Respiratory</option>
-            <option value="stress">Stress</option>
-            <option value="sleep">Sleep</option>
-            <option value="energy">Energy</option>
-            <option value="immune">Immune</option>
-            <option value="skin">Skin</option>
-            <option value="mental">Mental</option>
-            <option value="cardio">Cardiovascular</option>
-           <option value="Other">Other</option>
-          </select>
-          <input type="text" id="symCategoryOther" placeholder="Please specify…" class="other-input hidden"/>
-        </div>
-        </div>
-        <div class="field range-field">
-          <label for="severity">Severity</label>
-          <input type="range" id="severity" min="1" max="10" value="5"/>
-          <span id="sevValue">5</span>/10
-        </div>
-        <div class="field">
-          <label for="symDuration">Duration (days)</label>
-          <input type="number" id="symDuration" min="0" placeholder="e.g. 3"/>
-        </div>
-        <button type="submit" class="btn-primary">Get Recommendations</button>
-      </form>
-      <div id="symResult" class="response sym-response" hidden>
-        <button class="close-btn" aria-label="Close result">×</button>
-        <div class="result-content"></div>
-      </div>
-    </section>
+ <section id="hero-symptom" class="module">
+  <h2><i class="fas fa-notes-medical"></i> Symptom Checker</h2>
+  <p class="desc">
+    Describe your symptoms and duration, choose severity, and our AI will recommend herbs, dosages, and precautions.
+  </p>
+  <form id="sym-form" class="sym-form">
+    <div class="field">
+      <label for="symInput">Your Symptoms</label>
+      <textarea
+        id="symInput"
+        required
+        placeholder="e.g. headache, nausea…"
+      ></textarea>
+    </div>
+
+    <div class="field">
+      <label for="symCategories">Category</label>
+      <select id="symCategories" multiple size="4" required>
+        <option disabled>Select category…</option>
+        <option value="pain">Pain</option>
+        <option value="digestive">Digestive</option>
+        <option value="respiratory">Respiratory</option>
+        <option value="stress">Stress</option>
+        <option value="sleep">Sleep</option>
+        <option value="energy">Energy</option>
+        <option value="immune">Immune</option>
+        <option value="skin">Skin</option>
+        <option value="mental">Mental</option>
+        <option value="cardio">Cardiovascular</option>
+        <option value="Other">Other</option>
+      </select>
+      <input
+        type="text"
+        id="symCategoriesOther"
+        placeholder="Please specify…"
+        class="other-input"
+      />
+    </div>
+
+    <div class="field range-field">
+      <label for="severity">Severity</label>
+      <input type="range" id="severity" min="1" max="10" value="5"/>
+      <span id="sevValue">5</span>/10
+    </div>
+
+    <div class="field">
+      <label for="symDuration">Duration (days)</label>
+      <input type="number" id="symDuration" min="0" placeholder="e.g. 3"/>
+    </div>
+
+    <button type="submit" class="btn-primary">Get Recommendations</button>
+  </form>
+
+  <div id="symResult" class="response sym-response" hidden>
+    <button class="close-btn" aria-label="Close result">×</button>
+    <div class="result-content"></div>
+    <div class="tool-row">
+      <button class="copy-btn" title="Copy"><i class="fas fa-copy"></i></button>
+      <button class="dl-btn" title="Download"><i class="fas fa-download"></i></button>
+    </div>
+  </div>
+</section>
+
 
     <!-- 3. Cultural Knowledge -->
     <section id="hero–cultural" class="module">
@@ -1640,6 +1692,10 @@ document.addEventListener("DOMContentLoaded", () => {
       <div id="safetyResult" class="response" role="status" hidden>
         <button class="close-btn" aria-label="Close result">×</button>
         <div class="result-content"></div>
+         <div class="tool-row">
+          <button class="copy-btn" title="Copy"><i class="fas fa-copy"></i></button>
+          <button class="dl-btn" title="Download"><i class="fas fa-download"></i></button>
+        </div>
       </div>
     </section>
 
@@ -1814,6 +1870,10 @@ document.addEventListener("DOMContentLoaded", () => {
       <div id="dosageResult" class="response" hidden>
         <button class="close-btn" aria-label="Close result">×</button>
         <div class="result-content"></div>
+         <div class="tool-row">
+          <button class="copy-btn" title="Copy"><i class="fas fa-copy"></i></button>
+          <button class="dl-btn" title="Download"><i class="fas fa-download"></i></button>
+        </div>
       </div>
     </section>
 
@@ -1878,19 +1938,29 @@ document.addEventListener("DOMContentLoaded", () => {
       <div id="interactionResult" class="response" role="status" hidden>
         <button class="close-btn" aria-label="Close result">×</button>
         <div class="result-content"></div>
+         <div class="tool-row">
+          <button class="copy-btn" title="Copy"><i class="fas fa-copy"></i></button>
+          <button class="dl-btn" title="Download"><i class="fas fa-download"></i></button>
+        </div>
       </div>
     </section>
 
 
       <!-- 12. Meet a Herbal Health Expert -->
-  <section id="meet-professional" class="module">
-    <h2><i class="fas fa-user-md"></i> Meet a Herbal Health Expert</h2>
-    <p class="desc">
-      Connect with one of our trusted herbal health professionals for personalized guidance and consultation.
-    </p>
-    <a href="consult.html" class="btn-primary">
-      <i class="fas fa-calendar-check"></i> Schedule an Appointment
-    </a>
+<section id="meet-professional" class="module meet-module">
+    <div class="meet-content">
+      <div class="meet-icon">
+        <i class="fas fa-user-md"></i>
+      </div>
+      <div class="meet-text">
+        <h2>Meet a<BR>Herbal Health Expert</h2>
+        <p>Get one-on-one guidance from our licensed herbal practitioners. Discover tailored wellness plans, expert dosage advice, and safe herbal combinations.</p>
+        <a href="consult.html" class="btn-schedule">
+          <i class="fas fa-calendar-check"></i>
+          Schedule Consultation
+        </a>
+      </div>
+    </div>
   </section>
     
     <!-- 13. ROI Calculator -->
@@ -1909,7 +1979,9 @@ document.addEventListener("DOMContentLoaded", () => {
             <option value="GHS" selected>Ghanaian Cedi (GHS)</option>
             <option value="USD">US Dollar (USD)</option>
             <option value="EUR">Euro (EUR)</option>
+             <option value="Other">Other</option>
           </select>
+          <input type="text" id="currencyOther" placeholder="Please specify currency…" class="other-input"/>
         </div>
         <div class="field">
           <label for="roiRx">Monthly Prescriptions</label>
@@ -2212,13 +2284,17 @@ document.addEventListener("DOMContentLoaded", () => {
     // Whenever a <select> gets value “Other”, reveal its corresponding .other-input
     document.querySelectorAll("select").forEach((sel) => {
       sel.addEventListener("change", (e) => {
-        const otherField = document.getElementById(sel.id + "Other");
-        if (!otherField) return;
-        if (sel.value === "Other" || Array.from(sel.selectedOptions).some(opt => opt.value === "Other")) {
-          otherField.style.display = "block";
-        } else {
-          otherField.style.display = "none";
-        }
+         const otherField = document.getElementById(sel.id + "Other");
+       if (!otherField) return;
+       // If “Other” is one of the chosen options, show & require that field
+       const pickedOther = Array.from(sel.selectedOptions).some(opt => opt.value === "Other");
+       if (pickedOther) {
+         otherField.style.display = "block";
+         otherField.required = true;
+       } else {
+         otherField.style.display = "none";
+         otherField.required = false;
+       }
       });
     });
     
@@ -2285,33 +2361,18 @@ document.addEventListener("DOMContentLoaded", () => {
          // If user typed a description, also send it to OpenAI
             panel.innerHTML = `<div class="result-content">Consulting AI about your text… <span class="spinner"></span></div>`;
             const sys = `
-You are a plant expert. Given a description, respond with name, uses, cautions, and regions as JSON ONLY, for example:
-{
-  "name": "Moringa oleifera",
-  "uses": "Anti-inflammatory, antioxidant, nutritional supplement",
-  "cautions": "May lower blood sugar in diabetics",
-  "regions": ["West Africa", "India", "Southeast Asia"]
-}
-            `.trim();
-            const rawGPT = await callOpenAI([
-              { role: "system", content: sys },
-              { role: "user", content: `Describe plant: "${desc}"` }
-            ]);
-            // Strip triple backticks if present, then parse
-            const cleaned = rawGPT.replace(/```json|```/g, "").trim();
-            let parsed;
-            try {
-              parsed = JSON.parse(cleaned);
-            } catch (parseErr) {
-              throw new Error("OpenAI did not return valid JSON: ```json " + rawGPT + " ```");
-            }
-            html += `
-              <p><strong>(From text description)</strong></p>
-              <p><strong>Plant Name:</strong> ${escapeHtml(parsed.name)}</p>
-              <p><strong>Uses:</strong> ${escapeHtml(parsed.uses)}</p>
-              <p><strong>Cautions:</strong> ${escapeHtml(parsed.cautions)}</p>
-              <p><strong>Regions:</strong> ${Array.isArray(parsed.regions) ? escapeHtml(parsed.regions.join(", ")) : "–"}</p>
-            `;
+You are a world‐class botanist. Given a user’s plant description, reply with a concise paragraph that includes:
+• Plant name  
+• Medicinal uses  
+• Any cautions or side effects  
+• Native or regional information  
+Add any additional helpful notes in a coherent, single paragraph.
+          `.trim();
+          const aiReply = await callOpenAI([
+            { role: "system", content: sys },
+            { role: "user", content: `Describe plant: "${desc}"` }
+          ]);
+          html += `<p>${escapeHtml(aiReply)}</p>`;
        }
 
         panel.innerHTML = `<div class="result-content">${html}</div>`;
@@ -2359,16 +2420,25 @@ You are a plant expert. Given a description, respond with name, uses, cautions, 
           {
             role: "system",
             content: `
-You are a highly knowledgeable herbal diagnostician. A user will provide their symptoms, categories, severity, and duration.
-Your task is to recommend a list of herbs, specify dosages, and list possible precautions. Provide the answer in plain-text bullet points.
+You are an expert herbal diagnostician. A user will give you:
+• Their symptoms  
+• Chosen categories  
+• Severity (1–10)  
+• Duration in days  
+
+Provide:
+1) A short introductory paragraph acknowledging the symptoms.  
+2) One paragraph listing recommended herbs (with their dosages).  
+3) One paragraph detailing any precautions or contraindications.  
+Write in clear, complete sentences and separate each section into its own paragraph.
             `.trim()
           },
           {
             role: "user",
             content: `Symptoms: ${symptoms}
 Categories: ${categories}
-Severity (1-10): ${severity}
-Duration (days): ${duration}`
+Severity: ${severity}
+Duration: ${duration} days`
           }
         ]);
         panel.innerHTML = `<div class="result-content">${formatHTML(aiReply)}</div>`;
@@ -2502,41 +2572,50 @@ You are a friendly, knowledgeable herbalist. A user will ask questions about her
     viewHistoryBtn.onclick = () => {
      const modal = document.createElement("div");
       modal.className = "history-modal";
+       const grouped = {};
+      chatHistory.forEach((m, i) => {
+        const dt = new Date(m.timestamp);
+        const label = formatDateSeparator(dt);
+        if (!grouped[label]) grouped[label] = [];
+        grouped[label].push({ who: m.who, text: m.text, idx: i });
+      });
+      // Build table HTML: one <thead> per group, then <tbody> rows
+      let tableHTML = `<table class="history-table">`;
+      Object.keys(grouped).forEach((label) => {
+        tableHTML += `
+          <thead>
+            <tr><th colspan="3">${label}</th></tr>
+            <tr>
+              <th>Sender</th>
+              <th>Message</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${grouped[label]
+              .map(m =>
+                `<tr data-index="${m.idx}">
+                   <td>${m.who}</td>
+                   <td>${escapeHtml(m.text)}</td>
+                   <td><button class="del-msg" data-index="${m.idx}" title="Delete"><i class="fas fa-trash-alt"></i></button></td>
+                 </tr>`
+              ).join("")}
+          </tbody>`;
+      });
+      tableHTML += `</table>`;
+
       modal.innerHTML = `
         <div class="history-content">
           <h3>Chat History</h3>
           <div class="history-table-wrapper">
-            <table class="history-table">
-              <thead>
-                <tr>
-                  <th>Date</th>
-                  <th>Sender</th>
-                  <th>Message</th>
-                  <th>Action</th>
-                </tr>
-              </thead>
-              <tbody>
-              ${chatHistory
-                .map((m, i) => {
-                  const dt = new Date(m.timestamp);
-                  return `
-                  <tr data-index="${i}">
-                    <td>${formatDateSeparator(dt)} ${dt.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit", hour12: true })}</td>
-                    <td>${m.who}</td>
-                    <td>${escapeHtml(m.text)}</td>
-                    <td><button class="del-msg" data-index="${i}" title="Delete"><i class="fas fa-trash-alt"></i></button></td>
-                  </tr>`;
-                })
-                .join("")}
-              </tbody>
-            </table>
+            ${tableHTML}
           </div>
           <div class="history-actions">
             <button class="clear-history"><i class="fas fa-trash"></i> Clear History</button>
             <button class="close-history"><i class="fas fa-times"></i> Close</button>
           </div>
         </div>`;
-     document.body.append(modal);
+    document.body.append(modal);
 
     // Hook up delete buttons (per‐row)
       modal.querySelectorAll(".del-msg").forEach(btn => {
@@ -2572,7 +2651,10 @@ You are a friendly, knowledgeable herbalist. A user will ask questions about her
 You are an expert herbal pharmacist. A user will provide one herb, age, and weight. Create a safe, personalized herbal formulation. Specify dosage, preparation method (e.g., tea, tincture), and any safety precautions. Use plain text bullet points.
       `.trim(),
       inputExtractor: () => {
-        const herb = document.getElementById("pfHerbs").value;
+        let herb = document.getElementById("pfHerbs").value;
+      if (herb === "Other") {
+        herb = document.getElementById("pfHerbsOther").value.trim();
+      }
         const age = document.getElementById("pfAge").value;
         const weight = document.getElementById("pfWeight").value;
         return `Herb: ${herb}\nAge: ${age}\nWeight: ${weight} kg`;
@@ -2599,7 +2681,10 @@ You are an expert researcher specializing in herbal clinical studies. The user w
 You are an experienced inventory analyst for herbal dispensaries. Given a herb name and a number of weeks, forecast weekly stock needs with buffer stock recommendations. Provide the answer as a short report with bullet points.
       `.trim(),
       inputExtractor: () => {
-        const herb = document.getElementById("forecastHerb").value;
+         let herb = document.getElementById("forecastHerb").value;
+         if (herb === "Other") {
+            herb = document.getElementById("forecastHerbOther").value.trim();
+         }
         const weeks = document.getElementById("forecastPeriod").value;
         return `Herb: ${herb}\nWeeks Ahead: ${weeks}`;
       },
@@ -2658,7 +2743,10 @@ You are a dosage calculation expert for herbal preparations. Given a user’s we
       inputExtractor: () => {
         const weight = document.getElementById("weight").value;
         const symptom = document.getElementById("symptom").value.trim();
-        const formType = document.getElementById("formType").value;
+        let formType = document.getElementById("formType").value;
+         if (formType === "Other") {
+           formType = document.getElementById("formTypeOther").value.trim();
+         }
         return `Weight: ${weight} kg\nSymptom: ${symptom}\nForm Type: ${formType}`;
       },
       resultPanelId: "dosageResult"
@@ -2696,6 +2784,10 @@ You are a qualified pharmacologist specialized in herb-herb interactions. Given 
       const rxCount = +document.getElementById("roiRx").value;
       const cost = +document.getElementById("roiCost").value;
       const currency = document.getElementById("currency").value;
+      let currency = document.getElementById("currency").value;
+      if (herb === "Other") {
+        herb = document.getElementById("currencyOther").value.trim();
+      }
       if (!(rxCount > 0 && cost > 0)) {
         panel.innerHTML = '<div class="result-content">⚠️ Please enter positive numbers for prescriptions and cost.</div>';
         return;
@@ -2918,8 +3010,31 @@ Conclude with final ROI percentage and a short summary line.
     });
   });
 </script>
+  <script>
+    window.addEventListener("load", () => {
+      if (typeof initRealCharts === "function") {
+        initRealCharts();
+      }
+    });
+  </script>
 
 
+<script>
+  document.addEventListener("DOMContentLoaded", () => {
+    // Grab all sidebar links:
+    document.querySelectorAll('aside#sidebar nav a').forEach((link) => {
+      // If the href of that link matches the current page’s filename...
+      const linkHref = link.getAttribute("href").split("/").pop(); // e.g. "herbal.html"
+      const pageNow = window.location.pathname.split("/").pop();    // e.g. "herbal.html"
+
+      if (linkHref === pageNow) {
+        link.classList.add("active");
+      } else {
+        link.classList.remove("active");
+      }
+    });
+  });
+</script>
 
 </body>
 </html>
