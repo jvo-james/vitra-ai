@@ -12,7 +12,17 @@
   
   <!-- Chart.js -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  
+  <script>
+  // As soon as Chart.js is available, initialize all charts:
+  if (window.Chart) {
+    initRealCharts?.();
+  } else {
+    window.addEventListener("load", () => {
+      if (typeof initRealCharts === "function") initRealCharts();
+    });
+  }
+</script>
+
  <style>
    *, *::before, *::after {
     margin: 0;
@@ -315,14 +325,13 @@
     transition: background var(--transition);
   }
   .response .close-btn {
-    position: absolute;
-    top: 0.5rem;
-    right: 0.5rem;
+    display: block;
     background: none;
     color: var(--secondary);
     font-size: 1.2rem;
     border: none;
     cursor: pointer;
+    margin-bottom: 0.5rem;
     transition: color var(--transition), transform var(--transition);
   }
   .response .close-btn:hover {
@@ -1487,6 +1496,77 @@
   transform: translateY(-2px);
   box-shadow: 0 6px 20px rgba(0,0,0,0.1);
 }
+@media (max-width: 600px) {
+  body {
+    flex-direction: column;
+  }
+  aside#sidebar {
+    position: fixed;
+    width: 100%;
+    height: auto;
+    bottom: 0;
+    top: auto;
+    flex-direction: row;
+    justify-content: space-around;
+  }
+  aside#sidebar .logo {
+    display: none;  /* hide the logo on tiny screens */
+  }
+  aside#sidebar nav a {
+    padding: 0.5rem;
+    font-size: 0.9rem;
+  }
+  header {
+    left: 0 !important;
+    position: fixed;
+    top: 0;
+    width: 100%;
+  }
+  main {
+    padding-top: calc(var(--header-h) + 1rem);
+  }
+  .hero-inner {
+    flex-direction: column;
+    gap: 1rem;
+  }
+  .module {
+    padding: 0.75rem;
+    margin-bottom: 1rem;
+  }
+  .module h2 {
+    font-size: 1.1rem;
+  }
+  .module form {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+  .module form input, 
+  .module form select, 
+  .module form textarea, 
+  .module form button {
+    width: 100% !important;
+    font-size: 0.9rem;
+  }
+  .chart-card {
+    min-height: 250px;
+  }
+  .chat-box {
+    max-height: 200px;
+  }
+  .chat-input-row {
+    flex-direction: column;
+  }
+  .history-content {
+    width: 95%;
+    padding: 1rem;
+  }
+  .history-content h3 {
+    font-size: 1.2rem;
+  }
+  .history-table th, .history-table td {
+    font-size: 0.85rem;
+  }
+}
 
  </style>
 
@@ -2039,50 +2119,57 @@
   </main>
 
   <script>
-      document.addEventListener("DOMContentLoaded", () => {
-        ["idenResult","symResult","cultureResult","safetyResult",
-         "pfResult","researchResults","inventoryResult","geneticResult",
-         "dosageResult","interactionResult","roiResult"]
-        .forEach(id => {
-          const panel = document.getElementById(id);
-          const saved = localStorage.getItem(id);
-          if (saved) {
-            panel.innerHTML = saved;
-            panel.hidden = false;
-            // Re-attach close & tool buttons after restoring
-            panel.querySelectorAll(".close-btn").forEach(btn => btn.onclick = () => panel.hidden = true);
-            if (panel.querySelector(".tool-row")) {
-              panel.querySelectorAll(".copy-btn").forEach(cb => {
-                cb.onclick = () => {
-                  const content = panel.querySelector(".result-content").innerText;
-                  navigator.clipboard.writeText(content);
-                  const t = document.createElement("div");
-                  t.className = "copy-toast";
-                  t.textContent = "Copied!";
-                  document.body.append(t);
-                  setTimeout(() => t.remove(), 1500);
-                };
-              });
-              panel.querySelectorAll(".dl-btn").forEach(db => {
-                db.onclick = () => {
-                  const text = panel.querySelector(".result-content").innerText;
-                  const blob = new Blob([text], { type: "text/plain" });
-                  const url = URL.createObjectURL(blob);
-                  const a = document.createElement("a");
-                  a.href = url;
-                  a.download = "response.txt";
-                  document.body.append(a);
-                  a.click();
-                  URL.revokeObjectURL(url);
-                  a.remove();
-                };
-              });
-            }
-          }
-        });
+      ["idenResult","symResult","cultureResult","safetyResult",
+   "pfResult","researchResults","inventoryResult","geneticResult",
+   "dosageResult","interactionResult","roiResult"]
+  .forEach(id => {
+    const panel = document.getElementById(id);
+    const saved = localStorage.getItem(id);
+    if (saved) {
+      panel.innerHTML = saved;
+      panel.hidden = false;
+      // ALWAYS re-run addClose & addTools, to ensure buttons reattach
+      addClose(panel);
+      addTools(panel);
+      panel.querySelectorAll(".close-btn").forEach(btn => btn.onclick = () => panel.hidden = true);
+      panel.querySelectorAll(".copy-btn").forEach(cb => {
+        cb.onclick = () => {
+          const content = panel.querySelector(".result-content").innerText;
+          navigator.clipboard.writeText(content);
+          const t = document.createElement("div");
+          t.className = "copy-toast";
+          t.textContent = "Copied!";
+          document.body.append(t);
+          setTimeout(() => t.remove(), 1500);
+        };
       });
+      panel.querySelectorAll(".dl-btn").forEach(db => {
+        db.onclick = () => {
+          const text = panel.querySelector(".result-content").innerText;
+          const blob = new Blob([text], { type: "text/plain" });
+          const url = URL.createObjectURL(blob);
+          const a = document.createElement("a");
+          a.href = url;
+          a.download = "response.txt";
+          document.body.append(a);
+          a.click();
+          URL.revokeObjectURL(url);
+          a.remove();
+        };
+      });
+    }
+  });
+
     </script>
- 
+ <script>
+  // On first load, apply saved theme:
+  const savedTheme = localStorage.getItem("vitra-theme");
+  if (savedTheme === "dark") {
+    document.documentElement.classList.add("dark");
+    document.documentElement.setAttribute("aria-theme", "dark");
+  }
+</script>
+
 <script>
   // ───── Utility: sanitize user-provided strings ─────
   function escapeHtml(unsafe) {
@@ -2271,6 +2358,7 @@
       themeToggle.classList.toggle("fa-sun", isDark);
       themeToggle.classList.toggle("fa-moon", !isDark);
       htmlEl.setAttribute("aria-theme", isDark ? "dark" : "light");
+       localStorage.setItem("vitra-theme", isDark ? "dark" : "light");
     });
 
     // Show hamburger icon only under 1024px
@@ -2372,7 +2460,7 @@ Add any additional helpful notes in a coherent, single paragraph.
             { role: "system", content: sys },
             { role: "user", content: `Describe plant: "${desc}"` }
           ]);
-          html += `<p>${escapeHtml(aiReply)}</p>`;
+          html += formatHTML(aiReply);
        }
 
         panel.innerHTML = `<div class="result-content">${html}</div>`;
@@ -2596,7 +2684,7 @@ You are a friendly, knowledgeable herbalist. A user will ask questions about her
               .map(m =>
                 `<tr data-index="${m.idx}">
                    <td>${m.who}</td>
-                   <td>${escapeHtml(m.text)}</td>
+                   <td>${formatHTML(m.text)}</td>
                    <td><button class="del-msg" data-index="${m.idx}" title="Delete"><i class="fas fa-trash-alt"></i></button></td>
                  </tr>`
               ).join("")}
