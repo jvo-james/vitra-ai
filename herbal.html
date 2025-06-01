@@ -12,16 +12,7 @@
   
   <!-- Chart.js -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  <script>
-  // As soon as Chart.js is available, initialize all charts:
-  if (window.Chart) {
-    initRealCharts?.();
-  } else {
-    window.addEventListener("load", () => {
-      if (typeof initRealCharts === "function") initRealCharts();
-    });
-  }
-</script>
+
 
  <style>
    *, *::before, *::after {
@@ -325,13 +316,14 @@
     transition: background var(--transition);
   }
   .response .close-btn {
-    display: block;
+    position: absolute;
+    top: 0.5rem;
+    right: 0.5rem;
     background: none;
     color: var(--secondary);
     font-size: 1.2rem;
     border: none;
     cursor: pointer;
-    margin-bottom: 0.5rem;
     transition: color var(--transition), transform var(--transition);
   }
   .response .close-btn:hover {
@@ -339,11 +331,12 @@
     transform: scale(1.1);
   }
   .response .result-content {
-    margin-top: 0.5rem;
+    margin-top: 1.5rem; /* leave space for close-button above */
     color: var(--text);
     line-height: 1.5;
   }
-  .tool-row {
+
+   .tool-row {
     position: static;                
     margin-top: 1rem;              
     display: flex;
@@ -1567,6 +1560,94 @@
     font-size: 0.85rem;
   }
 }
+/*──────────────────────────────────────────────────────────────────────────────
+  MOBILE LAYOUT TWEAKS (phones ≤ 600px)
+──────────────────────────────────────────────────────────────────────────────*/
+@media (max-width: 600px) {
+  body {
+    flex-direction: column;
+  }
+  /* Sidebar becomes bottom nav */
+  aside#sidebar {
+    position: fixed;
+    width: 100%;
+    height: auto;
+    bottom: 0;
+    top: auto;
+    flex-direction: row;
+    justify-content: space-around;
+  }
+  aside#sidebar .logo {
+    display: none;  /* hide logo */
+  }
+  aside#sidebar nav a {
+    flex: 1;
+    text-align: center;
+    padding: 0.5rem;
+    font-size: 0.9rem;
+  }
+
+  header {
+    left: 0 !important;
+    width: 100%;
+    padding: 0.5rem 1rem;
+  }
+  main {
+    padding-top: calc(var(--header-h) + 0.5rem);
+  }
+
+  /* Modules */
+  .module {
+    margin: 0.5rem;
+    padding: 0.5rem;
+  }
+  .module h2 {
+    font-size: 1.1rem;
+  }
+
+  /* Ensure forms stack vertically */
+  .module form,
+  .chat-input-row {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+  .module form input,
+  .module form select,
+  .module form textarea,
+  .module form button {
+    width: 100% !important;
+    font-size: 0.9rem;
+  }
+  .module form label {
+    font-size: 0.9rem;
+  }
+
+  /* Chat box height */
+  .chat-box {
+    max-height: 180px;
+  }
+
+  /* Charts: increase height */
+  .chart-card {
+    min-height: 240px;
+  }
+  .chart-card canvas {
+    height: 180px !important;
+  }
+
+  /* History modal tweaks */
+  .history-content {
+    width: 95%;
+    padding: 1rem;
+  }
+  .history-content h3 {
+    font-size: 1.2rem;
+  }
+  .history-table th, .history-table td {
+    font-size: 0.85rem;
+    padding: 0.4rem;
+  }
+}
 
  </style>
 
@@ -2691,51 +2772,101 @@ You are a friendly, knowledgeable herbalist. A user will ask questions about her
 
     // ─── PERSONALIZED FORMULATIONS ────────────────────────────────────────────
 
-    wireForm({
-      formId: "pf-form",
-      systemPrompt: `
+    (function() {
+     const form = document.getElementById("pf-form");
+     const panel = document.getElementById("pfResult");
+     const systemPrompt = `
 You are an expert herbal pharmacist. A user will provide one herb, age, and weight. Create a safe, personalized herbal formulation. Specify dosage, preparation method (e.g., tea, tincture), and any safety precautions. Use plain text bullet points.
-      `.trim(),
-      inputExtractor: () => {
-        let herb = document.getElementById("pfHerbs").value;
-      if (herb === "Other") {
-        herb = document.getElementById("pfHerbsOther").value.trim();
-      }
-        const age = document.getElementById("pfAge").value;
-        const weight = document.getElementById("pfWeight").value;
-        return `Herb: ${herb}\nAge: ${age}\nWeight: ${weight} kg`;
-      },
-      resultPanelId: "pfResult"
-    });
+     `.trim();
+     form.onsubmit = async (e) => {
+       e.preventDefault();
+       panel.hidden = false;
+       panel.innerHTML = '<div class="result-content">Processing… <span class="spinner"></span></div>';
+       try {
+         let herb = document.getElementById("pfHerbs").value;
+         if (herb === "Other") {
+           herb = document.getElementById("pfHerbsOther").value.trim();
+         }
+         const age = document.getElementById("pfAge").value;
+         const weight = document.getElementById("pfWeight").value;
+         const userContent = `Herb: ${herb}\nAge: ${age}\nWeight: ${weight} kg`;
+         const aiReply = await callOpenAI([
+           { role: "system", content: systemPrompt },
+           { role: "user", content: userContent }
+         ]);
+         panel.innerHTML = `<div class="result-content">${formatHTML(aiReply)}</div>`;
+         // Persist to localStorage:
+         localStorage.setItem("pfResult", panel.innerHTML);
+         addClose(panel);
+         addTools(panel);
+       } catch (err) {
+         showFriendlyError(panel);
+       }
+     };
+   })();
 
     // ─── RESEARCH SUMMARIES ───────────────────────────────────────────────────
 
-    wireForm({
-      formId: "research-form",
-      systemPrompt: `
+   (function() {
+     const form = document.getElementById("research-form");
+     const panel = document.getElementById("researchResults");
+     const systemPrompt = `
 You are an expert researcher specializing in herbal clinical studies. The user will provide study titles, abstracts, or keywords. Provide a concise, plain-text summary of the research, highlighting methodology, results, and conclusions. Include citations where appropriate.
-      `.trim(),
-      inputExtractor: () => document.getElementById("researchQuery").value.trim(),
-      resultPanelId: "researchResults"
-    });
+     `.trim();
+     form.onsubmit = async (e) => {
+       e.preventDefault();
+       panel.hidden = false;
+       panel.innerHTML = '<div class="result-content">Processing… <span class="spinner"></span></div>';
+       try {
+         const userContent = document.getElementById("researchQuery").value.trim();
+         const aiReply = await callOpenAI([
+           { role: "system", content: systemPrompt },
+           { role: "user", content: userContent }
+         ]);
+         panel.innerHTML = `<div class="result-content">${formatHTML(aiReply)}</div>`;
+         // Persist to localStorage:
+         localStorage.setItem("researchResults", panel.innerHTML);
+         addClose(panel);
+         addTools(panel);
+       } catch (err) {
+         showFriendlyError(panel);
+       }
+     };
+   })();
 
     // ─── INVENTORY FORECAST ───────────────────────────────────────────────────
 
-    wireForm({
-      formId: "inventory-form",
-      systemPrompt: `
+   (function() {
+     const form = document.getElementById("inventory-form");
+     const panel = document.getElementById("inventoryResult");
+     const systemPrompt = `
 You are an experienced inventory analyst for herbal dispensaries. Given a herb name and a number of weeks, forecast weekly stock needs with buffer stock recommendations. Provide the answer as a short report with bullet points.
-      `.trim(),
-      inputExtractor: () => {
+     `.trim();
+     form.onsubmit = async (e) => {
+       e.preventDefault();
+       panel.hidden = false;
+       panel.innerHTML = '<div class="result-content">Processing… <span class="spinner"></span></div>';
+       try {
          let herb = document.getElementById("forecastHerb").value;
          if (herb === "Other") {
-            herb = document.getElementById("forecastHerbOther").value.trim();
+           herb = document.getElementById("forecastHerbOther").value.trim();
          }
-        const weeks = document.getElementById("forecastPeriod").value;
-        return `Herb: ${herb}\nWeeks Ahead: ${weeks}`;
-      },
-      resultPanelId: "inventoryResult"
-    });
+         const weeks = document.getElementById("forecastPeriod").value;
+         const userContent = `Herb: ${herb}\nWeeks Ahead: ${weeks}`;
+         const aiReply = await callOpenAI([
+           { role: "system", content: systemPrompt },
+           { role: "user", content: userContent }
+         ]);
+         panel.innerHTML = `<div class="result-content">${formatHTML(aiReply)}</div>`;
+         // Persist to localStorage:
+         localStorage.setItem("inventoryResult", panel.innerHTML);
+         addClose(panel);
+         addTools(panel);
+       } catch (err) {
+         showFriendlyError(panel);
+       }
+     };
+   })();
 
     // ─── GENETICS MATCH ───────────────────────────────────────────────────────
 
@@ -2781,38 +2912,72 @@ You are a genetics expert in herbal medicine. The user will upload a genetic rep
 
     // ─── DOSAGE CALCULATOR ───────────────────────────────────────────────────
 
-    wireForm({
-      formId: "dose-form",
-      systemPrompt: `
+    (function() {
+     const form = document.getElementById("dose-form");
+     const panel = document.getElementById("dosageResult");
+     const systemPrompt = `
 You are a dosage calculation expert for herbal preparations. Given a user’s weight (in kg), symptom (e.g., headache), and extract form (powder, tincture, or capsule), calculate a safe daily dosage range. Provide the answer in plain text, specifying units (e.g., mg, ml) and any relevant safety notes.
-      `.trim(),
-      inputExtractor: () => {
-        const weight = document.getElementById("weight").value;
-        const symptom = document.getElementById("symptom").value.trim();
-        let formType = document.getElementById("formType").value;
+     `.trim();
+     form.onsubmit = async (e) => {
+       e.preventDefault();
+       panel.hidden = false;
+       panel.innerHTML = '<div class="result-content">Processing… <span class="spinner"></span></div>';
+       try {
+         const weight = document.getElementById("weight").value;
+         const symptom = document.getElementById("symptom").value.trim();
+         let formType = document.getElementById("formType").value;
          if (formType === "Other") {
            formType = document.getElementById("formTypeOther").value.trim();
          }
-        return `Weight: ${weight} kg\nSymptom: ${symptom}\nForm Type: ${formType}`;
-      },
-      resultPanelId: "dosageResult"
-    });
-
+         const userContent = `Weight: ${weight} kg\nSymptom: ${symptom}\nForm Type: ${formType}`;
+         const aiReply = await callOpenAI([
+           { role: "system", content: systemPrompt },
+           { role: "user", content: userContent }
+         ]);
+         panel.innerHTML = `<div class="result-content">${formatHTML(aiReply)}</div>`;
+         // Persist:
+         localStorage.setItem("dosageResult", panel.innerHTML);
+         addClose(panel);
+         addTools(panel);
+       } catch (err) {
+         showFriendlyError(panel);
+       }
+     };
+   })();
+    
     // ─── INTERACTION CHECKER ───────────────────────────────────────────────────
-
-    wireForm({
-      formId: "int-form",
-      systemPrompt: `
+ (function() {
+     const form = document.getElementById("int-form");
+     const panel = document.getElementById("interactionResult");
+     const systemPrompt = `
 You are a qualified pharmacologist specialized in herb-herb interactions. Given two herbs, evaluate if any known harmful interactions exist. Provide a clear explanation, including mechanisms if known, and any safety advice.
-      `.trim(),
-      inputExtractor: () => {
-        const a = document.getElementById("herbA").value;
-        const b = document.getElementById("herbB").value;
-        if (a === b) throw new Error("Please select two distinct herbs.");
-        return `Herb A: ${a}\nHerb B: ${b}`;
-      },
-      resultPanelId: "interactionResult"
-    });
+     `.trim();
+     form.onsubmit = async (e) => {
+       e.preventDefault();
+       panel.hidden = false;
+       panel.innerHTML = '<div class="result-content">Processing… <span class="spinner"></span></div>';
+       try {
+         const a = document.getElementById("herbA").value;
+         const b = document.getElementById("herbB").value;
+         if (a === b) {
+           panel.innerHTML = '<div class="result-content">⚠️ Please select two distinct herbs.</div>';
+           addClose(panel);
+           return;
+         }
+         const aiReply = await callOpenAI([
+           { role: "system", content: systemPrompt },
+           { role: "user", content: `Herb A: ${a}\nHerb B: ${b}` }
+         ]);
+         panel.innerHTML = `<div class="result-content">${formatHTML(aiReply)}</div>`;
+         // Persist:
+         localStorage.setItem("interactionResult", panel.innerHTML);
+         addClose(panel);
+         addTools(panel);
+       } catch (err) {
+         showFriendlyError(panel);
+       }
+     };
+   })();
 
     // ─── ROI CALCULATOR ───────────────────────────────────────────────────────
 
@@ -3093,6 +3258,13 @@ Conclude with final ROI percentage and a short summary line.
       });
     }
   });
+  });
+</script>
+<script>
+  window.addEventListener("load", () => {
+    if (typeof initRealCharts === "function") {
+      initRealCharts();
+    }
   });
 </script>
 
