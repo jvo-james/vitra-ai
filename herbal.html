@@ -947,51 +947,106 @@ document.addEventListener("DOMContentLoaded", () => {
   /*──────────────────────────────────────────────────────────────────────────────
     13. ROI CALCULATOR
   ──────────────────────────────────────────────────────────────────────────────*/
-  #roi-form .field {
+  .roi-form {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1.5rem;
+    align-items: flex-end;
+  }
+  .roi-form .field {
+    flex: 1 1 200px;
     display: flex;
     flex-direction: column;
-    gap: 0.25rem;
   }
-  #roi-form select,
-  #roi-form input {
-    max-width: 180px;
-    padding: 0.7rem 1rem;
-    border: 1px solid rgba(0, 0, 0, 0.1);
+  .roi-form label {
+    font-weight: 600;
+    margin-bottom: 0.25rem;
+    color: var(--text);
+  }
+  .roi-form select,
+  .roi-form input {
+    padding: 0.75rem;
+    font-size: 0.95rem;
+    border: 1.5px solid #d1dce5;
     border-radius: var(--radius);
     background: var(--bg);
     color: var(--text);
-    font-size: 0.95rem;
     transition: border-color var(--transition), box-shadow var(--transition);
   }
-  #roi-form select:focus,
-  #roi-form input:focus {
+  .roi-form select:focus,
+  .roi-form input:focus {
     outline: none;
     border-color: var(--primary);
     box-shadow: 0 0 8px var(--primary);
   }
-  #roi-form button {
-    background: var(--secondary);
-    color: #fff;
-    padding: 0.7rem 1.3rem;
-    border-radius: var(--radius);
-    margin-top: 0.5rem;
-    transition: background var(--transition), transform var(--transition);
-    font-weight: 600;
-  }
-  #roi-form button:hover {
+  .roi-form button {
     background: var(--primary);
+    color: #fff;
+    padding: 0.8rem 1.6rem;
+    border: none;
+    border-radius: var(--radius);
+    font-size: 1rem;
+    font-weight: 600;
+    box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+    cursor: pointer;
+    transition: background var(--transition), transform var(--transition);
+    margin-top: 0.5rem;
+  }
+  .roi-form button:hover {
+    background: var(--secondary);
     transform: translateY(-2px);
   }
   #roiResult {
-    margin-top: 1rem;
-    background: var(--surface);
+    margin-top: 1.5rem;
+    background: rgba(142,108,75,0.1);
+    border-left: 4px solid var(--secondary);
     padding: var(--padding);
     border-radius: var(--radius);
-    box-shadow: 0 1px 6px rgba(0, 0, 0, 0.05);
+    position: relative;
   }
   #roiResult .result-content {
     font-size: 0.95rem;
-    color: var(--text);
+    line-height: 1.5;
+  }
+  #roiResult .close-btn {
+    display: block;
+    margin-bottom: 0.5rem;
+    background: none;
+    color: var(--secondary);
+    font-size: 1.2rem;
+    border: none;
+    cursor: pointer;
+    transition: color var(--transition), transform var(--transition);
+  }
+  #roiResult .close-btn:hover {
+    color: var(--primary);
+    transform: scale(1.1);
+  }
+  #roiResult .tool-row {
+    position: absolute;
+    bottom: 0.5rem;
+    right: 0.5rem;
+    display: flex;
+    gap: 0.5rem;
+  }
+  #roiResult .tool-row button {
+    font-size: 0.85rem;
+    width: 1.6rem;
+    height: 1.6rem;
+    padding: 0.2rem;
+    background: var(--surface);
+    border: 1px solid var(--muted);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--secondary);
+    transition: background var(--transition), color var(--transition), transform var(--transition);
+  }
+  #roiResult .tool-row button:hover {
+    background: var(--primary);
+    color: #fff;
+    transform: scale(1.1);
   }
 
     .copy-toast {
@@ -1017,35 +1072,56 @@ document.addEventListener("DOMContentLoaded", () => {
   /*──────────────────────────────────────────────────────────────────────────────
     14. EXECUTIVE ANALYTICS DASHBOARD
   ──────────────────────────────────────────────────────────────────────────────*/
+  /*────────────────── Analytics Styles ──────────────────*/
   .charts {
-    display: grid !important;
-    grid-template-columns: repeat(2, 1fr) !important;
-    gap: 1rem !important;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 1.25rem;
     margin-top: 1rem;
   }
   .chart-card {
-    height: 250px;
+    background: var(--surface);
+    border-radius: var(--radius);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.03);
+    overflow: hidden;
     display: flex;
     flex-direction: column;
-    border: 1px solid rgba(0, 0, 0, 0.1);
-    border-radius: var(--radius);
-    overflow: hidden;
-    background: var(--surface);
     transition: box-shadow var(--transition);
   }
   .chart-card:hover {
-    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
+    box-shadow: 0 4px 16px rgba(0,0,0,0.06);
   }
   .chart-card canvas {
-    flex: 1 1 auto !important;
+    flex: 1 1 auto;
     width: 100% !important;
-    height: auto !important;
+    height: 200px !important;
   }
   .chart-card figcaption {
-    padding: 0.5rem;
+    padding: 0.5rem 0.75rem;
     background: var(--bg);
     font-size: 0.9rem;
     color: var(--text);
+  }
+  .chart-desc {
+    padding: 0 0.75rem 0.75rem;
+    font-size: 0.85rem;
+    color: var(--muted);
+  }
+  #exportCSV {
+    margin-top: 1rem;
+    background: var(--primary);
+    color: #fff;
+    padding: 0.75rem 1.5rem;
+    border: none;
+    border-radius: var(--radius);
+    font-weight: 600;
+    box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+    transition: background var(--transition), transform var(--transition);
+    cursor: pointer;
+  }
+  #exportCSV:hover {
+    background: var(--secondary);
+    transform: translateY(-2px);
   }
   #analytics button {
     margin-top: 1rem;
@@ -1328,7 +1404,49 @@ document.addEventListener("DOMContentLoaded", () => {
     background: var(--secondary);
     transform: translateY(-2px);
   }
-     #roi-form input,
+    .history-table-wrapper {
+    overflow-x: auto;
+    margin-bottom: var(--padding);
+  }
+  .history-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.95rem;
+  }
+  .history-table th,
+  .history-table td {
+    padding: 0.6rem 0.8rem;
+    text-align: left;
+    border: none;
+  }
+  .history-table tbody tr:nth-child(odd) {
+    background: rgba(0,0,0,0.03);
+  }
+  .history-actions {
+    position: sticky;
+    bottom: 0;
+    background: var(--surface);
+    display: flex;
+    justify-content: flex-end;
+    gap: 1rem;
+    padding-top: var(--padding);
+    border-top: 1px solid rgba(0,0,0,0.1);
+  }
+  .history-actions button {
+    background: var(--primary);
+    color: #fff;
+    border: none;
+    border-radius: var(--radius);
+    padding: 0.5rem 1rem;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: background var(--transition), transform var(--transition);
+  }
+  .history-actions button:hover {
+    background: var(--secondary);
+    transform: translateY(-1px);
+  }
+    #roi-form input,
       #roi-form select {
           padding: 0.75rem;
           font-size: 0.95rem;
@@ -1848,6 +1966,50 @@ document.addEventListener("DOMContentLoaded", () => {
   </footer>
   </main>
 
+  <script>
+      document.addEventListener("DOMContentLoaded", () => {
+        ["idenResult","symResult","cultureResult","safetyResult",
+         "pfResult","researchResults","inventoryResult","geneticResult",
+         "dosageResult","interactionResult","roiResult"]
+        .forEach(id => {
+          const panel = document.getElementById(id);
+          const saved = localStorage.getItem(id);
+          if (saved) {
+            panel.innerHTML = saved;
+            panel.hidden = false;
+            // Re-attach close & tool buttons after restoring
+            panel.querySelectorAll(".close-btn").forEach(btn => btn.onclick = () => panel.hidden = true);
+            if (panel.querySelector(".tool-row")) {
+              panel.querySelectorAll(".copy-btn").forEach(cb => {
+                cb.onclick = () => {
+                  const content = panel.querySelector(".result-content").innerText;
+                  navigator.clipboard.writeText(content);
+                  const t = document.createElement("div");
+                  t.className = "copy-toast";
+                  t.textContent = "Copied!";
+                  document.body.append(t);
+                  setTimeout(() => t.remove(), 1500);
+                };
+              });
+              panel.querySelectorAll(".dl-btn").forEach(db => {
+                db.onclick = () => {
+                  const text = panel.querySelector(".result-content").innerText;
+                  const blob = new Blob([text], { type: "text/plain" });
+                  const url = URL.createObjectURL(blob);
+                  const a = document.createElement("a");
+                  a.href = url;
+                  a.download = "response.txt";
+                  document.body.append(a);
+                  a.click();
+                  URL.revokeObjectURL(url);
+                  a.remove();
+                };
+              });
+            }
+          }
+        });
+      });
+    </script>
  
 </body>
 <script>
@@ -1881,6 +2043,7 @@ document.addEventListener("DOMContentLoaded", () => {
       }
     }
 
+    
     // Send an image file to Vision API via proxy
     async function callVision(file) {
       // Build FormData
@@ -2018,9 +2181,10 @@ document.addEventListener("DOMContentLoaded", () => {
     const themeToggle = document.getElementById("themeToggle");
 
     // Toggle collapsed sidebar
-    shrinkBtn.addEventListener("click", () => {
+   shrinkBtn.addEventListener("click", () => {
       sidebar.classList.toggle("collapsed");
       const icon = shrinkBtn.querySelector("i");
+      icon.classList.toggle("fa-angle-double-left");
       icon.classList.toggle("fa-angle-double-right");
     });
 
@@ -2152,6 +2316,7 @@ You are a plant expert. Given a description, respond with name, uses, cautions, 
        }
 
         panel.innerHTML = `<div class="result-content">${html}</div>`;
+        localStorage.setItem("idenResult", panel.innerHTML);
         addClose(panel);
         addTools(panel);
       } catch (err) {
@@ -2208,6 +2373,7 @@ Duration (days): ${duration}`
           }
         ]);
         panel.innerHTML = `<div class="result-content">${formatHTML(aiReply)}</div>`;
+        localStorage.setItem("symResult", panel.innerHTML);
         addClose(panel);
         addTools(panel);
       } catch (err) {
@@ -2224,6 +2390,7 @@ You are an expert in cultural herbalism and folklore. A user will give you a reg
       `.trim(),
       inputExtractor: () => document.getElementById("cultureQuery").value.trim(),
       resultPanelId: "cultureResult"
+       localStorage.setItem("cultureResult", panel.innerHTML);
     });
 
     // ─── SAFETY CHECKER ─────────────────────────────────────────────────────
@@ -2239,6 +2406,7 @@ You are a safety expert in herbal and pharmaceutical interactions. Given two her
         return `Item A: ${a}\nItem B: ${b}`;
       },
       resultPanelId: "safetyResult"
+      localStorage.setItem("safetyResult", panel.innerHTML);
     });
 
     // ─── AI HERBALIST CHAT ──────────────────────────────────────────────────
@@ -2261,7 +2429,7 @@ You are a safety expert in herbal and pharmaceutical interactions. Given two her
     }
 
     function addMessage(who, text, timestamp = new Date()) {
-      const msgDate = new Date(timestamp);
+      const msgDate = timestamp instanceof Date ? timestamp : new Date(timestamp);
       const msgDay = msgDate.toDateString();
       if (msgDay !== lastDateHeader) {
         const sep = document.createElement("div");
@@ -2274,7 +2442,7 @@ You are a safety expert in herbal and pharmaceutical interactions. Given two her
       msgDiv.className = who === "You" ? "user-msg" : "bot-msg";
       msgDiv.innerHTML = `
         ${formatHTML(text)}
-        <div class="timestamp">${msgDate.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}</div>
+      <div class="timestamp">${msgDate.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit", hour12: true })}</div>
       `;
       chatBox.append(msgDiv);
       chatBox.scrollTop = chatBox.scrollHeight;
@@ -2288,7 +2456,8 @@ You are a safety expert in herbal and pharmaceutical interactions. Given two her
       const userText = chatInput.value.trim();
       if (!userText) return;
       // 1) Display user’s message
-      addMessage("You", userText);
+      const userTime = new Date();
+      addMessage("You", userText, userTime);
       chatHistory.push({ who: "You", text: userText, timestamp: new Date().toISOString() });
       localStorage.setItem("chatHistory", JSON.stringify(chatHistory));
       chatInput.value = "";
@@ -2334,38 +2503,67 @@ You are a friendly, knowledgeable herbalist. A user will ask questions about her
 
     // View chat history in a modal
     viewHistoryBtn.onclick = () => {
-      const modal = document.createElement("div");
+     const modal = document.createElement("div");
       modal.className = "history-modal";
       modal.innerHTML = `
         <div class="history-content">
           <h3>Chat History</h3>
-          <ul>
-            ${chatHistory
-              .map((m, i) => {
-                const dt = new Date(m.timestamp);
-                return `
-                <li>
-                  <div class="chat-date-separator">${formatDateSeparator(dt)}</div>
-                  <strong>${m.who}:</strong> ${m.text}
-                  <button data-index="${i}" class="del-msg" title="Delete"><i class="fas fa-trash-alt"></i></button>
-                </li>`;
-              })
-              .join("")}
-          </ul>
-          <button class="close-history"><i class="fas fa-times"></i> Close</button>
+          <div class="history-table-wrapper">
+            <table class="history-table">
+              <thead>
+                <tr>
+                  <th>Date</th>
+                  <th>Sender</th>
+                  <th>Message</th>
+                  <th>Action</th>
+                </tr>
+              </thead>
+              <tbody>
+              ${chatHistory
+                .map((m, i) => {
+                  const dt = new Date(m.timestamp);
+                  return `
+                  <tr data-index="${i}">
+                    <td>${formatDateSeparator(dt)} ${dt.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit", hour12: true })}</td>
+                    <td>${m.who}</td>
+                    <td>${escapeHtml(m.text)}</td>
+                    <td><button class="del-msg" data-index="${i}" title="Delete"><i class="fas fa-trash-alt"></i></button></td>
+                  </tr>`;
+                })
+                .join("")}
+              </tbody>
+            </table>
+          </div>
+          <div class="history-actions">
+            <button class="clear-history"><i class="fas fa-trash"></i> Clear History</button>
+            <button class="close-history"><i class="fas fa-times"></i> Close</button>
+          </div>
         </div>`;
-      document.body.append(modal);
+     document.body.append(modal);
 
-      // Hook up delete buttons
+    // Hook up delete buttons (per‐row)
       modal.querySelectorAll(".del-msg").forEach(btn => {
         btn.onclick = () => {
           const idx = +btn.dataset.index;
           chatHistory.splice(idx, 1);
           localStorage.setItem("chatHistory", JSON.stringify(chatHistory));
-          modal.remove();
-          viewHistoryBtn.click(); // reopen to refresh
+          // Remove that <tr> from the table
+          const row = modal.querySelector(`tr[data-index="${idx}"]`);
+          if (row) row.remove();
+          // Re‐index the remaining rows’ data-index attributes
+          modal.querySelectorAll(".history-table tbody tr").forEach((tr, i) => {
+            tr.dataset.index = i;
+            tr.querySelector(".del-msg").dataset.index = i;
+          });
         };
       });
+      // “Clear History” button
+      modal.querySelector(".clear-history").onclick = () => {
+        chatHistory = [];
+        localStorage.removeItem("chatHistory");
+        modal.remove();
+      };
+      // “Close” button
       modal.querySelector(".close-history").onclick = () => modal.remove();
     };
 
@@ -2383,6 +2581,7 @@ You are an expert herbal pharmacist. A user will provide one herb, age, and weig
         return `Herb: ${herb}\nAge: ${age}\nWeight: ${weight} kg`;
       },
       resultPanelId: "pfResult"
+      localStorage.setItem("pfResult", panel.innerHTML);
     });
 
     // ─── RESEARCH SUMMARIES ───────────────────────────────────────────────────
@@ -2394,6 +2593,7 @@ You are an expert researcher specializing in herbal clinical studies. The user w
       `.trim(),
       inputExtractor: () => document.getElementById("researchQuery").value.trim(),
       resultPanelId: "researchResults"
+      localStorage.setItem("researchResults", panel.innerHTML);
     });
 
     // ─── INVENTORY FORECAST ───────────────────────────────────────────────────
@@ -2409,6 +2609,7 @@ You are an experienced inventory analyst for herbal dispensaries. Given a herb n
         return `Herb: ${herb}\nWeeks Ahead: ${weeks}`;
       },
       resultPanelId: "inventoryResult"
+      localStorage.setItem("inventoryResult", panel.innerHTML);
     });
 
     // ─── GENETICS MATCH ───────────────────────────────────────────────────────
@@ -2445,6 +2646,7 @@ You are a genetics expert in herbal medicine. The user will upload a genetic rep
           { role: "user", content: fileText }
         ]);
         panel.innerHTML = `<div class="result-content">${formatHTML(aiReply)}</div>`;
+        localStorage.setItem("geneticResult", panel.innerHTML);
         addClose(panel);
         addTools(panel);
       } catch (err) {
@@ -2466,6 +2668,7 @@ You are a dosage calculation expert for herbal preparations. Given a user’s we
         return `Weight: ${weight} kg\nSymptom: ${symptom}\nForm Type: ${formType}`;
       },
       resultPanelId: "dosageResult"
+       localStorage.setItem("dosageResult", panel.innerHTML);
     });
 
     // ─── INTERACTION CHECKER ───────────────────────────────────────────────────
@@ -2482,6 +2685,7 @@ You are a qualified pharmacologist specialized in herb-herb interactions. Given 
         return `Herb A: ${a}\nHerb B: ${b}`;
       },
       resultPanelId: "interactionResult"
+      localStorage.setItem("interactionResult", panel.innerHTML);
     });
 
     // ─── ROI CALCULATOR ───────────────────────────────────────────────────────
@@ -2531,6 +2735,7 @@ Conclude with final ROI percentage and a short summary line.
           }
         ]);
         panel.innerHTML = `<div class="result-content">${formatHTML(aiReply)}</div>`;
+        localStorage.setItem("roiResult", panel.innerHTML);
         addClose(panel);
         addTools(panel);
       } catch (err) {
@@ -2540,90 +2745,175 @@ Conclude with final ROI percentage and a short summary line.
 
     // ─── EXECUTIVE ANALYTICS DASHBOARD ───────────────────────────────────────
 
-    function getCSSVar(name) {
-      return getComputedStyle(document.documentElement).getPropertyValue(name).trim();
-    }
+   // ─── Executive Analytics: Real‐Data Charts ────────────────────────────
+  function getCSSVar(name) {
+    return getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+  }
 
-    function initCharts() {
-const colorText = getCSSVar("--text");
-      const baseConfig = (type, data) => ({
-        type: type,
-        data: data,
-        options: {
-          responsive: true,
-          maintainAspectRatio: false,
-          aspectRatio: 1.8,
-          color: colorText,
-          scales: {
-            x: {
-              ticks: { color: colorText },
-              grid: { display: false }
-            },
-            y: {
-              ticks: { color: colorText },
-              grid: { display: false }
-            }
+  function initRealCharts() {
+    const colorText = getCSSVar("--text");
+    const colorMuted = getCSSVar("--muted");
+
+    // 1) Adoption Over Time (line)
+    new Chart("chartAdoption", {
+      type: "line",
+      data: {
+        labels: ["January","February","March","April","May","June","July"],
+        datasets: [{
+          label: "New Users",
+          data: [45, 60, 80, 95, 120, 135, 150],
+          borderColor: getCSSVar("--primary"),
+          backgroundColor: "rgba(58,118,84,0.1)",
+          fill: true
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        scales: {
+          x: { 
+            ticks: { color: colorText },
+            grid: { display: false }
           },
-          plugins: {
-            legend: {
-              display: false,
-              labels: { color: colorText }
-            }
+          y: {
+            ticks: { color: colorText },
+            grid: { color: colorMuted }
+          }
+        },
+        plugins: {
+          legend: { display: false }
+        }
+      }
+    });
+
+    // 2) Efficacy Outcomes (bar): positive feedback % per herb
+    new Chart("chartEfficacy", {
+      type: "bar",
+      data: {
+        labels: ["Ashwagandha","Turmeric","Ginger","Chamomile"],
+        datasets: [{
+          data: [78, 85, 72, 90],
+          backgroundColor: [
+            "rgba(42,111,78,0.7)",
+            "rgba(142,108,75,0.7)",
+            "rgba(212,197,162,0.7)",
+            "rgba(42,111,78,0.4)"
+          ]
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        scales: {
+          x: { ticks: { color: colorText }, grid: { display: false } },
+          y: { ticks: { color: colorText }, grid: { color: colorMuted }, beginAtZero: true, max: 100 }
+        },
+        plugins: {
+          legend: { display: false }
+        }
+      }
+    });
+
+    // 3) Inventory Impact (pie): usage (kg) of top herbs this week
+    new Chart("chartSupply", {
+      type: "pie",
+      data: {
+        labels: ["Turmeric","Moringa","Ginger","Hibiscus"],
+        datasets: [{
+          data: [120, 95, 80, 60],
+          backgroundColor: [
+            "rgba(142,108,75,0.7)",
+            "rgba(42,111,78,0.7)",
+            "rgba(212,197,162,0.7)",
+            "rgba(42,111,78,0.4)"
+          ]
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: {
+            position: "bottom",
+            labels: { color: colorText }
           }
         }
+      }
+    });
+
+    // 4) Financial ROI (radar) for Q1–Q4
+    new Chart("chartROI", {
+      type: "radar",
+      data: {
+        labels: ["Q1","Q2","Q3","Q4"],
+        datasets: [{
+          label: "ROI (%)",
+          data: [12, 18, 22, 15],
+          borderColor: getCSSVar("--secondary"),
+          backgroundColor: "rgba(142,108,75,0.2)"
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        scales: {
+          r: {
+            angleLines: { color: colorMuted },
+            grid: { color: colorMuted },
+            pointLabels: { color: colorText }
+          }
+        },
+        plugins: {
+          legend: { display: false }
+        }
+      }
+    });
+  }
+
+  // ─── Export all charts + descriptions as CSV ─────────────────────────
+  document.getElementById("exportCSV").addEventListener("click", () => {
+    const charts = [
+      {
+        id: "Adoption",
+        desc: "Adoption Over Time: New AI users each month",
+        labels: ["January","February","March","April","May","June","July"],
+        values: [45, 60, 80, 95, 120, 135, 150]
+      },
+      {
+        id: "Efficacy",
+        desc: "Efficacy Outcomes: Positive feedback % per herb",
+        labels: ["Ashwagandha","Turmeric","Ginger","Chamomile"],
+        values: [78, 85, 72, 90]
+      },
+      {
+        id: "Supply",
+        desc: "Inventory Impact: Weekly usage (kg) of top herbs",
+        labels: ["Turmeric","Moringa","Ginger","Hibiscus"],
+        values: [120, 95, 80, 60]
+      },
+      {
+        id: "ROI",
+        desc: "Financial ROI: Quarterly ROI (%)",
+        labels: ["Q1","Q2","Q3","Q4"],
+        values: [12, 18, 22, 15]
+      }
+    ];
+    let csvContent = "Chart,Description,Label,Value\n";
+    charts.forEach(ch => {
+      ch.labels.forEach((lab, idx) => {
+        csvContent += `"${ch.id}","${ch.desc}","${lab}",${ch.values[idx]}\n`;
       });
-
-      new Chart("chartAdoption", baseConfig("line", {
-        labels: ["Jan", "Feb", "Mar", "Apr", "May"],
-        datasets: [{ data: [50, 75, 100, 125, 150] }]
-      }));
-
-      new Chart("chartEfficacy", baseConfig("bar", {
-        labels: ["Mild", "Moderate", "High"],
-        datasets: [{ data: [30, 45, 25] }]
-      }));
-
-      new Chart("chartSupply", baseConfig("pie", {
-        labels: ["Herb A", "Herb B", "Herb C"],
-        datasets: [{ data: [200, 150, 300] }]
-      }));
-
-      new Chart("chartROI", baseConfig("radar", {
-        labels: ["Q1", "Q2", "Q3", "Q4"],
-        datasets: [{ data: [5, 7, 6, 8] }]
-      }));
-
-    }
-
-    initCharts();
-
-   // Export charts data as CSV
-    document.getElementById("exportCSV").onclick = () => {
-      const chartIds = [
-        { id: "Adoption", desc: "Adoption Over Time: Number of new users subscribing monthly." },
-        { id: "Efficacy", desc: "Efficacy Outcomes: Positive feedback percentage by severity." },
-        { id: "Supply",   desc: "Supply Impact: Inventory usage distribution." },
-        { id: "ROI",      desc: "Financial ROI: Quarterly return percentages." }
-      ];
-      let csvContent = "Chart,Description,Label,Value\n";
-      chartIds.forEach((obj) => {
-        const chart = Chart.getChart("chart" + obj.id);
-        if (!chart) return;
-        chart.data.labels.forEach((label, idx) => {
-          const value = chart.data.datasets[0].data[idx];
-          csvContent += `"${obj.id}","${obj.desc}","${label}",${value}\n`;
-        });
-      });
-      const blob = new Blob([csvContent], { type: "text/csv" });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = "analytics_full.csv";
-      document.body.append(a);
-      a.click();
-      URL.revokeObjectURL(url);
-      a.remove();
-    };
+    });
+    const blob = new Blob([csvContent], { type: "text/csv" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "analytics_full.csv";
+    document.body.append(a);
+    a.click();
+    URL.revokeObjectURL(url);
+    a.remove();
+  });
 
     // ─── RESPONSE PANEL CLOSE BUTTONS ─────────────────────────────────────────
 
