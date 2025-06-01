@@ -2118,49 +2118,7 @@
   </footer>
   </main>
 
-  <script>
-      ["idenResult","symResult","cultureResult","safetyResult",
-   "pfResult","researchResults","inventoryResult","geneticResult",
-   "dosageResult","interactionResult","roiResult"]
-  .forEach(id => {
-    const panel = document.getElementById(id);
-    const saved = localStorage.getItem(id);
-    if (saved) {
-      panel.innerHTML = saved;
-      panel.hidden = false;
-      // ALWAYS re-run addClose & addTools, to ensure buttons reattach
-      addClose(panel);
-      addTools(panel);
-      panel.querySelectorAll(".close-btn").forEach(btn => btn.onclick = () => panel.hidden = true);
-      panel.querySelectorAll(".copy-btn").forEach(cb => {
-        cb.onclick = () => {
-          const content = panel.querySelector(".result-content").innerText;
-          navigator.clipboard.writeText(content);
-          const t = document.createElement("div");
-          t.className = "copy-toast";
-          t.textContent = "Copied!";
-          document.body.append(t);
-          setTimeout(() => t.remove(), 1500);
-        };
-      });
-      panel.querySelectorAll(".dl-btn").forEach(db => {
-        db.onclick = () => {
-          const text = panel.querySelector(".result-content").innerText;
-          const blob = new Blob([text], { type: "text/plain" });
-          const url = URL.createObjectURL(blob);
-          const a = document.createElement("a");
-          a.href = url;
-          a.download = "response.txt";
-          document.body.append(a);
-          a.click();
-          URL.revokeObjectURL(url);
-          a.remove();
-        };
-      });
-    }
-  });
-
-    </script>
+ 
  <script>
   // On first load, apply saved theme:
   const savedTheme = localStorage.getItem("vitra-theme");
@@ -3095,15 +3053,48 @@ Conclude with final ROI percentage and a short summary line.
         if (panel) panel.hidden = true;
       };
     });
+      ["idenResult","symResult","cultureResult","safetyResult",
+   "pfResult","researchResults","inventoryResult","geneticResult",
+   "dosageResult","interactionResult","roiResult"]
+  .forEach(id => {
+    const panel = document.getElementById(id);
+    const saved = localStorage.getItem(id);
+    if (saved) {
+      panel.innerHTML = saved;
+      panel.hidden = false;
+      // ALWAYS re-run addClose & addTools, to ensure buttons reattach
+      addClose(panel);
+      addTools(panel);
+      panel.querySelectorAll(".close-btn").forEach(btn => btn.onclick = () => panel.hidden = true);
+      panel.querySelectorAll(".copy-btn").forEach(cb => {
+        cb.onclick = () => {
+          const content = panel.querySelector(".result-content").innerText;
+          navigator.clipboard.writeText(content);
+          const t = document.createElement("div");
+          t.className = "copy-toast";
+          t.textContent = "Copied!";
+          document.body.append(t);
+          setTimeout(() => t.remove(), 1500);
+        };
+      });
+      panel.querySelectorAll(".dl-btn").forEach(db => {
+        db.onclick = () => {
+          const text = panel.querySelector(".result-content").innerText;
+          const blob = new Blob([text], { type: "text/plain" });
+          const url = URL.createObjectURL(blob);
+          const a = document.createElement("a");
+          a.href = url;
+          a.download = "response.txt";
+          document.body.append(a);
+          a.click();
+          URL.revokeObjectURL(url);
+          a.remove();
+        };
+      });
+    }
+  });
   });
 </script>
-  <script>
-    window.addEventListener("load", () => {
-      if (typeof initRealCharts === "function") {
-        initRealCharts();
-      }
-    });
-  </script>
 
 
 <script>
