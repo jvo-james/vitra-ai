@@ -2024,50 +2024,7 @@ document.addEventListener('DOMContentLoaded', () => {
       chatBox.append(msgDiv);
       chatBox.scrollTop = chatBox.scrollHeight;
     }
-    // Sanitize and format simple markdown
-    function sanitizeHTML(unsafe) {
-      if (!unsafe) return "";
-      return unsafe
-        .replace(/&/g, "&amp;")
-        .replace(/</g, "&lt;")
-        .replace(/>/g, "&gt;")
-        .replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>")
-        .replace(/\*(.+?)\*/g, "<em>$1</em>")
-        .replace(/`([^`]+)`/g, "<code>$1</code>")
-        .split(/\n{2,}/)
-        .map(p => `<p>${p.trim()}</p>`)
-        .join("");
-    }
-
-    //──────────────────────────────────────────────────────────────────────────────
-  // FUNCTION: addCloseCopyDownload(panel)
-  // Adds “Copy” and “Download” buttons after a generated response
-  //──────────────────────────────────────────────────────────────────────────────
-  function addCloseCopyDownload(panel) {
-    // Ensure we don’t insert duplicates
-    if (panel.querySelector(".tool-row")) return;
-
-    const toolRow = document.createElement("div");
-    toolRow.className = "tool-row";
-
-    // COPY button
-    const copyBtn = document.createElement("button");
-    copyBtn.className = "copy-btn";
-    copyBtn.type = "button";
-    copyBtn.title = "Copy response";
-    copyBtn.innerHTML = '<i class="fas fa-copy"></i>';
-    toolRow.append(copyBtn);
-
-    // DOWNLOAD button
-    const dlBtn = document.createElement("button");
-    dlBtn.className = "dl-btn";
-    dlBtn.type = "button";
-    dlBtn.title = "Download response";
-    dlBtn.innerHTML = '<i class="fas fa-download"></i>';
-    toolRow.append(dlBtn);
-
-    panel.append(toolRow);
-  }
+   
    
     // Render existing history
     chatHistory.forEach(m => {
@@ -2205,6 +2162,37 @@ When responding to user questions:
     };
   })();
 
+   //──────────────────────────────────────────────────────────────────────────────
+  // FUNCTION: addCloseCopyDownload(panel)
+  // Adds “Copy” and “Download” buttons after a generated response
+  //──────────────────────────────────────────────────────────────────────────────
+  function addCloseCopyDownload(panel) {
+    // Ensure we don’t insert duplicates
+    if (panel.querySelector(".tool-row")) return;
+
+    const toolRow = document.createElement("div");
+    toolRow.className = "tool-row";
+
+    // COPY button
+    const copyBtn = document.createElement("button");
+    copyBtn.className = "copy-btn";
+    copyBtn.type = "button";
+    copyBtn.title = "Copy response";
+    copyBtn.innerHTML = '<i class="fas fa-copy"></i>';
+    toolRow.append(copyBtn);
+
+    // DOWNLOAD button
+    const dlBtn = document.createElement("button");
+    dlBtn.className = "dl-btn";
+    dlBtn.type = "button";
+    dlBtn.title = "Download response";
+    dlBtn.innerHTML = '<i class="fas fa-download"></i>';
+    toolRow.append(dlBtn);
+
+    panel.append(toolRow);
+  }
+   
+
   //──────────────────────────────────────────────────────────────────────────────
   // GENERIC OPENAI CALL (with retry)
   //──────────────────────────────────────────────────────────────────────────────
@@ -2308,22 +2296,6 @@ When responding to user questions:
     });
   }
 
-  //──────────────────────────────────────────────────────────────────────────────
-  // SANITIZE & FORMAT SIMPLE MARKDOWN
-  //──────────────────────────────────────────────────────────────────────────────
-  function sanitizeHTML(unsafe) {
-    if (!unsafe) return "";
-    return unsafe
-      .replace(/&/g, "&amp;")
-      .replace(/</g, "&lt;")
-      .replace(/>/g, "&gt;")
-      .replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>")
-      .replace(/\*(.+?)\*/g, "<em>$1</em>")
-      .replace(/`([^`]+)`/g, "<code>$1</code>")
-      .split(/\n{2,}/)
-      .map(p => `<p>${p.trim()}</p>`)
-      .join("");
-  }
 
   //──────────────────────────────────────────────────────────────────────────────
 // WIRE ALL MODULES WITH SYSTEM PROMPTS (UPDATED “Other” HANDLING)
@@ -2626,10 +2598,7 @@ Provide:
   //──────────────────────────────────────────────────────────────────────────────
   // EXPORT ALL MODULE CHARTS BUTTON (Example: ID "exportData")
   //──────────────────────────────────────────────────────────────────────────────
-  const exportAllBtn = document.getElementById("exportData");
-  exportAllBtn.addEventListener("click", () => {
-    // Combine calorieChart and macroChart data into one CSV
-    const exportAllBtn = document.getElementById("exportData");
+   const exportAllBtn = document.getElementById("exportData");
   exportAllBtn.addEventListener("click", () => {
     // Combine calorieChartInstance and macroChartInstance data into one CSV
     let csv = "Chart,Label,Value\n";
@@ -2649,8 +2618,7 @@ Provide:
     a.download = "dietetics-progress.csv";
     a.click();
   });
-
-  //──────────────────────────────────────────────────────────────────────────────
+ //──────────────────────────────────────────────────────────────────────────────
   // RESPONSE PANEL CONTROLS (CLOSE, COPY, DOWNLOAD)
   //──────────────────────────────────────────────────────────────────────────────
   document.body.addEventListener("click", e => {
