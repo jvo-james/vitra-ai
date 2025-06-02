@@ -2326,30 +2326,45 @@ You are a Metabolomic Health Analyst AI. Analyze the user’s specified date ran
   // AFTER runRisk, INJECT RADAR CHART BASED ON AI RESPONSE
   //──────────────────────────────────────────────────────────────────────────────
   {
-    const runRiskBtn = document.getElementById("runRisk");
+ 
+  const runRiskBtn = document.getElementById("runRisk");
+    let radarChartInstance = null;
     runRiskBtn.addEventListener("click", () => {
       const panel = document.getElementById("riskResult");
-      // Delay to ensure AI reply is rendered
+      // Delay so AI text appears first
       setTimeout(() => {
         const text = panel.querySelector(".result-content").innerText || "";
-        // Match "marker: value" pairs
         const matches = [...text.matchAll(/(\w+):\s*(\d+)/g)];
         if (!matches.length) return;
         const labels = matches.map(m => m[1]);
         const data = matches.map(m => Number(m[2]));
-        // Remove existing canvas if any
+
+        // If a previous radar chart exists, destroy it before creating a new one
+        if (radarChartInstance) {
+          radarChartInstance.destroy();
+          radarChartInstance = null;
+        }
+
+        // Remove any existing <canvas> then add a fresh one
         const existingCanvas = panel.querySelector("canvas");
         if (existingCanvas) existingCanvas.remove();
         const canvas = document.createElement("canvas");
         panel.appendChild(canvas);
-        new Chart(canvas.getContext("2d"), {
+
+        radarChartInstance = new Chart(canvas.getContext("2d"), {
           type: "radar",
-          data: { labels, datasets: [{ label: "Biomarker Levels", data }] },
+          data: {
+            labels,
+            datasets: [{
+              label: "Biomarker Levels",
+              data
+            }]
+          },
           options: { responsive: true, maintainAspectRatio: false }
         });
       }, 700);
     });
-  }
+}
 
  // 6. Fitness Nutrition Coach
 wireModule("runFitness",
@@ -2421,105 +2436,107 @@ Provide:
   //──────────────────────────────────────────────────────────────────────────────
   // CHART.JS: PROGRESS CHARTS (Calories & Macro Distribution)
   //──────────────────────────────────────────────────────────────────────────────
-  // Weekly Calorie Intake (Line Chart)
-  const ctxCal = document.getElementById("calorieChart").getContext("2d");
-  // Simulate daily intake data for last 7 days
-  const weekdays = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
-  const today = new Date();
-  const last7Labels = [];
-  const last7Data = [];
-  for (let i = 6; i >= 0; i--) {
-    const d = new Date(today);
-    d.setDate(d.getDate() - i);
-    last7Labels.push(weekdays[d.getDay()]);
-    last7Data.push(Math.floor(Math.random() * 800) + 1500); // random 1500–2300 kcal
-  }
-  const calorieChart = new Chart(ctxCal, {
-    type: "line",
-    data: {
-      labels: last7Labels,
-      datasets: [{
-        label: "Calories In",
-        data: last7Data,
-        borderColor: getComputedStyle(document.documentElement).getPropertyValue("--primary").trim(),
-        backgroundColor: "rgba(212, 172, 13, 0.1)",
-        fill: true
-      }]
-    },
-    options: {
-      responsive: true,
-      maintainAspectRatio: false,
-      scales: {
-        x: { ticks: { color: getComputedStyle(document.documentElement).getPropertyValue("--text").trim() } },
-        y: {
-          ticks: { color: getComputedStyle(document.documentElement).getPropertyValue("--text").trim() },
-          beginAtZero: false,
-          suggestedMin: 1200,
-          suggestedMax: 2500
-        }
-      },
-      plugins: { legend: { display: false } }
+// Ensure we only create these once
+  let calorieChartInstance = null;
+  let macroChartInstance = null;
+
+  if (!calorieChartInstance && !macroChartInstance) {
+    // 1) Weekly Calorie Intake line chart
+    const ctxCal = document.getElementById("calorieChart").getContext("2d");
+    const weekdays = ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
+    const today = new Date();
+    const last7Labels = [];
+    const last7Data = [];
+    for (let i = 6; i >= 0; i--) {
+      const d = new Date(today);
+      d.setDate(d.getDate() - i);
+      last7Labels.push(weekdays[d.getDay()]);
+      last7Data.push(Math.floor(Math.random() * 800) + 1500); // random 1500-2300 kcal
     }
-  });
-  // Export Calorie Chart CSV
- if (!document.querySelector("#calorieChart + .export-chart-btn")) {
+    calorieChartInstance = new Chart(ctxCal, {
+      type: "line",
+      data: {
+        labels: last7Labels,
+        datasets: [{
+          label: "Calories In",
+          data: last7Data,
+          borderColor: getComputedStyle(document.documentElement).getPropertyValue("--primary").trim(),
+          backgroundColor: "rgba(212, 172, 13, 0.1)",
+          fill: true
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        scales: {
+          x: { ticks: { color: getComputedStyle(document.documentElement).getPropertyValue("--text").trim() } },
+          y: {
+            ticks: { color: getComputedStyle(document.documentElement).getPropertyValue("--text").trim() },
+            beginAtZero: false,
+            suggestedMin: 1200,
+            suggestedMax: 2500
+          }
+       },
+        plugins: { legend: { display: false } }
+      }
+    });
+    // Export Calorie CSV (only once)
     const expCalBtn = document.createElement("button");
     expCalBtn.innerText = "Export Chart";
     expCalBtn.className = "export-chart-btn";
     expCalBtn.type = "button";
     document.getElementById("calorieChart").after(expCalBtn);
-  expCalBtn.addEventListener("click", () => {
-    let csv = "Day,Calories\n";
-    calorieChart.data.labels.forEach((d, i) => {
-      csv += `"${d}",${calorieChart.data.datasets[0].data[i]}\n`;
+    expCalBtn.addEventListener("click", () => {
+      let csv = "Day,Calories\n";
+      calorieChartInstance.data.labels.forEach((d,i) => {
+        csv += `"${d}",${calorieChartInstance.data.datasets[0].data[i]}\n`;
+      });
+     const blob = new Blob([csv], { type: "text/csv" });
+      const a = document.createElement("a");
+      a.href = URL.createObjectURL(blob);
+      a.download = "calorie-intake.csv";
+      a.click();
     });
-    const blob = new Blob([csv], { type: "text/csv" });
-    const a = document.createElement("a");
-    a.href = URL.createObjectURL(blob);
-    a.download = "calorie-intake.csv";
-    a.click();
-  });
- }
-  // Macro Distribution (Pie Chart)
-  const ctxMacro = document.getElementById("macroChart").getContext("2d");
-  // Initial macros (random percentages summing to 100)
-  const rand1 = Math.floor(Math.random() * 40) + 30; // carbs 30–70
-  const rand2 = Math.floor(Math.random() * (100 - rand1));
-  const rand3 = 100 - rand1 - rand2;
-  const macroChart = new Chart(ctxMacro, {
-    type: "pie",
-    data: {
-      labels: ["Carbs", "Protein", "Fat"],
-      datasets: [{ data: [rand1, rand2, rand3], backgroundColor: [
-        getComputedStyle(document.documentElement).getPropertyValue("--secondary").trim(),
-        getComputedStyle(document.documentElement).getPropertyValue("--primary-alt").trim(),
-        getComputedStyle(document.documentElement).getPropertyValue("--accent").trim()
-      ] }]
-    },
-    options: {
-      responsive: true,
-      maintainAspectRatio: false,
-      plugins: { legend: { position: "bottom" } }
-    }
-  });
-  // Export Macro Chart CSV
-  if (!document.querySelector("#macroChart + .export-chart-btn")) {
+
+    // 2) Macro Distribution pie chart
+    const ctxMacro = document.getElementById("macroChart").getContext("2d");
+    const rand1 = Math.floor(Math.random() * 40) + 30;      // carbs 30–70
+    const rand2 = Math.floor(Math.random() * (100 - rand1));
+    const rand3 = 100 - rand1 - rand2;
+    macroChartInstance = new Chart(ctxMacro, {
+      type: "pie",
+      data: {
+        labels: ["Carbs","Protein","Fat"],
+        datasets: [{ data: [rand1, rand2, rand3], backgroundColor: [
+          getComputedStyle(document.documentElement).getPropertyValue("--secondary").trim(),
+          getComputedStyle(document.documentElement).getPropertyValue("--primary-alt").trim(),
+          getComputedStyle(document.documentElement).getPropertyValue("--accent").trim()
+        ] }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: { legend: { position: "bottom" } }
+      }
+    });
+    // Export Macro CSV (only once)
     const expMacroBtn = document.createElement("button");
     expMacroBtn.innerText = "Export Chart";
     expMacroBtn.className = "export-chart-btn";
     expMacroBtn.type = "button";
     document.getElementById("macroChart").after(expMacroBtn);
-  expMacroBtn.addEventListener("click", () => {
-    let csv = "Macro,Percent\n";
-    macroChart.data.labels.forEach((m, i) => {
-      csv += `"${m}",${macroChart.data.datasets[0].data[i]}\n`;
+    expMacroBtn.addEventListener("click", () => {
+      let csv = "Macro,Percent\n";
+      macroChartInstance.data.labels.forEach((m,i) => {
+        csv += `"${m}",${macroChartInstance.data.datasets[0].data[i]}\n`;
+      });
+     const blob = new Blob([csv], { type: "text/csv" });
+      const a = document.createElement("a");
+      a.href = URL.createObjectURL(blob);
+      a.download = "macro-distribution.csv";
+      a.click();
     });
-    const blob = new Blob([csv], { type: "text/csv" });
-    const a = document.createElement("a");
-    a.href = URL.createObjectURL(blob);
-    a.download = "macro-distribution.csv";
-    a.click();
-  });
+  }
   }
   
   //──────────────────────────────────────────────────────────────────────────────
