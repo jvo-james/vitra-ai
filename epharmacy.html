@@ -150,7 +150,7 @@ window.MathJax = {
   aside#sidebar .logo svg {
     width: 1.8rem;
     height: 1.8rem;
-    fill: var(--primary);
+    fill: var(--pharm-text);  
     transition: transform var(--transition);
   }
   aside#sidebar .logo:hover svg {
@@ -159,7 +159,9 @@ window.MathJax = {
   aside#sidebar .logo .logo-text {
     font-size: 1.4rem;
   }
-
+ aside#sidebar.collapsed .logo .logo-text {
+   display: none;
+ }
   aside#sidebar nav {
     flex: 1;
     overflow-y: auto;
@@ -214,7 +216,10 @@ window.MathJax = {
     background: var(--pharm-primary);
     transform: scale(1.1);
   }
-
+html.dark #shrinkSidebar {
+   background: var(--pharm-secondary);
+   color: var(--pharm-text);    /* Make the chevron icon match text in dark mode */
+ }
   /*──────────────────────────────────────────────────────────────────────────────
     HEADER
   ──────────────────────────────────────────────────────────────────────────────*/
@@ -253,7 +258,20 @@ window.MathJax = {
     font-weight: 600;
     color: var(--pharm-text);
   }
-
+html.dark aside#sidebar nav li a i {
+   color: var(--pharm-text);
+ }
+ html.dark aside#sidebar nav li.active a i,
+ html.dark aside#sidebar nav li a:hover i {
+   color: #fff;
+ }
+aside#sidebar nav li a i {
+   color: var(--pharm-text);
+ }
+aside#sidebar nav li.active a i,
+aside#sidebar nav li a:hover i {
+   color: #fff;
+ }
   /*──────────────────────────────────────────────────────────────────────────────
     MAIN CONTENT
   ──────────────────────────────────────────────────────────────────────────────*/
@@ -672,7 +690,22 @@ html.dark .bot-msg {
   transform: scale(1.1);
   background: var(--secondary);
 }
-
+.btn-secondary {
+   display: inline-flex;
+   align-items: center;
+   gap: 0.5rem;
+   background: var(--pharm-primary-alt);
+   color: #fff;
+   padding: 0.5rem 1rem;
+   border-radius: var(--radius);
+   font-weight: 500;
+   border: none;
+   transition: background var(--transition), transform var(--transition);
+ }
+ .btn-secondary:hover {
+   background: var(--pharm-primary);
+   transform: translateY(-1px);
+ }
 /* Small hint under chat */
 #chatHint {
   font-size: 0.9rem;
@@ -682,7 +715,18 @@ html.dark .bot-msg {
   align-items: center;
   gap: 0.5rem;
 }
-
+html.dark .user-msg {
+   border-color: var(--pharm-text); /* subtle border in dark */
+ }
+  html.dark .chat-input-row input {
+   background: var(--pharm-surface);
+   border-color: var(--pharm-secondary);
+   color: var(--pharm-text);
+ }
+ html.dark .chat-input-row button {
+   background: var(--pharm-primary-alt);
+   color: #fff;
+ }
 /* Spinner icon (used inside “bot thinking” states) */
 .spinner {
   display: inline-block;
@@ -1686,11 +1730,22 @@ html.dark .bot-msg {
 
   <!-- 2. Drug Dropdown -->
   <label for="drugSelect" style="margin-top:1rem; display:block;">Choose a drug:</label>
-  <select id="drugSelect">
-    <option value="" disabled selected>Select a drug…</option>
-    <!-- Options populated by JS -->
-  </select>
+ <select id="drugSelect" multiple size="5">
+   <!-- Options populated by JS -->
+ </select>
+ <div style="margin-top:0.5rem;">
+   <button id="addToCart" class="btn" style="background:var(--pharm-primary-alt);">
+     <i class="fas fa-cart-plus"></i> Add to Cart
+   </button>
+ </div>
   <div id="priceDisplay" style="margin-top:0.5rem; font-weight:600;"></div>
+
+    <!-- 2.b Cart Summary -->
+ <div id="cartSummary" style="margin-top:1rem; display:none; border:1px solid var(--pharm-secondary); border-radius:var(--radius); padding:var(--padding); background:var(--pharm-bg);">
+   <h4 style="margin-bottom:0.75rem; color:var(--pharm-primary-alt);">Selected Items:</h4>
+   <ul id="cartList" style="list-style:disc; padding-left:1.5rem; color:var(--pharm-text);"></ul>
+   <p style="font-weight:600; margin-top:0.75rem;">Total: ₵<span id="cartTotal">0.00</span></p>
+ </div>
 
   <!-- 3. User Details Form -->
   <div id="orderDetails" style="margin-top:1.5rem; display:none;">
@@ -1785,6 +1840,9 @@ html.dark .bot-msg {
     <div id="historyModal" class="modal" hidden>
       <div class="modal-content">
         <span class="close-modal">&times;</span>
+        <button class="close-modal" aria-label="Close History" style="position:absolute; top:0.75rem; right:1rem; background:none; border:none; font-size:1.25rem; color:var(--pharm-text); cursor:pointer;">
+         <i class="fas fa-times"></i>
+       </button>
         <div class="modal-header">
           <h3>Chat History</h3>
            <button id="clearHistory" class="btn" type="button" style="float:right;"><i class="fas fa-trash-alt"></i></button>
@@ -1882,6 +1940,23 @@ html.dark .bot-msg {
 <script src="https://js.paystack.co/v1/inline.js"></script>
 <script>
 document.addEventListener("DOMContentLoaded", () => {
+
+ window.callOpenAI = async function(messages) {
+   try {
+     const response = await fetch("/.netlify/functions/openai-proxy", {
+       method: "POST",
+       headers: { "Content-Type": "application/json" },
+       body: JSON.stringify({ messages })
+     });
+     if (!response.ok) throw new Error("OpenAI request failed");
+     const data = await response.json();
+     return data.choices?.[0]?.message?.content.trim() || "";
+   } catch (err) {
+     console.error(err);
+     throw err;
+   }
+ };
+
   // ──────────────────────────────────────────────────────────────────────────────
   // 1) LIST OF 40 POPULAR DRUGS IN GHANA (name + price in GHS)
   // ──────────────────────────────────────────────────────────────────────────────
@@ -2001,6 +2076,53 @@ ${drugsData.map(d => d.name).join(", ")}.
     }
   });
 
+    // ──────────────────────────────────────────────────────────────────────────────
+  // After existing ai‐powered suggestion logic, add “Add to Cart” handling
+  // ──────────────────────────────────────────────────────────────────────────────
+  const addToCartBtn = document.getElementById("addToCart");
+  const cartList     = document.getElementById("cartList");
+  const cartTotal    = document.getElementById("cartTotal");
+  const cartSummary  = document.getElementById("cartSummary");
+
+ let cartItems = []; // array of { name, price }
+
+  addToCartBtn.addEventListener("click", () => {
+    // Grab all selected <option> indices
+    const selectedOptions = Array.from(drugSelect.selectedOptions);
+    if (selectedOptions.length === 0) {
+      alert("⚠️ Please select at least one drug to add.");
+      return;
+    }
+
+   // Reset cartItems each time (so duplicates from previous add are removed)
+   cartItems = [];
+    selectedOptions.forEach(opt => {
+      const idx = Number(opt.value);
+      if (!isNaN(idx) && idx >= 0) {
+        const { name, price } = drugsData[idx];
+       cartItems.push({ name, price });
+      }
+    });
+
+    // Populate cartList
+    cartList.innerHTML = "";
+   let total = 0;
+    cartItems.forEach(item => {
+      const li = document.createElement("li");
+      li.textContent = `${item.name} — ₵${item.price.toFixed(2)}`;
+      cartList.append(li);
+     total += item.price;
+    });
+   cartTotal.textContent = total.toFixed(2);
+
+   // Show the summary area
+    cartSummary.style.display = "block";
+
+   // Hide single‐item priceDisplay since we're now dealing with multiple
+   priceDisplay.textContent = "";
+   document.getElementById("orderDetails").style.display = "block";
+  });
+
   // ──────────────────────────────────────────────────────────────────────────────
   // 3) PAYMENT WITH PAYSTACK
   // ──────────────────────────────────────────────────────────────────────────────
@@ -2115,6 +2237,7 @@ ${drugsData.map(d => d.name).join(", ")}.
       themeToggle.classList.toggle("fa-moon", !isDark);
       htmlEl.setAttribute("aria-theme", isDark ? "dark" : "light");
       localStorage.setItem("epharmacy-theme", isDark ? "dark" : "light");
+   shrinkSidebar.style.color = isDark ? getComputedStyle(document.documentElement).getPropertyValue("--pharm-text") : getComputedStyle(document.documentElement).getPropertyValue("--pharm-surface");
     });
 
     // ────────────────────────────────────────────────────────────────────────────
@@ -2129,6 +2252,13 @@ ${drugsData.map(d => d.name).join(", ")}.
       const icon = shrinkSidebar.querySelector("i");
       icon.classList.toggle("fa-chevron-left");
       icon.classList.toggle("fa-chevron-right");
+
+      const logoText = sidebar.querySelector(".logo .logo-text");
+     if (sidebar.classList.contains("collapsed")) {
+       logoText.style.display = "none";
+     } else {
+       logoText.style.display = "inline"; 
+     }
     });
     // Mobile open/close
     hamburger.addEventListener("click", () => {
@@ -2892,6 +3022,13 @@ You are a friendly, knowledgeable pharmacist. A user will ask questions about me
       modal.querySelector(".close-history").onclick = () => modal.remove();
     });
 
+     const staticHistoryModal  = document.getElementById("historyModal");
+   const staticCloseBtn      = staticHistoryModal?.querySelector(".close-modal");
+   if (staticCloseBtn) {
+     staticCloseBtn.addEventListener("click", () => {
+       staticHistoryModal.hidden = true;
+     });
+   }
     // ────────────────────────────────────────────────────────────────────────────
     // 18) USAGE STATISTICS CHARTS (REAL-TIME)
     // ────────────────────────────────────────────────────────────────────────────
