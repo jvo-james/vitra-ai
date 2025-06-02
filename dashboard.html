@@ -608,286 +608,324 @@
   </div>
   <div id="toast" class="toast"></div>
 
-  <!-- SCRIPTS -->
-  <script>
-    // ──────────────────────────────────────────────────────────────────────────────
-    // FIREBASE INITIALIZATION
-    // ──────────────────────────────────────────────────────────────────────────────
-    const firebaseConfig = {
-      apiKey: "AIzaSyBhaYOcLMXuobCT-vaXr-zXTZnBfaheAIY",
-      authDomain: "vitra-ai-712ea.firebaseapp.com",
-      projectId: "vitra-ai-712ea",
-      storageBucket: "vitra-ai-712ea.appspot.com",
-      messagingSenderId: "306868103753",
-      appId: "1:306868103753:web:e2d7700f8ad34c1e17ed98"
-    };
-    firebase.initializeApp(firebaseConfig);
 
-    document.addEventListener('DOMContentLoaded', () => {
-      // ELEMENT REFERENCES
-      const themeToggle = document.getElementById('themeToggle');
-      const signOutBtn = document.getElementById('signOutBtn');
-      const userNameEl = document.getElementById('userName');
-      const profileLink = document.getElementById('profileLink');
-      const profileModal = document.getElementById('profileModal');
-      const closeProfileModal = document.getElementById('closeProfileModal');
-      const profileNameInput = document.getElementById('profileName');
-      const saveProfileBtn = document.getElementById('saveProfileBtn');
+<script>
+  // ──────────────────────────────────────────────────────────────────────────────
+  // FIREBASE INITIALIZATION
+  // ──────────────────────────────────────────────────────────────────────────────
+  const firebaseConfig = {
+    apiKey: "AIzaSyBhaYOcLMXuobCT-vaXr-zXTZnBfaheAIY",
+    authDomain: "vitra-ai-712ea.firebaseapp.com",
+    projectId: "vitra-ai-712ea",
+    storageBucket: "vitra-ai-712ea.appspot.com",
+    messagingSenderId: "306868103753",
+    appId: "1:306868103753:web:e2d7700f8ad34c1e17ed98"
+  };
+  firebase.initializeApp(firebaseConfig);
 
-      const toastEl = document.getElementById('toast');
-      const startDateInput = document.getElementById('startDate');
-      const endDateInput = document.getElementById('endDate');
-      const filterBtn = document.getElementById('filterBtn');
+  document.addEventListener('DOMContentLoaded', () => {
+    // ELEMENT REFERENCES
+    const themeToggle = document.getElementById('themeToggle');
+    const signOutBtn = document.getElementById('signOutBtn');
+    const userNameEl = document.getElementById('userName');
+    const profileLink = document.getElementById('profileLink');
+    const profileModal = document.getElementById('profileModal');
+    const closeProfileModal = document.getElementById('closeProfileModal');
+    const profileNameInput = document.getElementById('profileName');
+    const saveProfileBtn = document.getElementById('saveProfileBtn');
 
-      // STATS ELEMENTS
-      const herbalQueriesEl = document.getElementById('herbalQueries');
-      const psychQueriesEl = document.getElementById('psychQueries');
-      const dietQueriesEl = document.getElementById('dietQueries');
-      const pharmacyQueriesEl = document.getElementById('pharmacyQueries');
-      const consultQueriesEl = document.getElementById('consultQueries');
+    const toastEl = document.getElementById('toast');
+    const startDateInput = document.getElementById('startDate');
+    const endDateInput = document.getElementById('endDate');
+    const filterBtn = document.getElementById('filterBtn');
 
-      // AUTH STATE
-      firebase.auth().onAuthStateChanged(user => {
-        if (!user) return window.location.href = 'index.html';
-        const display = user.displayName || "";
-        userNameEl.textContent = display || "User";
-        profileNameInput.value = display;      });
+    // STATS ELEMENTS
+    const herbalQueriesEl = document.getElementById('herbalQueries');
+    const psychQueriesEl = document.getElementById('psychQueries');
+    const dietQueriesEl = document.getElementById('dietQueries');
+    const pharmacyQueriesEl = document.getElementById('pharmacyQueries');
+    const consultQueriesEl = document.getElementById('consultQueries');
 
-      // THEME TOGGLE
-      themeToggle.onclick = () => {
-        document.documentElement.classList.toggle('dark');
-        themeToggle.classList.toggle('fa-moon');
-        themeToggle.classList.toggle('fa-sun');
-      };
-
-      // SIGN OUT
-      signOutBtn.onclick = () => {
-        firebase.auth().signOut().then(() => {
-          window.location.href = 'index.html';
-        });
-      };
-
-      // TOAST FUNCTION
-      function showToast(message) {
-        toastEl.textContent = message;
-        toastEl.classList.add('visible');
-        setTimeout(() => toastEl.classList.remove('visible'), 3000);
-      }
-
-      // HELPER: GET CSS VARIABLE COLOR
-      function varColor(name) {
-        return getComputedStyle(document.documentElement).getPropertyValue(name).trim();
-      }
-
-      // ────────────────────────────────────────────────────────────────────────────
-      // INITIAL DUMMY DATA (CAN REPLACE WITH REAL FIREBASE FETCH)
-      // ────────────────────────────────────────────────────────────────────────────
-      let statsData = {
-        herbal: 0,
-        psych: 0,
-        diet: 0,
-        pharmacy: 0,
-        consult: 0,
-        daily: [0,0,0,0,0,0,0], 
-        labels: [] 
-
-      };
-
-      // FUNCTION TO GENERATE LAST 7 DAYS LABELS
-      function generateLast7Days() {
-        const labels = [];
-        for (let i = 6; i >= 0; i--) {
-          const d = new Date();
-          d.setDate(d.getDate() - i);
-          labels.push(d.toLocaleDateString('default', { month: 'short', day: 'numeric' }));
-        }
-        return labels;
-      }
-      statsData.labels = generateLast7Days();
-
-      // DISPLAY STATS
-      function displayStats() {
-         statsData.herbal = parseInt(localStorage.getItem('statHerbal')) || 0;
-        statsData.psych = parseInt(localStorage.getItem('statPsych')) || 0;
-        statsData.diet = parseInt(localStorage.getItem('statDiet')) || 0;
-        statsData.pharmacy = parseInt(localStorage.getItem('statPharmacy')) || 0;
-        statsData.consult = parseInt(localStorage.getItem('statConsult')) || 0;
-
-        herbalQueriesEl.textContent = statsData.herbal;
-        psychQueriesEl.textContent = statsData.psych;
-        dietQueriesEl.textContent = statsData.diet;
-        pharmacyQueriesEl.textContent = statsData.pharmacy;
-        consultQueriesEl.textContent = statsData.consult;
-
-      }
-      displayStats();
-
-      // ────────────────────────────────────────────────────────────────────────────
-      // CHARTS INITIALIZATION
-      // ────────────────────────────────────────────────────────────────────────────
-      // Distribution Doughnut Chart
-      const distCtx = document.getElementById('distributionChart').getContext('2d');
-      const distributionChart = new Chart(distCtx, {
-        type: 'doughnut',
-        data: {
-          labels: ['Herbal', 'Psychology', 'Dietetics', 'E-Pharmacy', 'Consult'],
-          datasets: [{
-            data: [
-              statsData.herbal,
-              statsData.psych,
-              statsData.diet,
-              statsData.pharmacy,
-              statsData.consult
-            ],
-            backgroundColor: [
-              varColor('--primary'),
-              varColor('--accent'),
-              '#8BC34A',
-              '#FF5722',
-              '#3F51B5'
-            ],
-            borderWidth: 1
-          }]
-        },
-        options: {
-          responsive: true,
-          plugins: {
-            legend: {
-              position: 'bottom',
-              labels: { color: varColor('--text') }
-            }
-          }
-        }
-      });
-
-      // Daily Line Chart
-      const dailyCtx = document.getElementById('dailyChart').getContext('2d');
-      const dailyChart = new Chart(dailyCtx, {
-        type: 'line',
-        data: {
-          labels: statsData.labels,
-          datasets: [{
-            label: 'Total Queries',
-            data: statsData.daily,
-            borderColor: varColor('--primary'),
-            backgroundColor: 'rgba(74,120,196,0.1)',
-            tension: 0.3,
-            pointBackgroundColor: varColor('--primary'),
-            fill: true
-          }]
-        },
-        options: {
-          responsive: true,
-          scales: {
-            y: {
-              beginAtZero: true,
-              ticks: { color: varColor('--text') },
-              grid: { color: varColor('--muted') }
-            },
-            x: {
-              ticks: { color: varColor('--text') },
-              grid: { display: false }
-            }
-          },
-          plugins: {
-            legend: { display: false }
-          }
-        }
-      });
-
-      // ────────────────────────────────────────────────────────────────────────────
-      // FILTER FUNCTIONALITY (DATES)
-      // ────────────────────────────────────────────────────────────────────────────
-      filterBtn.onclick = () => {
-        const start = startDateInput.value;
-        const end = endDateInput.value;
-        if (!start || !end) {
-          showToast('Please pick both dates');
-          return;
-        }
-        const startDate = new Date(start);
-        const endDate = new Date(end);
-        if (startDate > endDate) {
-          showToast('Start date cannot be after end date');
-          return;
-        }
-        // Dummy filter logic: randomize stats for demonstration
-        statsData.herbal = Math.floor(Math.random() * 200);
-        statsData.psych = Math.floor(Math.random() * 200);
-        statsData.diet = Math.floor(Math.random() * 200);
-        statsData.pharmacy = Math.floor(Math.random() * 200);
-        statsData.consult = Math.floor(Math.random() * 200);
-        statsData.daily = Array.from({ length: 7 }, () => Math.floor(Math.random() * 50 + 10));
-        statsData.labels = generateLast7Days();
-
-        // Update displays & charts
-        displayStats();
-        distributionChart.data.datasets[0].data = [
-          statsData.herbal,
-          statsData.psych,
-          statsData.diet,
-          statsData.pharmacy,
-          statsData.consult
-        ];
-        distributionChart.update();
-        dailyChart.data.labels = statsData.labels;
-        dailyChart.data.datasets[0].data = statsData.daily;
-        dailyChart.update();
-
-        showToast('Statistics updated for selected range');
-         // Simply reload stored stats
-        displayStats();
-        distributionChart.data.datasets[0].data = [
-          statsData.herbal,
-          statsData.psych,
-          statsData.diet,
-          statsData.pharmacy,
-          statsData.consult
-        ];
-        distributionChart.update();
-        showToast('Statistics reloaded');
-
-      };
-
-      profileLink.onclick = () => {
-        profileModal.hidden = false;
-        profileNameInput.focus();
-      };
-
-      // Close Profile Modal
-     closeProfileModal.onclick = () => {
-       profileModal.hidden = true;
-      };
-
-      // Save Profile Changes
-      saveProfileBtn.onclick = async () => {
-        const newName = profileNameInput.value.trim();
-        if (!newName) {
-          showToast('Name cannot be empty');
-          return;
-        }
-        const user = firebase.auth().currentUser;
-        if (user) {
-          try {
-            await user.updateProfile({ displayName: newName });
-            userNameEl.textContent = newName;
-            // Persist in localStorage too
-            localStorage.setItem('displayName', newName);
-            showToast('Profile updated');
-            profileModal.hidden = true;
-          } catch (err) {
-            console.error(err);
-            showToast('Could not update profile');
-          }
-        }
-      };
-
-      // On page load, if user has persisted displayName in localStorage, set it
-      const storedName = localStorage.getItem('displayName');
-      if (storedName) {
-        userNameEl.textContent = storedName;
-     }
+    // AUTH STATE
+    firebase.auth().onAuthStateChanged(user => {
+      if (!user) return window.location.href = 'index.html';
+      const display = user.displayName || "";
+      userNameEl.textContent = display || "User";
+      profileNameInput.value = display;
     });
-  </script>
+
+    // THEME TOGGLE
+    themeToggle.onclick = () => {
+      document.documentElement.classList.toggle('dark');
+      themeToggle.classList.toggle('fa-moon');
+      themeToggle.classList.toggle('fa-sun');
+    };
+
+    // SIGN OUT
+    signOutBtn.onclick = () => {
+      firebase.auth().signOut().then(() => {
+        window.location.href = 'index.html';
+      });
+    };
+
+    // TOAST FUNCTION
+    function showToast(message) {
+      toastEl.textContent = message;
+      toastEl.classList.add('visible');
+      setTimeout(() => toastEl.classList.remove('visible'), 3000);
+    }
+
+    // HELPER: GET CSS VARIABLE COLOR
+    function varColor(name) {
+      return getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+    }
+
+    // ────────────────────────────────────────────────────────────────────────────
+    // INITIAL DUMMY DATA STRUCTURE
+    // ────────────────────────────────────────────────────────────────────────────
+    let statsData = {
+      herbal: 0,
+      psych: 0,
+      diet: 0,
+      pharmacy: 0,
+      consult: 0,
+      daily: [0, 0, 0, 0, 0, 0, 0],
+      labels: []
+    };
+
+    // FUNCTION TO GENERATE LAST 7 DAYS LABELS
+    function generateLast7Days() {
+      const labels = [];
+      for (let i = 6; i >= 0; i--) {
+        const d = new Date();
+        d.setDate(d.getDate() - i);
+        labels.push(d.toLocaleDateString('default', { month: 'short', day: 'numeric' }));
+      }
+      return labels;
+    }
+    statsData.labels = generateLast7Days();
+
+    // DISPLAY STATS (reads total counters from localStorage)
+    function displayStats() {
+      statsData.herbal   = parseInt(localStorage.getItem('statHerbal'))   || 0;
+      statsData.psych    = parseInt(localStorage.getItem('statPsych'))    || 0;
+      statsData.diet     = parseInt(localStorage.getItem('statDiet'))     || 0;
+      statsData.pharmacy = parseInt(localStorage.getItem('statPharmacy')) || 0;
+      statsData.consult  = parseInt(localStorage.getItem('statConsult'))  || 0;
+
+      herbalQueriesEl.textContent   = statsData.herbal;
+      psychQueriesEl.textContent    = statsData.psych;
+      dietQueriesEl.textContent     = statsData.diet;
+      pharmacyQueriesEl.textContent = statsData.pharmacy;
+      consultQueriesEl.textContent  = statsData.consult;
+    }
+    displayStats();
+
+    // ────────────────────────────────────────────────────────────────────────────
+    // CHARTS INITIALIZATION
+    // ────────────────────────────────────────────────────────────────────────────
+    // Distribution Doughnut Chart
+    const distCtx = document.getElementById('distributionChart').getContext('2d');
+    const distributionChart = new Chart(distCtx, {
+      type: 'doughnut',
+      data: {
+        labels: ['Herbal', 'Psychology', 'Dietetics', 'E-Pharmacy', 'Consult'],
+        datasets: [{
+          data: [
+            statsData.herbal,
+            statsData.psych,
+            statsData.diet,
+            statsData.pharmacy,
+            statsData.consult
+          ],
+          backgroundColor: [
+            varColor('--primary'),
+            varColor('--accent'),
+            '#8BC34A',
+            '#FF5722',
+            '#3F51B5'
+          ],
+          borderWidth: 1
+        }]
+      },
+      options: {
+        responsive: true,
+        plugins: {
+          legend: {
+            position: 'bottom',
+            labels: { color: varColor('--text') }
+          }
+        }
+      }
+    });
+
+    // Daily Line Chart
+    const dailyCtx = document.getElementById('dailyChart').getContext('2d');
+    const dailyChart = new Chart(dailyCtx, {
+      type: 'line',
+      data: {
+        labels: statsData.labels,
+        datasets: [{
+          label: 'Total Queries',
+          data: statsData.daily,
+          borderColor: varColor('--primary'),
+          backgroundColor: 'rgba(74,120,196,0.1)',
+          tension: 0.3,
+          pointBackgroundColor: varColor('--primary'),
+          fill: true
+        }]
+      },
+      options: {
+        responsive: true,
+        scales: {
+          y: {
+            beginAtZero: true,
+            ticks: { color: varColor('--text') },
+            grid: { color: varColor('--muted') }
+          },
+          x: {
+            ticks: { color: varColor('--text') },
+            grid: { display: false }
+          }
+        },
+        plugins: {
+          legend: { display: false }
+        }
+      }
+    });
+
+    // ────────────────────────────────────────────────────────────────────────────
+    // FILTER FUNCTIONALITY (DATES)
+    // ────────────────────────────────────────────────────────────────────────────
+    filterBtn.onclick = () => {
+      const start = startDateInput.value;
+      const end   = endDateInput.value;
+      if (!start || !end) {
+        showToast('Please pick both dates');
+        return;
+      }
+      const startDate = new Date(start);
+      const endDate   = new Date(end);
+      endDate.setHours(23, 59, 59, 999);
+      if (startDate > endDate) {
+        showToast('Start date cannot be after end date');
+        return;
+      }
+
+      // Helper: count how many ISO‐timestamps in localStorage[key] fall in [startDate, endDate]
+      function countInRange(key) {
+        const raw = localStorage.getItem(key) || '[]';
+        const arr = JSON.parse(raw);
+        return arr.filter(ts => {
+          const d = new Date(ts);
+          return d >= startDate && d <= endDate;
+        }).length;
+      }
+
+      // Rebuild sector counts based on timestamps arrays
+      statsData.herbal   = countInRange('timestampsHerbal');
+      statsData.psych    = countInRange('timestampsPsych');
+      statsData.diet     = countInRange('timestampsDiet');
+      statsData.pharmacy = countInRange('timestampsPharmacy');
+      statsData.consult  = countInRange('timestampsConsult');
+
+      // Build “last 7 days” data
+      const last7Counts = [];
+      const labels      = [];
+      for (let i = 6; i >= 0; i--) {
+        const dayStart = new Date();
+        dayStart.setHours(0, 0, 0, 0);
+        dayStart.setDate(dayStart.getDate() - i);
+        const dayEnd = new Date(dayStart);
+        dayEnd.setHours(23, 59, 59, 999);
+
+        function countForDay(key) {
+          const raw = localStorage.getItem(key) || '[]';
+          const arr = JSON.parse(raw);
+          return arr.filter(ts => {
+            const d = new Date(ts);
+            return d >= dayStart && d <= dayEnd;
+          }).length;
+        }
+
+        const countHerbal   = countForDay('timestampsHerbal');
+        const countPsych    = countForDay('timestampsPsych');
+        const countDiet     = countForDay('timestampsDiet');
+        const countPharma   = countForDay('timestampsPharmacy');
+        const countConsult  = countForDay('timestampsConsult');
+
+        last7Counts.push(countHerbal + countPsych + countDiet + countPharma + countConsult);
+        labels.push(dayStart.toLocaleDateString('default', { month: 'short', day: 'numeric' }));
+      }
+      statsData.daily  = last7Counts;
+      statsData.labels = labels;
+
+      // Update the “total” cards
+      herbalQueriesEl.textContent   = statsData.herbal;
+      psychQueriesEl.textContent    = statsData.psych;
+      dietQueriesEl.textContent     = statsData.diet;
+      pharmacyQueriesEl.textContent = statsData.pharmacy;
+      consultQueriesEl.textContent  = statsData.consult;
+
+      // Update the doughnut chart
+      distributionChart.data.datasets[0].data = [
+        statsData.herbal,
+        statsData.psych,
+        statsData.diet,
+        statsData.pharmacy,
+        statsData.consult
+      ];
+      distributionChart.update();
+
+      // Update the line chart
+      dailyChart.data.labels           = statsData.labels;
+      dailyChart.data.datasets[0].data = statsData.daily;
+      dailyChart.update();
+
+      showToast('Statistics updated for selected range');
+    };
+
+    profileLink.onclick = () => {
+      profileModal.hidden = false;
+      profileNameInput.focus();
+    };
+
+    // Close Profile Modal
+    closeProfileModal.onclick = () => {
+      profileModal.hidden = true;
+    };
+
+    // Save Profile Changes
+    saveProfileBtn.onclick = async () => {
+      const newName = profileNameInput.value.trim();
+      if (!newName) {
+        showToast('Name cannot be empty');
+        return;
+      }
+      const user = firebase.auth().currentUser;
+      if (user) {
+        try {
+          await user.updateProfile({ displayName: newName });
+          userNameEl.textContent = newName;
+          // Persist in localStorage too
+          localStorage.setItem('displayName', newName);
+          showToast('Profile updated');
+          profileModal.hidden = true;
+        } catch (err) {
+          console.error(err);
+          showToast('Could not update profile');
+        }
+      }
+    };
+
+    // On page load, if user has persisted displayName in localStorage, set it
+    const storedName = localStorage.getItem('displayName');
+    if (storedName) {
+      userNameEl.textContent = storedName;
+    }
+  });
+</script>
+
+  
 </body>
 </html>
