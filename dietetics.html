@@ -102,7 +102,7 @@
     display: flex;
     align-items: center;
     gap: 0.5rem;
-    padding: 1rem;
+    padding: 1rem 0.5rem;
     font-size: 1.25rem;
     font-weight: 700;
     color: var(--primary-alt);
@@ -128,12 +128,17 @@
     display: flex;
     align-items: center;
     gap: 0.75rem;
-    padding: 0.75rem 1rem;
+    padding: 0.75rem 0.5rem;   
     border-radius: var(--radius);
     color: var(--text);
     font-weight: 500;
     transition: background var(--transition), transform var(--transition);
-    white-space: nowrap;
+    white-space: normal;    
+    flex-wrap: wrap; 
+  }
+  aside#sidebar nav a.active i,
+  aside#sidebar nav a:hover i {
+    color: #fff;  
   }
   aside#sidebar nav a i {
     font-size: 1.2rem;
@@ -397,23 +402,48 @@
     background: rgba(44, 62, 80, 0.6);
     z-index: 1;
   }
-  #hero .hero-content {
-    position: relative;
-    z-index: 2;
-    max-width: 800px;
-    margin: 0 auto;
-    text-align: center;
-  }
-  #hero h2 {
-    font-size: 2.5rem;
-    margin-bottom: 0.5rem;
+ #hero-chat .chat-controls button {
+   background: var(--primary-alt);
+    border: 2px solid var(--primary);
+    border-radius: 0.5rem;
+    padding: 0.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
     color: #fff;
-  }
-  #hero p.desc {
     font-size: 1rem;
-    color: rgba(255, 255, 255, 0.85);
-    margin-bottom: 1.5rem;
+    transition: background var(--transition), transform var(--transition);
   }
+ #hero-chat .chat-controls button:hover {
+    background: var(--primary);
+    transform: translateY(-2px);
+  }
+#hero .hero-inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  position: relative;
+  z-index: 2;
+  max-width: 1200px;
+  margin: 0 auto;
+  gap: 2rem;
+}
+#hero .hero-content {
+  flex: 1;
+  text-align: left;
+}
+#hero h1 {
+  font-size: 3rem;      /* increased */
+  margin-bottom: 1rem;
+  color: #fff;
+  line-height: 1.1;
+}
+#hero .hero-subtitle {
+  font-size: 1.25rem;
+  color: rgba(255, 255, 255, 0.9);
+  margin-bottom: 2rem;
+}
+  
   #hero .hero-actions {
     display: flex;
     justify-content: center;
@@ -462,6 +492,16 @@
     text-shadow: 0 1px 2px rgba(0, 0, 0, 0.6);
     margin-bottom: 1rem;
   }
+  #hero .hero-image {
+  flex: 1;
+  display: flex;
+  justify-content: flex-end;
+}
+#hero .hero-image img {
+  max-width: 100%;
+  border-radius: var(--radius);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+}
   /* Nationality input smaller and at bottom */
   #nat-form {
     position: relative;
@@ -941,10 +981,15 @@
     color: var(--secondary);
   }
   .checkbox-group {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+   display: grid;
+    grid-template-columns: repeat(4, 1fr);  
     gap: 0.75rem;
     align-items: flex-start;
+  }
+  @media(max-width: 992px) {
+   .checkbox-group {
+      grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    }
   }
   .checkbox-group label {
     display: inline-flex;
@@ -966,7 +1011,15 @@
     margin-top: 0.5rem;
     padding: 0.5rem;
   }
-
+  html.dark .checkbox-group label {
+    background: var(--surface);
+    border: 1px solid var(--muted);
+    color: var(--text);
+  }
+  html.dark .checkbox-group input[type="checkbox"] {
+    background: var(--bg);
+    accent-color: var(--secondary);
+  }
   /*──────────────────────────────────────────────────────────────────────────────
     SPINNER ICON & TOAST
   ──────────────────────────────────────────────────────────────────────────────*/
@@ -1023,7 +1076,16 @@
     opacity: 0.3;
     transform: scale(1.1) rotate(0deg);
   }
-
+ #risk-form {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+   gap: 1rem;
+  }
+  @media(max-width: 768px) {
+  #risk-form {
+     grid-template-columns: 1fr;
+   }
+ }
   /*──────────────────────────────────────────────────────────────────────────────
     MEET A NUTRITION EXPERT SECTION
   ──────────────────────────────────────────────────────────────────────────────*/
@@ -1268,9 +1330,9 @@
         </div>
       </div>
       <!-- SUBTLE BACKGROUND ICONS (foody style) -->
-       <i class="fas fa-apple-alt hero-bg-icon" style="top: 8%; left: 5%;"></i>
-    <i class="fas fa-carrot hero-bg-icon" style="top: 15%; right: 12%;"></i>
-    <i class="fas fa-lemon hero-bg-icon" style="bottom: 15%; left: 10%;"></i>
+      <i class="fas fa-apple-alt hero-bg-icon" style="top: 10%; left: 10%;"></i>
+    <i class="fas fa-carrot hero-bg-icon" style="top: 12%; right: 15%;"></i>
+    <i class="fas fa-lemon hero-bg-icon" style="bottom: 15%; left: 12%;"></i>
     <i class="fas fa-fish hero-bg-icon" style="bottom: 12%; right: 18%;"></i>
     <i class="fas fa-bread-slice hero-bg-icon" style="top: 50%; left: 40%;"></i>
     </section>
@@ -1358,10 +1420,7 @@
       <div id="planResult" class="response" hidden>
         <button class="close-btn" aria-label="Close result">×</button>
         <div class="result-content"></div>
-        <div class="tool-row">
-          <button class="copy-btn" title="Copy"><i class="fas fa-copy"></i></button>
-          <button class="dl-btn" title="Download"><i class="fas fa-download"></i></button>
-        </div>
+       
       </div>
     </section>
 
@@ -1391,11 +1450,7 @@
       <div id="nutriResult" class="response" hidden>
         <button class="close-btn" aria-label="Close result">×</button>
         <div class="result-content"></div>
-        <div class="tool-row">
-          <button class="copy-btn" title="Copy"><i class="fas fa-copy"></i></button>
-          <button class="dl-btn" title="Download"><i class="fas fa-download"></i></button>
-        </div>
-      </div>
+             </div>
     </section>
 
     <!-- 5. Recipe Recommender -->
@@ -1438,11 +1493,7 @@
       <div id="recipeResult" class="response" hidden>
         <button class="close-btn" aria-label="Close result">×</button>
         <div class="result-content"></div>
-        <div class="tool-row">
-          <button class="copy-btn" title="Copy"><i class="fas fa-copy"></i></button>
-          <button class="dl-btn" title="Download"><i class="fas fa-download"></i></button>
-        </div>
-      </div>
+             </div>
     </section>
 
     <!-- 6. Deficiency Risk Scanner -->
@@ -1477,11 +1528,7 @@
       <div id="defResult" class="response" hidden>
         <button class="close-btn" aria-label="Close result">×</button>
         <div class="result-content"></div>
-        <div class="tool-row">
-          <button class="copy-btn" title="Copy"><i class="fas fa-copy"></i></button>
-          <button class="dl-btn" title="Download"><i class="fas fa-download"></i></button>
-        </div>
-      </div>
+             </div>
     </section>
 
     <!-- 7. Metabolomic Risk Radar -->
@@ -1602,11 +1649,7 @@
       <div id="fitnessResult" class="response" hidden>
         <button class="close-btn" aria-label="Close result">×</button>
         <div class="result-content"></div>
-        <div class="tool-row">
-          <button class="copy-btn" title="Copy"><i class="fas fa-copy"></i></button>
-          <button class="dl-btn" title="Download"><i class="fas fa-download"></i></button>
-        </div>
-      </div>
+             </div>
     </section>
 
     <!-- 9. Pharma-Integrated Nutrient Suite -->
@@ -1674,11 +1717,7 @@
       <div id="pharmaResult" class="response" hidden>
         <button class="close-btn" aria-label="Close result">×</button>
         <div class="result-content"></div>
-        <div class="tool-row">
-          <button class="copy-btn" title="Copy"><i class="fas fa-copy"></i></button>
-          <button class="dl-btn" title="Download"><i class="fas fa-download"></i></button>
-        </div>
-      </div>
+            </div>
     </section>
 
     <!-- 10. Symptom-to-Treatment Advisor -->
@@ -1705,11 +1744,7 @@
       <div id="symptomResult" class="response" hidden>
         <button class="close-btn" aria-label="Close result">×</button>
         <div class="result-content"></div>
-        <div class="tool-row">
-          <button class="copy-btn" title="Copy"><i class="fas fa-copy"></i></button>
-          <button class="dl-btn" title="Download"><i class="fas fa-download"></i></button>
-        </div>
-      </div>
+             </div>
     </section>
 
     <!-- 11. Progress Charts -->
@@ -2207,47 +2242,85 @@ When responding to user questions:
   }
 
   //──────────────────────────────────────────────────────────────────────────────
-  // WIRE ALL MODULES WITH SYSTEM PROMPTS
-  //──────────────────────────────────────────────────────────────────────────────
-  wireModule("genPlan",
-    ["calories", "dietType", "allergyList", "budget"],
-    ["calories", "dietType"],
-    `
-You are a registered Dietitian AI. Given the user's daily calorie target, diet type, allergies/intolerances, and budget, generate a detailed 7-day meal plan including macronutrient breakdowns, shopping lists, and simple recipes. Offer culturally relevant options based on the user's nationality when possible.
-    `.trim()
-  );
+// WIRE ALL MODULES WITH SYSTEM PROMPTS (UPDATED “Other” HANDLING)
+//──────────────────────────────────────────────────────────────────────────────
 
-  wireModule("analyzeNutri",
-    ["foodLog", "unitSelect"],
-    ["foodLog"],
-    `
-You are a Nutrition Scientist AI. Analyze the user's food log and preferred unit; produce a comprehensive macro- and micronutrient breakdown with totals, percentages, and commentary on adequacy. Include suggestions for balancing deficiencies or excesses, using the user's nationality as context for typical local foods.
-    `.trim()
-  );
+// 1. Meal Plan Generator
+wireModule("genPlan",
+  ["calories", "dietType", "allergyList", "budget"],
+  ["calories", "dietType"],
+  `
+You are a registered Dietitian AI. Given the user’s daily calorie target, diet type (if they chose “Other,” use exactly the custom text they provided), allergies/intolerances, and budget, generate a detailed 7-day meal plan including:
+  • Macronutrient breakdowns
+  • A complete shopping list
+  • Simple, easy-to-follow recipes
 
-  wireModule("getRecipes",
-    ["pantry", "cuisineType", "recipeDifficulty", "maxTime"],
-    ["pantry"],
-    `
-You are a Culinary AI Chef. Given the user's pantry items, chosen cuisine style, difficulty level, and max prep time, recommend three original recipes. Include ingredient lists, step-by-step instructions, estimated times, dietary analysis, and local ingredient substitutions based on the user's nationality.
-    `.trim()
-  );
+• Do NOT ever output the single word “Other.” If the user selected “Other,” substitute the user’s exact text instead of “Other.”
+• Offer culturally relevant options based on the user’s nationality whenever possible.
+  `.trim()
+);
 
-  wireModule("scanDef",
-    ["symptoms", "dietOverview"],
-    ["symptoms"],
-    `
-You are a Clinical Dietitian AI. Identify potential nutrient deficiencies from the user's symptoms and diet overview. Rank the likely deficiencies with reasoning, provide recommended dietary sources or supplements, and suggest simple meal modifications. Tailor suggestions to the user's nationality and typical regional diet.
-    `.trim()
-  );
+// 2. Nutrient Analyzer
+wireModule("analyzeNutri",
+  ["foodLog", "unitSelect"],
+  ["foodLog"],
+  `
+You are a Nutrition Scientist AI. Analyze the user’s food log and their chosen unit (if they selected “Other,” use that custom text verbatim). Produce a comprehensive macro- and micronutrient breakdown with:
+  • Total amounts and percentages
+  • Commentary on adequacy or imbalance
+  • Suggestions for balancing deficiencies or excesses
 
-  wireModule("runRisk",
-    ["riskFrom", "riskTo", "biomarkers", "conditions", "context"],
-    ["riskFrom", "riskTo", "biomarkers", "conditions", "context"],
-    `
-You are a Metabolomic Health Analyst AI. Analyze the user's specified date range and biomarker list (e.g., glucose, LDL) in context with their medical conditions. Generate a risk radar interpretation, highlight trends, and provide targeted health alerts. Use nationality context to suggest relevant dietary adjustments and local testing resources.
-    `.trim()
-  );
+• Do NOT ever output “Other.” If the user’s unit was “Other,” use their exact custom unit name instead.
+• Frame recommendations using the user’s nationality to reference typical local foods.
+  `.trim()
+);
+
+// 3. Recipe Recommender
+wireModule("getRecipes",
+  ["pantry", "cuisineType", "recipeDifficulty", "maxTime"],
+  ["pantry"],
+  `
+You are a Culinary AI Chef. Given the user’s pantry items, chosen cuisine style (if “Other,” substitute exactly what they typed), difficulty level, and maximum prep time, recommend three original recipes that include:
+  • Full ingredient lists
+  • Step-by-step instructions
+  • Estimated cooking times
+  • Dietary analysis (macros, major micronutrients)
+  • Local ingredient substitutions based on the user’s nationality
+
+• Do NOT ever output “Other.” If the user chose “Other” for “cuisineType,” use their exact custom text instead.
+  `.trim()
+);
+
+// 4. Deficiency Risk Scanner
+wireModule("scanDef",
+  ["symptoms", "dietOverview"],
+  ["symptoms"],
+  `
+You are a Clinical Dietitian AI. Identify potential nutrient deficiencies based on the user’s selected symptoms (if they checked “Other,” include their exact text) and their brief diet overview. Then:
+  • Rank the likely deficiencies in order of probability (e.g., iron deficiency, vitamin B12)
+  • Provide reasoning for each ranking
+  • Offer dietary sources or supplement suggestions
+  • Suggest simple meal modifications to address each deficiency
+
+• Do NOT output “Other.” If the user typed a custom symptom, include that exact text instead.
+  Tailor all suggestions to the user’s nationality and typical regional diet.
+  `.trim()
+);
+
+// 5. Metabolomic Risk Radar
+wireModule("runRisk",
+  ["riskFrom", "riskTo", "biomarkers", "conditions", "context"],
+  ["riskFrom", "riskTo", "biomarkers", "conditions", "context"],
+  `
+You are a Metabolomic Health Analyst AI. Analyze the user’s specified date range (riskFrom → riskTo), biomarkers (e.g., “glucose, LDL”; if “Other,” use their exact text), diagnosed conditions (if “Other,” use their exact text), and context (if “Other,” use their exact text). Perform the following:
+  • Generate a detailed radar-chart interpretation of biomarker trends
+  • Highlight any predictive health alerts (e.g., “glucose trending upward”)
+  • Provide targeted dietary adjustments using local foods based on the user’s nationality
+  • Recommend relevant local testing resources for follow-up
+
+• Do NOT ever output “Other.” Whenever the user’s input was “Other,” substitute the precise custom text they provided.
+  `.trim()
+);
 
   //──────────────────────────────────────────────────────────────────────────────
   // AFTER runRisk, INJECT RADAR CHART BASED ON AI RESPONSE
@@ -2278,29 +2351,72 @@ You are a Metabolomic Health Analyst AI. Analyze the user's specified date range
     });
   }
 
-  wireModule("runFitness",
-    ["fitGoal", "fitFreq", "blendIngredients", "carbDate", "intensity", "crpLevel", "nutraPref"],
-    ["fitGoal", "fitFreq"],
-    `
-You are a Certified Sports Nutritionist AI. Based on the user's goals, workout frequency, available ingredients, carb-timing date, exercise intensity, CRP/CK levels, and chosen nutraceuticals, create a detailed fitness nutrition plan. Provide balanced macros, pre- and post-workout blend recipes, recovery guidelines, and monitoring tips. Adjust recommendations for the user's nationality (e.g., local supplement availability).
-    `.trim()
-  );
+ // 6. Fitness Nutrition Coach
+wireModule("runFitness",
+  ["fitGoal", "fitFreq", "blendIngredients", "carbDate", "intensity", "crpLevel", "nutraPref"],
+  ["fitGoal", "fitFreq"],
+  `
+You are a Certified Sports Nutritionist AI. Based on the user’s:
+  • Workout goal (if “Other,” use their exact wording)
+  • Weekly workout frequency
+  • Available ingredients for pre/post-workout blends (if “Other,” use their exact text)
+  • Carb-timing start date
+  • Training intensity
+  • CRP / CK lab values
+  • Nutraceutical preference (if “Other,” use their exact text)
+Construct a complete fitness nutrition plan that includes:
+  • Balanced macronutrient targets
+  • Pre- and post-workout blend recipes
+  • Recovery guidelines for inflammation
+  • Monitoring tips for CRP / CK levels
 
-  wireModule("runPharma",
-    ["medList", "foodList", "compoundGoal", "doseFreq", "scheduleNotes", "cohortSelect"],
-    ["medList"],
-    `
-You are a Pharmacist-Dietitian AI. Analyze potential drug–nutrient interactions from the user's medication and food lists. Provide compounding suggestions for desired outcomes, create a medication dosing schedule that optimizes nutrient absorption, and generate outcome analytics comparing cohorts (e.g., diet-only vs diet+meds). Tailor advice to the user's nationality and local healthcare guidelines.
-    `.trim()
-  );
+• Do NOT ever output “Other.” If any field was “Other,” insert exactly what they typed instead.
+  Adjust all guidance for the user’s nationality (e.g., local supplement availability).
+  `.trim()
+);
 
-  wireModule("runSymptom",
-    ["sympAge", "sympDesc", "foodPref"],
-    ["sympAge", "sympDesc"],
-    `
-You are a Medical Nutrition Therapist AI. Diagnose possible conditions based on the user's age, symptom description, and food preferences. Provide OTC treatment suggestions, recommend appropriate foods and meals (including local cuisine), and advise on seeking professional care if needed.
-    `.trim()
-  );
+// 7. Pharma-Integrated Nutrient Suite
+wireModule("runPharma",
+  ["medList", "foodList", "compoundGoal", "doseFreq", "scheduleNotes", "cohortSelect"],
+  ["medList"],
+  `
+You are a Pharmacist-Dietitian AI. Analyze potential drug–nutrient interactions given the user’s:
+  • Medications (if “Other,” use exact text)
+  • Food items (if “Other,” use exact text)
+  • Desired compounding goal (if “Other,” use exact text)
+  • Dosage frequency (if “Other,” use exact text)
+  • Custom schedule notes (free text)
+  • Cohort to compare (if “Other,” use exact text)
+
+Do the following:
+  • Identify any critical drug-nutrient interactions
+  • Provide compounding suggestions to achieve the desired outcome
+  • Create a dosing schedule that optimizes nutrient absorption
+  • Generate outcome analytics comparing the specified cohort (e.g., diet-only vs diet+meds)
+
+• Do NOT output “Other.” Replace every “Other” selection with exactly what the user typed.
+  Tailor all advice to their nationality and local healthcare guidelines.
+  `.trim()
+);
+
+// 8. Symptom-to-Treatment Advisor
+wireModule("runSymptom",
+  ["sympAge", "sympDesc", "foodPref"],
+  ["sympAge", "sympDesc"],
+  `
+You are a Medical Nutrition Therapist AI. Based on:
+  • The user’s age
+  • The symptom description (if they typed “Other,” use their exact text)
+  • Their food preferences (if “Other,” use exact text)
+Provide:
+  • Possible diagnoses or conditions
+  • Over-the-counter treatment suggestions
+  • Tailored food and meal recommendations using local cuisine
+  • Advice on when to seek professional medical care
+
+• Do NOT output “Other.” If any input field was “Other,” substitute the exact text the user provided.
+  `.trim()
+);
 
   //──────────────────────────────────────────────────────────────────────────────
   // CHART.JS: PROGRESS CHARTS (Calories & Macro Distribution)
@@ -2346,10 +2462,12 @@ You are a Medical Nutrition Therapist AI. Diagnose possible conditions based on 
     }
   });
   // Export Calorie Chart CSV
-  const expCalBtn = document.createElement("button");
-  expCalBtn.innerText = "Export Chart"; expCalBtn.className = "export-chart-btn";
-  expCalBtn.type = "button";
-  document.getElementById("calorieChart").after(expCalBtn);
+ if (!document.querySelector("#calorieChart + .export-chart-btn")) {
+    const expCalBtn = document.createElement("button");
+    expCalBtn.innerText = "Export Chart";
+    expCalBtn.className = "export-chart-btn";
+    expCalBtn.type = "button";
+    document.getElementById("calorieChart").after(expCalBtn);
   expCalBtn.addEventListener("click", () => {
     let csv = "Day,Calories\n";
     calorieChart.data.labels.forEach((d, i) => {
@@ -2361,7 +2479,7 @@ You are a Medical Nutrition Therapist AI. Diagnose possible conditions based on 
     a.download = "calorie-intake.csv";
     a.click();
   });
-
+ }
   // Macro Distribution (Pie Chart)
   const ctxMacro = document.getElementById("macroChart").getContext("2d");
   // Initial macros (random percentages summing to 100)
@@ -2385,10 +2503,12 @@ You are a Medical Nutrition Therapist AI. Diagnose possible conditions based on 
     }
   });
   // Export Macro Chart CSV
-  const expMacroBtn = document.createElement("button");
-  expMacroBtn.innerText = "Export Chart"; expMacroBtn.className = "export-chart-btn";
-  expMacroBtn.type = "button";
-  document.getElementById("macroChart").after(expMacroBtn);
+  if (!document.querySelector("#macroChart + .export-chart-btn")) {
+    const expMacroBtn = document.createElement("button");
+    expMacroBtn.innerText = "Export Chart";
+    expMacroBtn.className = "export-chart-btn";
+    expMacroBtn.type = "button";
+    document.getElementById("macroChart").after(expMacroBtn);
   expMacroBtn.addEventListener("click", () => {
     let csv = "Macro,Percent\n";
     macroChart.data.labels.forEach((m, i) => {
@@ -2400,7 +2520,8 @@ You are a Medical Nutrition Therapist AI. Diagnose possible conditions based on 
     a.download = "macro-distribution.csv";
     a.click();
   });
-
+  }
+  
   //──────────────────────────────────────────────────────────────────────────────
   // EXPORT ALL MODULE CHARTS BUTTON (Example: ID "exportData")
   //──────────────────────────────────────────────────────────────────────────────
