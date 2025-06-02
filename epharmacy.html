@@ -1526,7 +1526,22 @@ html.dark .bot-msg {
   box-shadow: var(--shadow);
   position: relative;
 }
-
+html.dark #buyDrugs #symptomInputBuy,
+html.dark #buyDrugs #drugSelect,
+html.dark #buyDrugs #orderDetails input,
+html.dark #buyDrugs #orderDetails textarea {
+  background: var(--pharm-surface);
+  color: var(--pharm-text);
+  border-color: var(--pharm-secondary);
+}
+html.dark #buyDrugs #symptomInputBuy:focus,
+html.dark #buyDrugs #drugSelect:focus,
+html.dark #buyDrugs #orderDetails input:focus,
+html.dark #buyDrugs #orderDetails textarea:focus {
+  background: var(--pharm-surface);
+  border-color: var(--pharm-secondary);
+  box-shadow: 0 0 0 3px rgba(148, 210, 189, 0.3);
+}
 </style>
 
 
@@ -1551,7 +1566,7 @@ html.dark .bot-msg {
         <li><a href="consult.html"><i class="fas fa-calendar-check"></i> <span>Consult Booking</span></a></li>
       </ul>
     </nav>
-    <button id="shrinkSidebar" title="Toggle sidebar" style="margin:0.5rem; background:none; border:none; cursor:pointer;">
+    <button id="shrinkSidebar" title="Toggle sidebar" style="margin:0.5rem; cursor:pointer;">
       <i class="fas fa-chevron-left"></i>
     </button>
   </aside>
@@ -1736,9 +1751,6 @@ html.dark .bot-msg {
       </div>
     </section>
 
-<!-- ─────────────────────────────────────────────────────────────────────────────
-   SECTION: BUY DRUGS (Insert this before your <footer> in <main>)
-   ───────────────────────────────────────────────────────────────────────────── -->
 <section id="buyDrugs" class="module">
   <h2><i class="fas fa-shopping-cart"></i> Buy Drugs from Our Pharmacy</h2>
   <p class="desc">
@@ -1777,19 +1789,33 @@ html.dark .bot-msg {
   <!-- 3. User Details Form -->
   <div id="orderDetails" style="margin-top:1.5rem; display:none;">
     <h3><i class="fas fa-user"></i> Your Details</h3>
-    <label>Full Name:
+  <label>Full Name:
       <input type="text" id="buyerName" placeholder="e.g. John Doe" required>
     </label>
     <label>Phone Number:
-      <input type="tel" id="buyerPhone" placeholder="e.g. +233501234567" required>
+      <input 
+        type="tel" 
+        id="buyerPhone" 
+        placeholder="+233501234567" 
+        pattern="\+\d{10,15}" 
+        required
+      >
+      <small style="display:block; font-size:0.85rem; color:var(--pharm-muted);">
+        Format: <code>+CountryCodeNumber</code> (10–15 digits). e.g. <code>+233501234567</code>
+      </small>
     </label>
     <label>Email Address:
-      <input type="email" id="buyerEmail" placeholder="e.g. example@mail.com" required>
+      <input 
+        type="email" 
+        id="buyerEmail" 
+        placeholder="example@mail.com" 
+        required
+      >
     </label>
     <label>Delivery Address:
       <textarea id="buyerAddress" rows="2" placeholder="Street, City, Region…" required></textarea>
     </label>
-    <button id="payWithPaystack" class="btn" style="background: var(--pharm-primary-alt);">
+     <button id="payWithPaystack" class="btn" style="background: var(--pharm-primary-alt);">
       <i class="fas fa-credit-card"></i> Proceed to Payment
     </button>
   </div>
@@ -2182,7 +2208,7 @@ From the list below, suggest exactly ONE drug (return only the name, matching th
 ${drugsData.map(d => d.name).join(", ")}.
       `.trim();
 
-      const aiReply = await window.callOpenAI([
+     const aiReply = await callOpenAI([
         { role: "system", content: sysPrompt },
         { role: "user",   content: `Symptoms: ${symptoms}` }
       ]);
@@ -2254,19 +2280,38 @@ ${drugsData.map(d => d.name).join(", ")}.
   // 6) “Proceed to Payment” ▶ PAYSTACK INTEGRATION
   // ────────────────────────────────────────────────────────────────
   payButton.addEventListener("click", () => {
-    if (cartItems.length === 0) {
+  if (cartItems.length === 0) {
       alert("⚠️ Your cart is empty. Please add at least one drug.");
       return;
     }
-    // Gather buyer info
-    const name    = document.getElementById("buyerName").value.trim();
-    const phone   = document.getElementById("buyerPhone").value.trim();
-    const email   = document.getElementById("buyerEmail").value.trim();
-    const address = document.getElementById("buyerAddress").value.trim();
+    // Grab the DOM elements (not just their values)
+    const nameEl    = document.getElementById("buyerName");
+    const phoneEl   = document.getElementById("buyerPhone");
+    const emailEl   = document.getElementById("buyerEmail");
+    const addressEl = document.getElementById("buyerAddress");
+
+    // 1) Basic “non-empty” check
+    const name    = nameEl.value.trim();
+    const phone   = phoneEl.value.trim();
+    const email   = emailEl.value.trim();
+    const address = addressEl.value.trim();
     if (!name || !phone || !email || !address) {
       alert("⚠️ Please fill in all your details before proceeding.");
       return;
     }
+
+    // 2) Now enforce HTML5 validity on email & phone
+    if (!emailEl.checkValidity()) {
+      alert("⚠️ Please enter a valid email address (e.g. user@example.com).");
+      emailEl.focus();
+      return;
+    }
+    if (!phoneEl.checkValidity()) {
+      alert("⚠️ Please enter a valid phone number (must start with + and be 10–15 digits).");
+      phoneEl.focus();
+      return;
+    }
+
 
     // Calculate total in GHS and convert to kobo
     const totalGHS  = cartItems.reduce((sum, itm) => sum + itm.price, 0);
