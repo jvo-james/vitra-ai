@@ -12,7 +12,7 @@
 
 <style>
   /*──────────────────────────────────────────────────────────────────────────────
-    RESET & GLOBAL VARIABLES
+    PALE YELLOW THEME & RESET
   ──────────────────────────────────────────────────────────────────────────────*/
   *, *::before, *::after {
     margin: 0;
@@ -23,64 +23,56 @@
     font-family: 'Montserrat', sans-serif;
     font-size: 16px;
     scroll-behavior: smooth;
-
-    /* Color Palette (Pale Yellow primary, Rich Purple secondary) */
-    --color-primary: #FDE68A;          /* Pale Yellow */
-    --color-primary-alt: #FCD34D;      /* Medium Yellow */
-    --color-secondary: #9333EA;        /* Rich Purple */
-    --color-secondary-alt: #7E22CE;    /* Deep Purple */
-    --color-accent: rgba(255, 250, 235, 0.9); /* Soft Cream */
-    --color-bg: #FEFCE8;               /* Very Light Cream */
-    --color-surface: #FFFFFF;          /* White Surface */
-    --color-text: #3E3E3E;             /* Dark Gray Text */
-    --color-muted: #776C5B;            /* Warm Gray */
-    --color-disabled: rgba(200,200,200,0.4);
-    --radius: 1rem;
+    --primary: #F7DC6F;          /* Pale Yellow */
+    --primary-alt: #D4AC0D;      /* Rich Golden */
+    --secondary: #C39BD3;        /* Soft Lavender */
+    --accent: rgba(255, 249, 230, 0.9); /* Cream */
+    --bg: #FEF9E7;               /* Light Cream */
+    --surface: #FFFFFF;          /* White */
+    --text: #2C3E50;             /* Dark Slate */
+    --muted: #7D6608;            /* Earth Brown */
+    --radius: 0.75rem;
     --padding: 1rem;
     --transition: 0.3s ease;
-    --shadow-light: 0 4px 12px rgba(0, 0, 0, 0.05);
-    --shadow-medium: 0 6px 20px rgba(0, 0, 0, 0.1);
-    --sidebar-width: 220px;
-    --sidebar-collapsed: 60px;
-    --header-height: 60px;
+    --sidebar-width: 240px;
+    --sidebar-collapsed-width: 80px;
+    --header-height: 64px;
+    --shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
   }
   html.dark {
-    --color-bg: #1A1A1A;
-    --color-surface: rgba(30, 30, 30, 0.95);
-    --color-text: #ECECEC;
-    --color-muted: #AAA;
-    --color-disabled: rgba(100,100,100,0.4);
+    --bg: #2C2C2C;
+    --surface: #3A3A3A;
+    --text: #ECECEC;
+    --muted: #AAA;
   }
   body {
     display: flex;
     min-height: 100vh;
-    background: var(--color-bg);
-    color: var(--color-text);
+    background: var(--bg);
+    color: var(--text);
     overflow-x: hidden;
     transition: background var(--transition), color var(--transition);
   }
   a {
-    color: var(--color-secondary);
+    color: var(--primary);
     text-decoration: none;
     transition: color var(--transition);
   }
   a:hover {
-    color: var(--color-secondary-alt);
+    color: var(--primary-alt);
+  }
+  img {
+    max-width: 100%;
+    display: block;
   }
   button, input, textarea, select {
     font-family: inherit;
     transition: var(--transition);
   }
-  button:disabled,
-  input:disabled,
-  select:disabled,
-  textarea:disabled {
-    cursor: not-allowed;
-    opacity: 0.6;
-  }
-  img {
-    max-width: 100%;
-    display: block;
+  button {
+    cursor: pointer;
+    border: none;
+    background: none;
   }
   ul, ol {
     list-style: none;
@@ -93,86 +85,90 @@
     position: fixed;
     top: 0;
     left: 0;
-    bottom: 0;
     width: var(--sidebar-width);
-    background: var(--color-surface);
-    box-shadow: var(--shadow-medium);
+    height: 100vh;
+    background: var(--surface);
+    box-shadow: var(--shadow);
     display: flex;
     flex-direction: column;
+    transition: width var(--transition), transform var(--transition);
     z-index: 1000;
-    transition: width var(--transition), background var(--transition);
+    overflow-x: hidden;
+  }
+  aside#sidebar.collapsed {
+    width: var(--sidebar-collapsed-width);
   }
   aside#sidebar .brand {
     display: flex;
     align-items: center;
     gap: 0.75rem;
     padding: var(--padding);
-    font-size: 1.25rem;
+    font-size: 1.4rem;
     font-weight: 700;
-    color: var(--color-secondary);
+    color: var(--primary-alt);
   }
   aside#sidebar .brand i {
-    font-size: 1.5rem;
+    font-size: 1.8rem;
+    color: var(--primary-alt);
+  }
+  aside#sidebar .brand span {
+    transition: opacity var(--transition);
+  }
+  aside#sidebar.collapsed .brand span {
+    opacity: 0;
   }
   aside#sidebar nav {
+    margin-top: 2rem;
     flex: 1;
     overflow-y: auto;
-  }
-  aside#sidebar nav ul {
-    padding: 0;
-  }
-  aside#sidebar nav li {
-    margin-bottom: 0.25rem;
   }
   aside#sidebar nav a {
     display: flex;
     align-items: center;
-    gap: 0.75rem;
+    gap: 1rem;
     padding: 0.75rem var(--padding);
     border-radius: var(--radius);
-    color: var(--color-text);
+    color: var(--text);
+    font-weight: 500;
     transition: background var(--transition), transform var(--transition);
   }
   aside#sidebar nav a i {
-    width: 1.25rem;
+    font-size: 1.2rem;
+    width: 1.2rem;
     text-align: center;
-    font-size: 1.25rem;
-    color: var(--color-secondary);
+    color: var(--primary-alt);
+  }
+  aside#sidebar nav a span {
+    transition: opacity var(--transition);
+  }
+  aside#sidebar.collapsed nav a span {
+    opacity: 0;
   }
   aside#sidebar nav a:hover,
-  aside#sidebar nav .active a {
-    background: var(--color-primary);
-    color: var(--color-text);
-    transform: translateX(4px);
+  aside#sidebar nav a.active {
+    background: var(--primary-alt);
+    color: #fff;
+    transform: translateX(8px);
   }
-  aside#sidebar nav .active a i {
-    color: var(--color-text);
+  aside#sidebar nav a.active {
+    font-weight: 700;
   }
-  #shrinkSidebar {
+  #shrinkBtn {
     margin: var(--padding) auto;
-    background: var(--color-secondary);
-    border: none;
+    background: var(--primary);
+    color: #fff;
     border-radius: 50%;
     width: 36px;
     height: 36px;
-    color: #fff;
-    box-shadow: var(--shadow-medium);
-    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: var(--shadow);
     transition: background var(--transition), transform var(--transition);
   }
-  #shrinkSidebar:hover {
-    background: var(--color-secondary-alt);
-    transform: scale(1.05);
-  }
-  aside#sidebar.collapsed {
-    width: var(--sidebar-collapsed);
-  }
-  aside#sidebar.collapsed .brand span,
-  aside#sidebar.collapsed nav a span {
-    display: none;
-  }
-  aside#sidebar.collapsed nav a {
-    justify-content: center;
+  #shrinkBtn:hover {
+    background: var(--primary-alt);
+    transform: scale(1.1);
   }
 
   /*──────────────────────────────────────────────────────────────────────────────
@@ -184,299 +180,380 @@
     left: var(--sidebar-width);
     right: 0;
     height: var(--header-height);
-    background: var(--color-surface);
-    box-shadow: var(--shadow-medium);
+    background: var(--surface);
+    box-shadow: var(--shadow);
     display: flex;
     align-items: center;
     justify-content: space-between;
     padding: 0 var(--padding);
-    z-index: 1001;
+    z-index: 999;
     transition: left var(--transition), background var(--transition);
   }
+  aside#sidebar.collapsed ~ header {
+    left: var(--sidebar-collapsed-width);
+  }
   header h1 {
-    font-size: 1.5rem;
+    font-size: 1.6rem;
     font-weight: 600;
-    color: var(--color-secondary);
+    color: var(--text);
   }
-  header #hamburger,
-  header #themeToggle {
+  header .hamburger,
+  header .theme-toggle {
     font-size: 1.5rem;
-    color: var(--color-secondary);
+    color: var(--primary-alt);
     cursor: pointer;
-    transition: transform var(--transition), color var(--transition);
+    transition: color var(--transition), transform var(--transition);
   }
-  header #hamburger:hover,
-  header #themeToggle:hover {
+  header .hamburger:hover,
+  header .theme-toggle:hover {
+    color: var(--primary);
     transform: scale(1.1);
-    color: var(--color-secondary-alt);
-  }
-  @media (max-width: 768px) {
-    header #hamburger {
-      display: block;
-    }
-    header, main {
-      left: 0 !important;
-    }
-    aside#sidebar {
-      transform: translateX(-100%);
-      transition: transform var(--transition);
-    }
-    aside#sidebar.open {
-      transform: translateX(0);
-    }
   }
 
   /*──────────────────────────────────────────────────────────────────────────────
-    MAIN CONTENT & MODULES
+    MAIN
   ──────────────────────────────────────────────────────────────────────────────*/
   main {
     flex: 1;
     margin-top: var(--header-height);
     margin-left: var(--sidebar-width);
     padding: var(--padding);
+    background: var(--bg);
     transition: margin-left var(--transition);
   }
+  aside#sidebar.collapsed ~ main {
+    margin-left: var(--sidebar-collapsed-width);
+  }
+
+  /*──────────────────────────────────────────────────────────────────────────────
+    MODULE BASE STYLES
+  ──────────────────────────────────────────────────────────────────────────────*/
   section.module {
-    background: var(--color-surface);
+    background: var(--surface);
     border-radius: var(--radius);
     padding: var(--padding);
     margin-bottom: 1.5rem;
-    box-shadow: var(--shadow-medium);
-    transition: transform var(--transition), background var(--transition);
-    position: relative;
+    box-shadow: var(--shadow);
+    transition: transform var(--transition), box-shadow var(--transition);
   }
-  section.module:hover:not(.disabled) {
+  section.module:hover {
     transform: translateY(-4px);
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 6px 24px rgba(0, 0, 0, 0.1);
   }
-  section.module.disabled {
-    opacity: 0.4;
-    pointer-events: none;
-  }
-  h2 {
+  section.module h2 {
     display: flex;
     align-items: center;
-    gap: 0.5rem;
-    font-size: 1.6rem;
-    color: var(--color-secondary);
+    gap: 0.75rem;
     margin-bottom: 0.75rem;
+    font-size: 1.5rem;
+    color: var(--primary-alt);
   }
-  .desc {
-    color: var(--color-muted);
-    margin-bottom: 1rem;
+  section.module p.desc {
     font-size: 0.95rem;
+    color: var(--muted);
+    margin-bottom: 1rem;
+  }
+  section.module form {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+    align-items: flex-end;
+  }
+  section.module form label {
+    font-size: 0.95rem;
+    color: var(--text);
+    margin-bottom: 0.25rem;
+    display: block;
+    font-weight: 500;
+  }
+  section.module form input,
+  section.module form select,
+  section.module form textarea {
+    flex: 1 1 200px;
+    padding: 0.75rem;
+    border: 1.5px solid rgba(0, 0, 0, 0.1);
+    background: var(--bg);
+    color: var(--text);
+    font-size: 0.95rem;
+    border-radius: var(--radius);
+    transition: border-color var(--transition), box-shadow var(--transition);
+  }
+  section.module form input:focus,
+  section.module form select:focus,
+  section.module form textarea:focus {
+    outline: none;
+    border-color: var(--primary-alt);
+    box-shadow: 0 0 8px var(--primary-alt);
+  }
+  section.module form button {
+    background: var(--primary);
+    color: #fff;
+    padding: 0.7rem 1.4rem;
+    border-radius: var(--radius);
+    font-size: 0.95rem;
+    font-weight: 600;
+    cursor: pointer;
+    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
+    transition: background var(--transition), transform var(--transition), box-shadow var(--transition);
+  }
+  section.module form button:hover:not([disabled]) {
+    background: var(--primary-alt);
+    transform: scale(1.03);
+    box-shadow: 0 5px 14px rgba(0, 0, 0, 0.12);
+  }
+  section.module form button[disabled] {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+  .hint {
+    width: 100%;
+    font-size: 0.85rem;
+    color: var(--muted);
+  }
+
+  /*──────────────────────────────────────────────────────────────────────────────
+    RESPONSE PANELS
+  ──────────────────────────────────────────────────────────────────────────────*/
+  .response {
+    background: var(--accent);
+    border-left: 4px solid var(--secondary);
+    padding: var(--padding);
+    border-radius: var(--radius);
+    margin-top: 1rem;
+    position: relative;
+    box-shadow: var(--shadow);
+    transition: background var(--transition);
+  }
+  .response .close-btn {
+    position: absolute;
+    top: var(--padding);
+    right: var(--padding);
+    background: none;
+    color: var(--secondary);
+    font-size: 1.2rem;
+    border: none;
+    cursor: pointer;
+    transition: color var(--transition), transform var(--transition);
+  }
+  .response .close-btn:hover {
+    color: var(--primary-alt);
+    transform: scale(1.1);
+  }
+  .response .result-content {
+    margin-top: 1.5rem; /* space for close button */
+    color: var(--text);
+    line-height: 1.5;
+  }
+  .tool-row {
+    position: absolute;
+    bottom: var(--padding);
+    right: var(--padding);
+    display: flex;
+    gap: 0.5rem;
+  }
+  .tool-row button {
+    background: var(--surface);
+    border: 1px solid var(--muted);
+    border-radius: 50%;
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--secondary);
+    transition: background var(--transition), color var(--transition), transform var(--transition);
+  }
+  .tool-row button:hover {
+    background: var(--primary-alt);
+    color: #fff;
+    transform: scale(1.1);
   }
 
   /*──────────────────────────────────────────────────────────────────────────────
     HERO SECTION
   ──────────────────────────────────────────────────────────────────────────────*/
   #hero {
+    background: url('hero-food.jpg') center/cover no-repeat;
     position: relative;
-    overflow: hidden;
-    background: url('dietetics-hero.jpg') center/cover no-repeat; /* Replace with actual image path */
     border-radius: var(--radius);
-    padding: 3rem 2rem;
-    box-shadow: var(--shadow-medium);
-    margin-bottom: 1.5rem;
+    overflow: hidden;
+    padding: 2rem var(--padding) 4rem;
+    box-shadow: var(--shadow);
+    color: #fff;
   }
-  #hero::after {
-    content: '';
+  #hero::before {
+    content: "";
     position: absolute;
     inset: 0;
-    background: rgba(254, 252, 232, 0.7);
-    pointer-events: none;
-  }
-  #hero .hero-inner {
-    position: relative;
+    background: rgba(44, 62, 80, 0.6);
     z-index: 1;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    flex-wrap: wrap;
-    max-width: 1200px;
-    margin: 0 auto;
-    gap: 2rem;
   }
   #hero .hero-content {
-    flex: 1;
-    min-width: 280px;
+    position: relative;
+    z-index: 2;
+    max-width: 800px;
+    margin: 0 auto;
+    text-align: center;
   }
   #hero h2 {
-    font-size: 2.4rem;
-    color: var(--color-secondary);
+    font-size: 2.5rem;
+    margin-bottom: 0.5rem;
+    color: #fff;
   }
   #hero p.desc {
-    font-size: 1.05rem;
-    margin-top: 0.5rem;
-    color: var(--color-text);
+    font-size: 1rem;
+    color: rgba(255, 255, 255, 0.85);
+    margin-bottom: 1.5rem;
   }
-  #hero .hero-features {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-    gap: 1rem;
-    margin-top: 2rem;
-    width: 100%;
-  }
-  .feature-card {
-    background: var(--color-accent);
-    border-radius: var(--radius);
-    padding: var(--padding);
-    box-shadow: var(--shadow-light);
+  #hero .hero-actions {
     display: flex;
-    flex-direction: column;
-    gap: 0.5rem;
-    transition: transform var(--transition), box-shadow var(--transition);
+    justify-content: center;
+    gap: 1rem;
+    flex-wrap: wrap;
+    margin-bottom: 2rem;
   }
-  .feature-card:hover {
-    transform: translateY(-5px);
-    box-shadow: var(--shadow-medium);
-  }
-  .feature-card i {
-    font-size: 1.75rem;
-    color: var(--color-secondary);
-  }
-  .feature-card h3 {
-    font-size: 1.25rem;
-    margin-bottom: 0.5rem;
-    color: var(--color-secondary);
-  }
-  .feature-card input[type="text"],
-  .feature-card input[type="number"],
-  .feature-card select {
-    width: 100%;
-    padding: 0.75rem;
-    border: 2px solid var(--color-primary-alt);
-    border-radius: var(--radius);
-    background: #fff;
-    color: var(--color-text);
-    font-size: 0.95rem;
-    transition: border-color var(--transition), box-shadow var(--transition);
-  }
-  .feature-card input:focus,
-  .feature-card select:focus {
-    border-color: var(--color-secondary);
-    box-shadow: 0 0 8px var(--color-secondary);
-    outline: none;
-  }
-  .feature-card button.btn {
-    align-self: flex-end;
-    background: var(--color-secondary);
+  #hero .hero-actions .btn {
+    background: var(--secondary);
     color: #fff;
-    padding: 0.7rem 1.4rem;
-    border: none;
-    font-size: 0.95rem;
-    font-weight: 600;
+    padding: 0.75rem 1.5rem;
     border-radius: var(--radius);
-    cursor: pointer;
-    box-shadow: var(--shadow-light);
-    transition: background var(--transition), transform var(--transition), box-shadow var(--transition);
-  }
-  .feature-card button.btn:hover {
-    background: var(--color-secondary-alt);
-    transform: translateY(-2px);
-    box-shadow: var(--shadow-medium);
-  }
-
-  /* Decorative Stickers */
-  .sticker {
-    position: absolute;
-    font-size: 4rem;
-    color: var(--color-primary-alt);
-    opacity: 0.25;
-    transition: transform var(--transition), opacity var(--transition);
-  }
-  .sticker:hover {
-    transform: scale(1.1) rotate(0deg);
-    opacity: 0.4;
-  }
-  .sticker-1 { top: 1rem; left: 2rem; transform: rotate(-15deg); }
-  .sticker-2 { top: 3rem; right: 3rem; transform: rotate(10deg); }
-  .sticker-3 { bottom: 2rem; left: 50%; transform: translateX(-50%) rotate(-5deg); }
-  /* Additional stickers positions can be customized as needed */
-
-  /*──────────────────────────────────────────────────────────────────────────────
-    “Nationalit​y” LABEL & BUTTON
-  ──────────────────────────────────────────────────────────────────────────────*/
-  #nationality-label {
-    display: inline-flex;
+    font-weight: 600;
+    display: flex;
     align-items: center;
     gap: 0.5rem;
-    font-weight: 600;
-    color: var(--color-secondary);
-    margin-bottom: 0.75rem;
+    transition: background var(--transition), transform var(--transition), box-shadow var(--transition);
   }
-  #nationality {
-    flex: 1;
-    padding: 0.75rem;
-    border: 2px solid var(--color-primary-alt);
+  #hero .hero-actions .btn:hover {
+    background: var(--primary-alt);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
+  }
+  #hero .hero-tip {
+    position: relative;
+    z-index: 2;
+    background: rgba(255, 255, 255, 0.9);
     border-radius: var(--radius);
-    background: #fff;
-    color: var(--color-text);
+    padding: var(--padding);
+    max-width: 600px;
+    margin: 0 auto 2rem;
+    box-shadow: var(--shadow);
+  }
+  #hero .hero-tip h3 {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 1.2rem;
+    color: var(--primary-alt);
+    margin-bottom: 0.5rem;
+  }
+  #hero .hero-tip p {
+    font-size: 1rem;
+    color: var(--text);
+  }
+  /* Nationality input smaller and at bottom */
+  #nat-form {
+    position: relative;
+    z-index: 2;
+    margin-top: 2rem;
+    display: flex;
+    justify-content: center;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+  }
+  #nat-form input {
+    width: 200px;
+    padding: 0.6rem;
+    border: 1.5px solid rgba(0, 0, 0, 0.1);
+    border-radius: var(--radius);
+    background: var(--bg);
+    color: var(--text);
     font-size: 0.95rem;
     transition: border-color var(--transition), box-shadow var(--transition);
   }
-  #nationality:focus {
-    border-color: var(--color-secondary);
-    box-shadow: 0 0 8px var(--color-secondary);
-    outline: none;
-  }
-  #setNationality {
-    margin-top: 0.5rem;
-    background: var(--color-secondary);
+  #nat-form button {
+    background: var(--primary-alt);
     color: #fff;
-    border: none;
+    padding: 0.6rem 1.2rem;
     border-radius: var(--radius);
-    padding: 0.75rem 1rem;
     font-weight: 600;
-    cursor: pointer;
-    box-shadow: var(--shadow-light);
-    transition: background var(--transition), transform var(--transition), box-shadow var(--transition);
+    transition: background var(--transition), transform var(--transition);
   }
-  #setNationality:hover {
-    background: var(--color-secondary-alt);
+  #nat-form button:hover {
+    background: var(--primary);
     transform: translateY(-2px);
-    box-shadow: var(--shadow-medium);
   }
 
   /*──────────────────────────────────────────────────────────────────────────────
     CHATBOT SECTION
   ──────────────────────────────────────────────────────────────────────────────*/
-  #dietBot .chat-controls {
+  #chatSection .chat-controls {
     display: flex;
+    justify-content: flex-end;
     gap: 0.5rem;
-    margin-bottom: 0.75rem;
+    margin-bottom: 0.5rem;
   }
-  #dietBot .chat-controls button {
-    background: none;
-    border: 2px solid var(--color-secondary);
-    color: var(--color-secondary);
+  #chatSection .chat-controls button {
+    background: var(--surface);
+    border: 1px solid var(--muted);
     border-radius: 50%;
-    width: 36px;
-    height: 36px;
+    width: 40px;
+    height: 40px;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 1rem;
-    cursor: pointer;
-    transition: background var(--transition), color var(--transition), transform var(--transition);
+    color: var(--secondary);
+    transition: background var(--transition), transform var(--transition);
   }
-  #dietBot .chat-controls button:hover {
-    background: var(--color-secondary);
+  #chatSection .chat-controls button:hover {
+    background: var(--primary-alt);
     color: #fff;
     transform: scale(1.1);
   }
   .chat-box {
-    background: var(--color-accent);
-    border: 1px solid var(--color-muted);
+    background: var(--bg);
+    border: 1px solid rgba(0, 0, 0, 0.1);
     border-radius: var(--radius);
     padding: var(--padding);
-    max-height: 400px;
+    min-height: 250px;
+    max-height: 450px;
     overflow-y: auto;
-    min-height: 200px;
     display: flex;
     flex-direction: column;
     gap: 0.5rem;
     transition: background var(--transition), border-color var(--transition);
+  }
+  .user-msg,
+  .bot-msg {
+    max-width: 80%;
+    margin: 0.5rem 0;
+    padding: 0.8rem 1rem;
+    border-radius: 1.2rem;
+    position: relative;
+    line-height: 1.4;
+    transition: background var(--transition), color var(--transition);
+  }
+  .user-msg {
+    background: var(--primary-alt);
+    color: #fff;
+    align-self: flex-end;
+    border-bottom-right-radius: 0.2rem;
+  }
+  .bot-msg {
+    background: var(--accent);
+    color: var(--text);
+    align-self: flex-start;
+    border-bottom-left-radius: 0.2rem;
+  }
+  html.dark .bot-msg {
+    background: var(--surface);
+    color: var(--text);
+  }
+  .timestamp {
+    font-size: 0.7rem;
+    color: var(--muted);
+    position: absolute;
+    bottom: -1.2rem;
+    right: 0.8rem;
   }
   .chat-input {
     display: flex;
@@ -484,76 +561,41 @@
     margin-top: 0.5rem;
   }
   .chat-input input {
-    flex: 1;
-    padding: 0.75rem;
-    border: 2px solid var(--color-primary-alt);
+    flex: 1 1 100%;
+    padding: 0.8rem 1rem;
+    border: 1px solid var(--muted);
     border-radius: var(--radius);
-    background: #fff;
-    color: var(--color-text);
+    background: var(--bg);
+    color: var(--text);
     font-size: 0.95rem;
     transition: border-color var(--transition), box-shadow var(--transition);
   }
   .chat-input input:focus {
-    border-color: var(--color-secondary);
-    box-shadow: 0 0 8px var(--color-secondary);
     outline: none;
+    border-color: var(--primary-alt);
+    box-shadow: 0 0 8px var(--primary-alt);
   }
   .chat-input button {
-    background: var(--color-secondary);
-    border: none;
+    background: var(--primary);
     border-radius: 50%;
-    width: 36px;
-    height: 36px;
+    width: 40px;
+    height: 40px;
     display: flex;
     align-items: center;
     justify-content: center;
     color: #fff;
     font-size: 1rem;
-    cursor: pointer;
     transition: background var(--transition), transform var(--transition);
   }
   .chat-input button:hover {
-    background: var(--color-secondary-alt);
+    background: var(--primary-alt);
     transform: scale(1.1);
   }
-  .user-msg,
-  .bot-msg {
-    max-width: 80%;
-    padding: 0.75rem 1rem;
-    border-radius: var(--radius);
-    position: relative;
-    line-height: 1.4;
-    transition: background var(--transition), color var(--transition);
-  }
-  .user-msg {
-    background: var(--color-secondary);
-    color: #fff;
-    align-self: flex-end;
-    border-bottom-right-radius: 0.2rem;
-  }
-  .bot-msg {
-    background: var(--color-accent);
-    color: var(--color-text);
-    align-self: flex-start;
-    border-bottom-left-radius: 0.2rem;
-  }
-  html.dark .bot-msg {
-    background: var(--color-surface);
-    color: var(--color-text);
-  }
-  .timestamp {
-    font-size: 0.7rem;
-    color: var(--color-muted);
-    position: absolute;
-    bottom: -1.2rem;
-    right: 0.8rem;
-  }
-  .date-separator {
-    text-align: center;
-    margin: 1rem 0;
-    font-weight: bold;
-    color: var(--color-secondary);
-    user-select: none;
+  #chatHint {
+    font-size: 0.9rem;
+    color: var(--muted);
+    margin-top: 0.5rem;
+    display: none;
   }
 
   /*──────────────────────────────────────────────────────────────────────────────
@@ -563,142 +605,319 @@
     display: none;
     margin-top: 0.5rem;
     padding: 0.75rem;
-    border: 2px solid var(--color-primary-alt);
-    background: #fff;
-    color: var(--color-text);
+    border: 1.5px solid rgba(0, 0, 0, 0.1);
+    background: var(--bg);
+    color: var(--text);
     font-size: 0.95rem;
     border-radius: var(--radius);
     transition: border-color var(--transition), box-shadow var(--transition);
   }
   .other-input:focus {
-    border-color: var(--color-secondary);
-    box-shadow: 0 0 8px var(--color-secondary);
     outline: none;
+    border-color: var(--primary-alt);
+    box-shadow: 0 0 8px var(--primary-alt);
   }
 
   /*──────────────────────────────────────────────────────────────────────────────
-    FORMS, LABELS & INPUTS
+    CHARTS & ANALYTICS
   ──────────────────────────────────────────────────────────────────────────────*/
-  label {
+  .charts {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 1.25rem;
+    margin-top: 1rem;
+  }
+  .chart-card {
+    background: var(--surface);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    overflow: hidden;
     display: flex;
     flex-direction: column;
-    font-size: 0.95rem;
-    color: var(--color-text);
-    margin-bottom: 0.75rem;
+    transition: box-shadow var(--transition);
   }
-  input[type="text"],
-  input[type="number"],
-  input[type="date"],
-  input[type="time"],
-  textarea,
-  select {
+  .chart-card:hover {
+    box-shadow: 0 6px 24px rgba(0, 0, 0, 0.1);
+  }
+  .chart-card canvas {
+    flex: 1 1 auto;
+    width: 100% !important;
+    height: 250px !important;
+  }
+  .chart-card figcaption {
+    padding: 0.5rem 0.75rem;
+    background: var(--bg);
+    font-size: 0.9rem;
+    color: var(--text);
+    border-top: 1px solid rgba(0, 0, 0, 0.05);
+  }
+  .chart-desc {
+    padding: 0 0.75rem 0.75rem;
+    font-size: 0.85rem;
+    color: var(--muted);
+  }
+  #exportData, .export-chart-btn {
+    margin-top: 1rem;
+    background: var(--primary-alt);
+    color: #fff;
+    padding: 0.6rem 1.2rem;
+    border-radius: var(--radius);
+    font-weight: 600;
+    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
+    transition: transform var(--transition), background var(--transition);
+  }
+  #exportData:hover, .export-chart-btn:hover {
+    background: var(--primary);
+    transform: translateY(-2px);
+  }
+
+  /*──────────────────────────────────────────────────────────────────────────────
+    “Meet a Nutrition Expert” SECTION
+  ──────────────────────────────────────────────────────────────────────────────*/
+  .meet-module {
+    background: linear-gradient(135deg, rgba(247, 220, 111, 0.1), rgba(195, 155, 211, 0.1));
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 2rem;
+    border-radius: var(--radius);
+    margin-bottom: 2rem;
+  }
+  .meet-content {
+    display: flex;
+    align-items: center;
+    max-width: 900px;
+    width: 100%;
+    gap: 2rem;
+  }
+  .meet-icon {
+    flex: 0 0 80px;
+    height: 80px;
+    background: var(--primary-alt);
+    color: #fff;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2.5rem;
+    box-shadow: var(--shadow);
+  }
+  .meet-text h2 {
+    font-size: 2rem;
+    margin-bottom: 0.5rem;
+    color: var(--secondary);
+    line-height: 1.2;
+  }
+  .meet-text p {
+    font-size: 1rem;
+    margin-bottom: 1rem;
+    color: var(--text);
+    line-height: 1.4;
+  }
+  .btn-schedule {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    background: linear-gradient(45deg, var(--primary), var(--primary-alt));
+    color: #fff;
+    padding: 0.75rem 1.5rem;
+    border-radius: var(--radius);
+    font-weight: 600;
+    font-size: 1rem;
+    transition: transform var(--transition), box-shadow var(--transition);
+  }
+  .btn-schedule:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
+  }
+
+  /*──────────────────────────────────────────────────────────────────────────────
+    PROGRESS CHARTS SECTION
+  ──────────────────────────────────────────────────────────────────────────────*/
+  #progressCharts {
+    margin-top: 2rem;
+    background: var(--surface);
+    border-radius: var(--radius);
+    padding: var(--padding);
+    box-shadow: var(--shadow);
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+  }
+  #progressCharts h2 {
+    grid-column: 1 / -1;
+    font-size: 1.5rem;
+    color: var(--primary-alt);
+    margin-bottom: 1rem;
+  }
+  #progressCharts canvas {
+    background: var(--bg);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    width: 100% !important;
+    height: 250px !important;
+  }
+  #progressCharts .export-chart-btn {
+    grid-column: span 1;
+    justify-self: center;
+  }
+
+  /*──────────────────────────────────────────────────────────────────────────────
+    HISTORY MODAL
+  ──────────────────────────────────────────────────────────────────────────────*/
+  .history-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 2000;
+  }
+  .history-modal .history-content {
+    background: var(--surface);
+    border-radius: var(--radius);
+    width: 100%;
+    max-width: 600px;
+    max-height: 80vh;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    box-shadow: var(--shadow);
+  }
+  .history-modal .history-content h3 {
+    padding: 1rem;
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: var(--primary-alt);
+    border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+    background: var(--surface);
+  }
+  .history-modal .history-table-wrapper {
+    flex: 1;
+    overflow-y: auto;
+    padding: 0 1rem;
+    background: var(--bg);
+  }
+  .history-modal .history-table-wrapper .history-date {
+    text-align: center;
+    font-weight: 600;
+    color: var(--muted);
+    margin: 1rem 0 0.5rem;
+  }
+  .history-modal .history-row {
+    display: grid;
+    grid-template-columns: 1fr auto auto;
+    gap: 0.5rem;
+    align-items: center;
+    padding: 0.5rem 0;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+  }
+  .history-modal .history-row .history-sender {
+    font-weight: 500;
+    color: var(--text);
+  }
+  .history-modal .history-row .history-text {
+    color: var(--text);
+  }
+  .history-modal .history-row .del-msg {
+    background: none;
+    border: none;
+    color: var(--muted);
+    font-size: 1rem;
+    cursor: pointer;
+    transition: color var(--transition), transform var(--transition);
+  }
+  .history-modal .history-row .del-msg:hover {
+    color: var(--primary-alt);
+    transform: scale(1.1);
+  }
+  .history-modal .history-actions {
+    display: flex;
+    justify-content: space-between;
+    gap: 0.5rem;
+    padding: 0.75rem 1rem;
+    background: var(--surface);
+    border-top: 1px solid rgba(0, 0, 0, 0.05);
+    position: sticky;
+    bottom: 0;
+  }
+  .history-modal .history-actions button {
+    flex: 1;
+    background: var(--primary-alt);
+    color: #fff;
+    padding: 0.5rem;
+    font-size: 0.9rem;
+    font-weight: 500;
+    border: none;
+    border-radius: var(--radius);
+    cursor: pointer;
+    transition: background var(--transition), transform var(--transition);
+  }
+  .history-modal .history-actions button:hover {
+    background: var(--primary);
+    transform: translateY(-1px);
+  }
+
+  /*──────────────────────────────────────────────────────────────────────────────
+    FORMS & INPUT STYLING
+  ──────────────────────────────────────────────────────────────────────────────*/
+  input, textarea, select {
+    width: 100%;
     padding: 0.75rem;
-    border: 2px solid var(--color-primary-alt);
+    border: 2px solid var(--primary-alt);
     border-radius: var(--radius);
     background: #fff;
-    color: var(--color-text);
-    font-size: 0.95rem;
-    transition: border-color var(--transition), box-shadow var(--transition);
+    color: var(--text);
+    font-size: 1rem;
+    transition: border-color .2s, box-shadow .2s;
   }
-  input:focus,
-  textarea:focus,
-  select:focus {
-    border-color: var(--color-secondary);
-    box-shadow: 0 0 8px var(--color-secondary);
-    outline: none;
+  input:focus, textarea:focus, select:focus {
+    border-color: var(--secondary);
+    box-shadow: 0 0 0 3px rgba(195, 155, 211, 0.2);
   }
-  textarea {
-    resize: vertical;
-  }
+  textarea { resize: vertical; }
   button.btn {
     display: inline-flex;
     align-items: center;
     gap: 0.5rem;
     padding: 0.75rem 1.25rem;
-    background: var(--color-primary);
-    color: var(--color-text);
-    border: none;
-    border-radius: var(--radius);
+    background: var(--primary-alt);
+    color: #000;
     font-weight: 600;
-    box-shadow: var(--shadow-light);
-    cursor: pointer;
-    transition: background var(--transition), transform var(--transition), box-shadow var(--transition);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    transition: background var(--transition), transform var(--transition);
   }
-  button.btn:hover:not([disabled]) {
-    background: var(--color-primary-alt);
+  button.btn:hover {
+    background: var(--primary);
     transform: translateY(-2px);
-    box-shadow: var(--shadow-medium);
   }
   button.btn-secondary {
-    background: var(--color-secondary);
+    background: var(--secondary);
     color: #fff;
   }
-  button.btn-secondary:hover:not([disabled]) {
-    background: var(--color-secondary-alt);
+  button.btn-secondary:hover {
+    background: var(--primary-alt);
   }
 
   /*──────────────────────────────────────────────────────────────────────────────
-    RESPONSE PANELS
+    FIELDSETS & CHECKBOX GROUPS
   ──────────────────────────────────────────────────────────────────────────────*/
-  .response {
-    background: var(--color-surface);
-    border-left: 4px solid var(--color-secondary);
+  fieldset {
+    border: 1px solid var(--muted);
     border-radius: var(--radius);
-    padding: var(--padding);
-    margin-top: 1rem;
-    position: relative;
-    box-shadow: var(--shadow-medium);
-    transition: background var(--transition), box-shadow var(--transition);
+    padding: 0.75rem;
+    margin-bottom: 1rem;
   }
-  .response.waiting {
-    opacity: 0.8;
+  legend {
+    padding: 0 0.5rem;
+    font-weight: 600;
+    color: var(--secondary);
   }
-  .response .close-btn {
-    position: absolute;
-    top: var(--padding);
-    right: var(--padding);
-    background: none;
-    border: none;
-    font-size: 1.25rem;
-    color: var(--color-secondary);
-    cursor: pointer;
-    transition: color var(--transition), transform var(--transition);
-  }
-  .response .close-btn:hover {
-    color: var(--color-secondary-alt);
-    transform: scale(1.1);
-  }
-  .response .result-content {
-    margin-top: 1.5rem;
-    color: var(--color-text);
-    line-height: 1.5;
-    white-space: pre-wrap;
-  }
-  .tool-row {
-    position: absolute;
-    bottom: var(--padding);
-    right: var(--padding);
-    display: flex;
-    gap: 0.5rem;
-  }
-  .copy-btn, .dl-btn {
-    background: none;
-    border: none;
-    cursor: pointer;
-    padding: 0.25rem;
-    color: var(--color-secondary);
-    font-size: 1rem;
-    transition: background var(--transition), color var(--transition), transform var(--transition);
-  }
-  .copy-btn:hover, .dl-btn:hover {
-    background: var(--color-primary);
-    color: var(--color-text);
-    transform: scale(1.1);
-  }
-
-  /*──────────────────────────────────────────────────────────────────────────────
-    CHECKBOX GROUPS
-  ──────────────────────────────────────────────────────────────────────────────*/
   .checkbox-group {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
@@ -710,334 +929,379 @@
     align-items: center;
     gap: 0.5rem;
     padding: 0.5rem 0.75rem;
-    background: var(--color-surface);
-    border: 1px solid var(--color-muted);
+    background: var(--accent);
+    border: 1px solid var(--muted);
     border-radius: var(--radius);
     cursor: pointer;
-    transition: background var(--transition), transform var(--transition);
   }
   .checkbox-group input[type="checkbox"] {
     width: 1rem;
     height: 1rem;
-    accent-color: var(--color-secondary);
+    accent-color: var(--secondary);
   }
-  .checkbox-group label:hover {
-    background: var(--color-accent);
-    transform: translateY(-2px);
-  }
-  .checkbox-group input[type="checkbox"][value="Other"]:checked ~ 
-  input.other-input {
-    display: block;
-    width: 100%;
+  .checkbox-group input[type="text"].other-input {
+    grid-column: 1 / -1;
     margin-top: 0.5rem;
+    padding: 0.5rem;
   }
 
   /*──────────────────────────────────────────────────────────────────────────────
-    HISTORY MODAL (CHAT HISTORY)
+    SPINNER ICON & TOAST
   ──────────────────────────────────────────────────────────────────────────────*/
-  .history-modal {
+  .spinner {
+    display: inline-block;
+    width: 1em;
+    height: 1em;
+    border: 2px solid var(--primary-alt);
+    border-top-color: transparent;
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+    vertical-align: middle;
+    margin-left: 0.25em;
+  }
+  @keyframes spin {
+    to { transform: rotate(360deg); }
+  }
+  .spin-text {
+    text-align: center;
+    margin-top: 0.5rem;
+    font-style: italic;
+    color: var(--muted);
+  }
+  .toast {
     position: fixed;
-    inset: 0;
-    background: rgba(0, 0, 0, 0.5);
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%) translateY(100%);
+    background: var(--primary-alt);
+    color: #fff;
+    padding: 0.75rem 1.5rem;
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    opacity: 0;
+    transition: transform 0.3s, opacity 0.3s;
+    z-index: 2000;
+  }
+  .toast.visible {
+    transform: translateX(-50%) translateY(0);
+    opacity: 1;
+  }
+
+  /*──────────────────────────────────────────────────────────────────────────────
+    STICKERS (DECORATIVE ICONS)
+  ──────────────────────────────────────────────────────────────────────────────*/
+  .sticker {
+    position: absolute;
+    font-size: 4rem;
+    opacity: 0.15;
+    transition: transform 0.3s, opacity 0.3s;
+    color: var(--primary-alt);
+  }
+  .sticker:hover {
+    opacity: 0.3;
+    transform: scale(1.1) rotate(0deg);
+  }
+  /* (Positions will be inlined as style="" on each <i> element) */
+
+  /*──────────────────────────────────────────────────────────────────────────────
+    MEET A NUTRITION EXPERT SECTION
+  ──────────────────────────────────────────────────────────────────────────────*/
+  .meet-module {
+    background: linear-gradient(135deg, rgba(247, 220, 111, 0.1), rgba(195, 155, 211, 0.1));
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 2rem;
+    border-radius: var(--radius);
+    margin-bottom: 2rem;
+  }
+  .meet-content {
+    display: flex;
+    align-items: center;
+    max-width: 900px;
+    width: 100%;
+    gap: 2rem;
+  }
+  .meet-icon {
+    flex: 0 0 80px;
+    height: 80px;
+    background: var(--primary-alt);
+    color: #fff;
+    border-radius: 50%;
     display: flex;
     align-items: center;
     justify-content: center;
-    z-index: 2000;
+    font-size: 2.5rem;
+    box-shadow: var(--shadow);
   }
-  .history-content {
-    background: var(--color-surface);
-    border-radius: var(--radius);
-    width: 90%;
-    max-width: 600px;
-    max-height: 80vh;
-    display: grid;
-    grid-template-rows: auto 1fr auto;
-    box-shadow: var(--shadow-medium);
-    overflow: hidden;
+  .meet-text h2 {
+    font-size: 2rem;
+    margin-bottom: 0.5rem;
+    color: var(--secondary);
+    line-height: 1.2;
   }
-  .history-content h3 {
-    padding: 1rem;
-    font-size: 1.25rem;
-    font-weight: 600;
-    color: var(--color-secondary);
-    border-bottom: 1px solid var(--color-muted);
-  }
-  .history-content ul {
-    flex: 1 1 auto;
-    overflow-y: auto;
-    padding: 0 1rem;
-    list-style: none;
-  }
-  .history-content ul li {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 0.75rem 0;
-    border-bottom: 1px solid var(--color-muted);
-    font-size: 0.95rem;
-  }
-  .history-content ul li .history-date {
-    color: var(--color-muted);
-    font-size: 0.85rem;
-    margin-top: 0.25rem;
-  }
-  .history-content .del-msg {
-    background: none;
-    border: none;
-    color: var(--color-secondary);
+  .meet-text p {
     font-size: 1rem;
-    cursor: pointer;
-    transition: color var(--transition), transform var(--transition);
+    margin-bottom: 1rem;
+    color: var(--text);
+    line-height: 1.4;
   }
-  .history-content .del-msg:hover {
-    color: var(--color-secondary-alt);
-    transform: scale(1.1);
-  }
-  .history-content .button-row {
-    display: flex;
+  .btn-schedule {
+    display: inline-flex;
+    align-items: center;
     gap: 0.5rem;
-    padding: 0.75rem 1rem;
-    background: var(--color-surface);
-    border-top: 1px solid var(--color-muted);
-  }
-  .history-content .button-row button {
-    flex: 1;
-    padding: 0.5rem;
-    border: none;
-    border-radius: var(--radius);
-    cursor: pointer;
-    transition: background var(--transition), transform var(--transition);
-    font-size: 0.95rem;
-    font-weight: 600;
-  }
-  .history-content .clear-history {
-    background: var(--color-secondary);
+    background: linear-gradient(45deg, var(--primary), var(--primary-alt));
     color: #fff;
-  }
-  .history-content .clear-history:hover {
-    background: var(--color-secondary-alt);
-    transform: translateY(-2px);
-  }
-  .history-content .close-history {
-    background: var(--color-primary);
-    color: var(--color-text);
-  }
-  .history-content .close-history:hover {
-    background: var(--color-primary-alt);
-    transform: translateY(-2px);
-  }
-
-  /*──────────────────────────────────────────────────────────────────────────────
-    CHECKBOX-OTHER INPUTS (SYMPTOMS)
-  ──────────────────────────────────────────────────────────────────────────────*/
-  #otherSymptom {
-    display: none;
-    margin-left: 0.5rem;
-    padding: 0.5rem;
-    border: 2px solid var(--color-primary-alt);
+    padding: 0.75rem 1.5rem;
     border-radius: var(--radius);
-    background: #fff;
-    color: var(--color-text);
-    font-size: 0.9rem;
-    transition: border-color var(--transition), box-shadow var(--transition);
+    font-weight: 600;
+    font-size: 1rem;
+    transition: transform var(--transition), box-shadow var(--transition);
   }
-  #otherSymptom:focus {
-    border-color: var(--color-secondary);
-    box-shadow: 0 0 8px var(--color-secondary);
-    outline: none;
-  }
-
-  /*──────────────────────────────────────────────────────────────────────────────
-    PROGRESS CHARTS & EXPORT BUTTONS
-  ──────────────────────────────────────────────────────────────────────────────*/
-  #progressCharts {
-    display: grid;
-    grid-template-columns: 1fr;
-    gap: 1rem;
-  }
-  #progressCharts canvas {
-    background: var(--color-surface);
-    border-radius: var(--radius);
-    box-shadow: var(--shadow-light);
-    padding: 0.5rem;
-  }
-  @media (min-width: 1025px) {
-    #progressCharts {
-      grid-template-columns: 1fr 1fr;
-    }
-    #progressCharts canvas {
-      height: 300px !important;
-    }
+  .btn-schedule:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
   }
 
   /*──────────────────────────────────────────────────────────────────────────────
     RESPONSIVE ADJUSTMENTS
   ──────────────────────────────────────────────────────────────────────────────*/
-  @media (max-width: 1024px) {
-    main {
-      margin-left: 0;
-      padding: var(--padding) 0.5rem;
+  @media(max-width: 1024px) {
+    header {
+      left: 0 !important;
     }
-    #hero .hero-inner {
-      flex-direction: column;
-      gap: 2rem;
+    aside#sidebar {
+      transform: translateX(-100%);
+      transition: transform var(--transition);
+    }
+    aside#sidebar.open {
+      transform: translateX(0);
+    }
+    main {
+      margin-left: 0 !important;
     }
     #hero h2 {
       font-size: 2rem;
     }
     #hero p.desc {
-      font-size: 1rem;
+      font-size: 0.95rem;
     }
-    .hero-features {
-      grid-template-columns: 1fr;
+    #hero .hero-tip {
+      width: 90%;
+    }
+    .meet-content {
+      flex-direction: column;
+      gap: 1rem;
+    }
+    .meet-text h2 {
+      font-size: 1.75rem;
+      text-align: center;
+    }
+    .meet-text p {
+      text-align: center;
+    }
+    #progressCharts {
+      grid-template-columns: 1fr !important;
     }
   }
-  @media (max-width: 768px) {
-    section.module {
-      padding: 0.75rem;
+  @media(max-width: 768px) {
+    #shrinkBtn {
+      margin: 0.75rem auto;
     }
-    .chat-controls,
-    .chat-input {
+    header h1 {
+      font-size: 1.2rem;
+    }
+    .chat-input, .chat-controls {
       flex-direction: column;
-      gap: 0.75rem;
     }
-    .tool-row {
-      position: static;
+    .chat-controls button, .chat-input button {
+      width: 100%;
       margin-top: 0.5rem;
     }
-    .feature-card input,
-    .feature-card button {
-      width: 100%;
+    .chart-card canvas {
+      height: 200px !important;
     }
   }
-  @media (max-width: 640px) {
-    header h1 {
-      font-size: 1.25rem;
+  @media(max-width: 640px) {
+    .meet-content {
+      flex-direction: column;
+      text-align: center;
+    }
+    .meet-icon {
+      margin: 0 auto;
+    }
+    #hero {
+      padding: 1.5rem var(--padding) 3rem;
     }
     #hero h2 {
       font-size: 1.8rem;
     }
     #hero p.desc {
-      font-size: 0.95rem;
+      font-size: 0.9rem;
     }
-    #hero {
-      padding: 2rem 1rem;
+    #hero .hero-actions .btn {
+      width: 100%;
+      justify-content: center;
     }
-    #hero .hero-features {
-      gap: 1rem;
+    #hero .hero-tip {
+      width: 100%;
+      padding: 0.75rem;
     }
-    #shrinkSidebar {
-      width: 32px;
-      height: 32px;
+  }
+  @media(max-width: 480px) {
+    header h1 {
+      font-size: 1rem;
+    }
+    aside#sidebar.collapsed .brand i {
+      font-size: 1.5rem;
+    }
+    #hero .hero-actions {
+      flex-direction: column;
+    }
+    #hero .hero-actions .btn {
+      font-size: 0.9rem;
+      padding: 0.6rem 1rem;
+    }
+    .meet-text h2 {
+      font-size: 1.5rem;
     }
   }
 </style>
 
 
+
 </head>
 
 
-  <body>
-  <!-- Sidebar -->
+<body>
+  <!-- SIDEBAR -->
   <aside id="sidebar">
-    <div class="brand">
-      <i class="fas fa-utensils"></i>
-      <span>Vitra AI Dietetics</span>
+    <div class="logo">
+      <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" fill="var(--primary)">
+        <polygon points="10,10 25,90 50,40 75,90 90,10 65,10 50,70 35,10"/>
+      </svg>
+      <span class="logo-text">Vitra AI</span>
     </div>
-    <nav>
-      <ul>
-        <li><a href="herbal.html"><i class="fas fa-seedling"></i> <span>Herbal Medicine</span></a></li>
-        <li><a href="psych.html"><i class="fas fa-brain"></i> <span>Psychology &amp; MH</span></a></li>
-        <li class="active"><a href="#"><i class="fas fa-apple-alt"></i> <span>Dietetics</span></a></li>
-        <li><a href="pharmacy.html"><i class="fas fa-prescription-bottle-alt"></i> <span>E-Pharmacy</span></a></li>
-        <li><a href="consult.html"><i class="fas fa-calendar-check"></i> <span>Consult Booking</span></a></li>
-      </ul>
+    <nav role="navigation">
+      <a href="herbal.html" id="link-herbal">
+        <i class="fas fa-seedling"></i>
+        <span>Herbal Medicine</span>
+      </a>
+      <a href="psychology.html" id="link-psych">
+        <i class="fas fa-brain"></i>
+        <span>Psychology &amp; Mental Health</span>
+      </a>
+      <a href="dietetics.html" id="link-diet" class="active">
+        <i class="fas fa-utensils"></i>
+        <span>Dietetics</span>
+      </a>
+      <a href="epharmacy.html" id="link-epharm">
+        <i class="fas fa-prescription-bottle-alt"></i>
+        <span>E-Pharmacy</span>
+      </a>
+      <a href="consult.html" id="link-consult">
+        <i class="fas fa-calendar-check"></i>
+        <span>Consultation Booking</span>
+      </a>
     </nav>
-    <button id="shrinkSidebar" aria-label="Toggle sidebar">
+    <button id="shrinkBtn" aria-label="Toggle sidebar">
       <i class="fas fa-angle-double-left"></i>
     </button>
   </aside>
 
-  <!-- Header -->
+  <!-- HEADER -->
   <header>
-    <i id="hamburger" class="fas fa-bars" aria-label="Open menu"></i>
-    <h1>Dietetics &amp; Nutrition</h1>
-    <i id="themeToggle" class="fas fa-moon" aria-label="Toggle dark mode"></i>
+    <div style="display:flex; align-items:center; gap:1rem;">
+      <i id="hamburger" class="fas fa-bars hamburger" aria-label="Toggle navigation"></i>
+      <h1>Dietetics &amp; Nutrition Hub</h1>
+    </div>
+    <div>
+      <i id="themeToggle" class="fas fa-moon theme-toggle" aria-label="Toggle theme"></i>
+    </div>
   </header>
 
-  <!-- Main Content -->
-  <main>
-    <!-- Hero Section -->
+  <!-- MAIN CONTENT -->
+  <main role="main">
+    <!-- HERO SECTION -->
     <section id="hero" class="module hero-module">
       <div class="hero-inner">
-        <!-- Left Content -->
         <div class="hero-content">
-          <h1><i class="fas fa-apple-alt"></i> Nourish Your Body, Empower Your Life</h1>
-          <p class="hero-subtitle">Delicious, science-backed guidance—tailored to you.</p>
-          <!-- Today's Nutrition Tip & Nationality Input -->
-          <div class="hero-features">
-            <!-- Today's Nutrition Tip Card -->
-            <div class="feature-card">
-              <i class="fas fa-lightbulb"></i>
-              <h3>Today's Nutrition Tip</h3>
-              <div id="dailyTip" class="response">
-                <button class="close-btn"><i class="fas fa-times"></i></button>
-                <div class="tool-row">
-                  <button class="copy-btn"><i class="fas fa-copy"></i></button>
-                  <button class="dl-btn"><i class="fas fa-download"></i></button>
-                </div>
-                <div class="result-content">Enjoy a handful of mixed berries at breakfast to boost your antioxidant intake and support healthy digestion.</div>
-              </div>
-              <button id="refreshTip" class="btn-secondary">Refresh Tip</button>
-            </div>
-            <!-- Nationality Input Card -->
-            <div class="feature-card">
-              <i class="fas fa-globe"></i>
-              <h3>Your Nationality</h3>
-              <input type="text" id="nationality" placeholder="e.g. Ghanaian" required>
-              <button id="setNationality" class="btn-secondary">Set Nationality</button>
-            </div>
+          <h1><i class="fas fa-utensils"></i> Nourish Your Wellness</h1>
+          <p class="hero-subtitle">
+            Discover AI-powered meal planning, nutrient insights, recipe inspiration, and expert guidance—all in one place.
+          </p>
+          <div class="hero-actions">
+            <!-- Today's Nutrition Tip (static placeholder; refreshed via script) -->
+            <a href="#hero-tip" class="btn-primary">
+              <i class="fas fa-lightbulb"></i> Today's Nutrition Tip
+            </a>
+            <!-- Nationality input (must be filled before using modules) -->
+            <a href="#hero-nat" class="btn-tertiary">
+              <i class="fas fa-globe"></i> Set Nationality
+            </a>
           </div>
         </div>
-        <!-- Right Hero Image -->
         <div class="hero-image">
-          <img src="diet.jpg" alt="Vibrant plate of healthy food">
+          <!-- Hero image for Dietetics -->
+          <img src="diet.jpg" alt="Assortment of healthy foods and utensils">
         </div>
       </div>
-      <!-- Decorative Stickers (Avoid Overlapping Image) -->
-      <i class="fas fa-pepper-hot sticker sticker-1"></i>
-      <i class="fas fa-carrot sticker sticker-2"></i>
-      <i class="fas fa-ice-cream sticker sticker-3"></i>
-      <i class="fas fa-bread-slice sticker" style="top:5%;right:10%;"></i>
-      <i class="fas fa-lemon sticker" style="bottom:10%;left:12%;"></i>
-      <i class="fas fa-fish sticker" style="bottom:15%;right:15%;"></i>
+      <!-- SUBTLE BACKGROUND ICONS (foody style) -->
+      <i class="fas fa-apple-alt hero-bg-icon" style="top: 6%; left: 8%;"></i>
+      <i class="fas fa-carrot hero-bg-icon" style="top: 5%; right: 10%;"></i>
+      <i class="fas fa-lemon hero-bg-icon" style="bottom: 10%; left: 12%;"></i>
+      <i class="fas fa-fish hero-bg-icon" style="bottom: 8%; right: 15%;"></i>
+      <i class="fas fa-bread-slice hero-bg-icon" style="top: 45%; left: 45%;"></i>
     </section>
 
-    <!-- Nutrition Chatbot -->
-    <section id="dietBot" class="module">
-      <h2><i class="fas fa-comments"></i> Nutrition Chatbot</h2>
-      <p class="desc">Ask your diet or nutrition questions for instant, expert advice.</p>
-      <div class="chat-controls">
-        <button id="clearDiet" class="btn-secondary"><i class="fas fa-trash"></i> Clear Chat</button>
-        <button id="viewDietHistory" class="btn-secondary"><i class="fas fa-history"></i> Chat History</button>
-      </div>
-      <div id="dietChatBox" class="chat-box"></div>
-      <form id="diet-form" class="chat-input">
-        <input id="dietInput" type="text" placeholder="Type your question…" required>
-        <button id="sendDiet" class="btn"><i class="fas fa-paper-plane"></i></button>
+    <!-- 1. User Nationality (required) -->
+    <section id="hero-nat" class="module">
+      <h2><i class="fas fa-globe"></i> Set Your Nationality</h2>
+      <p class="desc">
+        Please enter your nationality so that all AI modules tailor recommendations (e.g., regional foods, pricing).
+      </p>
+      <form id="nat-form">
+        <div class="field">
+          <label for="nationality">Nationality:</label>
+          <input id="nationality" name="nationality" type="text" placeholder="e.g. Ghanaian" required/>
+        </div>
+        <button type="submit" class="btn-primary">Save Nationality</button>
       </form>
-      <div id="dietHint" class="desc" style="display:none;">AI is thinking…</div>
+      <div id="natResult" class="response" hidden>
+        <button class="close-btn" aria-label="Close result">×</button>
+        <div class="result-content"></div>
+      </div>
     </section>
 
-    <!-- Meal Plan Generator -->
-    <section id="mealPlanner" class="module">
+    <!-- 2. Nutrition Chatbot -->
+    <section id="hero-chat" class="module">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem;">
+        <h2><i class="fas fa-comments"></i> Nutrition Chatbot</h2>
+        <div class="chat-controls">
+          <button id="viewHistory" title="View History"><i class="fas fa-history"></i></button>
+          <button id="clearChat" title="Clear Chat"><i class="fas fa-trash-alt"></i></button>
+        </div>
+      </div>
+      <div id="chatBox" class="chat-box" role="log" aria-live="polite"></div>
+      <div class="chat-input-row">
+        <input id="chatInput" placeholder="Ask about diet, meals, or nutrients…" aria-label="Type your question" required/>
+        <button id="sendChat" aria-label="Send message"><i class="fas fa-paper-plane"></i></button>
+      </div>
+    </section>
+
+    <!-- 3. Meal Plan Generator -->
+    <section id="meal-planner" class="module">
       <h2><i class="fas fa-calendar-alt"></i> Meal Plan Generator</h2>
-      <p class="desc">Create a 7-day plan that fits your calories, style, and restrictions.</p>
+      <p class="desc">
+        Create a 7-day meal plan fitting your calories, dietary style, and restrictions.
+      </p>
       <form id="planner-form">
-        <label>Daily Calories:
-          <input type="number" id="calories" min="800" max="4000" value="2000" required>
-        </label>
-        <label>Diet Type:
+        <div class="field">
+          <label for="calories">Daily Calories:</label>
+          <input type="number" id="calories" min="800" max="4000" value="2000" required/>
+        </div>
+        <div class="field">
+          <label for="dietType">Diet Type:</label>
           <select id="dietType">
             <option>Balanced</option>
             <option>Low-Carb</option>
@@ -1047,171 +1311,208 @@
             <option>Plant-Based</option>
             <option value="Other">Other</option>
           </select>
-          <input class="other-input" placeholder="Specify diet…" style="display:none;">
-        </label>
-        <label>Allergies &amp; Intolerances:
+          <input class="other-input" placeholder="Specify diet…" style="display:none;"/>
+        </div>
+        <div class="field">
+          <label for="allergyList">Allergies &amp; Intolerances:</label>
           <select id="allergyList" multiple>
-            <option>Gluten</option><option>Dairy</option><option>Nuts</option>
-            <option>Shellfish</option><option>Soy</option><option>Eggs</option>
-            <option>Sesame</option><option>Other</option>
+            <option>Gluten</option>
+            <option>Dairy</option>
+            <option>Nuts</option>
+            <option>Shellfish</option>
+            <option>Soy</option>
+            <option>Eggs</option>
+            <option>Sesame</option>
+            <option>Other</option>
           </select>
-          <input class="other-input" placeholder="Specify others…" style="display:none;">
-        </label>
-        <label>Budget:
+          <input class="other-input" placeholder="Specify others…" style="display:none;"/>
+        </div>
+        <div class="field">
+          <label for="budget">Budget:</label>
           <select id="budget">
-            <option>Low</option><option>Medium</option><option>High</option>
+            <option>Low</option>
+            <option>Medium</option>
+            <option>High</option>
           </select>
-        </label>
-        <button id="genPlan" class="btn"><i class="fas fa-utensils"></i> Generate Plan</button>
-      </form>
-      <div id="planPanel" class="response" hidden>
-        <button class="close-btn"><i class="fas fa-times"></i></button>
-        <div class="tool-row">
-          <button class="copy-btn"><i class="fas fa-copy"></i></button>
-          <button class="dl-btn"><i class="fas fa-download"></i></button>
         </div>
+        <button type="submit" class="btn-primary"><i class="fas fa-utensils"></i> Generate Plan</button>
+      </form>
+      <div id="planResult" class="response" hidden>
+        <button class="close-btn" aria-label="Close result">×</button>
         <div class="result-content"></div>
+        <div class="tool-row">
+          <button class="copy-btn" title="Copy"><i class="fas fa-copy"></i></button>
+          <button class="dl-btn" title="Download"><i class="fas fa-download"></i></button>
+        </div>
       </div>
     </section>
 
-    <!-- Nutrient Analyzer -->
-    <section id="nutriAnalyzer" class="module">
+    <!-- 4. Nutrient Analyzer -->
+    <section id="nutri-analyzer" class="module">
       <h2><i class="fas fa-vial"></i> Nutrient Analyzer</h2>
-      <p class="desc">Get a complete macro and micronutrient breakdown of any recipe or meal log.</p>
-      <form id="analyze-form">
-        <label>Ingredients / Food Log:
-          <textarea id="foodLog" rows="4" placeholder="e.g. 200g yam, 1 egg, spinach…"></textarea>
-        </label>
-        <label>Portion Size Units:
+      <p class="desc">
+        Get a full macro and micronutrient breakdown of any recipe or meal log.
+      </p>
+      <form id="nutri-form">
+        <div class="field">
+          <label for="foodLog">Ingredients / Food Log:</label>
+          <textarea id="foodLog" rows="4" placeholder="e.g. 200g rice, 1 egg, spinach…" required></textarea>
+        </div>
+        <div class="field">
+          <label for="unitSelect">Portion Size Units:</label>
           <select id="unitSelect">
-            <option>grams</option><option>pieces</option><option>cups</option>
-            <option>tablespoons</option><option>servings</option>
+            <option>grams</option>
+            <option>pieces</option>
+            <option>cups</option>
+            <option>tablespoons</option>
+            <option>servings</option>
           </select>
-        </label>
-        <button id="analyzeNutri" class="btn"><i class="fas fa-chart-bar"></i> Analyze</button>
-      </form>
-      <div id="nutriPanel" class="response" hidden>
-        <button class="close-btn"><i class="fas fa-times"></i></button>
-        <div class="tool-row">
-          <button class="copy-btn"><i class="fas fa-copy"></i></button>
-          <button class="dl-btn"><i class="fas fa-download"></i></button>
         </div>
+        <button type="submit" class="btn-primary"><i class="fas fa-chart-bar"></i> Analyze Nutrition</button>
+      </form>
+      <div id="nutriResult" class="response" hidden>
+        <button class="close-btn" aria-label="Close result">×</button>
         <div class="result-content"></div>
+        <div class="tool-row">
+          <button class="copy-btn" title="Copy"><i class="fas fa-copy"></i></button>
+          <button class="dl-btn" title="Download"><i class="fas fa-download"></i></button>
+        </div>
       </div>
     </section>
 
-    <!-- Recipe Recommender -->
-    <section id="recipeRec" class="module">
+    <!-- 5. Recipe Recommender -->
+    <section id="recipe-rec" class="module">
       <h2><i class="fas fa-book-open"></i> Recipe Recommender</h2>
-      <p class="desc">Turn your pantry into delicious meals across global cuisines.</p>
+      <p class="desc">
+        Transform your pantry into delicious meals—globally inspired and easy to cook.
+      </p>
       <form id="recipe-form">
-        <label>Pantry Items:
-          <input id="pantry" type="text" placeholder="e.g. Rice, Beans, Plantain">
-        </label>
-        <label>Cuisine Style:
-          <select id="cuisineType">
-            <option>West African</option><option>Italian</option><option>Asian Fusion</option>
-            <option>Mexican</option><option>Middle Eastern</option><option value="Other">Other</option>
-          </select>
-          <input class="other-input" placeholder="Specify cuisine…" style="display:none;">
-        </label>
-        <label>Difficulty:
-          <select id="recipeDifficulty">
-            <option>Easy</option><option>Medium</option><option>Advanced</option>
-          </select>
-        </label>
-        <label>Max Prep Time:
-          <input type="number" id="maxTime" min="5" max="180" value="30"> minutes
-        </label>
-        <button id="getRecipes" class="btn"><i class="fas fa-hamburger"></i> Get Recipes</button>
-      </form>
-      <div id="recipePanel" class="response" hidden>
-        <button class="close-btn"><i class="fas fa-times"></i></button>
-        <div class="tool-row">
-          <button class="copy-btn"><i class="fas fa-copy"></i></button>
-          <button class="dl-btn"><i class="fas fa-download"></i></button>
+        <div class="field">
+          <label for="pantry">Pantry Items:</label>
+          <input id="pantry" type="text" placeholder="e.g. Rice, Beans, Plantain" required/>
         </div>
+        <div class="field">
+          <label for="cuisineType">Cuisine Style:</label>
+          <select id="cuisineType">
+            <option>West African</option>
+            <option>Italian</option>
+            <option>Asian Fusion</option>
+            <option>Mexican</option>
+            <option>Middle Eastern</option>
+            <option value="Other">Other</option>
+          </select>
+          <input class="other-input" placeholder="Specify cuisine…" style="display:none;"/>
+        </div>
+        <div class="field">
+          <label for="recipeDifficulty">Difficulty:</label>
+          <select id="recipeDifficulty">
+            <option>Easy</option>
+            <option>Medium</option>
+            <option>Advanced</option>
+          </select>
+        </div>
+        <div class="field">
+          <label for="maxTime">Max Prep Time:</label>
+          <input type="number" id="maxTime" min="5" max="180" value="30"/> minutes
+        </div>
+        <button type="submit" class="btn-primary"><i class="fas fa-hamburger"></i> Get Recipes</button>
+      </form>
+      <div id="recipeResult" class="response" hidden>
+        <button class="close-btn" aria-label="Close result">×</button>
         <div class="result-content"></div>
+        <div class="tool-row">
+          <button class="copy-btn" title="Copy"><i class="fas fa-copy"></i></button>
+          <button class="dl-btn" title="Download"><i class="fas fa-download"></i></button>
+        </div>
       </div>
     </section>
 
-    <!-- Deficiency Risk Scanner -->
-    <section id="deficiency" class="module">
+    <!-- 6. Deficiency Risk Scanner -->
+    <section id="def-risk" class="module">
       <h2><i class="fas fa-exclamation-triangle"></i> Deficiency Risk Scanner</h2>
-      <p class="desc">Identify potential nutrient shortfalls based on symptoms and diet.</p>
+      <p class="desc">
+        Identify potential nutrient shortfalls based on your symptoms and diet.
+      </p>
       <form id="def-form">
-        <label>Select Symptoms (up to 5):
+        <div class="field">
+          <label>Select Symptoms (up to 5):</label>
           <div class="checkbox-group">
-            <label><input type="checkbox" name="symptom" value="Fatigue"> Fatigue</label>
-            <label><input type="checkbox" name="symptom" value="Hair Loss"> Hair Loss</label>
-            <label><input type="checkbox" name="symptom" value="Muscle Cramps"> Muscle Cramps</label>
-            <label><input type="checkbox" name="symptom" value="Pale Skin"> Pale Skin</label>
-            <label><input type="checkbox" name="symptom" value="Bleeding Gums"> Bleeding Gums</label>
-            <label><input type="checkbox" name="symptom" value="Bone Pain"> Bone Pain</label>
-            <label><input type="checkbox" name="symptom" value="Bruising"> Bruising</label>
+            <label><input type="checkbox" name="symptom" value="Fatigue"/> Fatigue</label>
+            <label><input type="checkbox" name="symptom" value="Hair Loss"/> Hair Loss</label>
+            <label><input type="checkbox" name="symptom" value="Muscle Cramps"/> Muscle Cramps</label>
+            <label><input type="checkbox" name="symptom" value="Pale Skin"/> Pale Skin</label>
+            <label><input type="checkbox" name="symptom" value="Bleeding Gums"/> Bleeding Gums</label>
+            <label><input type="checkbox" name="symptom" value="Bone Pain"/> Bone Pain</label>
+            <label><input type="checkbox" name="symptom" value="Bruising"/> Bruising</label>
             <label>
-              <input type="checkbox" name="symptom" value="Other"> Other
-              <input type="text" id="otherSymptom" class="other-input" placeholder="Specify…">
+              <input type="checkbox" name="symptom" value="Other"/> Other
+              <input type="text" id="otherSymptom" placeholder="Specify…" style="display:none; margin-left:.5rem;"/>
             </label>
           </div>
-        </label>
-        <label>Brief Diet Overview:
-          <textarea id="dietOverview" rows="3" placeholder="e.g. Mostly rice, occasional vegetables…"></textarea>
-        </label>
-        <button id="scanDef" class="btn"><i class="fas fa-stethoscope"></i> Scan Deficiency</button>
-      </form>
-      <div id="defPanel" class="response" hidden>
-        <button class="close-btn"><i class="fas fa-times"></i></button>
-        <div class="tool-row">
-          <button class="copy-btn"><i class="fas fa-copy"></i></button>
-          <button class="dl-btn"><i class="fas fa-download"></i></button>
         </div>
+        <div class="field">
+          <label for="dietOverview">Brief Diet Overview:</label>
+          <textarea id="dietOverview" rows="3" placeholder="e.g. Mostly rice, occasional veggies…" required></textarea>
+        </div>
+        <button type="submit" class="btn-primary"><i class="fas fa-stethoscope"></i> Scan Deficiency</button>
+      </form>
+      <div id="defResult" class="response" hidden>
+        <button class="close-btn" aria-label="Close result">×</button>
         <div class="result-content"></div>
+        <div class="tool-row">
+          <button class="copy-btn" title="Copy"><i class="fas fa-copy"></i></button>
+          <button class="dl-btn" title="Download"><i class="fas fa-download"></i></button>
+        </div>
       </div>
     </section>
 
-    <!-- Metabolomic Risk Radar -->
-    <section id="riskRadar" class="module">
+    <!-- 7. Metabolomic Risk Radar -->
+    <section id="risk-radar" class="module">
       <h2><i class="fas fa-chart-pie"></i> Metabolomic Risk Radar</h2>
       <p class="desc">
-        Track biomarkers (e.g., glucose, lipids) over any date range to generate an interactive radar chart and predictive alerts.
+        Track biomarkers (e.g., glucose, lipids) over time. Generate an interactive radar chart and predictive health alerts.
       </p>
       <form id="risk-form">
-        <label>Date Range:
-          <input type="date" id="riskFrom"> – <input type="date" id="riskTo">
-        </label>
-        <label><input type="checkbox" id="syncBiomarkers"> Enable Continuous Biomarker Sync</label>
-        <label>Biomarkers (comma-sep):
-          <input id="biomarkers" type="text" placeholder="e.g. glucose, LDL…">
-        </label>
-        <label>Conditions:
-          <input id="conditions" type="text" placeholder="e.g. prediabetes…">
-        </label>
-        <label>Context:
-          <input id="context" type="text" placeholder="e.g. routine check…">
-        </label>
-        <button id="runRisk" class="btn"><i class="fas fa-biohazard"></i> Run Radar</button>
-      </form>
-      <div id="riskPanel" class="response" hidden>
-        <button class="close-btn"><i class="fas fa-times"></i></button>
-        <div class="tool-row">
-          <button class="copy-btn"><i class="fas fa-copy"></i></button>
-          <button class="dl-btn"><i class="fas fa-download"></i></button>
+        <div class="field">
+          <label>Date Range:</label>
+          <input type="date" id="riskFrom" required/> – <input type="date" id="riskTo" required/>
         </div>
+        <div class="field">
+          <label><input type="checkbox" id="syncBiomarkers"/> Enable Continuous Biomarker Sync</label>
+        </div>
+        <div class="field">
+          <label for="biomarkers">Biomarkers (comma-sep):</label>
+          <input id="biomarkers" type="text" placeholder="e.g. glucose, LDL…" required/>
+        </div>
+        <div class="field">
+          <label for="conditions">Conditions:</label>
+          <input id="conditions" type="text" placeholder="e.g. prediabetes…" required/>
+        </div>
+        <div class="field">
+          <label for="context">Context:</label>
+          <input id="context" type="text" placeholder="e.g. routine check…" required/>
+        </div>
+        <button type="submit" class="btn-primary"><i class="fas fa-biohazard"></i> Run Radar</button>
+      </form>
+      <div id="riskResult" class="response" hidden>
+        <button class="close-btn" aria-label="Close result">×</button>
         <div class="result-content"></div>
+        <!-- Radar chart will be injected here by script -->
       </div>
     </section>
 
-    <!-- AI-Driven Fitness Nutrition Coach -->
-    <section id="fitnessCoach" class="module">
+    <!-- 8. Fitness Nutrition Coach -->
+    <section id="fitness-coach" class="module">
       <h2><i class="fas fa-dumbbell"></i> Fitness Nutrition Coach</h2>
-      <p class="desc">Customize your macros, pre/post-workout blends, and recovery support.</p>
+      <p class="desc">
+        Tailor your macros, pre/post-workout blends, and recovery support.
+      </p>
       <form id="fitness-form">
-        <!-- 1. Performance Profiling -->
         <fieldset>
           <legend>1. Performance Profiling</legend>
-          <label>Workout Goal:
-            <select id="fitGoal">
+          <div class="field">
+            <label for="fitGoal">Workout Goal:</label>
+            <select id="fitGoal" required>
               <option>Endurance</option>
               <option>Strength</option>
               <option>Hybrid</option>
@@ -1219,278 +1520,628 @@
               <option>General Health</option>
               <option value="Other">Other</option>
             </select>
-            <input class="other-input" placeholder="Specify goal…" style="display:none;">
-          </label>
-          <label>Weekly Workouts:
+            <input class="other-input" placeholder="Specify goal…" style="display:none;"/>
+          </div>
+          <div class="field">
+            <label for="fitFreq">Weekly Workouts:</label>
             <select id="fitFreq">
-              <option>1–2</option><option>3–4</option><option>5–7</option>
+              <option>1–2</option>
+              <option>3–4</option>
+              <option>5–7</option>
             </select>
-          </label>
+          </div>
         </fieldset>
-        <!-- 2. Pre/Post-Workout -->
         <fieldset>
           <legend>2. Pre/Post-Workout Micro-Blends</legend>
-          <label>Available Ingredients:
+          <div class="field">
+            <label for="blendIngredients">Available Ingredients:</label>
             <select id="blendIngredients" multiple>
-              <option>Pea Protein</option><option>Beetroot Powder</option>
-              <option>Taurine</option><option>Banana</option>
-              <option>Oats</option><option value="Other">Other</option>
+              <option>Pea Protein</option>
+              <option>Beetroot Powder</option>
+              <option>Taurine</option>
+              <option>Banana</option>
+              <option>Oats</option>
+              <option>Other</option>
             </select>
-            <input class="other-input" placeholder="Add ingredient…" style="display:none;">
-          </label>
+            <input class="other-input" placeholder="Add ingredient…" style="display:none;"/>
+          </div>
         </fieldset>
-        <!-- 3. Carb-Timing Calendar -->
         <fieldset>
           <legend>3. Carb-Timing Calendar</legend>
-          <label>Start Date:
-            <input type="date" id="carbDate">
-          </label>
-          <label>Intensity Level:
+          <div class="field">
+            <label for="carbDate">Start Date:</label>
+            <input type="date" id="carbDate" required/>
+          </div>
+          <div class="field">
+            <label for="intensity">Intensity Level:</label>
             <select id="intensity">
-              <option>Low</option><option>Moderate</option><option>High</option>
+              <option>Low</option>
+              <option>Moderate</option>
+              <option>High</option>
             </select>
-          </label>
+          </div>
         </fieldset>
-        <!-- 4. Recovery Monitor -->
         <fieldset>
           <legend>4. Recovery &amp; Inflammation</legend>
-          <label>Track CRP &amp; CK Levels:
-            <input type="number" id="crpLevel" placeholder="CRP mg/L">
-          </label>
-          <label>Nutraceutical Preference:
+          <div class="field">
+            <label for="crpLevel">Track CRP &amp; CK Levels (mg/L):</label>
+            <input type="number" id="crpLevel" placeholder="CRP"/>
+          </div>
+          <div class="field">
+            <label for="nutraPref">Nutraceutical Preference:</label>
             <select id="nutraPref">
-              <option>Curcumin</option><option>Omega-3</option>
-              <option>Turmeric</option><option>Ginger</option>
-              <option value="Other">Other</option>
+              <option>Curcumin</option>
+              <option>Omega-3</option>
+              <option>Turmeric</option>
+              <option>Ginger</option>
+              <option>Other</option>
             </select>
-            <input class="other-input" placeholder="Specify…" style="display:none;">
-          </label>
+            <input class="other-input" placeholder="Specify…" style="display:none;"/>
+          </div>
         </fieldset>
-        <button id="runFitness" class="btn"><i class="fas fa-running"></i> Generate Plan</button>
+        <button type="submit" class="btn-primary"><i class="fas fa-running"></i> Generate Plan</button>
       </form>
-      <div id="fitnessPanel" class="response" hidden>
-        <button class="close-btn"><i class="fas fa-times"></i></button>
-        <div class="tool-row">
-          <button class="copy-btn"><i class="fas fa-copy"></i></button>
-          <button class="dl-btn"><i class="fas fa-download"></i></button>
-        </div>
+      <div id="fitnessResult" class="response" hidden>
+        <button class="close-btn" aria-label="Close result">×</button>
         <div class="result-content"></div>
+        <div class="tool-row">
+          <button class="copy-btn" title="Copy"><i class="fas fa-copy"></i></button>
+          <button class="dl-btn" title="Download"><i class="fas fa-download"></i></button>
+        </div>
       </div>
     </section>
 
-    <!-- Pharma-Integrated Nutrient & Medication Suite -->
-    <section id="pharmaSuite" class="module">
+    <!-- 9. Pharma-Integrated Nutrient Suite -->
+    <section id="pharma-suite" class="module">
       <h2><i class="fas fa-pills"></i> Pharma-Integrated Nutrient &amp; Medication Suite</h2>
-      <p class="desc">Check drug–nutrient interactions, compounding suggestions, reminders &amp; analytics.</p>
+      <p class="desc">
+        Drug–nutrient interactions, compounding suggestions, reminders &amp; analytics—all in one.
+      </p>
       <form id="pharma-form">
-        <!-- 1. Drug–Nutrient Interaction -->
         <fieldset>
           <legend>1. Interaction Engine</legend>
-          <label>Medications (comma-sep):
-            <input id="medList" type="text" placeholder="e.g. Warfarin, Metformin">
-          </label>
-          <label>Food Items (comma-sep):
-            <input id="foodList" type="text" placeholder="e.g. Grapefruit, Spinach">
-          </label>
+          <div class="field">
+            <label for="medList">Medications (comma-sep):</label>
+            <input id="medList" type="text" placeholder="e.g. Warfarin, Metformin" required/>
+          </div>
+          <div class="field">
+            <label for="foodList">Food Items (comma-sep):</label>
+            <input id="foodList" type="text" placeholder="e.g. Grapefruit, Spinach" required/>
+          </div>
         </fieldset>
-        <!-- 2. Custom Compounding -->
         <fieldset>
-          <legend>2. Compounding Suggestions</legend>
-          <label>Desired Outcome:
+          <legend>2. Custom Compounding</legend>
+          <div class="field">
+            <label for="compoundGoal">Desired Outcome:</label>
             <select id="compoundGoal">
-              <option>Increased Absorption</option><option>Anti-inflammatory</option>
-              <option>Energy Boost</option><option value="Other">Other</option>
+              <option>Increased Absorption</option>
+              <option>Anti-inflammatory</option>
+              <option>Energy Boost</option>
+              <option>Other</option>
             </select>
-            <input class="other-input" placeholder="Specify…" style="display:none;">
-          </label>
+            <input class="other-input" placeholder="Specify…" style="display:none;"/>
+          </div>
         </fieldset>
-        <!-- 3. Adherence & Reminder Hub -->
         <fieldset>
-          <legend>3. Medication Scheduling</legend>
-          <label>Dosage Frequency:
+          <legend>3. Adherence &amp; Reminder Hub</legend>
+          <div class="field">
+            <label for="doseFreq">Dosage Frequency:</label>
             <select id="doseFreq">
-              <option>Once daily</option><option>Twice daily</option>
-              <option>With meals</option><option value="Other">Other</option>
+              <option>Once daily</option>
+              <option>Twice daily</option>
+              <option>With meals</option>
+              <option>Other</option>
             </select>
-          </label>
-          <label>Custom Schedule Notes:
-            <textarea id="scheduleNotes" rows="2" placeholder="e.g. take with water, avoid night…"></textarea>
-          </label>
+          </div>
+          <div class="field">
+            <label for="scheduleNotes">Custom Schedule Notes:</label>
+            <textarea id="scheduleNotes" rows="2" placeholder="e.g. take with water, avoid night…" ></textarea>
+          </div>
         </fieldset>
-        <!-- 4. Outcome Analytics -->
         <fieldset>
           <legend>4. Outcome Analytics</legend>
-          <label>Compare Cohort:
+          <div class="field">
+            <label for="cohortSelect">Compare Cohort:</label>
             <select id="cohortSelect">
-              <option>Diet-only</option><option>Diet+Supplements</option>
-              <option>Diet+Meds</option><option value="Other">Other</option>
+              <option>Diet-only</option>
+              <option>Diet+Supplements</option>
+              <option>Diet+Meds</option>
+              <option>Other</option>
             </select>
-            <input class="other-input" placeholder="Specify…" style="display:none;">
-          </label>
+            <input class="other-input" placeholder="Specify…" style="display:none;"/>
+          </div>
         </fieldset>
-        <button id="runPharma" class="btn"><i class="fas fa-flask"></i> Run Suite</button>
+        <button type="submit" class="btn-primary"><i class="fas fa-flask"></i> Run Suite</button>
       </form>
-      <div id="pharmaPanel" class="response" hidden>
-        <button class="close-btn"><i class="fas fa-times"></i></button>
-        <div class="tool-row">
-          <button class="copy-btn"><i class="fas fa-copy"></i></button>
-          <button class="dl-btn"><i class="fas fa-download"></i></button>
-        </div>
+      <div id="pharmaResult" class="response" hidden>
+        <button class="close-btn" aria-label="Close result">×</button>
         <div class="result-content"></div>
+        <div class="tool-row">
+          <button class="copy-btn" title="Copy"><i class="fas fa-copy"></i></button>
+          <button class="dl-btn" title="Download"><i class="fas fa-download"></i></button>
+        </div>
       </div>
     </section>
 
-    <!-- Symptom-to-Treatment Advisor -->
-    <section id="symptomAdvisor" class="module">
+    <!-- 10. Symptom-to-Treatment Advisor -->
+    <section id="symptom-advisor" class="module">
       <h2><i class="fas fa-user-md"></i> Symptom-to-Treatment Advisor</h2>
-      <p class="desc">Describe your symptoms and receive food &amp; OTC suggestions suitable for Ghana.</p>
+      <p class="desc">
+        Describe symptoms and receive drug suggestions plus Ghanaian food recommendations.
+      </p>
       <form id="symptom-form">
-        <label>Your Age:
-          <input type="number" id="sympAge" min="1" max="120" required>
-        </label>
-        <label>Describe Symptoms:
-          <textarea id="sympDesc" rows="4" placeholder="e.g. headache, fever, cough…"></textarea>
-        </label>
-        <label>Food Preferences (comma-sep):
-          <input id="foodPref" type="text" placeholder="e.g. Jollof rice, Pizza, Burger">
-        </label>
-        <button id="runSymptom" class="btn"><i class="fas fa-stethoscope"></i> Get Advice</button>
-      </form>
-      <div id="symptomPanel" class="response" hidden>
-        <button class="close-btn"><i class="fas fa-times"></i></button>
-        <div class="tool-row">
-          <button class="copy-btn"><i class="fas fa-copy"></i></button>
-          <button class="dl-btn"><i class="fas fa-download"></i></button>
+        <div class="field">
+          <label for="sympAge">Your Age:</label>
+          <input id="sympAge" type="number" min="1" max="120" required/>
         </div>
+        <div class="field">
+          <label for="sympDesc">Describe Symptoms:</label>
+          <textarea id="sympDesc" rows="4" placeholder="e.g. headache, fever, cough…" required></textarea>
+        </div>
+        <div class="field">
+          <label for="foodPref">Food Preferences (comma-sep):</label>
+          <input id="foodPref" type="text" placeholder="e.g. Jollof rice, Pizza, Burger"/>
+        </div>
+        <button type="submit" class="btn-primary"><i class="fas fa-stethoscope"></i> Get Advice</button>
+      </form>
+      <div id="symptomResult" class="response" hidden>
+        <button class="close-btn" aria-label="Close result">×</button>
         <div class="result-content"></div>
+        <div class="tool-row">
+          <button class="copy-btn" title="Copy"><i class="fas fa-copy"></i></button>
+          <button class="dl-btn" title="Download"><i class="fas fa-download"></i></button>
+        </div>
       </div>
     </section>
 
-    <!-- Progress Charts -->
-    <section id="progressCharts" class="module">
+    <!-- 11. Progress Charts -->
+    <section id="progress-charts" class="module">
       <h2><i class="fas fa-chart-line"></i> Progress Charts</h2>
-      <canvas id="intakeChart"></canvas>
-      <button class="export-chart-btn" type="button">Export Chart</button>
-      <canvas id="macroChart"></canvas>
-      <button class="export-chart-btn" type="button">Export Chart</button>
+      <div class="charts">
+        <figure class="chart-card">
+          <canvas id="calorieChart"></canvas>
+          <figcaption><strong>Weekly Calorie Intake:</strong> Track your daily calorie consumption.</figcaption>
+          <p class="chart-desc">This line chart shows your calories in for the last 7 days.</p>
+        </figure>
+        <figure class="chart-card">
+          <canvas id="macroChart"></canvas>
+          <figcaption><strong>Macro Distribution:</strong> Current macro breakdown (%) of your diet.</figcaption>
+          <p class="chart-desc">This pie chart displays the proportion of Carbs, Protein, and Fat.</p>
+        </figure>
+      </div>
+      <button id="exportData" class="btn-primary">Export Data CSV</button>
     </section>
 
-    <!-- Meet a Nutrition Expert -->
-    <section id="meet-expert" class="module meet-module">
+    <!-- 12. Meet a Dietetics Health Expert -->
+    <section id="meet-professional" class="module meet-module">
       <div class="meet-content">
         <div class="meet-icon">
           <i class="fas fa-user-md"></i>
         </div>
         <div class="meet-text">
-          <h2>Meet a Nutrition Expert</h2>
-          <p>Schedule a one-on-one with our registered dietitian for personalized meal guidance, supplement advice, and evidence-based strategies.</p>
+          <h2>Meet a<br>Dietetics Health Expert</h2>
+          <p>
+            Get one-on-one guidance from our licensed dietitians. Discover personalized meal plans, tailored nutrition advice, and ongoing support.
+          </p>
           <a href="consult.html" class="btn-schedule">
-            <i class="fas fa-calendar-check"></i> Schedule Consultation
+            <i class="fas fa-calendar-check"></i>
+            Schedule Consultation
           </a>
         </div>
       </div>
     </section>
+
+    <!-- FOOTER -->
+    <footer>
+      <p>&copy; 2025 Vitra AI. <a href="#privacy">Privacy Policy</a> | <a href="#terms">Terms &amp; Conditions</a></p>
+    </footer>
   </main>
 
-
-  <!-- Chart.js & App Logic -->
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
- 
-</body>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
 document.addEventListener('DOMContentLoaded', () => {
-  //────────────────── Global State & Helpers ──────────────────
+  //──────────────────────────────────────────────────────────────────────────────
+  // THEME PERSISTENCE & TOGGLE
+  //──────────────────────────────────────────────────────────────────────────────
+  (function() {
+    const savedTheme = localStorage.getItem("diet-theme");
+    if (savedTheme === "dark") {
+      document.documentElement.classList.add("dark");
+      document.documentElement.setAttribute("aria-theme", "dark");
+      const icon = document.getElementById("themeToggle");
+      if (icon) icon.classList.replace("fa-moon", "fa-sun");
+    }
+  })();
+  const themeToggle = document.getElementById("themeToggle");
+  themeToggle.addEventListener("click", () => {
+    const htmlEl = document.documentElement;
+    const isDark = htmlEl.classList.toggle("dark");
+    themeToggle.classList.toggle("fa-sun", isDark);
+    themeToggle.classList.toggle("fa-moon", !isDark);
+    htmlEl.setAttribute("aria-theme", isDark ? "dark" : "light");
+    localStorage.setItem("diet-theme", isDark ? "dark" : "light");
+  });
 
-  // Retrieve saved nationality (if any)
-  if (localStorage.getItem('dieteticsNationality')) {
-    userNationality = localStorage.getItem('dieteticsNationality');
-    document.getElementById('nationality').value = userNationality;
-    enableModules();
+  //──────────────────────────────────────────────────────────────────────────────
+  // SIDEBAR COLLAPSE & HAMBURGER (MOBILE)
+  //──────────────────────────────────────────────────────────────────────────────
+  const sidebar = document.getElementById("sidebar");
+  const shrinkBtn = document.getElementById("shrinkBtn");
+  const hamburger = document.getElementById("hamburger");
+  const header = document.querySelector("header");
+  // Persist sidebar collapsed state
+  if (localStorage.getItem("sidebar-collapsed") === "true") {
+    sidebar.classList.add("collapsed");
+    shrinkBtn.querySelector("i").classList.replace("fa-angle-double-left", "fa-angle-double-right");
+    header.classList.add("sidebar-collapsed");
+  }
+  shrinkBtn.addEventListener("click", () => {
+    sidebar.classList.toggle("collapsed");
+    const icon = shrinkBtn.querySelector("i");
+    icon.classList.toggle("fa-angle-double-left");
+    icon.classList.toggle("fa-angle-double-right");
+    header.classList.toggle("sidebar-collapsed");
+    localStorage.setItem("sidebar-collapsed", sidebar.classList.contains("collapsed"));
+  });
+  // Hamburger for mobile
+  function updateHamburgerVisibility() {
+    hamburger.style.display = window.matchMedia("(max-width: 1024px)").matches ? "block" : "none";
+  }
+  window.matchMedia("(max-width: 1024px)").addListener(updateHamburgerVisibility);
+  updateHamburgerVisibility();
+  hamburger.addEventListener("click", e => {
+    e.stopPropagation();
+    sidebar.classList.toggle("open");
+  });
+  document.addEventListener("click", e => {
+    if (!sidebar.classList.contains("open")) return;
+    if (sidebar.contains(e.target) || hamburger.contains(e.target)) return;
+    sidebar.classList.remove("open");
+  });
+
+  //──────────────────────────────────────────────────────────────────────────────
+  // NAVLINK HIGHLIGHTING
+  //──────────────────────────────────────────────────────────────────────────────
+  document.querySelectorAll('aside#sidebar nav a').forEach(link => {
+    const linkHref = link.getAttribute("href").split("/").pop();
+    const pageNow = window.location.pathname.split("/").pop();
+    if (linkHref === pageNow) link.classList.add("active");
+    else link.classList.remove("active");
+  });
+
+  //──────────────────────────────────────────────────────────────────────────────
+  // TOAST FUNCTION
+  //──────────────────────────────────────────────────────────────────────────────
+  function showToast(message) {
+    const toast = document.createElement("div");
+    toast.className = "toast";
+    toast.textContent = message;
+    document.body.append(toast);
+    requestAnimationFrame(() => toast.classList.add("visible"));
+    setTimeout(() => toast.classList.remove("visible"), 1800);
+    setTimeout(() => toast.remove(), 2200);
   }
 
-  // Inject toast & spinner CSS (if not already present in <style>)
-  (function(){
-    const css = `
-      .toast {
-        position: fixed;
-        bottom: 2rem;
-        left: 50%;
-        transform: translateX(-50%) translateY(100%);
-        background: var(--color-primary-alt);
-        color: #fff;
-        padding: .75rem 1.5rem;
-        border-radius: var(--radius);
-        opacity: 0;
-        transition: transform .3s, opacity .3s;
-        z-index: 2000;
-      }
-      .toast.visible {
-        transform: translateX(-50%) translateY(0);
-        opacity: 1;
-      }
-      .spinner {
-        border: 4px solid rgba(0,0,0,0.1);
-        border-top: 4px solid var(--color-primary);
-        border-radius: 50%;
-        width: 24px;
-        height: 24px;
-        animation: spin 0.8s linear infinite;
-        margin: 1rem auto;
-      }
-      @keyframes spin { to { transform: rotate(360deg); } }
-      .spin-text {
-        text-align: center;
-        margin-top: .5rem;
-        font-style: italic;
-        color: var(--color-muted);
-      }
-      .response.waiting .close-btn,
-      .response.waiting .tool-row {
-        display: none !important;
-      }
-      .export-chart-btn {
-        margin-top: .5rem;
-        padding: .25rem .5rem;
-        background: var(--color-secondary);
-        color: #fff;
-        border: none;
-        border-radius: .5rem;
-        cursor: pointer;
-      }
+  //──────────────────────────────────────────────────────────────────────────────
+  // TODAY'S NUTRITION TIP (STATIC RANDOMIZED)
+  //──────────────────────────────────────────────────────────────────────────────
+  const nutritionTips = [
+    "Add a handful of leafy greens to every meal for extra fiber and vitamins.",
+    "Start your day with a high‐protein breakfast to stay fuller longer.",
+    "Swap sugary drinks for infused water with fresh fruits and herbs.",
+    "Choose whole grains (brown rice, quinoa) instead of refined grains.",
+    "Include a colorful variety of vegetables on your plate each day.",
+    "Snack on nuts and seeds for healthy fats and sustained energy.",
+    "Rotate your proteins: try beans, lentils, tofu, and fish across the week.",
+    "Cook with olive oil instead of butter to boost heart‐healthy monounsaturated fats.",
+    "Portion your meals: use a smaller plate to help control serving sizes.",
+    "Stay hydrated—aim for at least 8 cups of water daily."
+  ];
+  function displayRandomTip() {
+    const tipArea = document.createElement("div");
+    tipArea.id = "heroTip";
+    tipArea.className = "hero-tip";
+    const idx = Math.floor(Math.random() * nutritionTips.length);
+    tipArea.innerHTML = `
+      <h3><i class="fas fa-lightbulb"></i> Today’s Nutrition Tip</h3>
+      <p>${nutritionTips[idx]}</p>
     `;
-    const styleTag = document.createElement('style');
-    styleTag.textContent = css;
-    document.head.append(styleTag);
+    const heroSection = document.getElementById("hero");
+    // Insert below hero-actions
+    const actions = heroSection.querySelector(".hero-actions");
+    actions.insertAdjacentElement("afterend", tipArea);
+  }
+  displayRandomTip();
+
+  //──────────────────────────────────────────────────────────────────────────────
+  // NATIONALITY FORM HANDLER
+  //──────────────────────────────────────────────────────────────────────────────
+  let userNationality = localStorage.getItem("userNationality") || "";
+  const natInput = document.getElementById("nationality");
+  if (userNationality && natInput) natInput.value = userNationality;
+  const natForm = document.getElementById("nat-form");
+  natForm.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const val = natInput.value.trim();
+    if (!val) return showToast("Please enter your nationality.");
+    userNationality = val;
+    localStorage.setItem("userNationality", val);
+    const resultPanel = document.getElementById("natResult");
+    resultPanel.hidden = false;
+    resultPanel.querySelector(".result-content").textContent = `Nationality set to ${val}!`;
+    addCloseCopyDownload(resultPanel);
+  });
+  //──────────────────────────────────────────────────────────────────────────────
+  // HELPER: ADD close, copy, download TO RESPONSE PANELS
+  //──────────────────────────────────────────────────────────────────────────────
+  function addCloseCopyDownload(panel) {
+    if (!panel) return;
+    // Close button
+    if (!panel.querySelector(".close-btn")) {
+      const btn = document.createElement("button");
+      btn.className = "close-btn";
+      btn.setAttribute("aria-label", "Close result");
+      btn.textContent = "×";
+      btn.onclick = () => (panel.hidden = true);
+      panel.prepend(btn);
+    }
+    // Tool row
+    if (!panel.querySelector(".tool-row")) {
+      const tools = document.createElement("div");
+      tools.className = "tool-row";
+      tools.innerHTML = `
+        <button class="copy-btn" title="Copy"><i class="fas fa-copy"></i></button>
+        <button class="dl-btn" title="Download"><i class="fas fa-download"></i></button>
+      `;
+      panel.append(tools);
+      const contentDiv = panel.querySelector(".result-content");
+      tools.querySelector(".copy-btn").onclick = () => {
+        navigator.clipboard.writeText(contentDiv.innerText || "");
+        showToast("Copied!");
+      };
+      tools.querySelector(".dl-btn").onclick = () => {
+        const text = contentDiv.innerText || "";
+        const blob = new Blob([text], { type: "text/plain" });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = "response.txt";
+        document.body.append(a);
+        a.click();
+        URL.revokeObjectURL(url);
+        a.remove();
+      };
+    }
+  }
+
+  //──────────────────────────────────────────────────────────────────────────────
+  // “OTHER” INPUT REVEAL FOR SELECTS
+  //──────────────────────────────────────────────────────────────────────────────
+  document.querySelectorAll("select").forEach(sel => {
+    sel.addEventListener("change", () => {
+      const otherField = sel.parentElement.querySelector(".other-input");
+      if (!otherField) return;
+      if (sel.value === "Other") {
+        otherField.style.display = "block";
+        otherField.required = true;
+      } else {
+        otherField.style.display = "none";
+        otherField.required = false;
+      }
+    });
+  });
+
+  //──────────────────────────────────────────────────────────────────────────────
+  // CHATBOT: NUTRITION ASSISTANT (SIMILAR TO herbal.html)
+  //──────────────────────────────────────────────────────────────────────────────
+  (function() {
+    const chatBox = document.getElementById("chatBox");
+    const chatInput = document.getElementById("chatInput");
+    const sendChatBtn = document.getElementById("sendChat");
+    const viewHistoryBtn = document.getElementById("viewHistory");
+    const clearChatBtn = document.getElementById("clearChat");
+    let lastDateHeader = null;
+
+    // Load persisted chat history
+    let chatHistory = JSON.parse(localStorage.getItem("dietChatHistory") || "[]");
+    function formatDateSeparator(date) {
+      const today = new Date();
+      const diffDays = Math.floor((today.setHours(0, 0, 0, 0) - date.setHours(0, 0, 0, 0)) / 86400000);
+      if (diffDays === 0) return "Today";
+      if (diffDays === 1) return "Yesterday";
+      return date.toLocaleDateString();
+    }
+    function addMessage(who, text, timestamp = new Date()) {
+      const msgDate = timestamp instanceof Date ? timestamp : new Date(timestamp);
+      const msgDay = msgDate.toDateString();
+      if (msgDay !== lastDateHeader) {
+        const sep = document.createElement("div");
+        sep.className = "chat-date-separator";
+        sep.textContent = formatDateSeparator(msgDate);
+        chatBox.append(sep);
+        lastDateHeader = msgDay;
+      }
+      const msgDiv = document.createElement("div");
+      msgDiv.className = who === "You" ? "user-msg" : "bot-msg";
+      msgDiv.innerHTML = `
+        ${sanitizeHTML(text)}
+        <div class="timestamp">${msgDate.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit", hour12: true })}</div>
+      `;
+      chatBox.append(msgDiv);
+      chatBox.scrollTop = chatBox.scrollHeight;
+    }
+    // Sanitize and format simple markdown
+    function sanitizeHTML(unsafe) {
+      if (!unsafe) return "";
+      return unsafe
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>")
+        .replace(/\*(.+?)\*/g, "<em>$1</em>")
+        .replace(/`([^`]+)`/g, "<code>$1</code>")
+        .split(/\n{2,}/)
+        .map(p => `<p>${p.trim()}</p>`)
+        .join("");
+    }
+
+    // Render existing history
+    chatHistory.forEach(m => {
+      const ts = m.timestamp ? new Date(m.timestamp) : new Date();
+      addMessage(m.who, m.text, ts);
+    });
+
+    // Send chat
+    sendChatBtn.onclick = async (e) => {
+      e.preventDefault();
+      const userText = chatInput.value.trim();
+      if (!userText) return;
+      const userTime = new Date();
+      addMessage("You", userText, userTime);
+      chatHistory.push({ who: "You", text: userText, timestamp: userTime.toISOString() });
+      localStorage.setItem("dietChatHistory", JSON.stringify(chatHistory));
+      chatInput.value = "";
+
+      // Show spinner
+      const spinnerDiv = document.createElement("div");
+      spinnerDiv.className = "bot-msg";
+      spinnerDiv.innerHTML = `<div class="spinner"></div>`;
+      chatBox.append(spinnerDiv);
+      chatBox.scrollTop = chatBox.scrollHeight;
+
+      const systemPrompt = `
+You are a professional Dietetics AI with expertise in meal planning, nutrient analysis, and culinary guidance.
+When responding to user questions:
+  • Acknowledge user’s context empathetically.
+  • Provide evidence-based dietary advice (e.g., macronutrient ratios, portion control).
+  • Reference user’s nationality if known (e.g., “As a Ghanaian diet, you can include...").
+  • Suggest at least two actionable, practical steps (recipes, shopping lists, meal timing).
+  • If user input is unclear, ask a clarifying question.
+  • Maintain a friendly, encouraging tone. Keep replies under 200 words unless asked for more detail.
+      `.trim();
+
+      try {
+        const aiReply = await callOpenAI([
+          { role: "system", content: `Nationality: ${userNationality}` },
+          { role: "system", content: systemPrompt },
+          { role: "user", content: userText }
+        ]);
+        const replyTime = new Date();
+        spinnerDiv.innerHTML = `
+          ${sanitizeHTML(aiReply)}
+          <div class="timestamp">${replyTime.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit", hour12: true })}</div>
+        `;
+        chatHistory.push({ who: "AI", text: aiReply, timestamp: replyTime.toISOString() });
+        localStorage.setItem("dietChatHistory", JSON.stringify(chatHistory));
+      } catch (err) {
+        spinnerDiv.innerHTML = `<div class="result-content">⚠️ Something went wrong. Please try again.</div>`;
+      }
+      chatBox.scrollTop = chatBox.scrollHeight;
+    };
+
+    // Clear chat
+    clearChatBtn.onclick = () => {
+      chatBox.innerHTML = "";
+      chatHistory = [];
+      localStorage.removeItem("dietChatHistory");
+      lastDateHeader = null;
+    };
+
+    // View history modal
+    viewHistoryBtn.onclick = () => {
+      const modal = document.createElement("div");
+      modal.className = "history-modal";
+      const grouped = {};
+      chatHistory.forEach((m, i) => {
+        const dt = new Date(m.timestamp);
+        const label = formatDateSeparator(dt);
+        if (!grouped[label]) grouped[label] = [];
+        grouped[label].push({ who: m.who, text: m.text, idx: i, ts: m.timestamp });
+      });
+
+      let listHTML = "";
+      Object.keys(grouped).forEach(label => {
+        listHTML += `<div class="history-date">${label}</div>`;
+        grouped[label].forEach(m => {
+          listHTML += `
+            <div class="history-row" data-index="${m.idx}">
+              <div class="history-sender"><strong>${m.who}:</strong></div>
+              <div class="history-text">${sanitizeHTML(m.text)}</div>
+              <button class="del-msg" data-index="${m.idx}" title="Delete"><i class="fas fa-trash-alt"></i></button>
+            </div>
+          `;
+        });
+      });
+
+      modal.innerHTML = `
+        <div class="history-content">
+          <h3>Chat History</h3>
+          <div class="history-table-wrapper">${listHTML}</div>
+          <div class="history-actions">
+            <button class="clear-history"><i class="fas fa-trash"></i> Clear All</button>
+            <button class="close-history"><i class="fas fa-times"></i> Close</button>
+          </div>
+        </div>
+      `;
+      document.body.append(modal);
+
+      // Delete single message
+      modal.querySelectorAll(".del-msg").forEach(btn => {
+        btn.onclick = () => {
+          const idx = +btn.dataset.index;
+          chatHistory.splice(idx, 1);
+          localStorage.setItem("dietChatHistory", JSON.stringify(chatHistory));
+          // Remove all rows and rebuild
+          modal.querySelector(".history-table-wrapper").innerHTML = "";
+          Object.keys(grouped).forEach(label => {
+            grouped[label].forEach(m => {
+              if (m.idx !== idx) {
+                modal.querySelector(".history-table-wrapper").innerHTML += `
+                  <div class="history-row" data-index="${m.idx}">
+                    <div class="history-sender"><strong>${m.who}:</strong></div>
+                    <div class="history-text">${sanitizeHTML(m.text)}</div>
+                    <button class="del-msg" data-index="${m.idx}" title="Delete"><i class="fas fa-trash-alt"></i></button>
+                  </div>
+                `;
+              }
+            });
+          });
+        };
+      });
+
+      // Clear all history
+      modal.querySelector(".clear-history").onclick = () => {
+        chatHistory = [];
+        localStorage.removeItem("dietChatHistory");
+        modal.querySelector(".history-table-wrapper").innerHTML = "";
+      };
+
+      // Close modal
+      modal.querySelector(".close-history").onclick = () => modal.remove();
+    };
   })();
 
-  function showToast(msg) {
-    const t = document.createElement('div');
-    t.className = 'toast';
-    t.innerText = msg;
-    document.body.appendChild(t);
-    requestAnimationFrame(() => t.classList.add('visible'));
-    setTimeout(() => t.classList.remove('visible'), 1800);
-    setTimeout(() => t.remove(), 2200);
-  }
-
+  //──────────────────────────────────────────────────────────────────────────────
+  // GENERIC OPENAI CALL (with retry)
+  //──────────────────────────────────────────────────────────────────────────────
   async function callOpenAI(messages, retries = 1) {
     try {
-      const res = await fetch('/.netlify/functions/openai-proxy', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+      const response = await fetch("/.netlify/functions/openai-proxy", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ messages })
       });
-      if (!res.ok) {
-        const errText = await res.text();
-        throw new Error(`OpenAI error ${res.status}: ${errText}`);
+      if (!response.ok) {
+        const errText = await response.text();
+        throw new Error(`OpenAI error ${response.status}: ${errText}`);
       }
-      const j = await res.json();
-      if (!j.choices?.[0]?.message?.content) {
-        throw new Error(`Malformed response: ${JSON.stringify(j)}`);
+      const data = await response.json();
+      if (!data.choices?.[0]?.message?.content) {
+        throw new Error("Malformed OpenAI response");
       }
-      return j.choices[0].message.content;
+      return data.choices[0].message.content.trim();
     } catch (err) {
-      if (retries > 0 && err.message.includes('Sandbox.Timedout')) {
+      if (retries > 0 && err.message.includes("Sandbox.Timedout")) {
         await new Promise(r => setTimeout(r, 1000));
         return callOpenAI(messages, retries - 1);
       }
@@ -1498,539 +2149,351 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
-  function escapeHTML(str) {
-    return str.replace(/&/g,'&amp;')
-              .replace(/</g,'&lt;')
-              .replace(/>/g,'&gt;');
-  }
-
-  function formatHTML(txt) {
-    const lines = txt.split('\n');
-    let html = '', i = 0;
-    function inline(s) {
-      return escapeHTML(s)
-        .replace(/`([^`]+)`/g, '<code>$1</code>')
-        .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
-        .replace(/\*(.+?)\*/g, '<em>$1</em>')
-        .replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" target="_blank">$1</a>');
-    }
-    function renderList(idx, ordered) {
-      const tag = ordered ? 'ol' : 'ul';
-      html += `<${tag}>`;
-      while (idx < lines.length) {
-        const line = lines[idx];
-        const m = ordered
-          ? line.match(/^\s*\d+\.\s+(.*)/)
-          : line.match(/^\s*[-+*]\s+(.*)/);
-        if (!m) break;
-        html += `<li>${inline(m[1].trim())}</li>`;
-        idx++;
-      }
-      html += `</${tag}>`;
-      return idx;
-    }
-    while (i < lines.length) {
-      const line = lines[i].trim();
-      if (line.startsWith('```')) {
-        const lang = line.slice(3).trim();
-        i++;
-        let code = '';
-        while (i < lines.length && !lines[i].startsWith('```')) {
-          code += escapeHTML(lines[i]) + '\n';
-          i++;
-        }
-        html += `<pre><code class="language-${lang}">${code}</code></pre>`;
-        i++;
-        continue;
-      }
-      if (/^(-{3,}|\*{3,})$/.test(line)) {
-        html += '<hr>';
-        i++;
-        continue;
-      }
-      if (/^#{1,4}\s/.test(line)) {
-        const lvl = line.match(/^#+/)[0].length;
-        const text = line.slice(lvl).trim();
-        html += `<h${lvl}>${inline(text)}</h${lvl}>`;
-        i++;
-        continue;
-      }
-      if (line.startsWith('>')) {
-        html += `<blockquote>${inline(line.slice(1).trim())}</blockquote>`;
-        i++;
-        continue;
-      }
-      if (/^\s*\d+\.\s+/.test(line)) {
-        i = renderList(i, true);
-        continue;
-      }
-      if (/^\s*[-+*]\s+/.test(line)) {
-        i = renderList(i, false);
-        continue;
-      }
-      if (line.includes('|') && i + 1 < lines.length) {
-        const delim = lines[i+1].trim();
-        if (/^\|?[:\- ]+\|[:\- ]+(\|[:\- ]+)*$/.test(delim)) {
-          const headers = lines[i].replace(/^\||\|$/g,'').split('|').map(h=>h.trim());
-          i += 2;
-          const rows = [];
-          while (i < lines.length && lines[i].includes('|')) {
-            rows.push(lines[i].replace(/^\||\|$/g,'').split('|').map(c=>c.trim()));
-            i++;
+  //──────────────────────────────────────────────────────────────────────────────
+  // MODULE WIRING HELPER
+  //──────────────────────────────────────────────────────────────────────────────
+  function wireModule(buttonId, fieldIds, requiredIds, systemContent) {
+    const btn = document.getElementById(buttonId);
+    btn.type = "button";
+    btn.addEventListener("click", async () => {
+      // Validate required fields
+      for (const req of requiredIds) {
+        if (req === "symptoms") {
+          if (!document.querySelector('input[name="symptom"]:checked')) {
+            return showToast("Select at least one symptom.");
           }
-          html += '<table><thead><tr>' + headers.map(h=>`<th>${inline(h)}</th>`).join('') + '</tr></thead><tbody>';
-          rows.forEach(r => {
-            html += '<tr>' + r.map(c=>`<td>${inline(c)}</td>`).join('') + '</tr>';
-          });
-          html += '</tbody></table>';
-          continue;
-        }
-      }
-      if (line) {
-        html += `<p>${inline(line)}</p>`;
-      }
-      i++;
-    }
-    return html;
-  }
-
-  function enableModules() {
-    moduleSections.forEach(id => {
-      const sec = document.getElementById(id);
-      if (sec) sec.classList.remove('disabled');
-    });
-  }
-
-  //────────────────── Hero: Nationality & Tip ──────────────────
-  const tipPanel = document.getElementById('dailyTip');
-  const tipContent = tipPanel.querySelector('.result-content');
-  const tipClose = tipPanel.querySelector('.close-btn');
-  tipClose.addEventListener('click', () => tipPanel.hidden = true);
-
-  document.getElementById('setNationality').addEventListener('click', () => {
-    const v = document.getElementById('nationality').value.trim();
-    if (!v) return showToast('Please enter your nationality.');
-    userNationality = v;
-    localStorage.setItem('dieteticsNationality', v);
-    showToast(`Nationality set to ${v}`);
-    enableModules();
-  });
-
-  async function loadNutritionTip() {
-    tipPanel.hidden = false;
-    tipPanel.classList.add('waiting');
-    tipContent.innerHTML = `<div class="spinner"></div><div class="spin-text">Loading tip…</div>`;
-    try {
-      // Generate a simple nutrition tip based on nationality context
-      const tip = await callOpenAI([
-        { role: 'system', content: `Nationality: ${userNationality}` },
-        { role: 'system', content: 'You are a nutrition expert. Provide one concise daily nutrition tip that might resonate with someone of the given nationality.' },
-        { role: 'user', content: 'Generate a nutrition tip.' }
-      ]);
-      tipContent.innerHTML = formatHTML(tip);
-    } catch (err) {
-      console.error(err);
-      tipContent.innerText = err.message.includes('Sandbox.Timedout')
-        ? '⚠️ Server busy, please try again.'
-        : `⚠️ ${err.message}`;
-    } finally {
-      tipPanel.classList.remove('waiting');
-    }
-  }
-
-  // Auto-load tip on page load if nationality is set
-  if (userNationality) loadNutritionTip();
-  document.getElementById('refreshTip').addEventListener('click', () => {
-    if (!userNationality) return showToast('Set nationality first.');
-    loadNutritionTip();
-  });
-
-  //────────────────── Generic Wiring Utility ──────────────────
-  function getSelectValue(sel) {
-    const other = sel.parentElement.querySelector('.other-input');
-    return (other && sel.value === 'Other') ? other.value.trim() : sel.value;
-  }
-
-  const PHASE_TEXT = {
-    genPlan: 'Generating meal plan…',
-    analyzeNutri: 'Analyzing nutrients…',
-    getRecipes: 'Recommending recipes…',
-    scanDef: 'Scanning deficiencies…',
-    runRisk: 'Running risk radar…',
-    runFitness: 'Generating fitness plan…',
-    runPharma: 'Running pharma suite…',
-    runSymptom: 'Diagnosing symptoms…'
-  };
-
-  async function handleModule(btnId, fieldIds, requiredIds, sysPrompt, panelId) {
-    if (!userNationality) return showToast('Set your nationality before proceeding.');
-    // Validate required fields
-    for (const rid of requiredIds) {
-      if (rid === 'symptoms') {
-        const checked = document.querySelectorAll('input[name="symptom"]:checked');
-        if (checked.length === 0) return showToast('Select at least one symptom.');
-      } else {
-        const el = document.getElementById(rid);
-        if (!el || !el.value.trim()) return showToast('Please fill all required fields.');
-      }
-    }
-    const panel = document.getElementById(panelId);
-    panel.hidden = false;
-    panel.classList.add('waiting');
-    panel.querySelector('.result-content').innerHTML =
-      `<div class="spinner"></div><div class="spin-text">${PHASE_TEXT[btnId] || 'Processing…'}</div>`;
-    // Build user content block
-    let userContent = '';
-    for (const fid of fieldIds) {
-      if (fid === 'symptoms') {
-        let vals = Array.from(document.querySelectorAll('input[name="symptom"]:checked'))
-          .map(cb => cb.value).join(', ');
-        const otherSym = document.getElementById('otherSymptom')?.value.trim();
-        if (otherSym) vals += `, ${otherSym}`;
-        userContent += `symptoms: ${vals}\n`;
-      } else {
-        const el = document.getElementById(fid);
-        if (!el) continue;
-        if (el.tagName === 'SELECT' && el.multiple) {
-          userContent += `${fid}: ${[...el.selectedOptions].map(o => o.value).join(', ')}\n`;
-        } else if (el.tagName === 'SELECT') {
-          userContent += `${fid}: ${getSelectValue(el)}\n`;
         } else {
-          userContent += `${fid}: ${el.value}\n`;
+          const el = document.getElementById(req);
+          if (!el || !el.value.trim()) {
+            return showToast("Please fill in all required fields.");
+          }
         }
       }
-    }
-    try {
-      const reply = await callOpenAI([
-        { role: 'system', content: `Nationality: ${userNationality}` },
-        { role: 'system', content: sysPrompt },
-        { role: 'user', content: userContent }
-      ]);
-      panel.querySelector('.result-content').innerHTML = formatHTML(reply);
-    } catch (err) {
-      console.error(err);
-      panel.querySelector('.result-content').innerText =
-        err.message.includes('Sandbox.Timedout')
-          ? '⚠️ Server busy, please try again.'
-          : `⚠️ ${err.message}`;
-    } finally {
-      panel.classList.remove('waiting');
-    }
-  }
+      // Determine panel ID
+      let panelId;
+      if (buttonId === "getRecipes") panelId = "recipeResult";
+      else panelId = buttonId.replace(/^(send|gen|analyze|get|scan|run)/, match => "").replace(/^./, c => c.toLowerCase()) + "Result";
 
-  //────────────────── Wire Each Module ──────────────────
-  // Meal Plan Generator
-  document.getElementById('genPlan').addEventListener('click', () => {
-    handleModule(
-      'genPlan',
-      ['calories', 'dietType', 'allergyList', 'budget'],
-      ['calories', 'dietType'],
-      `You are an expert registered dietitian. Given the user’s daily calorie target, diet type, allergies/intolerances, and budget, generate a detailed 7-day meal plan with macros and a shopping list.`,
-      'planPanel'
-    );
-  });
-
-  // Nutrient Analyzer
-  document.getElementById('analyzeNutri').addEventListener('click', () => {
-    handleModule(
-      'analyzeNutri',
-      ['foodLog', 'unitSelect'],
-      ['foodLog'],
-      `You are a nutrition scientist. Analyze the user’s food log and unit preference; produce a macro and micronutrient breakdown with totals and commentary.`,
-      'nutriPanel'
-    );
-  });
-
-  // Recipe Recommender
-  document.getElementById('getRecipes').addEventListener('click', () => {
-    handleModule(
-      'getRecipes',
-      ['pantry', 'cuisineType', 'recipeDifficulty', 'maxTime'],
-      ['pantry'],
-      `You are a professional chef AI. Given pantry items, cuisine style, difficulty, and max prep time, recommend 3 original recipes with ingredients, steps, and approximate times.`,
-      'recipePanel'
-    );
-  });
-
-  // Deficiency Risk Scanner
-  document.getElementById('scanDef').addEventListener('click', () => {
-    handleModule(
-      'scanDef',
-      ['symptoms', 'dietOverview'],
-      ['symptoms'],
-      `You are a clinical dietitian. Identify potential nutrient deficiencies from the provided symptoms and brief diet overview, rank them by likelihood, and give actionable recommendations.`,
-      'defPanel'
-    );
-  });
-
-  // Metabolomic Risk Radar
-  document.getElementById('runRisk').addEventListener('click', async () => {
-    await handleModule(
-      'runRisk',
-      ['riskFrom', 'riskTo', 'syncBiomarkers', 'biomarkers', 'conditions', 'context'],
-      ['riskFrom', 'riskTo', 'biomarkers', 'conditions', 'context'],
-      `You are a metabolomic health analyst. Generate a risk radar chart for the user’s biomarkers over the given date range; interpret trends and highlight potential concerns.`,
-      'riskPanel'
-    );
-    // After content appears, parse numeric values and render radar chart
-    setTimeout(() => {
-      const panel = document.getElementById('riskPanel');
-      const text = panel.querySelector('.result-content').innerText;
-      const matches = [...text.matchAll(/([A-Za-z]+):\s*([\d.]+)/g)];
-      if (!matches.length) return;
-      const labels = matches.map(m => m[1]);
-      const data = matches.map(m => Number(m[2]));
-      const oldCanvas = panel.querySelector('canvas');
-      if (oldCanvas) oldCanvas.remove();
-      const canvas = document.createElement('canvas');
-      canvas.style.marginTop = '1rem';
-      panel.appendChild(canvas);
-      new Chart(canvas.getContext('2d'), {
-        type: 'radar',
-        data: {
-          labels,
-          datasets: [{
-            label: 'Biomarker Levels',
-            data
-          }]
-        },
-        options: {
-          responsive: true,
-          maintainAspectRatio: false
+      const panel = document.getElementById(panelId);
+      panel.hidden = false;
+      panel.querySelector(".result-content").innerHTML = `<div class="spinner"></div><div class="spin-text">Please wait…</div>`;
+      // Build user content
+      let userContent = "";
+      for (const fid of fieldIds) {
+        if (fid === "symptoms") {
+          let vals = Array.from(document.querySelectorAll('input[name="symptom"]:checked')).map(cb => cb.value);
+          const otherSym = document.getElementById("otherSymptom");
+          if (otherSym && otherSym.value.trim()) vals.push(otherSym.value.trim());
+          userContent += `symptoms: ${vals.join(", ")}\n`;
+        } else {
+          const el = document.getElementById(fid);
+          if (!el) continue;
+          if (el.tagName === "SELECT" && el.multiple) {
+            userContent += `${fid}: ${[...el.selectedOptions].map(o => o.value).join(", ")}\n`;
+          } else if (el.tagName === "SELECT") {
+            const oi = el.parentElement.querySelector(".other-input");
+            const val = (oi && el.value === "Other") ? oi.value.trim() : el.value;
+            userContent += `${fid}: ${val}\n`;
+          } else {
+            userContent += `${fid}: ${el.value}\n`;
+          }
         }
-      });
-    }, 500);
-  });
-
-  // Fitness Nutrition Coach
-  document.getElementById('runFitness').addEventListener('click', () => {
-    handleModule(
-      'runFitness',
-      ['fitGoal', 'fitFreq', 'blendIngredients', 'carbDate', 'intensity', 'crpLevel', 'nutraPref'],
-      ['fitGoal', 'fitFreq'],
-      `You are a certified sports nutritionist. Based on the user’s workout goal, weekly frequency, available blend ingredients, carb-timing date/intensity, CRP level, and nutraceutical preference, generate a tailored fitness nutrition plan.`,
-      'fitnessPanel'
-    );
-  });
-
-  // Pharma-Integrated Nutrient & Medication Suite
-  document.getElementById('runPharma').addEventListener('click', () => {
-    handleModule(
-      'runPharma',
-      ['medList', 'foodList', 'compoundGoal', 'doseFreq', 'scheduleNotes', 'cohortSelect'],
-      ['medList'],
-      `You are a pharmacologist-dietitian. Analyze drug–nutrient interactions, suggest compounding options, schedule medication reminders, and provide outcome analytics for the chosen cohort.`,
-      'pharmaPanel'
-    );
-  });
-
-  // Symptom-to-Treatment Advisor
-  document.getElementById('runSymptom').addEventListener('click', () => {
-    handleModule(
-      'runSymptom',
-      ['sympAge', 'sympDesc', 'foodPref'],
-      ['sympAge', 'sympDesc'],
-      `You are a medical nutrition therapist. Based on the user’s age, described symptoms, and food preferences, diagnose possible conditions and recommend OTC treatments and culturally appropriate foods.`,
-      'symptomPanel'
-    );
-  });
-
-  //────────────────── Dietetics Chatbot Wiring ──────────────────
-  const dietChatBox = document.getElementById('dietChatBox');
-  const dietHint = document.getElementById('dietHint');
-  let dietHistory = JSON.parse(localStorage.getItem('dieteticsChatHistory') || '[]');
-  dietHistory.forEach(m => addDietChat(m.who, m.text, m.timestamp));
-
-  function addDietChat(who, text, isoTs) {
-    const time = new Date(isoTs).toLocaleTimeString();
-    const msg = document.createElement('div');
-    msg.className = who === 'You' ? 'user-msg' : 'bot-msg';
-    msg.innerHTML = `${formatHTML(text)}<div class="timestamp">${time}</div>`;
-    dietChatBox.appendChild(msg);
-    dietChatBox.scrollTop = dietChatBox.scrollHeight;
-  }
-
-  document.getElementById('sendDiet').addEventListener('click', async () => {
-    const q = document.getElementById('dietInput').value.trim();
-    if (!q) return showToast('Please type a question.');
-    addDietChat('You', q, new Date().toISOString());
-    dietHistory.push({ who: 'You', text: q, timestamp: new Date().toISOString() });
-    localStorage.setItem('dieteticsChatHistory', JSON.stringify(dietHistory));
-    document.getElementById('dietInput').value = '';
-    dietHint.style.display = 'block';
-    try {
-      const reply = await callOpenAI([
-        { role: 'system', content: `Nationality: ${userNationality}` },
-        { role: 'system', content: 'You are a dietetics assistant. Provide clear, evidence-based nutrition advice.' },
-        { role: 'user', content: q }
-      ]);
-      addDietChat('AI', reply, new Date().toISOString());
-      dietHistory.push({ who: 'AI', text: reply, timestamp: new Date().toISOString() });
-      localStorage.setItem('dieteticsChatHistory', JSON.stringify(dietHistory));
-    } catch (err) {
-      console.error(err);
-      addDietChat('AI', err.message.includes('Sandbox.Timedout') ? '⚠️ Server busy—try again.' : `⚠️ ${err.message}`, new Date().toISOString());
-    } finally {
-      dietHint.style.display = 'none';
-    }
-  });
-
-  document.getElementById('clearDiet').addEventListener('click', () => {
-    dietChatBox.innerHTML = '';
-  });
-
-  document.getElementById('viewDietHistory').addEventListener('click', () => {
-    const modal = document.createElement('div');
-    modal.className = 'history-modal';
-    modal.innerHTML = `
-      <div class="history-content">
-        <h3>Chat History</h3>
-        <ul>
-          ${dietHistory.map((m,i) => `
-            <li>
-              <div>
-                <strong>${m.who}:</strong> ${escapeHTML(m.text)}
-                <div class="history-date">${new Date(m.timestamp).toLocaleString()}</div>
-              </div>
-              <button class="del-msg" data-index="${i}" title="Delete"><i class="fas fa-trash"></i></button>
-            </li>
-          `).join('')}
-        </ul>
-        <button class="close-history">Close</button>
-      </div>
-    `;
-    document.body.appendChild(modal);
-    modal.querySelectorAll('.del-msg').forEach(btn => {
-      btn.addEventListener('click', () => {
-        const idx = Number(btn.dataset.index);
-        dietHistory.splice(idx, 1);
-        localStorage.setItem('dieteticsChatHistory', JSON.stringify(dietHistory));
-        btn.closest('li').remove();
-      });
-    });
-    modal.querySelector('.close-history').addEventListener('click', () => modal.remove());
-  });
-
-  //────────────────── Response Panel Controls ──────────────────
-  document.body.addEventListener('click', e => {
-    const rp = e.target.closest('.response');
-    if (!rp) return;
-    if (e.target.closest('.close-btn')) { rp.hidden = true; return; }
-    if (e.target.closest('.copy-btn')) {
-      const txt = rp.querySelector('.result-content').innerText;
-      navigator.clipboard.writeText(txt).then(() => showToast('Copied!'));
-      return;
-    }
-    if (e.target.closest('.dl-btn')) {
-      const txt = rp.querySelector('.result-content').innerText;
-      const blob = new Blob([txt], { type: 'text/plain' });
-      const a = document.createElement('a');
-      a.href = URL.createObjectURL(blob);
-      a.download = 'response.txt';
-      a.click();
-    }
-  });
-
-  //────────────────── Sidebar & Dark Mode ──────────────────
-  document.getElementById('hamburger').addEventListener('click', () => {
-    document.getElementById('sidebar').classList.toggle('open');
-  });
-  document.getElementById('shrinkSidebar').addEventListener('click', () => {
-    const sb = document.getElementById('sidebar');
-    sb.classList.toggle('collapsed');
-    const left = sb.classList.contains('collapsed')
-      ? 'var(--sidebar-collapsed)' : 'var(--sidebar-width)';
-    document.querySelector('header').style.left = left;
-    document.querySelector('main').style.marginLeft = left;
-    const icon = document.querySelector('#shrinkSidebar i');
-    icon.classList.toggle('fa-angle-double-left');
-    icon.classList.toggle('fa-angle-double-right');
-  });
-  document.getElementById('themeToggle').addEventListener('click', () => {
-    document.documentElement.classList.toggle('dark');
-    const icon = document.getElementById('themeToggle');
-    icon.classList.toggle('fa-moon');
-    icon.classList.toggle('fa-sun');
-  });
-
-  //────────────────── “Other” Input Logic ──────────────────
-  document.querySelectorAll('select').forEach(sel => {
-    sel.addEventListener('change', () => {
-      const other = sel.parentElement.querySelector('.other-input');
-      if (other) other.style.display = sel.value === 'Other' ? 'block' : 'none';
-    });
-  });
-  const symptomOtherCheckbox = document.querySelector('input[value="Other"][name="symptom"]');
-  if (symptomOtherCheckbox) {
-    symptomOtherCheckbox.addEventListener('change', e => {
-      document.getElementById('otherSymptom').style.display = e.target.checked ? 'inline-block' : 'none';
+      }
+      try {
+        const aiReply = await callOpenAI([
+          { role: "system", content: `Nationality: ${userNationality}` },
+          { role: "system", content: systemContent },
+          { role: "user", content: userContent }
+        ]);
+        panel.querySelector(".result-content").innerHTML = sanitizeHTML(aiReply);
+        addCloseCopyDownload(panel);
+      } catch (err) {
+        panel.querySelector(".result-content").innerText = err.message.includes("Sandbox.Timedout")
+          ? "⚠️ Server busy—please try again."
+          : `⚠️ ${err.message}`;
+        addCloseCopyDownload(panel);
+      }
     });
   }
 
-  //────────────────── Progress Charts (Realistic Sample Data) ──────────────────
-  const intakeCtx = document.getElementById('intakeChart').getContext('2d');
-  const intakeChart = new Chart(intakeCtx, {
-    type: 'line',
+  //──────────────────────────────────────────────────────────────────────────────
+  // SANITIZE & FORMAT SIMPLE MARKDOWN
+  //──────────────────────────────────────────────────────────────────────────────
+  function sanitizeHTML(unsafe) {
+    if (!unsafe) return "";
+    return unsafe
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>")
+      .replace(/\*(.+?)\*/g, "<em>$1</em>")
+      .replace(/`([^`]+)`/g, "<code>$1</code>")
+      .split(/\n{2,}/)
+      .map(p => `<p>${p.trim()}</p>`)
+      .join("");
+  }
+
+  //──────────────────────────────────────────────────────────────────────────────
+  // WIRE ALL MODULES WITH SYSTEM PROMPTS
+  //──────────────────────────────────────────────────────────────────────────────
+  wireModule("genPlan",
+    ["calories", "dietType", "allergyList", "budget"],
+    ["calories", "dietType"],
+    `
+You are a registered Dietitian AI. Given the user's daily calorie target, diet type, allergies/intolerances, and budget, generate a detailed 7-day meal plan including macronutrient breakdowns, shopping lists, and simple recipes. Offer culturally relevant options based on the user's nationality when possible.
+    `.trim()
+  );
+
+  wireModule("analyzeNutri",
+    ["foodLog", "unitSelect"],
+    ["foodLog"],
+    `
+You are a Nutrition Scientist AI. Analyze the user's food log and preferred unit; produce a comprehensive macro- and micronutrient breakdown with totals, percentages, and commentary on adequacy. Include suggestions for balancing deficiencies or excesses, using the user's nationality as context for typical local foods.
+    `.trim()
+  );
+
+  wireModule("getRecipes",
+    ["pantry", "cuisineType", "recipeDifficulty", "maxTime"],
+    ["pantry"],
+    `
+You are a Culinary AI Chef. Given the user's pantry items, chosen cuisine style, difficulty level, and max prep time, recommend three original recipes. Include ingredient lists, step-by-step instructions, estimated times, dietary analysis, and local ingredient substitutions based on the user's nationality.
+    `.trim()
+  );
+
+  wireModule("scanDef",
+    ["symptoms", "dietOverview"],
+    ["symptoms"],
+    `
+You are a Clinical Dietitian AI. Identify potential nutrient deficiencies from the user's symptoms and diet overview. Rank the likely deficiencies with reasoning, provide recommended dietary sources or supplements, and suggest simple meal modifications. Tailor suggestions to the user's nationality and typical regional diet.
+    `.trim()
+  );
+
+  wireModule("runRisk",
+    ["riskFrom", "riskTo", "biomarkers", "conditions", "context"],
+    ["riskFrom", "riskTo", "biomarkers", "conditions", "context"],
+    `
+You are a Metabolomic Health Analyst AI. Analyze the user's specified date range and biomarker list (e.g., glucose, LDL) in context with their medical conditions. Generate a risk radar interpretation, highlight trends, and provide targeted health alerts. Use nationality context to suggest relevant dietary adjustments and local testing resources.
+    `.trim()
+  );
+
+  //──────────────────────────────────────────────────────────────────────────────
+  // AFTER runRisk, INJECT RADAR CHART BASED ON AI RESPONSE
+  //──────────────────────────────────────────────────────────────────────────────
+  {
+    const runRiskBtn = document.getElementById("runRisk");
+    runRiskBtn.addEventListener("click", () => {
+      const panel = document.getElementById("riskResult");
+      // Delay to ensure AI reply is rendered
+      setTimeout(() => {
+        const text = panel.querySelector(".result-content").innerText || "";
+        // Match "marker: value" pairs
+        const matches = [...text.matchAll(/(\w+):\s*(\d+)/g)];
+        if (!matches.length) return;
+        const labels = matches.map(m => m[1]);
+        const data = matches.map(m => Number(m[2]));
+        // Remove existing canvas if any
+        const existingCanvas = panel.querySelector("canvas");
+        if (existingCanvas) existingCanvas.remove();
+        const canvas = document.createElement("canvas");
+        panel.appendChild(canvas);
+        new Chart(canvas.getContext("2d"), {
+          type: "radar",
+          data: { labels, datasets: [{ label: "Biomarker Levels", data }] },
+          options: { responsive: true, maintainAspectRatio: false }
+        });
+      }, 700);
+    });
+  }
+
+  wireModule("runFitness",
+    ["fitGoal", "fitFreq", "blendIngredients", "carbDate", "intensity", "crpLevel", "nutraPref"],
+    ["fitGoal", "fitFreq"],
+    `
+You are a Certified Sports Nutritionist AI. Based on the user's goals, workout frequency, available ingredients, carb-timing date, exercise intensity, CRP/CK levels, and chosen nutraceuticals, create a detailed fitness nutrition plan. Provide balanced macros, pre- and post-workout blend recipes, recovery guidelines, and monitoring tips. Adjust recommendations for the user's nationality (e.g., local supplement availability).
+    `.trim()
+  );
+
+  wireModule("runPharma",
+    ["medList", "foodList", "compoundGoal", "doseFreq", "scheduleNotes", "cohortSelect"],
+    ["medList"],
+    `
+You are a Pharmacist-Dietitian AI. Analyze potential drug–nutrient interactions from the user's medication and food lists. Provide compounding suggestions for desired outcomes, create a medication dosing schedule that optimizes nutrient absorption, and generate outcome analytics comparing cohorts (e.g., diet-only vs diet+meds). Tailor advice to the user's nationality and local healthcare guidelines.
+    `.trim()
+  );
+
+  wireModule("runSymptom",
+    ["sympAge", "sympDesc", "foodPref"],
+    ["sympAge", "sympDesc"],
+    `
+You are a Medical Nutrition Therapist AI. Diagnose possible conditions based on the user's age, symptom description, and food preferences. Provide OTC treatment suggestions, recommend appropriate foods and meals (including local cuisine), and advise on seeking professional care if needed.
+    `.trim()
+  );
+
+  //──────────────────────────────────────────────────────────────────────────────
+  // CHART.JS: PROGRESS CHARTS (Calories & Macro Distribution)
+  //──────────────────────────────────────────────────────────────────────────────
+  // Weekly Calorie Intake (Line Chart)
+  const ctxCal = document.getElementById("calorieChart").getContext("2d");
+  // Simulate daily intake data for last 7 days
+  const weekdays = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+  const today = new Date();
+  const last7Labels = [];
+  const last7Data = [];
+  for (let i = 6; i >= 0; i--) {
+    const d = new Date(today);
+    d.setDate(d.getDate() - i);
+    last7Labels.push(weekdays[d.getDay()]);
+    last7Data.push(Math.floor(Math.random() * 800) + 1500); // random 1500–2300 kcal
+  }
+  const calorieChart = new Chart(ctxCal, {
+    type: "line",
     data: {
-      labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+      labels: last7Labels,
       datasets: [{
-        label: 'Calories In',
-        data: [2100, 1800, 2200, 2000, 1950, 2300, 2050],
-        borderColor: getComputedStyle(document.documentElement).getPropertyValue('--color-secondary').trim(),
-        fill: false
+        label: "Calories In",
+        data: last7Data,
+        borderColor: getComputedStyle(document.documentElement).getPropertyValue("--primary").trim(),
+        backgroundColor: "rgba(212, 172, 13, 0.1)",
+        fill: true
       }]
     },
     options: {
       responsive: true,
-      maintainAspectRatio: false
+      maintainAspectRatio: false,
+      scales: {
+        x: { ticks: { color: getComputedStyle(document.documentElement).getPropertyValue("--text").trim() } },
+        y: {
+          ticks: { color: getComputedStyle(document.documentElement).getPropertyValue("--text").trim() },
+          beginAtZero: false,
+          suggestedMin: 1200,
+          suggestedMax: 2500
+        }
+      },
+      plugins: { legend: { display: false } }
     }
   });
-  const expIntake = document.createElement('button');
-  expIntake.innerText = 'Export Chart';
-  expIntake.className = 'export-chart-btn';
-  expIntake.type = 'button';
-  document.getElementById('intakeChart').after(expIntake);
-  expIntake.addEventListener('click', () => {
-    const csv = [
-      ['Day','Calories'],
-      ...intakeChart.data.labels.map((d,i) => [d, intakeChart.data.datasets[0].data[i]])
-    ].map(r => r.join(',')).join('\n');
-    const blob = new Blob([csv], { type: 'text/csv' });
-    const a = document.createElement('a');
+  // Export Calorie Chart CSV
+  const expCalBtn = document.createElement("button");
+  expCalBtn.innerText = "Export Chart"; expCalBtn.className = "export-chart-btn";
+  expCalBtn.type = "button";
+  document.getElementById("calorieChart").after(expCalBtn);
+  expCalBtn.addEventListener("click", () => {
+    let csv = "Day,Calories\n";
+    calorieChart.data.labels.forEach((d, i) => {
+      csv += `"${d}",${calorieChart.data.datasets[0].data[i]}\n`;
+    });
+    const blob = new Blob([csv], { type: "text/csv" });
+    const a = document.createElement("a");
     a.href = URL.createObjectURL(blob);
-    a.download = 'calories-intake.csv';
+    a.download = "calorie-intake.csv";
     a.click();
   });
 
-  const macroCtx = document.getElementById('macroChart').getContext('2d');
-  const macroChart = new Chart(macroCtx, {
-    type: 'pie',
+  // Macro Distribution (Pie Chart)
+  const ctxMacro = document.getElementById("macroChart").getContext("2d");
+  // Initial macros (random percentages summing to 100)
+  const rand1 = Math.floor(Math.random() * 40) + 30; // carbs 30–70
+  const rand2 = Math.floor(Math.random() * (100 - rand1));
+  const rand3 = 100 - rand1 - rand2;
+  const macroChart = new Chart(ctxMacro, {
+    type: "pie",
     data: {
-      labels: ['Carbs', 'Protein', 'Fat'],
-      datasets: [{ data: [50, 25, 25] }]
+      labels: ["Carbs", "Protein", "Fat"],
+      datasets: [{ data: [rand1, rand2, rand3], backgroundColor: [
+        getComputedStyle(document.documentElement).getPropertyValue("--secondary").trim(),
+        getComputedStyle(document.documentElement).getPropertyValue("--primary-alt").trim(),
+        getComputedStyle(document.documentElement).getPropertyValue("--accent").trim()
+      ] }]
     },
     options: {
       responsive: true,
-      maintainAspectRatio: false
+      maintainAspectRatio: false,
+      plugins: { legend: { position: "bottom" } }
     }
   });
-  const expMacro = document.createElement('button');
-  expMacro.innerText = 'Export Chart';
-  expMacro.className = 'export-chart-btn';
-  expMacro.type = 'button';
-  document.getElementById('macroChart').after(expMacro);
-  expMacro.addEventListener('click', () => {
-    const csv = [
-      ['Macro','Percent'],
-      ...macroChart.data.labels.map((m,i) => [m, macroChart.data.datasets[0].data[i]])
-    ].map(r => r.join(',')).join('\n');
-    const blob = new Blob([csv], { type: 'text/csv' });
-    const a = document.createElement('a');
+  // Export Macro Chart CSV
+  const expMacroBtn = document.createElement("button");
+  expMacroBtn.innerText = "Export Chart"; expMacroBtn.className = "export-chart-btn";
+  expMacroBtn.type = "button";
+  document.getElementById("macroChart").after(expMacroBtn);
+  expMacroBtn.addEventListener("click", () => {
+    let csv = "Macro,Percent\n";
+    macroChart.data.labels.forEach((m, i) => {
+      csv += `"${m}",${macroChart.data.datasets[0].data[i]}\n`;
+    });
+    const blob = new Blob([csv], { type: "text/csv" });
+    const a = document.createElement("a");
     a.href = URL.createObjectURL(blob);
-    a.download = 'macro-distribution.csv';
+    a.download = "macro-distribution.csv";
     a.click();
   });
+
+  //──────────────────────────────────────────────────────────────────────────────
+  // EXPORT ALL MODULE CHARTS BUTTON (Example: ID "exportData")
+  //──────────────────────────────────────────────────────────────────────────────
+  const exportAllBtn = document.getElementById("exportData");
+  exportAllBtn.addEventListener("click", () => {
+    // Combine calorieChart and macroChart data into one CSV
+    let csv = "Chart,Label,Value\n";
+    calorieChart.data.labels.forEach((lab, i) => {
+      csv += `"Calories","${lab}",${calorieChart.data.datasets[0].data[i]}\n`;
+    });
+    macroChart.data.labels.forEach((lab, i) => {
+      csv += `"Macro","${lab}",${macroChart.data.datasets[0].data[i]}\n`;
+    });
+    const blob = new Blob([csv], { type: "text/csv" });
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(blob);
+    a.download = "dietetics-progress.csv";
+    a.click();
+  });
+
+  //──────────────────────────────────────────────────────────────────────────────
+  // RESPONSE PANEL CONTROLS (CLOSE, COPY, DOWNLOAD)
+  //──────────────────────────────────────────────────────────────────────────────
+  document.body.addEventListener("click", e => {
+    const rp = e.target.closest(".response");
+    if (!rp) return;
+    if (e.target.closest(".close-btn")) {
+      rp.hidden = true;
+      return;
+    }
+    if (e.target.closest(".copy-btn")) {
+      const txt = rp.querySelector(".result-content").innerText;
+      navigator.clipboard.writeText(txt).then(() => showToast("Copied!"));
+      return;
+    }
+    if (e.target.closest(".dl-btn")) {
+      const txt = rp.querySelector(".result-content").innerText;
+      const blob = new Blob([txt], { type: "text/plain" });
+      const a = document.createElement("a");
+      a.href = URL.createObjectURL(blob);
+      a.download = "response.txt";
+      a.click();
+    }
+  });
+
+  //──────────────────────────────────────────────────────────────────────────────
+  // UTILITY: SANITIZE & FORMAT MARKDOWN
+  //──────────────────────────────────────────────────────────────────────────────
+  function sanitizeHTML(unsafe) {
+    if (!unsafe) return "";
+    return unsafe
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>")
+      .replace(/\*(.+?)\*/g, "<em>$1</em>")
+      .replace(/`([^`]+)`/g, "<code>$1</code>")
+      .split(/\n{2,}/)
+      .map(p => `<p>${p.trim()}</p>`)
+      .join("");
+  }
 });
 </script>
+
+
+  
+</body>
 
 </html>
