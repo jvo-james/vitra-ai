@@ -163,8 +163,9 @@
     bottom: var(--padding);
     left: 50%;
     transform: translateX(-50%);
-    width: 36px;
-    height: 36px;
+     min-width: 36px;
+  min-height: 36px;
+  aspect-ratio: 1 / 1;
     background: none;
     color: var(--primary);
     border: 2px solid var(--primary);
@@ -357,8 +358,9 @@
   }
   .tool-row button {
     font-size: 0.85rem;
-    width: 1.6rem;
-    height: 1.6rem;
+    min-width: 1.6rem;
+    min-height: 1.6rem;
+  aspect-ratio: 1 / 1;
     padding: 0.2rem;
     background: var(--surface);
     border: 1px solid var(--muted);
@@ -495,8 +497,9 @@
     background: var(--surface);
     border: 1px solid var(--muted);
     border-radius: 50%;
-    width: 36px;
-    height: 36px;
+    min-width: 36px;
+  min-height: 36px;
+  aspect-ratio: 1 / 1;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -583,8 +586,9 @@
     background: var(--primary);
     border: none;
     border-radius: 50%;
-    width: 36px;
-    height: 36px;
+    min-width: 36px;
+  min-height: 36px;
+  aspect-ratio: 1 / 1;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -739,7 +743,40 @@
     transform: translateY(-2px);
     box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
   }
-
+#nt-form {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1rem 1.5rem;
+  align-items: start;
+}
+#nt-form .other-input {
+  display: none;
+  grid-column: 1 / -1; 
+}
+#nt-form label {
+  margin-bottom: 0.25rem;
+  display: block;
+}
+  #pgx-form {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1rem 1.5rem;
+  align-items: start;
+}
+  #pgx-form .other-input {
+  display: none;
+  grid-column: 1 / -1; /* full width */
+}
+@media (max-width: 480px) {
+ #pgx-form {
+    grid-template-columns: 1fr;
+  }
+ }
+  @media (max-width: 768px) {
+ #pgx-form {
+    grid-template-columns: repeat(2, 1fr);
+  }
+ }
   /*──────────────────────────────────────────────────────────────────────────────
     FOOTER
   ──────────────────────────────────────────────────────────────────────────────*/
@@ -819,7 +856,43 @@
     .module p.desc {
       font-size: 0.95rem;
     }
+    form,
+  .chat-input-row {
+    flex-direction: column;
+    gap: 0.75rem;
   }
+  input[type="text"],
+  input[type="number"],
+  input[type="email"],
+  input[type="tel"],
+  select,
+  textarea {
+    width: 100% !important;
+    padding: 0.5rem !important;
+    font-size: 0.9rem !important;
+  }
+  button {
+    width: auto !important;
+    padding: 0.6rem 1rem !important;
+    font-size: 0.9rem !important;
+  }
+  .chart-card canvas {
+    height: 180px !important;
+  }
+  .hero-content h1 {
+    font-size: 2.2rem;
+  }
+  .charts {
+    grid-template-columns: 1fr !important;
+  }
+  .chart-card {
+    height: auto;
+  }
+  .hero-subtitle,
+  .module p.desc {
+    font-size: 0.95rem;
+  }
+ }
   @media (max-width: 640px) {
     form,
     .chat-input-row {
@@ -860,6 +933,10 @@
     .chat-box {
       max-height: 220px;
     }
+    .checkbox-group {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0.25rem 0.5rem;
+  }
   }
 
   /* Modal backdrop */
@@ -1158,8 +1235,7 @@ html.dark .history-modal .history-content {
         <div class="hero-content">
           <h1><i class="fas fa-brain"></i> Empower Your Mental Wellness</h1>
           <p class="hero-subtitle">
-            A comprehensive AI‐driven platform combining Cognitive Behavioral Therapy (CBT), mood analytics, neurochemical biomarker assessment, 
-            and clinical trial matchmaking (CTM). Interact seamlessly to optimize mental health outcomes, leveraging evidence-based methodologies.
+            AI-powered toolkit for therapy, mood insights, neurochemical balance, and clinical trial matching—all in one interactive dashboard.
         </p>
           <div class="hero-actions">
             <a href="#therapybot" class="btn-primary">
@@ -1288,7 +1364,7 @@ html.dark .history-modal .history-content {
       <p class="chart-desc">
         This line chart dynamically reflects the average mood score each day. Hover to see exact values or export data via CSV.
       </p>
-      <button id="exportMoodStats" class="btn-secondary">Export Mood Stats CSV</button>
+      <button id="exportMoodStats" class="btn-primary">Export Mood Stats CSV</button>
     </section>
     
     <!-- 3. Neurotransmitter Balance -->
@@ -1296,9 +1372,7 @@ html.dark .history-modal .history-content {
       <h2><i class="fas fa-vial"></i> Neurotransmitter Balance</h2>
       <p class="desc">
        Provide quantitative mood data, subjective sleep quality (e.g., “Fair,” “Good”), appetite status, and pharmacotherapy adherence. 
-        The AI engine synthesizes these inputs with neurochemical pathways (e.g., Serotonin, Dopamine) and delivers targeted lifestyle or dietary interventions 
-        to optimize neurotransmitter homeostasis.
-      </p>
+           </p>
       <form id="nt-form">
         <label for="ntMood">Mood (1–10):</label>
         <input type="range" id="ntMood" min="1" max="10" value="5"/>
@@ -1377,8 +1451,7 @@ html.dark .history-modal .history-content {
       <h2><i class="fas fa-dna"></i> Pharmacogenomics &amp; Dosing</h2>
       <p class="desc">
         Upload a validated Variant Call Format (VCF) file containing genotypic polymorphisms (e.g., CYP2C19, CYP2D6). Enter demographic and clinical parameters 
-        (e.g., age, sex). The AI uses Pharmacogenomic (PGx) algorithms to analyze allele frequencies, predict metabolizer phenotypes, and recommend 
-        individualized drug dosing regimens for maximum efficacy and safety.
+        (e.g., age, sex). 
       </p>
       <form id="pgx-form">
         <div class="two-column-grid">
@@ -1451,15 +1524,7 @@ html.dark .history-modal .history-content {
       <h2><i class="fas fa-exchange-alt"></i> Drug Interaction Profiler</h2>
       <p class="desc">
   Enter all current psychotropic medications (including OTCs, supplements, or herbal preparations) and any comorbid medical conditions (e.g., hepatic or renal impairment, cardiovascular disease).  
-  The AI will:
-  <ul>
-    <li>Check for CYP450‐mediated interactions (e.g., CYP2D6 or CYP3A4 inhibition/induction).</li>
-    <li>Identify QT‐prolongation or additive serotonergic effects.</li>
-    <li>Flag any contraindications based on existing comorbidities (e.g., avoid bupropion if seizure risk is elevated).</li>
-    <li>Offer clear, actionable recommendations: dose adjustments, monitoring strategies, or safer alternatives.</li>
-  </ul>
-  <strong>Tip:</strong> If you see a message asking for more detail, verify you didn’t leave any medication or condition blank. The AI uses specific mechanisms (enzyme overlaps, receptor synergy, organ‐function considerations) to produce precise safety advice.
-</p>
+  </p>
       <form id="int-form">
         <label for="intListSelect">Medications:</label>
         <select id="intListSelect" required>
@@ -1527,13 +1592,6 @@ html.dark .history-modal .history-content {
       <h2><i class="fas fa-wave-square"></i> EEG &amp; Brainwave Interpreter</h2>
       <p class="desc">
   Upload your raw EEG (Electroencephalography) file (EDF or CSV) and specify the recording condition or task (e.g., “Resting Eyes Closed,” “Cognitive Stress Task”).  
-  The AI will:
-  <ul>
-    <li>Describe expected waveform patterns for that condition (for instance, increased alpha waves during eyes-closed rest).</li>
-    <li>Highlight any deviations (e.g., excessive theta slowing or low beta power) and explain their potential clinical significance (e.g., drowsiness, attentional deficits).</li>
-    <li>Recommend at least two evidence‐based interventions (e.g., biofeedback, guided relaxation) or next-step evaluations (e.g., sleep study, cognitive assessment).</li>
-  </ul>
-  <strong>Note:</strong> If no EEG file or condition is detected, the AI will prompt you to upload or clarify. Its goal is to translate raw neurophysiology into actionable insights for mental wellness.
 </p>
 
       <form id="eeg-form">
@@ -1573,14 +1631,6 @@ html.dark .history-modal .history-content {
       <h2><i class="fas fa-handshake"></i> Clinical Trial Matcher</h2>
       <p class="desc">
   Describe your primary psychiatric diagnosis (e.g., Major Depressive Disorder, Generalized Anxiety Disorder), enter your location (city, country), and select the trial phase you wish to explore.  
-  The AI will:
-  <ul>
-    <li>Cross‐reference global registries to find actively recruiting trials that match your diagnosis, desired phase (I–IV), and geographic radius.</li>
-    <li>Summarize each trial with its official name, phase, design (e.g., “double‐blind, placebo‐controlled”), and concise inclusion/exclusion criteria (e.g., age range, prior treatment failures).</li>
-    <li>Provide contact information or a direct enrollment link whenever available, or suggest nearest alternatives if none are active in your area.</li>
-    <li>Advise on eligibility screening steps (e.g., lab tests, psychiatric assessments) to optimize your chances of qualifying.</li>
-  </ul>
-  <strong>Reminder:</strong> If any field is missing or unclear, the AI will prompt you—for example, “Please specify your exact city and state for more precise trial matches.” Use this section to efficiently discover research opportunities tailored to your needs.
 </p>
       <form id="trial-form">
         <label for="trialDx">Diagnosis:</label>
