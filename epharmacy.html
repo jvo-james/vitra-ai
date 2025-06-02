@@ -518,102 +518,7 @@ window.MathJax = {
     transform: scale(1.1);
   }
 
-  /*──────────────────────────────────────────────────────────────────────────────
-    CHATBOX & CHATBOT SECTION
-  ──────────────────────────────────────────────────────────────────────────────*/
-  .chat-box {
-    background: var(--pharm-bg);
-    border: 2px solid var(--pharm-primary-alt);
-    border-radius: var(--radius);
-    padding: var(--padding);
-    max-height: 300px;
-    overflow-y: auto;
-    display: flex;
-    flex-direction: column;
-    gap: 0.5rem;
-    transition: background var(--transition), border-color var(--transition);
-  }
-  html.dark .chat-box {
-    background: var(--pharm-surface);
-    border-color: var(--pharm-secondary);
-  }
-  .chat-controls {
-    display: flex;
-    gap: 0.5rem;
-    margin-bottom: 0.5rem;
-    flex-wrap: wrap;
-  }
-  .chat-controls button {
-    background: var(--pharm-surface);
-    border: 1px solid var(--pharm-muted);
-    border-radius: 50%;
-    width: 40px;
-    height: 40px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: var(--pharm-secondary);
-    transition: background var(--transition), transform var(--transition);
-  }
-  .chat-controls button:hover {
-    background: var(--pharm-primary-alt);
-    color: #fff;
-    transform: scale(1.1);
-  }
-  .chat-input {
-    display: flex;
-    gap: 0.5rem;
-    margin-top: 0.5rem;
-  }
-  .chat-input input {
-    flex: 1;
-    padding: 0.75rem;
-    border: 2px solid var(--pharm-primary-alt);
-    border-radius: var(--radius) 0 0 var(--radius);
-    background: var(--pharm-bg);
-    color: var(--pharm-text);
-    font-size: 1rem;
-  }
-  html.dark .chat-input input {
-    background: var(--pharm-surface);
-    border-color: var(--pharm-secondary);
-  }
-  .chat-input button {
-    border-radius: 0 var(--radius) var(--radius) 0;
-    background: var(--pharm-primary);
-    color: #fff;
-    padding: 0 1rem;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: background var(--transition), transform var(--transition);
-  }
-  .chat-input button:hover {
-    background: var(--pharm-primary-alt);
-    transform: scale(1.1);
-  }
-  .user-msg,
-  .bot-msg {
-    max-width: 70%;
-    padding: 0.75rem;
-    border-radius: var(--radius);
-    line-height: 1.4;
-    position: relative;
-    word-wrap: break-word;
-    transition: background var(--transition), color var(--transition);
-  }
-  .user-msg {
-    align-self: flex-end;
-    background: var(--pharm-primary);
-    color: #fff;
-    border-bottom-right-radius: 0;
-  }
-  .bot-msg {
-    align-self: flex-start;
-    background: var(--pharm-surface);
-    color: var(--pharm-text);
-    border-bottom-left-radius: 0;
-  }
+
   html.dark .bot-msg {
     background: var(--pharm-surface);
     color: var(--pharm-text);
@@ -649,66 +554,299 @@ html.dark .chat-input textarea {
   /*──────────────────────────────────────────────────────────────────────────────
     HISTORY MODAL
   ──────────────────────────────────────────────────────────────────────────────*/
-  .modal {
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: rgba(0, 0, 0, 0.5);
-    display: none;
-    align-items: center;
-    justify-content: center;
-    z-index: 2000;
+/*──────────────────────────────────────────────────────────────────────────────
+  CHAT + HISTORY (copy exactly from herbal.html)
+──────────────────────────────────────────────────────────────────────────────*/
+
+/* Chat container */
+.chat-box {
+  background: var(--bg);
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  border-radius: var(--radius);
+  padding: var(--padding);
+  min-height: 200px;
+  max-height: 300px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 1rem;
+  transition: background var(--transition), border-color var(--transition);
+}
+
+/* User and Bot message bubbles */
+.user-msg,
+.bot-msg {
+  max-width: 80%;
+  margin: 0.5rem 0;
+  padding: 0.8rem 1rem;
+  border-radius: 1.2rem;
+  position: relative;
+  transition: background var(--transition), color var(--transition);
+}
+.user-msg {
+  background: var(--primary);
+  color: #fff;
+  align-self: flex-end;
+  border-bottom-right-radius: 0.2rem;
+}
+.bot-msg {
+  background: #e8f5f1;
+  color: var(--text);
+  align-self: flex-start;
+  border-bottom-left-radius: 0.2rem;
+}
+html.dark .bot-msg {
+  background: var(--surface-dark);
+  color: var(--text-dark);
+}
+
+/* Timestamps inside each message */
+.timestamp {
+  font-size: 0.7rem;
+  position: absolute;
+  bottom: -1.2rem;
+  right: 0.8rem;
+  color: var(--muted);
+}
+
+/* Date separator between days */
+.chat-date-separator {
+  text-align: center;
+  margin: 0.75rem 0;
+  font-weight: bold;
+  color: var(--muted);
+  user-select: none;
+}
+
+/* Chat input row (text‐input + send button) */
+.chat-input-row {
+  display: flex;
+  gap: 0.5rem;
+}
+.chat-input-row input {
+  flex: 1 1 100%;
+  padding: 0.8rem 1rem;
+  border: 1px solid var(--muted);
+  border-radius: var(--radius);
+  background: var(--bg);
+  color: var(--text);
+  font-size: 0.95rem;
+  transition: border-color var(--transition), box-shadow var(--transition);
+}
+.chat-input-row input:focus {
+  outline: none;
+  border-color: var(--primary);
+  box-shadow: 0 0 8px var(--primary);
+}
+.chat-input-row button {
+  background: var(--primary);
+  border: none;
+  border-radius: 50%;
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: background var(--transition), transform var(--transition);
+}
+.chat-input-row button:hover {
+  transform: scale(1.1);
+  background: var(--secondary);
+}
+
+/* Small hint under chat */
+#chatHint {
+  font-size: 0.9rem;
+  color: var(--muted);
+  margin-bottom: 1rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+/* Spinner icon (used inside “bot thinking” states) */
+.spinner {
+  display: inline-block;
+  width: 1em;
+  height: 1em;
+  border: 2px solid var(--primary);
+  border-top-color: transparent;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+  vertical-align: middle;
+  margin-left: 0.25em;
+}
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/*──────────────────────────────────────────────────────────────────────────────
+  HISTORY MODAL (copy exactly)
+──────────────────────────────────────────────────────────────────────────────*/
+.history-modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0,0,0,0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 3000;
+}
+.history-content {
+  background: var(--surface);
+  padding: 2rem;
+  border-radius: var(--radius);
+  width: 90%;
+  max-width: 600px;
+  max-height: 80%;
+  overflow-y: auto;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+  position: relative;
+}
+.history-content h3 {
+  margin-bottom: 1rem;
+  color: var(--primary);
+  font-size: 1.5rem;
+  border-bottom: 2px solid var(--accent);
+  padding-bottom: 0.5rem;
+}
+.history-content ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+.history-content li {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.75rem 0;
+  border-bottom: 1px solid #eee;
+}
+.history-content li:last-child {
+  border-bottom: none;
+}
+.history-content .del-msg {
+  background: none;
+  border: none;
+  color: var(--secondary);
+  font-size: 1.1rem;
+  cursor: pointer;
+  transition: color var(--transition);
+}
+.history-content .del-msg:hover {
+  color: var(--primary);
+}
+.history-content .close-history {
+  display: block;
+  margin: 1.5rem auto 0;
+  background: var(--primary);
+  color: #fff;
+  border: none;
+  padding: 0.6rem 1.2rem;
+  border-radius: var(--radius);
+  cursor: pointer;
+  font-size: 1rem;
+  transition: background var(--transition), transform var(--transition);
+}
+.history-content .close-history:hover {
+  background: var(--secondary);
+  transform: translateY(-2px);
+}
+.history-table-wrapper {
+  overflow-x: auto;
+  margin-bottom: var(--padding);
+}
+.history-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.95rem;
+}
+.history-table th,
+.history-table td {
+  padding: 0.6rem 0.8rem;
+  text-align: left;
+  border: none;
+}
+.history-table tbody tr:nth-child(odd) {
+  background: rgba(0,0,0,0.03);
+}
+.history-actions {
+  position: sticky;
+  bottom: 0;
+  background: var(--surface);
+  display: flex;
+  justify-content: flex-end;
+  gap: 1rem;
+  padding-top: var(--padding);
+  border-top: 1px solid rgba(0,0,0,0.1);
+}
+.history-actions button {
+  background: var(--primary);
+  color: #fff;
+  border: none;
+  border-radius: var(--radius);
+  padding: 0.5rem 1rem;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: background var(--transition), transform var(--transition);
+}
+.history-actions button:hover {
+  background: var(--secondary);
+  transform: translateY(-1px);
+}
+
+/* Copy‐toast (small “Copied!” pop‐up) */
+.copy-toast {
+  position: fixed;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--primary);
+  color: #fff;
+  padding: 0.5rem 1rem;
+  border-radius: var(--radius);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+  font-size: 0.95rem;
+  animation: fade-in-out 2s ease forwards;
+  z-index: 2000;
+}
+@keyframes fade-in-out {
+  0% { opacity: 0; transform: translateX(-50%) translateY(20px); }
+  10% { opacity: 1; transform: translateX(-50%) translateY(0); }
+  90% { opacity: 1; }
+  100% { opacity: 0; transform: translateX(-50%) translateY(20px); }
+}
+
+/*──────────────────────────────────────────────────────────────────────────────
+  DARK MODE OVERRIDES FOR CHAT
+──────────────────────────────────────────────────────────────────────────────*/
+html.dark .chat-box {
+  background: var(--bg);
+  border-color: var(--muted);
+}
+html.dark .user-msg {
+  background: var(--secondary);
+  color: #fff;
+}
+html.dark .bot-msg {
+  background: var(--surface-dark);
+  color: var(--text-dark);
+}
+
+/*──────────────────────────────────────────────────────────────────────────────
+  RESPONSIVE TWEAKS (only if needed; copy from herbal.html)
+──────────────────────────────────────────────────────────────────────────────*/
+@media (max-width: 480px) {
+  .chat-box {
+    max-height: 220px;
   }
-  .modal-content {
-    background: var(--pharm-surface);
-    border-radius: var(--radius);
-    width: 90%;
-    max-width: 500px;
-    max-height: 80vh;
-    overflow-y: auto;
-    box-shadow: var(--shadow);
-    position: relative;
-    padding: var(--padding);
-  }
-  .modal-content h3 {
-    margin-bottom: 1rem;
-    color: var(--pharm-primary-alt);
-  }
-  .close-modal {
-    position: absolute;
-    top: 0.5rem;
-    right: 0.75rem;
-    font-size: 1.5rem;
-    color: var(--pharm-muted);
-    cursor: pointer;
-    transition: color var(--transition), transform var(--transition);
-  }
-  .close-modal:hover {
-    color: var(--pharm-primary-alt);
-    transform: scale(1.1);
-  }
-  .history-item {
-    margin-bottom: 1rem;
-    border-bottom: 1px solid var(--pharm-secondary);
-    padding-bottom: 0.5rem;
-  }
-  .delete-history {
-    background: none;
-    border: none;
-    font-size: 1rem;
-    color: var(--pharm-muted);
-    cursor: pointer;
-    transition: color var(--transition), transform var(--transition);
-  }
-  .delete-history:hover {
-    color: var(--pharm-primary-alt);
-    transform: scale(1.1);
-  }
- .modal:not([hidden]) {
-    display: flex;
-  }
+}
 
   /*──────────────────────────────────────────────────────────────────────────────
     CHARTS & EXPORT BUTTON
@@ -1088,27 +1226,21 @@ html.dark .chat-input textarea {
     </section>
 
     <!-- 5. Price Predictor & Locator -->
-    <section id="pricePredictor" class="module">
-      <h2><i class="fas fa-tag"></i> Price Predictor & Nearby Pharmacies</h2>
-      <p class="desc">Get real-time price estimates in your chosen currency and view a map of nearby pharmacies.</p>
-      <label>Drug:
-        <input list="drug-list" id="priceDrugInput" placeholder="Select or type drug…">
-      </label>
-      <label>Currency:
-        <input list="currency-list" id="currencyInput" placeholder="Currency…">
-        <datalist id="currency-list">
-          <option>USD</option><option>EUR</option><option>GBP</option><option>NGN</option>
-          <option>GHS</option><option>CAD</option><option>AUD</option><option>JPY</option>
-          <option>INR</option><option>CNY</option><option>Other</option>
-        </datalist>
-      </label>
-      <button id="predictPrice" class="btn"><i class="fas fa-dollar-sign"></i> Predict Price</button>
-      <div id="pricePanel" class="response" hidden>
-        <button class="close-btn"><i class="fas fa-times"></i></button>
-        <div class="result-content"></div>
-        <div id="pharmacyMap" style="height:200px; margin-top:1rem;"></div>
-      </div>
-    </section>
+
+<section id="hero–chat" class="module">
+  <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem;">
+    <h2><i class="fas fa-comments"></i> AI Herbalist Chat</h2>
+    <div class="chat-controls">
+      <button id="viewHistory" title="View History"><i class="fas fa-history"></i></button>
+      <button id="clearChat" title="Clear Chat"><i class="fas fa-trash-alt"></i></button>
+    </div>
+  </div>
+  <div id="chatBox" class="chat-box" role="log" aria-live="polite"></div>
+  <div class="chat-input-row">
+    <input id="chatInput" placeholder="Ask about herbal remedies…" aria-label="Type your question"/>
+    <button id="sendChat" aria-label="Send message"><i class="fas fa-paper-plane"></i></button>
+  </div>
+</section>
 
     <!-- 6. Compound Formulation Advisor -->
     <section id="compoundAdvisor" class="module">
@@ -1266,585 +1398,920 @@ html.dark .chat-input textarea {
 
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<!-- Paste this entire <script> block at the end of your <body>, replacing all existing <script> sections -->
 <script>
-document.addEventListener('DOMContentLoaded', () => {
-  //──────────────────────────────────────────────────────────────────────────────
-  // TOAST HELPER
-  //──────────────────────────────────────────────────────────────────────────────
-  function showToast(message) {
-    const toast = document.createElement('div');
-    toast.className = 'toast';
-    toast.textContent = message;
-    document.body.appendChild(toast);
-    requestAnimationFrame(() => toast.classList.add('visible'));
-    setTimeout(() => {
-      toast.classList.remove('visible');
-      setTimeout(() => toast.remove(), 300);
-    }, 2000);
+  // ──────────────────────────────────────────────────────────────────────────────
+  // E-PHARMACY AI PORTAL: ALL JAVASCRIPT FUNCTIONALITY
+  // ──────────────────────────────────────────────────────────────────────────────
+
+  // Utility: sanitize user-provided strings to prevent HTML injection
+  function escapeHtml(unsafe) {
+    return unsafe
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;")
+      .replace(/'/g, "&#039;");
   }
 
-  //──────────────────────────────────────────────────────────────────────────────
-  // SANITIZE & FORMAT SIMPLE MARKDOWN-LIKE AI RESPONSES
-  //──────────────────────────────────────────────────────────────────────────────
-  function sanitizeAIContent(raw) {
-    let inTable = false;
-    return raw
-      .replace(/```([\s\S]+?)```/g, (_, code) => `<pre>${code.trim()}</pre>`)
-      .replace(/^#### (.+)$/gm, '<h4>$1</h4>')
-      .replace(/^### (.+)$/gm, '<h3>$1</h3>')
-      .replace(/^## (.+)$/gm, '<h2>$1</h2>')
-      .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
-      .replace(/\*(.+?)\*/g, '<em>$1</em>')
-      .replace(/^\|(.+)\|$/gm, (_, row) => {
-        const cols = row.split('|').map(c => c.trim());
-        if (!inTable) {
-          inTable = true;
-          return '<table><thead><tr>' +
-            cols.map(c => `<th>${c}</th>`).join('') +
-            '</tr></thead><tbody>';
-        }
-        return '<tr>' + cols.map(c => `<td>${c}</td>`).join('') + '</tr>';
-      })
-      .replace(/$/, () => {
-        if (inTable) {
-          inTable = false;
-          return '</tbody></table>';
-        }
-        return '';
-      });
-  }
-
-  //──────────────────────────────────────────────────────────────────────────────
-  // GENERIC AI CALL FUNCTION
-  //──────────────────────────────────────────────────────────────────────────────
-  async function callAI(messages, retries = 1) {
-    try {
-      const response = await fetch('/.netlify/functions/openai-proxy', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ messages })
-      });
-      if (!response.ok) {
-        const errText = await response.text();
-        throw new Error(`OpenAI error ${response.status}: ${errText}`);
-      }
-      const data = await response.json();
-      const content = data.choices?.[0]?.message?.content;
-      if (!content) throw new Error('Malformed AI response');
-      return content.trim();
-    } catch (err) {
-      if (retries > 0 && err.message.includes('Timedout')) {
-        await new Promise(r => setTimeout(r, 1000));
-        return callAI(messages, retries - 1);
-      }
-      return `⚠️ ${err.message}`;
+  document.addEventListener("DOMContentLoaded", () => {
+    // ────────────────────────────────────────────────────────────────────────────
+    // 1) THEME TOGGLE & PERSISTENCE
+    // ────────────────────────────────────────────────────────────────────────────
+    const themeToggle = document.getElementById("themeToggle");
+    // On page load, apply saved theme:
+    const savedTheme = localStorage.getItem("epharmacy-theme");
+    if (savedTheme === "dark") {
+      document.documentElement.classList.add("dark");
+      document.documentElement.setAttribute("aria-theme", "dark");
+      themeToggle.classList.remove("fa-moon");
+      themeToggle.classList.add("fa-sun");
     }
-  }
-
-  //──────────────────────────────────────────────────────────────────────────────
-  // SPINNER & PHASE TEXT
-  //──────────────────────────────────────────────────────────────────────────────
-  const PHASE_TEXT = {
-    scanRx: 'Decoding prescription…',
-    lookupDrug: 'Retrieving drug data…',
-    checkInteractions: 'Analyzing interactions…',
-    computeDose: 'Calculating dosage…',
-    adviseDrug: 'Formulating recommendation…',
-    predictPrice: 'Estimating price…',
-    adviseCompound: 'Designing formulation…',
-    predictSideEffects: 'Predicting side-effects…',
-    scheduleRefill: 'Scheduling refills…'
-  };
-
-  function startThinking(panel, btnId) {
-    panel.hidden = false;
-    panel.classList.add('loading');
-   const contentDiv = panel.querySelector('.result-content');
-   contentDiv.innerHTML = `
-     <div style="display:flex; align-items:center; gap:0.5rem;">
-        <div class="spinner" style="width:1rem; height:1rem; border-width:2px;"></div>
-     </div>`;
-   const oldTools = panel.querySelector('.tool-row');
-    if (oldTools) oldTools.remove();
-    panel.querySelector('.close-btn').style.display = 'none';
-  }
-
-  function injectTools(panel) {
-    panel.classList.remove('loading');
-    if (panel.querySelector('.tool-row')) return;
-    const tools = document.createElement('div');
-    tools.className = 'tool-row';
-    tools.innerHTML = `
-      <button class="copy-btn"><i class="fas fa-copy"></i></button>
-      <button class="dl-btn"><i class="fas fa-download"></i></button>
-    `;
-    panel.appendChild(tools);
-    panel.querySelector('.close-btn').style.display = 'block';
-  }
-
-  //──────────────────────────────────────────────────────────────────────────────
-  // SIDEBAR TOGGLE & COLLAPSE
-  //──────────────────────────────────────────────────────────────────────────────
-  document.getElementById('hamburger').onclick = () => {
-    document.body.classList.toggle('sidebar-open');
-  };
-  const shrinkBtn = document.getElementById('shrinkSidebar');
-  shrinkBtn.onclick = () => {
-    const sb = document.getElementById('sidebar');
-    sb.classList.toggle('collapsed');
-    const icon = shrinkBtn.querySelector('i');
-    icon.classList.toggle('fa-chevron-left');
-    icon.classList.toggle('fa-chevron-right');
-    document.querySelector('header').style.left =
-      sb.classList.contains('collapsed') ? '60px' : '220px';
-    document.querySelector('main').style.marginLeft =
-      sb.classList.contains('collapsed') ? '70px' : '240px';
-  };
-document.addEventListener('click', e => {
-    const sb = document.getElementById('sidebar');
-    if (document.body.classList.contains('sidebar-open')) {
-     if (!sb.contains(e.target) && !document.getElementById('hamburger').contains(e.target)) {
-        document.body.classList.remove('sidebar-open');
-     }
-    }
-  });
-
-
-  //──────────────────────────────────────────────────────────────────────────────
-  // THEME TOGGLE
-  //──────────────────────────────────────────────────────────────────────────────
-  document.getElementById('themeToggle').onclick = () => {
-    document.documentElement.classList.toggle('dark');
-    document.getElementById('themeToggle').classList.toggle('fa-moon');
-    document.getElementById('themeToggle').classList.toggle('fa-sun');
-  };
-
-  //──────────────────────────────────────────────────────────────────────────────
-  // SMOOTH SCROLL FOR HERO ACTION LINKS
-  //──────────────────────────────────────────────────────────────────────────────
-  document.querySelectorAll('.hero-actions a[href^="#"]').forEach(anchor => {
-    anchor.addEventListener('click', e => {
-      e.preventDefault();
-      const target = document.querySelector(anchor.getAttribute('href'));
-      if (!target) return;
-      const offset = target.getBoundingClientRect().top + window.pageYOffset - 70;
-      window.scrollTo({ top: offset, behavior: 'smooth' });
+    themeToggle.addEventListener("click", () => {
+      const htmlEl = document.documentElement;
+      const isDark = htmlEl.classList.toggle("dark");
+      themeToggle.classList.toggle("fa-sun", isDark);
+      themeToggle.classList.toggle("fa-moon", !isDark);
+      htmlEl.setAttribute("aria-theme", isDark ? "dark" : "light");
+      localStorage.setItem("epharmacy-theme", isDark ? "dark" : "light");
     });
-  });
 
-  //──────────────────────────────────────────────────────────────────────────────
-  // “OTHER” INPUT LOGIC FOR SELECT FIELDS
-  //──────────────────────────────────────────────────────────────────────────────
-  document.getElementById('rxDiagnosis').onchange = () => {
-    document.getElementById('rxDiagOther').style.display =
-      document.getElementById('rxDiagnosis').value === 'Other' ? 'block' : 'none';
-  };
-  document.getElementById('rxMode').onchange = () => {
-    document.getElementById('rxModeOther').style.display =
-      document.getElementById('rxMode').value === 'Other' ? 'block' : 'none';
-  };
-  document.getElementById('comorbiditySelect').onchange = () => {
-    const otherInput = document.querySelector('#comorbiditySelect + .other-input');
-    if (otherInput) {
-      otherInput.style.display =
-        document.getElementById('comorbiditySelect').value === 'Other' ? 'block' : 'none';
+    // ────────────────────────────────────────────────────────────────────────────
+    // 2) SIDEBAR TOGGLE (COLLAPSE + MOBILE)
+    // ────────────────────────────────────────────────────────────────────────────
+    const sidebar = document.getElementById("sidebar");
+    const shrinkSidebar = document.getElementById("shrinkSidebar");
+    const hamburger = document.getElementById("hamburger");
+    // Collapse/uncollapse
+    shrinkSidebar.addEventListener("click", () => {
+      sidebar.classList.toggle("collapsed");
+      const icon = shrinkSidebar.querySelector("i");
+      icon.classList.toggle("fa-chevron-left");
+      icon.classList.toggle("fa-chevron-right");
+    });
+    // Mobile open/close
+    hamburger.addEventListener("click", () => {
+      document.body.classList.toggle("sidebar-open");
+    });
+    // Clicking outside on mobile closes sidebar
+    document.addEventListener("click", (e) => {
+      if (window.innerWidth <= 768 && sidebar.contains(e.target) === false && hamburger.contains(e.target) === false) {
+        document.body.classList.remove("sidebar-open");
+      }
+    });
+
+    // ────────────────────────────────────────────────────────────────────────────
+    // 3) UTILITY: OpenAI & Vision API PROXIES
+    // ────────────────────────────────────────────────────────────────────────────
+    async function callOpenAI(messages) {
+      try {
+        const response = await fetch("/.netlify/functions/openai-proxy", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ messages })
+        });
+        if (!response.ok) throw new Error("OpenAI request failed");
+        const data = await response.json();
+        return data.choices?.[0]?.message?.content.trim() || "";
+      } catch (err) {
+        console.error(err);
+        throw err;
+      }
     }
-  };
-  document.getElementById('refillSelect').addEventListener('change', e => {
-    document.getElementById('refillOther').style.display =
-      Array.from(e.target.selectedOptions).some(o => o.value === 'Other') ? 'block' : 'none';
-  });
+    async function callVision(file) {
+      const fd = new FormData();
+      fd.append("file", file);
+      const res = await fetch("/.netlify/functions/vision-proxy", {
+        method: "POST",
+        body: fd
+      });
+      const rawText = await res.text();
+      let payload = null;
+      try { payload = JSON.parse(rawText); } catch {}
+      if (!res.ok) {
+        const errMsg = payload?.error || rawText;
+        throw new Error("Vision API error: " + errMsg);
+      }
+      return payload !== null ? payload : rawText;
+    }
 
-  //──────────────────────────────────────────────────────────────────────────────
-  // WIRE HERO ACTIONS TO MODULE PROMPTS
-  //──────────────────────────────────────────────────────────────────────────────
-  function wireHero(btnSelector, panelId, buildPrompt) {
-    document.getElementById(btnSelector).addEventListener('click', async e => {
-      e.preventDefault();
-      const panel = document.getElementById(panelId);
-      startThinking(panel, btnSelector);
-      const aiResponse = await callAI([
-        { role: 'system', content: `You are a helpful e-pharmacy AI.` },
-        { role: 'user', content: buildPrompt() }
-      ]);
-      if (aiResponse.startsWith('⚠️')) {
-       panel.classList.add('error');
-        panel.querySelector('.result-content').textContent = aiResponse;
+    // ────────────────────────────────────────────────────────────────────────────
+    // 4) UTILITY: Format Markdown-like text into HTML
+    // ────────────────────────────────────────────────────────────────────────────
+    function formatHTML(text) {
+      if (!text) return "";
+      return text
+        .replace(/^######\s*(.+)$/gm, "<h6>$1</h6>")
+        .replace(/^#####\s*(.+)$/gm, "<h5>$1</h5>")
+        .replace(/^####\s*(.+)$/gm, "<h4>$1</h4>")
+        .replace(/^###\s*(.+)$/gm, "<h3>$1</h3>")
+        .replace(/^##\s*(.+)$/gm, "<h2>$1</h2>")
+        .replace(/^#\s*(.+)$/gm, "<h1>$1</h1>")
+        .replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>")
+        .replace(/\*(.+?)\*/g, "<em>$1</em>")
+        .replace(/`([^`]+)`/g, "<code>$1</code>")
+        .split(/\n{2,}/)
+        .map(p => `<p>${p.trim()}</p>`)
+        .join("");
+    }
+
+    // ────────────────────────────────────────────────────────────────────────────
+    // 5) UTILITY: Append close button to any .response panel
+    // ────────────────────────────────────────────────────────────────────────────
+    function addClose(panel) {
+      if (panel.querySelector(".close-btn")) return;
+      const btn = document.createElement("button");
+      btn.className = "close-btn";
+      btn.setAttribute("aria-label", "Close result");
+      btn.innerHTML = '<i class="fas fa-times"></i>';
+      btn.onclick = () => (panel.hidden = true);
+      panel.prepend(btn);
+    }
+
+    // ────────────────────────────────────────────────────────────────────────────
+    // 6) UTILITY: Append copy/download tools below result-content
+    // ────────────────────────────────────────────────────────────────────────────
+    function addTools(panel) {
+      if (panel.querySelector(".tool-row")) return;
+      const tools = document.createElement("div");
+      tools.className = "tool-row";
+      tools.innerHTML = `
+        <button class="copy-btn" title="Copy"><i class="fas fa-copy"></i></button>
+        <button class="dl-btn" title="Download"><i class="fas fa-download"></i></button>
+      `;
+      panel.append(tools);
+
+      const copyBtn = tools.querySelector(".copy-btn");
+      const dlBtn = tools.querySelector(".dl-btn");
+      const contentDiv = panel.querySelector(".result-content");
+
+      copyBtn.onclick = () => {
+        if (!contentDiv) return;
+        navigator.clipboard.writeText(contentDiv.innerText || "");
+        const toast = document.createElement("div");
+        toast.className = "copy-toast";
+        toast.textContent = "Copied!";
+        document.body.append(toast);
+        setTimeout(() => toast.remove(), 1500);
+      };
+
+      dlBtn.onclick = () => {
+        if (!contentDiv) return;
+        const text = contentDiv.innerText || "";
+        const blob = new Blob([text], { type: "text/plain" });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = "response.txt";
+        document.body.append(a);
+        a.click();
+        URL.revokeObjectURL(url);
+        a.remove();
+      };
+    }
+
+    // ────────────────────────────────────────────────────────────────────────────
+    // 7) UTILITY: Display a friendly error in a panel
+    // ────────────────────────────────────────────────────────────────────────────
+    function showFriendlyError(panel, message = "😕 Oops! Something went wrong. Please try again.") {
+      panel.innerHTML = `<div class="result-content">${escapeHtml(message)}</div>`;
+      panel.classList.add("error");
+      addClose(panel);
+    }
+
+    // ────────────────────────────────────────────────────────────────────────────
+    // 8) UTILITY: Show/Hide "Other" text inputs for <select> elements
+    // ────────────────────────────────────────────────────────────────────────────
+    document.querySelectorAll("select").forEach((sel) => {
+      sel.addEventListener("change", (e) => {
+        const otherField = document.getElementById(sel.id + "Other");
+        if (!otherField) return;
+        const pickedOther = Array.from(sel.selectedOptions).some(opt => opt.value === "Other");
+        if (pickedOther) {
+          otherField.style.display = "block";
+          otherField.required = true;
+        } else {
+          otherField.style.display = "none";
+          otherField.required = false;
+        }
+      });
+    });
+
+    // ────────────────────────────────────────────────────────────────────────────
+    // 9) PRESCRIPTION SCANNER (OCR + AI)
+    // ────────────────────────────────────────────────────────────────────────────
+    const scanRxBtn = document.getElementById("scanRx");
+    const scannerPanel = document.getElementById("scannerPanel");
+    const rxImageInput = document.getElementById("rxImage");
+    function previewRxImage(input) {
+      // Optionally show a thumbnail preview; not required here
+    }
+    window.previewRxImage = previewRxImage;
+
+    scanRxBtn.addEventListener("click", async () => {
+      const panel = scannerPanel;
+      panel.hidden = false;
+      panel.classList.remove("error");
+      panel.innerHTML = `<div class="result-content">Processing… <span class="spinner"></span></div>`;
+      try {
+        const file = rxImageInput.files[0];
+        const age = document.getElementById("rxAge").value.trim();
+        const weight = document.getElementById("rxWeight").value.trim();
+        let diagnosis = document.getElementById("rxDiagnosis").value;
+        if (diagnosis === "Other") diagnosis = document.getElementById("rxDiagOther").value.trim();
+        let mode = document.getElementById("rxMode").value;
+        if (mode === "Other") mode = document.getElementById("rxModeOther").value.trim();
+        const freq = document.getElementById("rxFreq").value;
+        const notes = document.getElementById("rxNotes").value.trim();
+
+        if (!file && !diagnosis) {
+          showFriendlyError(panel, "⚠️ Please upload a prescription image or select a diagnosis.");
+          return;
+        }
+
+        let combinedHtml = "";
+        if (file) {
+          // First: OCR via Vision API
+          const visionData = await callVision(file);
+          // visionData might contain fields like `text` or structured JSON
+          // We assume returned `visionData.text` holds recognized text
+          const recognizedText = visionData.text || JSON.stringify(visionData);
+          combinedHtml += `<p><strong>Recognized Prescription Text:</strong> ${escapeHtml(recognizedText)}</p><hr/>`;
+        }
+        // Build AI prompt
+        const sysPrompt = `
+You are a skilled medical assistant. A user has provided a prescription (OCR text if available), plus:
+• Patient Age: ${age} years
+• Weight: ${weight} kg
+• Diagnosis: ${diagnosis}
+• Medication Form: ${mode}
+• Frequency: ${freq}
+• Additional Notes: ${notes}
+
+Please output a clean, structured prescription summary that includes:
+1) Medication names and dosages (based on OCR or user input).  
+2) Suggested instructions (e.g., “take with food”).  
+3) Any safety warnings (allergies, dose adjustments).  
+4) Format as bullet points or short paragraphs for readability.
+        `.trim();
+
+        const userContent = file ? `${visionData.text}` : `Diagnosis: ${diagnosis}`;
+
+        const aiReply = await callOpenAI([
+          { role: "system", content: sysPrompt },
+          { role: "user", content: userContent }
+        ]);
+
+        combinedHtml += `<div class="result-content">${formatHTML(aiReply)}</div>`;
+        panel.innerHTML = combinedHtml;
+        addClose(panel);
+        addTools(panel);
+      } catch (err) {
+        console.error(err);
+        showFriendlyError(scannerPanel, err.message || "An error occurred while building the prescription.");
+      }
+    });
+
+    // Close button for scannerPanel
+    scannerPanel.querySelectorAll(".close-btn").forEach(btn => {
+      btn.onclick = () => scannerPanel.hidden = true;
+    });
+
+    // ────────────────────────────────────────────────────────────────────────────
+    // 10) DRUG INFORMATION LOOKUP
+    // ────────────────────────────────────────────────────────────────────────────
+    const lookupDrugBtn = document.getElementById("lookupDrug");
+    const drugInfoPanel = document.getElementById("drugInfoPanel");
+
+    lookupDrugBtn.addEventListener("click", async () => {
+      const panel = drugInfoPanel;
+      panel.hidden = false;
+      panel.classList.remove("error");
+      panel.innerHTML = `<div class="result-content">Searching… <span class="spinner"></span></div>`;
+      try {
+        let drugName = document.getElementById("drugInput").value.trim();
+        if (!drugName) {
+          showFriendlyError(panel, "⚠️ Please enter a drug name to lookup.");
+          return;
+        }
+        const sysPrompt = `
+You are a clinical pharmacologist. Provide a detailed monograph for the drug: "${drugName}". Include:
+• Mechanism of action  
+• Indications  
+• Dosing guidelines  
+• Common side effects  
+• Contraindications and precautions  
+• Monitoring parameters  
+Format as clear headings and bullet points.
+        `.trim();
+
+        const aiReply = await callOpenAI([
+          { role: "system", content: sysPrompt },
+          { role: "user", content: `Drug: ${drugName}` }
+        ]);
+
+        panel.innerHTML = `<div class="result-content">${formatHTML(aiReply)}</div>`;
+        addClose(panel);
+        addTools(panel);
+      } catch (err) {
+        console.error(err);
+        showFriendlyError(drugInfoPanel, err.message || "Failed to retrieve drug information.");
+      }
+    });
+    drugInfoPanel.querySelectorAll(".close-btn").forEach(btn => {
+      btn.onclick = () => drugInfoPanel.hidden = true;
+    });
+
+    // ────────────────────────────────────────────────────────────────────────────
+    // 11) INTERACTION CHECKER (DRUG–DRUG & DRUG–FOOD)
+    // ────────────────────────────────────────────────────────────────────────────
+    const checkInteractionsBtn = document.getElementById("checkInteractions");
+    const interactionPanel = document.getElementById("interactionPanel");
+
+    checkInteractionsBtn.addEventListener("click", async () => {
+      const panel = interactionPanel;
+      panel.hidden = false;
+      panel.classList.remove("error");
+      panel.innerHTML = `<div class="result-content">Analyzing… <span class="spinner"></span></div>`;
+      try {
+        const drug1 = document.getElementById("intDrug1").value.trim();
+        const drug2 = document.getElementById("intDrug2").value.trim();
+        const food = document.getElementById("intFood").value.trim();
+
+        if (!drug1 && !drug2 && !food) {
+          showFriendlyError(panel, "⚠️ Please enter at least one drug or food to check interactions.");
+          return;
+        }
+        const sysPrompt = `
+You are an expert in pharmacology. Evaluate potential interactions between:
+• Drug 1: ${drug1 || "N/A"}  
+• Drug 2: ${drug2 || "N/A"}  
+• Food/Supplement: ${food || "N/A"}  
+
+Provide:
+1) Any known drug–drug interactions (mechanism, severity).  
+2) Any known drug–food/supplement interactions.  
+3) Recommendations to mitigate risks.  
+Format as short paragraphs or bullet points.
+        `.trim();
+
+        const userContent = `Drug 1: ${drug1}\nDrug 2: ${drug2}\nFood/Supplement: ${food}`;
+        const aiReply = await callOpenAI([
+          { role: "system", content: sysPrompt },
+          { role: "user", content: userContent }
+        ]);
+
+        panel.innerHTML = `<div class="result-content">${formatHTML(aiReply)}</div>`;
+        addClose(panel);
+        addTools(panel);
+      } catch (err) {
+        console.error(err);
+        showFriendlyError(interactionPanel, err.message || "Interaction check failed.");
+      }
+    });
+    interactionPanel.querySelectorAll(".close-btn").forEach(btn => {
+      btn.onclick = () => interactionPanel.hidden = true;
+    });
+
+    // ────────────────────────────────────────────────────────────────────────────
+    // 12) DOSAGE CALCULATOR & TITRATION PLANNER
+    // ────────────────────────────────────────────────────────────────────────────
+    const computeDoseBtn = document.getElementById("computeDose");
+    const dosagePanel = document.getElementById("dosagePanel");
+
+    computeDoseBtn.addEventListener("click", async () => {
+      const panel = dosagePanel;
+      panel.hidden = false;
+      panel.classList.remove("error");
+      panel.innerHTML = `<div class="result-content">Calculating… <span class="spinner"></span></div>`;
+      try {
+        const weight = document.getElementById("patientWeight").value.trim();
+        const crCl = document.getElementById("crCl").value.trim();
+        const alt = document.getElementById("altValue").value.trim();
+
+        if (!weight || !crCl) {
+          showFriendlyError(panel, "⚠️ Please enter at least weight and creatinine clearance.");
+          return;
+        }
+        const sysPrompt = `
+You are a clinical pharmacokinetics specialist. Given:
+• Weight: ${weight} kg  
+• Creatinine Clearance: ${crCl} mL/min  
+• Liver Function (ALT): ${alt || "N/A"} U/L  
+
+Calculate:
+1) Initial drug dosing (e.g., mg/kg).  
+2) Titration schedule recommendations (step-wise dose adjustments).  
+3) Monitoring intervals (labs, vitals).  
+Provide clear instructions and rationale in bullet points.
+        `.trim();
+
+        const userContent = `Weight: ${weight} kg\nCrCl: ${crCl} mL/min\nALT: ${alt}`;
+        const aiReply = await callOpenAI([
+          { role: "system", content: sysPrompt },
+          { role: "user", content: userContent }
+        ]);
+
+        panel.innerHTML = `<div class="result-content">${formatHTML(aiReply)}</div>`;
+        addClose(panel);
+        addTools(panel);
+      } catch (err) {
+        console.error(err);
+        showFriendlyError(dosagePanel, err.message || "Dosage calculation failed.");
+      }
+    });
+    dosagePanel.querySelectorAll(".close-btn").forEach(btn => {
+      btn.onclick = () => dosagePanel.hidden = true;
+    });
+
+    // ────────────────────────────────────────────────────────────────────────────
+    // 13) SYMPTOM-BASED DRUG ADVISOR
+    // ────────────────────────────────────────────────────────────────────────────
+    const adviseDrugBtn = document.getElementById("adviseDrug");
+    const advisePanel = document.getElementById("advisePanel");
+
+    adviseDrugBtn.addEventListener("click", async () => {
+      const panel = advisePanel;
+      panel.hidden = false;
+      panel.classList.remove("error");
+      panel.innerHTML = `<div class="result-content">Analyzing… <span class="spinner"></span></div>`;
+      try {
+        const symptoms = document.getElementById("symptomInput").value.trim();
+        if (!symptoms) {
+          showFriendlyError(panel, "⚠️ Please describe your symptoms to get recommendations.");
+          return;
+        }
+        const sysPrompt = `
+You are a clinical pharmacist assistant. A patient describes symptoms: "${symptoms}".  
+Provide:
+1) List of appropriate over-the-counter or prescription medications.  
+2) Suggested dosages and frequency.  
+3) Monitoring/follow-up advice (e.g., when to see a doctor).  
+Format as separate paragraphs.
+        `.trim();
+
+        const aiReply = await callOpenAI([
+          { role: "system", content: sysPrompt },
+          { role: "user", content: `Symptoms: ${symptoms}` }
+        ]);
+
+        panel.innerHTML = `<div class="result-content">${formatHTML(aiReply)}</div>`;
+        addClose(panel);
+        addTools(panel);
+      } catch (err) {
+        console.error(err);
+        showFriendlyError(advisePanel, err.message || "Recommendation failed.");
+      }
+    });
+    advisePanel.querySelectorAll(".close-btn").forEach(btn => {
+      btn.onclick = () => advisePanel.hidden = true;
+    });
+
+    // ────────────────────────────────────────────────────────────────────────────
+    // 14) COMPOUND FORMULATION ADVISOR
+    // ────────────────────────────────────────────────────────────────────────────
+    const adviseCompoundBtn = document.getElementById("adviseCompound");
+    const compoundPanel = document.getElementById("compoundPanel");
+
+    adviseCompoundBtn.addEventListener("click", async () => {
+      const panel = compoundPanel;
+      panel.hidden = false;
+      panel.classList.remove("error");
+      panel.innerHTML = `<div class="result-content">Processing… <span class="spinner"></span></div>`;
+      try {
+        const ingredients = document.getElementById("compoundList").value.trim();
+        const strength = document.getElementById("compoundStrength").value.trim();
+        if (!ingredients || !strength) {
+          showFriendlyError(panel, "⚠️ Please list ingredients and desired strength.");
+          return;
+        }
+        const sysPrompt = `
+You are an experienced compounding pharmacist. A user provides:
+• Active ingredients & quantities: ${ingredients}  
+• Desired final strength: ${strength}  
+
+Provide a step-by-step compounding protocol that includes:
+1) Excipients and amounts.  
+2) Mixing order and technique.  
+3) Compounding equipment.  
+4) Storage conditions and shelf life.  
+Format as bullet points.
+        `.trim();
+
+        const aiReply = await callOpenAI([
+          { role: "system", content: sysPrompt },
+          { role: "user", content: `Ingredients: ${ingredients}\nStrength: ${strength}` }
+        ]);
+
+        panel.innerHTML = `<div class="result-content">${formatHTML(aiReply)}</div>`;
+        addClose(panel);
+        addTools(panel);
+      } catch (err) {
+        console.error(err);
+        showFriendlyError(compoundPanel, err.message || "Formulation advice failed.");
+      }
+    });
+    compoundPanel.querySelectorAll(".close-btn").forEach(btn => {
+      btn.onclick = () => compoundPanel.hidden = true;
+    });
+
+    // ────────────────────────────────────────────────────────────────────────────
+    // 15) SIDE-EFFECT & ADVERSE EVENT PREDICTOR
+    // ────────────────────────────────────────────────────────────────────────────
+    const predictSideEffectsBtn = document.getElementById("predictSideEffects");
+    const sideEffectPanel = document.getElementById("sideEffectPanel");
+    const comorbiditySelect = document.getElementById("comorbiditySelect");
+    const comorbidityOther = document.querySelector("#predictSideEffects ~ .other-input");
+
+    predictSideEffectsBtn.addEventListener("click", async () => {
+      const panel = sideEffectPanel;
+      panel.hidden = false;
+      panel.classList.remove("error");
+      panel.innerHTML = `<div class="result-content">Predicting… <span class="spinner"></span></div>`;
+      try {
+        const age = document.getElementById("patientAge").value.trim();
+        let comorbidity = comorbiditySelect.value;
+        if (comorbidity === "Other") comorbidity = comorbidityOther.value.trim();
+        const meds = document.getElementById("sideEffectDrugs").value.trim();
+
+        if (!age || !meds) {
+          showFriendlyError(panel, "⚠️ Please enter patient age and at least one medication.");
+          return;
+        }
+        const sysPrompt = `
+You are a clinical pharmacist. Given:
+• Patient Age: ${age}  
+• Comorbidities: ${comorbidity || "None"}  
+• Medications: ${meds}  
+
+Predict:
+1) Likely side effects with severity grading.  
+2) Recommended monitoring (labs, vitals).  
+3) Risk mitigation strategies.  
+Format as bullet points or short paragraphs.
+        `.trim();
+
+        const aiReply = await callOpenAI([
+          { role: "system", content: sysPrompt },
+          { role: "user", content: `Age: ${age}\nComorbidities: ${comorbidity}\nMedications: ${meds}` }
+        ]);
+
+        panel.innerHTML = `<div class="result-content">${formatHTML(aiReply)}</div>`;
+        addClose(panel);
+        addTools(panel);
+      } catch (err) {
+        console.error(err);
+        showFriendlyError(sideEffectPanel, err.message || "Prediction failed.");
+      }
+    });
+    sideEffectPanel.querySelectorAll(".close-btn").forEach(btn => {
+      btn.onclick = () => sideEffectPanel.hidden = true;
+    });
+
+    // Comorbidity "Other" field display
+    comorbiditySelect.addEventListener("change", () => {
+      if (comorbiditySelect.value === "Other") {
+        comorbidityOther.style.display = "block";
+        comorbidityOther.required = true;
       } else {
-       panel.classList.remove('error');
-       panel.querySelector('.result-content').innerHTML = sanitizeAIContent(aiResponse);
+        comorbidityOther.style.display = "none";
+        comorbidityOther.required = false;
       }
-
-      injectTools(panel);
-      savePanelsToStorage();
     });
-  }
 
-  wireHero('scanRx', 'scannerPanel', () => {
-    const fileInput = document.getElementById('rxImage').files[0];
-    const age = document.getElementById('rxAge').value.trim();
-    const weight = document.getElementById('rxWeight').value.trim();
-    let diag = document.getElementById('rxDiagnosis').value;
-    if (diag === 'Other') diag = document.getElementById('rxDiagOther').value.trim();
-    let mode = document.getElementById('rxMode').value;
-    if (mode === 'Other') mode = document.getElementById('rxModeOther').value.trim();
-    const freq = document.getElementById('rxFreq').value;
-    const notes = document.getElementById('rxNotes').value.trim();
-    if ((!fileInput && (!age || !weight || !diag || !mode || !freq))) {
-      return '⚠️ Please upload an image or fill all required fields (age, weight, diagnosis, form, frequency).';
-   }
-    let prompt = 'Build a structured prescription:';
-    if (fileInput) prompt += ' [OCR IMAGE SCAN]';
-    prompt += ` Patient Age: ${age || 'N/A'}, Weight: ${weight || 'N/A'}kg, Diagnosis: ${diag}, Form: ${mode}, Frequency: ${freq}. Notes: ${notes || 'None'}.`;
-    return prompt;
-  });
+    // ────────────────────────────────────────────────────────────────────────────
+    // 16) BULK REFILL SCHEDULER
+    // ────────────────────────────────────────────────────────────────────────────
+    const scheduleRefillBtn = document.getElementById("scheduleRefill");
+    const refillPanel = document.getElementById("refillPanel");
+    const refillSelect = document.getElementById("refillSelect");
+    const refillOther = document.getElementById("refillOther");
+    const refillListInput = document.getElementById("refillList");
 
-  wireHero('lookupDrug', 'drugInfoPanel', () => {
-    const drug = document.getElementById('drugInput').value.trim();
-    if (!drug) return '⚠️ Please specify a drug.';
-   return `You are a pharmacy expert AI. Provide a detailed monograph for "${drug}", covering: 1) Mechanism of action 2) Typical adult dosing (including renal/hepatic adjustments) 3) Major side effects and monitoring recommendations 4) Key patient counseling points 5) Contraindications and precautions.`;
-  });
+    scheduleRefillBtn.addEventListener("click", async () => {
+      const panel = refillPanel;
+      panel.hidden = false;
+      panel.classList.remove("error");
+      panel.innerHTML = `<div class="result-content">Scheduling… <span class="spinner"></span></div>`;
+      try {
+        const file = refillListInput.files[0];
+        let meds = Array.from(refillSelect.selectedOptions).map(o => o.value).filter(v => v);
+        if (refillSelect.value === "Other") {
+          meds.push(refillOther.value.trim());
+        }
+        if (!file && meds.length === 0) {
+          showFriendlyError(panel, "⚠️ Please upload a list or select medications.");
+          return;
+        }
 
-  wireHero('checkInteractions', 'interactionPanel', () => {
-    const d1 = document.getElementById('intDrug1').value.trim();
-    const d2 = document.getElementById('intDrug2').value.trim();
-    const food = document.getElementById('intFood').value.trim();
-    if (!d1 || !d2) return '⚠️ Please enter two drugs to check interactions.';
-    let prompt = `Check interactions between ${d1} and ${d2}.`;
-    if (food) prompt += ` Also consider when taken with ${food}.`;
-    return prompt;
-  });
+        let aiPrompt = `
+You are a pharmacy workflow specialist. A user wants to schedule bulk refills. They have:
+`;
+        if (file) {
+          const fileText = await file.text();
+          aiPrompt += `• Medication list from file:\n${fileText}\n`;
+        }
+        if (meds.length > 0) {
+          aiPrompt += `• Selected medications: ${meds.join(", ")}\n`;
+        }
+        aiPrompt += `
+Provide:
+1) An optimized refill schedule with dates and reminders.  
+2) Recommended refill intervals based on typical usage.  
+3) Any adherence tips.  
+Format as a short report with bullet points.
+        `.trim();
 
-  wireHero('computeDose', 'dosagePanel', () => {
-    const w = document.getElementById('patientWeight').value.trim();
-    const c = document.getElementById('crCl').value.trim();
-    const a = document.getElementById('altValue').value.trim();
-    if (!w || !c || !a) return '⚠️ Please fill weight, creatinine clearance, and ALT values.';
-    return `Calculate initial dose and titration schedule for a patient weighing ${w}kg, CrCl ${c}mL/min, ALT ${a}U/L.`;
-  });
+        const aiReply = await callOpenAI([
+          { role: "system", content: aiPrompt },
+          { role: "user", content: "Please schedule refills as described above." }
+        ]);
 
-  wireHero('adviseDrug', 'advisePanel', () => {
-    const symptoms = document.getElementById('symptomInput').value.trim();
-    if (!symptoms) return '⚠️ Please describe your symptoms.';
-    return `Recommend appropriate medications (with dosages and follow-up advice) for symptoms: ${symptoms}.`;
-  });
+        panel.innerHTML = `<div class="result-content">${formatHTML(aiReply)}</div>`;
+        addClose(panel);
+        addTools(panel);
+      } catch (err) {
+        console.error(err);
+        showFriendlyError(refillPanel, err.message || "Refill scheduling failed.");
+      }
+    });
+    refillPanel.querySelectorAll(".close-btn").forEach(btn => {
+      btn.onclick = () => refillPanel.hidden = true;
+    });
+    // Show/hide Other field for refillSelect
+    refillSelect.addEventListener("change", () => {
+      if (Array.from(refillSelect.selectedOptions).some(opt => opt.value === "Other")) {
+        refillOther.style.display = "block";
+        refillOther.required = true;
+      } else {
+        refillOther.style.display = "none";
+        refillOther.required = false;
+      }
+    });
 
-  wireHero('predictPrice', 'pricePanel', () => {
-    const d = document.getElementById('priceDrugInput').value.trim();
-    const ccy = document.getElementById('currencyInput').value.trim();
-    if (!d || !ccy) return '⚠️ Please select a drug and currency.';
-    return `Provide real-time price estimate for ${d} in ${ccy}, and list nearby pharmacies to purchase it.`;
-  });
+    // ────────────────────────────────────────────────────────────────────────────
+    // 17) DRUG EDUCATION CHATBOT (Pharma Chat)
+    // ────────────────────────────────────────────────────────────────────────────
+    const pharmaChatBox = document.getElementById("pharmaChatBox");
+    const sendPharmaBtn = document.getElementById("sendPharma");
+    const pharmaInput = document.getElementById("pharmaInput");
+    const clearPharmaBtn = document.getElementById("clearPharmaChat");
+    const historyBtn = document.getElementById("historyBtn");
+    let pharmaLastDateHeader = null;
 
-  wireHero('adviseCompound', 'compoundPanel', () => {
-    const ingredients = document.getElementById('compoundList').value.trim();
-    const strength = document.getElementById('compoundStrength').value.trim();
-    if (!ingredients || !strength) return '⚠️ Please list ingredients and desired strength.';
-    return `Design a compounding protocol for: ${ingredients}, final strength ${strength}, including excipients, mixing order, and storage guidelines.`;
-  });
-
-  wireHero('predictSideEffects', 'sideEffectPanel', () => {
-    const age = document.getElementById('patientAge').value.trim();
-    const comorbid = document.getElementById('comorbiditySelect').value;
-    const comorbidOtherEl = document.querySelector('#comorbiditySelect + .other-input');
-    let finalComorb = comorbid;
-    if (comorbid === 'Other' && comorbidOtherEl) finalComorb = comorbidOtherEl.value.trim();
-    const meds = document.getElementById('sideEffectDrugs').value.trim();
-    if (!age || !meds) return '⚠️ Please enter patient age and medications.';
-    return `Predict likely side-effects (severity and monitoring advice) for a ${age}-year-old with comorbidities: ${finalComorb || 'None'}, taking: ${meds}.`;
-  });
-
-  //──────────────────────────────────────────────────────────────────────────────
-  // BULK REFILL SCHEDULER WIRING
-  //──────────────────────────────────────────────────────────────────────────────
-  document.getElementById('scheduleRefill').onclick = async e => {
-    e.preventDefault();
-    const file = document.getElementById('refillList').files[0];
-    const selected = Array.from(document.getElementById('refillSelect').selectedOptions).map(o => o.value);
-    const otherText = document.getElementById('refillOther').value.trim();
-    if (!file && selected.length === 0 && !otherText) {
-      return showToast('⚠️ Upload a file or select/type at least one medication.');
+    // Load persisted history for pharma chat
+    let pharmaHistory = JSON.parse(localStorage.getItem("pharmaHistory") || "[]");
+    function pharmaFormatDateSeparator(date) {
+      const today = new Date();
+      const diffDays = Math.floor((today.setHours(0, 0, 0, 0) - date.setHours(0, 0, 0, 0)) / 86400000);
+      if (diffDays === 0) return "Today";
+      if (diffDays === 1) return "Yesterday";
+      return date.toLocaleDateString();
     }
-    let meds = selected.filter(m => m !== 'Other');
-    if (selected.includes('Other') && otherText) meds.push(otherText);
-    if (meds.length === 0 && file) {
-      const text = await file.text();
-      meds = text.split('\n').slice(1).map(l => l.split(',')[0]).filter(Boolean);
+    function pharmaAddMessage(who, text, timestamp = new Date()) {
+      const msgDate = timestamp instanceof Date ? timestamp : new Date(timestamp);
+      const msgDay = msgDate.toDateString();
+      if (msgDay !== pharmaLastDateHeader) {
+        const sep = document.createElement("div");
+        sep.className = "chat-date-separator";
+        sep.textContent = pharmaFormatDateSeparator(msgDate);
+        pharmaChatBox.append(sep);
+        pharmaLastDateHeader = msgDay;
+      }
+      const msgDiv = document.createElement("div");
+      msgDiv.className = who === "You" ? "user-msg" : "bot-msg";
+      msgDiv.innerHTML = `
+        ${formatHTML(text)}
+        <div class="timestamp">${msgDate.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit", hour12: true })}</div>
+      `;
+      pharmaChatBox.append(msgDiv);
+      pharmaChatBox.scrollTop = pharmaChatBox.scrollHeight;
     }
-    const panel = document.getElementById('refillPanel');
-    startThinking(panel, 'scheduleRefill');
-    const prompt = `Schedule refill reminders and generate a refill calendar for: ${meds.join(', ')}.`;
-    const aiReply = await callAI([
-      { role: 'system', content: 'You are a pharmacy scheduler AI.' },
-      { role: 'user', content: prompt }
-    ]);
-     if (aiReply.startsWith('⚠️')) {
-     panel.classList.add('error');
-      panel.querySelector('.result-content').textContent = aiReply;
-     } else {
-     panel.classList.remove('error');
-     panel.querySelector('.result-content').innerHTML = sanitizeAIContent(aiReply);
-    }
-     injectTools(panel);
-  };
+    // Render saved pharma history
+    pharmaHistory.forEach(m => pharmaAddMessage(m.who, m.text, new Date(m.timestamp)));
 
-  //──────────────────────────────────────────────────────────────────────────────
-  // COPY / DOWNLOAD / CLOSE FOR RESPONSE PANELS
-  //──────────────────────────────────────────────────────────────────────────────
-  document.body.addEventListener('click', e => {
-    const panel = e.target.closest('.response');
-    if (!panel) return;
-    // Copy
-    if (e.target.closest('.copy-btn')) {
-      const text = panel.querySelector('.result-content').innerText;
-      navigator.clipboard.writeText(text).then(() => showToast('Copied!'));
+    sendPharmaBtn.addEventListener("click", async (e) => {
+      e.preventDefault();
+      const userText = pharmaInput.value.trim();
+      if (!userText) return;
+      // 1) Display user's message
+      const userTime = new Date();
+      pharmaAddMessage("You", userText, userTime);
+      pharmaHistory.push({ who: "You", text: userText, timestamp: userTime.toISOString() });
+      localStorage.setItem("pharmaHistory", JSON.stringify(pharmaHistory));
+      pharmaInput.value = "";
+      // 2) Show spinner placeholder
+      const spinnerDiv = document.createElement("div");
+      spinnerDiv.className = "bot-msg";
+      spinnerDiv.innerHTML = `<div class="spinner"></div>`;
+      pharmaChatBox.append(spinnerDiv);
+      pharmaChatBox.scrollTop = pharmaChatBox.scrollHeight;
+      // 3) Call OpenAI for pharma chat
+      try {
+        const aiReply = await callOpenAI([
+          {
+            role: "system",
+            content: `
+You are a friendly, knowledgeable pharmacist. A user will ask questions about medications—mechanisms, dosing, side effects, interactions, or counseling. Provide concise, evidence-based answers with clear follow-up advice.
+            `.trim()
+          },
+          { role: "user", content: userText }
+        ]);
+        // 4) Replace spinner with actual response
+        const msgDate = new Date();
+        spinnerDiv.innerHTML = `
+          ${formatHTML(aiReply)}
+          <div class="timestamp">${msgDate.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}</div>
+        `;
+        pharmaHistory.push({ who: "Pharmacist", text: aiReply, timestamp: msgDate.toISOString() });
+        localStorage.setItem("pharmaHistory", JSON.stringify(pharmaHistory));
+      } catch (err) {
+        spinnerDiv.innerHTML = `<div class="result-content">⚠️ Oops! Something went wrong. Please try again.</div>`;
+        console.error(err);
+      }
+      pharmaChatBox.scrollTop = pharmaChatBox.scrollHeight;
+    });
+
+    clearPharmaBtn.addEventListener("click", () => {
+      pharmaChatBox.innerHTML = "";
+      pharmaLastDateHeader = null;
+    });
+
+    // History modal logic
+    historyBtn.addEventListener("click", () => {
+      const modal = document.createElement("div");
+      modal.className = "history-modal";
+      // Group messages by date
+      const grouped = {};
+      pharmaHistory.forEach((m, i) => {
+        const dt = new Date(m.timestamp);
+        const label = pharmaFormatDateSeparator(dt);
+        if (!grouped[label]) grouped[label] = [];
+        grouped[label].push({ who: m.who, text: m.text, idx: i });
+      });
+      // Build table HTML
+      let tableHTML = `<table class="history-table">`;
+      Object.keys(grouped).forEach(label => {
+        tableHTML += `
+          <thead>
+            <tr><th colspan="3">${label}</th></tr>
+            <tr>
+              <th>Sender</th>
+              <th>Message</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${grouped[label].map(m => `
+              <tr data-index="${m.idx}">
+                <td>${m.who}</td>
+                <td>${formatHTML(m.text)}</td>
+                <td><button class="del-msg" data-index="${m.idx}" title="Delete"><i class="fas fa-trash-alt"></i></button></td>
+              </tr>
+            `).join("")}
+          </tbody>`;
+      });
+      tableHTML += `</table>`;
+      modal.innerHTML = `
+        <div class="history-content">
+          <h3>Chat History</h3>
+          <div class="history-table-wrapper">${tableHTML}</div>
+          <div class="history-actions">
+            <button class="clear-history"><i class="fas fa-trash"></i> Clear History</button>
+            <button class="close-history"><i class="fas fa-times"></i> Close</button>
+          </div>
+        </div>`;
+      document.body.append(modal);
+
+      // Hook up delete buttons per-row
+      modal.querySelectorAll(".del-msg").forEach(btn => {
+        btn.onclick = () => {
+          const idx = +btn.dataset.index;
+          pharmaHistory.splice(idx, 1);
+          localStorage.setItem("pharmaHistory", JSON.stringify(pharmaHistory));
+          const row = modal.querySelector(`tr[data-index="${idx}"]`);
+          if (row) row.remove();
+          // Re-index remaining rows
+          modal.querySelectorAll(".history-table tbody tr").forEach((tr, i) => {
+            tr.dataset.index = i;
+            tr.querySelector(".del-msg").dataset.index = i;
+          });
+        };
+      });
+      // Clear entire history
+      modal.querySelector(".clear-history").onclick = () => {
+        pharmaHistory = [];
+        localStorage.removeItem("pharmaHistory");
+        modal.remove();
+      };
+      // Close modal
+      modal.querySelector(".close-history").onclick = () => modal.remove();
+    });
+
+    // ────────────────────────────────────────────────────────────────────────────
+    // 18) USAGE STATISTICS CHARTS (REAL-TIME)
+    // ────────────────────────────────────────────────────────────────────────────
+    function getCSSVar(name) {
+      return getComputedStyle(document.documentElement).getPropertyValue(name).trim();
     }
-    // Download
-    if (e.target.closest('.dl-btn')) {
-      const text = panel.querySelector('.result-content').innerText;
-      const blob = new Blob([text], { type: 'text/plain' });
-      const a = document.createElement('a');
-      a.href = URL.createObjectURL(blob);
-      a.download = 'response.txt';
+    function initCharts() {
+      const colorText = getCSSVar("--pharm-text");
+      const colorMuted = getCSSVar("--pharm-muted");
+      // Chart 1: Monthly Prescription Scans (line)
+      new Chart("chart1", {
+        type: "line",
+        data: {
+          labels: ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul"],
+          datasets: [{
+            label: "Prescription Scans",
+            data: [50, 75, 100, 125, 150, 175, 200],
+            borderColor: getCSSVar("--pharm-primary"),
+            backgroundColor: "rgba(10,147,150,0.1)",
+            fill: true
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          scales: {
+            x: { ticks: { color: colorText }, grid: { display: false } },
+            y: { ticks: { color: colorText }, grid: { color: colorMuted }, beginAtZero: true }
+          },
+          plugins: { legend: { display: false } }
+        }
+      });
+      // Chart 2: Weekly Drug Lookups (bar)
+      new Chart("chart2", {
+        type: "bar",
+        data: {
+          labels: ["Week 1", "Week 2", "Week 3", "Week 4"],
+          datasets: [{
+            label: "Drug Lookups",
+            data: [120, 140, 160, 180],
+            backgroundColor: [
+              "rgba(0,95,115,0.7)",
+              "rgba(148,210,189,0.7)",
+              "rgba(233,216,166,0.7)",
+              "rgba(10,147,150,0.7)"
+            ]
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          scales: {
+            x: { ticks: { color: colorText }, grid: { display: false } },
+            y: { ticks: { color: colorText }, grid: { color: colorMuted }, beginAtZero: true }
+          },
+          plugins: { legend: { display: false } }
+        }
+      });
+    }
+    window.addEventListener("load", () => {
+      if (typeof Chart !== "undefined" && document.getElementById("chart1")) {
+        initCharts();
+      }
+    });
+
+    // Export charts data to CSV
+    const exportChartsDataBtn = document.getElementById("exportChartsData");
+    exportChartsDataBtn.addEventListener("click", () => {
+      const chartsData = [
+        { id: "PrescriptionScans", desc: "Monthly prescription scans", labels: ["Jan","Feb","Mar","Apr","May","Jun","Jul"], values: [50,75,100,125,150,175,200] },
+        { id: "DrugLookups", desc: "Weekly drug lookups", labels: ["Week 1","Week 2","Week 3","Week 4"], values: [120,140,160,180] }
+      ];
+      let csvContent = "Chart,Description,Label,Value\n";
+      chartsData.forEach(ch => {
+        ch.labels.forEach((lab, idx) => {
+          csvContent += `"${ch.id}","${ch.desc}","${lab}",${ch.values[idx]}\n`;
+        });
+      });
+      const blob = new Blob([csvContent], { type: "text/csv" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "usage_statistics.csv";
+      document.body.append(a);
       a.click();
-    }
-    // Close
-    if (e.target.closest('.close-btn')) {
-      panel.hidden = true;
-    }
-  });
-
-  //──────────────────────────────────────────────────────────────────────────────
-  // DRUG-EDUCATION CHATBOT + HISTORY
-  //──────────────────────────────────────────────────────────────────────────────
-  const chatBox = document.getElementById('pharmaChatBox');
-  const chatInput = document.getElementById('pharmaInput');
-  const sendChatBtn = document.getElementById('sendPharma');
-  const clearChatBtn = document.getElementById('clearPharmaChat');
-  const historyBtn = document.getElementById('historyBtn');
-  const historyModal = document.getElementById('historyModal');
-  const historyList = document.getElementById('historyList');
-  const closeModalBtn = document.querySelector('.close-modal');
-  let lastDateKey = null;
-  const chatHistory = [];
-
-  function formatDateSeparator(date) {
-    const today = new Date();
-    const diffDays = Math.floor((today.setHours(0,0,0,0) - date.setHours(0,0,0,0)) / 86400000);
-    if (diffDays === 0) return 'Today';
-    if (diffDays === 1) return 'Yesterday';
-    return date.toLocaleDateString();
-  }
-
-  function addChatMessage(role, text) {
-    const now = new Date();
-    const dateKey = now.toDateString();
-    if (dateKey !== lastDateKey) {
-      const sep = document.createElement('div');
-      sep.className = 'chat-date';
-      sep.textContent = formatDateSeparator(now);
-      chatBox.append(sep);
-      lastDateKey = dateKey;
-    }
-    const wrapper = document.createElement('div');
-    wrapper.className = role === 'user' ? 'user-msg' : 'bot-msg';
-    wrapper.innerHTML = `
-      <div class="msg-text">${text}</div>
-      <div class="msg-ts">${now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</div>
-    `;
-    chatBox.append(wrapper);
-    chatBox.scrollTop = chatBox.scrollHeight;
-    chatHistory.push({ role, text, time: `${now.toDateString()} ${now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}` });
- saveChatToStorage();
-  }
-
-  sendChatBtn.onclick = async e => {
-    e.preventDefault();
-    const question = chatInput.value.trim();
-    if (!question) return showToast('⚠️ Please type a question.');
-    addChatMessage('user', question);
-    chatInput.value = '';
-    // Show spinner
-    addChatMessage('bot', `<div style="display:flex; justify-content:center;"><div class="spinner" style="width:1rem; height:1rem; border-width:2px;"></div></div>`);
-
-    // Call AI
-    const aiReply = await callAI([
-      { role: 'system', content: 'You are a knowledgeable pharmacy AI.' },
-      { role: 'user', content: question }
-    ]);
-    const lastMsg = chatBox.querySelectorAll('.bot-msg');
-   if (lastMsg.length) lastMsg[lastMsg.length - 1].remove();
-    addChatMessage('bot', sanitizeAIContent(aiReply));
-  };
-
-  clearChatBtn.onclick = () => {
-    chatBox.innerHTML = '';
-    lastDateKey = null;
-    chatHistory.length = 0;
-  };
-
-  historyBtn.onclick = e => {
-    e.preventDefault();
-    historyList.innerHTML = chatHistory.map((entry, i) => `
-      <div class="history-item">
-        <strong>${entry.role === 'user' ? 'You:' : 'Bot:'}</strong> ${entry.text}
-        <div class="msg-ts">${entry.time}</div>
-        <button class="delete-history" data-index="${i}">×</button>
-      </div>
-    `).join('');
-    historyModal.hidden = false;
-    localStorage.setItem('historyOpen', 'true');
-  };
-
-  closeModalBtn.onclick = () => {
-    historyModal.hidden = true;
-    localStorage.setItem('historyOpen', 'false');
-
-  };
-
-  historyList.addEventListener('click', e => {
-    if (!e.target.matches('.delete-history')) return;
-    const idx = +e.target.dataset.index;
-    chatHistory.splice(idx, 1);
-    e.target.closest('.history-item').remove();
-  });
-
-  //──────────────────────────────────────────────────────────────────────────────
-  // CHARTS SETUP & REAL-TIME UPDATES
-  //──────────────────────────────────────────────────────────────────────────────
-  const ctx1 = document.getElementById('chart1').getContext('2d');
-  const ctx2 = document.getElementById('chart2').getContext('2d');
-
-  // Initial dummy data
-  const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-  const days = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
-
-  const data1 = {
-    labels: months.slice(new Date().getMonth()), // from current month to year-end
-    datasets: [{ label: 'Rx Scans', data: [], borderWidth: 2 }]
-  };
-  const data2 = {
-    labels: days,
-    datasets: [{ label: 'Drug Lookups', data: [], backgroundColor: [] }]
-  };
-
- //──────────────────────────────────────────────────────────────────────────────
-  // STATE PERSISTENCE: LOAD FROM localStorage
- //──────────────────────────────────────────────────────────────────────────────
-  if (localStorage.getItem('darkMode') === 'true') {
-    document.documentElement.classList.add('dark');
-   document.getElementById('themeToggle').classList.replace('fa-moon', 'fa-sun');
- }
-  function restorePanels() {
-   const panelsData = JSON.parse(localStorage.getItem('panels') || '{}');
-   Object.entries(panelsData).forEach(([id, html]) => {
-     const panel = document.getElementById(id);
-     if (panel && html) {
-        panel.hidden = false;
-       panel.querySelector('.result-content').innerHTML = html;
-        injectTools(panel);
-      }
+      URL.revokeObjectURL(url);
+      a.remove();
     });
- }
- function savePanelsToStorage() {
-    const panels = {};
-   document.querySelectorAll('.response').forEach(panel => {
-     if (!panel.hidden) {
-       panels[panel.id] = panel.querySelector('.result-content').innerHTML;
-     }
-   });
-   localStorage.setItem('panels', JSON.stringify(panels));
- }
- function restoreChat() {
-   const stored = JSON.parse(localStorage.getItem('chatHistory') || '[]');
-   stored.forEach(entry => addChatMessage(entry.role, entry.text));
- }
-  function saveChatToStorage() {
-    localStorage.setItem('chatHistory', JSON.stringify(chatHistory));
-  }
- // Restore chat history & panels
- restoreChat();
- restorePanels();
- if (localStorage.getItem('historyOpen') === 'true') {
-   historyBtn.click();
- }
 
-  
-  // Populate with random initial values
-  for (let i = 0; i < data1.labels.length; i++) {
-    data1.datasets[0].data.push(Math.floor(Math.random() * 400) + 600);
-  }
-  for (let i = 0; i < data2.labels.length; i++) {
-    data2.datasets[0].data.push(Math.floor(Math.random() * 50) + 20);
-    data2.datasets[0].backgroundColor.push(getComputedStyle(document.documentElement).getPropertyValue('--pharm-primary-alt').trim());
-  }
+    // ────────────────────────────────────────────────────────────────────────────
+    // 19) “TALK TO A LICENSED PHARMACIST” LINKS – no JS needed aside from above
+    // ────────────────────────────────────────────────────────────────────────────
 
-  const chart1Instance = new Chart(ctx1, {
-    type: 'line',
-    data: data1,
-    options: {
-      responsive: true,
-      maintainAspectRatio: false,
-      plugins: { title: { display: true, text: 'Monthly Prescription Scans' } },
-      scales: {
-        x: { title: { display: true, text: 'Month' } },
-        y: { title: { display: true, text: 'Scans' }, beginAtZero: true }
-      }
+    // ────────────────────────────────────────────────────────────────────────────
+    // 20) RESPONSIVE ADJUSTMENTS & FINAL HOOKS
+    // ────────────────────────────────────────────────────────────────────────────
+    // Show hamburger only on small screens
+    const mq = window.matchMedia("(max-width: 768px)");
+    function updateHamburgerVisibility() {
+      hamburger.style.display = mq.matches ? "block" : "none";
     }
+    mq.addListener(updateHamburgerVisibility);
+    updateHamburgerVisibility();
   });
-
-  const chart2Instance = new Chart(ctx2, {
-    type: 'bar',
-    data: data2,
-    options: {
-      responsive: true,
-      maintainAspectRatio: false,
-      plugins: { title: { display: true, text: 'Weekly Drug Lookups' } },
-      scales: {
-        x: { title: { display: true, text: 'Day' } },
-        y: { title: { display: true, text: 'Lookups' }, beginAtZero: true }
-      }
-    }
-  });
-
-  // Simulate real-time updates every 30 seconds
-  setInterval(() => {
-    // Update chart1: push a new value for next month, shift if needed
-    const nextMonthIndex = (months.indexOf(data1.labels[data1.labels.length - 1]) + 1) % 12;
-    const newMonth = months[nextMonthIndex];
-    const newScanValue = Math.floor(Math.random() * 400) + 600;
-    data1.labels.push(newMonth);
-    data1.datasets[0].data.push(newScanValue);
-    if (data1.labels.length > 12) {
-      data1.labels.shift();
-      data1.datasets[0].data.shift();
-    }
-    chart1Instance.update();
-
-    // Update chart2: shift data array by one day and push a new random value
-    data2.datasets[0].data.shift();
-    data2.datasets[0].data.push(Math.floor(Math.random() * 50) + 20);
-    chart2Instance.update();
-  }, 30000);
-
-  // Export combined CSV
-  document.getElementById('exportChartsData').onclick = () => {
-    let csv = 'Month,Scans\n';
-    data1.labels.forEach((lbl, i) => {
-      csv += `"${lbl}",${data1.datasets[0].data[i]}\n`;
-    });
-    csv += '\nDay,Lookups\n';
-    data2.labels.forEach((lbl, i) => {
-      csv += `"${lbl}",${data2.datasets[0].data[i]}\n`;
-    });
-    const blob = new Blob([csv], { type: 'text/csv' });
-    const a = document.createElement('a');
-    a.href = URL.createObjectURL(blob);
-    a.download = 'epharmacy_usage_stats.csv';
-    a.click();
-  };
-
-});
 </script>
 
 </body>
