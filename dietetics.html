@@ -10,11 +10,10 @@
   <link rel="stylesheet"
         href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
-  <style>
+<style>
   /*──────────────────────────────────────────────────────────────────────────────
-    RESET & BASE VARIABLES
+    RESET & GLOBAL VARIABLES
   ──────────────────────────────────────────────────────────────────────────────*/
-  /* Reset */
   *, *::before, *::after {
     margin: 0;
     padding: 0;
@@ -24,6 +23,33 @@
     font-family: 'Montserrat', sans-serif;
     font-size: 16px;
     scroll-behavior: smooth;
+
+    /* Color Palette (Pale Yellow primary, Rich Purple secondary) */
+    --color-primary: #FDE68A;          /* Pale Yellow */
+    --color-primary-alt: #FCD34D;      /* Medium Yellow */
+    --color-secondary: #9333EA;        /* Rich Purple */
+    --color-secondary-alt: #7E22CE;    /* Deep Purple */
+    --color-accent: rgba(255, 250, 235, 0.9); /* Soft Cream */
+    --color-bg: #FEFCE8;               /* Very Light Cream */
+    --color-surface: #FFFFFF;          /* White Surface */
+    --color-text: #3E3E3E;             /* Dark Gray Text */
+    --color-muted: #776C5B;            /* Warm Gray */
+    --color-disabled: rgba(200,200,200,0.4);
+    --radius: 1rem;
+    --padding: 1rem;
+    --transition: 0.3s ease;
+    --shadow-light: 0 4px 12px rgba(0, 0, 0, 0.05);
+    --shadow-medium: 0 6px 20px rgba(0, 0, 0, 0.1);
+    --sidebar-width: 220px;
+    --sidebar-collapsed: 60px;
+    --header-height: 60px;
+  }
+  html.dark {
+    --color-bg: #1A1A1A;
+    --color-surface: rgba(30, 30, 30, 0.95);
+    --color-text: #ECECEC;
+    --color-muted: #AAA;
+    --color-disabled: rgba(100,100,100,0.4);
   }
   body {
     display: flex;
@@ -31,15 +57,26 @@
     background: var(--color-bg);
     color: var(--color-text);
     overflow-x: hidden;
+    transition: background var(--transition), color var(--transition);
   }
   a {
-    color: inherit;
+    color: var(--color-secondary);
     text-decoration: none;
-    transition: color 0.3s ease;
+    transition: color var(--transition);
+  }
+  a:hover {
+    color: var(--color-secondary-alt);
   }
   button, input, textarea, select {
-    font: inherit;
-    transition: all 0.3s ease;
+    font-family: inherit;
+    transition: var(--transition);
+  }
+  button:disabled,
+  input:disabled,
+  select:disabled,
+  textarea:disabled {
+    cursor: not-allowed;
+    opacity: 0.6;
   }
   img {
     max-width: 100%;
@@ -48,44 +85,6 @@
   ul, ol {
     list-style: none;
   }
-  :focus {
-    outline: none;
-  }
-
-  /* Color & Theme Variables */
-  :root {
-    --color-primary: #D4AC0D;             /* Golden (foody, like edible saffron) */
-    --color-primary-alt: #B7950B;         /* Darker golden */
-    --color-secondary: #884EA0;           /* Purple accent for contrast */
-    --color-secondary-alt: #733D91;       /* Darker purple */
-    --color-accent: rgba(255, 235, 205, 0.8); /* Light warm cream */
-    --color-bg: #FEF9E7;                  /* Soft cream background */
-    --color-surface: rgba(255, 248, 220, 0.9); /* Very light pancake-like surface */
-    --color-text: #3E3E3E;                /* Dark charcoal for readability */
-    --color-muted: #7D6608;               /* Earthy brown for secondary text */
-    --radius: 1rem;                       /* Rounded corners for a friendly feel */
-    --padding: 1rem;                      /* Standard padding */
-    --transition: 0.3s ease;              /* Smooth transitions */
-    --shadow: 0 6px 20px rgba(0, 0, 0, 0.1); /* Soft shadow */
-    --sidebar-width: 220px;               /* Sidebar expanded width */
-    --sidebar-collapsed: 60px;            /* Sidebar collapsed width */
-    --header-height: 60px;                /* Header height */
-  }
-  html.dark {
-    --color-bg: #1A1A1A;
-    --color-surface: rgba(30,30,30,0.9);
-    --color-text: #ECECEC;
-    --color-muted: #AAA;
-  }
-  html.dark input,
-  html.dark textarea,
-  html.dark select {
-    background: var(--color-surface);
-    color: var(--color-text);
-    border-color: var(--color-muted);
-  }
-  html.dark .user-msg { color: #111; }
-  html.dark .bot-msg  { color: var(--color-text); }
 
   /*──────────────────────────────────────────────────────────────────────────────
     SIDEBAR
@@ -97,15 +96,11 @@
     bottom: 0;
     width: var(--sidebar-width);
     background: var(--color-surface);
-    box-shadow: var(--shadow);
+    box-shadow: var(--shadow-medium);
     display: flex;
     flex-direction: column;
     z-index: 1000;
-    transition: width var(--transition);
-    overflow: hidden;
-  }
-  aside#sidebar.collapsed {
-    width: var(--sidebar-collapsed);
+    transition: width var(--transition), background var(--transition);
   }
   aside#sidebar .brand {
     display: flex;
@@ -114,7 +109,7 @@
     padding: var(--padding);
     font-size: 1.25rem;
     font-weight: 700;
-    color: var(--color-primary);
+    color: var(--color-secondary);
   }
   aside#sidebar .brand i {
     font-size: 1.5rem;
@@ -124,11 +119,10 @@
     overflow-y: auto;
   }
   aside#sidebar nav ul {
-    display: flex;
-    flex-direction: column;
+    padding: 0;
   }
-  aside#sidebar nav li + li {
-    margin-top: 0.25rem;
+  aside#sidebar nav li {
+    margin-bottom: 0.25rem;
   }
   aside#sidebar nav a {
     display: flex;
@@ -137,26 +131,41 @@
     padding: 0.75rem var(--padding);
     border-radius: var(--radius);
     color: var(--color-text);
-    font-weight: 500;
-    transition: background var(--transition), transform var(--transition), color var(--transition);
+    transition: background var(--transition), transform var(--transition);
   }
   aside#sidebar nav a i {
-    font-size: 1.2rem;
-    width: 1.2rem;
+    width: 1.25rem;
     text-align: center;
-    color: var(--color-primary-alt);
-  }
-  aside#sidebar nav a span {
-    white-space: nowrap;
+    font-size: 1.25rem;
+    color: var(--color-secondary);
   }
   aside#sidebar nav a:hover,
   aside#sidebar nav .active a {
-    background: var(--color-primary-alt);
-    color: #fff;
+    background: var(--color-primary);
+    color: var(--color-text);
     transform: translateX(4px);
   }
   aside#sidebar nav .active a i {
+    color: var(--color-text);
+  }
+  #shrinkSidebar {
+    margin: var(--padding) auto;
+    background: var(--color-secondary);
+    border: none;
+    border-radius: 50%;
+    width: 36px;
+    height: 36px;
     color: #fff;
+    box-shadow: var(--shadow-medium);
+    cursor: pointer;
+    transition: background var(--transition), transform var(--transition);
+  }
+  #shrinkSidebar:hover {
+    background: var(--color-secondary-alt);
+    transform: scale(1.05);
+  }
+  aside#sidebar.collapsed {
+    width: var(--sidebar-collapsed);
   }
   aside#sidebar.collapsed .brand span,
   aside#sidebar.collapsed nav a span {
@@ -164,23 +173,6 @@
   }
   aside#sidebar.collapsed nav a {
     justify-content: center;
-  }
-  #shrinkSidebar {
-    margin: var(--padding);
-    align-self: center;
-    background: var(--color-primary);
-    border: none;
-    border-radius: 50%;
-    width: 36px;
-    height: 36px;
-    color: #fff;
-    box-shadow: var(--shadow);
-    cursor: pointer;
-    transition: background var(--transition), transform var(--transition);
-  }
-  #shrinkSidebar:hover {
-    background: var(--color-primary-alt);
-    transform: translateY(-2px);
   }
 
   /*──────────────────────────────────────────────────────────────────────────────
@@ -193,7 +185,7 @@
     right: 0;
     height: var(--header-height);
     background: var(--color-surface);
-    box-shadow: var(--shadow);
+    box-shadow: var(--shadow-medium);
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -202,40 +194,40 @@
     transition: left var(--transition), background var(--transition);
   }
   header h1 {
-    font-size: 1.4rem;
+    font-size: 1.5rem;
     font-weight: 600;
-    color: var(--color-text);
+    color: var(--color-secondary);
   }
   header #hamburger,
   header #themeToggle {
     font-size: 1.5rem;
-    color: var(--color-primary);
+    color: var(--color-secondary);
     cursor: pointer;
     transition: transform var(--transition), color var(--transition);
   }
   header #hamburger:hover,
   header #themeToggle:hover {
-    color: var(--color-secondary);
     transform: scale(1.1);
+    color: var(--color-secondary-alt);
   }
   @media (max-width: 768px) {
     header #hamburger {
       display: block;
     }
+    header, main {
+      left: 0 !important;
+    }
     aside#sidebar {
       transform: translateX(-100%);
       transition: transform var(--transition);
     }
-    body.sidebar-open aside#sidebar {
+    aside#sidebar.open {
       transform: translateX(0);
-    }
-    header, main {
-      left: 0 !important;
     }
   }
 
   /*──────────────────────────────────────────────────────────────────────────────
-    MAIN & MODULES
+    MAIN CONTENT & MODULES
   ──────────────────────────────────────────────────────────────────────────────*/
   main {
     flex: 1;
@@ -244,34 +236,30 @@
     padding: var(--padding);
     transition: margin-left var(--transition);
   }
-  @media (max-width: 768px) {
-    main {
-      margin-left: 0;
-      padding: 0.5rem;
-    }
-  }
   section.module {
     background: var(--color-surface);
     border-radius: var(--radius);
     padding: var(--padding);
     margin-bottom: 1.5rem;
-    box-shadow: var(--shadow);
-    transition: transform var(--transition), box-shadow var(--transition);
+    box-shadow: var(--shadow-medium);
+    transition: transform var(--transition), background var(--transition);
+    position: relative;
   }
-  section.module:hover {
+  section.module:hover:not(.disabled) {
     transform: translateY(-4px);
-    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+  }
+  section.module.disabled {
+    opacity: 0.4;
+    pointer-events: none;
   }
   h2 {
     display: flex;
     align-items: center;
     gap: 0.5rem;
     font-size: 1.6rem;
-    color: var(--color-primary);
+    color: var(--color-secondary);
     margin-bottom: 0.75rem;
-  }
-  h2 i {
-    font-size: 1.6rem;
   }
   .desc {
     color: var(--color-muted);
@@ -285,170 +273,183 @@
   #hero {
     position: relative;
     overflow: hidden;
+    background: url('dietetics-hero.jpg') center/cover no-repeat; /* Replace with actual image path */
+    border-radius: var(--radius);
+    padding: 3rem 2rem;
+    box-shadow: var(--shadow-medium);
+    margin-bottom: 1.5rem;
+  }
+  #hero::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: rgba(254, 252, 232, 0.7);
+    pointer-events: none;
+  }
+  #hero .hero-inner {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    max-width: 1200px;
+    margin: 0 auto;
+    gap: 2rem;
+  }
+  #hero .hero-content {
+    flex: 1;
+    min-width: 280px;
+  }
+  #hero h2 {
+    font-size: 2.4rem;
+    color: var(--color-secondary);
+  }
+  #hero p.desc {
+    font-size: 1.05rem;
+    margin-top: 0.5rem;
+    color: var(--color-text);
   }
   #hero .hero-features {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
     gap: 1rem;
-    margin-top: 1rem;
+    margin-top: 2rem;
+    width: 100%;
   }
   .feature-card {
-    background: var(--color-bg);
+    background: var(--color-accent);
     border-radius: var(--radius);
     padding: var(--padding);
-    box-shadow: var(--shadow);
+    box-shadow: var(--shadow-light);
     display: flex;
     flex-direction: column;
-    align-items: flex-start;
-    position: relative;
+    gap: 0.5rem;
     transition: transform var(--transition), box-shadow var(--transition);
   }
   .feature-card:hover {
     transform: translateY(-5px);
-    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15);
+    box-shadow: var(--shadow-medium);
   }
   .feature-card i {
-    font-size: 2rem;
-    color: var(--color-primary-alt);
-    margin-bottom: 0.5rem;
+    font-size: 1.75rem;
+    color: var(--color-secondary);
   }
   .feature-card h3 {
-    margin-bottom: 0.75rem;
-    font-size: 1.2rem;
+    font-size: 1.25rem;
+    margin-bottom: 0.5rem;
     color: var(--color-secondary);
   }
   .feature-card input[type="text"],
   .feature-card input[type="number"],
-  .feature-card select,
-  .feature-card textarea {
+  .feature-card select {
     width: 100%;
-    margin-bottom: 0.5rem;
     padding: 0.75rem;
     border: 2px solid var(--color-primary-alt);
-    border-radius: 0.5rem;
+    border-radius: var(--radius);
     background: #fff;
     color: var(--color-text);
     font-size: 0.95rem;
+    transition: border-color var(--transition), box-shadow var(--transition);
   }
-  .feature-card input[type="text"]:focus,
-  .feature-card input[type="number"]:focus,
-  .feature-card select:focus,
-  .feature-card textarea:focus {
+  .feature-card input:focus,
+  .feature-card select:focus {
     border-color: var(--color-secondary);
-    box-shadow: 0 0 0 3px rgba(136, 78, 160, 0.2);
+    box-shadow: 0 0 8px var(--color-secondary);
+    outline: none;
   }
-  .feature-card button {
+  .feature-card button.btn {
     align-self: flex-end;
-    background: var(--color-primary);
+    background: var(--color-secondary);
     color: #fff;
-    padding: 0.75rem 1.25rem;
+    padding: 0.7rem 1.4rem;
     border: none;
-    border-radius: var(--radius);
+    font-size: 0.95rem;
     font-weight: 600;
+    border-radius: var(--radius);
     cursor: pointer;
-    box-shadow: var(--shadow);
-    transition: background var(--transition), transform var(--transition);
+    box-shadow: var(--shadow-light);
+    transition: background var(--transition), transform var(--transition), box-shadow var(--transition);
   }
-  .feature-card button:hover {
-    background: var(--color-primary-alt);
+  .feature-card button.btn:hover {
+    background: var(--color-secondary-alt);
     transform: translateY(-2px);
+    box-shadow: var(--shadow-medium);
   }
 
-  /*──────── Decorative “Stickers” ───────*/
+  /* Decorative Stickers */
   .sticker {
     position: absolute;
-    font-size: 4.5rem;
-    color: var(--color-secondary-alt);
-    opacity: 0.2;
-    transition: transform 0.3s ease, opacity 0.3s ease;
+    font-size: 4rem;
+    color: var(--color-primary-alt);
+    opacity: 0.25;
+    transition: transform var(--transition), opacity var(--transition);
   }
   .sticker:hover {
-    transform: scale(1.1) rotate(0);
-    opacity: 0.3;
+    transform: scale(1.1) rotate(0deg);
+    opacity: 0.4;
   }
   .sticker-1 { top: 1rem; left: 2rem; transform: rotate(-15deg); }
   .sticker-2 { top: 3rem; right: 3rem; transform: rotate(10deg); }
   .sticker-3 { bottom: 2rem; left: 50%; transform: translateX(-50%) rotate(-5deg); }
+  /* Additional stickers positions can be customized as needed */
 
   /*──────────────────────────────────────────────────────────────────────────────
-    BUTTON STYLES
+    “Nationalit​y” LABEL & BUTTON
   ──────────────────────────────────────────────────────────────────────────────*/
-  .btn {
+  #nationality-label {
     display: inline-flex;
     align-items: center;
     gap: 0.5rem;
-    background: var(--color-primary);
-    color: #000;
-    padding: 0.75rem 1.25rem;
-    border: none;
-    border-radius: var(--radius);
     font-weight: 600;
-    box-shadow: var(--shadow);
-    cursor: pointer;
-    transition: background var(--transition), transform var(--transition);
+    color: var(--color-secondary);
+    margin-bottom: 0.75rem;
   }
-  .btn:hover {
-    background: var(--color-primary-alt);
-    transform: translateY(-2px);
+  #nationality {
+    flex: 1;
+    padding: 0.75rem;
+    border: 2px solid var(--color-primary-alt);
+    border-radius: var(--radius);
+    background: #fff;
+    color: var(--color-text);
+    font-size: 0.95rem;
+    transition: border-color var(--transition), box-shadow var(--transition);
   }
-  .btn-secondary {
+  #nationality:focus {
+    border-color: var(--color-secondary);
+    box-shadow: 0 0 8px var(--color-secondary);
+    outline: none;
+  }
+  #setNationality {
+    margin-top: 0.5rem;
     background: var(--color-secondary);
     color: #fff;
+    border: none;
+    border-radius: var(--radius);
     padding: 0.75rem 1rem;
-    border-radius: 0.5rem;
-    box-shadow: var(--shadow);
+    font-weight: 600;
+    cursor: pointer;
+    box-shadow: var(--shadow-light);
+    transition: background var(--transition), transform var(--transition), box-shadow var(--transition);
   }
-  .btn-secondary:hover {
+  #setNationality:hover {
     background: var(--color-secondary-alt);
     transform: translateY(-2px);
-  }
-  .btn-schedule {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.5rem;
-    background: linear-gradient(135deg, var(--color-primary), var(--color-secondary));
-    color: #fff;
-    padding: 0.75rem 1.5rem;
-    border-radius: var(--radius);
-    font-weight: 600;
-    font-size: 1rem;
-    box-shadow: var(--shadow);
-    transition: transform var(--transition), box-shadow var(--transition);
-  }
-  .btn-schedule:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
-  }
-  .btn-icon {
-    width: 2.2rem;
-    height: 2.2rem;
-    padding: 0;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    background: var(--color-accent);
-    border: 1px solid var(--color-muted);
-    border-radius: 50%;
-    cursor: pointer;
-    transition: background var(--transition), transform var(--transition);
-  }
-  .btn-icon:hover {
-    background: var(--color-primary-alt);
-    transform: translateY(-2px);
+    box-shadow: var(--shadow-medium);
   }
 
   /*──────────────────────────────────────────────────────────────────────────────
     CHATBOT SECTION
   ──────────────────────────────────────────────────────────────────────────────*/
-  .chat-controls {
+  #dietBot .chat-controls {
     display: flex;
     gap: 0.5rem;
     margin-bottom: 0.75rem;
   }
-  .chat-controls button {
-    background: var(--color-surface);
-    border: 2px solid var(--color-primary);
-    color: var(--color-primary);
+  #dietBot .chat-controls button {
+    background: none;
+    border: 2px solid var(--color-secondary);
+    color: var(--color-secondary);
     border-radius: 50%;
     width: 36px;
     height: 36px;
@@ -459,36 +460,23 @@
     cursor: pointer;
     transition: background var(--transition), color var(--transition), transform var(--transition);
   }
-  .chat-controls button:hover {
-    background: var(--color-primary);
+  #dietBot .chat-controls button:hover {
+    background: var(--color-secondary);
     color: #fff;
     transform: scale(1.1);
   }
-  .chat-controls .btn-secondary {
-    background: none;
-    border: 2px solid var(--color-primary);
-    color: var(--color-primary);
-    font-weight: 600;
-    width: auto;
-    border-radius: var(--radius);
-    padding: 0.5rem 1rem;
-  }
-  .chat-controls .btn-secondary:hover {
-    background: var(--color-primary);
-    color: #fff;
-  }
-
   .chat-box {
-    background: var(--color-bg);
+    background: var(--color-accent);
     border: 1px solid var(--color-muted);
     border-radius: var(--radius);
     padding: var(--padding);
-    max-height: 500px;
+    max-height: 400px;
     overflow-y: auto;
-    min-height: 250px;
+    min-height: 200px;
     display: flex;
     flex-direction: column;
     gap: 0.5rem;
+    transition: background var(--transition), border-color var(--transition);
   }
   .chat-input {
     display: flex;
@@ -497,20 +485,21 @@
   }
   .chat-input input {
     flex: 1;
-    padding: 0.75rem 1rem;
+    padding: 0.75rem;
     border: 2px solid var(--color-primary-alt);
-    border-radius: 0.5rem;
+    border-radius: var(--radius);
     background: #fff;
     color: var(--color-text);
     font-size: 0.95rem;
+    transition: border-color var(--transition), box-shadow var(--transition);
   }
   .chat-input input:focus {
     border-color: var(--color-secondary);
-    box-shadow: 0 0 0 3px rgba(136,78,160,0.2);
+    box-shadow: 0 0 8px var(--color-secondary);
+    outline: none;
   }
   .chat-input button {
-    background: var(--color-primary);
-    color: #fff;
+    background: var(--color-secondary);
     border: none;
     border-radius: 50%;
     width: 36px;
@@ -518,12 +507,13 @@
     display: flex;
     align-items: center;
     justify-content: center;
+    color: #fff;
     font-size: 1rem;
     cursor: pointer;
     transition: background var(--transition), transform var(--transition);
   }
   .chat-input button:hover {
-    background: var(--color-secondary);
+    background: var(--color-secondary-alt);
     transform: scale(1.1);
   }
   .user-msg,
@@ -532,10 +522,12 @@
     padding: 0.75rem 1rem;
     border-radius: var(--radius);
     position: relative;
+    line-height: 1.4;
+    transition: background var(--transition), color var(--transition);
   }
   .user-msg {
-    background: var(--color-primary-alt);
-    color: #000;
+    background: var(--color-secondary);
+    color: #fff;
     align-self: flex-end;
     border-bottom-right-radius: 0.2rem;
   }
@@ -551,20 +543,21 @@
   }
   .timestamp {
     font-size: 0.7rem;
+    color: var(--color-muted);
     position: absolute;
     bottom: -1.2rem;
     right: 0.8rem;
-    color: var(--color-muted);
   }
   .date-separator {
     text-align: center;
     margin: 1rem 0;
-    font-weight: 700;
-    color: var(--color-primary);
+    font-weight: bold;
+    color: var(--color-secondary);
+    user-select: none;
   }
 
   /*──────────────────────────────────────────────────────────────────────────────
-    “OTHER” INPUTS
+    “OTHER” INPUT FIELDS
   ──────────────────────────────────────────────────────────────────────────────*/
   .other-input {
     display: none;
@@ -574,57 +567,138 @@
     background: #fff;
     color: var(--color-text);
     font-size: 0.95rem;
-    border-radius: 0.5rem;
+    border-radius: var(--radius);
+    transition: border-color var(--transition), box-shadow var(--transition);
   }
   .other-input:focus {
     border-color: var(--color-secondary);
-    box-shadow: 0 0 0 3px rgba(136,78,160,0.2);
+    box-shadow: 0 0 8px var(--color-secondary);
+    outline: none;
   }
 
   /*──────────────────────────────────────────────────────────────────────────────
-    FORMS & INPUTS (GENERAL)
+    FORMS, LABELS & INPUTS
   ──────────────────────────────────────────────────────────────────────────────*/
-  fieldset {
-    border: 1px solid var(--color-muted);
-    border-radius: var(--radius);
-    padding: 0.75rem;
-    margin-bottom: 1rem;
-    background: var(--color-bg);
-  }
-  legend {
-    padding: 0 0.5rem;
-    font-weight: 600;
-    color: var(--color-secondary);
-    background: var(--color-bg);
-  }
   label {
-    display: block;
-    margin-bottom: 0.75rem;
+    display: flex;
+    flex-direction: column;
     font-size: 0.95rem;
     color: var(--color-text);
+    margin-bottom: 0.75rem;
   }
   input[type="text"],
   input[type="number"],
   input[type="date"],
   input[type="time"],
-  select,
-  textarea {
-    width: 100%;
+  textarea,
+  select {
     padding: 0.75rem;
     border: 2px solid var(--color-primary-alt);
-    border-radius: 0.5rem;
+    border-radius: var(--radius);
     background: #fff;
     color: var(--color-text);
     font-size: 0.95rem;
-    transition: border-color 0.2s, box-shadow 0.2s;
+    transition: border-color var(--transition), box-shadow var(--transition);
   }
   input:focus,
-  select:focus,
-  textarea:focus {
+  textarea:focus,
+  select:focus {
     border-color: var(--color-secondary);
-    box-shadow: 0 0 0 3px rgba(136,78,160,0.2);
+    box-shadow: 0 0 8px var(--color-secondary);
+    outline: none;
+  }
+  textarea {
+    resize: vertical;
+  }
+  button.btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.75rem 1.25rem;
+    background: var(--color-primary);
+    color: var(--color-text);
+    border: none;
+    border-radius: var(--radius);
+    font-weight: 600;
+    box-shadow: var(--shadow-light);
+    cursor: pointer;
+    transition: background var(--transition), transform var(--transition), box-shadow var(--transition);
+  }
+  button.btn:hover:not([disabled]) {
+    background: var(--color-primary-alt);
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-medium);
+  }
+  button.btn-secondary {
+    background: var(--color-secondary);
+    color: #fff;
+  }
+  button.btn-secondary:hover:not([disabled]) {
+    background: var(--color-secondary-alt);
   }
 
+  /*──────────────────────────────────────────────────────────────────────────────
+    RESPONSE PANELS
+  ──────────────────────────────────────────────────────────────────────────────*/
+  .response {
+    background: var(--color-surface);
+    border-left: 4px solid var(--color-secondary);
+    border-radius: var(--radius);
+    padding: var(--padding);
+    margin-top: 1rem;
+    position: relative;
+    box-shadow: var(--shadow-medium);
+    transition: background var(--transition), box-shadow var(--transition);
+  }
+  .response.waiting {
+    opacity: 0.8;
+  }
+  .response .close-btn {
+    position: absolute;
+    top: var(--padding);
+    right: var(--padding);
+    background: none;
+    border: none;
+    font-size: 1.25rem;
+    color: var(--color-secondary);
+    cursor: pointer;
+    transition: color var(--transition), transform var(--transition);
+  }
+  .response .close-btn:hover {
+    color: var(--color-secondary-alt);
+    transform: scale(1.1);
+  }
+  .response .result-content {
+    margin-top: 1.5rem;
+    color: var(--color-text);
+    line-height: 1.5;
+    white-space: pre-wrap;
+  }
+  .tool-row {
+    position: absolute;
+    bottom: var(--padding);
+    right: var(--padding);
+    display: flex;
+    gap: 0.5rem;
+  }
+  .copy-btn, .dl-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 0.25rem;
+    color: var(--color-secondary);
+    font-size: 1rem;
+    transition: background var(--transition), color var(--transition), transform var(--transition);
+  }
+  .copy-btn:hover, .dl-btn:hover {
+    background: var(--color-primary);
+    color: var(--color-text);
+    transform: scale(1.1);
+  }
+
+  /*──────────────────────────────────────────────────────────────────────────────
+    CHECKBOX GROUPS
+  ──────────────────────────────────────────────────────────────────────────────*/
   .checkbox-group {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
@@ -639,303 +713,231 @@
     background: var(--color-surface);
     border: 1px solid var(--color-muted);
     border-radius: var(--radius);
-    font-size: 0.9rem;
     cursor: pointer;
+    transition: background var(--transition), transform var(--transition);
   }
   .checkbox-group input[type="checkbox"] {
     width: 1rem;
     height: 1rem;
     accent-color: var(--color-secondary);
   }
-  .checkbox-group input[type="checkbox"][value="Other"]:checked ~ input.other-input {
+  .checkbox-group label:hover {
+    background: var(--color-accent);
+    transform: translateY(-2px);
+  }
+  .checkbox-group input[type="checkbox"][value="Other"]:checked ~ 
+  input.other-input {
     display: block;
     width: 100%;
+    margin-top: 0.5rem;
   }
 
   /*──────────────────────────────────────────────────────────────────────────────
-    RESPONSE PANELS
+    HISTORY MODAL (CHAT HISTORY)
   ──────────────────────────────────────────────────────────────────────────────*/
-  .response {
-    position: relative;
-    background: var(--color-surface);
-    border-left: 4px solid var(--color-secondary);
-    border-radius: var(--radius);
-    padding: var(--padding);
-    margin-top: 1rem;
-    box-shadow: var(--shadow);
+  .history-modal {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 2000;
   }
-  .response .close-btn {
-    position: absolute;
-    top: var(--padding);
-    right: var(--padding);
+  .history-content {
+    background: var(--color-surface);
+    border-radius: var(--radius);
+    width: 90%;
+    max-width: 600px;
+    max-height: 80vh;
+    display: grid;
+    grid-template-rows: auto 1fr auto;
+    box-shadow: var(--shadow-medium);
+    overflow: hidden;
+  }
+  .history-content h3 {
+    padding: 1rem;
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: var(--color-secondary);
+    border-bottom: 1px solid var(--color-muted);
+  }
+  .history-content ul {
+    flex: 1 1 auto;
+    overflow-y: auto;
+    padding: 0 1rem;
+    list-style: none;
+  }
+  .history-content ul li {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.75rem 0;
+    border-bottom: 1px solid var(--color-muted);
+    font-size: 0.95rem;
+  }
+  .history-content ul li .history-date {
+    color: var(--color-muted);
+    font-size: 0.85rem;
+    margin-top: 0.25rem;
+  }
+  .history-content .del-msg {
     background: none;
     border: none;
-    font-size: 1rem;
     color: var(--color-secondary);
+    font-size: 1rem;
     cursor: pointer;
     transition: color var(--transition), transform var(--transition);
   }
-  .response .close-btn:hover {
-    color: var(--color-primary);
+  .history-content .del-msg:hover {
+    color: var(--color-secondary-alt);
     transform: scale(1.1);
   }
-  .response .result-content {
-    white-space: pre-wrap;
-    line-height: 1.5;
-    margin-top: 1.5rem;
-    color: var(--color-text);
-  }
-  .tool-row {
-    position: absolute;
-    bottom: var(--padding);
-    right: var(--padding);
+  .history-content .button-row {
     display: flex;
     gap: 0.5rem;
+    padding: 0.75rem 1rem;
+    background: var(--color-surface);
+    border-top: 1px solid var(--color-muted);
   }
-  .tool-row button {
-    background: none;
+  .history-content .button-row button {
+    flex: 1;
+    padding: 0.5rem;
     border: none;
-    padding: 0.25rem;
-    cursor: pointer;
-    transition: background var(--transition);
-    color: var(--color-secondary);
-  }
-  .tool-row button:hover {
-    background: var(--color-primary-alt);
-    color: #fff;
-  }
-  .response.waiting .close-btn,
-  .response.waiting .tool-row {
-    display: none !important;
-  }
-
-  /*──────────────────────────────────────────────────────────────────────────────
-    MEET EXPERT SECTION
-  ──────────────────────────────────────────────────────────────────────────────*/
-  .meet-module {
-    background: linear-gradient(135deg, rgba(212,172,13,0.1), rgba(136,78,160,0.1));
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    padding: 2rem;
     border-radius: var(--radius);
-    margin-bottom: 2rem;
+    cursor: pointer;
+    transition: background var(--transition), transform var(--transition);
+    font-size: 0.95rem;
+    font-weight: 600;
   }
-  .meet-content {
-    display: flex;
-    align-items: center;
-    max-width: 900px;
-    width: 100%;
-    gap: 2rem;
-  }
-  .meet-icon {
-    flex: 0 0 80px;
-    height: 80px;
-    background: var(--color-primary);
+  .history-content .clear-history {
+    background: var(--color-secondary);
     color: #fff;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 2.5rem;
-    box-shadow: var(--shadow);
   }
-  .meet-text h2 {
-    font-size: 2rem;
-    margin-bottom: 0.5rem;
-    color: var(--color-secondary);
-    line-height: 1.2;
+  .history-content .clear-history:hover {
+    background: var(--color-secondary-alt);
+    transform: translateY(-2px);
   }
-  .meet-text p {
-    font-size: 1rem;
-    margin-bottom: 1rem;
+  .history-content .close-history {
+    background: var(--color-primary);
     color: var(--color-text);
-    line-height: 1.4;
+  }
+  .history-content .close-history:hover {
+    background: var(--color-primary-alt);
+    transform: translateY(-2px);
   }
 
   /*──────────────────────────────────────────────────────────────────────────────
-    PROGRESS CHARTS SECTION
+    CHECKBOX-OTHER INPUTS (SYMPTOMS)
+  ──────────────────────────────────────────────────────────────────────────────*/
+  #otherSymptom {
+    display: none;
+    margin-left: 0.5rem;
+    padding: 0.5rem;
+    border: 2px solid var(--color-primary-alt);
+    border-radius: var(--radius);
+    background: #fff;
+    color: var(--color-text);
+    font-size: 0.9rem;
+    transition: border-color var(--transition), box-shadow var(--transition);
+  }
+  #otherSymptom:focus {
+    border-color: var(--color-secondary);
+    box-shadow: 0 0 8px var(--color-secondary);
+    outline: none;
+  }
+
+  /*──────────────────────────────────────────────────────────────────────────────
+    PROGRESS CHARTS & EXPORT BUTTONS
   ──────────────────────────────────────────────────────────────────────────────*/
   #progressCharts {
     display: grid;
     grid-template-columns: 1fr;
     gap: 1rem;
   }
+  #progressCharts canvas {
+    background: var(--color-surface);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow-light);
+    padding: 0.5rem;
+  }
   @media (min-width: 1025px) {
     #progressCharts {
       grid-template-columns: 1fr 1fr;
     }
-  }
-  #progressCharts canvas {
-    background: var(--color-surface);
-    border-radius: var(--radius);
-    box-shadow: var(--shadow);
-    width: 100% !important;
-    height: auto !important;
-  }
-  .export-chart-btn {
-    margin-top: 0.5rem;
-    padding: 0.25rem 0.5rem;
-    background: var(--color-secondary);
-    color: #fff;
-    border: none;
-    border-radius: 0.5rem;
-    cursor: pointer;
-    transition: background var(--transition);
-  }
-  .export-chart-btn:hover {
-    background: var(--color-secondary-alt);
-  }
-
-  /*──────────────────────────────────────────────────────────────────────────────
-    HISTORY MODAL
-  ──────────────────────────────────────────────────────────────────────────────*/
-  .history-modal {
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: rgba(0,0,0,0.5);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    z-index: 2000;
-    padding: 1rem;
-  }
-  .history-modal .modal-content {
-    background: var(--color-surface);
-    border-radius: var(--radius);
-    width: 100%;
-    max-width: 600px;
-    max-height: 80vh;
-    display: grid;
-    grid-template-rows: auto 1fr auto;
-    gap: 0.5rem;
-    overflow: hidden;
-    box-shadow: var(--shadow);
-    padding: var(--padding);
-  }
-  .history-modal h3 {
-    text-align: center;
-    color: var(--color-primary);
-    font-size: 1.25rem;
-    font-weight: 600;
-    margin-bottom: 0.5rem;
-  }
-  .history-modal ul {
-    flex: 1;
-    overflow-y: auto;
-    list-style: none;
-    padding: 0 0.5rem;
-  }
-  .history-modal li {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 0.5rem 0;
-    border-bottom: 1px solid var(--color-muted);
-  }
-  .history-modal .history-date {
-    font-size: 0.85rem;
-    color: var(--color-muted);
-    margin-bottom: 0.25rem;
-    text-align: center;
-    font-weight: 600;
-    width: 100%;
-  }
-  .history-modal .button-row {
-    display: flex;
-    justify-content: space-between;
-    gap: 0.5rem;
-    flex-shrink: 0;
-    padding-top: 0.5rem;
-    position: sticky;
-    bottom: 0;
-    background: var(--color-surface);
-  }
-  .history-modal button {
-    flex: 1;
-    margin: 0 0.25rem;
-    padding: 0.5rem;
-    border: none;
-    border-radius: var(--radius);
-    cursor: pointer;
-    transition: background var(--transition), transform var(--transition);
-  }
-  .history-modal .clear-all-btn {
-    background: var(--color-primary);
-    color: #fff;
-  }
-  .history-modal .clear-all-btn:hover {
-    background: var(--color-primary-alt);
-    transform: translateY(-1px);
-  }
-  .history-modal .close-modal {
-    background: var(--color-secondary);
-    color: #fff;
-  }
-  .history-modal .close-modal:hover {
-    background: var(--color-secondary-alt);
-    transform: translateY(-1px);
-  }
-  .history-modal .delete-btn {
-    width: 1.8rem;
-    height: 1.8rem;
-    font-size: 1rem;
-    border: none;
-    background: var(--color-accent);
-    border-radius: 50%;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    transition: background var(--transition), transform var(--transition);
-  }
-  .history-modal .delete-btn:hover {
-    background: var(--color-primary-alt);
-    transform: scale(1.1);
+    #progressCharts canvas {
+      height: 300px !important;
+    }
   }
 
   /*──────────────────────────────────────────────────────────────────────────────
     RESPONSIVE ADJUSTMENTS
   ──────────────────────────────────────────────────────────────────────────────*/
   @media (max-width: 1024px) {
-    #hero .hero-features {
+    main {
+      margin-left: 0;
+      padding: var(--padding) 0.5rem;
+    }
+    #hero .hero-inner {
+      flex-direction: column;
+      gap: 2rem;
+    }
+    #hero h2 {
+      font-size: 2rem;
+    }
+    #hero p.desc {
+      font-size: 1rem;
+    }
+    .hero-features {
       grid-template-columns: 1fr;
     }
   }
-  @media (max-width: 640px) {
+  @media (max-width: 768px) {
     section.module {
       padding: 0.75rem;
     }
-    .chat-input, .chat-controls {
+    .chat-controls,
+    .chat-input {
       flex-direction: column;
-      gap: 0.5rem;
+      gap: 0.75rem;
     }
     .tool-row {
       position: static;
       margin-top: 0.5rem;
     }
-    canvas {
-      max-width: 100% !important;
-      height: auto !important;
-    }
-    .feature-card button,
     .feature-card input,
-    .feature-card select {
+    .feature-card button {
       width: 100%;
     }
-    .feature-card {
-      flex-direction: column;
+  }
+  @media (max-width: 640px) {
+    header h1 {
+      font-size: 1.25rem;
+    }
+    #hero h2 {
+      font-size: 1.8rem;
+    }
+    #hero p.desc {
+      font-size: 0.95rem;
+    }
+    #hero {
+      padding: 2rem 1rem;
+    }
+    #hero .hero-features {
+      gap: 1rem;
+    }
+    #shrinkSidebar {
+      width: 32px;
+      height: 32px;
     }
   }
 </style>
 
+
 </head>
 
 
-       <body>
+  <body>
   <!-- Sidebar -->
   <aside id="sidebar">
     <div class="brand">
@@ -945,7 +947,7 @@
     <nav>
       <ul>
         <li><a href="herbal.html"><i class="fas fa-seedling"></i> <span>Herbal Medicine</span></a></li>
-        <li><a href="psych.html"><i class="fas fa-brain"></i> <span>Psychology & MH</span></a></li>
+        <li><a href="psych.html"><i class="fas fa-brain"></i> <span>Psychology &amp; MH</span></a></li>
         <li class="active"><a href="#"><i class="fas fa-apple-alt"></i> <span>Dietetics</span></a></li>
         <li><a href="pharmacy.html"><i class="fas fa-prescription-bottle-alt"></i> <span>E-Pharmacy</span></a></li>
         <li><a href="consult.html"><i class="fas fa-calendar-check"></i> <span>Consult Booking</span></a></li>
@@ -966,76 +968,55 @@
   <!-- Main Content -->
   <main>
     <!-- Hero Section -->
-    <section id="hero" class="module">
-      <h2><i class="fas fa-apple-alt"></i> Empower Your Nutrition</h2>
-      <p class="desc">AI-driven tools for meal planning, nutrient insights, recipe inspiration &amp; more.</p>
-      <div class="hero-features">
-        <!-- Recipe Search -->
-        <div class="feature-card">
-          <i class="fas fa-search"></i>
-          <h3>Recipe Search</h3>
-          <input type="text" id="heroRecipeSearch" placeholder="e.g. Jollof rice with chicken">
-          <button id="heroSearchBtn" class="btn">Search</button>
-          <!-- Recipe Search response panel -->
-          <div id="recipeSearchPanel" class="response" hidden>
-            <button class="close-btn"><i class="fas fa-times"></i></button>
-            <div class="result-content"></div>
-            <div class="tool-row">
-              <button class="copy-btn"><i class="fas fa-copy"></i></button>
-              <button class="dl-btn"><i class="fas fa-download"></i></button>
+    <section id="hero" class="module hero-module">
+      <div class="hero-inner">
+        <!-- Left Content -->
+        <div class="hero-content">
+          <h1><i class="fas fa-apple-alt"></i> Nourish Your Body, Empower Your Life</h1>
+          <p class="hero-subtitle">Delicious, science-backed guidance—tailored to you.</p>
+          <!-- Today's Nutrition Tip & Nationality Input -->
+          <div class="hero-features">
+            <!-- Today's Nutrition Tip Card -->
+            <div class="feature-card">
+              <i class="fas fa-lightbulb"></i>
+              <h3>Today's Nutrition Tip</h3>
+              <div id="dailyTip" class="response">
+                <button class="close-btn"><i class="fas fa-times"></i></button>
+                <div class="tool-row">
+                  <button class="copy-btn"><i class="fas fa-copy"></i></button>
+                  <button class="dl-btn"><i class="fas fa-download"></i></button>
+                </div>
+                <div class="result-content">Enjoy a handful of mixed berries at breakfast to boost your antioxidant intake and support healthy digestion.</div>
+              </div>
+              <button id="refreshTip" class="btn-secondary">Refresh Tip</button>
+            </div>
+            <!-- Nationality Input Card -->
+            <div class="feature-card">
+              <i class="fas fa-globe"></i>
+              <h3>Your Nationality</h3>
+              <input type="text" id="nationality" placeholder="e.g. Ghanaian" required>
+              <button id="setNationality" class="btn-secondary">Set Nationality</button>
             </div>
           </div>
         </div>
-
-        <!-- Today's Tip -->
-        <div class="feature-card">
-          <i class="fas fa-lightbulb"></i>
-          <h3>Today's Nutrition Tip</h3>
-          <div id="dailyTip" class="response">
-            <button class="close-btn"><i class="fas fa-times"></i></button>
-            <div class="tool-row">
-              <button class="copy-btn"><i class="fas fa-copy"></i></button>
-              <button class="dl-btn"><i class="fas fa-download"></i></button>
-            </div>
-            <div class="result-content">Loading tip…</div>
-          </div>
-          <button id="refreshTip" class="btn-secondary">Refresh Tip</button>
+        <!-- Right Hero Image -->
+        <div class="hero-image">
+          <img src="https://images.unsplash.com/photo-1512058564366-c9e7b6d1de30?auto=format&fit=crop&w=800&q=80" alt="Vibrant plate of healthy food">
         </div>
-
-        <!-- Quick Macro Snapshot -->
-        <div class="feature-card">
-          <i class="fas fa-chart-pie"></i>
-          <h3>Macro Snapshot</h3>
-          <div id="macroSnapshot">Protein: – g / Carbs: – g / Fat: – g</div>
-          <button id="refreshMacro" class="btn-secondary">Update</button>
-        </div>
-
-        <!-- Nationality input -->
-        <div class="feature-card">
-          <label id="nationality-label">
-            <i class="fas fa-globe"></i>
-            Nationality:
-            <input type="text" id="nationality" placeholder="e.g. Ghanaian">
-          </label>
-          <button id="setNationality" class="btn-secondary">Set Nationality</button>
-        </div>
-
-        <!-- Decorative “Stickers” -->
-        <i class="fas fa-pepper-hot sticker sticker-1"></i>
-        <i class="fas fa-carrot sticker sticker-2"></i>
-        <i class="fas fa-ice-cream sticker sticker-3"></i>
-        <i class="fas fa-apple-alt sticker" style="top:10%;left:15%;"></i>
-        <i class="fas fa-bread-slice sticker" style="top:20%;right:20%;"></i>
-        <i class="fas fa-lemon sticker" style="bottom:25%;left:10%;"></i>
-        <i class="fas fa-fish sticker" style="bottom:15%;right:15%;"></i>
-        <i class="fas fa-bacon sticker" style="top:50%;left:50%;"></i>
       </div>
+      <!-- Decorative Stickers (Avoid Overlapping Image) -->
+      <i class="fas fa-pepper-hot sticker sticker-1"></i>
+      <i class="fas fa-carrot sticker sticker-2"></i>
+      <i class="fas fa-ice-cream sticker sticker-3"></i>
+      <i class="fas fa-bread-slice sticker" style="top:5%;right:10%;"></i>
+      <i class="fas fa-lemon sticker" style="bottom:10%;left:12%;"></i>
+      <i class="fas fa-fish sticker" style="bottom:15%;right:15%;"></i>
     </section>
 
-    <!-- 1. Nutrition Chatbot -->
+    <!-- Nutrition Chatbot -->
     <section id="dietBot" class="module">
       <h2><i class="fas fa-comments"></i> Nutrition Chatbot</h2>
-      <p class="desc">Ask any diet or nutrition question and get instant, tailored advice.</p>
+      <p class="desc">Ask your diet or nutrition questions for instant, expert advice.</p>
       <div class="chat-controls">
         <button id="clearDiet" class="btn-secondary"><i class="fas fa-trash"></i> Clear Chat</button>
         <button id="viewDietHistory" class="btn-secondary"><i class="fas fa-history"></i> Chat History</button>
@@ -1048,10 +1029,10 @@
       <div id="dietHint" class="desc" style="display:none;">AI is thinking…</div>
     </section>
 
-    <!-- 2. Meal Plan Generator -->
+    <!-- Meal Plan Generator -->
     <section id="mealPlanner" class="module">
       <h2><i class="fas fa-calendar-alt"></i> Meal Plan Generator</h2>
-      <p class="desc">Create a 7-day meal plan that fits your calories, style, and restrictions.</p>
+      <p class="desc">Create a 7-day plan that fits your calories, style, and restrictions.</p>
       <form id="planner-form">
         <label>Daily Calories:
           <input type="number" id="calories" min="800" max="4000" value="2000" required>
@@ -1093,7 +1074,7 @@
       </div>
     </section>
 
-    <!-- 3. Nutrient Analyzer -->
+    <!-- Nutrient Analyzer -->
     <section id="nutriAnalyzer" class="module">
       <h2><i class="fas fa-vial"></i> Nutrient Analyzer</h2>
       <p class="desc">Get a complete macro and micronutrient breakdown of any recipe or meal log.</p>
@@ -1119,10 +1100,10 @@
       </div>
     </section>
 
-    <!-- 4. Recipe Recommender -->
+    <!-- Recipe Recommender -->
     <section id="recipeRec" class="module">
       <h2><i class="fas fa-book-open"></i> Recipe Recommender</h2>
-      <p class="desc">Transform your pantry into delicious meals across global cuisines.</p>
+      <p class="desc">Turn your pantry into delicious meals across global cuisines.</p>
       <form id="recipe-form">
         <label>Pantry Items:
           <input id="pantry" type="text" placeholder="e.g. Rice, Beans, Plantain">
@@ -1154,7 +1135,7 @@
       </div>
     </section>
 
-    <!-- 5. Deficiency Risk Scanner -->
+    <!-- Deficiency Risk Scanner -->
     <section id="deficiency" class="module">
       <h2><i class="fas fa-exclamation-triangle"></i> Deficiency Risk Scanner</h2>
       <p class="desc">Identify potential nutrient shortfalls based on symptoms and diet.</p>
@@ -1170,7 +1151,7 @@
             <label><input type="checkbox" name="symptom" value="Bruising"> Bruising</label>
             <label>
               <input type="checkbox" name="symptom" value="Other"> Other
-              <input type="text" id="otherSymptom" placeholder="Specify…" style="display:none; margin-left:.5rem;">
+              <input type="text" id="otherSymptom" class="other-input" placeholder="Specify…">
             </label>
           </div>
         </label>
@@ -1189,13 +1170,11 @@
       </div>
     </section>
 
-    <!-- 6. Metabolomic Risk Radar -->
+    <!-- Metabolomic Risk Radar -->
     <section id="riskRadar" class="module">
       <h2><i class="fas fa-chart-pie"></i> Metabolomic Risk Radar</h2>
       <p class="desc">
-        Continuous biomarker tracking (e.g. glucose, lipids) over any date range.
-        Generates an interactive risk “radar” chart and predictive health alerts based
-        on your trends. Enable “sync” for live updates.
+        Track biomarkers (e.g., glucose, lipids) over any date range to generate an interactive radar chart and predictive alerts.
       </p>
       <form id="risk-form">
         <label>Date Range:
@@ -1223,10 +1202,10 @@
       </div>
     </section>
 
-    <!-- 7. AI-Driven Fitness Nutrition Coach -->
+    <!-- AI-Driven Fitness Nutrition Coach -->
     <section id="fitnessCoach" class="module">
       <h2><i class="fas fa-dumbbell"></i> Fitness Nutrition Coach</h2>
-      <p class="desc">Tailor your macros, pre/post-workout blends, and recovery support.</p>
+      <p class="desc">Customize your macros, pre/post-workout blends, and recovery support.</p>
       <form id="fitness-form">
         <!-- 1. Performance Profiling -->
         <fieldset>
@@ -1255,7 +1234,7 @@
             <select id="blendIngredients" multiple>
               <option>Pea Protein</option><option>Beetroot Powder</option>
               <option>Taurine</option><option>Banana</option>
-              <option>Oats</option><option>Other</option>
+              <option>Oats</option><option value="Other">Other</option>
             </select>
             <input class="other-input" placeholder="Add ingredient…" style="display:none;">
           </label>
@@ -1282,7 +1261,7 @@
             <select id="nutraPref">
               <option>Curcumin</option><option>Omega-3</option>
               <option>Turmeric</option><option>Ginger</option>
-              <option>Other</option>
+              <option value="Other">Other</option>
             </select>
             <input class="other-input" placeholder="Specify…" style="display:none;">
           </label>
@@ -1299,10 +1278,10 @@
       </div>
     </section>
 
-    <!-- 8. Pharma-Integrated Nutrient & Medication Suite -->
+    <!-- Pharma-Integrated Nutrient & Medication Suite -->
     <section id="pharmaSuite" class="module">
-      <h2><i class="fas fa-pills"></i> Pharma-Integrated Nutrient & Medication Suite</h2>
-      <p class="desc">Drug–nutrient interactions, compounding suggestions, reminders &amp; analytics.</p>
+      <h2><i class="fas fa-pills"></i> Pharma-Integrated Nutrient &amp; Medication Suite</h2>
+      <p class="desc">Check drug–nutrient interactions, compounding suggestions, reminders &amp; analytics.</p>
       <form id="pharma-form">
         <!-- 1. Drug–Nutrient Interaction -->
         <fieldset>
@@ -1320,7 +1299,7 @@
           <label>Desired Outcome:
             <select id="compoundGoal">
               <option>Increased Absorption</option><option>Anti-inflammatory</option>
-              <option>Energy Boost</option><option>Other</option>
+              <option>Energy Boost</option><option value="Other">Other</option>
             </select>
             <input class="other-input" placeholder="Specify…" style="display:none;">
           </label>
@@ -1331,7 +1310,7 @@
           <label>Dosage Frequency:
             <select id="doseFreq">
               <option>Once daily</option><option>Twice daily</option>
-              <option>With meals</option><option>Other</option>
+              <option>With meals</option><option value="Other">Other</option>
             </select>
           </label>
           <label>Custom Schedule Notes:
@@ -1344,7 +1323,7 @@
           <label>Compare Cohort:
             <select id="cohortSelect">
               <option>Diet-only</option><option>Diet+Supplements</option>
-              <option>Diet+Meds</option><option>Other</option>
+              <option>Diet+Meds</option><option value="Other">Other</option>
             </select>
             <input class="other-input" placeholder="Specify…" style="display:none;">
           </label>
@@ -1361,10 +1340,10 @@
       </div>
     </section>
 
-    <!-- 9. Symptom-to-Treatment Advisor -->
+    <!-- Symptom-to-Treatment Advisor -->
     <section id="symptomAdvisor" class="module">
       <h2><i class="fas fa-user-md"></i> Symptom-to-Treatment Advisor</h2>
-      <p class="desc">Describe your symptoms and receive drug suggestions &amp; suitable Ghanaian foods.</p>
+      <p class="desc">Describe your symptoms and receive food &amp; OTC suggestions suitable for Ghana.</p>
       <form id="symptom-form">
         <label>Your Age:
           <input type="number" id="sympAge" min="1" max="120" required>
@@ -1387,24 +1366,24 @@
       </div>
     </section>
 
-    <!-- 10. Progress Charts -->
+    <!-- Progress Charts -->
     <section id="progressCharts" class="module">
       <h2><i class="fas fa-chart-line"></i> Progress Charts</h2>
       <canvas id="intakeChart"></canvas>
+      <button class="export-chart-btn" type="button">Export Chart</button>
       <canvas id="macroChart"></canvas>
+      <button class="export-chart-btn" type="button">Export Chart</button>
     </section>
 
-    <!-- 11. Meet a Dietetics Health Expert -->
+    <!-- Meet a Nutrition Expert -->
     <section id="meet-expert" class="module meet-module">
       <div class="meet-content">
         <div class="meet-icon">
           <i class="fas fa-user-md"></i>
         </div>
         <div class="meet-text">
-          <h2>Meet a<br/>Registered Dietitian</h2>
-          <p>
-            Schedule one-on-one sessions with licensed dietitians for personalized meal plans, nutrient advice, and evidence-based strategies.
-          </p>
+          <h2>Meet a Nutrition Expert</h2>
+          <p>Schedule a one-on-one with our registered dietitian for personalized meal guidance, supplement advice, and evidence-based strategies.</p>
           <a href="consult.html" class="btn-schedule">
             <i class="fas fa-calendar-check"></i> Schedule Consultation
           </a>
@@ -1413,608 +1392,656 @@
     </section>
   </main>
 
+
   <!-- Chart.js & App Logic -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  <script>
-    document.addEventListener('DOMContentLoaded', () => {
-      // Prevent default form submissions
-      document.querySelectorAll('form').forEach(f =>
-        f.addEventListener('submit', e => e.preventDefault())
-      );
+ 
+</body>
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  //────────────────── Global State & Helpers ──────────────────
+  let userNationality = '';
+  // Disable all interactive modules until nationality is set
+  const moduleSections = [
+    'dietBot', 'mealPlanner', 'nutriAnalyzer', 'recipeRec',
+    'deficiency', 'riskRadar', 'fitnessCoach', 'pharmaSuite',
+    'symptomAdvisor', 'progressCharts'
+  ];
+  moduleSections.forEach(id => {
+    const sec = document.getElementById(id);
+    if (sec) sec.classList.add('disabled');
+  });
 
-      // ── Global State
-      let userNationality = localStorage.getItem('nationality') || '';
-      if (userNationality) document.getElementById('nationality').value = userNationality;
+  // Retrieve saved nationality (if any)
+  if (localStorage.getItem('dieteticsNationality')) {
+    userNationality = localStorage.getItem('dieteticsNationality');
+    document.getElementById('nationality').value = userNationality;
+    enableModules();
+  }
 
-      // ── Inject shared CSS for toasts/spinners
-      (function(){
-        const css = \`
-          .toast { position:fixed; bottom:2rem; left:50%; transform:translateX(-50%) translateY(100%); 
-            background:var(--color-primary-alt); color:#fff; padding:.75rem 1.5rem; border-radius:var(--radius);
-            opacity:0; transition:transform .3s, opacity .3s; z-index:2000; }
-          .toast.visible { transform:translateX(-50%) translateY(0); opacity:1; }
-          .spinner { border:4px solid rgba(0,0,0,0.1); border-top:4px solid var(--color-primary);
-            border-radius:50%; width:24px; height:24px; animation:spin .8s linear infinite; margin:1rem auto; }
-          @keyframes spin { to{transform:rotate(360deg);} }
-          .spin-text { text-align:center; margin-top:.5rem; font-style:italic; color:var(--color-muted); }
-          .response.waiting .close-btn,
-          .response.waiting .tool-row { display:none!important; }
-          .export-chart-btn { margin-top:.5rem; padding:.25rem .5rem; background:var(--color-secondary);
-            color:#fff; border:none; border-radius:.5rem; cursor:pointer; }
-        \`;
-        const s = document.createElement('style');
-        s.textContent = css;
-        document.head.append(s);
-      })();
-
-      // ── Helpers
-      function showToast(msg) {
-        const t = document.createElement('div');
-        t.className = 'toast';
-        t.innerText = msg;
-        document.body.append(t);
-        requestAnimationFrame(() => t.classList.add('visible'));
-        setTimeout(() => t.classList.remove('visible'), 1800);
-        setTimeout(() => t.remove(), 2200);
+  // Inject toast & spinner CSS (if not already present in <style>)
+  (function(){
+    const css = `
+      .toast {
+        position: fixed;
+        bottom: 2rem;
+        left: 50%;
+        transform: translateX(-50%) translateY(100%);
+        background: var(--color-primary-alt);
+        color: #fff;
+        padding: .75rem 1.5rem;
+        border-radius: var(--radius);
+        opacity: 0;
+        transition: transform .3s, opacity .3s;
+        z-index: 2000;
       }
-
-      // Enhanced OpenAI caller with 1 retry on timeout
-      async function callOpenAI(messages, retries = 1) {
-        try {
-          const res = await fetch('/.netlify/functions/openai-proxy', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ messages })
-          });
-          if (!res.ok) {
-            const errText = await res.text();
-            throw new Error(\`OpenAI error \${res.status}: \${errText}\`);
-          }
-          const j = await res.json();
-          if (!j.choices?.[0]?.message?.content) {
-            throw new Error(\`Malformed response: \${JSON.stringify(j)}\`);
-          }
-          return j.choices[0].message.content;
-        } catch (err) {
-          if (retries > 0 && err.message.includes('Sandbox.Timedout')) {
-            await new Promise(r => setTimeout(r, 1000));
-            return callOpenAI(messages, retries - 1);
-          }
-          throw err;
-        }
+      .toast.visible {
+        transform: translateX(-50%) translateY(0);
+        opacity: 1;
       }
+      .spinner {
+        border: 4px solid rgba(0,0,0,0.1);
+        border-top: 4px solid var(--color-primary);
+        border-radius: 50%;
+        width: 24px;
+        height: 24px;
+        animation: spin 0.8s linear infinite;
+        margin: 1rem auto;
+      }
+      @keyframes spin { to { transform: rotate(360deg); } }
+      .spin-text {
+        text-align: center;
+        margin-top: .5rem;
+        font-style: italic;
+        color: var(--color-muted);
+      }
+      .response.waiting .close-btn,
+      .response.waiting .tool-row {
+        display: none !important;
+      }
+      .export-chart-btn {
+        margin-top: .5rem;
+        padding: .25rem .5rem;
+        background: var(--color-secondary);
+        color: #fff;
+        border: none;
+        border-radius: .5rem;
+        cursor: pointer;
+      }
+    `;
+    const styleTag = document.createElement('style');
+    styleTag.textContent = css;
+    document.head.append(styleTag);
+  })();
 
-      function formatHTML(txt) {
-        const lines = txt.split('\\n');
-        let html = '', i = 0;
-        function esc(str) {
-          return str.replace(/&/g,'&amp;')
-                    .replace(/</g,'&lt;')
-                    .replace(/>/g,'&gt;');
-        }
-        function renderList(startIdx, ordered) {
-          const tag = ordered ? 'ol' : 'ul';
-          html += \`<\${tag}>\`;
-          while (startIdx < lines.length) {
-            const line = lines[startIdx];
-            const m = ordered
-              ? line.match(/^\\s*\\d+\\.\\s+(.*)/)
-              : line.match(/^\\s*[-+*]\\s+(.*)/);
-            if (!m) break;
-            html += \`<li>\${inline(m[1].trim())}</li>\`;
-            startIdx++;
-          }
-          html += \`</\${tag}>\`;
-          return startIdx;
-        }
-        function inline(str) {
-          return esc(str)
-            .replace(/`([^`]+)`/g, '<code>$1</code>')
-            .replace(/\\*\\*(.+?)\\*\\*/g, '<strong>$1</strong>')
-            .replace(/\\*(.+?)\\*/g, '<em>$1</em>');
-        }
-        while (i < lines.length) {
-          const line = lines[i].trim();
-          if (line.startsWith('```')) {
-            const lang = line.slice(3).trim() || '';
-            i++;
-            let code = '';
-            while (i < lines.length && !lines[i].startsWith('```')) {
-              code += esc(lines[i]) + '\\n';
-              i++;
-            }
-            html += \`<pre><code class="language-\${lang}">\${code}</code></pre>\`;
-            i++;
-            continue;
-          }
-          if (/^(-{3,}|\\*{3,})$/.test(line)) {
-            html += '<hr>';
-            i++;
-            continue;
-          }
-          if (/^#{1,4}\\s/.test(line)) {
-            const level = line.match(/^#+/)[0].length;
-            const text  = line.slice(level).trim();
-            html += \`<h\${level}>\${inline(text)}</h\${level}>\`;
-            i++;
-            continue;
-          }
-          if (line.startsWith('>')) {
-            const text = line.replace(/^>\\s?/, '');
-            html += \`<blockquote>\${inline(text)}</blockquote>\`;
-            i++;
-            continue;
-          }
-          if (/^\\s*\\d+\\.\\s+/.test(line)) {
-            i = renderList(i, true);
-            continue;
-          }
-          if (/^\\s*[-+*]\\s+/.test(line)) {
-            i = renderList(i, false);
-            continue;
-          }
-          if (line.includes('|') && i+1 < lines.length) {
-            const delim = lines[i+1].trim();
-            if (/^\\|?[:\\- ]+\\|[:\\- ]+(\\|[:\\- ]+)*$/.test(delim)) {
-              const headers = lines[i].replace(/^\\||\\|$/g,'').split('|').map(h=>h.trim());
-              i += 2;
-              const rows = [];
-              while (i < lines.length && lines[i].includes('|')) {
-                rows.push(lines[i].replace(/^\\||\\|$/g,'').split('|').map(c=>c.trim()));
-                i++;
-              }
-              html += '<table><thead><tr>' +
-                      headers.map(h=>\`<th>\${inline(h)}</th>\`).join('') +
-                      '</tr></thead><tbody>';
-              rows.forEach(r => {
-                html += '<tr>' + r.map(c=>\`<td>\${inline(c)}</td>\`).join('') + '</tr>';
-              });
-              html += '</tbody></table>';
-              continue;
-            }
-          }
-          if (line) {
-            html += \`<p>\${inline(line)}</p>\`;
-          }
+  function showToast(msg) {
+    const t = document.createElement('div');
+    t.className = 'toast';
+    t.innerText = msg;
+    document.body.appendChild(t);
+    requestAnimationFrame(() => t.classList.add('visible'));
+    setTimeout(() => t.classList.remove('visible'), 1800);
+    setTimeout(() => t.remove(), 2200);
+  }
+
+  async function callOpenAI(messages, retries = 1) {
+    try {
+      const res = await fetch('/.netlify/functions/openai-proxy', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ messages })
+      });
+      if (!res.ok) {
+        const errText = await res.text();
+        throw new Error(`OpenAI error ${res.status}: ${errText}`);
+      }
+      const j = await res.json();
+      if (!j.choices?.[0]?.message?.content) {
+        throw new Error(`Malformed response: ${JSON.stringify(j)}`);
+      }
+      return j.choices[0].message.content;
+    } catch (err) {
+      if (retries > 0 && err.message.includes('Sandbox.Timedout')) {
+        await new Promise(r => setTimeout(r, 1000));
+        return callOpenAI(messages, retries - 1);
+      }
+      throw err;
+    }
+  }
+
+  function escapeHTML(str) {
+    return str.replace(/&/g,'&amp;')
+              .replace(/</g,'&lt;')
+              .replace(/>/g,'&gt;');
+  }
+
+  function formatHTML(txt) {
+    const lines = txt.split('\n');
+    let html = '', i = 0;
+    function inline(s) {
+      return escapeHTML(s)
+        .replace(/`([^`]+)`/g, '<code>$1</code>')
+        .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+        .replace(/\*(.+?)\*/g, '<em>$1</em>')
+        .replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" target="_blank">$1</a>');
+    }
+    function renderList(idx, ordered) {
+      const tag = ordered ? 'ol' : 'ul';
+      html += `<${tag}>`;
+      while (idx < lines.length) {
+        const line = lines[idx];
+        const m = ordered
+          ? line.match(/^\s*\d+\.\s+(.*)/)
+          : line.match(/^\s*[-+*]\s+(.*)/);
+        if (!m) break;
+        html += `<li>${inline(m[1].trim())}</li>`;
+        idx++;
+      }
+      html += `</${tag}>`;
+      return idx;
+    }
+    while (i < lines.length) {
+      const line = lines[i].trim();
+      if (line.startsWith('```')) {
+        const lang = line.slice(3).trim();
+        i++;
+        let code = '';
+        while (i < lines.length && !lines[i].startsWith('```')) {
+          code += escapeHTML(lines[i]) + '\n';
           i++;
         }
-        return html;
+        html += `<pre><code class="language-${lang}">${code}</code></pre>`;
+        i++;
+        continue;
       }
-
-      function getSelectValue(sel) {
-        const oi = sel.parentElement.querySelector('.other-input');
-        return (oi && sel.value === 'Other') ? oi.value.trim() : sel.value;
+      if (/^(-{3,}|\*{3,})$/.test(line)) {
+        html += '<hr>';
+        i++;
+        continue;
       }
-
-      const PHASE_TEXT = {
-        heroSearchBtn:'Searching recipes…', refreshTip:'Loading tip…',
-        refreshMacro:'Updating macro snapshot…', genPlan:'Generating plan…',
-        analyzeNutri:'Analyzing nutrition…', getRecipes:'Recommending recipes…',
-        scanDef:'Scanning deficiencies…', runRisk:'Running radar…',
-        runFitness:'Generating fitness plan…', runPharma:'Running pharma suite…',
-        runSymptom:'Diagnosing symptoms…'
-      };
-
-      // ── Hero handler (Recipe Search, Tip, etc.)
-      async function handleHero(btnId, panelId, sysPrompt, qFn) {
-        const q = qFn();
-        if (!q) return showToast('Please enter a value.');
-        const panel = document.getElementById(panelId);
-        panel.hidden = false;
-        panel.classList.add('waiting');
-        panel.querySelector('.result-content').innerHTML =
-          \`<div class="spinner"></div>
-           <div class="spin-text">\${PHASE_TEXT[btnId]||'Please wait…'}</div>\`;
-        try {
-          const reply = await callOpenAI([
-            {role:'system',content:\`Nationality: \${userNationality}\`},
-            {role:'system',content:sysPrompt},
-            {role:'user',content:q}
-          ]);
-          panel.querySelector('.result-content').innerHTML = formatHTML(reply);
-        } catch (err) {
-          console.error(err);
-          panel.querySelector('.result-content').innerText =
-            err.message.includes('Sandbox.Timedout')
-              ? '⚠️ Server busy, please try again.'
-              : \`⚠️ \${err.message}\`;
-        } finally {
-          panel.classList.remove('waiting');
-        }
+      if (/^#{1,4}\s/.test(line)) {
+        const lvl = line.match(/^#+/)[0].length;
+        const text = line.slice(lvl).trim();
+        html += `<h${lvl}>${inline(text)}</h${lvl}>`;
+        i++;
+        continue;
       }
-
-      // Wire Hero buttons
-      document.getElementById('heroSearchBtn').type='button';
-      document.getElementById('heroSearchBtn').onclick = () =>
-        handleHero('heroSearchBtn','recipeSearchPanel',
-          'You are a recipe finder.',
-          () => document.getElementById('heroRecipeSearch').value.trim()
-        );
-
-      document.getElementById('refreshTip').type='button';
-      document.getElementById('refreshTip').onclick = () =>
-        handleHero('refreshTip','dailyTip',
-          'You are a nutrition tip generator.',
-          () => 'Give one daily nutrition tip.'
-        );
-      // auto-load today's tip
-      handleHero('refreshTip','dailyTip',
-        'You are a nutrition tip generator.',()=>'Give one daily nutrition tip.');
-
-      // Macro snapshot chart injection & update
-      const heroMacroCanvas = document.createElement('canvas');
-      heroMacroCanvas.id='heroMacroChart';
-      document.querySelector('#hero .feature-card:nth-child(3)')
-              .append(heroMacroCanvas);
-      const macroDesc = document.createElement('p');
-      macroDesc.className='macro-desc';
-      macroDesc.innerText='This pie chart shows your macro distribution (%).';
-      document.querySelector('#hero .feature-card:nth-child(3)')
-              .append(macroDesc);
-
-      const heroMacroChart = new Chart(heroMacroCanvas.getContext('2d'), {
-        type:'pie',
-        data:{labels:['Carbs','Protein','Fat'],datasets:[{data:[1,1,1]}]},
-        options:{animation:false,maintainAspectRatio:true,layout:{padding:10}}
-      });
-
-      const refreshMacroBtn = document.getElementById('refreshMacro');
-      refreshMacroBtn.type='button';
-      refreshMacroBtn.onclick = async () => {
-        const panel = document.getElementById('macroSnapshot');
-        panel.classList.add('waiting');
-        panel.innerHTML = \`<div class="spinner"></div>
-          <div class="spin-text">\${PHASE_TEXT.refreshMacro}</div>\`;
-        try {
-          const reply = await callOpenAI([
-            {role:'system',content:\`Nationality: \${userNationality}\`},
-            {role:'system',content:'You are a macro snapshot AI.'},
-            {role:'user',content:'Provide protein/carbs/fat percentages.'}
-          ]);
-          const nums = reply.match(/\\d+/g)?.map(Number) || [];
-          if (nums.length>=3) {
-            heroMacroChart.data.datasets[0].data=[nums[0],nums[1],nums[2]];
-            heroMacroChart.update();
-            panel.innerText=\`Protein: \${nums[1]}% / Carbs: \${nums[0]}% / Fat: \${nums[2]}%\`;
-          } else {
-            panel.innerText='⚠️ Unexpected response.';
+      if (line.startsWith('>')) {
+        html += `<blockquote>${inline(line.slice(1).trim())}</blockquote>`;
+        i++;
+        continue;
+      }
+      if (/^\s*\d+\.\s+/.test(line)) {
+        i = renderList(i, true);
+        continue;
+      }
+      if (/^\s*[-+*]\s+/.test(line)) {
+        i = renderList(i, false);
+        continue;
+      }
+      if (line.includes('|') && i + 1 < lines.length) {
+        const delim = lines[i+1].trim();
+        if (/^\|?[:\- ]+\|[:\- ]+(\|[:\- ]+)*$/.test(delim)) {
+          const headers = lines[i].replace(/^\||\|$/g,'').split('|').map(h=>h.trim());
+          i += 2;
+          const rows = [];
+          while (i < lines.length && lines[i].includes('|')) {
+            rows.push(lines[i].replace(/^\||\|$/g,'').split('|').map(c=>c.trim()));
+            i++;
           }
-        } catch(err) {
-          console.error(err);
-          panel.innerText= err.message.includes('Sandbox.Timedout')
-            ? '⚠️ Server busy—please try again.' : '⚠️ Error';
-        } finally {
-          panel.classList.remove('waiting');
-        }
-      };
-      // auto-load macro
-      refreshMacroBtn.click();
-
-      // ── Generic module wiring helper
-      function wire(btnId, fields, required, sysPrompt) {
-        const btn = document.getElementById(btnId);
-        btn.type='button';
-        btn.onclick = async () => {
-          // validation
-          for (const id of required) {
-            if (id==='symptoms') {
-              if (!document.querySelector('input[name="symptom"]:checked'))
-                return showToast('Select at least one symptom.');
-            } else {
-              const el=document.getElementById(id);
-              if (!el||!el.value.trim())
-                return showToast('Please fill in all required fields.');
-            }
-          }
-          // find panel ID
-          let pid = btnId==='getRecipes'
-            ? 'recipePanel'
-            : btnId.replace(/^(send|gen|analyze|get|scan|run)/, '')
-                .replace(/^./,c=>c.toLowerCase()) + 'Panel';
-
-          const panel = document.getElementById(pid);
-          panel.hidden=false;
-          panel.classList.add('waiting');
-          panel.querySelector('.result-content').innerHTML =
-            \`<div class="spinner"></div>
-             <div class="spin-text">\${PHASE_TEXT[btnId]||'Please wait…'}</div>\`;
-          // build user content
-          let content='';
-          for (const id of fields) {
-            if (id==='symptoms') {
-              let vals = Array.from(document.querySelectorAll('input[name="symptom"]:checked'))
-                .map(cb=>cb.value).join(', ');
-              if (document.getElementById('otherSymptom').value) {
-                vals += ', ' + document.getElementById('otherSymptom').value.trim();
-              }
-              content+=\`symptoms: \${vals}\n\`;
-            } else {
-              const el=document.getElementById(id);
-              if (!el) continue;
-              if (el.tagName==='SELECT'&&el.multiple) {
-                content+=\`\${id}: \${[...el.selectedOptions].map(o=>o.value).join(', ')}\n\`;
-              } else if (el.tagName==='SELECT') {
-                content+=\`\${id}: \${getSelectValue(el)}\n\`;
-              } else content+=\`\${id}: \${el.value}\n\`;
-            }
-          }
-          // call AI
-          try {
-            const reply = await callOpenAI([
-              {role:'system',content:\`Nationality: \${userNationality}\`},
-              {role:'system',content:sysPrompt},
-              {role:'user',content}
-            ]);
-            panel.querySelector('.result-content').innerHTML = formatHTML(reply);
-          } catch (err) {
-            console.error(err);
-            panel.querySelector('.result-content').innerText =
-              err.message.includes('Sandbox.Timedout')
-                ? '⚠️ Server busy—please try again.'
-                : \`⚠️ \${err.message}\`;
-          } finally {
-            panel.classList.remove('waiting');
-          }
-        };
-      }
-
-      document.querySelector('input[value="Other"][name="symptom"]')
-      .addEventListener('change', e => {
-        document.getElementById('otherSymptom').style.display = e.target.checked ? 'inline-block' : 'none';
-      });
-
-      // ── Wire all your modules
-      wire('genPlan',     ['calories','dietType','allergyList','budget'], ['calories','dietType'],
-           \`You are an expert registered dietitian. Given the user’s daily calorie target, diet type, allergies/intolerances, and budget, generate a detailed 7-day meal plan with macros and shopping list.\`);
-      wire('analyzeNutri',['foodLog','unitSelect'], ['foodLog'],
-           \`You are a nutrition scientist. Analyze the user’s food log and unit preference; produce a macro/micronutrient breakdown with totals and commentary.\`);
-      wire('getRecipes',['pantry','cuisineType','recipeDifficulty','maxTime'], ['pantry'],
-           \`You are a professional chef AI. Given pantry items, cuisine, difficulty, and max prep time, recommend 3 original recipes with ingredients, steps, times.\`);
-      wire('scanDef',   ['symptoms','dietOverview'], ['symptoms'],
-           \`You are a clinical dietitian. Identify potential nutrient deficiencies from symptoms and diet, rank them, and give recommendations.\`);
-      wire('runRisk',   ['riskFrom','riskTo','syncBiomarkers','biomarkers','conditions','context'],
-           ['riskFrom','riskTo','biomarkers','conditions','context'],
-           \`You are a metabolomic health analyst. Generate a risk radar for biomarkers in date range; interpret trends and alert.\`);
-      {
-        // After runRisk, build the radar chart from AI response
-        const runRiskBtn = document.getElementById('runRisk');
-        runRiskBtn.addEventListener('click', async () => {
-          const panel = document.getElementById('riskPanel');
-          setTimeout(() => {
-            const text = panel.querySelector('.result-content').innerText;
-            const matches = [...text.matchAll(/(\\w+):\\s*(\\d+)/g)];
-            if (!matches.length) return;
-            const labels = matches.map(m => m[1]);
-            const data   = matches.map(m => Number(m[2]));
-            const old = panel.querySelector('canvas');
-            if (old) old.remove();
-            const canvas = document.createElement('canvas');
-            panel.appendChild(canvas);
-            new Chart(canvas.getContext('2d'), {
-              type: 'radar',
-              data: {
-                labels,
-                datasets: [{
-                  label: 'Biomarker Levels',
-                  data
-                }]
-              },
-              options: { responsive: true, maintainAspectRatio: false }
-            });
-          }, 500);
-        });
-      }
-
-      wire('runFitness',['fitGoal','fitFreq','blendIngredients','carbDate','intensity','crpLevel','nutraPref'],
-           ['fitGoal','fitFreq'],
-           \`You are a certified sports nutritionist. Based on goals, freq, ingredients, dates, intensity, CRP, nutraceuticals, create a fitness nutrition plan.\`);
-      wire('runPharma', ['medList','foodList','compoundGoal','doseFreq','scheduleNotes','cohortSelect'],
-           ['medList'],
-           \`You are a pharmacologist-dietitian. Analyze drug-food interactions, suggest compounding, schedule reminders, and provide analytics.\`);
-      wire('runSymptom',['sympAge','sympDesc','foodPref'], ['sympAge','sympDesc'],
-           \`You are a medical nutrition therapist. Diagnose conditions from age, symptoms, and food preferences; recommend OTC treatments and foods.\`);
-
-      // ── Nutrition Chatbot wiring
-      const chatBox = document.getElementById('dietChatBox'),
-            chatHint= document.getElementById('dietHint');
-      let history = JSON.parse(localStorage.getItem('chatHistory')||'[]');
-      history.forEach(m=> addChat(m.who,m.text,m.timestamp));
-
-      function addChat(who, txt, isoTs) {
-        const d = isoTs ? new Date(isoTs) : new Date();
-        const today = new Date();
-        if (chatBox.children.length===0 && d.toDateString()===today.toDateString()) {
-          const sep = document.createElement('div');
-          sep.className='date-separator';
-          sep.innerText='Today';
-          chatBox.append(sep);
-        }
-        const m = document.createElement('div');
-        m.className = who==='You' ? 'user-msg':'bot-msg';
-        const timeLabel = d.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit", hour12: true });
-        m.innerHTML = \`\${formatHTML(txt)}<div class="timestamp">\${timeLabel}</div>\`;
-        chatBox.append(m);
-        chatBox.scrollTop = chatBox.scrollHeight;
-      }
-
-      document.getElementById('sendDiet').type='button';
-      document.getElementById('sendDiet').onclick = async () => {
-        const q = document.getElementById('dietInput').value.trim();
-        if (!q) return showToast('Please type a question.');
-        addChat('You',q);
-        const now=new Date();
-        history.push({who:'You',text:q,timestamp:now.toISOString()});
-        localStorage.setItem('chatHistory',JSON.stringify(history));
-        document.getElementById('dietInput').value='';
-        chatHint.style.display='block';
-        try {
-          const reply = await callOpenAI([
-            {role:'system',content:\`Nationality: \${userNationality}\`},
-            {role:'system',content:'You are a dietetics assistant.'},
-            {role:'user',content:q}
-          ]);
-          const now2=new Date();
-          addChat('AI',reply,now2.toISOString());
-          history.push({who:'AI',text:reply,timestamp:now2.toISOString()});
-          localStorage.setItem('chatHistory',JSON.stringify(history));
-        } catch(err) {
-          console.error(err);
-          addChat('AI',err.message.includes('Sandbox.Timedout')
-            ? '⚠️ Server busy—please try again.'
-            : \`⚠️ \${err.message}\`);
-        } finally {
-          chatHint.style.display='none';
-        }
-      };
-
-      document.getElementById('clearDiet').type='button';
-      document.getElementById('clearDiet').onclick = () => { chatBox.innerHTML=''; };
-
-      document.getElementById('viewDietHistory').type='button';
-      document.getElementById('viewDietHistory').onclick = () => {
-        const modal = document.createElement('div');
-        modal.className='history-modal';
-        modal.innerHTML=\`
-          <div class="modal-content">
-            <h3>Chat History</h3>
-            <ul>
-              \${history.map((m,i) => \`
-                <li data-index="\${i}">
-                  <div class="history-date">\${new Date(m.timestamp).toLocaleDateString()}</div>
-                  <div class="history-msg"><strong>\${m.who}:</strong> \${m.text}</div>
-                  <button class="delete-btn" data-i="\${i}"><i class="fas fa-trash"></i></button>
-                </li>\`).join('')}
-            </ul>
-            <div class="button-row">
-              <button class="clear-all-btn">Delete Chat History</button>
-              <button class="close-modal">Close</button>
-            </div>
-          </div>\`;
-        document.body.append(modal);
-        modal.querySelectorAll('.delete-btn').forEach(b=>b.onclick=()=>{
-          const idx = Number(b.dataset.i);
-          history.splice(idx,1);
-          localStorage.setItem('chatHistory',JSON.stringify(history));
-          const li = modal.querySelector(\`li[data-index="\${idx}"]\`);
-          if (li) li.remove();
-          modal.querySelectorAll('li').forEach((node, ni) => {
-            node.dataset.index = ni;
-            node.querySelector('.delete-btn').dataset.i = ni;
+          html += '<table><thead><tr>' + headers.map(h=>`<th>${inline(h)}</th>`).join('') + '</tr></thead><tbody>';
+          rows.forEach(r => {
+            html += '<tr>' + r.map(c=>`<td>${inline(c)}</td>`).join('') + '</tr>';
           });
-        });
-        modal.querySelector('.clear-all-btn').onclick=()=>{
-          history=[]; localStorage.removeItem('chatHistory');
-          modal.querySelector('ul').innerHTML='';
-        };
-        modal.querySelector('.close-modal').onclick=()=>modal.remove();
-      };
-
-      // ── Response panel controls
-      document.body.addEventListener('click', e=>{
-        const rp = e.target.closest('.response');
-        if (!rp) return;
-        if (e.target.closest('.close-btn')) { rp.hidden=true; return; }
-        if (e.target.closest('.copy-btn')) {
-          const txt=rp.querySelector('.result-content').innerText;
-          navigator.clipboard.writeText(txt).then(()=>showToast('Copied!'));
-          return;
+          html += '</tbody></table>';
+          continue;
         }
-        if (e.target.closest('.dl-btn')) {
-          const txt=rp.querySelector('.result-content').innerText;
-          const blob=new Blob([txt],{type:'text/plain'});
-          const a=document.createElement('a');
-          a.href=URL.createObjectURL(blob);
-          a.download='response.txt';
-          a.click();
-        }
-      });
+      }
+      if (line) {
+        html += `<p>${inline(line)}</p>`;
+      }
+      i++;
+    }
+    return html;
+  }
 
-      // ── Sidebar & dark mode toggles
-      document.getElementById('hamburger').type='button';
-      document.getElementById('hamburger').onclick=()=>
-        document.body.classList.toggle('sidebar-open');
-      document.getElementById('shrinkSidebar').type='button';
-      document.getElementById('shrinkSidebar').onclick=()=>{
-        const sb=document.getElementById('sidebar');
-        sb.classList.toggle('collapsed');
-        const left=sb.classList.contains('collapsed')
-          ? 'var(--sidebar-collapsed)' : 'var(--sidebar-width)';
-        document.querySelector('header').style.left=left;
-        document.querySelector('main').style.marginLeft=left;
-        const icon=document.querySelector('#shrinkSidebar i');
-        icon.classList.toggle('fa-angle-double-left');
-        icon.classList.toggle('fa-angle-double-right');
-      };
-      document.getElementById('themeToggle').type='button';
-      document.getElementById('themeToggle').onclick=()=>{
-        document.documentElement.classList.toggle('dark');
-        const icon=document.getElementById('themeToggle');
-        icon.classList.toggle('fa-moon');
-        icon.classList.toggle('fa-sun');
-      };
-
-      // ── “Other” inputs
-      document.querySelectorAll('select').forEach(sel=>
-        sel.onchange=()=>{
-          const oi=sel.parentElement.querySelector('.other-input');
-          if (oi) oi.style.display = sel.value==='Other'?'block':'none';
-        }
-      );
-
-      // ── Nationality setter
-      document.getElementById('setNationality').type='button';
-      document.getElementById('setNationality').onclick=()=>{
-        const v=document.getElementById('nationality').value.trim();
-        if (!v) return showToast('Enter your nationality.');
-        localStorage.setItem('nationality',v);
-        userNationality=v;
-        showToast(\`Nationality set to \${v}\`);
-      };
-
-      // ── Progress charts + export
-      const ctx1=document.getElementById('intakeChart').getContext('2d');
-      const intakeChart=new Chart(ctx1,{ type:'line',
-        data:{ labels:['Mon','Tue','Wed','Thu','Fri','Sat','Sun'],
-          datasets:[{ label:'Calories In', data:[2000,1800,2100,1900,2050,1950,2200],
-            borderColor:getComputedStyle(document.documentElement)
-              .getPropertyValue('--color-secondary').trim(),
-            fill:false }] }
-      });
-      const exp1=document.createElement('button');
-      exp1.innerText='Export Chart'; exp1.className='export-chart-btn';
-      exp1.type='button'; document.getElementById('intakeChart').after(exp1);
-      exp1.onclick=()=>{
-        const csv = [
-          ['Day','Calories'],
-          ...intakeChart.data.labels.map((d,i) => [d,intakeChart.data.datasets[0].data[i]])
-        ].map(r => r.join(',')).join('\\n');
-        const blob = new Blob([csv], { type: 'text/csv' });
-        const a = document.createElement('a');
-        a.href = URL.createObjectURL(blob);
-        a.download = 'intake-data.csv';
-        a.click();
-      };
-
-      const ctx2=document.getElementById('macroChart').getContext('2d');
-      const macroChart=new Chart(ctx2,{ type:'pie',
-        data:{ labels:['Carbs','Protein','Fat'], datasets:[{ data:[50,25,25] }] }
-      });
-      const exp2=document.createElement('button');
-      exp2.innerText='Export Chart'; exp2.className='export-chart-btn';
-      exp2.type='button'; document.getElementById('macroChart').after(exp2);
-      exp2.onclick=()=>{
-        const csv = [
-          ['Macro','Percent'],
-          ...macroChart.data.labels.map((m,i)=>[m,macroChart.data.datasets[0].data[i]])
-        ].map(r=>r.join(',')).join('\\n');
-        const blob = new Blob([csv], { type: 'text/csv' });
-        const a = document.createElement('a');
-        a.href = URL.createObjectURL(blob);
-        a.download = 'macro-data.csv';
-        a.click();
-      };
+  function enableModules() {
+    moduleSections.forEach(id => {
+      const sec = document.getElementById(id);
+      if (sec) sec.classList.remove('disabled');
     });
-  </script>
-</body>
+  }
+
+  //────────────────── Hero: Nationality & Tip ──────────────────
+  const tipPanel = document.getElementById('dailyTip');
+  const tipContent = tipPanel.querySelector('.result-content');
+  const tipClose = tipPanel.querySelector('.close-btn');
+  tipClose.addEventListener('click', () => tipPanel.hidden = true);
+
+  document.getElementById('setNationality').addEventListener('click', () => {
+    const v = document.getElementById('nationality').value.trim();
+    if (!v) return showToast('Please enter your nationality.');
+    userNationality = v;
+    localStorage.setItem('dieteticsNationality', v);
+    showToast(`Nationality set to ${v}`);
+    enableModules();
+  });
+
+  async function loadNutritionTip() {
+    tipPanel.hidden = false;
+    tipPanel.classList.add('waiting');
+    tipContent.innerHTML = `<div class="spinner"></div><div class="spin-text">Loading tip…</div>`;
+    try {
+      // Generate a simple nutrition tip based on nationality context
+      const tip = await callOpenAI([
+        { role: 'system', content: `Nationality: ${userNationality}` },
+        { role: 'system', content: 'You are a nutrition expert. Provide one concise daily nutrition tip that might resonate with someone of the given nationality.' },
+        { role: 'user', content: 'Generate a nutrition tip.' }
+      ]);
+      tipContent.innerHTML = formatHTML(tip);
+    } catch (err) {
+      console.error(err);
+      tipContent.innerText = err.message.includes('Sandbox.Timedout')
+        ? '⚠️ Server busy, please try again.'
+        : `⚠️ ${err.message}`;
+    } finally {
+      tipPanel.classList.remove('waiting');
+    }
+  }
+
+  // Auto-load tip on page load if nationality is set
+  if (userNationality) loadNutritionTip();
+  document.getElementById('refreshTip').addEventListener('click', () => {
+    if (!userNationality) return showToast('Set nationality first.');
+    loadNutritionTip();
+  });
+
+  //────────────────── Generic Wiring Utility ──────────────────
+  function getSelectValue(sel) {
+    const other = sel.parentElement.querySelector('.other-input');
+    return (other && sel.value === 'Other') ? other.value.trim() : sel.value;
+  }
+
+  const PHASE_TEXT = {
+    genPlan: 'Generating meal plan…',
+    analyzeNutri: 'Analyzing nutrients…',
+    getRecipes: 'Recommending recipes…',
+    scanDef: 'Scanning deficiencies…',
+    runRisk: 'Running risk radar…',
+    runFitness: 'Generating fitness plan…',
+    runPharma: 'Running pharma suite…',
+    runSymptom: 'Diagnosing symptoms…'
+  };
+
+  async function handleModule(btnId, fieldIds, requiredIds, sysPrompt, panelId) {
+    if (!userNationality) return showToast('Set your nationality before proceeding.');
+    // Validate required fields
+    for (const rid of requiredIds) {
+      if (rid === 'symptoms') {
+        const checked = document.querySelectorAll('input[name="symptom"]:checked');
+        if (checked.length === 0) return showToast('Select at least one symptom.');
+      } else {
+        const el = document.getElementById(rid);
+        if (!el || !el.value.trim()) return showToast('Please fill all required fields.');
+      }
+    }
+    const panel = document.getElementById(panelId);
+    panel.hidden = false;
+    panel.classList.add('waiting');
+    panel.querySelector('.result-content').innerHTML =
+      `<div class="spinner"></div><div class="spin-text">${PHASE_TEXT[btnId] || 'Processing…'}</div>`;
+    // Build user content block
+    let userContent = '';
+    for (const fid of fieldIds) {
+      if (fid === 'symptoms') {
+        let vals = Array.from(document.querySelectorAll('input[name="symptom"]:checked'))
+          .map(cb => cb.value).join(', ');
+        const otherSym = document.getElementById('otherSymptom')?.value.trim();
+        if (otherSym) vals += `, ${otherSym}`;
+        userContent += `symptoms: ${vals}\n`;
+      } else {
+        const el = document.getElementById(fid);
+        if (!el) continue;
+        if (el.tagName === 'SELECT' && el.multiple) {
+          userContent += `${fid}: ${[...el.selectedOptions].map(o => o.value).join(', ')}\n`;
+        } else if (el.tagName === 'SELECT') {
+          userContent += `${fid}: ${getSelectValue(el)}\n`;
+        } else {
+          userContent += `${fid}: ${el.value}\n`;
+        }
+      }
+    }
+    try {
+      const reply = await callOpenAI([
+        { role: 'system', content: `Nationality: ${userNationality}` },
+        { role: 'system', content: sysPrompt },
+        { role: 'user', content: userContent }
+      ]);
+      panel.querySelector('.result-content').innerHTML = formatHTML(reply);
+    } catch (err) {
+      console.error(err);
+      panel.querySelector('.result-content').innerText =
+        err.message.includes('Sandbox.Timedout')
+          ? '⚠️ Server busy, please try again.'
+          : `⚠️ ${err.message}`;
+    } finally {
+      panel.classList.remove('waiting');
+    }
+  }
+
+  //────────────────── Wire Each Module ──────────────────
+  // Meal Plan Generator
+  document.getElementById('genPlan').addEventListener('click', () => {
+    handleModule(
+      'genPlan',
+      ['calories', 'dietType', 'allergyList', 'budget'],
+      ['calories', 'dietType'],
+      `You are an expert registered dietitian. Given the user’s daily calorie target, diet type, allergies/intolerances, and budget, generate a detailed 7-day meal plan with macros and a shopping list.`,
+      'planPanel'
+    );
+  });
+
+  // Nutrient Analyzer
+  document.getElementById('analyzeNutri').addEventListener('click', () => {
+    handleModule(
+      'analyzeNutri',
+      ['foodLog', 'unitSelect'],
+      ['foodLog'],
+      `You are a nutrition scientist. Analyze the user’s food log and unit preference; produce a macro and micronutrient breakdown with totals and commentary.`,
+      'nutriPanel'
+    );
+  });
+
+  // Recipe Recommender
+  document.getElementById('getRecipes').addEventListener('click', () => {
+    handleModule(
+      'getRecipes',
+      ['pantry', 'cuisineType', 'recipeDifficulty', 'maxTime'],
+      ['pantry'],
+      `You are a professional chef AI. Given pantry items, cuisine style, difficulty, and max prep time, recommend 3 original recipes with ingredients, steps, and approximate times.`,
+      'recipePanel'
+    );
+  });
+
+  // Deficiency Risk Scanner
+  document.getElementById('scanDef').addEventListener('click', () => {
+    handleModule(
+      'scanDef',
+      ['symptoms', 'dietOverview'],
+      ['symptoms'],
+      `You are a clinical dietitian. Identify potential nutrient deficiencies from the provided symptoms and brief diet overview, rank them by likelihood, and give actionable recommendations.`,
+      'defPanel'
+    );
+  });
+
+  // Metabolomic Risk Radar
+  document.getElementById('runRisk').addEventListener('click', async () => {
+    await handleModule(
+      'runRisk',
+      ['riskFrom', 'riskTo', 'syncBiomarkers', 'biomarkers', 'conditions', 'context'],
+      ['riskFrom', 'riskTo', 'biomarkers', 'conditions', 'context'],
+      `You are a metabolomic health analyst. Generate a risk radar chart for the user’s biomarkers over the given date range; interpret trends and highlight potential concerns.`,
+      'riskPanel'
+    );
+    // After content appears, parse numeric values and render radar chart
+    setTimeout(() => {
+      const panel = document.getElementById('riskPanel');
+      const text = panel.querySelector('.result-content').innerText;
+      const matches = [...text.matchAll(/([A-Za-z]+):\s*([\d.]+)/g)];
+      if (!matches.length) return;
+      const labels = matches.map(m => m[1]);
+      const data = matches.map(m => Number(m[2]));
+      const oldCanvas = panel.querySelector('canvas');
+      if (oldCanvas) oldCanvas.remove();
+      const canvas = document.createElement('canvas');
+      canvas.style.marginTop = '1rem';
+      panel.appendChild(canvas);
+      new Chart(canvas.getContext('2d'), {
+        type: 'radar',
+        data: {
+          labels,
+          datasets: [{
+            label: 'Biomarker Levels',
+            data
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false
+        }
+      });
+    }, 500);
+  });
+
+  // Fitness Nutrition Coach
+  document.getElementById('runFitness').addEventListener('click', () => {
+    handleModule(
+      'runFitness',
+      ['fitGoal', 'fitFreq', 'blendIngredients', 'carbDate', 'intensity', 'crpLevel', 'nutraPref'],
+      ['fitGoal', 'fitFreq'],
+      `You are a certified sports nutritionist. Based on the user’s workout goal, weekly frequency, available blend ingredients, carb-timing date/intensity, CRP level, and nutraceutical preference, generate a tailored fitness nutrition plan.`,
+      'fitnessPanel'
+    );
+  });
+
+  // Pharma-Integrated Nutrient & Medication Suite
+  document.getElementById('runPharma').addEventListener('click', () => {
+    handleModule(
+      'runPharma',
+      ['medList', 'foodList', 'compoundGoal', 'doseFreq', 'scheduleNotes', 'cohortSelect'],
+      ['medList'],
+      `You are a pharmacologist-dietitian. Analyze drug–nutrient interactions, suggest compounding options, schedule medication reminders, and provide outcome analytics for the chosen cohort.`,
+      'pharmaPanel'
+    );
+  });
+
+  // Symptom-to-Treatment Advisor
+  document.getElementById('runSymptom').addEventListener('click', () => {
+    handleModule(
+      'runSymptom',
+      ['sympAge', 'sympDesc', 'foodPref'],
+      ['sympAge', 'sympDesc'],
+      `You are a medical nutrition therapist. Based on the user’s age, described symptoms, and food preferences, diagnose possible conditions and recommend OTC treatments and culturally appropriate foods.`,
+      'symptomPanel'
+    );
+  });
+
+  //────────────────── Dietetics Chatbot Wiring ──────────────────
+  const dietChatBox = document.getElementById('dietChatBox');
+  const dietHint = document.getElementById('dietHint');
+  let dietHistory = JSON.parse(localStorage.getItem('dieteticsChatHistory') || '[]');
+  dietHistory.forEach(m => addDietChat(m.who, m.text, m.timestamp));
+
+  function addDietChat(who, text, isoTs) {
+    const time = new Date(isoTs).toLocaleTimeString();
+    const msg = document.createElement('div');
+    msg.className = who === 'You' ? 'user-msg' : 'bot-msg';
+    msg.innerHTML = `${formatHTML(text)}<div class="timestamp">${time}</div>`;
+    dietChatBox.appendChild(msg);
+    dietChatBox.scrollTop = dietChatBox.scrollHeight;
+  }
+
+  document.getElementById('sendDiet').addEventListener('click', async () => {
+    const q = document.getElementById('dietInput').value.trim();
+    if (!q) return showToast('Please type a question.');
+    addDietChat('You', q, new Date().toISOString());
+    dietHistory.push({ who: 'You', text: q, timestamp: new Date().toISOString() });
+    localStorage.setItem('dieteticsChatHistory', JSON.stringify(dietHistory));
+    document.getElementById('dietInput').value = '';
+    dietHint.style.display = 'block';
+    try {
+      const reply = await callOpenAI([
+        { role: 'system', content: `Nationality: ${userNationality}` },
+        { role: 'system', content: 'You are a dietetics assistant. Provide clear, evidence-based nutrition advice.' },
+        { role: 'user', content: q }
+      ]);
+      addDietChat('AI', reply, new Date().toISOString());
+      dietHistory.push({ who: 'AI', text: reply, timestamp: new Date().toISOString() });
+      localStorage.setItem('dieteticsChatHistory', JSON.stringify(dietHistory));
+    } catch (err) {
+      console.error(err);
+      addDietChat('AI', err.message.includes('Sandbox.Timedout') ? '⚠️ Server busy—try again.' : `⚠️ ${err.message}`, new Date().toISOString());
+    } finally {
+      dietHint.style.display = 'none';
+    }
+  });
+
+  document.getElementById('clearDiet').addEventListener('click', () => {
+    dietChatBox.innerHTML = '';
+  });
+
+  document.getElementById('viewDietHistory').addEventListener('click', () => {
+    const modal = document.createElement('div');
+    modal.className = 'history-modal';
+    modal.innerHTML = `
+      <div class="history-content">
+        <h3>Chat History</h3>
+        <ul>
+          ${dietHistory.map((m,i) => `
+            <li>
+              <div>
+                <strong>${m.who}:</strong> ${escapeHTML(m.text)}
+                <div class="history-date">${new Date(m.timestamp).toLocaleString()}</div>
+              </div>
+              <button class="del-msg" data-index="${i}" title="Delete"><i class="fas fa-trash"></i></button>
+            </li>
+          `).join('')}
+        </ul>
+        <button class="close-history">Close</button>
+      </div>
+    `;
+    document.body.appendChild(modal);
+    modal.querySelectorAll('.del-msg').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const idx = Number(btn.dataset.index);
+        dietHistory.splice(idx, 1);
+        localStorage.setItem('dieteticsChatHistory', JSON.stringify(dietHistory));
+        btn.closest('li').remove();
+      });
+    });
+    modal.querySelector('.close-history').addEventListener('click', () => modal.remove());
+  });
+
+  //────────────────── Response Panel Controls ──────────────────
+  document.body.addEventListener('click', e => {
+    const rp = e.target.closest('.response');
+    if (!rp) return;
+    if (e.target.closest('.close-btn')) { rp.hidden = true; return; }
+    if (e.target.closest('.copy-btn')) {
+      const txt = rp.querySelector('.result-content').innerText;
+      navigator.clipboard.writeText(txt).then(() => showToast('Copied!'));
+      return;
+    }
+    if (e.target.closest('.dl-btn')) {
+      const txt = rp.querySelector('.result-content').innerText;
+      const blob = new Blob([txt], { type: 'text/plain' });
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = 'response.txt';
+      a.click();
+    }
+  });
+
+  //────────────────── Sidebar & Dark Mode ──────────────────
+  document.getElementById('hamburger').addEventListener('click', () => {
+    document.getElementById('sidebar').classList.toggle('open');
+  });
+  document.getElementById('shrinkSidebar').addEventListener('click', () => {
+    const sb = document.getElementById('sidebar');
+    sb.classList.toggle('collapsed');
+    const left = sb.classList.contains('collapsed')
+      ? 'var(--sidebar-collapsed)' : 'var(--sidebar-width)';
+    document.querySelector('header').style.left = left;
+    document.querySelector('main').style.marginLeft = left;
+    const icon = document.querySelector('#shrinkSidebar i');
+    icon.classList.toggle('fa-angle-double-left');
+    icon.classList.toggle('fa-angle-double-right');
+  });
+  document.getElementById('themeToggle').addEventListener('click', () => {
+    document.documentElement.classList.toggle('dark');
+    const icon = document.getElementById('themeToggle');
+    icon.classList.toggle('fa-moon');
+    icon.classList.toggle('fa-sun');
+  });
+
+  //────────────────── “Other” Input Logic ──────────────────
+  document.querySelectorAll('select').forEach(sel => {
+    sel.addEventListener('change', () => {
+      const other = sel.parentElement.querySelector('.other-input');
+      if (other) other.style.display = sel.value === 'Other' ? 'block' : 'none';
+    });
+  });
+  const symptomOtherCheckbox = document.querySelector('input[value="Other"][name="symptom"]');
+  if (symptomOtherCheckbox) {
+    symptomOtherCheckbox.addEventListener('change', e => {
+      document.getElementById('otherSymptom').style.display = e.target.checked ? 'inline-block' : 'none';
+    });
+  }
+
+  //────────────────── Progress Charts (Realistic Sample Data) ──────────────────
+  const intakeCtx = document.getElementById('intakeChart').getContext('2d');
+  const intakeChart = new Chart(intakeCtx, {
+    type: 'line',
+    data: {
+      labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+      datasets: [{
+        label: 'Calories In',
+        data: [2100, 1800, 2200, 2000, 1950, 2300, 2050],
+        borderColor: getComputedStyle(document.documentElement).getPropertyValue('--color-secondary').trim(),
+        fill: false
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false
+    }
+  });
+  const expIntake = document.createElement('button');
+  expIntake.innerText = 'Export Chart';
+  expIntake.className = 'export-chart-btn';
+  expIntake.type = 'button';
+  document.getElementById('intakeChart').after(expIntake);
+  expIntake.addEventListener('click', () => {
+    const csv = [
+      ['Day','Calories'],
+      ...intakeChart.data.labels.map((d,i) => [d, intakeChart.data.datasets[0].data[i]])
+    ].map(r => r.join(',')).join('\n');
+    const blob = new Blob([csv], { type: 'text/csv' });
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = 'calories-intake.csv';
+    a.click();
+  });
+
+  const macroCtx = document.getElementById('macroChart').getContext('2d');
+  const macroChart = new Chart(macroCtx, {
+    type: 'pie',
+    data: {
+      labels: ['Carbs', 'Protein', 'Fat'],
+      datasets: [{ data: [50, 25, 25] }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false
+    }
+  });
+  const expMacro = document.createElement('button');
+  expMacro.innerText = 'Export Chart';
+  expMacro.className = 'export-chart-btn';
+  expMacro.type = 'button';
+  document.getElementById('macroChart').after(expMacro);
+  expMacro.addEventListener('click', () => {
+    const csv = [
+      ['Macro','Percent'],
+      ...macroChart.data.labels.map((m,i) => [m, macroChart.data.datasets[0].data[i]])
+    ].map(r => r.join(',')).join('\n');
+    const blob = new Blob([csv], { type: 'text/csv' });
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = 'macro-distribution.csv';
+    a.click();
+  });
+});
+</script>
 
 </html>
