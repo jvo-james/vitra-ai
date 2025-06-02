@@ -163,8 +163,8 @@
     bottom: var(--padding);
     left: 50%;
     transform: translateX(-50%);
-     min-width: 36px;
-  min-height: 36px;
+     max-width: 36px;
+  max-height: 36px;
   aspect-ratio: 1 / 1;
     background: none;
     color: var(--primary);
@@ -358,8 +358,8 @@
   }
   .tool-row button {
     font-size: 0.85rem;
-    min-width: 1.6rem;
-    min-height: 1.6rem;
+    max-width: 1.6rem;
+    max-height: 1.6rem;
   aspect-ratio: 1 / 1;
     padding: 0.2rem;
     background: var(--surface);
@@ -497,8 +497,8 @@
     background: var(--surface);
     border: 1px solid var(--muted);
     border-radius: 50%;
-    min-width: 36px;
-  min-height: 36px;
+    max-width: 36px;
+  max-height: 36px;
   aspect-ratio: 1 / 1;
     display: flex;
     align-items: center;
@@ -586,8 +586,8 @@
     background: var(--primary);
     border: none;
     border-radius: 50%;
-    min-width: 36px;
-  min-height: 36px;
+    max-width: 36px;
+  max-height: 36px;
   aspect-ratio: 1 / 1;
     display: flex;
     align-items: center;
@@ -2299,10 +2299,37 @@ You are an advanced mental health AI specializing in daily mood analytics and pe
   },
   { role: "user", content: `Daily Mood Entry:\n${JSON.stringify(data)}` }
 ]);
-          panel.innerHTML = `<div class="result-content">${formatHTML(aiReply)}</div>`;
-          addClose(panel);
-          addTools(panel);
-          localStorage.setItem("moodPanel", panel.innerHTML);
+          panel.innerHTML = `
+          <div class="result-content">${formatHTML(aiReply)}</div>
+          <div class="tool-row">
+            <button class="copy-btn" title="Copy"><i class="fas fa-copy"></i></button>
+            <button class="dl-btn" title="Download"><i class="fas fa-download"></i></button>
+          </div>`;
+        // Attach close button:
+        addClose(panel);
+        // Attach copy & download handlers:
+        panel.querySelector(".copy-btn").onclick = () => {
+          const txt = panel.querySelector(".result-content").innerText || "";
+          navigator.clipboard.writeText(txt);
+          const toast = document.createElement("div");
+          toast.className = "copy-toast";
+          toast.textContent = "Copied!";
+          document.body.append(toast);
+          setTimeout(() => toast.remove(), 1500);
+        };
+        panel.querySelector(".dl-btn").onclick = () => {
+          const txt = panel.querySelector(".result-content").innerText || "";
+          const blob = new Blob([txt], { type: "text/plain" });
+          const url = URL.createObjectURL(blob);
+          const a = document.createElement("a");
+          a.href = url;
+          a.download = "mood-analysis.txt";
+          document.body.append(a);
+          a.click();
+          URL.revokeObjectURL(url);
+          a.remove();
+        };
+        localStorage.setItem("moodPanel", panel.innerHTML);
         } catch (err) {
           panel.innerHTML = `<div class="result-content">😕 Something went wrong.</div>`;
           addClose(panel);
