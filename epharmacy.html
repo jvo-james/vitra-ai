@@ -398,6 +398,17 @@ window.MathJax = {
   .response.loading .close-btn {
     display: none;
   }
+   .response.loading {
+    max-height: 120px;
+ }
+  .response.loading .result-content {
+   max-height: 80px;
+    overflow-y: auto;
+  }
+.response.error {
+    border-color: #e53e3e;
+  }
+
   html.dark .response {
     background: var(--pharm-surface);
   }
@@ -620,6 +631,19 @@ window.MathJax = {
     margin: 1rem 0;
     font-size: 0.85rem;
     color: var(--pharm-muted);
+  }
+section.module label textarea {
+    background: var(--pharm-bg);
+    color: var(--pharm-text);
+  }
+  html.dark section.module label textarea {
+   background: var(--pharm-surface);
+    color: var(--pharm-text);
+  }
+html.dark .chat-input textarea {
+    background: var(--pharm-surface);
+  border-color: var(--pharm-secondary);
+   color: var(--pharm-text);
   }
 
   /*──────────────────────────────────────────────────────────────────────────────
@@ -1128,8 +1152,8 @@ window.MathJax = {
       <h2><i class="fas fa-robot"></i> Drug-Education Chatbot</h2>
       <p class="desc">Ask any question about medications—AI provides answers with citations, dosing charts, and follow-ups.</p>
       <div class="chat-controls">
-        <button id="clearPharmaChat" class="btn-secondary"><i class="fas fa-trash"></i> Clear Chat</button>
-        <button id="historyBtn" class="btn" style="margin-left:0.5rem;"><i class="fas fa-history"></i> History</button>
+      <button id="clearPharmaChat" class="btn-secondary" type="button"><i class="fas fa-trash"></i> Clear Chat</button>
+    <button id="historyBtn" class="btn" type="button" style="margin-left:0.5rem;"><i class="fas fa-history"></i> History</button>
       </div>
       <div id="pharmaChatBox" class="chat-box"></div>
       <form id="pharma-form" class="chat-input">
@@ -1144,7 +1168,7 @@ window.MathJax = {
         <span class="close-modal">&times;</span>
         <div class="modal-header">
           <h3>Chat History</h3>
-          <button id="clearHistory" class="btn" style="float:right;"><i class="fas fa-trash-alt"></i></button>
+           <button id="clearHistory" class="btn" type="button" style="float:right;"><i class="fas fa-trash-alt"></i></button>
         </div>
         <div id="historyList" style="max-height:400px; overflow-y:auto;"></div>
       </div>
@@ -1331,16 +1355,20 @@ document.addEventListener('DOMContentLoaded', () => {
 
   function startThinking(panel, btnId) {
     panel.hidden = false;
-    const contentDiv = panel.querySelector('.result-content');
-    contentDiv.innerHTML = `
-      <div class="spin-header">${PHASE_TEXT[btnId] || 'Thinking…'}</div>
-      <div class="spinner"></div>`;
-    const oldTools = panel.querySelector('.tool-row');
+    panel.classList.add('loading');
+   const contentDiv = panel.querySelector('.result-content');
+   contentDiv.innerHTML = `
+     <div class="spin-header" style="display:flex; align-items:center; gap:0.5rem;">
+       <span>${PHASE_TEXT[btnId] || 'Thinking…'}</span>
+        <div class="spinner" style="width:1rem; height:1rem; border-width:2px;"></div>
+      </div>`;
+   const oldTools = panel.querySelector('.tool-row');
     if (oldTools) oldTools.remove();
     panel.querySelector('.close-btn').style.display = 'none';
   }
 
   function injectTools(panel) {
+    panel.classList.remove('loading');
     if (panel.querySelector('.tool-row')) return;
     const tools = document.createElement('div');
     tools.className = 'tool-row';
@@ -1370,6 +1398,15 @@ document.addEventListener('DOMContentLoaded', () => {
     document.querySelector('main').style.marginLeft =
       sb.classList.contains('collapsed') ? '70px' : '240px';
   };
+document.addEventListener('click', e => {
+    const sb = document.getElementById('sidebar');
+    if (document.body.classList.contains('sidebar-open')) {
+     if (!sb.contains(e.target) && !document.getElementById('hamburger').contains(e.target)) {
+        document.body.classList.remove('sidebar-open');
+     }
+    }
+  });
+
 
   //──────────────────────────────────────────────────────────────────────────────
   // THEME TOGGLE
@@ -1428,7 +1465,13 @@ document.addEventListener('DOMContentLoaded', () => {
         { role: 'system', content: `You are a helpful e-pharmacy AI.` },
         { role: 'user', content: buildPrompt() }
       ]);
-      panel.querySelector('.result-content').innerHTML = sanitizeAIContent(aiResponse);
+      if (aiResponse.startsWith('⚠️')) {
+        panel.classList.add('error');
+      panel.querySelector('.result-content').textContent = aiResponse;
+     } else {
+       panel.classList.remove('error');
+       panel.querySelector('.result-content').innerHTML = sanitizeAIContent(aiResponse);
+      }
       injectTools(panel);
     });
   }
@@ -1445,7 +1488,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const notes = document.getElementById('rxNotes').value.trim();
     if ((!fileInput && (!age || !weight || !diag || !mode || !freq))) {
       return '⚠️ Please upload an image or fill all required fields (age, weight, diagnosis, form, frequency).';
-    }
+   }
     let prompt = 'Build a structured prescription:';
     if (fileInput) prompt += ' [OCR IMAGE SCAN]';
     prompt += ` Patient Age: ${age || 'N/A'}, Weight: ${weight || 'N/A'}kg, Diagnosis: ${diag}, Form: ${mode}, Frequency: ${freq}. Notes: ${notes || 'None'}.`;
@@ -1455,7 +1498,7 @@ document.addEventListener('DOMContentLoaded', () => {
   wireHero('lookupDrug', 'drugInfoPanel', () => {
     const drug = document.getElementById('drugInput').value.trim();
     if (!drug) return '⚠️ Please specify a drug.';
-    return `Provide a comprehensive monograph for "${drug}", including mechanism of action, typical dosing (with adjustments), major adverse effects, monitoring advice, and key counseling points.`;
+   return `You are a pharmacy expert AI. Provide a detailed monograph for "${drug}", covering: 1) Mechanism of action 2) Typical adult dosing (including renal/hepatic adjustments) 3) Major side effects and monitoring recommendations 4) Key patient counseling points 5) Contraindications and precautions.`;
   });
 
   wireHero('checkInteractions', 'interactionPanel', () => {
@@ -1531,8 +1574,14 @@ document.addEventListener('DOMContentLoaded', () => {
       { role: 'system', content: 'You are a pharmacy scheduler AI.' },
       { role: 'user', content: prompt }
     ]);
-    panel.querySelector('.result-content').innerHTML = sanitizeAIContent(aiReply);
-    injectTools(panel);
+     if (aiReply.startsWith('⚠️')) {
+     panel.classList.add('error');
+      panel.querySelector('.result-content').textContent = aiReply;
+     } else {
+     panel.classList.remove('error');
+     panel.querySelector('.result-content').innerHTML = sanitizeAIContent(aiReply);
+    }
+     injectTools(panel);
   };
 
   //──────────────────────────────────────────────────────────────────────────────
@@ -1612,15 +1661,16 @@ document.addEventListener('DOMContentLoaded', () => {
     chatInput.value = '';
     // Show spinner
     const spinnerEl = document.createElement('div');
-    spinnerEl.className = 'spinner';
-    chatBox.append(spinnerEl);
-    chatBox.scrollTop = chatBox.scrollHeight;
+   spinnerEl.className = 'spinner';
+    spinnerEl.style.marginLeft = '0.5rem';
+    addChatMessage('bot', '<span class="spin-header">Thinking… <div class="spinner" style="width:1rem; height:1rem; border-width:2px;"></div></span>');
     // Call AI
     const aiReply = await callAI([
       { role: 'system', content: 'You are a knowledgeable pharmacy AI.' },
       { role: 'user', content: question }
     ]);
-    spinnerEl.remove();
+    const lastMsg = chatBox.querySelectorAll('.bot-msg');
+   if (lastMsg.length) lastMsg[lastMsg.length - 1].remove();
     addChatMessage('bot', sanitizeAIContent(aiReply));
   };
 
