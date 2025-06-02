@@ -1501,6 +1501,30 @@ html.dark .bot-msg {
     font-size: 1.2rem;
   }
 }
+.modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0,0,0,0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 3000;
+}
+.modal .modal-content {
+  background: var(--pharm-surface);
+  border-radius: var(--radius);
+  padding: var(--padding);
+  width: 90%;
+  max-width: 600px;
+  max-height: 80%;
+  overflow-y: auto;
+  box-shadow: var(--shadow);
+  position: relative;
+}
+
 </style>
 
 
@@ -1730,7 +1754,8 @@ html.dark .bot-msg {
 
   <!-- 2. Drug Dropdown -->
   <label for="drugSelect" style="margin-top:1rem; display:block;">Choose a drug:</label>
- <select id="drugSelect" multiple size="5">
+ <small class="desc" style="margin-bottom:0.5rem;">Hold Ctrl (⌘ on Mac) to select more than one.</small>
+  <select id="drugSelect" multiple size="5">
    <!-- Options populated by JS -->
  </select>
  <div style="margin-top:0.5rem;">
@@ -1839,7 +1864,6 @@ html.dark .bot-msg {
     <!-- History Modal -->
     <div id="historyModal" class="modal" hidden>
       <div class="modal-content">
-        <span class="close-modal">&times;</span>
         <button class="close-modal" aria-label="Close History" style="position:absolute; top:0.75rem; right:1rem; background:none; border:none; font-size:1.25rem; color:var(--pharm-text); cursor:pointer;">
          <i class="fas fa-times"></i>
        </button>
@@ -1896,10 +1920,16 @@ html.dark .bot-msg {
       <div class="chart-wrapper">
         <h3>Monthly Prescription Scans</h3>
         <canvas id="chart1"></canvas>
+          <p class="desc" style="margin-top:0.5rem;">
+         This line chart shows how many prescriptions were scanned each month over the past 7 months.
+       </p>
       </div>
       <div class="chart-wrapper" style="margin-top:1.5rem;">
         <h3>Weekly Drug Lookups</h3>
         <canvas id="chart2"></canvas>
+        <p class="desc" style="margin-top:0.5rem;">
+         This bar chart displays the total number of drug lookup requests for each week of the current month.
+       </p>
       </div>
       <button id="exportChartsData" class="btn" style="margin-top:1.5rem;"><i class="fas fa-file-export"></i> Export Data (CSV)</button>
     </section>
@@ -2013,22 +2043,8 @@ document.addEventListener("DOMContentLoaded", () => {
     drugSelect.append(opt);
   });
 
-  // Show price of selected drug
-  const priceDisplay = document.getElementById("priceDisplay");
-  function updatePriceDisplay() {
-    const idx = Number(drugSelect.value);
-   if (isNaN(idx) || idx < 0) {
-     priceDisplay.textContent = "";
-     // Hide order form if nothing selected
-     document.getElementById("orderDetails").style.display = "none";
-     return;
-   }
-    const { name, price } = drugsData[idx];
-    priceDisplay.textContent = `Price: ₵${price.toFixed(2)}`;
-    // Show the order details form
-    document.getElementById("orderDetails").style.display = "block";
-  }
-  drugSelect.addEventListener("change", updatePriceDisplay);
+   const priceDisplay = document.getElementById("priceDisplay");
+  priceDisplay.textContent = "";
 
   // ──────────────────────────────────────────────────────────────────────────────
   // 2) AI‐POWERED SUGGESTION FROM SYMPTOMS
@@ -2130,16 +2146,13 @@ ${drugsData.map(d => d.name).join(", ")}.
   const paymentModal = document.getElementById("paymentModal");
   const confirmText = document.getElementById("confirmText");
 
-  payButton.addEventListener("click", () => {
-    // Gather order details
-    const idx = +drugSelect.value;
-    if (isNaN(idx)) {
-      alert("Please select a drug first.");
-      return;
-    }
-    const drug = drugsData[idx];
-    const amountGHS = drug.price;
-    const amountKobo = Math.round(amountGHS * 100); // Paystack expects kobo
+  if (!cartItems || cartItems.length === 0) {
+     alert("⚠️ Your cart is empty. Please add at least one drug.");
+     return;
+   }
+   // Compute total
+   const totalGHS = cartItems.reduce((sum, item) => sum + item.price, 0);
+   const amountKobo = Math.round(totalGHS * 100); // Paystack expects kobo
 
     const name = document.getElementById("buyerName").value.trim();
     const phone = document.getElementById("buyerPhone").value.trim();
@@ -2169,14 +2182,16 @@ ${drugsData.map(d => d.name).join(", ")}.
       },
       callback: function(response) {
         // Payment successful: show confirmation modal
-        confirmText.innerHTML = `
-          Thank you, <strong>${escapeHtml(name)}</strong>!<br>
-          You have successfully purchased: <strong>${escapeHtml(drug.name)}</strong> for <strong>₵${amountGHS.toFixed(2)}</strong>.<br>
-          Transaction Reference: <em>${response.reference}</em><br>
-          We will deliver to: <em>${escapeHtml(address)}</em><br>
-          Contact: <em>${escapeHtml(phone)}</em><br><br>
-          <small>Check your email (${escapeHtml(email)}) for the receipt.</small>
-        `;
+       const namesList = cartItems.map(i => i.name).join("<br>• ");
+       confirmText.innerHTML = `
+         Thank you, <strong>${escapeHtml(name)}</strong>!<br>
+         You have successfully purchased:<br>• ${namesList}<br><br>
+         <strong>Total Paid:</strong> ₵${totalGHS.toFixed(2)}<br>
+         <strong>Transaction Reference:</strong> <em>${response.reference}</em><br><br>
+         We will deliver to: <em>${escapeHtml(address)}</em><br>
+         Contact: <em>${escapeHtml(phone)}</em><br><br>
+         <small>Check your email (${escapeHtml(email)}) for the receipt.</small>
+       `;
         paymentModal.hidden = false;
       }
     });
