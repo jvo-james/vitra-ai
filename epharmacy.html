@@ -706,6 +706,9 @@ html.dark .chat-input textarea {
     color: var(--pharm-primary-alt);
     transform: scale(1.1);
   }
+ .modal:not([hidden]) {
+    display: flex;
+  }
 
   /*──────────────────────────────────────────────────────────────────────────────
     CHARTS & EXPORT BUTTON
@@ -1358,10 +1361,9 @@ document.addEventListener('DOMContentLoaded', () => {
     panel.classList.add('loading');
    const contentDiv = panel.querySelector('.result-content');
    contentDiv.innerHTML = `
-     <div class="spin-header" style="display:flex; align-items:center; gap:0.5rem;">
-       <span>${PHASE_TEXT[btnId] || 'Thinking…'}</span>
+     <div style="display:flex; align-items:center; gap:0.5rem;">
         <div class="spinner" style="width:1rem; height:1rem; border-width:2px;"></div>
-      </div>`;
+     </div>`;
    const oldTools = panel.querySelector('.tool-row');
     if (oldTools) oldTools.remove();
     panel.querySelector('.close-btn').style.display = 'none';
@@ -1466,13 +1468,15 @@ document.addEventListener('click', e => {
         { role: 'user', content: buildPrompt() }
       ]);
       if (aiResponse.startsWith('⚠️')) {
-        panel.classList.add('error');
-      panel.querySelector('.result-content').textContent = aiResponse;
-     } else {
+       panel.classList.add('error');
+        panel.querySelector('.result-content').textContent = aiResponse;
+      } else {
        panel.classList.remove('error');
        panel.querySelector('.result-content').innerHTML = sanitizeAIContent(aiResponse);
       }
+
       injectTools(panel);
+      savePanelsToStorage();
     });
   }
 
@@ -1651,6 +1655,7 @@ document.addEventListener('click', e => {
     chatBox.append(wrapper);
     chatBox.scrollTop = chatBox.scrollHeight;
     chatHistory.push({ role, text, time: `${now.toDateString()} ${now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}` });
+ saveChatToStorage();
   }
 
   sendChatBtn.onclick = async e => {
@@ -1660,10 +1665,8 @@ document.addEventListener('click', e => {
     addChatMessage('user', question);
     chatInput.value = '';
     // Show spinner
-    const spinnerEl = document.createElement('div');
-   spinnerEl.className = 'spinner';
-    spinnerEl.style.marginLeft = '0.5rem';
-    addChatMessage('bot', '<span class="spin-header">Thinking… <div class="spinner" style="width:1rem; height:1rem; border-width:2px;"></div></span>');
+    addChatMessage('bot', `<div style="display:flex; justify-content:center;"><div class="spinner" style="width:1rem; height:1rem; border-width:2px;"></div></div>`);
+
     // Call AI
     const aiReply = await callAI([
       { role: 'system', content: 'You are a knowledgeable pharmacy AI.' },
@@ -1690,10 +1693,13 @@ document.addEventListener('click', e => {
       </div>
     `).join('');
     historyModal.hidden = false;
+    localStorage.setItem('historyOpen', 'true');
   };
 
   closeModalBtn.onclick = () => {
     historyModal.hidden = true;
+    localStorage.setItem('historyOpen', 'false');
+
   };
 
   historyList.addEventListener('click', e => {
@@ -1722,6 +1728,48 @@ document.addEventListener('click', e => {
     datasets: [{ label: 'Drug Lookups', data: [], backgroundColor: [] }]
   };
 
+ //──────────────────────────────────────────────────────────────────────────────
+  // STATE PERSISTENCE: LOAD FROM localStorage
+ //──────────────────────────────────────────────────────────────────────────────
+  if (localStorage.getItem('darkMode') === 'true') {
+    document.documentElement.classList.add('dark');
+   document.getElementById('themeToggle').classList.replace('fa-moon', 'fa-sun');
+ }
+  function restorePanels() {
+   const panelsData = JSON.parse(localStorage.getItem('panels') || '{}');
+   Object.entries(panelsData).forEach(([id, html]) => {
+     const panel = document.getElementById(id);
+     if (panel && html) {
+        panel.hidden = false;
+       panel.querySelector('.result-content').innerHTML = html;
+        injectTools(panel);
+      }
+    });
+ }
+ function savePanelsToStorage() {
+    const panels = {};
+   document.querySelectorAll('.response').forEach(panel => {
+     if (!panel.hidden) {
+       panels[panel.id] = panel.querySelector('.result-content').innerHTML;
+     }
+   });
+   localStorage.setItem('panels', JSON.stringify(panels));
+ }
+ function restoreChat() {
+   const stored = JSON.parse(localStorage.getItem('chatHistory') || '[]');
+   stored.forEach(entry => addChatMessage(entry.role, entry.text));
+ }
+  function saveChatToStorage() {
+    localStorage.setItem('chatHistory', JSON.stringify(chatHistory));
+  }
+ // Restore chat history & panels
+ restoreChat();
+ restorePanels();
+ if (localStorage.getItem('historyOpen') === 'true') {
+   historyBtn.click();
+ }
+
+  
   // Populate with random initial values
   for (let i = 0; i < data1.labels.length; i++) {
     data1.datasets[0].data.push(Math.floor(Math.random() * 400) + 600);
