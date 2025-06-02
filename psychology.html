@@ -995,10 +995,10 @@
 
    /* Container for emotion/trigger checkboxes */
 .checkbox-group {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
-  gap: 0.25rem 0.5rem; /* vertical/horizontal gap */
-}
+   display: grid;
+   grid-template-columns: repeat(5, 1fr); 
+   gap: 0.5rem; 
+ }
 
 /* Each label wraps the checkbox + text */
 .checkbox-group label {
@@ -1083,7 +1083,24 @@ input.other-input {
   background: var(--primary);
   color: #fff;
 }
-
+html.dark .history-modal .history-content {
+   background: var(--surface); /* Light surface even in dark mode */
+ }
+ html.dark .history-modal table th {
+   background: var(--surface); /* Keep header visible */
+   color: var(--text);
+ }
+ html.dark .history-modal table td {
+   color: var(--text);
+ }
+ html.dark .history-modal .history-table-wrapper {
+   background: var(--bg);
+ }
+.two-column-grid {
+   display: grid;
+   grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+   gap: 1rem;
+ }
 </style>
 
   <body>
@@ -1141,15 +1158,14 @@ input.other-input {
         <div class="hero-content">
           <h1><i class="fas fa-brain"></i> Empower Your Mental Wellness</h1>
           <p class="hero-subtitle">
-            AI-powered toolkit for therapy, mood insights, neurochemical balance, and clinical trial matching—all in one interactive dashboard.
-          </p>
+            A comprehensive AI‐driven platform combining Cognitive Behavioral Therapy (CBT), mood analytics, neurochemical biomarker assessment, 
+            and clinical trial matchmaking (CTM). Interact seamlessly to optimize mental health outcomes, leveraging evidence-based methodologies.
+        </p>
           <div class="hero-actions">
             <a href="#therapybot" class="btn-primary">
               <i class="fas fa-comments"></i> Therapy Bot
             </a>
-            <a href="#moodTracker" class="btn-secondary">
-              <i class="fas fa-sliders-h"></i> Mood Tracker
-            </a>
+           
             <a href="#neurotransmitter" class="btn-primary">
               <i class="fas fa-vial"></i> Neuro Balance
             </a>
@@ -1163,10 +1179,9 @@ input.other-input {
         </div>
       </div>
       <!-- SUBTLE BACKGROUND ICONS -->
-      <i class="fas fa-pills hero-bg-icon" style="top: 5%; right: 9%;"></i>
-      <i class="fas fa-wave-square hero-bg-icon" style="bottom: 10%; left: 12%;"></i>
-      <i class="fas fa-chart-line hero-bg-icon" style="bottom: 8%; right: 15%;"></i>
-    </section>
+     <i class="fas fa-pills hero-bg-icon" style="top: 10%; left: 10%;"></i>
+    <i class="fas fa-wave-square hero-bg-icon" style="bottom: 15%; left: 5%;"></i>
+     <i class="fas fa-chart-line hero-bg-icon" style="top: 20%; left: 40%;"></i>    </section>
 
     <!-- 1. Conversational Therapy Bot -->
     <section id="therapybot" class="module">
@@ -1188,7 +1203,8 @@ input.other-input {
     <section id="moodTracker" class="module">
       <h2><i class="fas fa-heartbeat"></i> Daily Mood Tracker</h2>
       <p class="desc">
-        Log your mood on a scale of 1–10, select key emotions and triggers. AI spots patterns and suggests self-care strategies.
+        Record your mood on a 1–10 scale, select salient emotions (e.g., “Anxious,” “Calm”), and identify potential triggers (e.g., “Sleep,” “Finance”). 
+        Our AI performs real‐time data aggregation, pattern recognition (PR), and generates personalized self‐care recommendations via Natural Language Generation (NLG).
       </p>
       <form id="mood-form">
         <label for="moodRange">Mood Score: <strong><span id="moodValue">5</span>/10</strong></label>
@@ -1248,26 +1264,7 @@ input.other-input {
         <label for="moodNote">Journal Entry:</label>
         <textarea id="moodNote" rows="3" placeholder="Describe today’s events…"></textarea>
 
-        <label for="selfCare">Self-Care Focus:</label>
-        <select id="selfCare" required>
-          <optgroup label="Breathing &amp; Relaxation">
-            <option>Guided Breathing</option>
-            <option>Body Scan</option>
-          </optgroup>
-          <optgroup label="Movement">
-            <option>Yoga Flow</option>
-            <option>Stretch &amp; Walk</option>
-          </optgroup>
-          <optgroup label="Mindfulness">
-            <option>Sound Meditation</option>
-            <option>Visualization</option>
-          </optgroup>
-          <option value="Other">Other</option>
-        </select>
-        <input type="text" id="selfCareOther" class="other-input hidden" placeholder="Please specify…"/>
-
-        <button type="submit" class="btn-primary"><i class="fas fa-chart-line"></i> Analyze Mood</button>
-      </form>
+             </form>
       <div id="moodPanel" class="response" hidden>
         <button class="close-btn" aria-label="Close result">×</button>
         <div class="result-content"></div>
@@ -1278,16 +1275,35 @@ input.other-input {
       </div>
     </section>
 
+     <!-- 2b. Daily Mood Statistics -->
+    <section id="moodStats" class="module">
+      <h2><i class="fas fa-chart-bar"></i> Mood Tracker Statistics</h2>
+      <p class="desc">
+        Overview of your mood patterns over the past week. Chart updates automatically as new entries are logged.
+      </p>
+      <div class="chart-card">
+        <canvas id="moodStatsChart"></canvas>
+        <figcaption>Average Mood Score (1–10) per Day</figcaption>
+      </div>
+      <p class="chart-desc">
+        This line chart dynamically reflects the average mood score each day. Hover to see exact values or export data via CSV.
+      </p>
+      <button id="exportMoodStats" class="btn-secondary">Export Mood Stats CSV</button>
+    </section>
+    
     <!-- 3. Neurotransmitter Balance -->
     <section id="neurotransmitter" class="module">
       <h2><i class="fas fa-vial"></i> Neurotransmitter Balance</h2>
       <p class="desc">
-        Input mood, sleep quality, appetite, and medication adherence. AI correlates these with key neurotransmitters and suggests adjustments.
+       Provide quantitative mood data, subjective sleep quality (e.g., “Fair,” “Good”), appetite status, and pharmacotherapy adherence. 
+        The AI engine synthesizes these inputs with neurochemical pathways (e.g., Serotonin, Dopamine) and delivers targeted lifestyle or dietary interventions 
+        to optimize neurotransmitter homeostasis.
       </p>
       <form id="nt-form">
         <label for="ntMood">Mood (1–10):</label>
         <input type="range" id="ntMood" min="1" max="10" value="5"/>
-
+        <div class="two-column-grid">
+      <div>
         <label for="ntSleep">Sleep Quality:</label>
         <select id="ntSleep" required>
           <option>Poor</option>
@@ -1342,7 +1358,8 @@ input.other-input {
             <option value="Other">Other</option>
           </select>
         <input type="text" id="ntFocusOther" class="other-input hidden" placeholder="Please specify…"/>
-
+ </div>
+    </div>
         <button id="analyzeNeuro" class="btn-primary" type="submit"><i class="fas fa-brain"></i> Analyze Balance</button>
       </form>
       <div id="neurotransmitterPanel" class="response" hidden>
@@ -1359,9 +1376,13 @@ input.other-input {
     <section id="pharmacogenomics" class="module">
       <h2><i class="fas fa-dna"></i> Pharmacogenomics &amp; Dosing</h2>
       <p class="desc">
-        Upload your genotype (VCF) and clinical data. AI recommends optimized dosing based on gene–drug interactions and phenotype.
+        Upload a validated Variant Call Format (VCF) file containing genotypic polymorphisms (e.g., CYP2C19, CYP2D6). Enter demographic and clinical parameters 
+        (e.g., age, sex). The AI uses Pharmacogenomic (PGx) algorithms to analyze allele frequencies, predict metabolizer phenotypes, and recommend 
+        individualized drug dosing regimens for maximum efficacy and safety.
       </p>
       <form id="pgx-form">
+        <div class="two-column-grid">
+          <div>
         <label for="pgxUpload">Upload Genotype (VCF/JSON):</label>
         <input type="file" id="pgxUpload" accept=".vcf,.txt,.json" required/>
 
@@ -1411,7 +1432,8 @@ input.other-input {
             <option value="Other">Other</option>
           </select>
         <input type="text" id="pgxGeneOther" class="other-input hidden" placeholder="Please specify…"/>
-
+ </div>
+       </div>
         <button id="runPGx" class="btn-primary" type="submit"><i class="fas fa-flask"></i> Run Analysis</button>
       </form>
       <div id="pharmacogenomicsPanel" class="response" hidden>
@@ -1428,8 +1450,16 @@ input.other-input {
     <section id="interactions" class="module">
       <h2><i class="fas fa-exchange-alt"></i> Drug Interaction Profiler</h2>
       <p class="desc">
-        Enter current psychotropic medications and comorbid conditions. AI evaluates potential interactions and safety considerations.
-      </p>
+  Enter all current psychotropic medications (including OTCs, supplements, or herbal preparations) and any comorbid medical conditions (e.g., hepatic or renal impairment, cardiovascular disease).  
+  The AI will:
+  <ul>
+    <li>Check for CYP450‐mediated interactions (e.g., CYP2D6 or CYP3A4 inhibition/induction).</li>
+    <li>Identify QT‐prolongation or additive serotonergic effects.</li>
+    <li>Flag any contraindications based on existing comorbidities (e.g., avoid bupropion if seizure risk is elevated).</li>
+    <li>Offer clear, actionable recommendations: dose adjustments, monitoring strategies, or safer alternatives.</li>
+  </ul>
+  <strong>Tip:</strong> If you see a message asking for more detail, verify you didn’t leave any medication or condition blank. The AI uses specific mechanisms (enzyme overlaps, receptor synergy, organ‐function considerations) to produce precise safety advice.
+</p>
       <form id="int-form">
         <label for="intListSelect">Medications:</label>
         <select id="intListSelect" required>
@@ -1496,8 +1526,16 @@ input.other-input {
     <section id="eeg" class="module">
       <h2><i class="fas fa-wave-square"></i> EEG &amp; Brainwave Interpreter</h2>
       <p class="desc">
-        Upload EEG data (EDF/CSV) and specify task. AI analyzes alpha, beta, theta, delta patterns and suggests cognitive insights.
-      </p>
+  Upload your raw EEG (Electroencephalography) file (EDF or CSV) and specify the recording condition or task (e.g., “Resting Eyes Closed,” “Cognitive Stress Task”).  
+  The AI will:
+  <ul>
+    <li>Describe expected waveform patterns for that condition (for instance, increased alpha waves during eyes-closed rest).</li>
+    <li>Highlight any deviations (e.g., excessive theta slowing or low beta power) and explain their potential clinical significance (e.g., drowsiness, attentional deficits).</li>
+    <li>Recommend at least two evidence‐based interventions (e.g., biofeedback, guided relaxation) or next-step evaluations (e.g., sleep study, cognitive assessment).</li>
+  </ul>
+  <strong>Note:</strong> If no EEG file or condition is detected, the AI will prompt you to upload or clarify. Its goal is to translate raw neurophysiology into actionable insights for mental wellness.
+</p>
+
       <form id="eeg-form">
         <label for="eegFile">Upload EEG File:</label>
         <input type="file" id="eegFile" accept=".edf,.csv" required/>
@@ -1534,8 +1572,16 @@ input.other-input {
     <section id="trialmatch" class="module">
       <h2><i class="fas fa-handshake"></i> Clinical Trial Matcher</h2>
       <p class="desc">
-        Describe your diagnosis and location. AI suggests relevant psychiatry trials (phase, criteria, contact info).
-      </p>
+  Describe your primary psychiatric diagnosis (e.g., Major Depressive Disorder, Generalized Anxiety Disorder), enter your location (city, country), and select the trial phase you wish to explore.  
+  The AI will:
+  <ul>
+    <li>Cross‐reference global registries to find actively recruiting trials that match your diagnosis, desired phase (I–IV), and geographic radius.</li>
+    <li>Summarize each trial with its official name, phase, design (e.g., “double‐blind, placebo‐controlled”), and concise inclusion/exclusion criteria (e.g., age range, prior treatment failures).</li>
+    <li>Provide contact information or a direct enrollment link whenever available, or suggest nearest alternatives if none are active in your area.</li>
+    <li>Advise on eligibility screening steps (e.g., lab tests, psychiatric assessments) to optimize your chances of qualifying.</li>
+  </ul>
+  <strong>Reminder:</strong> If any field is missing or unclear, the AI will prompt you—for example, “Please specify your exact city and state for more precise trial matches.” Use this section to efficiently discover research opportunities tailored to your needs.
+</p>
       <form id="trial-form">
         <label for="trialDx">Diagnosis:</label>
          <select id="trialDx" required>
@@ -1855,7 +1901,7 @@ input.other-input {
       let lastDateHeader = null;
 
       // Load persisted chat history
-      let chatHistory = JSON.parse(localStorage.getItem("therapyChatHistory") || "[]");
+ let chatHistory = JSON.parse(localStorage.getItem("therapyChatHistory") || "[]");
       function formatDateSeparator(date) {
         const today = new Date();
         const diffDays = Math.floor((today.setHours(0, 0, 0, 0) - date.setHours(0, 0, 0, 0)) / 86400000);
@@ -1883,10 +1929,13 @@ input.other-input {
         chatBox.scrollTop = chatBox.scrollHeight;
       }
       // Render existing history
-      chatHistory.forEach(m => addMessage(m.who, m.text, new Date(m.timestamp)));
-
+chatHistory.forEach(m => {
+        const ts = m.timestamp ? new Date(m.timestamp) : new Date();
+        addMessage(m.who, m.text, ts);
+      });
+      
       // Send chat
-      sendChatBtn.onclick = async e => {
+      sendChatBtn.onclick = async (e) => {
         e.preventDefault();
         const userText = chatInput.value.trim();
         if (!userText) return;
@@ -1903,22 +1952,15 @@ input.other-input {
         chatBox.append(spinnerDiv);
         chatBox.scrollTop = chatBox.scrollHeight;
 
-        const modality = (() => {
-          const sel = document.getElementById("therapyModality");
-          return sel.value === "Other" ? document.getElementById("therapyModalityOther").value.trim() : sel.value;
-        })();
-        const length = (() => {
-          const sel = document.getElementById("therapyLength");
-          return sel.value === "Other" ? document.getElementById("therapyLengthOther").value.trim() : sel.value;
-        })();
-        const language = (() => {
-          const sel = document.getElementById("therapyLang");
-          return sel.value === "Other" ? document.getElementById("therapyLangOther").value.trim() : sel.value;
-        })();
-
         const systemPrompt = `
-You are a licensed therapist. Modality: ${escapeHtml(modality)}; Length: ${escapeHtml(length)}; Language: ${escapeHtml(language)}.
-Respond empathetically, providing clear guidance, CBT techniques, mindfulness exercises or emotional support steps tailored to the user's request.
+You are a licensed clinical psychologist with expertise in Cognitive Behavioral Therapy (CBT), dialectical behavior therapy (DBT), and mindfulness-based stress reduction (MBSR).
+When the user asks a question:
+  • Respond empathically and non-judgmentally.
+  • Offer at least two actionable steps or exercises (e.g., breathing exercises, thought records).
+  • Use evidence-based interventions, referencing therapy models when appropriate (e.g., “In CBT, you might…“).
+  • If user input is unclear or incomplete, ask a clarifying question before proceeding.
+  • If they mention emergency (“kill myself,” “self-harm”), provide crisis resources but do not simulate therapy.
+  • Maintain a calm, reassuring tone. Keep each reply under 250 words unless explicitly asked for more detail.
         `.trim();
 
         try {
@@ -2030,9 +2072,7 @@ Respond empathetically, providing clear guidance, CBT techniques, mindfulness ex
       const moodRange = document.getElementById("moodRange");
       const moodValue = document.getElementById("moodValue");
       const triggersOther = document.getElementById("moodTriggersOther");
-      const selfCare = document.getElementById("selfCare");
-      const selfCareOther = document.getElementById("selfCareOther");
-
+     
       moodRange.oninput = () => (moodValue.textContent = moodRange.value);
 
       // “Other” for triggers
@@ -2049,17 +2089,7 @@ Respond empathetically, providing clear guidance, CBT techniques, mindfulness ex
         });
       });
 
-      selfCare.addEventListener("change", e => {
-        if (e.target.value === "Other") {
-          selfCareOther.style.display = "block";
-          selfCareOther.required = true;
-        } else {
-          selfCareOther.style.display = "none";
-          selfCareOther.required = false;
-        }
-      });
-      selfCare.dispatchEvent(new Event("change"));
-
+     
       form.onsubmit = async e => {
         e.preventDefault();
         panel.hidden = false;
@@ -2075,9 +2105,22 @@ Respond empathetically, providing clear guidance, CBT techniques, mindfulness ex
 
         try {
           const aiReply = await callOpenAI([
-            { role: "system", content: "You are an AI mental health assistant analyzing daily mood logs. Provide personalized feedback, identify patterns, and suggest self-care strategies." },
-            { role: "user", content: `Daily Mood Entry:\n${JSON.stringify(data)}` }
-          ]);
+  {
+    role: "system",
+    content: `
+You are an advanced mental health AI specializing in daily mood analytics and personalized self-care recommendations. When given a “Daily Mood Entry,” do the following:
+
+• If any required field (mood score, at least one emotion) is missing or empty, ask a clarifying question (e.g., “Please select at least one emotion.”).  
+• Analyze mood (1–10), selected emotions (e.g., “Anxious,” “Calm”), and triggers (e.g., “Work,” “Sleep”).  
+• Identify patterns or correlations (for example: “High stress at work correlates with low mood.”).  
+• Provide at least three tailored, evidence-based self-care strategies (e.g., “Try progressive muscle relaxation,” “Practice 5-minute mindfulness breathing,” “Consider scheduling a 15-minute walk after work”).  
+• Use empathetic, non-judgmental language—acknowledge feelings, normalize common struggles.  
+• If user mentions high-risk phrases (e.g., “suicidal,” “want to harm myself”), respond with a brief crisis-safe message (“I’m sorry you’re feeling this way. If you feel you might harm yourself, please reach out to 988 or a trusted professional immediately.”).  
+• Keep each reply under 200 words unless explicitly asked for more detail.  
+    `.trim()
+  },
+  { role: "user", content: `Daily Mood Entry:\n${JSON.stringify(data)}` }
+]);
           panel.innerHTML = `<div class="result-content">${formatHTML(aiReply)}</div>`;
           addClose(panel);
           addTools(panel);
@@ -2137,10 +2180,17 @@ Respond empathetically, providing clear guidance, CBT techniques, mindfulness ex
           focus: ntFocus.value === "Other" ? ntFocusOther.value.trim() : ntFocus.value
         };
         try {
-          const aiReply = await callOpenAI([
-            { role: "system", content: "You are a neuroscientist analyzing neurotransmitter balance based on user inputs. Provide neurochemical insights, suggest lifestyle or dietary adjustments to optimize balance, and explain impacts." },
-            { role: "user", content: `Neuro Profile Data:\n${JSON.stringify(data)}` }
-          ]);
+         const aiReply = await callOpenAI([
+          { role: "system", content: `
+You are a neuroscientist specializing in psychopharmacology and human neurochemistry. 
+When given mood, sleep, appetite, and adherence data:
+  • Correlate metrics (e.g., low sleep quality) with likely neurotransmitter imbalances (e.g., low Serotonin).
+  • Provide at least three evidence‐based recommendations (e.g., diet, exercise, supplementation).
+  • Explain each recommendation’s mechanism briefly (e.g., “Vitamin B6 is co-factor for Serotonin synthesis”).
+  • If invalid or missing data, request clarification (e.g., “Please specify sleep quality from Poor to Excellent.”).
+          `.trim() },
+          { role: "user", content: `Neuro Profile Data:\n${JSON.stringify(data)}` }
+        ]);
           panel.innerHTML = `<div class="result-content">${formatHTML(aiReply)}</div>`;
           addClose(panel);
           addTools(panel);
@@ -2209,10 +2259,25 @@ Respond empathetically, providing clear guidance, CBT techniques, mindfulness ex
           return;
         }
         try {
-          const aiReply = await callOpenAI([
-            { role: "system", content: "You are a pharmacogenomics expert providing personalized dosing recommendations based on genotype and clinical data. Consider drug-gene interactions, phenotype, and safety guidelines." },
-            { role: "user", content: `Patient Data:\n${JSON.stringify(data)}` }
-          ]);
+        const aiReply = await callOpenAI([
+  {
+    role: "system",
+    content: `
+You are a board-certified pharmacogenomics specialist. When provided with a user’s clinical data (sex, age, genotype variant, and chosen medication), do the following:
+
+• If any field is missing or invalid, ask for clarification (e.g., “Please confirm the gene variant (e.g., CYP2C19*1).”).  
+• Interpret the genotype‐phenotype relationship (e.g., “CYP2C19*2 suggests intermediate metabolizer status”).  
+• Explain how that phenotype affects the chosen medication (e.g., “As an intermediate metabolizer, you may require a lower dose of Clopidogrel for efficacy”).  
+• Provide a specific, evidence‐based dosing recommendation (e.g., “Recommend 75 mg daily with food; monitor platelet function after 7 days”).  
+• Cite any major guidelines or clinical trials supporting your recommendation (e.g., “Based on CPIC guidelines (Clinical Pharmacogenetics Implementation Consortium) for CYP2C19 and Clopidogrel”).  
+• Use clear terminology but define abbreviations (e.g., “IM = Intermediate Metabolizer”).  
+• If the user indicates a rare variant not in your list, state that “I do not have sufficient evidence for this variant—please consult a pharmacogeneticist.”  
+• Always include a brief safety note (e.g., “Monitor for signs of bleeding or thrombosis”).  
+• Keep tone professional and precise, under 250 words unless asked for more detail.
+    `.trim()
+  },
+  { role: "user", content: `Patient Data:\n${JSON.stringify(data)}` }
+]);
           panel.innerHTML = `<div class="result-content">${formatHTML(aiReply)}</div>`;
           addClose(panel);
           addTools(panel);
@@ -2267,10 +2332,27 @@ Respond empathetically, providing clear guidance, CBT techniques, mindfulness ex
           return;
         }
         try {
-          const aiReply = await callOpenAI([
-            { role: "system", content: "You are a drug interaction profiler specialized in psychotropic medications. Evaluate medication–condition and medication–medication interactions, cite mechanisms and safety advice." },
-            { role: "user", content: `Medications: ${meds}\nComorbid Conditions: ${cond}` }
-          ]);
+         const aiReply = await callOpenAI([
+  {
+    role: "system",
+    content: `
+You are a clinical pharmacologist specializing in psychotropic drug interactions. When given a list of medications and comorbid conditions:
+
+• If no medication or condition is provided, ask for that input (e.g., “Please list at least one current medication.”).  
+• Check for CYP450 metabolism overlaps, receptor antagonism/synergy, QT prolongation risk, and condition-drug contraindications (e.g., “Sertraline + Tramadol increases serotonin syndrome risk”).  
+• For each interaction, provide:  
+  1. Mechanism (e.g., “CYP2D6 inhibition leads to increased levels of…”)  
+  2. Clinical significance (e.g., “High risk of sedation; consider dose adjustment”)  
+  3. Recommendation (e.g., “Switch to an alternative SSRIs with lower CYP2D6 inhibition”).  
+• If the user’s comorbid condition (e.g., “Liver impairment”) could affect pharmacokinetics, mention dose modifications or monitoring.  
+• If any medication is not recognized, say “I do not have data on [medication]—please verify its generic name.”  
+• Summarize at the end: “In summary, these interactions warrant X, Y, Z.”  
+• Keep the response under 300 words unless asked for more detail.  
+• Maintain an authoritative but empathetic tone.
+    `.trim()
+  },
+  { role: "user", content: `Medications: ${meds}\nComorbid Conditions: ${cond}` }
+]);
           panel.innerHTML = `<div class="result-content">${formatHTML(aiReply)}</div>`;
           addClose(panel);
           addTools(panel);
@@ -2321,9 +2403,23 @@ Respond empathetically, providing clear guidance, CBT techniques, mindfulness ex
         const cond = eegCondition.value === "Other" ? eegConditionOther.value.trim() : eegCondition.value;
         try {
           const aiReply = await callOpenAI([
-            { role: "system", content: "You are an EEG & brainwave interpreter specializing in mental health. Analyze common patterns (alpha, beta, theta, delta) and suggest cognitive insights or interventions." },
-            { role: "user", content: `EEG Analysis:\nCondition/Task: ${cond}` }
-          ]);
+  {
+    role: "system",
+    content: `
+You are a neurophysiologist specializing in EEG interpretation for psychiatric and cognitive insights. When provided with an EEG “Condition/Task” descriptor (e.g., “Resting Eyes Closed,” “Stress Task”):
+
+• If no file or condition is provided, request it (“Please upload an EEG file and select a condition.”).  
+• Explain typical waveform patterns expected for that condition (e.g., “Eyes closed resting: elevated alpha in occipital leads”).  
+• Identify clinical concerns if abnormal (e.g., “Excessive theta in frontal leads may indicate drowsiness or attention deficit”).  
+• Suggest at least two actionable interventions or follow-up steps (e.g., “Consider mindfulness meditation to enhance alpha coherence,” “Refer for sleep study if excessive delta persists”).  
+• Use terms like “alpha (8–12 Hz), theta (4–7 Hz), beta (13–30 Hz), delta (<4 Hz).”  
+• If condition/label is unfamiliar, ask for clarification (“I’m unfamiliar with ‘XYZ’—can you describe the task further?”).  
+• Always maintain a balanced tone—neither overly technical nor too simplified.  
+• Keep the response under 200 words unless asked for more detail.
+    `.trim()
+  },
+  { role: "user", content: `EEG Analysis:\nCondition/Task: ${cond}` }
+]);
           panel.innerHTML = `<div class="result-content">${formatHTML(aiReply)}</div>`;
           addClose(panel);
           addTools(panel);
@@ -2380,9 +2476,28 @@ Respond empathetically, providing clear guidance, CBT techniques, mindfulness ex
         }
         try {
           const aiReply = await callOpenAI([
-            { role: "system", content: "You are a clinical trial matching engine specialized in psychiatry. Suggest relevant trials by phase, location, and eligibility. Provide trial names, phases, brief inclusion criteria, and contact information if available." },
-            { role: "user", content: `Diagnosis: ${dx}\nLocation: ${loc}\nPhase: ${ph}` }
-          ]);
+  {
+    role: "system",
+    content: `
+You are a clinical research coordinator specializing in psychiatric trials. When provided with “Diagnosis,” “Location,” and “Phase”:
+
+• If any field is missing, prompt the user (e.g., “Please specify the diagnosis if not listed.”).  
+• Query major registries (e.g., ClinicalTrials.gov, EU Clinical Trials Register) in your knowledge base for matching studies.  
+• For each suggested trial, include:  
+  1. Official trial name (e.g., “Trial of XYZ for Major Depressive Disorder”).  
+  2. Phase and design (e.g., “Phase II, randomized, double-blind”).  
+  3. Brief inclusion/exclusion criteria (e.g., “Adults 18–55, refractory to two SSRIs, no substance abuse”).  
+  4. Key contact info or recruitment website (e.g., “Contact: research@psychiatriccenter.org”).  
+• If no exact matches are found, suggest “nearby phases” (e.g., if Phase III isn’t recruiting, list Phase II or IV).  
+• Provide at least two alternate options in different geographic regions if possible.  
+• If user’s location is not recognized, ask for a city/state again.  
+• Keep each trial summary under 75 words.  
+• Conclude with “Please verify eligibility criteria on the official registry before enrollment.”  
+• Use a formal, concise tone.  
+    `.trim()
+  },
+  { role: "user", content: `Diagnosis: ${dx}\nLocation: ${loc}\nPhase: ${ph}` }
+]);
           panel.innerHTML = `<div class="result-content">${formatHTML(aiReply)}</div>`;
           addClose(panel);
           addTools(panel);
@@ -2409,6 +2524,64 @@ Respond empathetically, providing clear guidance, CBT techniques, mindfulness ex
         return getComputedStyle(document.documentElement).getPropertyValue(name).trim();
       }
 
+      // ─── Mood Stats Chart ─────────────────────────────────────────────────
+      function initMoodStatsChart() {
+        const ctx = document.getElementById("moodStatsChart").getContext("2d");
+        // Attempt to load saved mood entries from localStorage
+        let savedEntries = JSON.parse(localStorage.getItem("dailyMoodEntries") || "[]");
+        // If none, simulate dummy data for last 7 days
+        if (!savedEntries.length) {
+          const today = new Date();
+          for (let i = 6; i >= 0; i--) {
+            const day = new Date(today);
+            day.setDate(today.getDate() - i);
+            savedEntries.push({ date: day.toLocaleDateString(), score: Math.floor(Math.random() * 5) + 5 });
+          }
+          localStorage.setItem("dailyMoodEntries", JSON.stringify(savedEntries));
+        }
+        const labels = savedEntries.map(e => e.date);
+        const dataPoints = savedEntries.map(e => e.score);
+        new Chart(ctx, {
+          type: "line",
+          data: {
+            labels: labels,
+            datasets: [{
+              label: "Avg Mood Score",
+              data: dataPoints,
+              borderColor: getCSSVar("--primary"),
+              backgroundColor: "rgba(226,74,74,0.1)",
+              fill: true
+            }]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+              x: { ticks: { color: getCSSVar("--text") }, grid: { display: false } },
+              y: { ticks: { color: getCSSVar("--text") }, grid: { color: getCSSVar("--muted") }, beginAtZero: true, max: 10 }
+            },
+            plugins: { legend: { display: false } }
+          }
+        });
+
+       // CSV Export for moodStats
+        document.getElementById("exportMoodStats").addEventListener("click", () => {
+          let csv = "Date,Mood Score\n";
+          savedEntries.forEach(e => {
+            csv += `"${e.date}",${e.score}\n`;
+          });
+          const blob = new Blob([csv], { type: "text/csv" });
+          const url = URL.createObjectURL(blob);
+          const a = document.createElement("a");
+          a.href = url;
+          a.download = "mood_stats.csv";
+          document.body.append(a);
+          a.click();
+          URL.revokeObjectURL(url);
+          a.remove();
+        });
+      }
+  
       function initRealCharts() {
         const colorText = getCSSVar("--text");
         const colorMuted = getCSSVar("--muted");
@@ -2460,6 +2633,7 @@ Respond empathetically, providing clear guidance, CBT techniques, mindfulness ex
             plugins: { legend: { display: false } }
           }
         });
+        initMoodStatsChart();
       }
 
       window.addEventListener("load", () => {
