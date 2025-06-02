@@ -14,10 +14,7 @@
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
 
   <style>
-    /*──────────────────────────────────────────────────────────────────────────────
-      VARIABLES & THEME
-    ──────────────────────────────────────────────────────────────────────────────*/
-    :root {
+      :root {
       --primary: #4A78C4;
       --accent: #FFA500;
       --bg: #F0F4FF;
@@ -40,10 +37,7 @@
       --shadow-dark: rgba(0,0,0,0.7);
     }
 
-    /*──────────────────────────────────────────────────────────────────────────────
-      RESET & BASE
-    ──────────────────────────────────────────────────────────────────────────────*/
-    *, *::before, *::after {
+      *, *::before, *::after {
       box-sizing: border-box;
       margin: 0;
       padding: 0;
@@ -59,18 +53,11 @@
     a { text-decoration: none; color: inherit; }
     button { font: inherit; cursor: pointer; background: none; border: none; }
 
-    /*──────────────────────────────────────────────────────────────────────────────
-      LAYOUT CONTAINER
-    ──────────────────────────────────────────────────────────────────────────────*/
-    body {
+     body {
       display: flex;
       min-height: 100vh;
       overflow-x: hidden;
     }
-
-    /*──────────────────────────────────────────────────────────────────────────────
-      SIDEBAR
-    ──────────────────────────────────────────────────────────────────────────────*/
     .sidebar {
       width: 240px;
       background: var(--surface);
@@ -80,6 +67,8 @@
       gap: 1rem;
       box-shadow: 2px 0 8px var(--shadow-light);
       z-index: 10;
+       position: sticky;
+      top: 0;
     }
     html.dark .sidebar {
       box-shadow: 2px 0 8px var(--shadow-dark);
@@ -128,11 +117,18 @@
     .sidebar nav a.active i {
       color: var(--surface);
     }
-
-    /*──────────────────────────────────────────────────────────────────────────────
-      MAIN AREA
-    ──────────────────────────────────────────────────────────────────────────────*/
-    .main {
+ @media(max-width: 768px) {
+    .content {
+         grid-template-columns: 1fr;
+         padding: 1rem;
+       }
+      .sidebar {
+        display: none;
+      }
+      .topbar {
+        justify-content: center;
+      } }
+      .main {
       flex: 1;
       display: flex;
       flex-direction: column;
@@ -372,6 +368,123 @@
       transform: translateX(-50%) translateY(0);
       opacity: 1;
     }
+
+      /*──────── PROFILE MODAL ────────*/
+    #profileModal {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0,0,0,0.5);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 50;
+      opacity: 0;
+      transition: opacity 0.3s ease;
+    }
+    #profileModal:not([hidden]) {
+      opacity: 1;
+    }
+
+    #profileModal .modal-content {
+      background: var(--surface);
+    border-radius: var(--radius);
+      padding: calc(var(--padding) * 1.2);
+      max-width: 400px;
+      width: 90%;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.15);
+      position: relative;
+      transform: translateY(-20px);
+      animation: slideDown 0.3s forwards;
+    }
+
+    @keyframes slideDown {
+      to { transform: translateY(0); }
+    }
+
+    #profileModal h3 {
+      margin-bottom: 1rem;
+      font-size: 1.5rem;
+      color: var(--primary);
+      text-align: center;
+    }
+
+    #profileModal label {
+      display: block;
+      font-weight: 600;
+      margin-bottom: 0.5rem;
+      color: var(--text);
+    }
+
+    #profileModal input {
+      width: 100%;
+      padding: 0.75rem 1rem;
+      border: 1px solid var(--muted);
+      border-radius: var(--radius);
+     background: var(--bg);
+     color: var(--text);
+      font-size: 1rem;
+      margin-bottom: 1rem;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    }
+    #profileModal input:focus {
+      outline: none;
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(var(--primary-rgb),0.15);
+    }
+
+    #profileModal button#saveProfileBtn {
+      width: 100%;
+      padding: 0.75rem;
+      background: var(--primary);
+      color: var(--secondary);
+      font-size: 1rem;
+      font-weight: 600;
+     border-radius: var(--radius);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+      transition: background 0.2s ease, transform 0.2s ease;
+   }
+    #profileModal button#saveProfileBtn:hover {
+      background: darken(var(--primary), 10%);
+      transform: translateY(-2px);
+    }
+
+    #profileModal .btn-close {
+      position: absolute;
+      top: 0.75rem;
+      right: 0.75rem;
+      background: transparent;
+      color: var(--muted);
+      font-size: 1.25rem;
+     border: none;
+      cursor: pointer;
+      transition: color 0.2s ease, transform 0.2s ease;
+    }
+    #profileModal .btn-close:hover {
+     color: var(--primary);
+      transform: scale(1.1);
+    }
+
+    /* Ensure readability in dark mode */
+    html.dark #profileModal .modal-content {
+      background: var(--surface);
+      color: var(--text);
+    }
+    html.dark #profileModal input {
+      background: var(--bg);
+      color: var(--text);
+      border-color: var(--muted);
+    }
+    html.dark #profileModal button#saveProfileBtn {
+      background: var(--primary);
+      color: #fff;
+    }
+    html.dark #profileModal .btn-close {
+      color: var(--muted);
+    }
+
   </style>
 </head>
 
@@ -391,7 +504,7 @@
       <a href="dietetics.html"><i class="fas fa-apple-alt"></i> Dietetics</a>
       <a href="epharmacy.html"><i class="fas fa-pills"></i> E-Pharmacy</a>
       <a href="consult.html"><i class="fas fa-calendar-check"></i> Consultation</a>
-      <a href="profile.html"><i class="fas fa-user-circle"></i> Profile</a>
+      <a href="#"><i class="fas fa-user-circle"></i> Profile</a>
     </nav>
   </aside>
 
@@ -475,7 +588,15 @@
     </section>
   </div>
 
-  <!-- TOAST NOTIFICATION -->
+  <div id="profileModal" class="modal" hidden>
+    <div class="modal-content">
+      <button class="btn-close" id="closeProfileModal"><i class="fas fa-times"></i></button>
+      <h3>Update Profile</h3>
+      <label for="profileName"><i class="fas fa-user"></i> Name:</label>
+      <input type="text" id="profileName" placeholder="Enter your name" required/>
+      <button id="saveProfileBtn" class="btn"><i class="fas fa-save"></i> Save</button>
+    </div>
+  </div>
   <div id="toast" class="toast"></div>
 
   <!-- SCRIPTS -->
@@ -498,6 +619,12 @@
       const themeToggle = document.getElementById('themeToggle');
       const signOutBtn = document.getElementById('signOutBtn');
       const userNameEl = document.getElementById('userName');
+      const profileLink = document.getElementById('profileLink');
+      const profileModal = document.getElementById('profileModal');
+      const closeProfileModal = document.getElementById('closeProfileModal');
+      const profileNameInput = document.getElementById('profileName');
+      const saveProfileBtn = document.getElementById('saveProfileBtn');
+
       const toastEl = document.getElementById('toast');
       const startDateInput = document.getElementById('startDate');
       const endDateInput = document.getElementById('endDate');
@@ -513,8 +640,9 @@
       // AUTH STATE
       firebase.auth().onAuthStateChanged(user => {
         if (!user) return window.location.href = 'index.html';
-        userNameEl.textContent = user.displayName || "User";
-      });
+        const display = user.displayName || "";
+        userNameEl.textContent = display || "User";
+        profileNameInput.value = display;      });
 
       // THEME TOGGLE
       themeToggle.onclick = () => {
@@ -546,13 +674,14 @@
       // INITIAL DUMMY DATA (CAN REPLACE WITH REAL FIREBASE FETCH)
       // ────────────────────────────────────────────────────────────────────────────
       let statsData = {
-        herbal: 124,
-        psych: 98,
-        diet: 76,
-        pharmacy: 153,
-        consult: 85,
-        daily: [20, 22, 18, 25, 30, 28, 32], // last 7 days total
-        labels: [] // will be set dynamically as dates
+        herbal: 0,
+        psych: 0,
+        diet: 0,
+        pharmacy: 0,
+        consult: 0,
+        daily: [0,0,0,0,0,0,0], 
+        labels: [] 
+
       };
 
       // FUNCTION TO GENERATE LAST 7 DAYS LABELS
@@ -569,11 +698,18 @@
 
       // DISPLAY STATS
       function displayStats() {
+         statsData.herbal = parseInt(localStorage.getItem('statHerbal')) || 0;
+        statsData.psych = parseInt(localStorage.getItem('statPsych')) || 0;
+        statsData.diet = parseInt(localStorage.getItem('statDiet')) || 0;
+        statsData.pharmacy = parseInt(localStorage.getItem('statPharmacy')) || 0;
+        statsData.consult = parseInt(localStorage.getItem('statConsult')) || 0;
+
         herbalQueriesEl.textContent = statsData.herbal;
         psychQueriesEl.textContent = statsData.psych;
         dietQueriesEl.textContent = statsData.diet;
         pharmacyQueriesEl.textContent = statsData.pharmacy;
         consultQueriesEl.textContent = statsData.consult;
+
       }
       displayStats();
 
@@ -690,14 +826,58 @@
         dailyChart.update();
 
         showToast('Statistics updated for selected range');
+         // Simply reload stored stats
+        displayStats();
+        distributionChart.data.datasets[0].data = [
+          statsData.herbal,
+          statsData.psych,
+          statsData.diet,
+          statsData.pharmacy,
+          statsData.consult
+        ];
+        distributionChart.update();
+        showToast('Statistics reloaded');
+
       };
 
-      // SET DEFAULT DATES TO PAST WEEK
-      const today = new Date().toISOString().split('T')[0];
-      const prevWeek = new Date();
-      prevWeek.setDate(prevWeek.getDate() - 7);
-      startDateInput.value = prevWeek.toISOString().split('T')[0];
-      endDateInput.value = today;
+      profileLink.onclick = () => {
+        profileModal.hidden = false;
+        profileNameInput.focus();
+      };
+
+      // Close Profile Modal
+     closeProfileModal.onclick = () => {
+       profileModal.hidden = true;
+      };
+
+      // Save Profile Changes
+      saveProfileBtn.onclick = async () => {
+        const newName = profileNameInput.value.trim();
+        if (!newName) {
+          showToast('Name cannot be empty');
+          return;
+        }
+        const user = firebase.auth().currentUser;
+        if (user) {
+          try {
+            await user.updateProfile({ displayName: newName });
+            userNameEl.textContent = newName;
+            // Persist in localStorage too
+            localStorage.setItem('displayName', newName);
+            showToast('Profile updated');
+            profileModal.hidden = true;
+          } catch (err) {
+            console.error(err);
+            showToast('Could not update profile');
+          }
+        }
+      };
+
+      // On page load, if user has persisted displayName in localStorage, set it
+      const storedName = localStorage.getItem('displayName');
+      if (storedName) {
+        userNameEl.textContent = storedName;
+     }
     });
   </script>
 </body>
