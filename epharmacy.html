@@ -550,7 +550,19 @@ html.dark .chat-input textarea {
   border-color: var(--pharm-secondary);
    color: var(--pharm-text);
   }
-
+.response .close-btn {
+    position: absolute;
+    top: var(--padding);
+    right: var(--padding);
+    background: none;
+    color: var(--pharm-secondary);
+    font-size: 1.2rem;
+    border: none;
+    cursor: pointer;
+    transition: color var(--transition), transform var(--transition);
+    display: block;       /* <-- Always show by default */
+    opacity: 0.6;         /* Slightly muted until hover */
+  }
   /*──────────────────────────────────────────────────────────────────────────────
     HISTORY MODAL
   ──────────────────────────────────────────────────────────────────────────────*/
@@ -682,6 +694,70 @@ html.dark .bot-msg {
 @keyframes spin {
   to { transform: rotate(360deg); }
 }
+  /*──────────────────────────────────────────────────────────────────────────────
+    CHAT BUBBLES (WhatsApp‐Style)
+  ──────────────────────────────────────────────────────────────────────────────*/
+  .chat-box {
+    background: var(--pharm-bg);
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    border-radius: var(--radius);
+    padding: var(--padding);
+    min-height: 300px;   /* a bit taller */
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+  .user-msg,
+  .bot-msg {
+    max-width: 75%;
+    padding: 0.75rem 1rem;
+    border-radius: 1.2rem;
+    position: relative;
+    word-wrap: break-word;
+    transition: background var(--transition), color var(--transition);
+  }
+  .user-msg {
+    background: var(--pharm-primary-alt);
+    color: #fff;
+    align-self: flex-end;
+    border-bottom-right-radius: 0.2rem;
+    border-bottom-left-radius: 1.2rem;
+    border-top-right-radius: 1.2rem;
+    border-top-left-radius: 1.2rem;
+  }
+  .bot-msg {
+    background: var(--pharm-surface);
+    color: var(--pharm-text);
+    align-self: flex-start;
+    border-bottom-left-radius: 0.2rem;
+    border-bottom-right-radius: 1.2rem;
+    border-top-left-radius: 1.2rem;
+    border-top-right-radius: 1.2rem;
+    box-shadow: var(--shadow);
+  }
+  /* Timestamp inside each bubble */
+  .timestamp, .msg-ts {
+    font-size: 0.65rem;
+    color: var(--pharm-muted);
+    position: absolute;
+    bottom: -1.2rem;
+    right: 0.6rem;
+  }
+  .spinner {
+    display: inline-block;
+    width: 1em;
+    height: 1em;
+    border: 2px solid var(--pharm-primary);
+    border-top-color: transparent;
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+    vertical-align: middle;
+    margin-left: 0.25em;
+  }
+  @keyframes spin {
+    to { transform: rotate(360deg); }
+  }
 
 /*──────────────────────────────────────────────────────────────────────────────
   HISTORY MODAL (copy exactly)
@@ -800,7 +876,81 @@ html.dark .bot-msg {
   background: var(--secondary);
   transform: translateY(-1px);
 }
-
+.history-content {
+   background: var(--pharm-surface);
+   border-radius: var(--radius);
+   padding: var(--padding);
+   width: 90%;
+   max-width: 600px;
+   max-height: 80%;
+   overflow-y: auto;
+   box-shadow: var(--shadow);
+   position: relative;
+   border: 1px solid var(--pharm-secondary);
+   display: flex;
+   flex-direction: column;
+ }
+ .history-content h3 {
+   color: var(--pharm-primary-alt);
+   font-size: 1.5rem;
+   font-weight: 600;
+   margin-bottom: 1rem;
+   padding-bottom: 0.5rem;
+   border-bottom: 2px solid var(--pharm-secondary);
+   text-align: center;
+ }
+ .history-table-wrapper {
+   background: var(--pharm-bg);
+   border-radius: var(--radius);
+   flex: 1;
+   overflow-y: auto;
+   padding: var(--padding);
+ }
+ .history-table {
+   width: 100%;
+   border-collapse: collapse;
+ }
+ .history-table th, .history-table td {
+   padding: 0.75rem;
+   text-align: left;
+   border-bottom: 1px solid rgba(0,0,0,0.05);
+ }
+ .history-table thead tr:first-child th {
+   background: var(--pharm-secondary);
+  color: #fff;
+  font-weight: 600;
+   font-size: 1rem;
+ }
+ .history-table tbody tr:nth-child(odd) {
+   background: rgba(0,0,0,0.03);
+ }
+ .history-actions {
+   display: flex;
+   justify-content: space-between;
+   padding-top: var(--padding);
+   border-top: 1px solid rgba(0,0,0,0.1);
+ }
+ .history-actions button {
+   background: var(--pharm-primary-alt);
+   color: #fff;
+   border: none;
+   border-radius: var(--radius);
+   padding: 0.6rem 1.2rem;
+   font-size: 0.95rem;
+   cursor: pointer;
+   transition: background var(--transition), transform var(--transition);
+ }
+ .history-actions button:hover {
+   background: var(--pharm-primary);
+   transform: translateY(-1px);
+ }
+ .history-table td .del-msg i {
+   color: var(--pharm-secondary);
+   transition: color var(--transition);
+ }
+ .history-table td .del-msg:hover i {
+   color: var(--pharm-primary-alt);
+ }
 /* Copy‐toast (small “Copied!” pop‐up) */
 .copy-toast {
   position: fixed;
@@ -1530,6 +1680,7 @@ html.dark .bot-msg {
   <!-- 2. Drug Dropdown -->
   <label for="drugSelect" style="margin-top:1rem; display:block;">Choose a drug:</label>
   <select id="drugSelect">
+    <option value="" disabled selected>Select a drug…</option>
     <!-- Options populated by JS -->
   </select>
   <div id="priceDisplay" style="margin-top:0.5rem; font-weight:600;"></div>
@@ -1615,10 +1766,12 @@ html.dark .bot-msg {
     <button id="historyBtn" class="btn" type="button" style="margin-left:0.5rem;"><i class="fas fa-history"></i> History</button>
       </div>
       <div id="pharmaChatBox" class="chat-box"></div>
-      <form id="pharma-form" class="chat-input">
-        <input id="pharmaInput" type="text" placeholder="Ask me anything about meds…">
-        <button id="sendPharma" class="btn"><i class="fas fa-paper-plane"></i></button>
-      </form>
+     <form id="pharma-form" class="chat-input-row">
+   <input id="pharmaInput" type="text" placeholder="Ask me anything about meds…" />
+   <button id="sendPharma" class="btn" type="submit">
+     <i class="fas fa-paper-plane"></i>
+   </button>
+ </form>
     </section>
 
     <!-- History Modal -->
@@ -1781,11 +1934,13 @@ document.addEventListener("DOMContentLoaded", () => {
   // Show price of selected drug
   const priceDisplay = document.getElementById("priceDisplay");
   function updatePriceDisplay() {
-    const idx = +drugSelect.value;
-    if (isNaN(idx)) {
-      priceDisplay.textContent = "";
-      return;
-    }
+    const idx = Number(drugSelect.value);
+   if (isNaN(idx) || idx < 0) {
+     priceDisplay.textContent = "";
+     // Hide order form if nothing selected
+     document.getElementById("orderDetails").style.display = "none";
+     return;
+   }
     const { name, price } = drugsData[idx];
     priceDisplay.textContent = `Price: ₵${price.toFixed(2)}`;
     // Show the order details form
@@ -2653,7 +2808,10 @@ You are a friendly, knowledgeable pharmacist. A user will ask questions about me
 
     clearPharmaBtn.addEventListener("click", () => {
       pharmaChatBox.innerHTML = "";
-      pharmaLastDateHeader = null;
+    pharmaLastDateHeader = null;
+     // Also clear persisted history if you want:
+     pharmaHistory = [];
+     localStorage.removeItem("pharmaHistory");
     });
 
     // History modal logic
