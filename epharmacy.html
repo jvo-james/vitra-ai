@@ -1970,252 +1970,7 @@ html.dark .bot-msg {
     </footer>
   </main>
 <script src="https://js.paystack.co/v1/inline.js"></script>
-<script>
-document.addEventListener("DOMContentLoaded", () => {
 
- window.callOpenAI = async function(messages) {
-   try {
-     const response = await fetch("/.netlify/functions/openai-proxy", {
-       method: "POST",
-       headers: { "Content-Type": "application/json" },
-       body: JSON.stringify({ messages })
-     });
-     if (!response.ok) throw new Error("OpenAI request failed");
-     const data = await response.json();
-     return data.choices?.[0]?.message?.content.trim() || "";
-   } catch (err) {
-     console.error(err);
-     throw err;
-   }
- };
-
-  // ──────────────────────────────────────────────────────────────────────────────
-  // 1) LIST OF 40 POPULAR DRUGS IN GHANA (name + price in GHS)
-  // ──────────────────────────────────────────────────────────────────────────────
-  const drugsData = [
-    { name: "Paracetamol 500mg", price: 0.80 },
-    { name: "Amoxicillin 500mg", price: 2.50 },
-    { name: "Ciprofloxacin 500mg", price: 3.00 },
-    { name: "Azithromycin 250mg", price: 4.00 },
-    { name: "Metformin 500mg", price: 2.00 },
-    { name: "Lisinopril 10mg", price: 2.20 },
-    { name: "Atorvastatin 20mg", price: 5.50 },
-    { name: "Omeprazole 20mg", price: 3.50 },
-    { name: "Amoxicillin-Clavulanate 625mg", price: 6.00 },
-    { name: "Ceftriaxone 1g Injection", price: 12.00 },
-    { name: "Artemether-Lumefantrine (Coartem) 80/480mg", price: 8.00 },
-    { name: "Quinine 300mg", price: 1.50 },
-    { name: "Albendazole 400mg", price: 1.20 },
-    { name: "Ivermectin 6mg", price: 2.80 },
-    { name: "Mebendazole 100mg", price: 1.10 },
-    { name: "Vitamin C 500mg", price: 0.90 },
-    { name: "Vitamin D 1000 IU", price: 1.50 },
-    { name: "Iron Sulphate 200mg", price: 1.80 },
-    { name: "Enalapril 5mg", price: 2.10 },
-    { name: "Metoprolol 50mg", price: 2.60 },
-    { name: "Atenolol 50mg", price: 2.40 },
-    { name: "Salbutamol Inhaler 100mcg", price: 25.00 },
-    { name: "Budesonide Inhaler 200mcg", price: 45.00 },
-    { name: "Salmetrol-Fluticasone 50/250mcg", price: 60.00 },
-    { name: "Regular Insulin (10mL vial)", price: 70.00 },
-    { name: "Insulin Glargine 100IU/mL", price: 150.00 },
-    { name: "Metronidazole 400mg", price: 1.30 },
-    { name: "Tinidazole 500mg", price: 3.20 },
-    { name: "Zinc Sulphate 20mg", price: 1.00 },
-    { name: "Co-trimoxazole (Trimethoprim-Sulfamethoxazole) 480mg", price: 1.70 },
-    { name: "Nifedipine 20mg", price: 2.90 },
-    { name: "Simvastatin 20mg", price: 4.80 },
-    { name: "Hydrochlorothiazide 25mg", price: 1.90 },
-    { name: "Prednisone 20mg", price: 3.80 },
-    { name: "Naproxen 500mg", price: 2.20 },
-    { name: "Ibuprofen 400mg", price: 1.50 },
-    { name: "Diclofenac 50mg", price: 1.80 },
-    { name: "Erythromycin 500mg", price: 4.00 },
-    { name: "Doxycycline 100mg", price: 3.50 },
-    { name: "Chloroquine 250mg", price: 1.20 },
-    { name: "Artesunate 50mg", price: 6.50 }
-  ];
-
-  // Populate the dropdown
-  const drugSelect = document.getElementById("drugSelect");
-  drugsData.forEach((d, idx) => {
-    const opt = document.createElement("option");
-    opt.value = idx; // index in array
-    opt.textContent = `${d.name} — ₵${d.price.toFixed(2)}`;
-    drugSelect.append(opt);
-  });
-
-   const priceDisplay = document.getElementById("priceDisplay");
-  priceDisplay.textContent = "";
-
-  // ──────────────────────────────────────────────────────────────────────────────
-  // 2) AI‐POWERED SUGGESTION FROM SYMPTOMS
-  // ──────────────────────────────────────────────────────────────────────────────
-  const suggestDrugBtn = document.getElementById("suggestDrug");
-  const symptomInputBuy = document.getElementById("symptomInputBuy");
-  const suggestionMsg = document.getElementById("suggestionMsg");
-
-  suggestDrugBtn.addEventListener("click", async () => {
-    const symptoms = symptomInputBuy.value.trim();
-    suggestionMsg.textContent = "";
-    if (!symptoms) {
-      suggestionMsg.textContent = "⚠️ Please describe your symptoms first.";
-      return;
-    }
-    suggestionMsg.innerHTML = `Analyzing symptoms… <span class="spinner"></span>`;
-    try {
-      // Use existing callOpenAI() to ask for a drug suggestion
-      const sysPrompt = `
-You are a clinical pharmacist. A patient reports these symptoms: "${symptoms}". 
-Based on the common practice in Ghana, suggest ONE most appropriate over-the-counter or prescription drug from the following list (provide exactly the drug name as shown):
-${drugsData.map(d => d.name).join(", ")}.
-      `.trim();
-
-      const aiReply = await callOpenAI([
-        { role: "system", content: sysPrompt },
-        { role: "user", content: `Symptoms: ${symptoms}` }
-      ]);
-
-      // Try to match AI reply to one of our drug names
-      const suggestion = aiReply.split("\n")[0].trim();
-      const matchedIndex = drugsData.findIndex(d => 
-        d.name.toLowerCase() === suggestion.toLowerCase()
-      );
-      if (matchedIndex >= 0) {
-        drugSelect.value = matchedIndex;
-        updatePriceDisplay();
-        suggestionMsg.textContent = `Our AI suggests: "${drugsData[matchedIndex].name}".`;
-      } else {
-        suggestionMsg.textContent = `AI suggested "${suggestion}", which is not in our list. Please choose manually.`;
-      }
-    } catch (err) {
-      console.error(err);
-      suggestionMsg.textContent = "⚠️ Unable to get suggestion right now. Please try again.";
-    }
-  });
-
-    // ──────────────────────────────────────────────────────────────────────────────
-  // After existing ai‐powered suggestion logic, add “Add to Cart” handling
-  // ──────────────────────────────────────────────────────────────────────────────
-  const addToCartBtn = document.getElementById("addToCart");
-  const cartList     = document.getElementById("cartList");
-  const cartTotal    = document.getElementById("cartTotal");
-  const cartSummary  = document.getElementById("cartSummary");
-
- let cartItems = []; // array of { name, price }
-
-  addToCartBtn.addEventListener("click", () => {
-    // Grab all selected <option> indices
-    const selectedOptions = Array.from(drugSelect.selectedOptions);
-    if (selectedOptions.length === 0) {
-      alert("⚠️ Please select at least one drug to add.");
-      return;
-    }
-
-   // Reset cartItems each time (so duplicates from previous add are removed)
-   cartItems = [];
-    selectedOptions.forEach(opt => {
-      const idx = Number(opt.value);
-      if (!isNaN(idx) && idx >= 0) {
-        const { name, price } = drugsData[idx];
-       cartItems.push({ name, price });
-      }
-    });
-
-    // Populate cartList
-    cartList.innerHTML = "";
-   let total = 0;
-    cartItems.forEach(item => {
-      const li = document.createElement("li");
-      li.textContent = `${item.name} — ₵${item.price.toFixed(2)}`;
-      cartList.append(li);
-     total += item.price;
-    });
-   cartTotal.textContent = total.toFixed(2);
-
-   // Show the summary area
-    cartSummary.style.display = "block";
-
-   // Hide single‐item priceDisplay since we're now dealing with multiple
-   priceDisplay.textContent = "";
-   document.getElementById("orderDetails").style.display = "block";
-  });
-
-  // ──────────────────────────────────────────────────────────────────────────────
-  // 3) PAYMENT WITH PAYSTACK
-  // ──────────────────────────────────────────────────────────────────────────────
-  const payButton = document.getElementById("payWithPaystack");
-  const paymentModal = document.getElementById("paymentModal");
-  const confirmText = document.getElementById("confirmText");
-
-  if (!cartItems || cartItems.length === 0) {
-     alert("⚠️ Your cart is empty. Please add at least one drug.");
-     return;
-   }
-   // Compute total
-   const totalGHS = cartItems.reduce((sum, item) => sum + item.price, 0);
-   const amountKobo = Math.round(totalGHS * 100); // Paystack expects kobo
-
-    const name = document.getElementById("buyerName").value.trim();
-    const phone = document.getElementById("buyerPhone").value.trim();
-    const email = document.getElementById("buyerEmail").value.trim();
-    const address = document.getElementById("buyerAddress").value.trim();
-
-    if (!name || !phone || !email || !address) {
-      alert("Please fill in all your details before proceeding.");
-      return;
-    }
-
-    // Initialize Paystack
-    const handler = PaystackPop.setup({
-      key: "pk_test_297586e51710e83d3c159bfe71ff45c7e23411fa",
-        email: email
-      amount: amountKobo,
-      currency: "GHS",
-      firstname: name,
-      metadata: {
-        custom_fields: [
-          { display_name: "Phone Number", variable_name: "phone_number", value: phone },
-          { display_name: "Delivery Address", variable_name: "delivery_address", value: address }
-        ]
-      },
-      onClose: function() {
-        alert("Payment window was closed. If you already paid, call our support line.");
-      },
-      callback: function(response) {
-        // Payment successful: show confirmation modal
-       const namesList = cartItems.map(i => i.name).join("<br>• ");
-       confirmText.innerHTML = `
-         Thank you, <strong>${escapeHtml(name)}</strong>!<br>
-         You have successfully purchased:<br>• ${namesList}<br><br>
-         <strong>Total Paid:</strong> ₵${totalGHS.toFixed(2)}<br>
-         <strong>Transaction Reference:</strong> <em>${response.reference}</em><br><br>
-         We will deliver to: <em>${escapeHtml(address)}</em><br>
-         Contact: <em>${escapeHtml(phone)}</em><br><br>
-         <small>Check your email (${escapeHtml(email)}) for the receipt.</small>
-       `;
-        paymentModal.hidden = false;
-      }
-    });
-    handler.openIframe();
-  });
-
-  // Close success modal
-  paymentModal.querySelector(".close-history").onclick = () => {
-    paymentModal.hidden = true;
-    // Optionally, reset the form:
-    document.getElementById("orderDetails").style.display = "none";
-    drugSelect.value = "";
-    priceDisplay.textContent = "";
-    suggestionMsg.textContent = "";
-    symptomInputBuy.value = "";
-    document.getElementById("buyerName").value = "";
-    document.getElementById("buyerPhone").value = "";
-    document.getElementById("buyerEmail").value = "";
-    document.getElementById("buyerAddress").value = "";
-  };
-});
-</script>
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <!-- Paste this entire <script> block at the end of your <body>, replacing all existing <script> sections -->
@@ -2323,6 +2078,257 @@ ${drugsData.map(d => d.name).join(", ")}.
       return payload !== null ? payload : rawText;
     }
 
+   // ────────────────────────────────────────────────────────────────
+  // 1) LIST OF DRUGS (name + price in GHS)
+  // ────────────────────────────────────────────────────────────────
+  const drugsData = [
+    { name: "Paracetamol 500mg", price: 0.80 },
+    { name: "Amoxicillin 500mg", price: 2.50 },
+    { name: "Ciprofloxacin 500mg", price: 3.00 },
+    { name: "Azithromycin 250mg", price: 4.00 },
+    { name: "Metformin 500mg", price: 2.00 },
+    { name: "Lisinopril 10mg", price: 2.20 },
+    { name: "Atorvastatin 20mg", price: 5.50 },
+    { name: "Omeprazole 20mg", price: 3.50 },
+    { name: "Amoxicillin-Clavulanate 625mg", price: 6.00 },
+    { name: "Ceftriaxone 1g Injection", price: 12.00 },
+    { name: "Artemether-Lumefantrine (Coartem) 80/480mg", price: 8.00 },
+    { name: "Quinine 300mg", price: 1.50 },
+    { name: "Albendazole 400mg", price: 1.20 },
+    { name: "Ivermectin 6mg", price: 2.80 },
+    { name: "Mebendazole 100mg", price: 1.10 },
+    { name: "Vitamin C 500mg", price: 0.90 },
+    { name: "Vitamin D 1000 IU", price: 1.50 },
+    { name: "Iron Sulphate 200mg", price: 1.80 },
+    { name: "Enalapril 5mg", price: 2.10 },
+    { name: "Metoprolol 50mg", price: 2.60 },
+    { name: "Atenolol 50mg", price: 2.40 },
+    { name: "Salbutamol Inhaler 100mcg", price: 25.00 },
+    { name: "Budesonide Inhaler 200mcg", price: 45.00 },
+    { name: "Salmetrol-Fluticasone 50/250mcg", price: 60.00 },
+    { name: "Regular Insulin (10mL vial)", price: 70.00 },
+    { name: "Insulin Glargine 100IU/mL", price: 150.00 },
+    { name: "Metronidazole 400mg", price: 1.30 },
+    { name: "Tinidazole 500mg", price: 3.20 },
+    { name: "Zinc Sulphate 20mg", price: 1.00 },
+    { name: "Co-trimoxazole (Trimethoprim-Sulfamethoxazole) 480mg", price: 1.70 },
+    { name: "Nifedipine 20mg", price: 2.90 },
+    { name: "Simvastatin 20mg", price: 4.80 },
+    { name: "Hydrochlorothiazide 25mg", price: 1.90 },
+    { name: "Prednisone 20mg", price: 3.80 },
+    { name: "Naproxen 500mg", price: 2.20 },
+    { name: "Ibuprofen 400mg", price: 1.50 },
+    { name: "Diclofenac 50mg", price: 1.80 },
+    { name: "Erythromycin 500mg", price: 4.00 },
+    { name: "Doxycycline 100mg", price: 3.50 },
+    { name: "Chloroquine 250mg", price: 1.20 },
+    { name: "Artesunate 50mg", price: 6.50 }
+  ];
+
+  // ────────────────────────────────────────────────────────────────
+  // 2) CACHE DOM ELEMENTS
+  // ────────────────────────────────────────────────────────────────
+  const symptomInputBuy = document.getElementById("symptomInputBuy");
+  const suggestDrugBtn   = document.getElementById("suggestDrug");
+  const suggestionMsg    = document.getElementById("suggestionMsg");
+  const drugSelect       = document.getElementById("drugSelect");
+  const priceDisplay     = document.getElementById("priceDisplay");
+  const addToCartBtn     = document.getElementById("addToCart");
+  const cartList         = document.getElementById("cartList");
+  const cartTotal        = document.getElementById("cartTotal");
+  const cartSummary      = document.getElementById("cartSummary");
+  const orderDetails     = document.getElementById("orderDetails");
+  const payButton        = document.getElementById("payWithPaystack");
+  const paymentModal     = document.getElementById("paymentModal");
+  const confirmText      = document.getElementById("confirmText");
+
+  // ────────────────────────────────────────────────────────────────
+  // 3) POPULATE <select id="drugSelect" multiple size="5">
+  // ────────────────────────────────────────────────────────────────
+  drugsData.forEach((drug, idx) => {
+    const opt = document.createElement("option");
+    opt.value = idx; 
+    opt.textContent = `${drug.name} — ₵${drug.price.toFixed(2)}`;
+    drugSelect.appendChild(opt);
+  });
+
+  // When a single‐item is selected, show its price (but we handle cart separately)
+  function updateSinglePrice() {
+    const idx = Number(drugSelect.value);
+    if (isNaN(idx) || idx < 0) {
+      priceDisplay.textContent = "";
+      return;
+    }
+    priceDisplay.textContent = `Price: ₵${drugsData[idx].price.toFixed(2)}`;
+  }
+  drugSelect.addEventListener("change", updateSinglePrice);
+
+  // ────────────────────────────────────────────────────────────────
+  // 4) “Suggest a Drug” ▶ AI SUGGESTION
+  // ────────────────────────────────────────────────────────────────
+  suggestDrugBtn.addEventListener("click", async () => {
+    const symptoms = symptomInputBuy.value.trim();
+    suggestionMsg.textContent = "";
+    if (!symptoms) {
+      suggestionMsg.textContent = "⚠️ Please describe your symptoms first.";
+      return;
+    }
+    suggestionMsg.innerHTML = `Analyzing symptoms… <span class="spinner"></span>`;
+    try {
+      // You must have defined callOpenAI(...) elsewhere on the page.
+      const sysPrompt = `
+You are a clinical pharmacist. A patient reports these symptoms: "${symptoms}". 
+From the list below, suggest exactly ONE drug (return only the name, matching the list):
+${drugsData.map(d => d.name).join(", ")}.
+      `.trim();
+
+      const aiReply = await window.callOpenAI([
+        { role: "system", content: sysPrompt },
+        { role: "user",   content: `Symptoms: ${symptoms}` }
+      ]);
+
+      // Take the first line as the suggestion
+      const suggestion = aiReply.split("\n")[0].trim();
+      const matchedIndex = drugsData.findIndex(
+        d => d.name.toLowerCase() === suggestion.toLowerCase()
+      );
+      if (matchedIndex >= 0) {
+        // Select that index (clear any prior selections first)
+        Array.from(drugSelect.options).forEach(opt => opt.selected = false);
+        drugSelect.options[matchedIndex].selected = true;
+        updateSinglePrice();
+        suggestionMsg.textContent = `Our AI suggests: "${drugsData[matchedIndex].name}".`;
+      } else {
+        suggestionMsg.textContent = `AI suggested "${suggestion}", which is not in our list. Please choose manually.`;
+      }
+    } catch (err) {
+      console.error(err);
+      suggestionMsg.textContent = "⚠️ Unable to get suggestion right now. Please try again.";
+    }
+  });
+
+  // ────────────────────────────────────────────────────────────────
+  // 5) “Add to Cart” ▶ MULTI‐SELECT & CART SUMMARY
+  // ────────────────────────────────────────────────────────────────
+  let cartItems = []; // { name, price } pairs
+
+  addToCartBtn.addEventListener("click", () => {
+    const selectedOptions = Array.from(drugSelect.selectedOptions);
+    if (selectedOptions.length === 0) {
+      alert("⚠️ Please select at least one drug to add.");
+      return;
+    }
+
+    // Rebuild cartItems from scratch each time
+    cartItems = selectedOptions.map(opt => {
+      const idx = Number(opt.value);
+      return {
+        name:  drugsData[idx].name,
+        price: drugsData[idx].price
+      };
+    });
+
+    // Populate the <ul id="cartList">
+    cartList.innerHTML = "";
+    let total = 0;
+    cartItems.forEach(item => {
+      const li = document.createElement("li");
+      li.textContent = `${item.name} — ₵${item.price.toFixed(2)}`;
+      cartList.appendChild(li);
+      total += item.price;
+    });
+    cartTotal.textContent = total.toFixed(2);
+    cartSummary.style.display = "block";
+
+    // Reveal the “Your Details” form
+    orderDetails.style.display = "block";
+    // Clear single‐item price display
+    priceDisplay.textContent = "";
+  });
+
+  // Initially hide form and cart
+  orderDetails.style.display = "none";
+  cartSummary.style.display  = "none";
+
+  // ────────────────────────────────────────────────────────────────
+  // 6) “Proceed to Payment” ▶ PAYSTACK INTEGRATION
+  // ────────────────────────────────────────────────────────────────
+  payButton.addEventListener("click", () => {
+    if (cartItems.length === 0) {
+      alert("⚠️ Your cart is empty. Please add at least one drug.");
+      return;
+    }
+    // Gather buyer info
+    const name    = document.getElementById("buyerName").value.trim();
+    const phone   = document.getElementById("buyerPhone").value.trim();
+    const email   = document.getElementById("buyerEmail").value.trim();
+    const address = document.getElementById("buyerAddress").value.trim();
+    if (!name || !phone || !email || !address) {
+      alert("⚠️ Please fill in all your details before proceeding.");
+      return;
+    }
+
+    // Calculate total in GHS and convert to kobo
+    const totalGHS  = cartItems.reduce((sum, itm) => sum + itm.price, 0);
+    const totalKobo = Math.round(totalGHS * 100);
+
+    // Initialize Paystack
+    const handler = PaystackPop.setup({
+key: "pk_test_297586e51710e83d3c159bfe71ff45c7e23411fa",
+      email: email,
+      amount: totalKobo,
+      currency: "GHS",
+      firstname: name,
+      metadata: {
+        custom_fields: [
+          { display_name: "Phone Number",    variable_name: "phone_number",    value: phone   },
+          { display_name: "Delivery Address", variable_name: "delivery_address", value: address }
+        ]
+      },
+      onClose: function() {
+        alert("Payment window was closed. If you already paid, please contact support.");
+      },
+      callback: function(response) {
+        // Build a confirmation summary of purchased items
+        const itemLines = cartItems
+          .map(itm => `${itm.name} — ₵${itm.price.toFixed(2)}`)
+          .join("<br>");
+        confirmText.innerHTML = `
+          Thank you, <strong>${escapeHtml(name)}</strong>!<br>
+          You have successfully purchased:<br>
+          ${itemLines}<br><br>
+          <strong>Total Paid: ₵${totalGHS.toFixed(2)}</strong><br>
+          Transaction Reference: <em>${response.reference}</em><br>
+          Delivery Address: <em>${escapeHtml(address)}</em><br>
+          Contact: <em>${escapeHtml(phone)}</em><br>
+          Check your email (${escapeHtml(email)}) for the receipt.
+        `;
+        paymentModal.hidden = false;
+      }
+    });
+    handler.openIframe();
+  });
+
+  // Close payment confirmation modal
+  paymentModal.querySelector(".close-history").onclick = () => {
+    paymentModal.hidden = true;
+    // Reset everything
+    cartItems = [];
+    cartList.innerHTML = "";
+    cartTotal.textContent = "0.00";
+    cartSummary.style.display = "none";
+    orderDetails.style.display = "none";
+    symptomInputBuy.value = "";
+    suggestionMsg.textContent = "";
+    priceDisplay.textContent = "";
+    drugSelect.value = "";
+    document.getElementById("buyerName").value = "";
+    document.getElementById("buyerPhone").value = "";
+    document.getElementById("buyerEmail").value = "";
+    document.getElementById("buyerAddress").value = "";
+  };
+
+ 
     // ────────────────────────────────────────────────────────────────────────────
     // 4) UTILITY: Format Markdown-like text into HTML
     // ────────────────────────────────────────────────────────────────────────────
