@@ -861,6 +861,198 @@
       max-height: 220px;
     }
   }
+
+   /*──────────────────────── History Modal ─────────────────────────────────*/
+  .history-modal {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.6);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 2000;
+  }
+
+  .history-content {
+    background: var(--surface-light);
+    border-radius: var(--radius);
+    padding: 1.5rem;
+    width: 90%;
+    max-width: 700px;
+    max-height: 80vh;
+    overflow-y: auto;
+    box-shadow: 0 12px 60px rgba(0, 0, 0, 0.2);
+    position: relative;
+  }
+
+  .history-content h3 {
+    font-size: 1.8rem;
+    margin-bottom: 1rem;
+    color: var(--primary);
+  }
+
+  .history-table-wrapper {
+    overflow-x: auto;
+    margin-bottom: 1rem;
+  }
+
+  .history-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.95rem;
+  }
+
+  .history-table th,
+  .history-table td {
+    border-bottom: 1px solid var(--muted-light);
+    padding: 0.5rem;
+    text-align: left;
+  }
+
+  .history-table th {
+    background: var(--primary-light);
+    color: #fff;
+    position: sticky;
+    top: 0;
+    z-index: 1;
+  }
+
+  .history-table thead tr:first-child th {
+    background: var(--primary);
+  }
+
+  .history-table tbody tr:hover {
+    background: var(--accent-light);
+  }
+
+  .del-msg {
+    background: none;
+    border: none;
+    color: var(--muted-light);
+    cursor: pointer;
+    font-size: 1.1rem;
+    transition: color var(--transition);
+  }
+
+  .del-msg:hover {
+    color: var(--primary);
+  }
+
+  .history-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 1rem;
+    position: sticky;
+    bottom: 0;
+    background: var(--surface-light);
+    padding-top: 0.5rem;
+  }
+
+  .history-actions button {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 1rem;
+    border: none;
+    border-radius: var(--radius);
+    background: var(--primary);
+    color: #fff;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background var(--transition), transform var(--transition);
+  }
+
+  .history-actions .clear-history {
+    background: var(--secondary);
+  }
+
+  .history-actions button:hover {
+    transform: translateY(-2px);
+    filter: brightness(1.1);
+  }
+ /*──────────────────────── Copy Toast ─────────────────────────────────*/
+  .copy-toast {
+    position: fixed;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--primary);
+    color: #fff;
+    padding: 0.5rem 1rem;
+    border-radius: var(--radius);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    font-size: 0.95rem;
+    animation: fade-in-out 2s ease forwards;
+    z-index: 2000;
+  }
+
+  @keyframes fade-in-out {
+    0% { opacity: 0; transform: translateX(-50%) translateY(20px); }
+    10% { opacity: 1; transform: translateX(-50%) translateY(0); }
+    90% { opacity: 1; }
+    100% { opacity: 0; transform: translateX(-50%) translateY(20px); }
+  }
+
+   .checkbox-group {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+    gap: 0.75rem;
+  }
+  /* When “Other” checkbox is checked, show the text field */
+.checkbox-group input[type="checkbox"][value="Other"]:checked ~ 
+input.other-input {
+  display: block;
+  width: 100%;
+}
+  /* Container around the two buttons (already .chat-controls or .tool-row) */
+#therapybot .chat-controls {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.5rem;
+  margin-bottom: 0.75rem;
+}
+
+/* Base styling for those icon-buttons */
+#therapybot .chat-controls button {
+  width: 36px;
+  height: 36px;
+  background: var(--surface);
+  border: 2px solid var(--secondary);  /* blue outline */
+  color: var(--secondary);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1rem;
+  transition: background var(--transition), color var(--transition), transform var(--transition);
+}
+
+/* On hover, invert colors */
+#therapybot .chat-controls button:hover {
+  background: var(--secondary);
+  color: #fff;
+  transform: scale(1.1);
+}
+
+/* If you want one to be “history” (blue) and one “clear” (red), override: */
+#viewHistory {
+  border-color: var(--secondary);
+  color: var(--secondary);
+}
+#viewHistory:hover {
+  background: var(--secondary);
+  color: #fff;
+}
+
+#clearChat {
+  border-color: var(--primary);
+  color: var(--primary);
+}
+#clearChat:hover {
+  background: var(--primary);
+  color: #fff;
+}
+
 </style>
 
 
