@@ -133,8 +133,7 @@
     color: var(--text);
     font-weight: 500;
     transition: background var(--transition), transform var(--transition);
-    white-space: normal;    
-    flex-wrap: wrap; 
+    white-space: nowrap;    
   }
   aside#sidebar nav a.active i,
   aside#sidebar nav a:hover i {
@@ -148,6 +147,7 @@
   }
   aside#sidebar nav a span {
     transition: opacity var(--transition);
+    word-break: break-word;
   }
   aside#sidebar.collapsed nav a span {
     opacity: 0;
@@ -160,6 +160,17 @@
   }
   aside#sidebar nav a.active {
     font-weight: 700;
+  }
+   aside#sidebar.collapsed nav a {
+    justify-content: center;
+    padding: 0.75rem 0;
+  }
+
+  aside#sidebar.collapsed nav a:hover,
+  aside#sidebar.collapsed nav a.active {
+    background: var(--primary-alt);
+    color: #fff;
+    transform: none;
   }
   #shrinkBtn {
     margin: 1rem auto;
@@ -538,13 +549,15 @@
   /*──────────────────────────────────────────────────────────────────────────────
     CHATBOT SECTION
   ──────────────────────────────────────────────────────────────────────────────*/
-  #chatSection .chat-controls {
+ #hero-chat .chat-controls {
     display: flex;
     justify-content: flex-end;
     gap: 0.5rem;
     margin-bottom: 0.5rem;
+    /* do not allow wrapping—always keep both buttons on one line */
+    flex-wrap: nowrap;
   }
-  #chatSection .chat-controls button {
+  #hero-chat .chat-controls button {
     background: var(--surface);
     border: 1px solid var(--muted);
     border-radius: 50%;
@@ -556,12 +569,12 @@
     color: var(--secondary);
     transition: background var(--transition), transform var(--transition);
   }
-  #chatSection .chat-controls button:hover {
+  #hero-chat .chat-controls button:hover {
     background: var(--primary-alt);
     color: #fff;
     transform: scale(1.1);
   }
-  .chat-box {
+ .chat-box {
     background: var(--bg);
     border: 1px solid rgba(0, 0, 0, 0.1);
     border-radius: var(--radius);
@@ -695,10 +708,8 @@
     box-shadow: 0 6px 24px rgba(0, 0, 0, 0.1);
   }
   .chart-card canvas {
-    flex: 1 1 auto;
     width: 100% !important;
-    height: 100% !important;
-    min-height: 250px !important;
+    height: 250px !important;
   }
   .chart-card figcaption {
     padding: 0.5rem 0.75rem;
@@ -1060,6 +1071,44 @@
   .toast.visible {
     transform: translateX(-50%) translateY(0);
     opacity: 1;
+  }
+
+    /*──────────────────────────────────────────────────────────────────────────────
+    RESPONSE PANELS
+  ──────────────────────────────────────────────────────────────────────────────*/
+  .response {
+    background: var(--accent);
+    border-left: 4px solid var(--secondary);
+    padding: var(--padding);
+    border-radius: var(--radius);
+    margin-top: 1rem;
+    position: relative;
+    box-shadow: var(--shadow);
+    transition: background var(--transition);
+  }
+  .response.loading .close-btn {
+    display: none;
+  }
+  .response .close-btn {
+    position: absolute;
+    top: var(--padding);
+    right: var(--padding);
+    background: none;
+    color: var(--secondary);
+    font-size: 1.2rem;
+    border: none;
+    cursor: pointer;
+    transition: color var(--transition), transform var(--transition);
+  }
+  .response .close-btn:hover {
+    color: var(--primary-alt);
+    transform: scale(1.1);
+  }
+  .response .result-content {
+    margin-top: 1.5rem; /* space for close button */
+    color: var(--text);
+    line-height: 1.5;
+    margin-bottom: 2rem;
   }
 
   /*──────────────────────────────────────────────────────────────────────────────
@@ -2184,7 +2233,10 @@ When responding to user questions:
 
       const panel = document.getElementById(panelId);
       panel.hidden = false;
-      panel.querySelector(".result-content").innerHTML = `<div class="spinner"></div><div class="spin-text">Please wait…</div>`;
+      // **1)** Enter “loading” state so the close‐button is hidden
+      panel.classList.add("loading");
+      panel.querySelector(".result-content").innerHTML =
+        `<div class="spinner"></div><div class="spin-text">Please wait…</div>`;
       // Build user content
       let userContent = "";
       for (const fid of fieldIds) {
@@ -2213,13 +2265,18 @@ When responding to user questions:
           { role: "system", content: systemContent },
           { role: "user", content: userContent }
         ]);
+        panel.classList.remove("loading");
         panel.querySelector(".result-content").innerHTML = sanitizeHTML(aiReply);
         addCloseCopyDownload(panel);
       } catch (err) {
-        panel.querySelector(".result-content").innerText = err.message.includes("Sandbox.Timedout")
+        panel.classList.remove("loading");
+        panel.querySelector(
+          ".result-content"
+        ).innerText = err.message.includes("Sandbox.Timedout")
           ? "⚠️ Server busy—please try again."
           : `⚠️ ${err.message}`;
         addCloseCopyDownload(panel);
+
       }
     });
   }
