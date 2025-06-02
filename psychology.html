@@ -862,114 +862,114 @@
     }
   }
 
-   /*──────────────────────── History Modal ─────────────────────────────────*/
-  .history-modal {
-    position: fixed;
-    inset: 0;
-    background: rgba(0, 0, 0, 0.6);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    z-index: 2000;
-  }
+  /* Modal backdrop */
+.history-modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.4); /* semi-transparent overlay */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2000;
+  padding: 1rem;
+}
 
-  .history-content {
-    background: var(--surface-light);
-    border-radius: var(--radius);
-    padding: 1.5rem;
-    width: 90%;
-    max-width: 700px;
-    max-height: 80vh;
-    overflow-y: auto;
-    box-shadow: 0 12px 60px rgba(0, 0, 0, 0.2);
-    position: relative;
-  }
+/* Modal content */
+.history-modal .history-content {
+  background: var(--surface);
+  border-radius: var(--radius);
+  width: 100%;
+  max-width: 600px;
+  max-height: 80vh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.1);
+}
 
-  .history-content h3 {
-    font-size: 1.8rem;
-    margin-bottom: 1rem;
-    color: var(--primary);
-  }
+/* Header / Title */
+.history-modal .history-content h3 {
+  padding: 1rem;
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: var(--primary);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+  background: var(--surface);
+}
 
-  .history-table-wrapper {
-    overflow-x: auto;
-    margin-bottom: 1rem;
-  }
+/* Scrollable table wrapper */
+.history-modal .history-table-wrapper {
+  flex: 1;
+  overflow-y: auto;
+  padding: 0 1rem;
+}
 
-  .history-table {
-    width: 100%;
-    border-collapse: collapse;
-    font-size: 0.95rem;
-  }
+/* Remove default table borders */
+.history-modal table {
+  width: 100%;
+  border-collapse: collapse;
+}
+.history-modal table th,
+.history-modal table td {
+  padding: 0.75rem 0.5rem;
+  text-align: left;
+  font-size: 0.9rem;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+}
+.history-modal table th {
+  background: var(--accent);
+  color: var(--text);
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
 
-  .history-table th,
-  .history-table td {
-    border-bottom: 1px solid var(--muted-light);
-    padding: 0.5rem;
-    text-align: left;
-  }
+/* Action buttons container (sticky at bottom) */
+.history-modal .history-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.5rem;
+  padding: 0.75rem 1rem;
+  background: var(--surface);
+  border-top: 1px solid rgba(0, 0, 0, 0.05);
+  position: sticky;
+  bottom: 0;
+}
 
-  .history-table th {
-    background: var(--primary-light);
-    color: #fff;
-    position: sticky;
-    top: 0;
-    z-index: 1;
-  }
+/* Buttons in the footer */
+.history-modal .history-actions button {
+  background: var(--primary);
+  color: #fff;
+  padding: 0.5rem 1rem;
+  font-size: 0.9rem;
+  font-weight: 500;
+  border: none;
+  border-radius: var(--radius);
+  cursor: pointer;
+  transition: background var(--transition), transform var(--transition);
+}
+.history-modal .history-actions button:hover {
+  background: var(--secondary);
+  transform: translateY(-1px);
+}
 
-  .history-table thead tr:first-child th {
-    background: var(--primary);
-  }
+/* “Delete” icon button inside each row (if you keep it) */
+.history-modal .history-content .del-msg {
+  background: none;
+  border: none;
+  color: var(--muted);
+  font-size: 1rem;
+  cursor: pointer;
+  transition: color var(--transition), transform var(--transition);
+}
+.history-modal .history-content .del-msg:hover {
+  color: var(--primary);
+  transform: scale(1.1);
+}
 
-  .history-table tbody tr:hover {
-    background: var(--accent-light);
-  }
-
-  .del-msg {
-    background: none;
-    border: none;
-    color: var(--muted-light);
-    cursor: pointer;
-    font-size: 1.1rem;
-    transition: color var(--transition);
-  }
-
-  .del-msg:hover {
-    color: var(--primary);
-  }
-
-  .history-actions {
-    display: flex;
-    justify-content: flex-end;
-    gap: 1rem;
-    position: sticky;
-    bottom: 0;
-    background: var(--surface-light);
-    padding-top: 0.5rem;
-  }
-
-  .history-actions button {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.5rem;
-    padding: 0.5rem 1rem;
-    border: none;
-    border-radius: var(--radius);
-    background: var(--primary);
-    color: #fff;
-    font-weight: 500;
-    cursor: pointer;
-    transition: background var(--transition), transform var(--transition);
-  }
-
-  .history-actions .clear-history {
-    background: var(--secondary);
-  }
-
-  .history-actions button:hover {
-    transform: translateY(-2px);
-    filter: brightness(1.1);
-  }
  /*──────────────────────── Copy Toast ─────────────────────────────────*/
   .copy-toast {
     position: fixed;
@@ -993,17 +993,48 @@
     100% { opacity: 0; transform: translateX(-50%) translateY(20px); }
   }
 
-   .checkbox-group {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
-    gap: 0.75rem;
-  }
-  /* When “Other” checkbox is checked, show the text field */
+   /* Container for emotion/trigger checkboxes */
+.checkbox-group {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  gap: 0.25rem 0.5rem; /* vertical/horizontal gap */
+}
+
+/* Each label wraps the checkbox + text */
+.checkbox-group label {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.9rem;
+  color: var(--text);
+  cursor: pointer;
+}
+
+/* Make the actual checkbox a bit smaller */
+.checkbox-group input[type="checkbox"] {
+  width: 1rem;
+  height: 1rem;
+  accent-color: var(--secondary); /* blue checkbox when checked */
+}
+
+/* If the user checks “Other”, reveal the input below */
+.checkbox-group input[type="text"].other-input {
+  grid-column: 1 / -1; /* span full width of the grid row */
+  margin-top: 0.25rem;
+  padding: 0.5rem;
+  font-size: 0.9rem;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  border-radius: var(--radius);
+  display: none;
+}
+
+/* When “Other” checkbox is checked, show the text field */
 .checkbox-group input[type="checkbox"][value="Other"]:checked ~ 
 input.other-input {
   display: block;
   width: 100%;
 }
+
   /* Container around the two buttons (already .chat-controls or .tool-row) */
 #therapybot .chat-controls {
   display: flex;
@@ -1055,13 +1086,11 @@ input.other-input {
 
 </style>
 
-
-  
-<body>
+  <body>
   <!-- SIDEBAR -->
   <aside id="sidebar">
     <div class="logo">
-      <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" fill="var(--primary)">
+      <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" fill="var(--secondary)">
         <polygon points="10,10 25,90 50,40 75,90 90,10 65,10 50,70 35,10"/>
       </svg>
       <span class="logo-text">Vitra AI</span>
@@ -1073,7 +1102,7 @@ input.other-input {
       </a>
       <a href="psychology.html" class="active">
         <i class="fas fa-brain"></i>
-        <span>Psych & Mental Health</span>
+        <span>Psych &amp; Mental Health</span>
       </a>
       <a href="dietetics.html">
         <i class="fas fa-utensils"></i>
@@ -1092,49 +1121,48 @@ input.other-input {
       <i class="fas fa-angle-double-left"></i>
     </button>
   </aside>
-<!-- MAIN CONTENT -->
-  <main role="main">
+
   <!-- HEADER -->
   <header>
-    <div class="header-left">
+    <div style="display:flex; align-items:center; gap:1rem;">
       <i id="hamburger" class="fas fa-bars hamburger" aria-label="Toggle navigation"></i>
       <h1>Neuropharma Command Center</h1>
     </div>
-    <div class="header-right">
+    <div>
       <i id="themeToggle" class="fas fa-moon theme-toggle" aria-label="Toggle theme"></i>
     </div>
   </header>
 
-  
+  <!-- MAIN CONTENT -->
+  <main role="main">
     <!-- HERO SECTION -->
     <section id="hero" class="module hero-module">
       <div class="hero-inner">
         <div class="hero-content">
           <h1><i class="fas fa-brain"></i> Empower Your Mental Wellness</h1>
           <p class="hero-subtitle">
-            Combine AI-driven therapy, mood tracking, neurochemical insights, and pharmacogenomics—all in one place.
+            AI-powered toolkit for therapy, mood insights, neurochemical balance, and clinical trial matching—all in one interactive dashboard.
           </p>
           <div class="hero-actions">
             <a href="#therapybot" class="btn-primary">
               <i class="fas fa-comments"></i> Therapy Bot
             </a>
-            
-           
-            <a href="#pharmacogenomics" class="btn-primary">
+            <a href="#moodTracker" class="btn-secondary">
+              <i class="fas fa-sliders-h"></i> Mood Tracker
+            </a>
+            <a href="#neurotransmitter" class="btn-primary">
+              <i class="fas fa-vial"></i> Neuro Balance
+            </a>
+            <a href="#pharmacogenomics" class="btn-secondary">
               <i class="fas fa-dna"></i> Pharmaco-Genomics
             </a>
-            
-            <a href="#eeg" class="btn-primary">
-              <i class="fas fa-wave-square"></i> EEG Analysis
-            </a>
-          
           </div>
         </div>
         <div class="hero-image">
-          <img src="mental.jpg" alt="Neuro and mental wellness illustration">
+          <img src="mental.webp" alt="Abstract illustration of mind–body wellness">
         </div>
       </div>
-      <i class="fas fa-microscope hero-bg-icon" style="top: 8%; left: 7%;"></i>
+      <!-- SUBTLE BACKGROUND ICONS -->
       <i class="fas fa-pills hero-bg-icon" style="top: 5%; right: 9%;"></i>
       <i class="fas fa-wave-square hero-bg-icon" style="bottom: 10%; left: 12%;"></i>
       <i class="fas fa-chart-line hero-bg-icon" style="bottom: 8%; right: 15%;"></i>
@@ -1142,75 +1170,30 @@ input.other-input {
 
     <!-- 1. Conversational Therapy Bot -->
     <section id="therapybot" class="module">
-      <h2><i class="fas fa-robot"></i> Conversational Therapy Bot</h2>
-      <p class="desc">
-        Choose a modality, duration, and language—then chat with our AI-powered therapist.  
-        Spinners show when the AI is thinking.
-      </p>
-      <form id="therapy-form" class="chat-form">
-        <div class="form-row">
-          <label for="therapyModality">Modality</label>
-          <select id="therapyModality" required>
-            <option value="CBT">CBT Exercises</option>
-            <option value="Mindfulness">Mindfulness</option>
-            <option value="Emotional">Emotional Support</option>
-            <option value="GuidedImagery">Guided Imagery</option>
-            <option value="Other">Other</option>
-          </select>
-          <input type="text" id="therapyModalityOther" class="other-input" placeholder="Please specify modality…" style="display:none;">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem;">
+        <h2><i class="fas fa-robot"></i> AI Therapist Chat</h2>
+        <div class="chat-controls">
+          <button id="viewHistory" title="View History"><i class="fas fa-history"></i></button>
+          <button id="clearChat" title="Clear Chat"><i class="fas fa-trash-alt"></i></button>
         </div>
-        <div class="form-row">
-          <label for="therapyLength">Length</label>
-          <select id="therapyLength" required>
-            <option>5 minutes</option>
-            <option>10 minutes</option>
-            <option>20 minutes</option>
-            <option value="Other">Other</option>
-          </select>
-          <input type="text" id="therapyLengthOther" class="other-input" placeholder="Please specify length…" style="display:none;">
-        </div>
-        <div class="form-row">
-          <label for="therapyLang">Language</label>
-          <select id="therapyLang" required>
-            <option>English</option>
-            <option>Spanish</option>
-            <option>French</option>
-            <option value="Other">Other</option>
-          </select>
-          <input type="text" id="therapyLangOther" class="other-input" placeholder="Please specify language…" style="display:none;">
-        </div>
-        <div class="form-row">
-          <label for="therapyInput">Your Topic</label>
-          <input id="therapyInput" type="text" placeholder="Describe what you need…" required>
-        </div>
-        <button id="sendChat" class="btn-primary" type="submit">
-          <i class="fas fa-paper-plane"></i> Send
-        </button>
-      </form>
-
-      <div class="tool-row chat-tools">
-        <button id="viewHistory" class="copy-btn" title="View History"><i class="fas fa-history"></i></button>
-        <button id="clearChat" class="dl-btn" title="Clear Chat"><i class="fas fa-trash"></i></button>
       </div>
-
       <div id="chatBox" class="chat-box" role="log" aria-live="polite"></div>
-      <div id="chatHint" class="chat-spinner" style="display:none;">
-        <i class="fas fa-spinner fa-spin"></i> AI is thinking…
+      <div class="chat-input-row">
+        <input id="chatInput" placeholder="Type your message…" aria-label="Type your question"/>
+        <button id="sendChat" aria-label="Send message"><i class="fas fa-paper-plane"></i></button>
       </div>
     </section>
 
     <!-- 2. Daily Mood Tracker -->
     <section id="moodTracker" class="module">
-      <h2><i class="fas fa-sliders-h"></i> Daily Mood Tracker</h2>
+      <h2><i class="fas fa-heartbeat"></i> Daily Mood Tracker</h2>
       <p class="desc">
-        Log your mood, emotions, triggers, and journal entry—AI spots patterns and suggests self-care tips.
+        Log your mood on a scale of 1–10, select key emotions and triggers. AI spots patterns and suggests self-care strategies.
       </p>
       <form id="mood-form">
-        <div class="form-row">
-          <label for="moodRange">Mood Score: <strong><span id="moodValue">5</span>/10</strong></label>
-          <input type="range" id="moodRange" min="1" max="10" value="5">
-        </div>
-        <fieldset>
+        <label for="moodRange">Mood Score: <strong><span id="moodValue">5</span>/10</strong></label>
+        <input type="range" id="moodRange" min="1" max="10" value="5"/>
+
           <legend>Emotions (select up to 20)</legend>
           <div class="checkbox-group emotions-group">
             <label><input type="checkbox" name="emotions" value="Happy"> Happy</label>
@@ -1261,36 +1244,29 @@ input.other-input {
           </div>
           <input type="text" id="moodTriggersOther" class="other-input" placeholder="Please specify…" style="display:none;">
         </fieldset>
-        <div class="form-row">
-          <label for="moodNote">Journal Entry</label>
-          <textarea id="moodNote" rows="3" placeholder="What happened today?" style="margin-bottom:1rem;"></textarea>
-        </div>
-        <div class="form-row">
-          <label for="selfCare">Self-Care Focus</label>
-          <select id="selfCare" required>
-            <optgroup label="Breathing & Relaxation">
-              <option>Guided Breathing</option>
-              <option>Progressive Muscle Relaxation</option>
-            </optgroup>
-            <optgroup label="Movement">
-              <option>Stretch & Walk</option>
-              <option>Yoga Flow</option>
-            </optgroup>
-            <optgroup label="Mindfulness">
-              <option>Body Scan</option>
-              <option>Sound Meditation</option>
-            </optgroup>
-            <optgroup label="Creative">
-              <option>Music Break</option>
-              <option>Art Prompt</option>
-            </optgroup>
-            <option value="Other">Other</option>
-          </select>
-          <input type="text" id="selfCareOther" class="other-input" placeholder="Please specify…" style="display:none;">
-        </div>
-        <button type="submit" class="btn-primary">
-          <i class="fas fa-chart-line"></i> Analyze Mood
-        </button>
+
+        <label for="moodNote">Journal Entry:</label>
+        <textarea id="moodNote" rows="3" placeholder="Describe today’s events…"></textarea>
+
+        <label for="selfCare">Self-Care Focus:</label>
+        <select id="selfCare" required>
+          <optgroup label="Breathing &amp; Relaxation">
+            <option>Guided Breathing</option>
+            <option>Body Scan</option>
+          </optgroup>
+          <optgroup label="Movement">
+            <option>Yoga Flow</option>
+            <option>Stretch &amp; Walk</option>
+          </optgroup>
+          <optgroup label="Mindfulness">
+            <option>Sound Meditation</option>
+            <option>Visualization</option>
+          </optgroup>
+          <option value="Other">Other</option>
+        </select>
+        <input type="text" id="selfCareOther" class="other-input hidden" placeholder="Please specify…"/>
+
+        <button type="submit" class="btn-primary"><i class="fas fa-chart-line"></i> Analyze Mood</button>
       </form>
       <div id="moodPanel" class="response" hidden>
         <button class="close-btn" aria-label="Close result">×</button>
@@ -1306,49 +1282,44 @@ input.other-input {
     <section id="neurotransmitter" class="module">
       <h2><i class="fas fa-vial"></i> Neurotransmitter Balance</h2>
       <p class="desc">
-        Integrate mood, sleep, appetite, and medication adherence—AI reveals neurochemical insights.
+        Input mood, sleep quality, appetite, and medication adherence. AI correlates these with key neurotransmitters and suggests adjustments.
       </p>
       <form id="nt-form">
-        <div class="form-row">
-          <label for="ntMood">Mood (1–10)</label>
-          <input type="range" id="ntMood" min="1" max="10" value="5">
-        </div>
-        <div class="form-row">
-          <label for="ntSleep">Sleep Quality</label>
-          <select id="ntSleep" required>
-            <option>Poor</option>
-            <option>Fair</option>
-            <option>Good</option>
-            <option>Excellent</option>
-            <option value="Other">Other</option>
-          </select>
-          <input type="text" id="ntSleepOther" class="other-input" placeholder="Please specify…" style="display:none;">
-        </div>
-        <div class="form-row">
-          <label for="ntAppetite">Appetite</label>
-          <select id="ntAppetite" required>
-            <option>Low</option>
-            <option>Normal</option>
-            <option>High</option>
-            <option value="Other">Other</option>
-          </select>
-          <input type="text" id="ntAppetiteOther" class="other-input" placeholder="Please specify…" style="display:none;">
-        </div>
-        <div class="form-row">
-          <label for="ntAdherence">Medication Adherence</label>
-          <select id="ntAdherence" required>
-            <option>Poor</option>
-            <option>Fair</option>
-            <option>Good</option>
-            <option>Excellent</option>
-            <option value="Other">Other</option>
-          </select>
-          <input type="text" id="ntAdherenceOther" class="other-input" placeholder="Please specify…" style="display:none;">
-        </div>
-        <div class="form-row">
-          <label for="ntFocus">Focus Neurotransmitter</label>
-          <select id="ntFocus" required>
-            <option>Serotonin</option>
+        <label for="ntMood">Mood (1–10):</label>
+        <input type="range" id="ntMood" min="1" max="10" value="5"/>
+
+        <label for="ntSleep">Sleep Quality:</label>
+        <select id="ntSleep" required>
+          <option>Poor</option>
+          <option>Fair</option>
+          <option>Good</option>
+          <option>Excellent</option>
+          <option value="Other">Other</option>
+        </select>
+        <input type="text" id="ntSleepOther" class="other-input hidden" placeholder="Please specify…"/>
+
+        <label for="ntAppetite">Appetite:</label>
+        <select id="ntAppetite" required>
+          <option>Low</option>
+          <option>Normal</option>
+          <option>High</option>
+          <option value="Other">Other</option>
+        </select>
+        <input type="text" id="ntAppetiteOther" class="other-input hidden" placeholder="Please specify…"/>
+
+        <label for="ntAdherence">Medication Adherence:</label>
+        <select id="ntAdherence" required>
+          <option>Poor</option>
+          <option>Fair</option>
+          <option>Good</option>
+          <option>Excellent</option>
+          <option value="Other">Other</option>
+        </select>
+        <input type="text" id="ntAdherenceOther" class="other-input hidden" placeholder="Please specify…"/>
+
+        <label for="ntFocus">Focus Neurotransmitter:</label>
+        <select id="ntFocus" required>
+         <option>Serotonin</option>
             <option>Dopamine</option>
             <option>GABA</option>
             <option>Glutamate</option>
@@ -1370,19 +1341,17 @@ input.other-input {
             <option>Neuropeptide Y</option>
             <option value="Other">Other</option>
           </select>
-          <input type="text" id="ntFocusOther" class="other-input" placeholder="Please specify…" style="display:none;">
-        </div>
-        <button id="analyzeNeuro" class="btn-primary" type="submit">
-          <i class="fas fa-brain"></i> Analyze Balance
-        </button>
+        <input type="text" id="ntFocusOther" class="other-input hidden" placeholder="Please specify…"/>
+
+        <button id="analyzeNeuro" class="btn-primary" type="submit"><i class="fas fa-brain"></i> Analyze Balance</button>
       </form>
       <div id="neurotransmitterPanel" class="response" hidden>
         <button class="close-btn" aria-label="Close result">×</button>
+        <div class="result-content"></div>
         <div class="tool-row">
           <button class="copy-btn" title="Copy"><i class="fas fa-copy"></i></button>
           <button class="dl-btn" title="Download"><i class="fas fa-download"></i></button>
         </div>
-        <div class="result-content"></div>
       </div>
     </section>
 
@@ -1390,33 +1359,28 @@ input.other-input {
     <section id="pharmacogenomics" class="module">
       <h2><i class="fas fa-dna"></i> Pharmacogenomics &amp; Dosing</h2>
       <p class="desc">
-        Upload your genotype file and enter clinical details—AI provides personalized dosing recommendations.
+        Upload your genotype (VCF) and clinical data. AI recommends optimized dosing based on gene–drug interactions and phenotype.
       </p>
       <form id="pgx-form">
-        <div class="form-row">
-          <label for="pgxUpload">Upload Genotype (VCF)</label>
-          <input type="file" id="pgxUpload" accept=".vcf,.txt" required>
-        </div>
-        <div class="form-row">
-          <label for="pgxSex">Sex</label>
-          <select id="pgxSex" required>
-            <option>Male</option>
-            <option>Female</option>
-            <option value="Other">Other</option>
-          </select>
-          <input type="text" id="pgxSexOther" class="other-input" placeholder="Please specify…" style="display:none;">
-        </div>
-        <div class="form-row">
-          <label for="pgxAge">Age</label>
-          <input type="number" id="pgxAge" min="0" required placeholder="Years">
-        </div>
-        <div class="form-row">
-          <label for="pgxWeight">Weight (kg)</label>
-          <input type="number" id="pgxWeight" min="1" placeholder="kg">
-        </div>
-        <div class="form-row">
-          <label for="pgxDrug">Drug</label>
-          <select id="pgxDrug" required>
+        <label for="pgxUpload">Upload Genotype (VCF/JSON):</label>
+        <input type="file" id="pgxUpload" accept=".vcf,.txt,.json" required/>
+
+        <label for="pgxSex">Sex:</label>
+        <select id="pgxSex" required>
+          <option>Male</option>
+          <option>Female</option>
+          <option value="Other">Other</option>
+        </select>
+        <input type="text" id="pgxSexOther" class="other-input hidden" placeholder="Please specify…"/>
+
+        <label for="pgxAge">Age (years):</label>
+        <input type="number" id="pgxAge" min="0" required/>
+
+        <label for="pgxWeight">Weight (kg):</label>
+        <input type="number" id="pgxWeight" min="1"/>
+
+        <label for="pgxDrug">Drug:</label>
+         <select id="pgxDrug" required>
             <option>Clopidogrel</option>
             <option>Warfarin</option>
             <option>Codeine</option>
@@ -1429,11 +1393,10 @@ input.other-input {
             <option>Lamotrigine</option>
             <option value="Other">Other</option>
           </select>
-          <input type="text" id="pgxDrugOther" class="other-input" placeholder="Enter drug…" style="display:none;">
-        </div>
-        <div class="form-row">
-          <label for="pgxGene">Gene Variant</label>
-          <select id="pgxGene" required>
+        <input type="text" id="pgxDrugOther" class="other-input hidden" placeholder="Please specify…"/>
+
+        <label for="pgxGene">Gene Variant:</label>
+        <select id="pgxGene" required>
             <option>CYP2C19*1</option>
             <option>CYP2C19*2</option>
             <option>CYP2C19*3</option>
@@ -1447,19 +1410,17 @@ input.other-input {
             <option>SLCO1B1*5</option>
             <option value="Other">Other</option>
           </select>
-          <input type="text" id="pgxGeneOther" class="other-input" placeholder="Enter variant…" style="display:none;">
-        </div>
-        <button id="runPGx" class="btn-primary" type="submit">
-          <i class="fas fa-flask"></i> Run Analysis
-        </button>
+        <input type="text" id="pgxGeneOther" class="other-input hidden" placeholder="Please specify…"/>
+
+        <button id="runPGx" class="btn-primary" type="submit"><i class="fas fa-flask"></i> Run Analysis</button>
       </form>
       <div id="pharmacogenomicsPanel" class="response" hidden>
         <button class="close-btn" aria-label="Close result">×</button>
+        <div class="result-content"></div>
         <div class="tool-row">
           <button class="copy-btn" title="Copy"><i class="fas fa-copy"></i></button>
           <button class="dl-btn" title="Download"><i class="fas fa-download"></i></button>
         </div>
-        <div class="result-content"></div>
       </div>
     </section>
 
@@ -1467,12 +1428,11 @@ input.other-input {
     <section id="interactions" class="module">
       <h2><i class="fas fa-exchange-alt"></i> Drug Interaction Profiler</h2>
       <p class="desc">
-        Enter current medications and comorbid conditions—AI checks for interaction risks.
+        Enter current psychotropic medications and comorbid conditions. AI evaluates potential interactions and safety considerations.
       </p>
       <form id="int-form">
-        <div class="form-row">
-          <label for="intListSelect">Medications</label>
-          <select id="intListSelect" required>
+        <label for="intListSelect">Medications:</label>
+        <select id="intListSelect" required>
             <option>Sertraline</option>
             <option>Fluoxetine</option>
             <option>Paroxetine</option>
@@ -1494,11 +1454,10 @@ input.other-input {
             <option>Buspirone</option>
             <option value="Other">Other</option>
           </select>
-          <input type="text" id="intListOther" class="other-input" placeholder="Enter medication…" style="display:none;">
-        </div>
-        <div class="form-row">
-          <label for="intComorbid">Comorbid Conditions</label>
-          <select id="intComorbid" required>
+        <input type="text" id="intListOther" class="other-input hidden" placeholder="Please specify…"/>
+
+        <label for="intComorbid">Comorbid Conditions:</label>
+        <select id="intComorbid" required>
             <option>Schizophrenia</option>
             <option>Bipolar Disorder</option>
             <option>Depression</option>
@@ -1519,19 +1478,17 @@ input.other-input {
             <option>Psychosis</option>
             <option value="Other">Other</option>
           </select>
-          <input type="text" id="intComorbidOther" class="other-input" placeholder="Enter condition…" style="display:none;">
-        </div>
-        <button id="checkInt" class="btn-primary" type="submit">
-          <i class="fas fa-pills"></i> Check Interactions
-        </button>
+        <input type="text" id="intComorbidOther" class="other-input hidden" placeholder="Please specify…"/>
+
+        <button id="checkInt" class="btn-primary" type="submit"><i class="fas fa-pills"></i> Check Interactions</button>
       </form>
       <div id="interactionsPanel" class="response" hidden>
         <button class="close-btn" aria-label="Close result">×</button>
+        <div class="result-content"></div>
         <div class="tool-row">
           <button class="copy-btn" title="Copy"><i class="fas fa-copy"></i></button>
           <button class="dl-btn" title="Download"><i class="fas fa-download"></i></button>
         </div>
-        <div class="result-content"></div>
       </div>
     </section>
 
@@ -1539,16 +1496,14 @@ input.other-input {
     <section id="eeg" class="module">
       <h2><i class="fas fa-wave-square"></i> EEG &amp; Brainwave Interpreter</h2>
       <p class="desc">
-        Upload EEG data—AI decodes patterns and suggests cognitive insights.
+        Upload EEG data (EDF/CSV) and specify task. AI analyzes alpha, beta, theta, delta patterns and suggests cognitive insights.
       </p>
       <form id="eeg-form">
-        <div class="form-row">
-          <label for="eegFile">Upload EEG File (EDF/CSV)</label>
-          <input type="file" id="eegFile" accept=".edf,.csv" required>
-        </div>
-        <div class="form-row">
-          <label for="eegCondition">Condition/Task</label>
-          <select id="eegCondition" required>
+        <label for="eegFile">Upload EEG File:</label>
+        <input type="file" id="eegFile" accept=".edf,.csv" required/>
+
+        <label for="eegCondition">Task / Condition:</label>
+        <select id="eegCondition" required>
             <option>Resting Eyes Closed</option>
             <option>Resting Eyes Open</option>
             <option>Sleep Stage 1</option>
@@ -1561,19 +1516,17 @@ input.other-input {
             <option>Video Watching</option>
             <option value="Other">Other</option>
           </select>
-          <input type="text" id="eegConditionOther" class="other-input" placeholder="Please specify…" style="display:none;">
-        </div>
-        <button id="analyzeEEG" class="btn-primary" type="submit">
-          <i class="fas fa-microchip"></i> Analyze EEG
-        </button>
+        <input type="text" id="eegConditionOther" class="other-input hidden" placeholder="Please specify…"/>
+
+        <button id="analyzeEEG" class="btn-primary" type="submit"><i class="fas fa-microchip"></i> Analyze EEG</button>
       </form>
       <div id="eegPanel" class="response" hidden>
         <button class="close-btn" aria-label="Close result">×</button>
+        <div class="result-content"></div>
         <div class="tool-row">
           <button class="copy-btn" title="Copy"><i class="fas fa-copy"></i></button>
           <button class="dl-btn" title="Download"><i class="fas fa-download"></i></button>
         </div>
-        <div class="result-content"></div>
       </div>
     </section>
 
@@ -1581,12 +1534,11 @@ input.other-input {
     <section id="trialmatch" class="module">
       <h2><i class="fas fa-handshake"></i> Clinical Trial Matcher</h2>
       <p class="desc">
-        Describe your diagnosis and location—AI suggests relevant clinical trials.
+        Describe your diagnosis and location. AI suggests relevant psychiatry trials (phase, criteria, contact info).
       </p>
       <form id="trial-form">
-        <div class="form-row">
-          <label for="trialDx">Diagnosis</label>
-          <select id="trialDx" required>
+        <label for="trialDx">Diagnosis:</label>
+         <select id="trialDx" required>
             <option>Anxiety</option>
             <option>Depression</option>
             <option>Schizophrenia</option>
@@ -1608,15 +1560,13 @@ input.other-input {
             <option>Borderline Personality</option>
             <option value="Other">Other</option>
           </select>
-          <input type="text" id="trialDxOther" class="other-input" placeholder="Please specify…" style="display:none;">
-        </div>
-        <div class="form-row">
-          <label for="trialLoc">Location</label>
-          <input id="trialLoc" type="text" placeholder="City, Country" required>
-        </div>
-        <div class="form-row">
-          <label for="trialPhase">Trial Phase</label>
-          <select id="trialPhase" required>
+        <input type="text" id="trialDxOther" class="other-input hidden" placeholder="Please specify…"/>
+
+        <label for="trialLoc">Location:</label>
+        <input id="trialLoc" type="text" placeholder="City, Country" required/>
+
+        <label for="trialPhase">Trial Phase:</label>
+       <select id="trialPhase" required>
             <option>Phase I</option>
             <option>Phase II</option>
             <option>Phase III</option>
@@ -1638,19 +1588,17 @@ input.other-input {
             <option>N-of-1 Trial</option>
             <option value="Other">Other</option>
           </select>
-          <input type="text" id="trialPhaseOther" class="other-input" placeholder="Please specify…" style="display:none;">
-        </div>
-        <button id="findTrials" class="btn-primary" type="submit">
-          <i class="fas fa-search"></i> Find Trials
-        </button>
+        <input type="text" id="trialPhaseOther" class="other-input hidden" placeholder="Please specify…"/>
+
+        <button id="findTrials" class="btn-primary" type="submit"><i class="fas fa-search"></i> Find Trials</button>
       </form>
       <div id="trialmatchPanel" class="response" hidden>
         <button class="close-btn" aria-label="Close result">×</button>
+        <div class="result-content"></div>
         <div class="tool-row">
           <button class="copy-btn" title="Copy"><i class="fas fa-copy"></i></button>
           <button class="dl-btn" title="Download"><i class="fas fa-download"></i></button>
         </div>
-        <div class="result-content"></div>
       </div>
     </section>
 
@@ -1658,31 +1606,33 @@ input.other-input {
     <section id="analytics" class="module">
       <h2><i class="fas fa-chart-pie"></i> Data Analytics &amp; ROI</h2>
       <p class="desc">
-        Visualize engagement, outcomes, and export CSV reports for your practice metrics.
+        Real‐time charts show therapy engagement and outcome metrics. Export your data as CSV for deeper analysis.
       </p>
       <div class="charts">
         <figure class="chart-card">
           <canvas id="engagementChart"></canvas>
-          <figcaption><strong>Engagement Over Time:</strong> Number of therapy sessions per week.</figcaption>
+          <figcaption><strong>Engagement Over Time:</strong> Weekly number of therapy sessions.</figcaption>
+          <p class="chart-desc">Line chart updates automatically every minute with simulated session counts.</p>
         </figure>
         <figure class="chart-card">
           <canvas id="outcomeChart"></canvas>
-          <figcaption><strong>Outcome Metrics:</strong> Average improvement scores month over month.</figcaption>
+          <figcaption><strong>Outcome Metrics:</strong> Average improvement scores per week.</figcaption>
+          <p class="chart-desc">Bar chart refreshed in real time to reflect latest patient survey data.</p>
         </figure>
       </div>
       <button id="exportCharts" class="btn-primary">Export CSV</button>
     </section>
 
-    <!-- MEET A THERAPY EXPERT -->
+    <!-- 9. Meet a Mental Health Expert -->
     <section id="meet-expert" class="module meet-module">
       <div class="meet-content">
         <div class="meet-icon">
           <i class="fas fa-user-md"></i>
         </div>
         <div class="meet-text">
-          <h2>Meet a<br>Mental Health Expert</h2>
+          <h2>Meet a<br/>Mental Health Expert</h2>
           <p>
-            Get one-on-one guidance from our licensed therapists. Discover personalized treatment plans, expert medication advice, and evidence-based strategies.
+            Schedule one-on-one sessions with licensed therapists for personalized guidance, medication advice, and evidence-based strategies.
           </p>
           <a href="consult.html" class="btn-schedule">
             <i class="fas fa-calendar-check"></i> Schedule Consultation
@@ -1693,164 +1643,160 @@ input.other-input {
 
     <!-- FOOTER -->
     <footer>
-      <p>&copy; 2025 Vitra AI – Neuropharma Command Center. <a href="#privacy">Privacy Policy</a> | <a href="#terms">Terms & Conditions</a></p>
+      <p>&copy; 2025 Vitra AI – Neuropharma Command Center. <a href="#privacy">Privacy Policy</a> | <a href="#terms">Terms &amp; Conditions</a></p>
     </footer>
   </main>
+</body>
 
+  
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
-  //──────────────────────── Utility Functions ────────────────────────────────
-  // Sanitize user-provided strings
-  function escapeHtml(unsafe) {
-    return unsafe
-      .replace(/&/g, "&amp;")
-      .replace(/</g, "&lt;")
-      .replace(/>/g, "&gt;")
-      .replace(/"/g, "&quot;")
-      .replace(/'/g, "&#039;");
-  }
-
-  // Convert simple markdown to HTML
-  function formatHTML(text) {
-    if (!text) return "";
-    return text
-      .replace(/^######\s*(.+)$/gm, "<h6>$1</h6>")
-      .replace(/^#####\s*(.+)$/gm, "<h5>$1</h5>")
-      .replace(/^####\s*(.+)$/gm, "<h4>$1</h4>")
-      .replace(/^###\s*(.+)$/gm, "<h3>$1</h3>")
-      .replace(/^##\s*(.+)$/gm, "<h2>$1</h2>")
-      .replace(/^#\s*(.+)$/gm, "<h1>$1</h1>")
-      .replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>")
-      .replace(/\*(.+?)\*/g, "<em>$1</em>")
-      .replace(/`([^`]+)`/g, "<code>$1</code>")
-      .split(/\n{2,}/)
-      .map(p => `<p>${p.trim()}</p>`)
-      .join("");
-  }
-
-  // Append a close button to a response panel
-  function addClose(panel) {
-    if (panel.querySelector(".close-btn")) return;
-    const btn = document.createElement("button");
-    btn.className = "close-btn";
-    btn.setAttribute("aria-label", "Close result");
-    btn.textContent = "×";
-    btn.onclick = () => (panel.hidden = true);
-    panel.prepend(btn);
-  }
-
-  // Add copy and download tools to a panel
-  function addTools(panel) {
-    if (panel.querySelector(".tool-row")) return;
-    const tools = document.createElement("div");
-    tools.className = "tool-row";
-    tools.innerHTML = `
-      <button class="copy-btn" title="Copy"><i class="fas fa-copy"></i></button>
-      <button class="dl-btn" title="Download"><i class="fas fa-download"></i></button>`;
-    panel.append(tools);
-
-    const copyBtn = tools.querySelector(".copy-btn");
-    const dlBtn = tools.querySelector(".dl-btn");
-    const contentDiv = panel.querySelector(".result-content");
-
-    copyBtn.onclick = () => {
-      if (!contentDiv) return;
-      navigator.clipboard.writeText(contentDiv.innerText || "");
-      const toast = document.createElement("div");
-      toast.className = "copy-toast";
-      toast.textContent = "Copied!";
-      document.body.append(toast);
-      setTimeout(() => toast.remove(), 1500);
-    };
-
-    dlBtn.onclick = () => {
-      if (!contentDiv) return;
-      const text = contentDiv.innerText || "";
-      const blob = new Blob([text], { type: "text/plain" });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = "response.txt";
-      document.body.append(a);
-      a.click();
-      URL.revokeObjectURL(url);
-      a.remove();
-    };
-  }
-
-  // Call OpenAI via proxy
-  async function callOpenAI(messages) {
-    try {
-      const response = await fetch("/.netlify/functions/openai-proxy", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ messages })
-      });
-      if (!response.ok) throw new Error("OpenAI request failed");
-      const data = await response.json();
-      return data.choices?.[0]?.message?.content.trim() || "";
-    } catch (err) {
-      console.error(err);
-      throw err;
-    }
-  }
-
-  // Helper: get select value or the corresponding other-input if "Other"
-  function getSelectValue(select) {
-    const other = select.parentElement.querySelector(".other-input");
-    if (other && select.value === "Other") {
-      return other.value.trim();
-    }
-    return select.value;
-  }
-
-  document.addEventListener("DOMContentLoaded", () => {
-    //──────────────────────── Persisted Theme ────────────────────────────────
+  // ─── Persisted Theme on Load ────────────────────────────────────────────────
+  (function() {
     const savedTheme = localStorage.getItem("vitra-theme");
     if (savedTheme === "dark") {
       document.documentElement.classList.add("dark");
       document.documentElement.setAttribute("aria-theme", "dark");
-      document.getElementById("themeToggle").classList.replace("fa-moon", "fa-sun");
+    }
+  })();
+
+  document.addEventListener("DOMContentLoaded", () => {
+    // ─── Utility Functions ───────────────────────────────────────────────────
+    function escapeHtml(unsafe) {
+      return unsafe
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
     }
 
-    //──────────────────────── Sidebar & Hamburger ─────────────────────────────
+    function formatHTML(text) {
+      if (!text) return "";
+      return text
+        .replace(/^######\s*(.+)$/gm, "<h6>$1</h6>")
+        .replace(/^#####\s*(.+)$/gm, "<h5>$1</h5>")
+        .replace(/^####\s*(.+)$/gm, "<h4>$1</h4>")
+        .replace(/^###\s*(.+)$/gm, "<h3>$1</h3>")
+        .replace(/^##\s*(.+)$/gm, "<h2>$1</h2>")
+        .replace(/^#\s*(.+)$/gm, "<h1>$1</h1>")
+        .replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>")
+        .replace(/\*(.+?)\*/g, "<em>$1</em>")
+        .replace(/`([^`]+)`/g, "<code>$1</code>")
+        .split(/\n{2,}/)
+        .map(p => `<p>${p.trim()}</p>`)
+        .join("");
+    }
+
+    function addClose(panel) {
+      if (panel.querySelector(".close-btn")) return;
+      const btn = document.createElement("button");
+      btn.className = "close-btn";
+      btn.setAttribute("aria-label", "Close result");
+      btn.textContent = "×";
+      btn.onclick = () => (panel.hidden = true);
+      panel.prepend(btn);
+    }
+
+    function addTools(panel) {
+      if (panel.querySelector(".tool-row")) return;
+      const tools = document.createElement("div");
+      tools.className = "tool-row";
+      tools.innerHTML = `
+        <button class="copy-btn" title="Copy"><i class="fas fa-copy"></i></button>
+        <button class="dl-btn" title="Download"><i class="fas fa-download"></i></button>
+      `;
+      panel.append(tools);
+
+      const contentDiv = panel.querySelector(".result-content");
+      tools.querySelector(".copy-btn").onclick = () => {
+        if (!contentDiv) return;
+        navigator.clipboard.writeText(contentDiv.innerText || "");
+        const toast = document.createElement("div");
+        toast.className = "copy-toast";
+        toast.textContent = "Copied!";
+        document.body.append(toast);
+        setTimeout(() => toast.remove(), 1500);
+      };
+      tools.querySelector(".dl-btn").onclick = () => {
+        if (!contentDiv) return;
+        const text = contentDiv.innerText || "";
+        const blob = new Blob([text], { type: "text/plain" });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = "response.txt";
+        document.body.append(a);
+        a.click();
+        URL.revokeObjectURL(url);
+        a.remove();
+      };
+    }
+
+    async function callOpenAI(messages) {
+      try {
+        const response = await fetch("/.netlify/functions/openai-proxy", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ messages })
+        });
+        if (!response.ok) throw new Error("OpenAI request failed");
+        const data = await response.json();
+        return data.choices?.[0]?.message?.content.trim() || "";
+      } catch (err) {
+        console.error(err);
+        throw err;
+      }
+    }
+
+    // ─── Sidebar, Hamburger & Shrink Toggle ────────────────────────────────────
     const sidebar = document.getElementById("sidebar");
     const shrinkBtn = document.getElementById("shrinkBtn");
     const hamburger = document.getElementById("hamburger");
+    const header = document.querySelector("header");
 
+    // Persist sidebar collapsed state
+    if (localStorage.getItem("sidebar-collapsed") === "true") {
+      sidebar.classList.add("collapsed");
+      shrinkBtn.querySelector("i").classList.replace("fa-angle-double-left", "fa-angle-double-right");
+      header.classList.add("sidebar-collapsed");
+    }
     shrinkBtn.addEventListener("click", () => {
       sidebar.classList.toggle("collapsed");
       const icon = shrinkBtn.querySelector("i");
       icon.classList.toggle("fa-angle-double-left");
       icon.classList.toggle("fa-angle-double-right");
+      header.classList.toggle("sidebar-collapsed");
       localStorage.setItem("sidebar-collapsed", sidebar.classList.contains("collapsed"));
-      document.querySelector("header").classList.toggle("sidebar-collapsed");
     });
 
-    if (localStorage.getItem("sidebar-collapsed") === "true") {
-      sidebar.classList.add("collapsed");
-      shrinkBtn.querySelector("i").classList.replace("fa-angle-double-left", "fa-angle-double-right");
-      document.querySelector("header").classList.add("sidebar-collapsed");
+    // Only show hamburger on small screens
+    function updateHamburgerVisibility() {
+      hamburger.style.display = window.matchMedia("(max-width: 1024px)").matches ? "block" : "none";
     }
+    window.matchMedia("(max-width: 1024px)").addListener(updateHamburgerVisibility);
+    updateHamburgerVisibility();
 
-    hamburger.addEventListener("click", () => {
+    // Toggle sidebar open/close on mobile
+    hamburger.addEventListener("click", e => {
+      e.stopPropagation();
       sidebar.classList.toggle("open");
     });
-
-    document.addEventListener("click", (e) => {
+    document.addEventListener("click", e => {
       if (!sidebar.classList.contains("open")) return;
       if (sidebar.contains(e.target) || hamburger.contains(e.target)) return;
       sidebar.classList.remove("open");
     });
 
-    const mq = window.matchMedia("(max-width: 1024px)");
-    function updateHamburgerVisibility() {
-      hamburger.style.display = mq.matches ? "block" : "none";
-    }
-    mq.addListener(updateHamburgerVisibility);
-    updateHamburgerVisibility();
+    // Highlight active sidebar link
+    document.querySelectorAll('aside#sidebar nav a').forEach(link => {
+      const linkHref = link.getAttribute("href").split("/").pop();
+      const pageNow = window.location.pathname.split("/").pop();
+      if (linkHref === pageNow) link.classList.add("active");
+      else link.classList.remove("active");
+    });
 
-    //──────────────────────── Theme Toggle ───────────────────────────────────
+    // ─── Theme Toggle ─────────────────────────────────────────────────────────
     const themeToggle = document.getElementById("themeToggle");
     themeToggle.addEventListener("click", () => {
       const htmlEl = document.documentElement;
@@ -1861,108 +1807,62 @@ input.other-input {
       localStorage.setItem("vitra-theme", isDark ? "dark" : "light");
     });
 
-    //──────────────────────── "Other" Select Handler ─────────────────────────
-    function setupOtherField(selectId, otherInputId) {
-      const sel = document.getElementById(selectId);
-      const other = document.getElementById(otherInputId);
+    // ─── “Other” Input Reveal Handler ─────────────────────────────────────────
+    document.querySelectorAll("select").forEach(sel => {
       sel.addEventListener("change", () => {
+        const otherField = sel.parentElement.querySelector(".other-input");
+        if (!otherField) return;
         if (sel.value === "Other") {
-          other.style.display = "block";
-          other.required = true;
+          otherField.style.display = "block";
+          otherField.required = true;
         } else {
-          other.style.display = "none";
-          other.required = false;
+          otherField.style.display = "none";
+          otherField.required = false;
         }
       });
       sel.dispatchEvent(new Event("change"));
-    }
-    // Therapy Bot selects
-    setupOtherField("therapyModality", "therapyModalityOther");
-    setupOtherField("therapyLength", "therapyLengthOther");
-    setupOtherField("therapyLang", "therapyLangOther");
-    // Mood Tracker self-care
-    setupOtherField("selfCare", "selfCareOther");
-    // Mood Tracker triggers single "Other" input
-    const triggersGroup = document.querySelectorAll('#moodTracker input[name="triggers"]');
-    const moodTriggersOther = document.getElementById("moodTriggersOther");
-    triggersGroup.forEach(cb => {
-      cb.addEventListener("change", () => {
-        if ([...document.querySelectorAll('#moodTracker input[name="triggers"]:checked')]
-              .some(c => c.value === "Other")) {
-          moodTriggersOther.style.display = "block";
-          moodTriggersOther.required = true;
-        } else {
-          moodTriggersOther.style.display = "none";
-          moodTriggersOther.required = false;
-        }
-      });
     });
 
-    // Neurotransmitter selects
-    ["ntSleep", "ntAppetite", "ntAdherence", "ntFocus"].forEach(id => {
-      setupOtherField(id, id + "Other");
-    });
-
-    // PGx selects
-    ["pgxSex", "pgxDrug", "pgxGene"].forEach(id => {
-      setupOtherField(id, id + "Other");
-    });
-
-    // Interaction selects
-    setupOtherField("intListSelect", "intListOther");
-    setupOtherField("intComorbid", "intComorbidOther");
-
-    // EEG select
-    setupOtherField("eegCondition", "eegConditionOther");
-
-    // Trial Matcher selects
-    setupOtherField("trialDx", "trialDxOther");
-    setupOtherField("trialPhase", "trialPhaseOther");
-
-    //──────────────────────── Restore Persisted Panels ────────────────────────
-    const panelMap = {
-      therapybot: "therapybotPanel", // not used as ID; therapy bot panel is chat, no panel to restore
-      moodTracker: "moodPanel",
-      neurotransmitter: "neurotransmitterPanel",
-      pharmacogenomics: "pharmacogenomicsPanel",
-      interactions: "interactionsPanel",
-      eeg: "eegPanel",
-      trialmatch: "trialmatchPanel"
-    };
-    Object.values(panelMap).forEach((pid) => {
+    // ─── Restore Persisted Panels (All Sections) ──────────────────────────────
+    const panelIds = [
+      "therapybotPanel",
+      "moodPanel",
+      "neurotransmitterPanel",
+      "pharmacogenomicsPanel",
+      "interactionsPanel",
+      "eegPanel",
+      "trialmatchPanel"
+    ];
+    panelIds.forEach(pid => {
       const saved = localStorage.getItem(pid);
       if (saved) {
         const panel = document.getElementById(pid);
         panel.innerHTML = saved;
         panel.hidden = false;
+        panel.querySelectorAll(".close-btn").forEach(btn => (btn.onclick = () => panel.hidden = true));
         addClose(panel);
         addTools(panel);
-        panel.querySelectorAll(".close-btn").forEach(btn => {
-          btn.onclick = () => panel.hidden = true;
-        });
       }
     });
 
-    //──────────────────────── Therapy Bot ─────────────────────────────────────
+    // ────────────────────── Conversational Therapy Bot ───────────────────────
     (function() {
       const chatBox = document.getElementById("chatBox");
-      const chatInput = document.getElementById("therapyInput");
-      const therapyModality = document.getElementById("therapyModality");
-      const therapyLength = document.getElementById("therapyLength");
-      const therapyLang = document.getElementById("therapyLang");
-      const chatHint = document.getElementById("chatHint");
+      const chatInput = document.getElementById("chatInput");
+      const sendChatBtn = document.getElementById("sendChat");
+      const viewHistoryBtn = document.getElementById("viewHistory");
+      const clearChatBtn = document.getElementById("clearChat");
       let lastDateHeader = null;
 
+      // Load persisted chat history
       let chatHistory = JSON.parse(localStorage.getItem("therapyChatHistory") || "[]");
-
       function formatDateSeparator(date) {
         const today = new Date();
-        const diff = Math.floor((today.setHours(0,0,0,0) - date.setHours(0,0,0,0)) / 86400000);
-        if (diff === 0) return "Today";
-        if (diff === 1) return "Yesterday";
+        const diffDays = Math.floor((today.setHours(0, 0, 0, 0) - date.setHours(0, 0, 0, 0)) / 86400000);
+        if (diffDays === 0) return "Today";
+        if (diffDays === 1) return "Yesterday";
         return date.toLocaleDateString();
       }
-
       function addMessage(who, text, timestamp = new Date()) {
         const msgDate = timestamp instanceof Date ? timestamp : new Date(timestamp);
         const msgDay = msgDate.toDateString();
@@ -1982,11 +1882,11 @@ input.other-input {
         chatBox.append(msgDiv);
         chatBox.scrollTop = chatBox.scrollHeight;
       }
-
-      // Render saved history
+      // Render existing history
       chatHistory.forEach(m => addMessage(m.who, m.text, new Date(m.timestamp)));
 
-      document.getElementById("sendChat").addEventListener("click", async (e) => {
+      // Send chat
+      sendChatBtn.onclick = async e => {
         e.preventDefault();
         const userText = chatInput.value.trim();
         if (!userText) return;
@@ -1997,14 +1897,28 @@ input.other-input {
         chatInput.value = "";
 
         // Show spinner
-        chatHint.style.display = "flex";
+        const spinnerDiv = document.createElement("div");
+        spinnerDiv.className = "bot-msg";
+        spinnerDiv.innerHTML = `<div class="spinner"></div>`;
+        chatBox.append(spinnerDiv);
+        chatBox.scrollTop = chatBox.scrollHeight;
 
-        const modality = getSelectValue(therapyModality);
-        const length = getSelectValue(therapyLength);
-        const language = getSelectValue(therapyLang);
+        const modality = (() => {
+          const sel = document.getElementById("therapyModality");
+          return sel.value === "Other" ? document.getElementById("therapyModalityOther").value.trim() : sel.value;
+        })();
+        const length = (() => {
+          const sel = document.getElementById("therapyLength");
+          return sel.value === "Other" ? document.getElementById("therapyLengthOther").value.trim() : sel.value;
+        })();
+        const language = (() => {
+          const sel = document.getElementById("therapyLang");
+          return sel.value === "Other" ? document.getElementById("therapyLangOther").value.trim() : sel.value;
+        })();
+
         const systemPrompt = `
 You are a licensed therapist. Modality: ${escapeHtml(modality)}; Length: ${escapeHtml(length)}; Language: ${escapeHtml(language)}.
-Respond empathetically, providing CBT techniques, mindfulness exercises, or emotional support steps tailored to the user's request.
+Respond empathetically, providing clear guidance, CBT techniques, mindfulness exercises or emotional support steps tailored to the user's request.
         `.trim();
 
         try {
@@ -2013,24 +1927,28 @@ Respond empathetically, providing CBT techniques, mindfulness exercises, or emot
             { role: "user", content: userText }
           ]);
           const replyTime = new Date();
-          chatHint.style.display = "none";
-          addMessage("Therapist", aiReply, replyTime);
+          spinnerDiv.innerHTML = `
+            ${formatHTML(aiReply)}
+            <div class="timestamp">${replyTime.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit", hour12: true })}</div>
+          `;
           chatHistory.push({ who: "Therapist", text: aiReply, timestamp: replyTime.toISOString() });
           localStorage.setItem("therapyChatHistory", JSON.stringify(chatHistory));
         } catch (err) {
-          chatHint.style.display = "none";
-          addMessage("Therapist", "⚠️ Something went wrong. Please try again.", new Date());
+          spinnerDiv.innerHTML = `<div class="result-content">⚠️ Something went wrong. Please try again.</div>`;
         }
-      });
+        chatBox.scrollTop = chatBox.scrollHeight;
+      };
 
-      document.getElementById("clearChat").addEventListener("click", () => {
+      // Clear chat
+      clearChatBtn.onclick = () => {
         chatBox.innerHTML = "";
         chatHistory = [];
         localStorage.removeItem("therapyChatHistory");
         lastDateHeader = null;
-      });
+      };
 
-      document.getElementById("viewHistory").addEventListener("click", () => {
+      // View history modal
+      viewHistoryBtn.onclick = () => {
         const modal = document.createElement("div");
         modal.className = "history-modal";
         const grouped = {};
@@ -2040,8 +1958,9 @@ Respond empathetically, providing CBT techniques, mindfulness exercises, or emot
           if (!grouped[label]) grouped[label] = [];
           grouped[label].push({ who: m.who, text: m.text, idx: i });
         });
+
         let tableHTML = `<table class="history-table">`;
-        Object.keys(grouped).forEach((label) => {
+        Object.keys(grouped).forEach(label => {
           tableHTML += `
             <thead>
               <tr><th colspan="3">${label}</th></tr>
@@ -2063,6 +1982,7 @@ Respond empathetically, providing CBT techniques, mindfulness exercises, or emot
             </tbody>`;
         });
         tableHTML += `</table>`;
+
         modal.innerHTML = `
           <div class="history-content">
             <h3>Chat History</h3>
@@ -2076,6 +1996,7 @@ Respond empathetically, providing CBT techniques, mindfulness exercises, or emot
           </div>`;
         document.body.append(modal);
 
+        // Delete single message
         modal.querySelectorAll(".del-msg").forEach(btn => {
           btn.onclick = () => {
             const idx = +btn.dataset.index;
@@ -2089,16 +2010,20 @@ Respond empathetically, providing CBT techniques, mindfulness exercises, or emot
             });
           };
         });
+
+        // Clear all history
         modal.querySelector(".clear-history").onclick = () => {
           chatHistory = [];
           localStorage.removeItem("therapyChatHistory");
           modal.remove();
         };
+
+        // Close modal
         modal.querySelector(".close-history").onclick = () => modal.remove();
-      });
+      };
     })();
 
-    //──────────────────────── Mood Tracker ────────────────────────────────────
+    // ───────────────────────── Daily Mood Tracker ─────────────────────────────
     (function() {
       const form = document.getElementById("mood-form");
       const panel = document.getElementById("moodPanel");
@@ -2108,23 +2033,44 @@ Respond empathetically, providing CBT techniques, mindfulness exercises, or emot
       const selfCare = document.getElementById("selfCare");
       const selfCareOther = document.getElementById("selfCareOther");
 
-      moodRange.oninput = () => {
-        moodValue.textContent = moodRange.value;
-      };
+      moodRange.oninput = () => (moodValue.textContent = moodRange.value);
 
-      form.onsubmit = async (e) => {
+      // “Other” for triggers
+      document.querySelectorAll('#moodTracker input[name="triggers"]').forEach(cb => {
+        cb.addEventListener("change", () => {
+          if ([...document.querySelectorAll('#moodTracker input[name="triggers"]:checked')]
+                .some(c => c.value === "Other")) {
+            triggersOther.style.display = "block";
+            triggersOther.required = true;
+          } else {
+            triggersOther.style.display = "none";
+            triggersOther.required = false;
+          }
+        });
+      });
+
+      selfCare.addEventListener("change", e => {
+        if (e.target.value === "Other") {
+          selfCareOther.style.display = "block";
+          selfCareOther.required = true;
+        } else {
+          selfCareOther.style.display = "none";
+          selfCareOther.required = false;
+        }
+      });
+      selfCare.dispatchEvent(new Event("change"));
+
+      form.onsubmit = async e => {
         e.preventDefault();
         panel.hidden = false;
-        panel.innerHTML = '<div class="result-content">Analyzing… <i class="fas fa-spinner fa-spin"></i></div>';
+        panel.innerHTML = '<div class="result-content">Analyzing… <span class="spinner"></span></div>';
 
         const data = {
           mood: moodRange.value,
           emotions: [...document.querySelectorAll('#moodTracker input[name="emotions"]:checked')].map(c => c.value),
-          triggers: [...document.querySelectorAll('#moodTracker input[name="triggers"]:checked')].map(c =>
-            c.value === "Other" ? triggersOther.value.trim() : c.value
-          ),
+          triggers: [...document.querySelectorAll('#moodTracker input[name="triggers"]:checked')].map(c => c.value === "Other" ? triggersOther.value.trim() : c.value),
           note: document.getElementById("moodNote").value.trim(),
-          selfCare: getSelectValue(selfCare)
+          selfCare: selfCare.value === "Other" ? selfCareOther.value.trim() : selfCare.value
         };
 
         try {
@@ -2142,6 +2088,7 @@ Respond empathetically, providing CBT techniques, mindfulness exercises, or emot
         }
       };
 
+      // Restore if saved
       const savedMood = localStorage.getItem("moodPanel");
       if (savedMood) {
         panel.innerHTML = savedMood;
@@ -2151,7 +2098,7 @@ Respond empathetically, providing CBT techniques, mindfulness exercises, or emot
       }
     })();
 
-    //──────────────────────── Neurotransmitter Balance ────────────────────────
+    // ───────────────── Neurotransmitter Balance ───────────────────────────────
     (function() {
       const form = document.getElementById("nt-form");
       const panel = document.getElementById("neurotransmitterPanel");
@@ -2164,16 +2111,30 @@ Respond empathetically, providing CBT techniques, mindfulness exercises, or emot
       const ntFocus = document.getElementById("ntFocus");
       const ntFocusOther = document.getElementById("ntFocusOther");
 
-      form.onsubmit = async (e) => {
+      [ntSleep, ntAppetite, ntAdherence, ntFocus].forEach(sel => {
+        sel.addEventListener("change", () => {
+          const other = sel.parentElement.querySelector(".other-input");
+          if (sel.value === "Other") {
+            other.style.display = "block";
+            other.required = true;
+          } else {
+            other.style.display = "none";
+            other.required = false;
+          }
+        });
+        sel.dispatchEvent(new Event("change"));
+      });
+
+      form.onsubmit = async e => {
         e.preventDefault();
         panel.hidden = false;
-        panel.innerHTML = '<div class="result-content">Analyzing… <i class="fas fa-spinner fa-spin"></i></div>';
+        panel.innerHTML = '<div class="result-content">Analyzing… <span class="spinner"></span></div>';
         const data = {
           mood: document.getElementById("ntMood").value,
-          sleep: getSelectValue(ntSleep),
-          appetite: getSelectValue(ntAppetite),
-          adherence: getSelectValue(ntAdherence),
-          focus: getSelectValue(ntFocus)
+          sleep: ntSleep.value === "Other" ? ntSleepOther.value.trim() : ntSleep.value,
+          appetite: ntAppetite.value === "Other" ? ntAppetiteOther.value.trim() : ntAppetite.value,
+          adherence: ntAdherence.value === "Other" ? ntAdherenceOther.value.trim() : ntAdherence.value,
+          focus: ntFocus.value === "Other" ? ntFocusOther.value.trim() : ntFocus.value
         };
         try {
           const aiReply = await callOpenAI([
@@ -2199,7 +2160,7 @@ Respond empathetically, providing CBT techniques, mindfulness exercises, or emot
       }
     })();
 
-    //──────────────────────── Pharmacogenomics & Dosing ─────────────────────
+    // ────────── Pharmacogenomics & Dosing ─────────────────────────────────────
     (function() {
       const form = document.getElementById("pgx-form");
       const panel = document.getElementById("pharmacogenomicsPanel");
@@ -2211,10 +2172,24 @@ Respond empathetically, providing CBT techniques, mindfulness exercises, or emot
       const pgxGeneOther = document.getElementById("pgxGeneOther");
       const pgxUpload = document.getElementById("pgxUpload");
 
-      form.onsubmit = async (e) => {
+      [pgxSex, pgxDrug, pgxGene].forEach(sel => {
+        sel.addEventListener("change", () => {
+          const other = sel.parentElement.querySelector(".other-input");
+          if (sel.value === "Other") {
+            other.style.display = "block";
+            other.required = true;
+          } else {
+            other.style.display = "none";
+            other.required = false;
+          }
+        });
+        sel.dispatchEvent(new Event("change"));
+      });
+
+      form.onsubmit = async e => {
         e.preventDefault();
         panel.hidden = false;
-        panel.innerHTML = '<div class="result-content">Processing… <i class="fas fa-spinner fa-spin"></i></div>';
+        panel.innerHTML = '<div class="result-content">Processing… <span class="spinner"></span></div>';
         const file = pgxUpload.files[0];
         if (!file) {
           panel.innerHTML = '<div class="result-content">⚠️ Please upload a genotype file.</div>';
@@ -2222,11 +2197,11 @@ Respond empathetically, providing CBT techniques, mindfulness exercises, or emot
           return;
         }
         const data = {
-          sex: getSelectValue(pgxSex),
+          sex: pgxSex.value === "Other" ? pgxSexOther.value.trim() : pgxSex.value,
           age: document.getElementById("pgxAge").value.trim(),
           weight: document.getElementById("pgxWeight").value.trim(),
-          drug: getSelectValue(pgxDrug),
-          gene: getSelectValue(pgxGene)
+          drug: pgxDrug.value === "Other" ? pgxDrugOther.value.trim() : pgxDrug.value,
+          gene: pgxGene.value === "Other" ? pgxGeneOther.value.trim() : pgxGene.value
         };
         if (!data.sex || !data.age || !data.drug || !data.gene) {
           panel.innerHTML = '<div class="result-content">⚠️ Please fill all required fields.</div>';
@@ -2257,7 +2232,7 @@ Respond empathetically, providing CBT techniques, mindfulness exercises, or emot
       }
     })();
 
-    //──────────────────────── Drug Interaction Profiler ──────────────────────
+    // ─────────── Drug Interaction Profiler ────────────────────────────────────
     (function() {
       const form = document.getElementById("int-form");
       const panel = document.getElementById("interactionsPanel");
@@ -2266,12 +2241,26 @@ Respond empathetically, providing CBT techniques, mindfulness exercises, or emot
       const intComorbid = document.getElementById("intComorbid");
       const intComorbidOther = document.getElementById("intComorbidOther");
 
-      form.onsubmit = async (e) => {
+      [intListSelect, intComorbid].forEach(sel => {
+        sel.addEventListener("change", () => {
+          const other = sel.parentElement.querySelector(".other-input");
+          if (sel.value === "Other") {
+            other.style.display = "block";
+            other.required = true;
+          } else {
+            other.style.display = "none";
+            other.required = false;
+          }
+        });
+        sel.dispatchEvent(new Event("change"));
+      });
+
+      form.onsubmit = async e => {
         e.preventDefault();
         panel.hidden = false;
-        panel.innerHTML = '<div class="result-content">Checking… <i class="fas fa-spinner fa-spin"></i></div>';
-        const meds = getSelectValue(intListSelect);
-        const cond = getSelectValue(intComorbid);
+        panel.innerHTML = '<div class="result-content">Checking… <span class="spinner"></span></div>';
+        const meds = intListSelect.value === "Other" ? intListOther.value.trim() : intListSelect.value;
+        const cond = intComorbid.value === "Other" ? intComorbidOther.value.trim() : intComorbid.value;
         if (!meds) {
           panel.innerHTML = '<div class="result-content">⚠️ Please select at least one medication.</div>';
           addClose(panel);
@@ -2301,7 +2290,7 @@ Respond empathetically, providing CBT techniques, mindfulness exercises, or emot
       }
     })();
 
-    //──────────────────────── EEG & Brainwave Interpreter ───────────────────
+    // ──────────── EEG & Brainwave Interpreter ─────────────────────────────────
     (function() {
       const form = document.getElementById("eeg-form");
       const panel = document.getElementById("eegPanel");
@@ -2309,7 +2298,18 @@ Respond empathetically, providing CBT techniques, mindfulness exercises, or emot
       const eegConditionOther = document.getElementById("eegConditionOther");
       const eegFile = document.getElementById("eegFile");
 
-      form.onsubmit = async (e) => {
+      eegCondition.addEventListener("change", () => {
+        if (eegCondition.value === "Other") {
+          eegConditionOther.style.display = "block";
+          eegConditionOther.required = true;
+        } else {
+          eegConditionOther.style.display = "none";
+          eegConditionOther.required = false;
+        }
+      });
+      eegCondition.dispatchEvent(new Event("change"));
+
+      form.onsubmit = async e => {
         e.preventDefault();
         panel.hidden = false;
         if (!eegFile.files.length) {
@@ -2317,8 +2317,8 @@ Respond empathetically, providing CBT techniques, mindfulness exercises, or emot
           addClose(panel);
           return;
         }
-        panel.innerHTML = '<div class="result-content">Analyzing… <i class="fas fa-spinner fa-spin"></i></div>';
-        const cond = getSelectValue(eegCondition);
+        panel.innerHTML = '<div class="result-content">Analyzing… <span class="spinner"></span></div>';
+        const cond = eegCondition.value === "Other" ? eegConditionOther.value.trim() : eegCondition.value;
         try {
           const aiReply = await callOpenAI([
             { role: "system", content: "You are an EEG & brainwave interpreter specializing in mental health. Analyze common patterns (alpha, beta, theta, delta) and suggest cognitive insights or interventions." },
@@ -2343,7 +2343,7 @@ Respond empathetically, providing CBT techniques, mindfulness exercises, or emot
       }
     })();
 
-    //──────────────────────── Clinical Trial Matcher ─────────────────────────
+    // ───────── Clinical Trial Matcher ─────────────────────────────────────────
     (function() {
       const form = document.getElementById("trial-form");
       const panel = document.getElementById("trialmatchPanel");
@@ -2351,15 +2351,28 @@ Respond empathetically, providing CBT techniques, mindfulness exercises, or emot
       const trialDxOther = document.getElementById("trialDxOther");
       const trialPhase = document.getElementById("trialPhase");
       const trialPhaseOther = document.getElementById("trialPhaseOther");
-      const trialLoc = document.getElementById("trialLoc");
 
-      form.onsubmit = async (e) => {
+      [trialDx, trialPhase].forEach(sel => {
+        sel.addEventListener("change", () => {
+          const other = sel.parentElement.querySelector(".other-input");
+          if (sel.value === "Other") {
+            other.style.display = "block";
+            other.required = true;
+          } else {
+            other.style.display = "none";
+            other.required = false;
+          }
+        });
+        sel.dispatchEvent(new Event("change"));
+      });
+
+      form.onsubmit = async e => {
         e.preventDefault();
         panel.hidden = false;
-        panel.innerHTML = '<div class="result-content">Searching… <i class="fas fa-spinner fa-spin"></i></div>';
-        const dx = getSelectValue(trialDx);
-        const loc = trialLoc.value.trim();
-        const ph = getSelectValue(trialPhase);
+        panel.innerHTML = '<div class="result-content">Searching… <span class="spinner"></span></div>';
+        const dx = trialDx.value === "Other" ? trialDxOther.value.trim() : trialDx.value;
+        const loc = document.getElementById("trialLoc").value.trim();
+        const ph = trialPhase.value === "Other" ? trialPhaseOther.value.trim() : trialPhase.value;
         if (!dx || !loc) {
           panel.innerHTML = '<div class="result-content">⚠️ Please specify diagnosis and location.</div>';
           addClose(panel);
@@ -2389,70 +2402,76 @@ Respond empathetically, providing CBT techniques, mindfulness exercises, or emot
       }
     })();
 
-    //──────────────────────── Data Analytics & Charts ───────────────────────
+    // ───────── Data Analytics & Charts ────────────────────────────────────────
     (function() {
-      const engCtx = document.getElementById("engagementChart").getContext("2d");
-      const outCtx = document.getElementById("outcomeChart").getContext("2d");
-
+      // Create real-time charts when page loads
       function getCSSVar(name) {
         return getComputedStyle(document.documentElement).getPropertyValue(name).trim();
       }
-      const colorText = getCSSVar("--text");
-      const colorMuted = getCSSVar("--muted");
-      const primary = getCSSVar("--primary");
-      const secondary = getCSSVar("--secondary");
 
-      // Ensure canvas containers have fixed height so charts don't grow infinitely
-      engCtx.canvas.parentElement.style.height = "200px";
-      outCtx.canvas.parentElement.style.height = "200px";
+      function initRealCharts() {
+        const colorText = getCSSVar("--text");
+        const colorMuted = getCSSVar("--muted");
+        const primary = getCSSVar("--primary");
+        const secondary = getCSSVar("--secondary");
 
-      // Engagement Over Time (line)
-      const engChart = new Chart(engCtx, {
-        type: "line",
-        data: {
-          labels: ["Mon","Tue","Wed","Thu","Fri","Sat","Sun"],
-          datasets: [{
-            label: "Sessions",
-            data: [12, 9, 14, 11, 13, 10, 15],
-            borderColor: primary,
-            backgroundColor: "rgba(74,144,226,0.1)",
-            fill: "start"
-          }]
-        },
-        options: {
-          responsive: true,
-          maintainAspectRatio: false,
-          scales: {
-            x: { ticks: { color: colorText }, grid: { display: false } },
-            y: { ticks: { color: colorText }, grid: { color: colorMuted }, beginAtZero: true }
+        // Engagement Over Time (line chart)
+        new Chart("engagementChart", {
+          type: "line",
+          data: {
+            labels: ["Mon","Tue","Wed","Thu","Fri","Sat","Sun"],
+            datasets: [{
+              label: "Sessions",
+              data: [12, 9, 14, 11, 13, 10, 15],
+              borderColor: primary,
+              backgroundColor: `rgba(${parseInt(primary.slice(1,3),16)},${parseInt(primary.slice(3,5),16)},${parseInt(primary.slice(5,7),16)},0.1)`,
+              fill: true
+            }]
           },
-          plugins: { legend: { display: false } }
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+              x: { ticks: { color: colorText }, grid: { display: false } },
+              y: { ticks: { color: colorText }, grid: { color: colorMuted }, beginAtZero: true }
+            },
+            plugins: { legend: { display: false } }
+          }
+        });
+
+        // Outcome Metrics (bar chart)
+        new Chart("outcomeChart", {
+          type: "bar",
+          data: {
+            labels: ["Week 1","Week 2","Week 3","Week 4"],
+            datasets: [{
+              label: "Outcome Score",
+              data: [3.2, 4.1, 4.5, 4.8],
+              backgroundColor: secondary
+            }]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+              x: { ticks: { color: colorText }, grid: { display: false } },
+              y: { ticks: { color: colorText }, grid: { color: colorMuted }, beginAtZero: true, max: 5 }
+            },
+            plugins: { legend: { display: false } }
+          }
+        });
+      }
+
+      window.addEventListener("load", () => {
+        if (typeof initRealCharts === "function") {
+          initRealCharts();
         }
       });
 
-      // Outcome Metrics (bar)
-      const outChart = new Chart(outCtx, {
-        type: "bar",
-        data: {
-          labels: ["Week 1","Week 2","Week 3","Week 4"],
-          datasets: [{
-            label: "Outcome Score",
-            data: [3.2, 4.1, 4.5, 4.8],
-            backgroundColor: secondary
-          }]
-        },
-        options: {
-          responsive: true,
-          maintainAspectRatio: false,
-          scales: {
-            x: { ticks: { color: colorText }, grid: { display: false } },
-            y: { ticks: { color: colorText }, grid: { color: colorMuted }, beginAtZero: true, max: 5 }
-          },
-          plugins: { legend: { display: false } }
-        }
-      });
-
+      // Export CSV button
       document.getElementById("exportCharts").addEventListener("click", () => {
+        const engChart = Chart.getChart("engagementChart");
+        const outChart = Chart.getChart("outcomeChart");
         let csv = "Chart,Label,Value\n";
         [
           ["Sessions", engChart],
@@ -2475,6 +2494,7 @@ Respond empathetically, providing CBT techniques, mindfulness exercises, or emot
     })();
   });
 </script>
+
   
 </body>
 
