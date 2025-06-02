@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
-  <title>Vitra AI – Dashboard</title>
+  <title>Vitra AI – Simple Dashboard</title>
   <!-- Fonts & Icons -->
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"/>
@@ -12,438 +12,328 @@
   <!-- Firebase -->
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
- <style>
-  /*──────────────────────────────────────────────────────────────────────────────
-    VARIABLES & THEME
-  ──────────────────────────────────────────────────────────────────────────────*/
-  :root {
-    --primary: #4A78C4;
-    --secondary: #FFFFFF;
-    --accent: #FFA500;
-    --bg: #F0F4FF;
-    --surface: #FFFFFF;
-    --text: #1A1A1A;
-    --muted: #555555;
-    --shadow-light: rgba(0,0,0,0.1);
-    --shadow-dark: rgba(0,0,0,0.4);
-    --radius: 1rem;
-    --padding: 1.5rem;
-    --gap: 1rem;
-    --max-width: 1200px;
-  }
-  html.dark {
-    --bg: #1F2233;
-    --surface: #2B2E44;
-    --text: #E0E0E0;
-    --muted: #888888;
-    --shadow-light: rgba(0,0,0,0.4);
-    --shadow-dark: rgba(0,0,0,0.7);
-  }
 
-  /*──────────────────────────────────────────────────────────────────────────────
-    GLOBAL RESET & BASE STYLES
-  ──────────────────────────────────────────────────────────────────────────────*/
-  *, *::before, *::after {
-    box-sizing: border-box;
-    margin: 0;
-    padding: 0;
-    transition: background-color .3s ease, color .3s ease, box-shadow .3s ease;
-  }
-  html, body {
-    height: 100%;
-    width: 100%;
-    background: var(--bg);
-    color: var(--text);
-    font-family: 'Montserrat', sans-serif;
-    -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
-  }
-  a {
-    text-decoration: none;
-    color: inherit;
-  }
-  button {
-    font: inherit;
-    cursor: pointer;
-    background: none;
-    border: none;
-  }
-  ul {
-    list-style: none;
-  }
-
-  /*──────────────────────────────────────────────────────────────────────────────
-    LAYOUT: FLEX CONTAINER
-  ──────────────────────────────────────────────────────────────────────────────*/
-  body {
-    display: flex;
-    min-height: 100vh;
-  }
-
-  /*──────────────────────────────────────────────────────────────────────────────
-    SIDEBAR
-  ──────────────────────────────────────────────────────────────────────────────*/
-  .sidebar {
-    width: 260px;
-    background: var(--surface);
-    padding: 2rem 1.5rem;
-    display: flex;
-    flex-direction: column;
-    gap: 1.25rem;
-    box-shadow: 2px 0 12px var(--shadow-light);
-    z-index: 100;
-  }
-  html.dark .sidebar {
-    box-shadow: 2px 0 12px var(--shadow-dark);
-  }
-
-  .sidebar .logo {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 0.75rem;
-    font-size: 1.75rem;
-    font-weight: 700;
-    color: var(--primary);
-  }
-  .sidebar .logo svg {
-    width: 2.25rem;
-    height: 2.25rem;
-    fill: var(--primary);
-  }
-
-  .sidebar nav {
-    margin-top: 2rem;
-    display: flex;
-    flex-direction: column;
-    gap: 0.75rem;
-  }
-  .sidebar nav a {
-    padding: 0.75rem 1rem;
-    border-radius: var(--radius);
-    display: flex;
-    align-items: center;
-    gap: 0.75rem;
-    color: var(--text);
-    font-weight: 500;
-    transition: background-color .2s, color .2s;
-  }
-  .sidebar nav a i {
-    font-size: 1.25rem;
-    color: var(--primary);
-    transition: color .2s;
-  }
-  .sidebar nav a:hover,
-  .sidebar nav a.active {
-    background: var(--primary);
-    color: var(--secondary);
-  }
-  .sidebar nav a:hover i,
-  .sidebar nav a.active i {
-    color: var(--secondary);
-  }
-
-  /*──────────────────────────────────────────────────────────────────────────────
-    MAIN CONTENT
-  ──────────────────────────────────────────────────────────────────────────────*/
-  .main {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    background: var(--bg);
-  }
-
-  /*──────────────────────────────────────────────────────────────────────────────
-    TOPBAR
-  ──────────────────────────────────────────────────────────────────────────────*/
-  .topbar {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 1rem 2rem;
-    background: var(--surface);
-    box-shadow: 0 2px 12px var(--shadow-light);
-  }
-  html.dark .topbar {
-    box-shadow: 0 2px 12px var(--shadow-dark);
-  }
-  .topbar .welcome {
-    font-size: 1.5rem;
-    font-weight: 500;
-  }
-  .topbar .controls {
-    display: flex;
-    align-items: center;
-    gap: 1rem;
-  }
-  .topbar button {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    padding: 0.5rem 1rem;
-    border-radius: var(--radius);
-    background: var(--primary);
-    color: var(--secondary);
-    font-weight: 500;
-    box-shadow: 0 2px 8px var(--shadow-light);
-  }
-  html.dark .topbar button {
-    box-shadow: 0 2px 8px var(--shadow-dark);
-  }
-  .topbar i {
-    font-size: 1.5rem;
-    color: var(--text);
-    cursor: pointer;
-  }
-  .topbar i:hover {
-    color: var(--primary);
-  }
-
-  /*──────────────────────────────────────────────────────────────────────────────
-    CONTENT GRID
-  ──────────────────────────────────────────────────────────────────────────────*/
-  .content {
-    padding: 2rem;
-    max-width: var(--max-width);
-    margin: 0 auto;
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-    gap: var(--gap);
-  }
-
-  /*──────────────────────────────────────────────────────────────────────────────
-    CARD BASE
-  ──────────────────────────────────────────────────────────────────────────────*/
-  .card {
-    background: var(--surface);
-    border-radius: var(--radius);
-    box-shadow: 0 2px 12px var(--shadow-light);
-    padding: var(--padding);
-    display: flex;
-    flex-direction: column;
-    transition: transform .2s ease, box-shadow .2s ease;
-  }
-  html.dark .card {
-    box-shadow: 0 2px 12px var(--shadow-dark);
-  }
-  .card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 4px 16px var(--shadow-light);
-  }
-  html.dark .card:hover {
-    box-shadow: 0 4px 16px var(--shadow-dark);
-  }
-  .card i {
-    font-size: 2.75rem;
-    color: var(--primary);
-    margin-bottom: 1rem;
-  }
-  .card h4 {
-    margin-bottom: 0.75rem;
-    font-size: 1.25rem;
-    color: var(--text);
-  }
-  .card p {
-    flex: 1;
-    margin-bottom: 1rem;
-    color: var(--muted);
-    line-height: 1.4;
-  }
-  .card a {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    margin-top: auto;
-    padding: 0.6rem 1.2rem;
-    background: var(--primary);
-    color: var(--secondary);
-    border-radius: var(--radius);
-    font-weight: 500;
-    box-shadow: 0 2px 8px var(--shadow-light);
-    transition: background-color .2s ease, transform .2s ease;
-  }
-  .card a:hover {
-    background: var(--accent);
-    transform: translateY(-2px);
-  }
-  html.dark .card a {
-    box-shadow: 0 2px 8px var(--shadow-dark);
-  }
-
-  /*──────────────────────────────────────────────────────────────────────────────
-    STAT INPUTS
-  ──────────────────────────────────────────────────────────────────────────────*/
-  .stat-input {
-    display: flex;
-    align-items: center;
-    gap: 0.75rem;
-    margin-top: 1rem;
-    flex-wrap: wrap;
-  }
-  .stat-input label {
-    font-weight: 500;
-    color: var(--text);
-  }
-  .stat-input input {
-    width: 70px;
-    padding: 0.4rem 0.6rem;
-    border: 1px solid var(--muted);
-    border-radius: var(--radius);
-    text-align: center;
-    background: var(--bg);
-    color: var(--text);
-    font-size: 1rem;
-  }
-  .stat-input input:focus {
-    border-color: var(--primary);
-    box-shadow: 0 0 0 3px rgba(74,120,196,0.3);
-    outline: none;
-  }
-  html.dark .stat-input input {
-    background: var(--surface);
-    border-color: var(--muted);
-    color: var(--text);
-  }
-
-  /*──────────────────────────────────────────────────────────────────────────────
-    CHART CARD (FULL-WIDTH)
-  ──────────────────────────────────────────────────────────────────────────────*/
-  .chart-card {
-    grid-column: 1 / -1;
-  }
-  .chart-card h4 {
-    margin-bottom: 1rem;
-    font-size: 1.5rem;
-    color: var(--text);
-  }
-  canvas {
-    width: 100% !important;
-    height: 280px !important;
-  }
-
-  /*──────────────────────────────────────────────────────────────────────────────
-    ADDITIONAL STYLING FOR MULTIPLE CHARTS
-  ──────────────────────────────────────────────────────────────────────────────*/
-  .chart-section {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-    gap: var(--gap);
-  }
-  .chart-wrapper {
-    background: var(--surface);
-    border-radius: var(--radius);
-    box-shadow: 0 2px 12px var(--shadow-light);
-    padding: var(--padding);
-    transition: box-shadow .2s ease, transform .2s ease;
-  }
-  html.dark .chart-wrapper {
-    box-shadow: 0 2px 12px var(--shadow-dark);
-  }
-  .chart-wrapper:hover {
-    transform: translateY(-3px);
-    box-shadow: 0 4px 16px var(--shadow-light);
-  }
-  html.dark .chart-wrapper:hover {
-    box-shadow: 0 4px 16px var(--shadow-dark);
-  }
-  .chart-wrapper h4 {
-    margin-bottom: 1rem;
-    font-size: 1.25rem;
-    color: var(--text);
-  }
-
-  /*──────────────────────────────────────────────────────────────────────────────
-    TOAST NOTIFICATIONS
-  ──────────────────────────────────────────────────────────────────────────────*/
-  .toast {
-    position: fixed;
-    bottom: 1.5rem;
-    left: 50%;
-    transform: translateX(-50%) translateY(100%);
-    background: var(--primary);
-    color: var(--secondary);
-    padding: 0.75rem 1.5rem;
-    border-radius: var(--radius);
-    box-shadow: 0 2px 12px var(--shadow-light);
-    opacity: 0;
-    transition: transform 0.3s ease, opacity 0.3s ease;
-    z-index: 200;
-    font-weight: 500;
-  }
-  html.dark .toast {
-    box-shadow: 0 2px 12px var(--shadow-dark);
-  }
-  .toast.visible {
-    transform: translateX(-50%) translateY(0);
-    opacity: 1;
-  }
-
-  /*──────────────────────────────────────────────────────────────────────────────
-    RESPONSIVE STYLING
-  ──────────────────────────────────────────────────────────────────────────────*/
-  @media (max-width: 1024px) {
-    .sidebar {
-      width: 200px;
-      padding: 1.5rem 1rem;
+  <style>
+    /*──────────────────────────────────────────────────────────────────────────────
+      VARIABLES & THEME
+    ──────────────────────────────────────────────────────────────────────────────*/
+    :root {
+      --primary: #4A78C4;
+      --accent: #FFA500;
+      --bg: #F0F4FF;
+      --surface: #FFFFFF;
+      --text: #1A1A1A;
+      --muted: #555555;
+      --shadow-light: rgba(0,0,0,0.1);
+      --shadow-dark: rgba(0,0,0,0.4);
+      --radius: 1rem;
+      --padding: 1.5rem;
+      --gap: 1rem;
+      --max-width: 1000px;
     }
+    html.dark {
+      --bg: #1F2233;
+      --surface: #2B2E44;
+      --text: #E0E0E0;
+      --muted: #888888;
+      --shadow-light: rgba(0,0,0,0.4);
+      --shadow-dark: rgba(0,0,0,0.7);
+    }
+
+    /*──────────────────────────────────────────────────────────────────────────────
+      RESET & BASE
+    ──────────────────────────────────────────────────────────────────────────────*/
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      transition: background-color .3s ease, color .3s ease, box-shadow .3s ease;
+    }
+    html, body {
+      height: 100%;
+      width: 100%;
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Montserrat', sans-serif;
+    }
+    a { text-decoration: none; color: inherit; }
+    button { font: inherit; cursor: pointer; background: none; border: none; }
+
+    /*──────────────────────────────────────────────────────────────────────────────
+      LAYOUT CONTAINER
+    ──────────────────────────────────────────────────────────────────────────────*/
+    body {
+      display: flex;
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    /*──────────────────────────────────────────────────────────────────────────────
+      SIDEBAR
+    ──────────────────────────────────────────────────────────────────────────────*/
+    .sidebar {
+      width: 240px;
+      background: var(--surface);
+      padding: 2rem 1rem;
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+      box-shadow: 2px 0 8px var(--shadow-light);
+      z-index: 10;
+    }
+    html.dark .sidebar {
+      box-shadow: 2px 0 8px var(--shadow-dark);
+    }
+    .sidebar .logo {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: var(--primary);
+    }
+    .sidebar .logo svg {
+      width: 2rem;
+      height: 2rem;
+      fill: var(--primary);
+    }
+    .sidebar nav {
+      margin-top: 2rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+    }
+    .sidebar nav a {
+      padding: 0.75rem 1rem;
+      border-radius: var(--radius);
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      color: var(--text);
+      font-weight: 500;
+      transition: background-color .2s, color .2s;
+    }
+    .sidebar nav a i {
+      font-size: 1.25rem;
+      color: var(--primary);
+      transition: color .2s;
+    }
+    .sidebar nav a:hover,
+    .sidebar nav a.active {
+      background: var(--primary);
+      color: var(--surface);
+    }
+    .sidebar nav a:hover i,
+    .sidebar nav a.active i {
+      color: var(--surface);
+    }
+
+    /*──────────────────────────────────────────────────────────────────────────────
+      MAIN AREA
+    ──────────────────────────────────────────────────────────────────────────────*/
+    .main {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      background: var(--bg);
+    }
+
+    /*──────────────────────────────────────────────────────────────────────────────
+      TOPBAR
+    ──────────────────────────────────────────────────────────────────────────────*/
     .topbar {
-      padding: 0.75rem 1.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 1rem 2rem;
+      background: var(--surface);
+      box-shadow: 0 2px 8px var(--shadow-light);
+      z-index: 5;
+    }
+    html.dark .topbar {
+      box-shadow: 0 2px 8px var(--shadow-dark);
     }
     .topbar .welcome {
       font-size: 1.25rem;
-    }
-  }
-  @media (max-width: 768px) {
-    .sidebar {
-      display: none;
-    }
-    body {
-      flex-direction: column;
-    }
-    .topbar {
-      justify-content: center;
-    }
-    .content {
-      padding: 1rem;
-      gap: 0.75rem;
-    }
-    .card {
-      padding: 1rem;
-    }
-    .chart-card {
-      grid-column: 1;
-    }
-  }
-  @media (max-width: 480px) {
-    .topbar .welcome {
-      font-size: 1rem;
+      font-weight: 500;
     }
     .topbar .controls {
-      gap: 0.5rem;
-    }
-    .topbar i {
-      font-size: 1.2rem;
+      display: flex;
+      align-items: center;
+      gap: 1rem;
     }
     .topbar button {
-      padding: 0.4rem 0.8rem;
-      font-size: 0.9rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.5rem 1rem;
+      border-radius: var(--radius);
+      background: var(--primary);
+      color: var(--surface);
+      font-weight: 500;
+      box-shadow: 0 2px 8px var(--shadow-light);
+    }
+    html.dark .topbar button {
+      box-shadow: 0 2px 8px var(--shadow-dark);
+    }
+    .topbar i {
+      font-size: 1.5rem;
+      color: var(--text);
+      cursor: pointer;
+    }
+    .topbar i:hover {
+      color: var(--primary);
+    }
+
+    /*──────────────────────────────────────────────────────────────────────────────
+      CONTENT GRID
+    ──────────────────────────────────────────────────────────────────────────────*/
+    .content {
+      padding: 2rem;
+      max-width: var(--max-width);
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: var(--gap);
+    }
+    @media(max-width: 768px) {
+      .content {
+        grid-template-columns: 1fr;
+        padding: 1rem;
+      }
+    }
+
+    /*──────────────────────────────────────────────────────────────────────────────
+      CARD
+    ──────────────────────────────────────────────────────────────────────────────*/
+    .card {
+      background: var(--surface);
+      border-radius: var(--radius);
+      box-shadow: 0 2px 8px var(--shadow-light);
+      padding: var(--padding);
+      display: flex;
+      flex-direction: column;
+      transition: transform .2s ease, box-shadow .2s ease;
+    }
+    html.dark .card {
+      box-shadow: 0 2px 8px var(--shadow-dark);
+    }
+    .card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 4px 16px var(--shadow-light);
+    }
+    html.dark .card:hover {
+      box-shadow: 0 4px 16px var(--shadow-dark);
     }
     .card h4 {
-      font-size: 1.1rem;
+      margin-bottom: 1rem;
+      font-size: 1.25rem;
+      color: var(--text);
     }
-    .card i {
-      font-size: 2.25rem;
+    .card label {
+      font-size: 1rem;
+      font-weight: 500;
+      margin-bottom: 0.5rem;
+      color: var(--text);
     }
-    .stat-input input {
-      width: 50px;
-      font-size: 0.9rem;
+    .card input {
+      width: 100%;
+      padding: 0.6rem;
+      border: 1px solid var(--muted);
+      border-radius: var(--radius);
+      background: var(--bg);
+      color: var(--text);
+      font-size: 1rem;
+      margin-bottom: 1rem;
+      transition: border-color .2s, box-shadow .2s;
     }
-  }
-</style>
+    .card input:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(74,120,196,0.3);
+      outline: none;
+    }
+    html.dark .card input {
+      background: var(--surface);
+      border-color: var(--muted);
+      color: var(--text);
+    }
+    .card button {
+      padding: 0.6rem 1.2rem;
+      background: var(--primary);
+      color: var(--surface);
+      border-radius: var(--radius);
+      font-weight: 500;
+      box-shadow: 0 2px 8px var(--shadow-light);
+      transition: background-color .2s, transform .2s;
+    }
+    .card button:hover {
+      background: var(--accent);
+      transform: translateY(-2px);
+    }
+    html.dark .card button {
+      box-shadow: 0 2px 8px var(--shadow-dark);
+    }
 
+    /*──────────────────────────────────────────────────────────────────────────────
+      CHART CONTAINER
+    ──────────────────────────────────────────────────────────────────────────────*/
+    .chart-card {
+      grid-column: 1 / -1;
+      background: var(--surface);
+      border-radius: var(--radius);
+      box-shadow: 0 2px 8px var(--shadow-light);
+      padding: var(--padding);
+      transition: transform .2s, box-shadow .2s;
+    }
+    html.dark .chart-card {
+      box-shadow: 0 2px 8px var(--shadow-dark);
+    }
+    .chart-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 4px 16px var(--shadow-light);
+    }
+    html.dark .chart-card:hover {
+      box-shadow: 0 4px 16px var(--shadow-dark);
+    }
+    .chart-card h4 {
+      margin-bottom: 1rem;
+      font-size: 1.5rem;
+      color: var(--text);
+    }
+    .chart-container {
+      width: 100%;
+      height: 260px;
+    }
 
-  
+    /*──────────────────────────────────────────────────────────────────────────────
+      TOAST
+    ──────────────────────────────────────────────────────────────────────────────*/
+    .toast {
+      position: fixed;
+      bottom: 1.5rem;
+      left: 50%;
+      transform: translateX(-50%) translateY(100%);
+      background: var(--primary);
+      color: var(--surface);
+      padding: 0.75rem 1.5rem;
+      border-radius: var(--radius);
+      box-shadow: 0 2px 8px var(--shadow-light);
+      opacity: 0;
+      transition: transform .3s ease, opacity .3s ease;
+      z-index: 200;
+      font-weight: 500;
+    }
+    html.dark .toast {
+      box-shadow: 0 2px 8px var(--shadow-dark);
+    }
+    .toast.visible {
+      transform: translateX(-50%) translateY(0);
+      opacity: 1;
+    }
+  </style>
 </head>
+
 <body>
   <!-- SIDEBAR -->
   <aside class="sidebar">
@@ -454,16 +344,16 @@
       <span>Vitra AI</span>
     </div>
     <nav>
-      <a href="#profile" class="active"><i class="fas fa-user-circle"></i> Profile</a>
-      <a href="#epharmacy"><i class="fas fa-pills"></i> E-Pharmacy</a>
-      <a href="#consult"><i class="fas fa-calendar-check"></i> Consults</a>
-      <a href="#diet"><i class="fas fa-apple-alt"></i> Diet Plan</a>
-      <a href="#therapy"><i class="fas fa-brain"></i> AI Therapist</a>
-      <a href="#stats"><i class="fas fa-chart-line"></i> My Stats</a>
+      <a href="#" class="active"><i class="fas fa-chart-pie"></i> Dashboard</a>
+      <a href="epharmacy.html"><i class="fas fa-pills"></i> E-Pharmacy</a>
+      <a href="consult.html"><i class="fas fa-calendar-check"></i> Consults</a>
+      <a href="dietetics.html"><i class="fas fa-apple-alt"></i> Diet Plan</a>
+      <a href="psychology.html"><i class="fas fa-brain"></i> AI Therapist</a>
+      <a href="profile.html"><i class="fas fa-user-circle"></i> Profile</a>
     </nav>
   </aside>
 
-  <!-- MAIN AREA -->
+  <!-- MAIN CONTENT -->
   <div class="main">
     <!-- TOPBAR -->
     <header class="topbar">
@@ -474,585 +364,222 @@
       </div>
     </header>
 
-    <!-- DASHBOARD CONTENT GRID -->
+    <!-- CONTENT GRID -->
     <section class="content">
-
-      <!-- PROFILE CARD -->
-      <div id="profile" class="card">
-        <i class="fas fa-user-circle"></i>
-        <h4>My Profile</h4>
-        <p id="userEmail">user@example.com</p>
-        <a href="profile.html">Edit Profile</a>
-      </div>
-
-      <!-- QUICK STATS: E-PHARMACY SUMMARY -->
-      <div id="epharmacy" class="card">
-        <i class="fas fa-pills"></i>
-        <h4>E-Pharmacy Summary</h4>
-        <p>Total Orders: <strong>128</strong></p>
-        <p>Pending: <strong>5</strong> | Shipped: <strong>112</strong> | Delivered: <strong>11</strong></p>
-        <div class="stat-input">
-          <label>Monthly Spend (₵):</label>
-          <input type="number" id="statSpend" value="3420" min="0" />
-        </div>
-        <button id="viewOrdersBtn">View All Orders</button>
-      </div>
-
-      <!-- QUICK STATS: UPCOMING CONSULTATIONS -->
-      <div id="consult" class="card">
-        <i class="fas fa-calendar-check"></i>
-        <h4>Upcoming Consultations</h4>
-        <p>Next Appointment: <strong>Dr. Kwame Asante</strong></p>
-        <p>Date: <strong>2025-06-10</strong> | Time: <strong>09:30 AM</strong></p>
-        <p>In-Network Consults: <strong>8</strong> this month</p>
-        <button id="manageConsultsBtn">Manage Consults</button>
-      </div>
-
-      <!-- QUICK STATS: DIET PLAN OVERVIEW -->
-      <div id="diet" class="card">
-        <i class="fas fa-apple-alt"></i>
-        <h4>Diet Plan Overview</h4>
-        <p>Calories Today: <strong>1,450</strong> / 2,000 kcal</p>
-        <p>Protein Intake: <strong>60g</strong> / 75g</p>
-        <p>Water Intake: <strong>1.8L</strong> / 2.5L</p>
-        <button id="viewDietBtn">View Full Plan</button>
-      </div>
-
-      <!-- QUICK STATS: AI THERAPIST -->
-      <div id="therapy" class="card">
-        <i class="fas fa-brain"></i>
-        <h4>AI Therapist</h4>
-        <p>Sessions This Week: <strong>3</strong></p>
-        <p>Unread Messages: <strong>2</strong></p>
-        <button id="continueTherapyBtn">Continue Session</button>
-      </div>
-
-      <!-- HEALTH METRICS STATISTICS -->
-      <div id="stats" class="card">
-        <i class="fas fa-chart-bar"></i>
-        <h4>Health Metrics</h4>
-        <div class="stat-input">
-          <label>Weight (kg):</label>
-          <input type="number" id="statWeight" value="70" min="30" max="200"/>
-        </div>
-        <div class="stat-input">
-          <label>Steps/Day:</label>
-          <input type="number" id="statSteps" value="5000" min="0" max="50000"/>
-        </div>
-        <div class="stat-input">
-          <label>Sleep (hrs):</label>
-          <input type="number" id="statSleep" value="7" min="0" max="24"/>
-        </div>
-        <button id="updateStatsBtn">Update Charts</button>
-      </div>
-
-      <!-- FULL-WIDTH CHART: WEEKLY ACTIVITY -->
-      <div class="card chart-card">
-        <h4>Weekly Activity Overview</h4>
-        <canvas id="activityChart"></canvas>
-      </div>
-
-      <!-- FULL-WIDTH CHART: CALORIE INTAKE VS EXPENDITURE -->
-      <div class="card chart-card">
-        <h4>Calorie Intake vs Expenditure</h4>
-        <canvas id="calorieChart"></canvas>
-      </div>
-
-      <!-- RECENT ORDERS TABLE -->
+      <!-- Input Card: Health Metrics -->
       <div class="card">
-        <i class="fas fa-receipt"></i>
-        <h4>Recent Pharmacy Orders</h4>
-        <table style="width:100%; border-collapse:collapse; margin-top:1rem;">
-          <thead>
-            <tr style="background:var(--primary); color:var(--secondary);">
-              <th style="padding:.75rem; text-align:left;">Order ID</th>
-              <th style="padding:.75rem; text-align:left;">Date</th>
-              <th style="padding:.75rem; text-align:left;">Status</th>
-              <th style="padding:.75rem; text-align:left;">Total (₵)</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td style="padding:.75rem;">#A1023</td>
-              <td style="padding:.75rem;">2025-06-01</td>
-              <td style="padding:.75rem; color:green;">Delivered</td>
-              <td style="padding:.75rem;">₵120.00</td>
-            </tr>
-            <tr>
-              <td style="padding:.75rem;">#A1024</td>
-              <td style="padding:.75rem;">2025-06-03</td>
-              <td style="padding:.75rem; color:orange;">Shipped</td>
-              <td style="padding:.75rem;">₵85.50</td>
-            </tr>
-            <tr>
-              <td style="padding:.75rem;">#A1025</td>
-              <td style="padding:.75rem;">2025-06-05</td>
-              <td style="padding:.75rem; color:red;">Pending</td>
-              <td style="padding:.75rem;">₵42.00</td>
-            </tr>
-            <tr>
-              <td style="padding:.75rem;">#A1026</td>
-              <td style="padding:.75rem;">2025-06-06</td>
-              <td style="padding:.75rem; color:green;">Delivered</td>
-              <td style="padding:.75rem;">₵210.75</td>
-            </tr>
-          </tbody>
-        </table>
-        <a href="epharmacy.html" style="margin-top:1rem;">View All Orders</a>
+        <h4>Update Your Health Metrics</h4>
+        <label for="weightInput">Weight (kg):</label>
+        <input type="number" id="weightInput" value="70" min="30" max="200"/>
+        <label for="stepsInput">Daily Steps:</label>
+        <input type="number" id="stepsInput" value="5000" min="0" max="50000"/>
+        <button id="updateBtn"><i class="fas fa-sync-alt"></i> Update Charts</button>
       </div>
 
-      <!-- UPCOMING APPOINTMENTS TABLE -->
+      <!-- Input Card: Sleep & Water -->
       <div class="card">
-        <i class="fas fa-clock"></i>
-        <h4>Upcoming Appointments</h4>
-        <table style="width:100%; border-collapse:collapse; margin-top:1rem;">
-          <thead>
-            <tr style="background:var(--primary); color:var(--secondary);">
-              <th style="padding:.75rem; text-align:left;">Consultant</th>
-              <th style="padding:.75rem; text-align:left;">Specialty</th>
-              <th style="padding:.75rem; text-align:left;">Date</th>
-              <th style="padding:.75rem; text-align:left;">Time</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td style="padding:.75rem;">Dr. Kojo Mensah</td>
-              <td style="padding:.75rem;">Psychiatrist</td>
-              <td style="padding:.75rem;">2025-06-08</td>
-              <td style="padding:.75rem;">10:00 AM</td>
-            </tr>
-            <tr>
-              <td style="padding:.75rem;">Dr. Abena Owusu</td>
-              <td style="padding:.75rem;">Cardiologist</td>
-              <td style="padding:.75rem;">2025-06-10</td>
-              <td style="padding:.75rem;">02:00 PM</td>
-            </tr>
-            <tr>
-              <td style="padding:.75rem;">Dr. Yaa Dufie</td>
-              <td style="padding:.75rem;">Dietitian</td>
-              <td style="padding:.75rem;">2025-06-12</td>
-              <td style="padding:.75rem;">09:30 AM</td>
-            </tr>
-          </tbody>
-        </table>
-        <a href="consult.html" style="margin-top:1rem;">Manage Appointments</a>
+        <h4>Other Metrics</h4>
+        <label for="sleepInput">Sleep (hrs):</label>
+        <input type="number" id="sleepInput" value="7" min="0" max="24"/>
+        <label for="waterInput">Water (L):</label>
+        <input type="number" id="waterInput" value="2" min="0" step="0.1" max="10"/>
+        <button id="updateOtherBtn"><i class="fas fa-sync-alt"></i> Update Charts</button>
       </div>
 
-      <!-- DIET LOG TABLE -->
-      <div class="card">
-        <i class="fas fa-utensils"></i>
-        <h4>Today’s Meal Log</h4>
-        <table style="width:100%; border-collapse:collapse; margin-top:1rem;">
-          <thead>
-            <tr style="background:var(--primary); color:var(--secondary);">
-              <th style="padding:.75rem; text-align:left;">Meal</th>
-              <th style="padding:.75rem; text-align:left;">Calories</th>
-              <th style="padding:.75rem; text-align:left;">Protein (g)</th>
-              <th style="padding:.75rem; text-align:left;">Time</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td style="padding:.75rem;">Breakfast - Oatmeal</td>
-              <td style="padding:.75rem;">320</td>
-              <td style="padding:.75rem;">12</td>
-              <td style="padding:.75rem;">08:00 AM</td>
-            </tr>
-            <tr>
-              <td style="padding:.75rem;">Snack - Banana</td>
-              <td style="padding:.75rem;">105</td>
-              <td style="padding:.75rem;">1</td>
-              <td style="padding:.75rem;">10:30 AM</td>
-            </tr>
-            <tr>
-              <td style="padding:.75rem;">Lunch - Grilled Chicken Salad</td>
-              <td style="padding:.75rem;">450</td>
-              <td style="padding:.75rem;">35</td>
-              <td style="padding:.75rem;">01:00 PM</td>
-            </tr>
-          </tbody>
-        </table>
-        <a href="dietetics.html" style="margin-top:1rem;">View Full Diet Plan</a>
-      </div>
-
-      <!-- THERAPY CHAT SUMMARY -->
-      <div class="card">
-        <i class="fas fa-comment-medical"></i>
-        <h4>AI Therapy Chat Summary</h4>
-        <p>Last session: <strong>2025-06-05</strong> with <strong>Ms. Abena Boateng</strong></p>
-        <p>Key topics discussed: Anxiety management, Sleep hygiene</p>
-        <a href="psychology.html#therapybot" style="margin-top:1rem;">Continue Chat</a>
-      </div>
-
-      <!-- NOTIFICATIONS CARD -->
-      <div class="card">
-        <i class="fas fa-bell"></i>
-        <h4>Notifications</h4>
-        <ul style="margin-top:1rem; list-style:disc; padding-left:1.5rem; color:var(--muted);">
-          <li>📦 Your order <strong>#A1025</strong> is now pending payment.</li>
-          <li>⌛ Upcoming appointment with <strong>Dr. Kojo Mensah</strong> tomorrow at 10:00 AM.</li>
-          <li>🏆 You reached 10,000 steps yesterday—great job!</li>
-          <li>🗓️ New diet plan available for review in the Diet Plan section.</li>
-        </ul>
-        <button style="margin-top:1rem;">View All Notifications</button>
-      </div>
-
-      <!-- PROGRESS SUMMARY CARDS -->
-      <div class="card">
-        <i class="fas fa-procedures"></i>
-        <h4>Medication Adherence</h4>
-        <p>You've taken <strong>95%</strong> of prescribed doses this week.</p>
-        <div style="background:var(--muted); border-radius:var(--radius); overflow:hidden; height:10px; margin-top:0.5rem;">
-          <div style="width:95%; background:var(--primary); height:100%;"></div>
+      <!-- Chart: Weight Over Week -->
+      <div class="chart-card">
+        <h4>Weight Trend (Last 7 Days)</h4>
+        <div class="chart-container">
+          <canvas id="weightChart"></canvas>
         </div>
       </div>
 
-      <div class="card">
-        <i class="fas fa-heartbeat"></i>
-        <h4>Average Heart Rate</h4>
-        <p>This week: <strong>72 bpm</strong></p>
-        <canvas id="heartRateChart" style="margin-top:1rem;"></canvas>
-      </div>
-
-      <div class="card">
-        <i class="fas fa-water"></i>
-        <h4>Hydration Level</h4>
-        <p>Daily average: <strong>2.2 L</strong></p>
-        <div style="display:flex; align-items:center; gap:0.5rem; margin-top:1rem;">
-          <div style="flex:1; background:var(--muted); border-radius:var(--radius); overflow:hidden; height:12px;">
-            <div style="width:88%; background:#00A7E1; height:100%;"></div>
-          </div>
-          <span><strong>88%</strong></span>
+      <!-- Chart: Steps & Sleep -->
+      <div class="chart-card">
+        <h4>Steps vs Sleep</h4>
+        <div class="chart-container">
+          <canvas id="stepsSleepChart"></canvas>
         </div>
       </div>
-
     </section>
   </div>
 
-<script>
-  // ─────────────────────────────────────────────────────────────────────────────
-  // FIREBASE CONFIG & INITIALIZATION
-  // ─────────────────────────────────────────────────────────────────────────────
-  const firebaseConfig = {
-    apiKey: "AIzaSyBhaYOcLMXuobCT-vaXr-zXTZnBfaheAIY",
-    authDomain: "vitra-ai-712ea.firebaseapp.com",
-    projectId: "vitra-ai-712ea",
-    storageBucket: "vitra-ai-712ea.appspot.com",
-    messagingSenderId: "306868103753",
-    appId: "1:306868103753:web:e2d7700f8ad34c1e17ed98"
-  };
-  firebase.initializeApp(firebaseConfig);
+  <!-- TOAST NOTIFICATION -->
+  <div id="toast" class="toast"></div>
 
-  document.addEventListener("DOMContentLoaded", () => {
-    // ────────────────────────────────────────────────────────────────────────────
-    // THEME TOGGLE
-    // ────────────────────────────────────────────────────────────────────────────
-    const themeToggle = document.getElementById("themeToggle");
-    themeToggle.onclick = () => {
-      document.documentElement.classList.toggle("dark");
-      themeToggle.classList.toggle("fa-moon");
-      themeToggle.classList.toggle("fa-sun");
+  <!-- SCRIPTS -->
+  <script>
+    // ──────────────────────────────────────────────────────────────────────────────
+    // FIREBASE INITIALIZATION
+    // ──────────────────────────────────────────────────────────────────────────────
+    const firebaseConfig = {
+      apiKey: "AIzaSyBhaYOcLMXuobCT-vaXr-zXTZnBfaheAIY",
+      authDomain: "vitra-ai-712ea.firebaseapp.com",
+      projectId: "vitra-ai-712ea",
+      storageBucket: "vitra-ai-712ea.appspot.com",
+      messagingSenderId: "306868103753",
+      appId: "1:306868103753:web:e2d7700f8ad34c1e17ed98"
     };
+    firebase.initializeApp(firebaseConfig);
 
-    // ────────────────────────────────────────────────────────────────────────────
-    // SIGN OUT
-    // ────────────────────────────────────────────────────────────────────────────
-    document.getElementById("signOutBtn").onclick = () => {
-      firebase.auth().signOut().then(() => {
-        window.location.href = "index.html";
+    document.addEventListener('DOMContentLoaded', () => {
+      // ELEMENT REFERENCES
+      const themeToggle = document.getElementById('themeToggle');
+      const signOutBtn = document.getElementById('signOutBtn');
+      const userNameEl = document.getElementById('userName');
+      const toastEl = document.getElementById('toast');
+
+      // AUTH STATE
+      firebase.auth().onAuthStateChanged(user => {
+        if (!user) return window.location.href = 'index.html';
+        userNameEl.textContent = user.displayName || "User";
       });
-    };
 
-    // ────────────────────────────────────────────────────────────────────────────
-    // AUTH STATE & USER INFO
-    // ────────────────────────────────────────────────────────────────────────────
-    firebase.auth().onAuthStateChanged(user => {
-      if (!user) {
-        window.location.href = "index.html";
-        return;
+      // THEME TOGGLE
+      themeToggle.onclick = () => {
+        document.documentElement.classList.toggle('dark');
+        themeToggle.classList.toggle('fa-moon');
+        themeToggle.classList.toggle('fa-sun');
+      };
+
+      // SIGN OUT
+      signOutBtn.onclick = () => {
+        firebase.auth().signOut().then(() => {
+          window.location.href = 'index.html';
+        });
+      };
+
+      // TOAST FUNCTION
+      function showToast(message) {
+        toastEl.textContent = message;
+        toastEl.classList.add('visible');
+        setTimeout(() => toastEl.classList.remove('visible'), 3000);
       }
-      document.getElementById("userName").textContent = user.displayName || "User";
-      document.getElementById("userEmail").textContent = user.email;
-    });
 
-    // ────────────────────────────────────────────────────────────────────────────
-    // BUTTON NAVIGATION
-    // ────────────────────────────────────────────────────────────────────────────
-    document.getElementById("viewOrdersBtn").onclick = () => {
-      window.location.href = "epharmacy.html";
-    };
-    document.getElementById("manageConsultsBtn").onclick = () => {
-      window.location.href = "consult.html";
-    };
-    document.getElementById("viewDietBtn").onclick = () => {
-      window.location.href = "dietetics.html";
-    };
-    document.getElementById("continueTherapyBtn").onclick = () => {
-      window.location.href = "psychology.html#therapybot";
-    };
+      // ────────────────────────────────────────────────────────────────────────────
+      // CHART INITIALIZATION
+      // ────────────────────────────────────────────────────────────────────────────
 
-    // ────────────────────────────────────────────────────────────────────────────
-    // TOAST NOTIFICATION FUNCTION
-    // ────────────────────────────────────────────────────────────────────────────
-    function showToast(message) {
-      const toast = document.createElement("div");
-      toast.className = "toast";
-      toast.innerText = message;
-      document.body.append(toast);
-      requestAnimationFrame(() => toast.classList.add("visible"));
-      setTimeout(() => toast.remove(), 3000);
-    }
-
-    document.querySelector(".card:nth-child(9) button").onclick = () => {
-      showToast("All notifications displayed in your Notifications panel.");
-    };
-
-    // ────────────────────────────────────────────────────────────────────────────
-    // SAMPLE REALISTIC DATA ARRAYS
-    // ────────────────────────────────────────────────────────────────────────────
-    const sampleWeight = [70.0, 69.8, 69.5, 69.7, 69.4, 69.2, 69.0];
-    const sampleSteps = [6000, 8500, 10000, 7500, 9000, 11000, 9500];
-    const sampleSleep = [7.0, 6.5, 8.0, 7.5, 7.0, 6.0, 8.0];
-    const sampleIntake = [1800, 1950, 2000, 1850, 1900, 2100, 2050];
-    const sampleExp = [2200, 2150, 2300, 2250, 2100, 2350, 2400];
-    const sampleHeart = [72, 75, 70, 68, 74, 73, 71];
-    const labels = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
-
-    // ────────────────────────────────────────────────────────────────────────────
-    // INITIALIZE CHARTS
-    // ────────────────────────────────────────────────────────────────────────────
-    // Health Chart: Weight & Steps
-    const healthCtx = document.getElementById("healthChart").getContext("2d");
-    const healthChart = new Chart(healthCtx, {
-      type: "line",
-      data: {
-        labels: labels,
-        datasets: [
-          {
-            label: "Weight (kg)",
-            data: sampleWeight,
-            borderColor: "#4A78C4",
-            backgroundColor: "rgba(74,120,196,0.1)",
-            fill: true,
+      // Weight Chart (Line)
+      const weightCtx = document.getElementById('weightChart').getContext('2d');
+      const weightChart = new Chart(weightCtx, {
+        type: 'line',
+        data: {
+          labels: ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'],
+          datasets: [{
+            label: 'Weight (kg)',
+            data: [70, 70, 70, 70, 70, 70, 70],
+            borderColor: varColor('--primary'),
+            backgroundColor: 'rgba(74,120,196,0.1)',
             tension: 0.3,
-            yAxisID: "yWeight"
-          },
-          {
-            label: "Steps",
-            data: sampleSteps,
-            borderColor: "#FFA500",
-            backgroundColor: "rgba(255,165,0,0.1)",
-            fill: true,
-            tension: 0.3,
-            yAxisID: "ySteps"
-          }
-        ]
-      },
-      options: {
-        responsive: true,
-        scales: {
-          yWeight: {
-            type: "linear",
-            position: "left",
-            title: { display: true, text: "Weight (kg)" },
-            beginAtZero: false,
-            min: 60,
-            max: 75
-          },
-          ySteps: {
-            type: "linear",
-            position: "right",
-            title: { display: true, text: "Steps" },
-            beginAtZero: true,
-            min: 0,
-            max: 15000,
-            grid: { drawOnChartArea: false }
-          }
+            pointBackgroundColor: varColor('--primary'),
+            fill: true
+          }]
         },
-        plugins: {
-          tooltip: {
-            mode: "index",
-            intersect: false
+        options: {
+          responsive: true,
+          scales: {
+            y: {
+              beginAtZero: false,
+              ticks: { color: varColor('--text') },
+              grid: { color: varColor('--muted') }
+            },
+            x: {
+              ticks: { color: varColor('--text') },
+              grid: { display: false }
+            }
           },
-          legend: {
-            position: "top"
+          plugins: {
+            legend: { display: false }
           }
         }
-      }
-    });
+      });
 
-    // Activity Chart: Steps vs. Sleep (Grouped Bar)
-    const activityCtx = document.getElementById("activityChart").getContext("2d");
-    const activityChart = new Chart(activityCtx, {
-      type: "bar",
-      data: {
-        labels: labels,
-        datasets: [
-          {
-            label: "Steps",
-            data: sampleSteps,
-            backgroundColor: "#4A78C4",
-            yAxisID: "ySteps"
-          },
-          {
-            label: "Sleep (hrs)",
-            data: sampleSleep,
-            backgroundColor: "#FFA500",
-            yAxisID: "ySleep"
-          }
-        ]
-      },
-      options: {
-        responsive: true,
-        scales: {
-          ySteps: {
-            type: "linear",
-            position: "left",
-            title: { display: true, text: "Steps" },
-            beginAtZero: true,
-            min: 0,
-            max: 15000
-          },
-          ySleep: {
-            type: "linear",
-            position: "right",
-            title: { display: true, text: "Sleep (hrs)" },
-            beginAtZero: true,
-            min: 0,
-            max: 10,
-            grid: { drawOnChartArea: false }
-          }
+      // Steps vs Sleep Chart (Bar + Line)
+      const stepsSleepCtx = document.getElementById('stepsSleepChart').getContext('2d');
+      const stepsSleepChart = new Chart(stepsSleepCtx, {
+        data: {
+          labels: ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'],
+          datasets: [
+            {
+              type: 'bar',
+              label: 'Steps',
+              data: [5000, 5000, 5000, 5000, 5000, 5000, 5000],
+              backgroundColor: varColor('--accent'),
+              yAxisID: 'y1'
+            },
+            {
+              type: 'line',
+              label: 'Sleep (hrs)',
+              data: [7, 7, 7, 7, 7, 7, 7],
+              borderColor: varColor('--primary'),
+              backgroundColor: 'rgba(74,120,196,0.1)',
+              tension: 0.3,
+              yAxisID: 'y2',
+              fill: true,
+              pointBackgroundColor: varColor('--primary')
+            }
+          ]
         },
-        plugins: {
-          tooltip: {
-            mode: "index",
-            intersect: false
+        options: {
+          responsive: true,
+          scales: {
+            y1: {
+              type: 'linear',
+              position: 'left',
+              beginAtZero: true,
+              ticks: { color: varColor('--text') },
+              grid: { color: varColor('--muted') }
+            },
+            y2: {
+              type: 'linear',
+              position: 'right',
+              beginAtZero: false,
+              ticks: { color: varColor('--text') },
+              grid: { display: false }
+            },
+            x: {
+              ticks: { color: varColor('--text') },
+              grid: { display: false }
+            }
           },
-          legend: {
-            position: "top"
+          plugins: {
+            legend: { position: 'top', labels: { color: varColor('--text') } }
           }
         }
-      }
-    });
+      });
 
-    // Calorie Chart: Intake vs Expenditure
-    const calorieCtx = document.getElementById("calorieChart").getContext("2d");
-    const calorieChart = new Chart(calorieCtx, {
-      type: "line",
-      data: {
-        labels: labels,
-        datasets: [
-          {
-            label: "Calorie Intake",
-            data: sampleIntake,
-            borderColor: "#4A78C4",
-            backgroundColor: "rgba(74,120,196,0.1)",
-            fill: true,
-            tension: 0.3
-          },
-          {
-            label: "Calorie Expenditure",
-            data: sampleExp,
-            borderColor: "#FF4500",
-            backgroundColor: "rgba(255,69,0,0.1)",
-            fill: true,
-            tension: 0.3
-          }
-        ]
-      },
-      options: {
-        responsive: true,
-        scales: {
-          y: {
-            beginAtZero: false,
-            min: 1500,
-            max: 2600,
-            title: { display: true, text: "Calories (kcal)" }
-          }
-        },
-        plugins: {
-          tooltip: {
-            mode: "index",
-            intersect: false
-          },
-          legend: {
-            position: "top"
-          }
+      // HELPER: Retrieve CSS variable as color
+      function varColor(name) {
+        return getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+      }
+
+      // ────────────────────────────────────────────────────────────────────────────
+      // UPDATE CHART DATA ON INPUT
+      // ────────────────────────────────────────────────────────────────────────────
+      const weightInput = document.getElementById('weightInput');
+      const stepsInput = document.getElementById('stepsInput');
+      const updateBtn = document.getElementById('updateBtn');
+
+      updateBtn.onclick = () => {
+        const w = parseFloat(weightInput.value);
+        const s = parseInt(stepsInput.value);
+        if (isNaN(w) || isNaN(s)) {
+          showToast('Please enter valid numbers');
+          return;
         }
-      }
+        // Update Weight Chart
+        weightChart.data.datasets[0].data = Array(7).fill(w);
+        weightChart.update();
+        // Update Steps on Steps vs Sleep
+        stepsSleepChart.data.datasets[0].data = Array(7).fill(s);
+        stepsSleepChart.update();
+        showToast('Charts updated!');
+      };
+
+      // Additional Inputs: Sleep & Water can be added similarly if needed
+
     });
-
-    // Heart Rate Chart
-    const heartCtx = document.getElementById("heartRateChart").getContext("2d");
-    const heartRateChart = new Chart(heartCtx, {
-      type: "line",
-      data: {
-        labels: labels,
-        datasets: [
-          {
-            label: "Heart Rate (bpm)",
-            data: sampleHeart,
-            borderColor: "#00A7E1",
-            backgroundColor: "rgba(0,167,225,0.1)",
-            fill: true,
-            tension: 0.3
-          }
-        ]
-      },
-      options: {
-        responsive: true,
-        scales: {
-          y: {
-            beginAtZero: false,
-            min: 60,
-            max: 90,
-            title: { display: true, text: "BPM" }
-          }
-        },
-        plugins: {
-          tooltip: {
-            mode: "index",
-            intersect: false
-          },
-          legend: {
-            position: "top"
-          }
-        }
-      }
-    });
-
-    // ────────────────────────────────────────────────────────────────────────────
-    // UPDATE CHARTS BASED ON USER INPUT
-    // ────────────────────────────────────────────────────────────────────────────
-    document.getElementById("updateStatsBtn").onclick = () => {
-      const w = +document.getElementById("statWeight").value;
-      const s = +document.getElementById("statSteps").value;
-      const sl = +document.getElementById("statSleep").value;
-
-      // Update Health Chart
-      healthChart.data.datasets[0].data = Array(7).fill(w);
-      healthChart.data.datasets[1].data = Array(7).fill(s);
-      healthChart.update();
-
-      // Update Activity Chart
-      activityChart.data.datasets[0].data = Array(7).fill(s);
-      activityChart.data.datasets[1].data = Array(7).fill(sl);
-      activityChart.update();
-
-      showToast("Health metrics updated successfully.");
-    };
-
-    // Update Spend Stat (display only)
-    document.getElementById("statSpend").addEventListener("input", (e) => {
-      const spend = +e.target.value;
-      if (spend < 0) {
-        showToast("Spend cannot be negative.");
-        e.target.value = 0;
-      }
-    });
-  });
-</script>
-
-  
+  </script>
 </body>
 </html>
