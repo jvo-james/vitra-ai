@@ -34,7 +34,7 @@
     --radius: 0.75rem;
     --padding: 1rem;
     --transition: 0.3s ease;
-    --sidebar-width: 240px;
+    --sidebar-width: 280px;
     --sidebar-collapsed-width: 80px;
     --header-height: 64px;
     --shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
@@ -93,7 +93,7 @@
    flex-direction: column;
    transition: width var(--transition), transform var(--transition);
    z-index: 1000;
-   overflow: hidden; /* disable any scrolling */
+   overflow: hidden;
  }
   aside#sidebar.collapsed {
     width: var(--sidebar-collapsed-width);
@@ -133,7 +133,6 @@
     color: var(--text);
     font-weight: 500;
     transition: background var(--transition), transform var(--transition);
-    white-space: nowrap;    
   }
   aside#sidebar nav a.active i,
   aside#sidebar nav a:hover i {
@@ -145,10 +144,7 @@
     text-align: center;
     color: var(--primary-alt);
   }
-  aside#sidebar nav a span {
-    transition: opacity var(--transition);
-    word-break: break-word;
-  }
+ 
   aside#sidebar.collapsed nav a span {
     opacity: 0;
   }
@@ -161,17 +157,18 @@
   aside#sidebar nav a.active {
     font-weight: 700;
   }
-   aside#sidebar.collapsed nav a {
+ aside#sidebar.collapsed {
+    flex: 0 0 var(--sidebar-collapsed-width);
+  }
+aside#sidebar.collapsed .logo .logo-text,
+  aside#sidebar.collapsed nav a span {
+    display: none;
+  }
+  aside#sidebar.collapsed nav a {
     justify-content: center;
-    padding: 0.75rem 0;
   }
 
-  aside#sidebar.collapsed nav a:hover,
-  aside#sidebar.collapsed nav a.active {
-    background: var(--primary-alt);
-    color: #fff;
-    transform: none;
-  }
+ 
   #shrinkBtn {
     margin: 1rem auto;
     background: var(--primary);
