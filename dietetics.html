@@ -2039,6 +2039,36 @@ document.addEventListener('DOMContentLoaded', () => {
         .join("");
     }
 
+    //──────────────────────────────────────────────────────────────────────────────
+  // FUNCTION: addCloseCopyDownload(panel)
+  // Adds “Copy” and “Download” buttons after a generated response
+  //──────────────────────────────────────────────────────────────────────────────
+  function addCloseCopyDownload(panel) {
+    // Ensure we don’t insert duplicates
+    if (panel.querySelector(".tool-row")) return;
+
+    const toolRow = document.createElement("div");
+    toolRow.className = "tool-row";
+
+    // COPY button
+    const copyBtn = document.createElement("button");
+    copyBtn.className = "copy-btn";
+    copyBtn.type = "button";
+    copyBtn.title = "Copy response";
+    copyBtn.innerHTML = '<i class="fas fa-copy"></i>';
+    toolRow.append(copyBtn);
+
+    // DOWNLOAD button
+    const dlBtn = document.createElement("button");
+    dlBtn.className = "dl-btn";
+    dlBtn.type = "button";
+    dlBtn.title = "Download response";
+    dlBtn.innerHTML = '<i class="fas fa-download"></i>';
+    toolRow.append(dlBtn);
+
+    panel.append(toolRow);
+  }
+   
     // Render existing history
     chatHistory.forEach(m => {
       const ts = m.timestamp ? new Date(m.timestamp) : new Date();
@@ -2599,13 +2629,20 @@ Provide:
   const exportAllBtn = document.getElementById("exportData");
   exportAllBtn.addEventListener("click", () => {
     // Combine calorieChart and macroChart data into one CSV
+    const exportAllBtn = document.getElementById("exportData");
+  exportAllBtn.addEventListener("click", () => {
+    // Combine calorieChartInstance and macroChartInstance data into one CSV
     let csv = "Chart,Label,Value\n";
-    calorieChart.data.labels.forEach((lab, i) => {
-      csv += `"Calories","${lab}",${calorieChart.data.datasets[0].data[i]}\n`;
-    });
-    macroChart.data.labels.forEach((lab, i) => {
-      csv += `"Macro","${lab}",${macroChart.data.datasets[0].data[i]}\n`;
-    });
+    if (calorieChartInstance) {
+      calorieChartInstance.data.labels.forEach((lab, i) => {
+        csv += `"Calories","${lab}",${calorieChartInstance.data.datasets[0].data[i]}\n`;
+      });
+    }
+    if (macroChartInstance) {
+      macroChartInstance.data.labels.forEach((lab, i) => {
+        csv += `"Macro","${lab}",${macroChartInstance.data.datasets[0].data[i]}\n`;
+      });
+    }
     const blob = new Blob([csv], { type: "text/csv" });
     const a = document.createElement("a");
     a.href = URL.createObjectURL(blob);
