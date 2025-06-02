@@ -163,8 +163,8 @@
     bottom: var(--padding);
     left: 50%;
     transform: translateX(-50%);
-     max-width: 36px;
-  max-height: 36px;
+    width: 36px;
+height: 36px;
   aspect-ratio: 1 / 1;
     background: none;
     color: var(--primary);
@@ -358,8 +358,8 @@
   }
   .tool-row button {
     font-size: 0.85rem;
-    max-width: 1.6rem;
-    max-height: 1.6rem;
+ width: 1.6rem;
+ height: 1.6rem;
   aspect-ratio: 1 / 1;
     padding: 0.2rem;
     background: var(--surface);
@@ -497,8 +497,8 @@
     background: var(--surface);
     border: 1px solid var(--muted);
     border-radius: 50%;
-    max-width: 36px;
-  max-height: 36px;
+width: 36px;
+height: 36px;
   aspect-ratio: 1 / 1;
     display: flex;
     align-items: center;
@@ -586,8 +586,8 @@
     background: var(--primary);
     border: none;
     border-radius: 50%;
-    max-width: 36px;
-  max-height: 36px;
+    width: 36px;
+ height: 36px;
   aspect-ratio: 1 / 1;
     display: flex;
     align-items: center;
@@ -743,40 +743,7 @@
     transform: translateY(-2px);
     box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
   }
-#nt-form {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 1rem 1.5rem;
-  align-items: start;
-}
-#nt-form .other-input {
-  display: none;
-  grid-column: 1 / -1; 
-}
-#nt-form label {
-  margin-bottom: 0.25rem;
-  display: block;
-}
-  #pgx-form {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 1rem 1.5rem;
-  align-items: start;
-}
-  #pgx-form .other-input {
-  display: none;
-  grid-column: 1 / -1; /* full width */
-}
-@media (max-width: 480px) {
- #pgx-form {
-    grid-template-columns: 1fr;
-  }
- }
-  @media (max-width: 768px) {
- #pgx-form {
-    grid-template-columns: repeat(2, 1fr);
-  }
- }
+
   /*──────────────────────────────────────────────────────────────────────────────
     FOOTER
   ──────────────────────────────────────────────────────────────────────────────*/
@@ -1492,7 +1459,7 @@ html.dark .history-modal .history-content {
       <p class="chart-desc">
         This line chart dynamically reflects the average mood score each day. Hover to see exact values or export data via CSV.
       </p>
-      <button id="exportMoodStats" class="btn-primary">Export Mood Stats CSV</button>
+      <button id="exportMoodStats" class="button">Export Mood Stats CSV</button>
     </section>
     
     <!-- 3. Neurotransmitter Balance -->
@@ -1506,7 +1473,7 @@ html.dark .history-modal .history-content {
         <input type="range" id="ntMood" min="1" max="10" value="5"/>
         <div class="two-column-grid">
       <div>
-        <label for="ntSleep">Sleep Quality:</label>
+        <label for="ntSleep">Sleep Quality:</label><br>
         <select id="ntSleep" required>
           <option>Poor</option>
           <option>Fair</option>
@@ -1516,7 +1483,7 @@ html.dark .history-modal .history-content {
         </select>
         <input type="text" id="ntSleepOther" class="other-input hidden" placeholder="Please specify…"/>
 
-        <label for="ntAppetite">Appetite:</label>
+        <label for="ntAppetite">Appetite:</label><br>
         <select id="ntAppetite" required>
           <option>Low</option>
           <option>Normal</option>
@@ -1525,7 +1492,7 @@ html.dark .history-modal .history-content {
         </select>
         <input type="text" id="ntAppetiteOther" class="other-input hidden" placeholder="Please specify…"/>
 
-        <label for="ntAdherence">Medication Adherence:</label>
+        <label for="ntAdherence">Medication Adherence:</label><br>
         <select id="ntAdherence" required>
           <option>Poor</option>
           <option>Fair</option>
@@ -1535,7 +1502,7 @@ html.dark .history-modal .history-content {
         </select>
         <input type="text" id="ntAdherenceOther" class="other-input hidden" placeholder="Please specify…"/>
 
-        <label for="ntFocus">Focus Neurotransmitter:</label>
+        <label for="ntFocus">Focus Neurotransmitter:</label><br>
         <select id="ntFocus" required>
          <option>Serotonin</option>
             <option>Dopamine</option>
@@ -1601,7 +1568,7 @@ html.dark .history-modal .history-content {
         <label for="pgxWeight">Weight (kg):</label>
         <input type="number" id="pgxWeight" min="1"/>
 
-        <label for="pgxDrug">Drug:</label>
+        <label for="pgxDrug">Drug:</label><br>
          <select id="pgxDrug" required>
             <option>Clopidogrel</option>
             <option>Warfarin</option>
@@ -1617,7 +1584,7 @@ html.dark .history-modal .history-content {
           </select>
         <input type="text" id="pgxDrugOther" class="other-input hidden" placeholder="Please specify…"/>
 
-        <label for="pgxGene">Gene Variant:</label>
+        <label for="pgxGene">Gene Variant:</label><br>
         <select id="pgxGene" required>
             <option>CYP2C19*1</option>
             <option>CYP2C19*2</option>
@@ -2720,6 +2687,126 @@ You are a clinical research coordinator specializing in psychiatric trials. When
         addClose(panel);
         addTools(panel);
       }
+    })();
+    // ───────────────────────── Daily Mood Tracker ─────────────────────────────
+    (function() {
+      const form = document.getElementById("mood-form");
+      const panel = document.getElementById("moodPanel");
+      const moodRange = document.getElementById("moodRange");
+      const moodValue = document.getElementById("moodValue");
+      const triggersOther = document.getElementById("moodTriggersOther");
+      // (Note: remove any references to selfCare/selfCareOther here if you no longer have that field)
+      
+      moodRange.oninput = () => (moodValue.textContent = moodRange.value);
+
+      // “Other” for triggers
+      document.querySelectorAll('#moodTracker input[name="triggers"]').forEach(cb => {
+        cb.addEventListener("change", () => {
+          const anyOther = [...document.querySelectorAll('#moodTracker input[name="triggers"]:checked')]
+            .some(c => c.value === "Other");
+          if (anyOther) {
+            triggersOther.style.display = "block";
+            triggersOther.required = true;
+          } else {
+            triggersOther.style.display = "none";
+            triggersOther.required = false;
+          }
+        });
+      });
+
+      // ─── Submit handler ───────────────────────────────────────────────────
+      form.onsubmit = async e => {
+        e.preventDefault();
+        // Show the panel (unhide) and show "Analyzing…" spinner
+        panel.hidden = false;
+        panel.innerHTML = '<div class="result-content">Analyzing… <span class="spinner"></span></div>';
+
+        // Gather the data
+        const data = {
+          mood: moodRange.value,
+          emotions: [...document.querySelectorAll('#moodTracker input[name="emotions"]:checked')].map(c => c.value),
+          triggers: [...document.querySelectorAll('#moodTracker input[name="triggers"]:checked')]
+                     .map(c => c.value === "Other" ? triggersOther.value.trim() : c.value),
+          note: document.getElementById("moodNote").value.trim()
+          // (If you still had a selfCare field, include it here—but you said you removed it.)
+        };
+
+        try {
+          const aiReply = await callOpenAI([
+            {
+              role: "system",
+              content: `
+You are an advanced mental health AI specializing in daily mood analytics and personalized self-care recommendations. When given a “Daily Mood Entry,” do the following:
+
+• If any required field (mood score, at least one emotion) is missing, ask a clarifying question (e.g., “Please select at least one emotion.”).  
+• Analyze mood (1–10), selected emotions (e.g., “Anxious,” “Calm”), and triggers (e.g., “Work,” “Sleep”).  
+• Identify patterns or correlations (for example: “High stress at work correlates with low mood.”).  
+• Provide at least three tailored, evidence-based self-care strategies (e.g., “Try progressive muscle relaxation,” “Practice 5-minute mindfulness breathing,” “Consider scheduling a 15-minute walk after work”).  
+• Use empathetic, non-judgmental language—acknowledge feelings, normalize common struggles.  
+• If user mentions high-risk phrases (e.g., “suicidal,” “want to harm myself”), respond with a brief crisis-safe message (“I’m sorry you’re feeling this way. If you feel you might harm yourself, please reach out to 988 or a trusted professional immediately.”).  
+• Keep each reply under 200 words unless explicitly asked for more detail.  
+        `.trim()
+            },
+            { role: "user", content: `Daily Mood Entry:\n${JSON.stringify(data)}` }
+          ]);
+          // Replace panel content with the AI’s formatted HTML
+          panel.innerHTML = `<div class="result-content">${formatHTML(aiReply)}</div>`;
+          addClose(panel);
+          addTools(panel);
+          localStorage.setItem("moodPanel", panel.innerHTML);
+        } catch (err) {
+          panel.innerHTML = `<div class="result-content">😕 Something went wrong.</div>`;
+          addClose(panel);
+        }
+      };
+
+      // ─── Restore if previously saved ─────────────────────────────────────────
+      const savedMood = localStorage.getItem("moodPanel");
+      if (savedMood) {
+        panel.innerHTML = savedMood;
+        panel.hidden = false;
+        addClose(panel);
+        addTools(panel);
+      }
+
+      // ─── **NEW**: Make “Close”, “Copy” and “Download” buttons inside #moodPanel work immediately ─────────────────────
+      // We listen for any click within #moodPanel, then delegate:
+      panel.addEventListener("click", e => {
+        // (1) Close button
+        if (e.target.closest(".close-btn")) {
+          panel.hidden = true;
+          return;
+        }
+        // (2) Copy button
+        if (e.target.closest(".copy-btn")) {
+          const contentDiv = panel.querySelector(".result-content");
+          if (!contentDiv) return;
+          navigator.clipboard.writeText(contentDiv.innerText.trim());
+          const toast = document.createElement("div");
+          toast.className = "copy-toast";
+          toast.textContent = "Copied!";
+          document.body.append(toast);
+          setTimeout(() => toast.remove(), 1500);
+          return;
+        }
+        // (3) Download button
+        if (e.target.closest(".dl-btn")) {
+          const contentDiv = panel.querySelector(".result-content");
+          if (!contentDiv) return;
+          const text = contentDiv.innerText.trim();
+          const blob = new Blob([text], { type: "text/plain" });
+          const url = URL.createObjectURL(blob);
+          const a = document.createElement("a");
+          a.href = url;
+          a.download = "mood_analysis.txt";
+          document.body.append(a);
+          a.click();
+          URL.revokeObjectURL(url);
+          a.remove();
+          return;
+        }
+      });
+      // ─────────────────────────────────────────────────────────────────────────
     })();
 
     // ───────── Data Analytics & Charts ────────────────────────────────────────
