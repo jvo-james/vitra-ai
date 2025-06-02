@@ -2646,17 +2646,33 @@ Provide:
   //──────────────────────────────────────────────────────────────────────────────
   // UTILITY: SANITIZE & FORMAT MARKDOWN
   //──────────────────────────────────────────────────────────────────────────────
-  function sanitizeHTML(unsafe) {
+ function sanitizeHTML(unsafe) {
     if (!unsafe) return "";
     return unsafe
+      // escape HTML-sensitive characters first
       .replace(/&/g, "&amp;")
       .replace(/</g, "&lt;")
       .replace(/>/g, "&gt;")
+
+      // headings: #### → <h4>…</h4>, ### → <h3>…</h3>, ## → <h2>…</h2>, # → <h1>…</h1>
+      .replace(/^####\s*(.+)$/gm, "<h4>$1</h4>")
+      .replace(/^###\s*(.+)$/gm, "<h3>$1</h3>")
+      .replace(/^##\s*(.+)$/gm, "<h2>$1</h2>")
+      .replace(/^#\s*(.+)$/gm,  "<h1>$1</h1>")
+
+      // bold, italic, inline code
       .replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>")
-      .replace(/\*(.+?)\*/g, "<em>$1</em>")
-      .replace(/`([^`]+)`/g, "<code>$1</code>")
+      .replace(/\*(.+?)\*/g,     "<em>$1</em>")
+      .replace(/`([^`]+)`/g,    "<code>$1</code>")
+
+      // split on two (or more) newlines, wrap each chunk in <p>…</p> unless it's already a heading
       .split(/\n{2,}/)
-      .map(p => `<p>${p.trim()}</p>`)
+      .map(p => {
+        const trimmed = p.trim();
+        // if it already begins with <h1>… or <h2>… or <h3>… or <h4>…, leave it
+        if (/^<h[1-4]>/.test(trimmed)) return trimmed;
+        return `<p>${trimmed}</p>`;
+      })
       .join("");
   }
 });
