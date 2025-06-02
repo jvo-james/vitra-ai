@@ -81,56 +81,59 @@
   /*──────────────────────────────────────────────────────────────────────────────
     SIDEBAR
   ──────────────────────────────────────────────────────────────────────────────*/
-  aside#sidebar {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: var(--sidebar-width);
-    height: 100vh;
-    background: var(--surface);
-    box-shadow: var(--shadow);
-    display: flex;
-    flex-direction: column;
-    transition: width var(--transition), transform var(--transition);
-    z-index: 1000;
-    overflow-x: hidden;
-  }
+   aside#sidebar {
+   position: fixed;
+   top: 0;
+   left: 0;
+   width: var(--sidebar-width);
+   height: 100vh;
+   background: var(--surface);
+   box-shadow: var(--shadow);
+   display: flex;
+   flex-direction: column;
+   transition: width var(--transition), transform var(--transition);
+   z-index: 1000;
+   overflow: hidden; /* disable any scrolling */
+ }
   aside#sidebar.collapsed {
     width: var(--sidebar-collapsed-width);
   }
-  aside#sidebar .brand {
+   aside#sidebar .logo {
     display: flex;
     align-items: center;
-    gap: 0.75rem;
-    padding: var(--padding);
-    font-size: 1.4rem;
+    gap: 0.5rem;
+    padding: 1rem;
+    font-size: 1.25rem;
     font-weight: 700;
     color: var(--primary-alt);
   }
-  aside#sidebar .brand i {
-    font-size: 1.8rem;
-    color: var(--primary-alt);
+  aside#sidebar .logo svg {
+    width: 2rem;
+    height: 2rem;
+    flex-shrink: 0;
   }
-  aside#sidebar .brand span {
+  aside#sidebar .logo .logo-text {
+    font-size: 1.25rem;
     transition: opacity var(--transition);
   }
-  aside#sidebar.collapsed .brand span {
+  aside#sidebar.collapsed .logo .logo-text {
     opacity: 0;
   }
   aside#sidebar nav {
     margin-top: 2rem;
     flex: 1;
-    overflow-y: auto;
+    overflow: hidden;
   }
   aside#sidebar nav a {
     display: flex;
     align-items: center;
-    gap: 1rem;
-    padding: 0.75rem var(--padding);
+    gap: 0.75rem;
+    padding: 0.75rem 1rem;
     border-radius: var(--radius);
     color: var(--text);
     font-weight: 500;
     transition: background var(--transition), transform var(--transition);
+    white-space: nowrap;
   }
   aside#sidebar nav a i {
     font-size: 1.2rem;
@@ -154,7 +157,7 @@
     font-weight: 700;
   }
   #shrinkBtn {
-    margin: var(--padding) auto;
+    margin: 1rem auto;
     background: var(--primary);
     color: #fff;
     border-radius: 50%;
@@ -343,11 +346,17 @@
     margin-top: 1.5rem; /* space for close button */
     color: var(--text);
     line-height: 1.5;
+    margin-bottom: 2rem;
+  }
+  html.dark .response {
+    background: rgba(60, 60, 60, 0.9);
+  }
+  html.dark .response .result-content {
+    color: var(--text);
   }
   .tool-row {
-    position: absolute;
-    bottom: var(--padding);
-    right: var(--padding);
+    position: static;
+   margin-top: 0.5rem;
     display: flex;
     gap: 0.5rem;
   }
@@ -431,24 +440,27 @@
   #hero .hero-tip {
     position: relative;
     z-index: 2;
-    background: rgba(255, 255, 255, 0.9);
-    border-radius: var(--radius);
-    padding: var(--padding);
+    background: transparent;
+    border-radius: 0;
+    padding: 0;
     max-width: 600px;
     margin: 0 auto 2rem;
-    box-shadow: var(--shadow);
+    box-shadow: none;
   }
   #hero .hero-tip h3 {
     display: flex;
     align-items: center;
     gap: 0.5rem;
-    font-size: 1.2rem;
-    color: var(--primary-alt);
-    margin-bottom: 0.5rem;
+    font-size: 1.3rem;
+    color: #fff; 
+    margin-bottom: 0.25rem;
+    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.7);
   }
   #hero .hero-tip p {
     font-size: 1rem;
-    color: var(--text);
+    color: #fff; 
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.6);
+    margin-bottom: 1rem;
   }
   /* Nationality input smaller and at bottom */
   #nat-form {
@@ -555,13 +567,15 @@
     bottom: -1.2rem;
     right: 0.8rem;
   }
-  .chat-input {
+  
+   .chat-input-row {
     display: flex;
+    align-items: center;
     gap: 0.5rem;
-    margin-top: 0.5rem;
+    margin-top: 0.75rem;
   }
-  .chat-input input {
-    flex: 1 1 100%;
+  .chat-input-row input {
+    flex: 1;
     padding: 0.8rem 1rem;
     border: 1px solid var(--muted);
     border-radius: var(--radius);
@@ -570,12 +584,12 @@
     font-size: 0.95rem;
     transition: border-color var(--transition), box-shadow var(--transition);
   }
-  .chat-input input:focus {
+  .chat-input-row input:focus {
     outline: none;
     border-color: var(--primary-alt);
     box-shadow: 0 0 8px var(--primary-alt);
   }
-  .chat-input button {
+  .chat-input-row button {
     background: var(--primary);
     border-radius: 50%;
     width: 40px;
@@ -587,11 +601,11 @@
     font-size: 1rem;
     transition: background var(--transition), transform var(--transition);
   }
-  .chat-input button:hover {
+  .chat-input-row button:hover {
     background: var(--primary-alt);
     transform: scale(1.1);
   }
-  #chatHint {
+ #chatHint {
     font-size: 0.9rem;
     color: var(--muted);
     margin-top: 0.5rem;
@@ -635,6 +649,7 @@
     display: flex;
     flex-direction: column;
     transition: box-shadow var(--transition);
+    min-height: 300px; 
   }
   .chart-card:hover {
     box-shadow: 0 6px 24px rgba(0, 0, 0, 0.1);
@@ -642,7 +657,8 @@
   .chart-card canvas {
     flex: 1 1 auto;
     width: 100% !important;
-    height: 250px !important;
+    height: 100% !important;
+    min-height: 250px !important;
   }
   .chart-card figcaption {
     padding: 0.5rem 0.75rem;
@@ -873,11 +889,17 @@
     background: #fff;
     color: var(--text);
     font-size: 1rem;
-    transition: border-color .2s, box-shadow .2s;
+ transition: border-color .2s, box-shadow .2s, background .2s, color .2s;
   }
   input:focus, textarea:focus, select:focus {
     border-color: var(--secondary);
     box-shadow: 0 0 0 3px rgba(195, 155, 211, 0.2);
+    background: var(--accent);
+  }
+  html.dark input, html.dark textarea, html.dark select {
+    background: var(--surface);
+    color: var(--text);
+    border-color: var(--muted);
   }
   textarea { resize: vertical; }
   button.btn {
@@ -990,10 +1012,10 @@
   /*──────────────────────────────────────────────────────────────────────────────
     STICKERS (DECORATIVE ICONS)
   ──────────────────────────────────────────────────────────────────────────────*/
-  .sticker {
+  .hero-bg-icon {
     position: absolute;
-    font-size: 4rem;
-    opacity: 0.15;
+    font-size: 6rem; /* bigger icons */
+    opacity: 0.14;
     transition: transform 0.3s, opacity 0.3s;
     color: var(--primary-alt);
   }
@@ -1001,7 +1023,6 @@
     opacity: 0.3;
     transform: scale(1.1) rotate(0deg);
   }
-  /* (Positions will be inlined as style="" on each <i> element) */
 
   /*──────────────────────────────────────────────────────────────────────────────
     MEET A NUTRITION EXPERT SECTION
@@ -1176,7 +1197,7 @@
 <body>
   <!-- SIDEBAR -->
   <aside id="sidebar">
-    <div class="logo">
+   <div class="logo">
       <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" fill="var(--primary)">
         <polygon points="10,10 25,90 50,40 75,90 90,10 65,10 50,70 35,10"/>
       </svg>
@@ -1247,11 +1268,11 @@
         </div>
       </div>
       <!-- SUBTLE BACKGROUND ICONS (foody style) -->
-      <i class="fas fa-apple-alt hero-bg-icon" style="top: 6%; left: 8%;"></i>
-      <i class="fas fa-carrot hero-bg-icon" style="top: 5%; right: 10%;"></i>
-      <i class="fas fa-lemon hero-bg-icon" style="bottom: 10%; left: 12%;"></i>
-      <i class="fas fa-fish hero-bg-icon" style="bottom: 8%; right: 15%;"></i>
-      <i class="fas fa-bread-slice hero-bg-icon" style="top: 45%; left: 45%;"></i>
+       <i class="fas fa-apple-alt hero-bg-icon" style="top: 8%; left: 5%;"></i>
+    <i class="fas fa-carrot hero-bg-icon" style="top: 15%; right: 12%;"></i>
+    <i class="fas fa-lemon hero-bg-icon" style="bottom: 15%; left: 10%;"></i>
+    <i class="fas fa-fish hero-bg-icon" style="bottom: 12%; right: 18%;"></i>
+    <i class="fas fa-bread-slice hero-bg-icon" style="top: 50%; left: 40%;"></i>
     </section>
 
     <!-- 1. User Nationality (required) -->
@@ -1267,10 +1288,7 @@
         </div>
         <button type="submit" class="btn-primary">Save Nationality</button>
       </form>
-      <div id="natResult" class="response" hidden>
-        <button class="close-btn" aria-label="Close result">×</button>
-        <div class="result-content"></div>
-      </div>
+      
     </section>
 
     <!-- 2. Nutrition Chatbot -->
@@ -1335,7 +1353,7 @@
             <option>High</option>
           </select>
         </div>
-        <button type="submit" class="btn-primary"><i class="fas fa-utensils"></i> Generate Plan</button>
+ <button type="button" id="genPlan" class="btn-primary"><i class="fas fa-utensils"></i> Generate Plan</button>
       </form>
       <div id="planResult" class="response" hidden>
         <button class="close-btn" aria-label="Close result">×</button>
@@ -1368,7 +1386,7 @@
             <option>servings</option>
           </select>
         </div>
-        <button type="submit" class="btn-primary"><i class="fas fa-chart-bar"></i> Analyze Nutrition</button>
+    <button type="button" id="analyzeNutri" class="btn-primary"><i class="fas fa-chart-bar"></i> Analyze Nutrition</button>
       </form>
       <div id="nutriResult" class="response" hidden>
         <button class="close-btn" aria-label="Close result">×</button>
@@ -1415,7 +1433,7 @@
           <label for="maxTime">Max Prep Time:</label>
           <input type="number" id="maxTime" min="5" max="180" value="30"/> minutes
         </div>
-        <button type="submit" class="btn-primary"><i class="fas fa-hamburger"></i> Get Recipes</button>
+    <button type="button" id="getRecipes" class="btn-primary"><i class="fas fa-hamburger"></i> Get Recipes</button>
       </form>
       <div id="recipeResult" class="response" hidden>
         <button class="close-btn" aria-label="Close result">×</button>
@@ -1454,7 +1472,7 @@
           <label for="dietOverview">Brief Diet Overview:</label>
           <textarea id="dietOverview" rows="3" placeholder="e.g. Mostly rice, occasional veggies…" required></textarea>
         </div>
-        <button type="submit" class="btn-primary"><i class="fas fa-stethoscope"></i> Scan Deficiency</button>
+    <button type="button" id="scanDef" class="btn-primary"><i class="fas fa-stethoscope"></i> Scan Deficiency</button>
       </form>
       <div id="defResult" class="response" hidden>
         <button class="close-btn" aria-label="Close result">×</button>
@@ -1492,7 +1510,7 @@
           <label for="context">Context:</label>
           <input id="context" type="text" placeholder="e.g. routine check…" required/>
         </div>
-        <button type="submit" class="btn-primary"><i class="fas fa-biohazard"></i> Run Radar</button>
+    <button type="button" id="runRisk" class="btn-primary"><i class="fas fa-biohazard"></i> Run Radar</button>
       </form>
       <div id="riskResult" class="response" hidden>
         <button class="close-btn" aria-label="Close result">×</button>
@@ -1579,7 +1597,7 @@
             <input class="other-input" placeholder="Specify…" style="display:none;"/>
           </div>
         </fieldset>
-        <button type="submit" class="btn-primary"><i class="fas fa-running"></i> Generate Plan</button>
+    <button type="button" id="runFitness" class="btn-primary"><i class="fas fa-running"></i> Generate Plan</button>
       </form>
       <div id="fitnessResult" class="response" hidden>
         <button class="close-btn" aria-label="Close result">×</button>
@@ -1651,7 +1669,7 @@
             <input class="other-input" placeholder="Specify…" style="display:none;"/>
           </div>
         </fieldset>
-        <button type="submit" class="btn-primary"><i class="fas fa-flask"></i> Run Suite</button>
+   <button type="button" id="runPharma" class="btn-primary"><i class="fas fa-flask"></i> Run Suite</button>
       </form>
       <div id="pharmaResult" class="response" hidden>
         <button class="close-btn" aria-label="Close result">×</button>
@@ -1682,7 +1700,7 @@
           <label for="foodPref">Food Preferences (comma-sep):</label>
           <input id="foodPref" type="text" placeholder="e.g. Jollof rice, Pizza, Burger"/>
         </div>
-        <button type="submit" class="btn-primary"><i class="fas fa-stethoscope"></i> Get Advice</button>
+    <button type="button" id="runSymptom" class="btn-primary"><i class="fas fa-stethoscope"></i> Get Advice</button>
       </form>
       <div id="symptomResult" class="response" hidden>
         <button class="close-btn" aria-label="Close result">×</button>
@@ -1829,15 +1847,17 @@ document.addEventListener('DOMContentLoaded', () => {
     "Add a handful of leafy greens to every meal for extra fiber and vitamins.",
     "Start your day with a high‐protein breakfast to stay fuller longer.",
     "Swap sugary drinks for infused water with fresh fruits and herbs.",
-    "Choose whole grains (brown rice, quinoa) instead of refined grains.",
+    "Choose whole grains instead of refined grains.",
     "Include a colorful variety of vegetables on your plate each day.",
     "Snack on nuts and seeds for healthy fats and sustained energy.",
-    "Rotate your proteins: try beans, lentils, tofu, and fish across the week.",
+    "Rotate your proteins: try beans, lentils, meat, and fish across the week.",
     "Cook with olive oil instead of butter to boost heart‐healthy monounsaturated fats.",
     "Portion your meals: use a smaller plate to help control serving sizes.",
     "Stay hydrated—aim for at least 8 cups of water daily."
   ];
   function displayRandomTip() {
+    const existing = document.getElementById("heroTip");
+    if (existing) existing.remove();
     const tipArea = document.createElement("div");
     tipArea.id = "heroTip";
     tipArea.className = "hero-tip";
@@ -1846,11 +1866,8 @@ document.addEventListener('DOMContentLoaded', () => {
       <h3><i class="fas fa-lightbulb"></i> Today’s Nutrition Tip</h3>
       <p>${nutritionTips[idx]}</p>
     `;
-    const heroSection = document.getElementById("hero");
-    // Insert below hero-actions
-    const actions = heroSection.querySelector(".hero-actions");
-    actions.insertAdjacentElement("afterend", tipArea);
-  }
+    document.querySelector("#hero .hero-actions").insertAdjacentElement("afterend", tipArea);
+ }
   displayRandomTip();
 
   //──────────────────────────────────────────────────────────────────────────────
@@ -1863,56 +1880,12 @@ document.addEventListener('DOMContentLoaded', () => {
   natForm.addEventListener("submit", async (e) => {
     e.preventDefault();
     const val = natInput.value.trim();
-    if (!val) return showToast("Please enter your nationality.");
+     if (!val) return showToast("Please enter your nationality.");
     userNationality = val;
     localStorage.setItem("userNationality", val);
-    const resultPanel = document.getElementById("natResult");
-    resultPanel.hidden = false;
-    resultPanel.querySelector(".result-content").textContent = `Nationality set to ${val}!`;
-    addCloseCopyDownload(resultPanel);
+    showToast(`Nationality set to ${val}!`);
   });
-  //──────────────────────────────────────────────────────────────────────────────
-  // HELPER: ADD close, copy, download TO RESPONSE PANELS
-  //──────────────────────────────────────────────────────────────────────────────
-  function addCloseCopyDownload(panel) {
-    if (!panel) return;
-    // Close button
-    if (!panel.querySelector(".close-btn")) {
-      const btn = document.createElement("button");
-      btn.className = "close-btn";
-      btn.setAttribute("aria-label", "Close result");
-      btn.textContent = "×";
-      btn.onclick = () => (panel.hidden = true);
-      panel.prepend(btn);
-    }
-    // Tool row
-    if (!panel.querySelector(".tool-row")) {
-      const tools = document.createElement("div");
-      tools.className = "tool-row";
-      tools.innerHTML = `
-        <button class="copy-btn" title="Copy"><i class="fas fa-copy"></i></button>
-        <button class="dl-btn" title="Download"><i class="fas fa-download"></i></button>
-      `;
-      panel.append(tools);
-      const contentDiv = panel.querySelector(".result-content");
-      tools.querySelector(".copy-btn").onclick = () => {
-        navigator.clipboard.writeText(contentDiv.innerText || "");
-        showToast("Copied!");
-      };
-      tools.querySelector(".dl-btn").onclick = () => {
-        const text = contentDiv.innerText || "";
-        const blob = new Blob([text], { type: "text/plain" });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement("a");
-        a.href = url;
-        a.download = "response.txt";
-        document.body.append(a);
-        a.click();
-        URL.revokeObjectURL(url);
-        a.remove();
-      };
-    }
-  }
+  
 
   //──────────────────────────────────────────────────────────────────────────────
   // “OTHER” INPUT REVEAL FOR SELECTS
