@@ -2283,6 +2283,7 @@ When responding to user questions:
         panel.classList.remove("loading");
         panel.querySelector(".result-content").innerHTML = sanitizeHTML(aiReply);
         addCloseCopyDownload(panel);
+        localStorage.setItem(panelId, panel.querySelector(".result-content").innerHTML);
       } catch (err) {
         panel.classList.remove("loading");
         panel.querySelector(
@@ -2291,6 +2292,7 @@ When responding to user questions:
           ? "⚠️ Server busy—please try again."
           : `⚠️ ${err.message}`;
         addCloseCopyDownload(panel);
+ localStorage.setItem(panelId, panel.querySelector(".result-content").innerHTML);
 
       }
     });
@@ -2306,14 +2308,22 @@ wireModule("genPlan",
   ["calories", "dietType", "allergyList", "budget"],
   ["calories", "dietType"],
   `
-You are a registered Dietitian AI. Given the user’s daily calorie target, diet type (if they chose “Other,” use exactly the custom text they provided), allergies/intolerances, and budget, generate a detailed 7-day meal plan including:
-  • Macronutrient breakdowns
-  • A complete shopping list
-  • Simple, easy-to-follow recipes
+You will receive user inputs as lines in exactly this format (one per line):
+  calories: <daily_calorie_number>
+  dietType: <diet choice or custom text>
+  allergyList: <comma-separated list>
+  budget: <Low|Medium|High>
 
-• Do NOT ever output the single word “Other.” If the user selected “Other,” substitute the user’s exact text instead of “Other.”
-• Offer culturally relevant options based on the user’s nationality whenever possible.
-  `.trim()
+Parse each field exactly by its label (e.g. “calories: 2000”), then produce:
+  • A detailed 7-day meal plan with macronutrient breakdowns
+  • A complete shopping list
+  • Step-by-step recipes
+
+Rules:
+• If dietType was “Other,” do NOT output “Other.” Instead, use the exact custom text provided.
+• If allergyList includes “Other,” use the exact custom text instead.
+• Tailor all suggestions to the user’s nationality when possible.
+`.trim()
 );
 
 // 2. Nutrient Analyzer
@@ -2321,14 +2331,20 @@ wireModule("analyzeNutri",
   ["foodLog", "unitSelect"],
   ["foodLog"],
   `
-You are a Nutrition Scientist AI. Analyze the user’s food log and their chosen unit (if they selected “Other,” use that custom text verbatim). Produce a comprehensive macro- and micronutrient breakdown with:
+You will receive user inputs as lines in exactly this format (one per line):
+  foodLog: <ingredients or meal log text>
+  unitSelect: <grams|pieces|cups|tablespoons|servings|custom unit>
+
+Parse each field by its label (e.g. “foodLog: 200g rice, 1 egg, spinach…”). Then produce:
+  • A full macro‐ and micronutrient breakdown
   • Total amounts and percentages
   • Commentary on adequacy or imbalance
-  • Suggestions for balancing deficiencies or excesses
+  • Suggestions for correcting deficiencies or excesses
 
-• Do NOT ever output “Other.” If the user’s unit was “Other,” use their exact custom unit name instead.
-• Frame recommendations using the user’s nationality to reference typical local foods.
-  `.trim()
+Rules:
+• If unitSelect was “Other,” do NOT output “Other.” Use the exact custom text.
+• Reference the user’s nationality for local food examples.
+`.trim()
 );
 
 // 3. Recipe Recommender
@@ -2336,15 +2352,22 @@ wireModule("getRecipes",
   ["pantry", "cuisineType", "recipeDifficulty", "maxTime"],
   ["pantry"],
   `
-You are a Culinary AI Chef. Given the user’s pantry items, chosen cuisine style (if “Other,” substitute exactly what they typed), difficulty level, and maximum prep time, recommend three original recipes that include:
+You will receive user inputs as lines in exactly this format (one per line):
+  pantry: <comma-separated pantry items>
+  cuisineType: <cuisine style or custom text>
+  recipeDifficulty: <Easy|Medium|Advanced>
+  maxTime: <number representing minutes>
+
+Parse each field by its label (e.g. “pantry: Rice, Beans, Plantain”). Then recommend three original recipes that include:
   • Full ingredient lists
   • Step-by-step instructions
   • Estimated cooking times
-  • Dietary analysis (macros, major micronutrients)
-  • Local ingredient substitutions based on the user’s nationality
+  • Nutritional breakdown (macros and major micronutrients)
+  • Local ingredient substitutes based on the user’s nationality
 
-• Do NOT ever output “Other.” If the user chose “Other” for “cuisineType,” use their exact custom text instead.
-  `.trim()
+Rules:
+• If cuisineType was “Other,” do NOT output “Other.” Use the exact custom text instead.
+`.trim()
 );
 
 // 4. Deficiency Risk Scanner
@@ -2352,15 +2375,20 @@ wireModule("scanDef",
   ["symptoms", "dietOverview"],
   ["symptoms"],
   `
-You are a Clinical Dietitian AI. Identify potential nutrient deficiencies based on the user’s selected symptoms (if they checked “Other,” include their exact text) and their brief diet overview. Then:
-  • Rank the likely deficiencies in order of probability (e.g., iron deficiency, vitamin B12)
-  • Provide reasoning for each ranking
-  • Offer dietary sources or supplement suggestions
-  • Suggest simple meal modifications to address each deficiency
+You will receive user inputs as lines in exactly this format (one per line):
+  symptoms: <comma-separated or multiple checked symptoms; “Other” may be followed by custom text>
+  dietOverview: <brief description of current diet>
 
-• Do NOT output “Other.” If the user typed a custom symptom, include that exact text instead.
-  Tailor all suggestions to the user’s nationality and typical regional diet.
-  `.trim()
+Parse each field by its label (e.g. “symptoms: Fatigue, Hair Loss”). Then:
+  • Rank likely nutrient deficiencies in order of probability (e.g., iron, B12)
+  • Provide reasoning for each ranking
+  • List dietary sources or supplement suggestions
+  • Suggest simple meal tweaks to address each deficiency
+
+Rules:
+• If “Other” appears in symptoms, use the exact custom text instead of the word “Other.”
+• Tailor all suggestions to the user’s nationality and regional diet.
+`.trim()
 );
 
 // 5. Metabolomic Risk Radar
@@ -2368,14 +2396,22 @@ wireModule("runRisk",
   ["riskFrom", "riskTo", "biomarkers", "conditions", "context"],
   ["riskFrom", "riskTo", "biomarkers", "conditions", "context"],
   `
-You are a Metabolomic Health Analyst AI. Analyze the user’s specified date range (riskFrom → riskTo), biomarkers (e.g., “glucose, LDL”; if “Other,” use their exact text), diagnosed conditions (if “Other,” use their exact text), and context (if “Other,” use their exact text). Perform the following:
-  • Generate a detailed radar-chart interpretation of biomarker trends
-  • Highlight any predictive health alerts (e.g., “glucose trending upward”)
-  • Provide targeted dietary adjustments using local foods based on the user’s nationality
-  • Recommend relevant local testing resources for follow-up
+You will receive user inputs as lines in exactly this format (one per line):
+  riskFrom: <YYYY-MM-DD>
+  riskTo: <YYYY-MM-DD>
+  biomarkers: <comma-separated biomarkers, e.g. “glucose, LDL”; “Other” may follow custom text>
+  conditions: <comma-separated conditions or “Other”>
+  context: <free-text context or “Other”>
 
-• Do NOT ever output “Other.” Whenever the user’s input was “Other,” substitute the precise custom text they provided.
-  `.trim()
+Parse each field exactly by its label. Then:
+  • Generate a detailed radar‐chart interpretation of biomarker trends
+  • Highlight predictive alerts (e.g., “glucose trending upward”)
+  • Suggest targeted dietary adjustments using local foods (consider nationality)
+  • Recommend local testing resources for follow‐up
+
+Rules:
+• If any field’s value is “Other,” replace it with the exact custom text provided.
+`.trim()
 );
 
   //──────────────────────────────────────────────────────────────────────────────
@@ -2427,23 +2463,25 @@ wireModule("runFitness",
   ["fitGoal", "fitFreq", "blendIngredients", "carbDate", "intensity", "crpLevel", "nutraPref"],
   ["fitGoal", "fitFreq"],
   `
-You are a Certified Sports Nutritionist AI. Based on the user’s:
-  • Workout goal (if “Other,” use their exact wording)
-  • Weekly workout frequency
-  • Available ingredients for pre/post-workout blends (if “Other,” use their exact text)
-  • Carb-timing start date
-  • Training intensity
-  • CRP / CK lab values
-  • Nutraceutical preference (if “Other,” use their exact text)
-Construct a complete fitness nutrition plan that includes:
-  • Balanced macronutrient targets
+You will receive user inputs as lines in exactly this format (one per line):
+  fitGoal: <workout goal or custom text>
+  fitFreq: <1–2|3–4|5–7>
+  blendIngredients: <comma-separated ingredients; “Other” may follow custom text>
+  carbDate: <YYYY-MM-DD>
+  intensity: <Low|Moderate|High>
+  crpLevel: <number in mg/L>
+  nutraPref: <nutraceutical preference or custom text>
+
+Parse each field by its exact label. Then construct:
+  • A balanced macronutrient plan
   • Pre- and post-workout blend recipes
   • Recovery guidelines for inflammation
   • Monitoring tips for CRP / CK levels
 
-• Do NOT ever output “Other.” If any field was “Other,” insert exactly what they typed instead.
-  Adjust all guidance for the user’s nationality (e.g., local supplement availability).
-  `.trim()
+Rules:
+• If any field’s value is “Other,” replace it with the exact custom text provided.
+• Tailor all guidance to the user’s nationality.
+`.trim()
 );
 
 // 7. Pharma-Integrated Nutrient Suite
@@ -2451,23 +2489,24 @@ wireModule("runPharma",
   ["medList", "foodList", "compoundGoal", "doseFreq", "scheduleNotes", "cohortSelect"],
   ["medList"],
   `
-You are a Pharmacist-Dietitian AI. Analyze potential drug–nutrient interactions given the user’s:
-  • Medications (if “Other,” use exact text)
-  • Food items (if “Other,” use exact text)
-  • Desired compounding goal (if “Other,” use exact text)
-  • Dosage frequency (if “Other,” use exact text)
-  • Custom schedule notes (free text)
-  • Cohort to compare (if “Other,” use exact text)
+You will receive user inputs as lines in exactly this format (one per line):
+  medList: <comma-separated medications or custom text>
+  foodList: <comma-separated foods or custom text>
+  compoundGoal: <desired outcome or custom text>
+  doseFreq: <frequency or custom text>
+  scheduleNotes: <free-text notes>
+  cohortSelect: <cohort comparison or custom text>
 
-Do the following:
-  • Identify any critical drug-nutrient interactions
-  • Provide compounding suggestions to achieve the desired outcome
-  • Create a dosing schedule that optimizes nutrient absorption
-  • Generate outcome analytics comparing the specified cohort (e.g., diet-only vs diet+meds)
+Parse each field by its exact label. Then:
+  • Identify critical drug–nutrient interactions
+  • Provide compounding suggestions
+  • Create an optimized dosing schedule
+  • Generate outcome analytics comparing the chosen cohort
 
-• Do NOT output “Other.” Replace every “Other” selection with exactly what the user typed.
-  Tailor all advice to their nationality and local healthcare guidelines.
-  `.trim()
+Rules:
+• If any field value is “Other,” replace it with the exact custom text provided.
+• Tailor all advice to the user’s nationality and local guidelines.
+`.trim()
 );
 
 // 8. Symptom-to-Treatment Advisor
@@ -2475,18 +2514,20 @@ wireModule("runSymptom",
   ["sympAge", "sympDesc", "foodPref"],
   ["sympAge", "sympDesc"],
   `
-You are a Medical Nutrition Therapist AI. Based on:
-  • The user’s age
-  • The symptom description (if they typed “Other,” use their exact text)
-  • Their food preferences (if “Other,” use exact text)
-Provide:
+You will receive user inputs as lines in exactly this format (one per line):
+  sympAge: <age number>
+  sympDesc: <description of symptoms or custom text>
+  foodPref: <comma-separated food preferences or custom text>
+
+Parse each field by its exact label. Then provide:
   • Possible diagnoses or conditions
   • Over-the-counter treatment suggestions
-  • Tailored food and meal recommendations using local cuisine
-  • Advice on when to seek professional medical care
+  • Tailored food/meal recommendations using local cuisine
+  • Advice on when to seek medical care
 
-• Do NOT output “Other.” If any input field was “Other,” substitute the exact text the user provided.
-  `.trim()
+Rules:
+• If any field’s value is “Other,” replace it with the exact custom text provided.
+`.trim()
 );
 
   //──────────────────────────────────────────────────────────────────────────────
@@ -2625,9 +2666,12 @@ Provide:
     const rp = e.target.closest(".response");
     if (!rp) return;
     if (e.target.closest(".close-btn")) {
-      rp.hidden = true;
-      return;
-    }
+     // remove this panel’s saved response
+     const panelId = rp.id;
+     localStorage.removeItem(panelId);
+     rp.hidden = true;
+     return;
+   }
     if (e.target.closest(".copy-btn")) {
       const txt = rp.querySelector(".result-content").innerText;
       navigator.clipboard.writeText(txt).then(() => showToast("Copied!"));
@@ -2675,6 +2719,31 @@ Provide:
       })
       .join("");
   }
+
+   //──────────────────────────────────────────────────────────────────────────────
+  // On load: restore any saved module responses
+  //──────────────────────────────────────────────────────────────────────────────
+  const modulePanels = [
+    "planResult",
+    "nutriResult",
+    "recipeResult",
+    "defResult",
+    "riskResult",
+    "fitnessResult",
+    "pharmaResult",
+    "symptomResult"
+  ];
+  modulePanels.forEach(panelId => {
+    const saved = localStorage.getItem(panelId);
+    if (saved) {
+      const panel = document.getElementById(panelId);
+      if (panel) {
+        panel.hidden = false;
+        panel.querySelector(".result-content").innerHTML = saved;
+        addCloseCopyDownload(panel);
+      }
+    }
+  });
 });
 </script>
 
