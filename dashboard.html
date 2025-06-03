@@ -60,11 +60,10 @@
       min-height: 100vh;
       overflow-x: hidden;
     }
- /* ===== Replace old .sidebar rules with these ===== */
 .sidebar {
   position: fixed;
   top: 0;
-  left: -260px;       /* initially hidden off‐screen */
+  left: -260px;      
   height: 100vh;
   width: 260px;
   background: var(--surface);
@@ -81,7 +80,6 @@
 html.dark .sidebar {
   box-shadow: 2px 0 12px var(--shadow-dark);
 }
-/* Accent strip on left edge */
 .sidebar::before {
   content: "";
   position: absolute;
@@ -94,14 +92,18 @@ html.dark .sidebar {
   border-bottom-right-radius: 4px;
 }
 .sidebar .logo {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.5rem;
-  font-size: 1.5rem;
-  font-weight: 700;
-  color: var(--primary);
-}
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    font-size: 1rem; 
+    font-weight: 700;
+    color: var(--primary);
+  }
+  .sidebar .logo svg {
+    width: 1.5rem;  
+    height: 1.5rem; 
+  }
 .sidebar nav {
   margin-top: 2rem;
   display: flex;
@@ -133,7 +135,6 @@ html.dark .sidebar {
 .sidebar nav a.active i {
   color: var(--surface);
 }
-/* Adjust text size slightly */
 .sidebar nav a span {
   font-size: 0.95rem;
 }
@@ -491,11 +492,7 @@ html.dark .sidebar {
     html.dark #profileModal .btn-close {
       color: var(--muted);
     }
-/*────────────────────────────────────────────────────────
-  Mobile (iPhone 11 / max-width ~414px)
-────────────────────────────────────────────────────────*/
 @media screen and (max-width: 480px) {
-  /* Hide fixed sidebar; use a bottom nav instead */
   .sidebar {
     position: fixed;
     bottom: 0;
@@ -524,22 +521,19 @@ html.dark .sidebar {
     font-size: 1rem;
   }
 
-  /* Main content spans full width */
   .main {
     margin-left: 0;
-    padding-bottom: 3rem; /* leave room for bottom nav */
+    padding-bottom: 3rem; 
   }
 
-  /* Topbar: center welcome and shrink padding */
   .topbar {
     padding: 0.75rem 1rem;
     justify-content: center;
   }
   .topbar .controls {
-    display: none; /* hide side controls, toggle via hamburger if needed */
+    display: none; 
   }
 
-  /* Content grid becomes single column */
   .content {
     display: flex;
     flex-direction: column;
@@ -547,7 +541,6 @@ html.dark .sidebar {
     padding: 0.75rem 1rem;
   }
 
-  /* Filter bar stacks inputs vertically */
   .filter-bar {
     flex-direction: column;
     align-items: stretch;
@@ -564,7 +557,6 @@ html.dark .sidebar {
     padding: 0.5rem;
   }
 
-  /* Cards stretch full width with reduced padding */
   .card {
     padding: 1rem;
   }
@@ -579,7 +571,6 @@ html.dark .sidebar {
     font-size: 0.85rem;
   }
 
-  /* Chart cards: reduce height */
   .chart-card {
     padding: 1rem;
   }
@@ -625,19 +616,19 @@ html.dark .sidebar {
   }
 }
 .hamburger-btn {
-  background: transparent;
-  border: none;
-  font-size: 1.5rem;
-  color: var(--text);
-  cursor: pointer;
-  display: none;
-  margin-right: 1rem;
-}
-@media screen and (max-width: 768px) {
-  .hamburger-btn {
-    display: block;
+    background: transparent;
+    border: none;
+    font-size: 1.5rem;
+    color: var(--text);
+    cursor: pointer;
+    display: none; /* always hidden by default */
+    margin-right: 1rem;
   }
-}
+  @media screen and (max-width: 768px) {
+    .hamburger-btn {
+      display: block; 
+    }
+  }
 
 @media screen and (max-width: 414px) and (orientation: portrait) {
   .card h4 {
