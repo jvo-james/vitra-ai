@@ -60,66 +60,84 @@
       min-height: 100vh;
       overflow-x: hidden;
     }
-    .sidebar {
-       position: fixed;             
-  left: 0;
- bottom: 0;
-  width: 240px;
- background: var(--surface);
- padding: 2rem 1rem;
+ /* ===== Replace old .sidebar rules with these ===== */
+.sidebar {
+  position: fixed;
+  top: 0;
+  left: -260px;       /* initially hidden off‐screen */
+  height: 100vh;
+  width: 260px;
+  background: var(--surface);
+  box-shadow: 2px 0 12px var(--shadow-light);
+  border-top-right-radius: 1rem;
+  border-bottom-right-radius: 1rem;
+  padding: 2rem 1rem;
   display: flex;
   flex-direction: column;
   gap: 1rem;
-  box-shadow: 2px 0 8px var(--shadow-light);
-  z-index: 10;
-    }
-    html.dark .sidebar {
-      box-shadow: 2px 0 8px var(--shadow-dark);
-    }
-    .sidebar .logo {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 0.5rem;
-      font-size: 1.5rem;
-      font-weight: 700;
-      color: var(--primary);
-    }
-    .sidebar .logo svg {
-      width: 2rem;
-      height: 2rem;
-      fill: var(--primary);
-    }
-    .sidebar nav {
-      margin-top: 2rem;
-      display: flex;
-      flex-direction: column;
-      gap: 0.75rem;
-    }
-    .sidebar nav a {
-      padding: 0.75rem 1rem;
-      border-radius: var(--radius);
-      display: flex;
-      align-items: center;
-      gap: 0.75rem;
-      color: var(--text);
-      font-weight: 500;
-      transition: background-color .2s, color .2s;
-    }
-    .sidebar nav a i {
-      font-size: 1.25rem;
-      color: var(--primary);
-      transition: color .2s;
-    }
-    .sidebar nav a:hover,
-    .sidebar nav a.active {
-      background: var(--primary);
-      color: var(--surface);
-    }
-    .sidebar nav a:hover i,
-    .sidebar nav a.active i {
-      color: var(--surface);
-    }
+  transition: left 0.3s ease;
+  z-index: 1000;
+}
+html.dark .sidebar {
+  box-shadow: 2px 0 12px var(--shadow-dark);
+}
+/* Accent strip on left edge */
+.sidebar::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 6px;
+  height: 100%;
+  background: var(--primary);
+  border-top-right-radius: 4px;
+  border-bottom-right-radius: 4px;
+}
+.sidebar .logo {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--primary);
+}
+.sidebar nav {
+  margin-top: 2rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+.sidebar nav a {
+  position: relative;
+  padding: 0.75rem 1rem 0.75rem 1.5rem;
+  border-radius: var(--radius);
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  color: var(--text);
+  font-weight: 500;
+  transition: background-color 0.2s, color 0.2s;
+}
+.sidebar nav a i {
+  font-size: 1.25rem;
+  color: var(--primary);
+  transition: color 0.2s;
+}
+.sidebar nav a:hover,
+.sidebar nav a.active {
+  background: var(--primary);
+  color: var(--surface);
+}
+.sidebar nav a:hover i,
+.sidebar nav a.active i {
+  color: var(--surface);
+}
+/* Adjust text size slightly */
+.sidebar nav a span {
+  font-size: 0.95rem;
+}
+
  @media(max-width: 768px) {
     .content {
          grid-template-columns: 1fr;
@@ -606,6 +624,20 @@
     height: 250px;
   }
 }
+.hamburger-btn {
+  background: transparent;
+  border: none;
+  font-size: 1.5rem;
+  color: var(--text);
+  cursor: pointer;
+  display: none;
+  margin-right: 1rem;
+}
+@media screen and (max-width: 768px) {
+  .hamburger-btn {
+    display: block;
+  }
+}
 
 @media screen and (max-width: 414px) and (orientation: portrait) {
   .card h4 {
@@ -622,6 +654,19 @@
   }
   .topbar i {
     font-size: 1.25rem;
+  }
+}
+@media screen and (min-width: 1024px) {
+  .content {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr); 
+    gap: var(--gap);
+  }
+  .filter-bar {
+    grid-column: 1 / -1;
+  }
+  .chart-card {
+    grid-column: span 1; 
   }
 }
 
@@ -649,6 +694,9 @@
 
   <div class="main">
     <header class="topbar">
+      <button id="hamburgerBtn" class="hamburger-btn">
+  <i class="fas fa-bars"></i>
+</button>
       <div class="welcome">Hello, <strong id="userName">User</strong>!</div>
       <div class="controls">
         <i id="themeToggle" class="fas fa-moon"></i>
@@ -741,6 +789,32 @@
 
   document.addEventListener('DOMContentLoaded', () => {
 
+const hamburgerBtn = document.getElementById('hamburgerBtn');
+const sidebar = document.querySelector('.sidebar');
+const sidebarOverlay = document.createElement('div');
+
+sidebarOverlay.style.position = 'fixed';
+sidebarOverlay.style.top = '0';
+sidebarOverlay.style.left = '0';
+sidebarOverlay.style.width = '100%';
+sidebarOverlay.style.height = '100%';
+sidebarOverlay.style.background = 'rgba(0,0,0,0.4)';
+sidebarOverlay.style.zIndex = '900';
+sidebarOverlay.style.display = 'none';
+document.body.appendChild(sidebarOverlay);
+
+function openSidebar() {
+  sidebar.style.left = '0';
+  sidebarOverlay.style.display = 'block';
+}
+function closeSidebar() {
+  sidebar.style.left = '-260px';
+  sidebarOverlay.style.display = 'none';
+}
+
+hamburgerBtn.addEventListener('click', openSidebar);
+sidebarOverlay.addEventListener('click', closeSidebar);
+
         const themeToggle = document.getElementById('themeToggle');
     const signOutBtn = document.getElementById('signOutBtn');
     const userNameEl = document.getElementById('userName');
@@ -826,73 +900,126 @@
     }
     displayStats();
 
+  const dailyCounts = [];
+for (let i = 6; i >= 0; i--) {
+  const dayStart = new Date();
+  dayStart.setHours(0, 0, 0, 0);
+  dayStart.setDate(dayStart.getDate() - i);
+
+  const dayEnd = new Date(dayStart);
+  dayEnd.setHours(23, 59, 59, 999);
+
+  function countDay(key) {
+    const raw = localStorage.getItem(key) || '[]';
+    const arr = JSON.parse(raw);
+    return arr.filter(ts => {
+      const d = new Date(ts);
+      return d >= dayStart && d <= dayEnd;
+    }).length;
+  }
+
+  const sumForDay =
+    countDay('timestampsHerbal') +
+    countDay('timestampsPsych') +
+    countDay('timestampsDiet') +
+    countDay('timestampsPharmacy') +
+    countDay('timestampsConsult');
+
+  dailyCounts.push(sumForDay);
+}
+
+dailyChart.data.datasets[0].data = dailyCounts;
+dailyChart.update();
+
     const distCtx = document.getElementById('distributionChart').getContext('2d');
-    const distributionChart = new Chart(distCtx, {
-      type: 'doughnut',
-      data: {
-        labels: ['Herbal', 'Psychology', 'Dietetics', 'E-Pharmacy', 'Consult'],
-        datasets: [{
-          data: [
-            statsData.herbal,
-            statsData.psych,
-            statsData.diet,
-            statsData.pharmacy,
-            statsData.consult
-          ],
-          backgroundColor: [
-            varColor('--primary'),
-            varColor('--accent'),
-            '#8BC34A',
-            '#FF5722',
-            '#3F51B5'
-          ],
-          borderWidth: 1
-        }]
-      },
-      options: {
-        responsive: true,
-        plugins: {
-          legend: {
-            position: 'bottom',
-            labels: { color: varColor('--text') }
-          }
+   const distributionChart = new Chart(distCtx, {
+  type: 'doughnut',
+  data: {
+    labels: ['Herbal', 'Psych', 'Diet', 'Pharmacy', 'Consult'],
+    datasets: [{
+      data: [statsData.herbal, statsData.psych, statsData.diet, statsData.pharmacy, statsData.consult],
+      backgroundColor: [
+        'rgba(74,120,196,0.8)',      
+        'rgba(255,165,0,0.8)',      
+        'rgba(139,195,74,0.8)',     
+        'rgba(255,87,34,0.8)',      
+        'rgba(63,81,181,0.8)'      
+      ],
+      borderColor: 'rgba(255,255,255,0.9)',
+      borderWidth: 2
+    }]
+  },
+  options: {
+    responsive: true,
+    cutout: '50%',  
+    plugins: {
+      legend: {
+        position: 'bottom',
+        labels: {
+          color: varColor('--text'),
+          padding: 20,
+          boxWidth: 12
         }
+      },
+      tooltip: {
+        backgroundColor: varColor('--surface'),
+        titleColor: varColor('--text'),
+        bodyColor: varColor('--text'),
+        borderColor: varColor('--muted'),
+        borderWidth: 1
       }
-    });
+    }
+  }
+});
+
 
     const dailyCtx = document.getElementById('dailyChart').getContext('2d');
     const dailyChart = new Chart(dailyCtx, {
-      type: 'line',
-      data: {
-        labels: statsData.labels,
-        datasets: [{
-          label: 'Total Queries',
-          data: statsData.daily,
-          borderColor: varColor('--primary'),
-          backgroundColor: 'rgba(74,120,196,0.1)',
-          tension: 0.3,
-          pointBackgroundColor: varColor('--primary'),
-          fill: true
-        }]
+  type: 'line',
+  data: {
+    labels: statsData.labels, 
+    datasets: [{
+      label: 'Daily Queries',
+      data: [], // we’ll fill via real data code above
+      borderColor: 'rgba(74,120,196,1)',
+      backgroundColor: 'rgba(74,120,196,0.2)',
+      pointBackgroundColor: 'rgba(74,120,196,1)',
+      pointBorderColor: varColor('--surface'),
+      pointBorderWidth: 2,
+      tension: 0.3,
+      fill: true,
+      borderWidth: 3,
+      pointRadius: 5,
+      pointHoverRadius: 7
+    }]
+  },
+  options: {
+    responsive: true,
+    scales: {
+      x: {
+        ticks: { color: varColor('--text'), maxRotation: 0, minRotation: 0 },
+        grid: { color: varColor('--muted'), drawBorder: false }
       },
-      options: {
-        responsive: true,
-        scales: {
-          y: {
-            beginAtZero: true,
-            ticks: { color: varColor('--text') },
-            grid: { color: varColor('--muted') }
-          },
-          x: {
-            ticks: { color: varColor('--text') },
-            grid: { display: false }
-          }
-        },
-        plugins: {
-          legend: { display: false }
-        }
+      y: {
+        beginAtZero: true,
+        ticks: { color: varColor('--text') },
+        grid: { color: varColor('--muted'), borderDash: [5, 5] }
       }
-    });
+    },
+    plugins: {
+      legend: { display: false },
+      tooltip: {
+        backgroundColor: varColor('--surface'),
+        titleColor: varColor('--text'),
+        bodyColor: varColor('--text'),
+        borderColor: varColor('--muted'),
+        borderWidth: 1,
+        cornerRadius: 4
+      }
+    }
+  }
+});
+
 
     filterBtn.onclick = () => {
       const start = startDateInput.value;
