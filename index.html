@@ -947,11 +947,18 @@ html.dark .service-card .info ul li {
     const signInMsg  = document.getElementById('signInMsg');
     signInForm.addEventListener('submit', e => {
       e.preventDefault();
-       document.getElementById('loadingOverlay').style.display = 'flex';
-      signInMsg.textContent = '';
-      const email = document.getElementById('signInEmail').value;
-      const pass  = document.getElementById('signInPass').value;
+       signInMsg.textContent = '';
+    const email = document.getElementById('signInEmail').value.trim();
+     const pass  = document.getElementById('signInPass').value;
+    const emailPattern = /^\S+@\S+\.\S+$/;
+    if (!emailPattern.test(email)) {
+      signInMsg.style.color = 'red';
+       signInMsg.textContent = 'Please enter a valid email address.';
+      return;
+    }
+     document.getElementById('loadingOverlay').style.display = 'flex';
 
+      
       firebase.auth().signInWithEmailAndPassword(email, pass)
         .then(({ user }) => {
           if (!user.emailVerified) {
@@ -961,8 +968,7 @@ html.dark .service-card .info ul li {
             return firebase.auth().signOut();
           }
            signInModal.style.display = 'none';
-          document.getElementById('loadingOverlay').style.display = 'flex';
-          window.location.href = 'dashboard.html?mode=signin';
+                    window.location.href = 'dashboard.html?mode=signin';
         })
        .catch(err => {
          document.getElementById('loadingOverlay').style.display = 'none';
@@ -1019,21 +1025,29 @@ html.dark .service-card .info ul li {
     const signUpMsg  = document.getElementById('signUpMsg');
     signUpForm.addEventListener('submit', e => {
       e.preventDefault();
-       document.getElementById('loadingOverlay').style.display = 'flex';
-      signUpMsg.textContent = '';
-      const name  = document.getElementById('signUpName').value.trim();
-      const email = document.getElementById('signUpEmail').value;
-      const pass  = document.getElementById('signUpPass').value;
-      const pass2 = document.getElementById('signUpPass2').value;
+       signUpMsg.textContent = '';
+     const name  = document.getElementById('signUpName').value.trim();
+     const email = document.getElementById('signUpEmail').value.trim();
+    const pass  = document.getElementById('signUpPass').value;
+    const pass2 = document.getElementById('signUpPass2').value;
+
+
+    const emailPattern = /^\S+@\S+\.\S+$/;
+    if (!emailPattern.test(email)) {
+       signUpMsg.style.color = 'red';
+       signUpMsg.textContent = 'Please enter a valid email address.';
+       return;
+     }
+
+
+    document.getElementById('loadingOverlay').style.display = 'flex';
 
       if (pass.length < 8 || !/\d/.test(pass)) {
-        document.getElementById('loadingOverlay').style.display = 'none';
-        signUpMsg.style.color = 'red';
+                signUpMsg.style.color = 'red';
         return signUpMsg.textContent = 'Password must be ≥8 characters and include a number.';
       }
       if (pass !== pass2) {
-       document.getElementById('loadingOverlay').style.display = 'none';
-        signUpMsg.style.color = 'red';
+               signUpMsg.style.color = 'red';
         return signUpMsg.textContent = 'Passwords do not match.';
       }
 
@@ -1043,13 +1057,13 @@ html.dark .service-card .info ul li {
               .then(() => user.sendEmailVerification())
         )
         .then(() => {
-          signUpMsg.style.color = 'green';
-          signUpMsg.textContent = 'Account created! Check your email to verify before signing in.';
-          signUpForm.querySelector('button[type="submit"]').disabled = true;
+          document.getElementById('loadingOverlay').style.display = 'none';
+       signUpMsg.style.color = 'green';
+        signUpMsg.textContent = 'Account created! Check your email to verify before signing in.';
+        signUpForm.querySelector('button[type="submit"]').disabled = true;
         })
        .catch(err => {
-           document.getElementById('loadingOverlay').style.display = 'none';
-          signUpMsg.style.color = 'red';
+                     signUpMsg.style.color = 'red';
           switch (err.code) {
             case 'auth/email-already-in-use':
               signUpMsg.textContent = 'That email is already registered. Please sign in instead.';
@@ -1063,6 +1077,8 @@ html.dark .service-card .info ul li {
             default:
               signUpMsg.textContent = 'Error creating account: ' + err.message;
           }
+         document.getElementById('loadingOverlay').style.display = 'none';
+
         });
     });
   });
