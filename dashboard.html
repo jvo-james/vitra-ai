@@ -29,6 +29,8 @@
       --max-width: 1200px;
         --secondary: #FFFFFF; 
         --primary-rgb: 74,120,196;  
+         --sidebar-w: 280px;
+  --sidebar-collapsed-w: 80px;
     }
     html.dark {
       --bg: #1F2233;
@@ -846,6 +848,14 @@ aside#sidebar nav a.active {
       }
     });
 
+    const sidebarLinks = document.querySelectorAll('aside#sidebar nav a');
+    sidebarLinks.forEach(link => {
+      link.addEventListener('click', () => {
+        sidebarLinks.forEach(l => l.classList.remove('active'));
+        link.classList.add('active');
+      });
+    });
+    
     const sidebar = document.getElementById("sidebar");
     const shrinkBtn = document.getElementById("shrinkBtn");
     const hamburger = document.getElementById("hamburger");
