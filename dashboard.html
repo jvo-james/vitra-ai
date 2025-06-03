@@ -617,6 +617,115 @@ aside#sidebar nav a.active {
     display: none;
   }
 
+  header {
+  position: fixed;
+  top: 0;
+  left: var(--sidebar-w);
+  right: 0;
+  height: var(--header-h);
+  background: linear-gradient(135deg, var(--primary), var(--accent));
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 1.5rem;
+  z-index: 999;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.15);
+  border-bottom-left-radius: 0.5rem;
+  border-bottom-right-radius: 0.5rem;
+  color: #fff;
+  transition: left 0.3s ease, background 0.3s ease;
+}
+
+aside#sidebar.collapsed ~ header {
+  left: var(--sidebar-collapsed-w);
+}
+
+header .left-group {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+header .hamburger {
+  font-size: 1.6rem;
+  cursor: pointer;
+  color: #fff;
+  display: none; 
+  transition: transform 0.2s ease;
+}
+header .hamburger:hover {
+  transform: scale(1.1);
+}
+
+@media (max-width: 1024px) {
+  header .hamburger {
+    display: block;
+  }
+}
+
+header h1 {
+  font-size: 1.6rem;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  margin: 0;
+}
+
+header .right-group {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+}
+
+header .welcome {
+  font-size: 1rem;
+  font-weight: 500;
+}
+
+header .theme-toggle {
+  font-size: 1.4rem;
+  cursor: pointer;
+  color: #fff;
+  transition: transform 0.2s ease;
+}
+header .theme-toggle:hover {
+  transform: scale(1.1);
+}
+
+header #signOutBtn {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: rgba(255, 255, 255, 0.2);
+  color: #fff;
+  font-weight: 600;
+  padding: 0.6rem 1rem;
+  border-radius: 0.5rem;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  transition: background 0.2s ease, transform 0.2s ease;
+}
+header #signOutBtn:hover {
+  background: rgba(255, 255, 255, 0.35);
+  transform: translateY(-2px);
+}
+
+@media (max-width: 480px) {
+  header {
+    padding: 0 1rem;
+    border-bottom-left-radius: 0;
+    border-bottom-right-radius: 0;
+  }
+  header h1 {
+    font-size: 1.3rem;
+  }
+  header .welcome {
+    display: none; 
+  }
+  header #signOutBtn {
+    padding: 0.4rem 0.8rem;
+    font-size: 0.9rem;
+  }
+}
+
   .main {
     margin-left: 0;
   }
@@ -739,17 +848,18 @@ aside#sidebar nav a.active {
   </aside>
   
    <div class="main">
-    <header>
-      <div style="display:flex; align-items:center; gap:1rem;">
-        <i id="hamburger" class="fas fa-bars hamburger" aria-label="Toggle navigation"></i>
-        <h1>Vitra AI Dashboard</h1>
-      </div>
-      <div style="display:flex; align-items:center; gap:1rem;">
-        <div class="welcome">Hello, <strong id="userName">User</strong>!</div>
-        <i id="themeToggle" class="fas fa-moon theme-toggle" aria-label="Toggle theme"></i>
-        <button id="signOutBtn"><i class="fas fa-sign-out-alt"></i> Sign Out</button>
-      </div>
-    </header>
+  <header>
+  <div class="left-group">
+    <i id="hamburger" class="fas fa-bars hamburger" aria-label="Toggle navigation"></i>
+    <h1>Vitra AI Dashboard</h1>
+  </div>
+  <div class="right-group">
+    <div class="welcome">Hello, <strong id="userName">User</strong>!</div>
+    <i id="themeToggle" class="fas fa-moon theme-toggle" aria-label="Toggle theme"></i>
+    <button id="signOutBtn"><i class="fas fa-sign-out-alt"></i> Sign Out</button>
+  </div>
+</header>
+
 
      <section class="content">
       <div class="filter-bar">
@@ -848,13 +958,6 @@ aside#sidebar nav a.active {
       }
     });
 
-    const sidebarLinks = document.querySelectorAll('aside#sidebar nav a');
-    sidebarLinks.forEach(link => {
-      link.addEventListener('click', () => {
-        sidebarLinks.forEach(l => l.classList.remove('active'));
-        link.classList.add('active');
-      });
-    });
     
     const sidebar = document.getElementById("sidebar");
     const shrinkBtn = document.getElementById("shrinkBtn");
