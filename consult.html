@@ -5,7 +5,6 @@
   <meta name="viewport" content="width=device-width,initial-scale=1.0" />
   <title>E-Pharmacy AI Portal</title>
 
-  <!-- Fonts & Icons -->
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;600;700&display=swap" rel="stylesheet" />
   <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
   <link
@@ -14,9 +13,7 @@
   />
  <script defer src="https://js.paystack.co/v1/inline.js"></script>
 <style>
-  /* ─────────────────────────────────────────────────────────────────────────────
-     Global Variables & Theme Settings
-     ───────────────────────────────────────────────────────────────────────────── */
+ 
   :root {
     --cb-primary: #3b3f88;
     --cb-primary-alt: #5c4d99;
@@ -29,8 +26,8 @@
     --padding: 1rem;
     --shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
     --transition: 0.3s ease;
-    --sidebar-width: 220px;
-    --sidebar-collapsed-width: 60px;
+    --sidebar-width: 280px;
+    --sidebar-collapsed-width: 80px;
   }
 
   html.dark {
@@ -41,10 +38,7 @@
     --shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
   }
 
-  /* ─────────────────────────────────────────────────────────────────────────────
-     Global Reset & Base Styles
-     ───────────────────────────────────────────────────────────────────────────── */
-  *,
+   *,
   *::before,
   *::after {
     box-sizing: border-box;
@@ -79,10 +73,7 @@
     font-family: inherit;
   }
 
-  /* ─────────────────────────────────────────────────────────────────────────────
-     Layout: Sidebar
-     ───────────────────────────────────────────────────────────────────────────── */
-  aside#sidebar {
+   aside#sidebar {
     position: fixed;
     top: 0;
     left: 0;
@@ -153,7 +144,6 @@
     align-self: flex-end;
   }
 
-  /* Sidebar: Collapsed State */
   body.sidebar-shrink aside#sidebar {
     width: var(--sidebar-collapsed-width);
   }
@@ -168,9 +158,6 @@
     justify-content: center;
   }
 
-  /* ─────────────────────────────────────────────────────────────────────────────
-     Layout: Header
-     ───────────────────────────────────────────────────────────────────────────── */
   header {
     position: sticky;
     top: 0;
@@ -206,21 +193,15 @@
     color: var(--cb-accent);
   }
 
-  /* ─────────────────────────────────────────────────────────────────────────────
-     Main Content & Sections
-     ───────────────────────────────────────────────────────────────────────────── */
    main, footer {
-   /* Only push <main> & <footer> to the right; sections inside <main> will flow normally. */
     margin-left: var(--sidebar-width);
     padding: var(--padding);
      transition: margin-left var(--transition);
  }
  section.module {
-   /* Sections inside <main> should not have an extra margin-left; they are already inside <main>. */
     margin-left: 0;
  }
 
- /* When sidebar is collapsed: shift main/footer */
   body.sidebar-shrink main,
   body.sidebar-shrink footer {
     margin-left: var(--sidebar-collapsed-width);
@@ -239,10 +220,7 @@
     color: var(--cb-muted);
   }
 
-  /* ─────────────────────────────────────────────────────────────────────────────
-     Module Base (Panels, Cards, Sections)
-     ───────────────────────────────────────────────────────────────────────────── */
-  section.module {
+   section.module {
     background: var(--cb-surface);
     border-radius: var(--radius);
     padding: var(--padding);
@@ -262,10 +240,7 @@
     font-size: 1rem;
   }
 
-  /* ─────────────────────────────────────────────────────────────────────────────
-     Hero Section
-     ───────────────────────────────────────────────────────────────────────────── */
-  #hero {
+   #hero {
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: var(--padding);
@@ -322,10 +297,7 @@
     background: #f0f0f0;
   }
 
-  /* ─────────────────────────────────────────────────────────────────────────────
-     Quick Actions Section
-     ───────────────────────────────────────────────────────────────────────────── */
-  #quickActions {
+   #quickActions {
     background: var(--cb-primary);
     color: #fff;
   }
@@ -395,9 +367,6 @@
     color: #ffffff;
   }
 
-  /* ─────────────────────────────────────────────────────────────────────────────
-     Forms & Inputs (Global)
-     ───────────────────────────────────────────────────────────────────────────── */
   form label {
     display: block;
     margin-bottom: 1rem;
@@ -464,10 +433,7 @@
     transform: translateY(-1px);
   }
 
-  /* ─────────────────────────────────────────────────────────────────────────────
-     Match Panel (Provider Matching & Urgent Flow)
-     ───────────────────────────────────────────────────────────────────────────── */
-  #matchResults,
+   #matchResults,
   #urgentMatchResults {
     position: relative;
     padding: 1.5rem;
@@ -521,7 +487,8 @@
     color: var(--cb-text);
     font-size: 0.95rem;
   }
-
+ #matchResults .close-btn i, 
+  #urgentMatchResults .close-btn i { color: #fff; }
   #matchResults .btn-sm.back,
   #urgentMatchResults .btn-sm.back {
     position: absolute;
@@ -531,7 +498,6 @@
     color: #fff;
   }
 
-  /* Urgent Flow: Scheduling Buttons */
   #urgentScheduleBtn {
     background: var(--cb-accent);
     color: #fff;
@@ -542,10 +508,7 @@
     background: #d4724f;
   }
 
-  /* ─────────────────────────────────────────────────────────────────────────────
-     Calendar & Time Slots (Provider Scheduling)
-     ───────────────────────────────────────────────────────────────────────────── */
-  .month-nav {
+    .month-nav {
     display: flex;
     align-items: center;
     justify-content: center;
@@ -580,7 +543,6 @@
     overflow: hidden;
   }
 
-  /* Weekday Headers */
   #calendar .cell:first-child,
   .calendar-grid .cell:first-child {
     font-weight: 600;
@@ -589,7 +551,6 @@
     padding: 0.5rem 0;
   }
 
-  /* Day Cells */
   #calendar .cell,
   .calendar-grid .cell {
     background: var(--cb-surface);
@@ -625,7 +586,6 @@
     border: 2px dashed var(--cb-primary);
   }
 
-  /* Time Slots */
   #timeSlots {
     margin-top: 1rem;
   }
@@ -661,9 +621,6 @@
     transform: translateY(-1px);
   }
 
-  /* ─────────────────────────────────────────────────────────────────────────────
-     Final Booking Form (Confirm)
-     ───────────────────────────────────────────────────────────────────────────── */
   #confirmForm {
     margin-top: 1rem;
     background: var(--cb-surface);
@@ -699,10 +656,7 @@
     font-weight: 600;
   }
 
-  /* ─────────────────────────────────────────────────────────────────────────────
-     Rich Dashboard (Cards & Tabs)
-     ───────────────────────────────────────────────────────────────────────────── */
-  #feature-rich-dashboard .dashboard-tabs {
+   #feature-rich-dashboard .dashboard-tabs {
     display: flex;
     gap: 0.5rem;
     margin-bottom: 1rem;
@@ -789,10 +743,7 @@
     transform: translateY(-1px);
   }
 
-  /* ─────────────────────────────────────────────────────────────────────────────
-     Upcoming Calendar Widget
-     ───────────────────────────────────────────────────────────────────────────── */
-  #upcomingCalendarWidget {
+   #upcomingCalendarWidget {
     margin-top: 1rem;
   }
 
@@ -842,10 +793,7 @@
     border: 2px dashed var(--cb-primary);
   }
 
-  /* ─────────────────────────────────────────────────────────────────────────────
-     Modals (Review & Cancel)
-     ───────────────────────────────────────────────────────────────────────────── */
-  .modal {
+    .modal {
     position: fixed;
     top: 0;
     left: 0;
@@ -915,10 +863,7 @@
     transform: translateY(-1px);
   }
 
-  /* ─────────────────────────────────────────────────────────────────────────────
-     Toast Notifications
-     ───────────────────────────────────────────────────────────────────────────── */
-  .toast {
+   .toast {
     position: fixed;
     bottom: 1rem;
     left: 50%;
@@ -938,10 +883,7 @@
     opacity: 1;
   }
 
-  /* ─────────────────────────────────────────────────────────────────────────────
-     Responsive Adjustments
-     ───────────────────────────────────────────────────────────────────────────── */
-  @media (max-width: 1024px) {
+   @media (max-width: 1024px) {
     section.module {
       padding: 0.75rem;
     }
@@ -976,10 +918,8 @@
     }
   }
 
-  /* ─────────────────────────────────────────────────────────────────────────────
-     Dark Mode Overrides (Optional)
-     ───────────────────────────────────────────────────────────────────────────── */
-  html.dark body {
+  
+   html.dark body {
     background: var(--cb-bg);
     color: var(--cb-text);
   }
@@ -1205,7 +1145,7 @@
 
 
 <body>
-  <!-- Sidebar -->
+
   <aside id="sidebar">
    <div class="logo">
       <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" fill="var(--primary)">
@@ -1238,7 +1178,6 @@
     </button>
   </aside>
 
-  <!-- Header -->
   <header>
     <i id="hamburger" class="fas fa-bars"></i>
     <h1>AI-Powered Consultation Booking</h1>
@@ -1246,7 +1185,6 @@
   </header>
 
   <main>
-    <!-- Hero -->
     <section id="hero" class="module">
       <div class="hero-text">
         <h2><i class="fas fa-stethoscope"></i> Seamless Consultation Booking</h2>
@@ -1264,12 +1202,10 @@
       </div>
     </section>
 
-    <!-- Urgent Booking Module -->
     <section id="urgentBooking" class="module" hidden>
       <h2><i class="fas fa-exclamation-triangle"></i> Urgent Appointment</h2>
       <p class="desc">Describe your concern, pick a specialist, then choose date/time. ₵500 non-refundable fee.</p>
 
-      <!-- Step 1 -->
       <div id="urgentStep1">
         <label>
           <i class="fas fa-notes-medical"></i> Chief Concern:
@@ -1285,7 +1221,6 @@
         </button>
       </div>
 
-      <!-- Step 2 -->
       <div id="urgentMatchResults" class="response" hidden>
         <button class="close-btn" id="urgentStep2Close" style="display: none;"><i class="fas fa-times"></i></button>
         <div class="card">
@@ -1301,7 +1236,6 @@
         <button class="btn-sm back" id="urgentStep2Back" style="display: none;">Back</button>
       </div>
 
-      <!-- Step 3 -->
       <div id="urgentCalendarFlow" hidden>
         <button class="btn-sm back" id="urgentStep3Back" style="display: none;">
           <i class="fas fa-arrow-left"></i> Back
@@ -1312,7 +1246,6 @@
         <button class="btn-sm close-btn" id="urgentStep3Close" style="display: none;"><i class="fas fa-times"></i></button>
       </div>
 
-      <!-- Step 4 -->
       <form id="urgentDetailsForm" class="module" hidden>
         <button type="button" class="btn-sm back" id="urgentStep4Back" style="display: none;">
           <i class="fas fa-arrow-left" style="display: none;"></i> Back
@@ -1332,12 +1265,10 @@
       </form>
     </section>
 
-    <!-- Provider Matching -->
     <section id="providerMatch" class="module">
       <h2><i class="fas fa-user-md"></i> Find Your Specialist</h2>
       <p class="desc">Describe your health concern and let our AI pick the best in-network professional.</p>
 
-      <!-- Step 1 -->
       <form id="matchForm">
         <label>
           <i class="fas fa-notes-medical"></i> Chief Concern:
@@ -1365,11 +1296,10 @@
           </select>
         </label>
         <button type="button" id="findMatchBtn" class="btn">
-          <i class="fas fa-search"></i> Predict Specialist
+          <i class="fas fa-search"></i>Find Specialist
         </button>
       </form>
 
-      <!-- Step 2 -->
       <div id="matchResults" class="response" hidden>
 <button class="close-btn" id="matchResultsClose"><i class="fas fa-times"></i></button>
     <button class="btn-sm back" id="matchResultsBack" style="display: none;">Back</button>
@@ -1383,7 +1313,6 @@
         <button id="scheduleMatchBtn" class="btn"><i class="fas fa-calendar-alt"></i> Schedule</button>
       </div>
 
-      <!-- Step 3 -->
       <div id="appointmentFlow" hidden>
         <button class="btn-sm close-btn" id="appointmentFlowClose"><i class="fas fa-times"></i></button>
         <h3><i class="fas fa-calendar-alt"></i> Schedule with <span id="chosenProvider"></span></h3>
@@ -1395,7 +1324,6 @@
         <div id="calendar" class="calendar-grid"></div>
         <div id="timeSlots"></div>
 
-        <!-- Step 4 -->
         <form id="confirmForm" class="module" hidden>
           <button class="btn-sm close-btn" id="confirmStep4Close"><i class="fas fa-times"></i></button>
           <button class="btn-sm back" id="confirmStep4Back">Back</button>
@@ -1414,9 +1342,8 @@
       </div>
     </section>
 
-    <!-- Dashboard -->
     <section id="feature-rich-dashboard" class="module">
-      <h2><i class="fas fa-tachometer-alt"></i> Rich Dashboard</h2>
+      <h2><i class="fas fa-tachometer-alt"></i> Dashboard</h2>
       <div class="dashboard-tabs">
         <button data-tab="rich-upcoming" class="active"><i class="fas fa-calendar-check"></i> Upcoming</button>
         <button data-tab="rich-past"><i class="fas fa-history"></i> Past</button>
@@ -1427,7 +1354,6 @@
       <div id="rich-favorites" class="dashboard-cards" hidden></div>
     </section>
 
-    <!-- Upcoming Calendar -->
     <section id="upcomingCalendar" class="module">
       <h2><i class="fas fa-calendar-alt"></i> Your Upcoming Appointments</h2>
       <p class="desc">Click any marked date to view details.</p>
@@ -1435,7 +1361,6 @@
     </section>
   </main>
 
-  <!-- Review Modal -->
   <div id="confirmModal" class="modal" hidden>
     <div class="modal-content">
       <h3>Review Your Appointment</h3>
@@ -1446,7 +1371,6 @@
     </div>
   </div>
 
-  <!-- Cancel Modal -->
   <div id="cancelModal" class="modal" hidden>
     <div class="modal-content">
       <h3>Cancel Appointment?</h3>
@@ -1467,7 +1391,6 @@
 <script defer>
 document.addEventListener("DOMContentLoaded", () => {
   
-  // ─── PROVIDERS ARRAY (with descriptions) ──────────────────────────────
   const providers = [
     {
       id: "p1",
@@ -1684,7 +1607,6 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   ];
 
-  // ─── URGENT AVAILABILITY ──────────────────────────────────────────────
   const availability = {
     p1:  { "2025-05-31": ["09:30","10:30","12:00"], "2025-06-10": ["09:00","10:00","11:00"], "2025-06-12": ["14:00","15:00"], "2025-06-15": ["08:30","09:30","10:30"] },
     p2:  { "2025-05-31": ["09:30","10:30","12:00"], "2025-06-03": ["10:00","13:00","16:00"], "2025-06-04": ["09:00","11:00"], "2025-06-15": ["12:00","14:00"] },
@@ -1706,7 +1628,6 @@ document.addEventListener("DOMContentLoaded", () => {
     p18: { "2025-05-31": ["09:30","10:30","12:00"], "2025-06-01": ["08:00","09:00","10:00"], "2025-06-08": ["11:30","12:30","13:30"], "2025-06-20": ["14:00","15:00","16:00"] }
   };
 
-  // Symptom keyword → provider ID
   const symptomMap = {
     cough: "p1", wheeze: "p1", asthma: "p1", pneumonia: "p1", bronchitis: "p1",
     chestpain: "p2", "chest pain": "p2", palpitations: "p2", "shortness of breath": "p2",
@@ -1727,27 +1648,22 @@ document.addEventListener("DOMContentLoaded", () => {
     psychologist: "p18", counsel: "p18"
   };
 
-  // URGENT fee in kobo (₵500)
   const URGENT_FEE_KOBO = 500 * 100;
 
-  // Appointment storage
   const appointments = [];
 
-    // ─── STATE & DATE VARIABLES ───────────────────────────────────────────
   let year               = new Date().getFullYear();
   let month              = new Date().getMonth();
-  let selDate            = "";    // selected date for normal flow
-  let selTime            = "";    // selected time for normal flow
-  let urgentProviderName = "";    // chosen provider name in urgent flow
-  let uDate              = "";    // chosen date in urgent flow
-  let uTime              = "";    // chosen time in urgent flow
-  let urgentFlow         = false; // flag to indicate we're in urgent flow
-  let providerId         = "";    // chosen provider ID for normal flow
-  let providerName       = "";    // chosen provider name for normal flow
-  let widgetYear         = new Date().getFullYear(); // for upcoming calendar widget
-  let widgetMonth        = new Date().getMonth();    // for upcoming calendar widget
-
-  // ─── ELEMENT REFERENCES ─────────────────────────────────────────────
+  let selDate            = "";    
+  let selTime            = "";    
+  let urgentProviderName = "";    
+  let uDate              = "";    
+  let uTime              = "";   
+  let urgentFlow         = false; 
+  let providerId         = "";   
+  let providerName       = "";    
+  let widgetYear         = new Date().getFullYear(); 
+  let widgetMonth        = new Date().getMonth();   
 
   const sidebar               = document.getElementById("sidebar");
   const hamburger             = document.getElementById("hamburger");
@@ -1816,7 +1732,6 @@ document.addEventListener("DOMContentLoaded", () => {
   const richPastSection       = document.getElementById("rich-past");
   const richFavoritesSection  = document.getElementById("rich-favorites");
 
-  // ─── LOAD LOCAL STORAGE ─────────────────────────────────────────────
 
   const stored = localStorage.getItem("appointments");
   if (stored) {
@@ -1834,7 +1749,6 @@ document.addEventListener("DOMContentLoaded", () => {
     if (el) el.value = draft[key];
   }
 
-  // ─── HELPER FUNCTIONS ────────────────────────────────────────────────
 
   function generateId(prefix = "") {
     return prefix + Date.now().toString();
@@ -1859,7 +1773,6 @@ document.addEventListener("DOMContentLoaded", () => {
     return j.choices?.[0]?.message?.content.trim() || "";
   }
 Storage.recordCategory("Consult");
-  // ─── UI TOGGLES ─────────────────────────────────────────────────────
 
   hamburger.addEventListener("click", () => {
     document.body.classList.toggle("sidebar-open");
@@ -1889,7 +1802,6 @@ Storage.recordCategory("Consult");
     urgentBooking.hidden = false;
   });
 
-  // ─── URGENT FLOW ─────────────────────────────────────────────────────
 
   urgentFindMatchBtn.addEventListener("click", async () => {
     const rawConcern = document.getElementById("urgentConcernInput").value.trim();
@@ -2023,7 +1935,6 @@ ${providers.map(p => `
     urgentFlow = true;
   });
 
-  // ─── NORMAL MATCH FLOW ─────────────────────────────────────────────────
 
   findMatchBtn.addEventListener("click", async () => {
     const rawConcern = document.getElementById("concernInput").value.trim();
@@ -2108,7 +2019,6 @@ ${providers.map(p => `
     appointmentFlow.hidden = true;
   });
 
-  // ─── CALENDAR BUILDING ───────────────────────────────────────────────
 
   prevMonthBtn.addEventListener("click", () => {
     month = month > 0 ? month - 1 : 11;
@@ -2209,7 +2119,6 @@ ${providers.map(p => `
     confirmModal.hidden = false;
   });
 
-  // ─── MODAL CONTROLS & PAYMENTS ───────────────────────────────────────
 
   modalClose.addEventListener("click", () => {
     confirmModal.hidden = true;
@@ -2251,7 +2160,6 @@ ${providers.map(p => `
     }
   });
 
-  // ─── CANCELLATION MODAL ─────────────────────────────────────────────
 
   cancelYes.addEventListener("click", () => {
     const id = cancelYes.dataset.apptId;
@@ -2270,7 +2178,6 @@ ${providers.map(p => `
     cancelModal.hidden = true;
   });
 
-  // ─── UPCOMING CALENDAR WIDGET ───────────────────────────────────────
 
   function renderUpcomingCalendarWidget() {
     upcomingCalendarWidget.innerHTML = "";
@@ -2360,7 +2267,6 @@ ${providers.map(p => `
     renderWidget();
   }
 
-  // ─── RICH DASHBOARD (CARDS & TABS) ─────────────────────────────────
 
   function addToRichDashboard(appt) {
     const card = document.createElement("div");
