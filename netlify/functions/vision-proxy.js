@@ -1,76 +1,70 @@
-// File: netlify/functions/vision-proxy.js
 
-const vision = require('@google-cloud/vision');
-const Busboy = require('busboy');
+const Busboy = require('busboy')         // this must point at the actual constructor
+const { Storage } = require('@google-cloud/storage')  // if you’re using GCS
+const vision = require('@google-cloud/vision')        // or whichever Vision SDK you use
 
-exports.handler = async (event, context) => {
-  // Only accept POST
-  if (event.httpMethod !== 'POST') {
-    return {
-      statusCode: 405,
-      body: JSON.stringify({ error: 'Method Not Allowed' }),
-    };
-  }
-
-  // We return a Promise because Busboy is callback-based
+exports.handler = async function(event, context) {
   return new Promise((resolve, reject) => {
-    // Reconstruct the raw buffer from event.body (base64 or binary)
-    const buffer = event.isBase64Encoded
-      ? Buffer.from(event.body, 'base64')
-      : Buffer.from(event.body, 'binary');
+    try {
+      // 2) Parse the multipart/form-data with Busboy
+      //    Netlify passes you event.headers and event.body (base64 if isBase64Encoded is true)
+      const headers = event.headers || {}
+      const busboy = new Busboy({ headers })
+      let fileBuffer = Buffer.alloc(0)
 
-    // Busboy expects actual HTTP headers, so pull them from event.headers:
-    const bb = new Busboy({ headers: event.headers });
+      // When Busboy sees a file field, accumulate its data into a Buffer
+      busboy.on('file', (fieldname, fileStream, filename, encoding, mimetype) => {
+        fileStream.on('data', (chunk) => {
+          fileBuffer = Buffer.concat([fileBuffer, chunk])
+        })
+      })
 
-    let fileBuffer = Buffer.alloc(0);
+      // When Busboy is done parsing, call Vision API on the Buffer
+      busboy.on('finish', async () => {
+        try {
+          if (!fileBuffer || fileBuffer.length === 0) {
+            resolve({
+              statusCode: 400,
+              body: JSON.stringify({ error: 'No file uploaded.' })
+            })
+            return
+          }
 
-    // When Busboy parses the file field, accumulate the chunks into fileBuffer
-    bb.on('file', (fieldname, fileStream, filename, encoding, mimetype) => {
-      fileStream.on('data', (data) => {
-        fileBuffer = Buffer.concat([fileBuffer, data]);
-      });
-    });
+          // 3) Example: call Google Cloud Vision to label the image
+          //    (Replace this with your own “identify herb” logic)
+          const client = new vision.ImageAnnotatorClient()
+          const [result] = await client.labelDetection({ image: { content: fileBuffer } })
 
-    // When parsing is finished, call Vision API
-    bb.on('finish', async () => {
-      try {
-        // Instantiate a Vision client using the environment variables
-        // Make sure you have set the following in Netlify UI (or via CLI):
-        //   GCP_PROJECT_ID
-        //   GOOGLE_CLIENT_EMAIL
-        //   GOOGLE_PRIVATE_KEY  (with newline characters encoded as actual \n)
-        const client = new vision.ImageAnnotatorClient({
-          projectId: process.env.GCP_PROJECT_ID,
-          credentials: {
-            client_email: process.env.GOOGLE_CLIENT_EMAIL,
-            private_key: process.env.GOOGLE_PRIVATE_KEY.replace(/\\n/g, '\n'),
-          },
-        });
+          // For illustration, we just pick the top label as “name”:
+          const labels = result.labelAnnotations || []
+          const name = labels.length ? labels[0].description : 'Unknown Plant'
 
-        // Call labelDetection (you can swap to faceDetection, textDetection, etc. as desired)
-        const [result] = await client.labelDetection({ image: { content: fileBuffer } });
+          // Return a JSON payload that your front end code can consume:
+          resolve({
+            statusCode: 200,
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              name,
+              uses: 'Example uses go here',
+              cautions: 'Example cautions go here',
+              regions: ['Region A', 'Region B']
+            })
+          })
+        } catch (visionErr) {
+       
+                    resolve({
+            statusCode: 500,
+            body: JSON.stringify({ error: visionErr.message || visionErr.toString() })
+          })
+        }
+      })
 
-        // Build a simple JSON response containing the top 5 labels
-        const labels = (result.labelAnnotations || [])
-          .slice(0, 5)
-          .map((annotation) => annotation.description);
-
-        return resolve({
-          statusCode: 200,
-          body: JSON.stringify({ labels }),
-        });
-      } catch (err) {
-        console.error('Vision API error', err);
-        return resolve({
-          statusCode: 500,
-          body: JSON.stringify({ error: err.message || 'Vision failed' }),
-        });
-      }
-    });
-
-    // Kick off Busboy parsing by writing the raw buffer
-    bb.end(buffer);
-  });
-};
-
-
+      // 4) Netlify gives you event.body as a string; if base64‐encoded, convert first
+      const encoding = event.isBase64Encoded ? 'base64' : 'binary'
+      const rawBody = Buffer.from(event.body || '', encoding)
+      busboy.end(rawBody)
+    } catch (outerErr) {
+      reject(outerErr)
+    }
+  })
+}
