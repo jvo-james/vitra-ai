@@ -970,27 +970,43 @@ html.dark .service-card .info ul li {
            signInModal.style.display = 'none';
                     window.location.href = 'dashboard.html?mode=signin';
         })
-       .catch(err => {
+        .catch(err => {
          document.getElementById('loadingOverlay').style.display = 'none';
-          signInMsg.style.color = 'red';
-          switch (err.code) {
-            case 'auth/invalid-email':
-              signInMsg.textContent = 'Please enter a valid email address.';
-              break;
-            case 'auth/user-disabled':
-              signInMsg.textContent = 'This account has been disabled. Contact support.';
-              break;
-            case 'auth/user-not-found':
-              signInMsg.textContent = 'No account found with that email. Please sign up.';
-              break;
-            case 'auth/wrong-password':
-            case 'auth/invalid-login-credentials':
-              signInMsg.textContent = 'Incorrect password. Please try again.';
-              break;
-            default:
-              signInMsg.textContent = 'Error signing in: ' + err.message;
-          }
-        });
+       signInMsg.style.color = 'red';
+
+        if (err.code === 'auth/invalid-email') {
+           signInMsg.textContent = 'Please enter a valid email address.';
+           return;
+         }
+
+         if (err.code === 'auth/user-disabled') {
+         signInMsg.textContent = 'This account has been disabled. Contact support.';
+          return;
+        }
+
+        if (err.code === 'auth/wrong-password' || err.code === 'auth/invalid-login-credentials') {
+           firebase.auth().fetchSignInMethodsForEmail(email)
+             .then(methods => {
+               if (methods.length === 0) {
+                signInMsg.textContent = 'No account found with that email. Please sign up.';
+              } else {
+                signInMsg.textContent = 'Incorrect password. Please try again.';
+              }
+             })
+            .catch(() => {
+               signInMsg.textContent = 'Incorrect password. Please try again.';
+             });
+          return;
+        }
+
+        if (err.code === 'auth/user-not-found') {
+           signInMsg.textContent = 'No account found with that email. Please sign up.';
+           return;
+        }
+
+         signInMsg.textContent = 'Error signing in: ' + err.message;
+       });
+
     });
 
     const forgotPassLink = document.getElementById('forgotPass');
