@@ -900,36 +900,7 @@ sidebarOverlay.addEventListener('click', closeSidebar);
     }
     displayStats();
 
-  const dailyCounts = [];
-for (let i = 6; i >= 0; i--) {
-  const dayStart = new Date();
-  dayStart.setHours(0, 0, 0, 0);
-  dayStart.setDate(dayStart.getDate() - i);
 
-  const dayEnd = new Date(dayStart);
-  dayEnd.setHours(23, 59, 59, 999);
-
-  function countDay(key) {
-    const raw = localStorage.getItem(key) || '[]';
-    const arr = JSON.parse(raw);
-    return arr.filter(ts => {
-      const d = new Date(ts);
-      return d >= dayStart && d <= dayEnd;
-    }).length;
-  }
-
-  const sumForDay =
-    countDay('timestampsHerbal') +
-    countDay('timestampsPsych') +
-    countDay('timestampsDiet') +
-    countDay('timestampsPharmacy') +
-    countDay('timestampsConsult');
-
-  dailyCounts.push(sumForDay);
-}
-
-dailyChart.data.datasets[0].data = dailyCounts;
-dailyChart.update();
 
     const distCtx = document.getElementById('distributionChart').getContext('2d');
    const distributionChart = new Chart(distCtx, {
@@ -980,7 +951,7 @@ dailyChart.update();
     labels: statsData.labels, 
     datasets: [{
       label: 'Daily Queries',
-      data: [], // we’ll fill via real data code above
+      data: [], 
       borderColor: 'rgba(74,120,196,1)',
       backgroundColor: 'rgba(74,120,196,0.2)',
       pointBackgroundColor: 'rgba(74,120,196,1)',
@@ -1020,7 +991,37 @@ dailyChart.update();
   }
 });
 
+  const dailyCounts = [];
+for (let i = 6; i >= 0; i--) {
+  const dayStart = new Date();
+  dayStart.setHours(0, 0, 0, 0);
+  dayStart.setDate(dayStart.getDate() - i);
 
+  const dayEnd = new Date(dayStart);
+  dayEnd.setHours(23, 59, 59, 999);
+
+  function countDay(key) {
+    const raw = localStorage.getItem(key) || '[]';
+    const arr = JSON.parse(raw);
+    return arr.filter(ts => {
+      const d = new Date(ts);
+      return d >= dayStart && d <= dayEnd;
+    }).length;
+  }
+
+  const sumForDay =
+    countDay('timestampsHerbal') +
+    countDay('timestampsPsych') +
+    countDay('timestampsDiet') +
+    countDay('timestampsPharmacy') +
+    countDay('timestampsConsult');
+
+  dailyCounts.push(sumForDay);
+}
+
+dailyChart.data.datasets[0].data = dailyCounts;
+dailyChart.update();
+    
     filterBtn.onclick = () => {
       const start = startDateInput.value;
       const end   = endDateInput.value;
