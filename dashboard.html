@@ -60,97 +60,126 @@
       min-height: 100vh;
       overflow-x: hidden;
     }
-.sidebar {
-  position: fixed;
-  top: 0;
-   left: 0;    
-  height: 100vh;
-  width: 260px;
-  background: var(--surface);
-  box-shadow: 2px 0 12px var(--shadow-light);
-  border-top-right-radius: 1rem;
-  border-bottom-right-radius: 1rem;
-  padding: 2rem 1rem;
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
-  transition: left 0.3s ease;
-  z-index: 1000;
-}
-html.dark .sidebar {
-  box-shadow: 2px 0 12px var(--shadow-dark);
-}
-.sidebar::before {
-  content: "";
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 6px;
-  height: 100%;
-  background: var(--primary);
-  border-top-right-radius: 4px;
-  border-bottom-right-radius: 4px;
-}
-.sidebar .logo {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 0.5rem;
-    font-size: 1.25rem; 
-    font-weight: 700;
-    color: var(--primary);
-  }
-  .sidebar .logo svg {
-    width: 1.5rem;  
-    height: 1.5rem; 
-  }
-.sidebar nav {
-  margin-top: 2rem;
-  display: flex;
-  flex-direction: column;
-  gap: 0.75rem;
-}
-.sidebar nav a {
-  position: relative;
-  padding: 0.75rem 1rem 0.75rem 1.5rem;
-  border-radius: var(--radius);
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-  color: var(--text);
-  font-weight: 500;
-  transition: background-color 0.2s, color 0.2s;
-}
-.sidebar nav a i {
-  font-size: 1.25rem;
-  color: var(--primary);
-  transition: color 0.2s;
-}
-.sidebar nav a:hover,
-.sidebar nav a.active {
-  background: var(--primary);
-  color: var(--surface);
-}
-.sidebar nav a:hover i,
-.sidebar nav a.active i {
-  color: var(--surface);
-}
-.sidebar nav a span {
-  font-size: 0.95rem;
-}
 
- @media(max-width: 768px) {
+  aside#sidebar {
+      flex: 0 0 280px; 
+     position: sticky;
+      top: 0;
+      height: 100vh;
+      background: var(--surface);
+      box-shadow: 2px 0 12px rgba(0, 0, 0, 0.05);
+      transition: flex 0.3s ease, background 0.3s ease;
+      overflow: hidden;
+      z-index: 1000;
+      display: flex;
+      flex-direction: column;
+    }
+    aside#sidebar .logo {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      padding: 1rem;
+      font-size: 1.4rem;
+      font-weight: 700;
+      color: var(--primary);
+   }
+    aside#sidebar .logo svg {
+      width: 1.8rem;
+      height: 1.8rem;
+      fill: var(--primary);
+      transition: transform 0.3s ease;
+   }
+    aside#sidebar .logo:hover svg {
+     transform: scale(1.1);
+    }
+    aside#sidebar nav {
+      margin-top: 2rem;
+      display: flex;
+    flex-direction: column;
+     flex: 1;
+    }
+    aside#sidebar nav a {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      padding: 0.75rem 1rem;
+      border-radius: var(--radius);
+      color: var(--text);
+      font-weight: 500;
+      transition: background 0.3s ease, padding-left 0.3s ease, color 0.3s ease;
+    }
+    aside#sidebar nav a i {
+      font-size: 1.2rem;
+      width: 1.2rem;
+     text-align: center;
+    }
+    aside#sidebar nav a:hover,
+    aside#sidebar nav a.active {
+      background: var(--primary);
+      color: #fff;
+      padding-left: calc(1rem + 0.5rem);
+    }
+    aside#sidebar nav a.active {
+      font-weight: 700;
+    }
+   aside#sidebar.collapsed {
+      flex: 0 0 80px; /* same as --sidebar-collapsed-w */
+    }
+    aside#sidebar.collapsed .logo .logo-text,
+    aside#sidebar.collapsed nav a span {
+      display: none;
+    }
+    aside#sidebar.collapsed nav a {
+     justify-content: center;
+    }
+    #shrinkBtn {
+     position: absolute;
+      bottom: 1rem;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 36px;
+      height: 36px;
+      aspect-ratio: 1 / 1;
+      background: none;
+      color: var(--primary);
+      border: 2px solid var(--primary);
+    border-radius: 50%;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: color 0.3s ease, border-color 0.3s ease, transform 0.3s ease;
+    }
+    #shrinkBtn:hover {
+      color: var(--secondary);
+      border-color: var(--secondary);
+      transform: translateX(-50%) scale(1.1);
+    }
+    @media (max-width: 1024px) {
+      aside#sidebar {
+        position: fixed !important;
+        transform: translateX(-100%);
+        z-index: 900;
+        flex: 0 0 280px;
+      }
+      aside#sidebar.open {
+        transform: translateX(0);
+      }
+      header {
+        left: 0 !important;
+      }
+    }
+    @media (max-width: 640px) {
+      aside#sidebar:not(.open) {
+        display: none;
+      }
+    }
+@media(max-width: 768px) {
     .content {
          grid-template-columns: 1fr;
          padding: 1rem;
        }
-   .sidebar {
-        left: -260px;   
-        display: none;  
-      }
-      .sidebar {
-        display: none;
-      }
+  
     .main {
         margin-left: 0;
       }
@@ -164,53 +193,42 @@ html.dark .sidebar {
       background: var(--bg);
         margin-left: 260px; 
     }
-
-       .topbar {
-      position: sticky;       
+ header {
+      position: fixed;
       top: 0;
-      display: flex;
+      left: 280px;
+      right: 0;
+      height: 64px;
+      background: var(--surface);
+      border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+     display: flex;
       align-items: center;
       justify-content: space-between;
-      padding: 1rem 2rem;
-      background: var(--surface);
-      box-shadow: 0 2px 8px var(--shadow-light);
-      z-index: 5;
+      padding: 0 1rem;
+      z-index: 999;
+      transition: left 0.3s ease, background 0.3s ease;
     }
-    html.dark .topbar {
-      box-shadow: 0 2px 8px var(--shadow-dark);
+    aside#sidebar.collapsed ~ header {
+      left: 80px; /* same as --sidebar-collapsed-w */
     }
-    .topbar .welcome {
-      font-size: 1.25rem;
-      font-weight: 500;
-    }
-    .topbar .controls {
-      display: flex;
-      align-items: center;
-      gap: 1rem;
-    }
-    .topbar button {
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-      padding: 0.5rem 1rem;
-      border-radius: var(--radius);
-      background: var(--primary);
-      color: var(--surface);
-      font-weight: 500;
-      box-shadow: 0 2px 8px var(--shadow-light);
-    }
-    html.dark .topbar button {
-      box-shadow: 0 2px 8px var(--shadow-dark);
-    }
-    .topbar i {
+    header h1 {
       font-size: 1.5rem;
+      font-weight: 600;
       color: var(--text);
-      cursor: pointer;
     }
-    .topbar i:hover {
+    header .hamburger,
+    header .theme-toggle {
+      font-size: 1.4rem;
       color: var(--primary);
+      cursor: pointer;
+      transition: transform 0.3s ease, color 0.3s ease;
     }
-
+    header .hamburger:hover,
+    header .theme-toggle:hover {
+     transform: scale(1.1);
+      color: var(--secondary);
+    }
+    
       .content {
       padding: 2rem;
       max-width: var(--max-width);
@@ -500,34 +518,6 @@ html.dark .sidebar {
       color: var(--muted);
     }
 @media screen and (max-width: 480px) {
-  .sidebar {
-    position: fixed;
-    bottom: 0;
-    left: 0;
-    width: 100%;
-    height: auto;
-    flex-direction: row;
-    justify-content: space-around;
-    padding: 0.5rem 0;
-    box-shadow: 0 -2px 8px var(--shadow-light);
-    background: var(--surface);
-  }
-  .sidebar nav {
-    flex-direction: row;
-    width: 100%;
-    justify-content: space-around;
-    margin-top: 0;
-  }
-  .sidebar nav a {
-    flex-direction: column;
-    align-items: center;
-    padding: 0.5rem 0;
-    font-size: 0.75rem;
-  }
-  .sidebar nav a i {
-    font-size: 1rem;
-  }
-
   .main {
     margin-left: 0;
     padding-bottom: 3rem; 
@@ -672,37 +662,62 @@ html.dark .sidebar {
 </head>
 
 <body>
-  <aside class="sidebar">
-    <div class="logo">
-      <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+ <aside id="sidebar">
+   <div class="logo">
+      <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" fill="var(--secondary)">
         <polygon points="10,10 25,90 50,40 75,90 90,10 65,10 50,70 35,10"/>
-      </svg>
-      <span>Vitra AI</span>
+     </svg>
+      <span class="logo-text">Vitra AI</span>
     </div>
-    <nav>
-      <a href="#" class="active"><i class="fas fa-chart-pie"></i> Dashboard</a>
-      <a href="herbal.html"><i class="fas fa-leaf"></i> Herbal Medicine</a>
-      <a href="psychology.html"><i class="fas fa-brain"></i> Psychology & MH</a>
-      <a href="dietetics.html"><i class="fas fa-apple-alt"></i> Dietetics</a>
-      <a href="epharmacy.html"><i class="fas fa-pills"></i> E-Pharmacy</a>
-      <a href="consult.html"><i class="fas fa-calendar-check"></i> Consultation</a>
-      <a href="#" id="profileLink"><i class="fas fa-user-circle"></i> Profile</a>
+    <nav role="navigation">
+      <a href="#" class="active">
+        <i class="fas fa-chart-pie"></i>
+       <span>Dashboard</span>
+      </a>
+      <a href="herbal.html">
+       <i class="fas fa-leaf"></i>
+        <span>Herbal Medicine</span>
+      </a>
+      <a href="psychology.html">
+        <i class="fas fa-brain"></i>
+       <span>Psych &amp; Mental Health</span>
+      </a>
+      <a href="dietetics.html">
+        <i class="fas fa-utensils"></i>
+        <span>Dietetics</span>
+     </a>
+      <a href="epharmacy.html">
+        <i class="fas fa-pills"></i>
+        <span>E-Pharmacy</span>
+      </a>
+      <a href="consult.html">
+       <i class="fas fa-calendar-check"></i>
+        <span>Consultation</span>
+      </a>
+      <a href="#" id="profileLink">
+       <i class="fas fa-user-circle"></i>
+        <span>Profile</span>
+      </a>
     </nav>
+    <button id="shrinkBtn" aria-label="Toggle sidebar">
+      <i class="fas fa-angle-double-left"></i>
+    </button>
   </aside>
-
-  <div class="main">
-    <header class="topbar">
-      <button id="hamburgerBtn" class="hamburger-btn">
-  <i class="fas fa-bars"></i>
-</button>
-      <div class="welcome">Hello, <strong id="userName">User</strong>!</div>
-      <div class="controls">
-        <i id="themeToggle" class="fas fa-moon"></i>
+  
+   <div class="main">
+    <header>
+      <div style="display:flex; align-items:center; gap:1rem;">
+        <i id="hamburger" class="fas fa-bars hamburger" aria-label="Toggle navigation"></i>
+        <h1>Vitra AI Dashboard</h1>
+      </div>
+      <div style="display:flex; align-items:center; gap:1rem;">
+        <div class="welcome">Hello, <strong id="userName">User</strong>!</div>
+        <i id="themeToggle" class="fas fa-moon theme-toggle" aria-label="Toggle theme"></i>
         <button id="signOutBtn"><i class="fas fa-sign-out-alt"></i> Sign Out</button>
       </div>
     </header>
 
-    <section class="content">
+     <section class="content">
       <div class="filter-bar">
         <label for="startDate">From:</label>
         <input type="date" id="startDate" value="">
@@ -787,32 +802,49 @@ html.dark .sidebar {
 
   document.addEventListener('DOMContentLoaded', () => {
 
-const hamburgerBtn = document.getElementById('hamburgerBtn');
-const sidebar = document.querySelector('.sidebar');
-const sidebarOverlay = document.createElement('div');
 
-sidebarOverlay.style.position = 'fixed';
-sidebarOverlay.style.top = '0';
-sidebarOverlay.style.left = '0';
-sidebarOverlay.style.width = '100%';
-sidebarOverlay.style.height = '100%';
-sidebarOverlay.style.background = 'rgba(0,0,0,0.4)';
-sidebarOverlay.style.zIndex = '900';
-sidebarOverlay.style.display = 'none';
-document.body.appendChild(sidebarOverlay);
+const sidebar = document.getElementById("sidebar");
+    const shrinkBtn = document.getElementById("shrinkBtn");
+    const hamburger = document.getElementById("hamburger");
+    const header = document.querySelector("header");
 
-function openSidebar() {
-  sidebar.style.left = '0';
-  sidebarOverlay.style.display = 'block';
-}
-function closeSidebar() {
-  sidebar.style.left = '-260px';
-  sidebarOverlay.style.display = 'none';
-}
+    if (localStorage.getItem("sidebar-collapsed") === "true") {
+      sidebar.classList.add("collapsed");
+      shrinkBtn.querySelector("i").classList.replace("fa-angle-double-left", "fa-angle-double-right");
+      header.classList.add("sidebar-collapsed");
+    }
+    shrinkBtn.addEventListener("click", () => {
+      sidebar.classList.toggle("collapsed");
+      const icon = shrinkBtn.querySelector("i");
+      icon.classList.toggle("fa-angle-double-left");
+      icon.classList.toggle("fa-angle-double-right");
+      header.classList.toggle("sidebar-collapsed");
+     localStorage.setItem("sidebar-collapsed", sidebar.classList.contains("collapsed"));
+    });
 
-hamburgerBtn.addEventListener('click', openSidebar);
-sidebarOverlay.addEventListener('click', closeSidebar);
+    function updateHamburgerVisibility() {
+      hamburger.style.display = window.matchMedia("(max-width: 1024px)").matches ? "block" : "none";
+    }
+    window.matchMedia("(max-width: 1024px)").addListener(updateHamburgerVisibility);
+    updateHamburgerVisibility();
 
+    hamburger.addEventListener("click", e => {
+      e.stopPropagation();
+      sidebar.classList.toggle("open");
+    });
+    document.addEventListener("click", e => {
+      if (!sidebar.classList.contains("open")) return;
+     if (sidebar.contains(e.target) || hamburger.contains(e.target)) return;
+      sidebar.classList.remove("open");
+    });
+
+    document.querySelectorAll('aside#sidebar nav a').forEach(link => {
+      const linkHref = link.getAttribute("href").split("/").pop();
+      const pageNow = window.location.pathname.split("/").pop();
+      if (linkHref === pageNow) link.classList.add("active");
+      else link.classList.remove("active");
+    });
+   
         const themeToggle = document.getElementById('themeToggle');
     const signOutBtn = document.getElementById('signOutBtn');
     const userNameEl = document.getElementById('userName');
