@@ -4,13 +4,13 @@
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
   <title>Vitra AI – Dashboard</title>
-  <!-- Fonts & Icons -->
-  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;600;700&display=swap" rel="stylesheet">
+
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"/>
-  <!-- Chart.js -->
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  <!-- Firebase -->
-  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
 
   <style>
@@ -139,10 +139,7 @@
         margin-left: 240px; 
     }
 
-    /*──────────────────────────────────────────────────────────────────────────────
-      TOPBAR
-    ──────────────────────────────────────────────────────────────────────────────*/
-    .topbar {
+       .topbar {
       position: sticky;       
       top: 0;
       display: flex;
@@ -188,10 +185,7 @@
       color: var(--primary);
     }
 
-    /*──────────────────────────────────────────────────────────────────────────────
-      CONTENT GRID
-    ──────────────────────────────────────────────────────────────────────────────*/
-    .content {
+      .content {
       padding: 2rem;
       max-width: var(--max-width);
       margin: 0 auto;
@@ -206,10 +200,7 @@
       }
     }
 
-    /*──────────────────────────────────────────────────────────────────────────────
-      CARD
-    ──────────────────────────────────────────────────────────────────────────────*/
-    .card {
+       .card {
       background: var(--surface);
       border-radius: var(--radius);
       box-shadow: 0 2px 8px var(--shadow-light);
@@ -261,10 +252,7 @@
       transform: translateY(-2px);
     }
 
-    /*──────────────────────────────────────────────────────────────────────────────
-      CHART CARD
-    ──────────────────────────────────────────────────────────────────────────────*/
-    .chart-card {
+       .chart-card {
       grid-column: 1 / -1;
       background: var(--surface);
       border-radius: var(--radius);
@@ -292,10 +280,7 @@
       height: 300px;
     }
 
-    /*──────────────────────────────────────────────────────────────────────────────
-      DATE FILTER
-    ──────────────────────────────────────────────────────────────────────────────*/
-    .filter-bar {
+      .filter-bar {
       grid-column: 1 / -1;
       display: flex;
       gap: 1rem;
@@ -349,10 +334,7 @@
       box-shadow: 0 2px 8px var(--shadow-dark);
     }
 
-    /*──────────────────────────────────────────────────────────────────────────────
-      TOAST
-    ──────────────────────────────────────────────────────────────────────────────*/
-    .toast {
+       .toast {
       position: fixed;
       bottom: 1.5rem;
       left: 50%;
@@ -376,7 +358,6 @@
       opacity: 1;
     }
 
-      /*──────── PROFILE MODAL ────────*/
    #profileModal {
       position: fixed;
       top: 0;
@@ -384,7 +365,7 @@
       width: 100%;
       height: 100%;
       background: rgba(0,0,0,0.5);
-      display: none; /* ← Hide completely when hidden */
+      display: none; 
       align-items: center;
       justify-content: center;
       z-index: 50;
@@ -392,7 +373,7 @@
       transition: opacity 0.3s ease;
     }
     #profileModal:not([hidden]) {
-      display: flex;   /* ← Make it appear when not hidden */
+      display: flex;   
       opacity: 1;
     }
 
@@ -456,7 +437,7 @@
       transition: background 0.2s ease, transform 0.2s ease;
    }
      #profileModal button#saveProfileBtn:hover {
-      background: #3A62A8;             /* manually darker shade of --primary */
+      background: #3A62A8;             
       transform: translateY(-2px);
     }
 
@@ -476,7 +457,6 @@
       transform: scale(1.1);
     }
 
-    /* Ensure readability in dark mode */
     html.dark #profileModal .modal-content {
       background: var(--surface);
       color: var(--text);
@@ -498,7 +478,6 @@
 </head>
 
 <body>
-  <!-- SIDEBAR -->
   <aside class="sidebar">
     <div class="logo">
       <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
@@ -517,9 +496,7 @@
     </nav>
   </aside>
 
-  <!-- MAIN CONTENT -->
   <div class="main">
-    <!-- TOPBAR -->
     <header class="topbar">
       <div class="welcome">Hello, <strong id="userName">User</strong>!</div>
       <div class="controls">
@@ -528,9 +505,7 @@
       </div>
     </header>
 
-    <!-- CONTENT GRID -->
     <section class="content">
-      <!-- Date Filter Bar -->
       <div class="filter-bar">
         <label for="startDate">From:</label>
         <input type="date" id="startDate" value="">
@@ -539,7 +514,6 @@
         <button id="filterBtn"><i class="fas fa-filter"></i> Apply Filter</button>
       </div>
 
-      <!-- Card: Herbal Medicine Stats -->
       <div class="card">
         <h4>Herbal Medicine AI</h4>
         <div class="stat" id="herbalQueries">0</div>
@@ -547,7 +521,6 @@
         <a href="herbal.html"><i class="fas fa-seedling"></i> Go to Herbal</a>
       </div>
 
-      <!-- Card: Psychology & MH Stats -->
       <div class="card">
         <h4>Psychology & MH AI</h4>
         <div class="stat" id="psychQueries">0</div>
@@ -555,7 +528,6 @@
         <a href="psychology.html"><i class="fas fa-brain"></i> Go to Psychology</a>
       </div>
 
-      <!-- Card: Dietetics Stats -->
       <div class="card">
         <h4>Dietetics AI</h4>
         <div class="stat" id="dietQueries">0</div>
@@ -563,7 +535,6 @@
         <a href="dietetics.html"><i class="fas fa-utensils"></i> Go to Dietetics</a>
       </div>
 
-      <!-- Card: E-Pharmacy Stats -->
       <div class="card">
         <h4>E-Pharmacy AI</h4>
         <div class="stat" id="pharmacyQueries">0</div>
@@ -571,7 +542,6 @@
         <a href="epharmacy.html"><i class="fas fa-pills"></i> Go to E-Pharmacy</a>
       </div>
 
-      <!-- Card: Consultation Booking Stats -->
       <div class="card">
         <h4>Consult Booking AI</h4>
         <div class="stat" id="consultQueries">0</div>
@@ -579,7 +549,6 @@
         <a href="consult.html"><i class="fas fa-calendar-check"></i> Go to Consultation</a>
       </div>
 
-      <!-- Chart: Queries Distribution by Sector -->
       <div class="chart-card">
         <h4>Queries Distribution by Sector</h4>
         <div class="chart-container">
@@ -587,7 +556,6 @@
         </div>
       </div>
 
-      <!-- Chart: Daily Queries Over Time -->
       <div class="chart-card">
         <h4>Daily AI Queries (Last 7 Days)</h4>
         <div class="chart-container">
@@ -610,10 +578,7 @@
 
 
 <script>
-  // ──────────────────────────────────────────────────────────────────────────────
-  // FIREBASE INITIALIZATION
-  // ──────────────────────────────────────────────────────────────────────────────
-  const firebaseConfig = {
+   const firebaseConfig = {
     apiKey: "AIzaSyBhaYOcLMXuobCT-vaXr-zXTZnBfaheAIY",
     authDomain: "vitra-ai-712ea.firebaseapp.com",
     projectId: "vitra-ai-712ea",
@@ -624,8 +589,8 @@
   firebase.initializeApp(firebaseConfig);
 
   document.addEventListener('DOMContentLoaded', () => {
-    // ELEMENT REFERENCES
-    const themeToggle = document.getElementById('themeToggle');
+
+        const themeToggle = document.getElementById('themeToggle');
     const signOutBtn = document.getElementById('signOutBtn');
     const userNameEl = document.getElementById('userName');
     const profileLink = document.getElementById('profileLink');
@@ -639,14 +604,12 @@
     const endDateInput = document.getElementById('endDate');
     const filterBtn = document.getElementById('filterBtn');
 
-    // STATS ELEMENTS
     const herbalQueriesEl = document.getElementById('herbalQueries');
     const psychQueriesEl = document.getElementById('psychQueries');
     const dietQueriesEl = document.getElementById('dietQueries');
     const pharmacyQueriesEl = document.getElementById('pharmacyQueries');
     const consultQueriesEl = document.getElementById('consultQueries');
 
-    // AUTH STATE
     firebase.auth().onAuthStateChanged(user => {
       if (!user) return window.location.href = 'index.html';
       const display = user.displayName || "";
@@ -654,36 +617,29 @@
       profileNameInput.value = display;
     });
 
-    // THEME TOGGLE
     themeToggle.onclick = () => {
       document.documentElement.classList.toggle('dark');
       themeToggle.classList.toggle('fa-moon');
       themeToggle.classList.toggle('fa-sun');
     };
 
-    // SIGN OUT
     signOutBtn.onclick = () => {
       firebase.auth().signOut().then(() => {
         window.location.href = 'index.html';
       });
     };
 
-    // TOAST FUNCTION
     function showToast(message) {
       toastEl.textContent = message;
       toastEl.classList.add('visible');
       setTimeout(() => toastEl.classList.remove('visible'), 3000);
     }
 
-    // HELPER: GET CSS VARIABLE COLOR
     function varColor(name) {
       return getComputedStyle(document.documentElement).getPropertyValue(name).trim();
     }
 
-    // ────────────────────────────────────────────────────────────────────────────
-    // INITIAL DUMMY DATA STRUCTURE
-    // ────────────────────────────────────────────────────────────────────────────
-    let statsData = {
+       let statsData = {
       herbal: 0,
       psych: 0,
       diet: 0,
@@ -693,7 +649,6 @@
       labels: []
     };
 
-    // FUNCTION TO GENERATE LAST 7 DAYS LABELS
     function generateLast7Days() {
       const labels = [];
       for (let i = 6; i >= 0; i--) {
@@ -705,7 +660,6 @@
     }
     statsData.labels = generateLast7Days();
 
-    // DISPLAY STATS (reads total counters from localStorage)
     function displayStats() {
       statsData.herbal   = parseInt(localStorage.getItem('statHerbal'))   || 0;
       statsData.psych    = parseInt(localStorage.getItem('statPsych'))    || 0;
@@ -721,10 +675,6 @@
     }
     displayStats();
 
-    // ────────────────────────────────────────────────────────────────────────────
-    // CHARTS INITIALIZATION
-    // ────────────────────────────────────────────────────────────────────────────
-    // Distribution Doughnut Chart
     const distCtx = document.getElementById('distributionChart').getContext('2d');
     const distributionChart = new Chart(distCtx, {
       type: 'doughnut',
@@ -759,7 +709,6 @@
       }
     });
 
-    // Daily Line Chart
     const dailyCtx = document.getElementById('dailyChart').getContext('2d');
     const dailyChart = new Chart(dailyCtx, {
       type: 'line',
@@ -794,9 +743,6 @@
       }
     });
 
-    // ────────────────────────────────────────────────────────────────────────────
-    // FILTER FUNCTIONALITY (DATES)
-    // ────────────────────────────────────────────────────────────────────────────
     filterBtn.onclick = () => {
       const start = startDateInput.value;
       const end   = endDateInput.value;
@@ -812,7 +758,6 @@
         return;
       }
 
-      // Helper: count how many ISO‐timestamps in localStorage[key] fall in [startDate, endDate]
       function countInRange(key) {
         const raw = localStorage.getItem(key) || '[]';
         const arr = JSON.parse(raw);
@@ -822,14 +767,12 @@
         }).length;
       }
 
-      // Rebuild sector counts based on timestamps arrays
       statsData.herbal   = countInRange('timestampsHerbal');
       statsData.psych    = countInRange('timestampsPsych');
       statsData.diet     = countInRange('timestampsDiet');
       statsData.pharmacy = countInRange('timestampsPharmacy');
       statsData.consult  = countInRange('timestampsConsult');
 
-      // Build “last 7 days” data
       const last7Counts = [];
       const labels      = [];
       for (let i = 6; i >= 0; i--) {
@@ -860,14 +803,12 @@
       statsData.daily  = last7Counts;
       statsData.labels = labels;
 
-      // Update the “total” cards
       herbalQueriesEl.textContent   = statsData.herbal;
       psychQueriesEl.textContent    = statsData.psych;
       dietQueriesEl.textContent     = statsData.diet;
       pharmacyQueriesEl.textContent = statsData.pharmacy;
       consultQueriesEl.textContent  = statsData.consult;
 
-      // Update the doughnut chart
       distributionChart.data.datasets[0].data = [
         statsData.herbal,
         statsData.psych,
@@ -877,7 +818,6 @@
       ];
       distributionChart.update();
 
-      // Update the line chart
       dailyChart.data.labels           = statsData.labels;
       dailyChart.data.datasets[0].data = statsData.daily;
       dailyChart.update();
@@ -890,12 +830,10 @@
       profileNameInput.focus();
     };
 
-    // Close Profile Modal
     closeProfileModal.onclick = () => {
       profileModal.hidden = true;
     };
 
-    // Save Profile Changes
     saveProfileBtn.onclick = async () => {
       const newName = profileNameInput.value.trim();
       if (!newName) {
@@ -907,7 +845,6 @@
         try {
           await user.updateProfile({ displayName: newName });
           userNameEl.textContent = newName;
-          // Persist in localStorage too
           localStorage.setItem('displayName', newName);
           showToast('Profile updated');
           profileModal.hidden = true;
@@ -918,7 +855,6 @@
       }
     };
 
-    // On page load, if user has persisted displayName in localStorage, set it
     const storedName = localStorage.getItem('displayName');
     if (storedName) {
       userNameEl.textContent = storedName;
