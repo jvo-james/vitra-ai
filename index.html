@@ -845,6 +845,8 @@ html.dark .service-card .info ul li {
   AOS.init({ duration: 800 });
 
   document.addEventListener('DOMContentLoaded', () => {
+    
+   document.getElementById('loadingOverlay').style.display = 'none';
 
         const themeToggle = document.getElementById('themeToggle');
     themeToggle.addEventListener('click', () => {
@@ -941,6 +943,7 @@ html.dark .service-card .info ul li {
     const signInMsg  = document.getElementById('signInMsg');
     signInForm.addEventListener('submit', e => {
       e.preventDefault();
+       document.getElementById('loadingOverlay').style.display = 'flex';
       signInMsg.textContent = '';
       const email = document.getElementById('signInEmail').value;
       const pass  = document.getElementById('signInPass').value;
@@ -948,6 +951,7 @@ html.dark .service-card .info ul li {
       firebase.auth().signInWithEmailAndPassword(email, pass)
         .then(({ user }) => {
           if (!user.emailVerified) {
+            document.getElementById('loadingOverlay').style.display = 'none';
             signInMsg.style.color = 'orange';
             signInMsg.textContent = 'Please verify your email before signing in.';
             return firebase.auth().signOut();
@@ -957,6 +961,7 @@ html.dark .service-card .info ul li {
           window.location.href = 'dashboard.html?mode=signin';
         })
        .catch(err => {
+         document.getElementById('loadingOverlay').style.display = 'none';
           signInMsg.style.color = 'red';
           switch (err.code) {
             case 'auth/invalid-email':
