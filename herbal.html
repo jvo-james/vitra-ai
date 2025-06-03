@@ -2604,19 +2604,14 @@ Add any additional helpful notes in a coherent, single paragraph.
         localStorage.setItem("idenResult", panel.innerHTML);
         addClose(panel);
         addTools(panel);
-      } catch (err) {
-        // 1) Log full error in console for debugging
-        console.error("Vision or AI call failed:", err);
-
-        // 2) Show the actual message (or full error) in the UI
-        const msg = err.message || JSON.stringify(err);
-        panel.innerHTML = `
-          <div class="result-content">
-            😕 Something went wrong.<br>
-            <em>${escapeHtml(msg)}</em>
-          </div>`;
-        addClose(panel);
-      }
+     } catch (err) {
+      panel.innerHTML = `
+        <div class="result-content">
+         😕 An error occurred. Please type in your description instead.
+        </div>
+      `;
+     addClose(panel);
+    }
     };
 
     // ─── SYMPTOM CHECKER ─────────────────────────────────────────────────────
