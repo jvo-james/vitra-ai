@@ -2208,20 +2208,30 @@ key: "pk_test_297586e51710e83d3c159bfe71ff45c7e23411fa",
       },
       callback: function(response) {
 
-          const itemLines = cartItems
-          .map(itm => `${itm.name} — ₵${itm.price.toFixed(2)}`)
-          .join("<br>");
-        confirmText.innerHTML = `
-          Thank you, <strong>${escapeHtml(name)}</strong>!<br>
-          You have successfully purchased:<br>
-          ${itemLines}<br><br>
-          <strong>Total Paid: ₵${totalGHS.toFixed(2)}</strong><br>
-          Transaction Reference: <em>${response.reference}</em><br>
-          Delivery Address: <em>${escapeHtml(address)}</em><br>
-          Contact: <em>${escapeHtml(phone)}</em><br>
-          Check your email (${escapeHtml(email)}) for the receipt.
-        `;
-        paymentModal.hidden = false;
+    const prev = JSON.parse(localStorage.getItem("purchasedDrugs") || "[]");
+    cartItems.forEach(itm => {
+      prev.push({
+        name: itm.name,
+        price: itm.price,
+        date: new Date().toISOString()
+      });
+    });
+    localStorage.setItem("purchasedDrugs", JSON.stringify(prev));
+
+    const itemLines = cartItems
+      .map(itm => `${itm.name} — ₵${itm.price.toFixed(2)}`)
+      .join("<br>");
+    confirmText.innerHTML = `
+      Thank you, <strong>${escapeHtml(name)}</strong>!<br>
+      You have successfully purchased:<br>
+      ${itemLines}<br><br>
+      <strong>Total Paid: ₵${totalGHS.toFixed(2)}</strong><br>
+      Transaction Reference: <em>${response.reference}</em><br>
+      Delivery Address: <em>${escapeHtml(address)}</em><br>
+      Contact: <em>${escapeHtml(phone)}</em><br>
+      Check your email (${escapeHtml(email)}) for the receipt.
+    `;
+    paymentModal.hidden = false;
       }
     });
     handler.openIframe();
