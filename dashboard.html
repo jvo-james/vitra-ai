@@ -13,868 +13,1344 @@
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
 
-  <style>
-      :root {
-      --primary: #4A78C4;
-      --accent: #FFA500;
-      --bg: #F0F4FF;
-      --surface: #FFFFFF;
-      --text: #1A1A1A;
-      --muted: #555555;
-      --shadow-light: rgba(0,0,0,0.1);
-      --shadow-dark: rgba(0,0,0,0.4);
-      --radius: 1rem;
-      --padding: 1.5rem;
-      --gap: 1rem;
-      --max-width: 1200px;
-        --secondary: #FFFFFF; 
-        --primary-rgb: 74,120,196;  
-         --sidebar-w: 280px;
-  --sidebar-collapsed-w: 80px;
-    }
-    html.dark {
-      --bg: #1F2233;
-      --surface: #2B2E44;
-      --text: #E0E0E0;
-      --muted: #888888;
-      --shadow-light: rgba(0,0,0,0.4);
-      --shadow-dark: rgba(0,0,0,0.7);
-       --sidebar-w: 280px;
-  --sidebar-collapsed-w: 80px;
-  --header-h: 64px;
+<style>
+  :root {
+    --primary: #4A78C4;
+    --secondary: #FFFFFF;
+    --accent: #FF5722;
+    --bg: #F7FAFE;
+    --surface: #FFFFFF;
+    --text: #1A1A1A;
+    --muted: #555555;
+    --radius: 0.75rem;
+    --padding: 1.5rem;
+    --gap: 1rem;
+    --max-width: 1200px;
+    --shadow-light: 0 2px 8px rgba(0, 0, 0, 0.1);
+    --shadow-dark: 0 2px 8px rgba(0, 0, 0, 0.4);
+    --transition: 0.3s ease;
+  }
 
-    }
+  html.dark {
+    --bg: #1F2233;
+    --surface: #2B2E44;
+    --text: #E0E0E0;
+    --muted: #888888;
+    --shadow-light: 0 2px 8px rgba(0, 0, 0, 0.4);
+    --shadow-dark: 0 2px 8px rgba(255, 255, 255, 0.1);
+  }
 
-      *, *::before, *::after {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-      transition: background-color .3s ease, color .3s ease, box-shadow .3s ease;
-    }
-    html, body {
-      height: 100%;
-      width: 100%;
-      background: var(--bg);
-      color: var(--text);
-      font-family: 'Montserrat', sans-serif;
-    }
-    a { text-decoration: none; color: inherit; }
-    button { font: inherit; cursor: pointer; background: none; border: none; }
+  *, *::before, *::after {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    transition: var(--transition);
+  }
 
-     body {
-      display: flex;
-      min-height: 100vh;
-      overflow-x: hidden;
-    }
+  html, body {
+    width: 100%;
+    height: 100%;
+    font-family: 'Montserrat', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    scroll-behavior: smooth;
+    line-height: 1.6;
+  }
 
-  aside#sidebar {
-       flex: 0 0 var(--sidebar-w);
-      position: fixed;
-      top: 0;
-      left: 0;
-      height: 100vh;
-      background: var(--surface);
-      box-shadow: 2px 0 12px var(--shadow-light);
-      transition: flex 0.3s ease, background 0.3s ease, box-shadow 0.3s ease;
-      overflow: hidden;
-      z-index: 1000;
-      display: flex;
-      flex-direction: column;
-    }
-    aside#sidebar .logo {
-      display: flex;
-      align-items: center;
-      gap: 0.75rem;
-      padding: 1rem;
-      font-size: 1.4rem;
-      font-weight: 700;
-      color: var(--primary);
-   }
-    aside#sidebar .logo svg {
-      width: 1.8rem;
-      height: 1.8rem;
-      fill: var(--primary);
-      transition: transform 0.3s ease;
-   }
-    aside#sidebar .logo:hover svg {
-     transform: scale(1.1);
-    }
-    aside#sidebar nav {
-      margin-top: 2rem;
-      display: flex;
-    flex-direction: column;
-     flex: 1;
-    }
-    aside#sidebar nav a {
-      display: flex;
-      align-items: center;
-      gap: 1rem;
-      padding: 0.75rem 1rem;
-      border-radius: var(--radius);
-      color: var(--text);
-      font-weight: 500;
-      transition: background 0.3s ease, padding-left 0.3s ease, color 0.3s ease;
-    }
-    aside#sidebar nav a i {
-      font-size: 1.2rem;
-      width: 1.2rem;
-     text-align: center;
-    }
-    aside#sidebar nav a:hover,
-    aside#sidebar nav a.active {
-      background: var(--primary);
-      color: #fff;
-      padding-left: calc(1rem + 0.5rem);
-    }
-    aside#sidebar nav a.active {
-      font-weight: 700;
-    }
-   aside#sidebar.collapsed {
-      flex: 0 0 var(--sidebar-collapsed-w);
-    }
-    aside#sidebar.collapsed .logo .logo-text,
-    aside#sidebar.collapsed nav a span {
+  a {
+    color: inherit;
+    text-decoration: none;
+  }
+
+  a:hover {
+    color: var(--primary);
+  }
+
+  img {
+    max-width: 100%;
+    display: block;
+  }
+
+  ul {
+    list-style: none;
+  }
+
+  button {
+    font: inherit;
+    cursor: pointer;
+    border: none;
+    background: none;
+  }
+
+  input, select, textarea {
+    font: inherit;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    color: var(--primary);
+  }
+
+  p {
+    color: var(--text);
+    margin-bottom: var(--gap);
+  }
+
+    .navbar {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    background: var(--surface);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.75rem var(--padding);
+    box-shadow: var(--shadow);
+    z-index: 1000;
+  }
+
+  .navbar .logo {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .navbar .logo svg {
+    width: 2.5rem;
+    height: 2.5rem;
+    fill: var(--primary);
+  }
+
+  .navbar .logo .logo-text {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: var(--primary);
+  }
+
+  .navbar ul {
+    display: flex;
+    gap: var(--gap);
+  }
+
+  .navbar ul li a {
+    padding: 0.5rem;
+    font-weight: 500;
+    color: var(--text);
+    transition: color 0.2s;
+  }
+
+  .navbar ul li a:hover {
+    color: var(--primary);
+  }
+
+  .navbar .auth {
+    display: flex;
+    gap: 0.75rem;
+  }
+
+  .navbar .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 1rem;
+    border-radius: var(--radius);
+    font-weight: 500;
+    transition: background 0.2s, transform 0.2s;
+  }
+
+  .btn-primary {
+    background: var(--primary);
+    color: #fff;
+  }
+
+  .btn-primary:hover {
+    background: #3A62A8;
+    transform: translateY(-2px);
+  }
+
+  .btn-secondary {
+    background: transparent;
+    color: var(--primary);
+    border: 2px solid var(--primary);
+  }
+
+  .btn-secondary:hover {
+    background: var(--primary);
+    color: var(--secondary);
+    transform: translateY(-2px);
+  }
+
+  #themeToggle {
+    font-size: 1.2rem;
+    color: var(--muted);
+    cursor: pointer;
+    margin-left: var(--gap);
+    transition: color 0.2s;
+  }
+
+  #themeToggle:hover {
+    color: var(--primary);
+  }
+
+  .hamburger {
+    display: none;
+    font-size: 1.5rem;
+    cursor: pointer;
+    color: var(--text);
+  }
+
+  @media (max-width: 768px) {
+    .navbar ul,
+    .navbar .auth {
       display: none;
     }
-    aside#sidebar.collapsed nav a {
-     justify-content: center;
+    .hamburger {
+      display: block;
     }
-    aside#sidebar nav a:hover,
-aside#sidebar nav a.active {
-  background: var(--primary);
-  color: #fff;
-  padding-left: calc(1rem + 0.5rem);
-}
+  }
 
-aside#sidebar nav a.active {
-  font-weight: 700;
-}
-    #shrinkBtn {
-     position: absolute;
-      bottom: 1rem;
-      left: 50%;
-      transform: translateX(-50%);
-      width: 36px;
-      height: 36px;
-      aspect-ratio: 1 / 1;
-      background: none;
-      color: var(--primary);
-      border: 2px solid var(--primary);
-    border-radius: 50%;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      transition: color 0.3s ease, border-color 0.3s ease, transform 0.3s ease;
-    }
-    #shrinkBtn:hover {
-      color: var(--secondary);
-      border-color: var(--secondary);
-      transform: translateX(-50%) scale(1.1);
-    }
-    @media (max-width: 1024px) {
-      aside#sidebar {
-        position: fixed !important;
-        transform: translateX(-100%);
-        z-index: 900;
-        flex: 0 0 280px;
-      }
-      aside#sidebar.open {
-        transform: translateX(0);
-      }
-      header {
-        left: 0 !important;
-      }
-    }
-    @media (max-width: 640px) {
-      aside#sidebar:not(.open) {
-        display: none;
-      }
-    }
-@media(max-width: 768px) {
-    .content {
-         grid-template-columns: 1fr;
-         padding: 1rem;
-       }
-  
-    .main {
-        margin-left: 0;
-      }
-      .topbar {
-        justify-content: center;
-      } }
-      .main {
-     flex: 1;
-      display: flex;
+    .sidebar-overlay {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 900;
+    display: none;
+    opacity: 0;
+    transition: opacity var(--transition);
+  }
+
+  .sidebar-overlay.show {
+    display: block;
+    opacity: 1;
+  }
+
+  .sidebar {
+    position: fixed;
+    top: 0; left: -260px;
+    width: 260px; height: 100%;
+    background: var(--surface);
+    color: var(--text);
+    padding: 2rem 1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    box-shadow: var(--shadow-light);
+    transition: left var(--transition);
+    z-index: 1000;
+  }
+
+  html.dark .sidebar {
+    background: var(--surface);
+    box-shadow: var(--shadow-dark);
+  }
+
+  .sidebar.show {
+    left: 0;
+  }
+
+  .sidebar-nav a {
+    display: block;
+    padding: 0.75rem 0.5rem;
+    font-size: 1.2rem;
+    color: var(--text);
+    border-radius: var(--radius);
+    transition: background 0.2s, color 0.2s;
+  }
+
+  .sidebar-nav a:hover {
+    background: rgba(74, 120, 196, 0.1);
+    color: var(--primary);
+  }
+
+  .sidebar-auth {
+    margin-top: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  .sidebar-auth button {
+    width: 100%;
+    padding: 0.75rem;
+    justify-content: center;
+    box-shadow: var(--shadow-light);
+  }
+
+  html.dark .sidebar-auth button {
+    box-shadow: var(--shadow-dark);
+  }
+
+  .sidebar-theme {
+    margin-top: 1rem;
+    text-align: center;
+    font-size: 1.5rem;
+    cursor: pointer;
+    color: var(--muted);
+  }
+
+  .sidebar-theme:hover {
+    color: var(--primary);
+  }
+
+  main {
+    margin: 0 auto;
+    padding: calc(var(--padding) + 4rem) var(--padding) var(--padding);
+    max-width: var(--max-width);
+  }
+
+  section {
+    margin-bottom: 3rem;
+  }
+
+  h2 {
+    font-size: 2rem;
+    margin-bottom: 1rem;
+    color: var(--primary);
+  }
+
+  #greetingSection {
+    text-align: center;
+    margin-bottom: 2rem;
+  }
+
+  #greetingSection h2 {
+    font-size: 2.25rem;
+    margin-bottom: 0.5rem;
+  }
+
+  #greetingSection p {
+    font-size: 1rem;
+    color: var(--muted);
+  }
+
+  #quickAccess {
+    background: var(--surface);
+    padding: 3rem 0;
+    border-radius: var(--radius);
+    box-shadow: var(--shadow-light);
+  }
+
+  html.dark #quickAccess {
+    background: var(--surface);
+    box-shadow: var(--shadow-dark);
+  }
+
+  #quickAccess .quick-access-inner {
+    max-width: var(--max-width);
+    margin: 0 auto;
+    text-align: center;
+    padding: 0 var(--padding);
+  }
+
+  #quickAccess h2 {
+    font-size: 2rem;
+    margin-bottom: 1.5rem;
+    color: var(--text);
+  }
+
+  #quickAccess .quick-buttons {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+    justify-content: center;
+  }
+
+  #quickAccess .quick-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 1rem 1.5rem;
+    border-radius: var(--radius);
+    font-weight: 600;
+    font-size: 1rem;
+    color: var(--secondary);
+    background: var(--primary);
+    transition: background 0.2s, transform 0.2s;
+    box-shadow: var(--shadow-light);
+  }
+
+  html.dark #quickAccess .quick-btn {
+    box-shadow: var(--shadow-dark);
+  }
+
+  #quickAccess .quick-btn.btn-secondary {
+    background: var(--secondary);
+    color: var(--primary);
+    border: 2px solid var(--primary);
+  }
+
+  #quickAccess .quick-btn i {
+    font-size: 1.25rem;
+  }
+
+  #quickAccess .quick-btn:hover {
+    background: #3A62A8;
+    transform: translateY(-2px);
+  }
+
+  @media (max-width: 600px) {
+    #quickAccess .quick-buttons {
       flex-direction: column;
-      background: var(--bg);
-      padding-top: var(--header-h);
-      margin-left: var(--sidebar-w);
-      transition: margin-left 0.3s ease;
+      gap: 0.75rem;
     }
-  aside#sidebar.collapsed ~ .main {
-      margin-left: var(--sidebar-collapsed-w);
-    }
- header {
-     position: fixed;
-      top: 0;
-      left: var(--sidebar-w);
-      right: 0;
-      height: var(--header-h);
-      background: var(--surface);
-      border-bottom: 1px solid rgba(0, 0, 0, 0.05);
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 0 var(--padding);
-      z-index: 999;
-      transition: left 0.3s ease, background 0.3s ease, box-shadow 0.3s ease;
-      box-shadow: 0 2px 8px var(--shadow-light);
-    }
-  html.dark header {
-      box-shadow: 0 2px 8px var(--shadow-dark);
-    }
-  aside#sidebar.collapsed ~ header {
-      left: var(--sidebar-collapsed-w);
-    }
-    header h1 {
-      font-size: 1.5rem;
-      font-weight: 600;
-      color: var(--text);
-    }
-    header .hamburger,
-    header .theme-toggle {
-      font-size: 1.4rem;
-      color: var(--primary);
-      cursor: pointer;
-      transition: transform 0.3s ease, color 0.3s ease;
-    }
-    header .hamburger:hover,
-    header .theme-toggle:hover {
-     transform: scale(1.1);
-      color: var(--secondary);
-    }
-    
-      .content {
-      padding: 2rem;
-      max-width: var(--max-width);
-      margin: 0 auto;
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-      gap: var(--gap);
-    }
-    @media(max-width: 768px) {
-      .content {
-        grid-template-columns: 1fr;
-        padding: 1rem;
-      }
-    }
-
-       .card {
-      background: var(--surface);
-      border-radius: var(--radius);
-      box-shadow: 0 2px 8px var(--shadow-light);
-      padding: var(--padding);
-      display: flex;
-      flex-direction: column;
-      transition: transform .2s ease, box-shadow .2s ease;
-    }
-    html.dark .card {
-      box-shadow: 0 2px 8px var(--shadow-dark);
-    }
-    .card:hover {
-      transform: translateY(-4px);
-      box-shadow: 0 4px 16px var(--shadow-light);
-    }
-    html.dark .card:hover {
-      box-shadow: 0 4px 16px var(--shadow-dark);
-    }
-    .card h4 {
-      margin-bottom: 1rem;
-      font-size: 1.25rem;
-      color: var(--text);
-    }
-    .card p {
-      margin-bottom: 1rem;
-      color: var(--muted);
-      flex: 1;
-    }
-    .card .stat {
-      font-size: 2rem;
-      font-weight: 600;
-      color: var(--primary);
-      margin-bottom: 0.5rem;
-    }
-    .card a {
-      margin-top: auto;
-      display: inline-flex;
-      align-items: center;
-      gap: 0.5rem;
-      padding: 0.5rem 1rem;
-      background: var(--primary);
-      color: var(--surface);
-      border-radius: var(--radius);
-      font-weight: 500;
-      transition: background-color .2s, transform .2s;
-    }
-    .card a:hover {
-      background: var(--accent);
-      transform: translateY(-2px);
-    }
-
-       .chart-card {
-      background: var(--surface);
-      border-radius: var(--radius);
-      box-shadow: 0 2px 8px var(--shadow-light);
-      padding: var(--padding);
-      transition: transform .2s, box-shadow .2s;
-    }
-    html.dark .chart-card {
-      box-shadow: 0 2px 8px var(--shadow-dark);
-    }
-    .chart-card:hover {
-      transform: translateY(-4px);
-      box-shadow: 0 4px 16px var(--shadow-light);
-    }
-    html.dark .chart-card:hover {
-      box-shadow: 0 4px 16px var(--shadow-dark);
-    }
-    .chart-card h4 {
-      margin-bottom: 1rem;
-      font-size: 1.5rem;
-      color: var(--text);
-    }
-  .chart-container {
+    #quickAccess .quick-btn {
       width: 100%;
-      height: 240px;
-      transition: height 0.3s ease;
+      justify-content: center;
     }
+  }
+
+  .dashboard-section {
+    background: var(--surface);
+    border-radius: var(--radius);
+    padding: var(--padding);
+    box-shadow: var(--shadow-light);
+    margin-bottom: 2rem;
+  }
+
+  html.dark .dashboard-section {
+    background: var(--surface);
+    box-shadow: var(--shadow-dark);
+  }
+
+  .dashboard-section h3 {
+    font-size: 1.5rem;
+    margin-bottom: 1rem;
+    color: var(--primary);
+  }
+
+  .dashboard-section .card {
+    display: flex;
+    align-items: center;
+    gap: var(--gap);
+    background: var(--bg);
+    border-radius: var(--radius);
+    padding: 1rem;
+    margin-bottom: 1rem;
+    box-shadow: var(--shadow-light);
+    position: relative;
+  }
+
+  html.dark .dashboard-section .card {
+    background: var(--surface);
+    box-shadow: var(--shadow-dark);
+  }
+
+  .dashboard-section .card:last-child {
+    margin-bottom: 0;
+  }
+
+  .dashboard-section .card i {
+    font-size: 1.75rem;
+    color: var(--primary);
+  }
+
+  .dashboard-section .card .details {
+    flex: 1;
+  }
+
+  .dashboard-section .card .details h4 {
+    font-size: 1.1rem;
+    color: var(--text);
+    margin-bottom: 0.25rem;
+    font-weight: 600;
+  }
+
+  .dashboard-section .card .details p {
+    font-size: 0.95rem;
+    color: var(--muted);
+  }
+
+  .dashboard-section .card .actions {
+    display: flex;
+    gap: 0.5rem;
+  }
+
+  .dashboard-section .card .btn-reschedule,
+  .dashboard-section .card .btn-cancel {
+    background: var(--primary);
+    color: #fff;
+    width: 36px;
+    height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    transition: background var(--transition), transform var(--transition);
+    box-shadow: var(--shadow-light);
+  }
+
+  html.dark .dashboard-section .card .btn-reschedule,
+  html.dark .dashboard-section .card .btn-cancel {
+    box-shadow: var(--shadow-dark);
+  }
+
+  .dashboard-section .card .btn-reschedule i,
+  .dashboard-section .card .btn-cancel i {
+    font-size: 1rem;
+  }
+
+  .dashboard-section .card .btn-reschedule:hover {
+    background: #3A62A8;
+    transform: translateY(-2px);
+  }
+
+  .dashboard-section .card .btn-cancel:hover {
+    background: #D4724F;
+    transform: translateY(-2px);
+  }
+
+  #appointmentsContainer {
+    margin-top: 1rem;
+  }
+  #appointmentsContainer p {
+    text-align: center;
+    color: var(--muted);
+    font-size: 1rem;
+    margin-top: 1rem;
+  }
+
+  #prescriptionsContainer {
+    margin-top: 1rem;
+  }
+  #prescriptionsContainer .card {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: var(--bg);
+    padding: 1rem;
+    border-radius: var(--radius);
+    box-shadow: var(--shadow-light);
+    margin-bottom: 1rem;
+  }
+  html.dark #prescriptionsContainer .card {
+    background: var(--surface);
+    box-shadow: var(--shadow-dark);
+  }
+  #prescriptionsContainer .card .details h4 {
+    font-size: 1.1rem;
+    color: var(--text);
+    margin-bottom: 0.25rem;
+    font-weight: 600;
+  }
+  #prescriptionsContainer .card .details p {
+    font-size: 0.95rem;
+    color: var(--muted);
+  }
+  #prescriptionsContainer .card .actions button {
+    background: var(--primary);
+    color: #fff;
+    padding: 0.5rem 1rem;
+    border-radius: var(--radius);
+    font-size: 0.9rem;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    transition: background 0.2s, transform 0.2s;
+    box-shadow: var(--shadow-light);
+  }
+  html.dark #prescriptionsContainer .card .actions button {
+    box-shadow: var(--shadow-dark);
+  }
+  #prescriptionsContainer .card .actions button:hover {
+    background: #3A62A8;
+    transform: translateY(-2px);
+  }
+  #prescriptionsContainer p {
+    text-align: center;
+    color: var(--muted);
+    margin-top: 1rem;
+  }
+
+  #nutritionContainer {
+    margin-top: 1rem;
+    text-align: center;
+    font-size: 1rem;
+    background: var(--surface);
+    padding: var(--padding);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow-light);
+  }
+  html.dark #nutritionContainer {
+    background: var(--surface);
+    box-shadow: var(--shadow-dark);
+  }
+  #nutritionContainer p {
+    margin-bottom: 0.75rem;
+    color: var(--text);
+    font-weight: 500;
+  }
+  #nutritionContainer a.btn-primary {
+    margin-top: 0.75rem;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  #insightsContainer {
+    margin-top: 1rem;
+  }
+  #insightsContainer .card {
+    flex-direction: column;
+    align-items: flex-start;
+    background: var(--surface);
+    padding: var(--padding);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow-light);
+    margin-bottom: 1rem;
+  }
+  html.dark #insightsContainer .card {
+    background: var(--surface);
+    box-shadow: var(--shadow-dark);
+  }
+  #insightsContainer .card .details h4 {
+    font-size: 1.1rem;
+    margin-bottom: 0.5rem;
+    color: var(--text);
+    font-weight: 600;
+  }
+  #insightsContainer .card .details p {
+    font-size: 0.95rem;
+    margin-bottom: 0.75rem;
+    color: var(--muted);
+  }
+  #insightsContainer .card a.btn-secondary {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.95rem;
+    margin-top: 0.5rem;
+  }
+
+  .filter-bar {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+    align-items: center;
+    background: var(--surface);
+    padding: 1rem;
+    border-radius: var(--radius);
+    box-shadow: var(--shadow-light);
+    margin-bottom: var(--gap);
+  }
+  html.dark .filter-bar {
+    background: var(--surface);
+    box-shadow: var(--shadow-dark);
+  }
+  .filter-bar label {
+    font-weight: 500;
+    color: var(--text);
+  }
+  .filter-bar input {
+    padding: 0.5rem;
+    border: 1px solid var(--muted);
+    border-radius: var(--radius);
+    background: var(--bg);
+    color: var(--text);
+    font-size: 1rem;
+    transition: border-color 0.2s, box-shadow 0.2s;
+    min-width: 120px;
+  }
+  .filter-bar input:focus {
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(74, 120, 196, 0.3);
+    outline: none;
+  }
+  html.dark .filter-bar input {
+    background: var(--surface);
+    border-color: var(--muted);
+    color: var(--text);
+  }
+  .filter-bar button {
+    padding: 0.6rem 1.2rem;
+    background: var(--primary);
+    color: var(--secondary);
+    border-radius: var(--radius);
+    font-weight: 500;
+    box-shadow: var(--shadow-light);
+    transition: background-color 0.2s, transform 0.2s;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+  html.dark .filter-bar button {
+    box-shadow: var(--shadow-dark);
+  }
+  .filter-bar button:hover {
+    background: var(--accent);
+    transform: translateY(-2px);
+  }
+
+  .content {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: var(--gap);
+    margin-top: var(--gap);
+  }
+  .content .card {
+    background: var(--surface);
+    padding: var(--padding);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow-light);
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    transition: transform var(--transition), box-shadow var(--transition);
+  }
+  html.dark .content .card {
+    background: var(--surface);
+    box-shadow: var(--shadow-dark);
+  }
+  .content .card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+  }
+  .content .card h4 {
+    font-size: 1.25rem;
+    color: var(--text);
+    margin-bottom: 0.5rem;
+    font-weight: 600;
+  }
+  .content .card .stat {
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--primary);
+  }
+  .content .card p {
+    color: var(--muted);
+    font-size: 0.95rem;
+  }
+  .content .card a {
+    margin-top: auto;
+    align-self: flex-start;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: var(--primary);
+    font-weight: 500;
+    transition: color 0.2s;
+  }
+  .content .card a i {
+    font-size: 1rem;
+  }
+  .content .card a:hover {
+    color: var(--accent);
+  }
+
+  .charts-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--gap);
+    padding: var(--padding);
+  }
+  .charts-row .chart-card {
+    background: var(--surface);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow-light);
+    padding: var(--padding);
+    flex: 1 1 300px;
+    display: flex;
+    flex-direction: column;
+    gap: var(--gap);
+  }
+  html.dark .charts-row .chart-card {
+    background: var(--surface);
+    box-shadow: var(--shadow-dark);
+  }
+  .chart-card h4 {
+    font-size: 1.25rem;
+    color: var(--text);
+    margin-bottom: 0.75rem;
+    font-weight: 600;
+  }
+  .chart-container {
+    position: relative;
+    width: 100%;
+    height: 250px;
+  }
   @media (max-width: 768px) {
+    .charts-row {
+      flex-direction: column;
+      padding: var(--padding) 0;
+    }
+    .charts-row .chart-card {
+      width: 100%;
+    }
+  }
+
+  .toast {
+    position: fixed;
+    bottom: 1.5rem;
+    left: 50%;
+    transform: translateX(-50%) translateY(100%);
+    background: var(--primary);
+    color: var(--secondary);
+    padding: 0.75rem 1.5rem;
+    border-radius: var(--radius);
+    box-shadow: var(--shadow-light);
+    opacity: 0;
+    pointer-events: none;
+    transition: transform 0.3s ease, opacity 0.3s ease;
+    z-index: 200;
+    font-weight: 500;
+  }
+  html.dark .toast {
+    box-shadow: var(--shadow-dark);
+  }
+  .toast.visible {
+    transform: translateX(-50%) translateY(0);
+    opacity: 1;
+  }
+
+  #profileModal {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 50;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+  }
+  #profileModal:not([hidden]) {
+    display: flex;
+    opacity: 1;
+  }
+  #profileModal .modal-content {
+    background: var(--surface);
+    border-radius: var(--radius);
+    padding: calc(var(--padding) * 1.2);
+    max-width: 400px;
+    width: 90%;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+    position: relative;
+    transform: translateY(-20px);
+    animation: slideDown 0.3s forwards;
+  }
+  @keyframes slideDown {
+    to { transform: translateY(0); }
+  }
+  #profileModal h3 {
+    margin-bottom: 1rem;
+    font-size: 1.5rem;
+    color: var(--primary);
+    text-align: center;
+  }
+  #profileModal label {
+    display: block;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+    color: var(--text);
+  }
+  #profileModal input {
+    width: 100%;
+    padding: 0.75rem 1rem;
+    border: 1px solid var(--muted);
+    border-radius: var(--radius);
+    background: var(--bg);
+    color: var(--text);
+    font-size: 1rem;
+    margin-bottom: 1rem;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  }
+  #profileModal input:focus {
+    outline: none;
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(74, 120, 196, 0.15);
+  }
+  html.dark #profileModal input {
+    background: var(--surface);
+    color: var(--text);
+    border-color: var(--muted);
+  }
+  #profileModal button#saveProfileBtn {
+    width: 100%;
+    padding: 0.75rem;
+    background: var(--primary);
+    color: var(--secondary);
+    font-size: 1rem;
+    font-weight: 600;
+    border-radius: var(--radius);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    transition: background 0.2s ease, transform 0.2s ease;
+  }
+  #profileModal button#saveProfileBtn:hover {
+    background: #3A62A8;
+    transform: translateY(-2px);
+  }
+  html.dark #profileModal button#saveProfileBtn {
+    background: var(--primary);
+    color: #fff;
+  }
+  #profileModal .btn-close {
+    position: absolute;
+    top: 0.75rem;
+    right: 0.75rem;
+    background: transparent;
+    color: var(--muted);
+    font-size: 1.25rem;
+    border: none;
+    cursor: pointer;
+    transition: color 0.2s ease, transform 0.2s ease;
+  }
+  #profileModal .btn-close:hover {
+    color: var(--primary);
+    transform: scale(1.1);
+  }
+  html.dark #profileModal .btn-close {
+    color: var(--muted);
+  }
+
+  #backToTop {
+    position: fixed;
+    bottom: 2rem; right: 2rem;
+    display: none;
+    background: var(--primary);
+    color: var(--secondary);
+    padding: 0.75rem;
+    border-radius: 50%;
+    font-size: 1.2rem;
+    cursor: pointer;
+    box-shadow: var(--shadow-light);
+    z-index: 1000;
+    transition: transform 0.2s;
+  }
+  html.dark #backToTop {
+    box-shadow: var(--shadow-dark);
+  }
+  #backToTop:hover {
+    transform: scale(1.1);
+  }
+
+  footer {
+    background: var(--surface);
+    padding: var(--padding);
+    text-align: center;
+    box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.05);
+    margin-top: 3rem;
+  }
+  html.dark footer {
+    background: var(--surface);
+    box-shadow: 0 -2px 8px rgba(255, 255, 255, 0.05);
+  }
+  footer p {
+    font-size: 0.9rem;
+    color: var(--muted);
+  }
+  footer .socials {
+    margin-top: 0.5rem;
+  }
+  footer .socials a {
+    margin: 0 0.5rem;
+    font-size: 1.2rem;
+    color: var(--muted);
+    transition: color 0.2s;
+  }
+  footer .socials a:hover {
+    color: var(--primary);
+  }
+
+   @media (max-width: 400px) {
+    html, body {
+      font-size: 14px;
+    }
+    .navbar .logo .logo-text {
+      font-size: 1.25rem;
+    }
+    .navbar .btn {
+      padding: 0.4rem 0.8rem;
+      font-size: 0.9rem;
+    }
+    #themeToggle {
+      font-size: 1rem;
+    }
+    .quick-buttons {
+      flex-direction: column;
+    }
+    .charts-row {
+      flex-direction: column;
+      padding: var(--padding) 0;
+    }
+    .charts-row .chart-card {
+      width: 100%;
+      padding: 1rem;
+    }
     .chart-container {
       height: 200px;
     }
   }
-  @media (max-width: 480px) {
-    .charts-row {
-      flex-direction: column;
-      gap: var(--gap);
-    }
-    .chart-container {
-      height: 180px;
-    }
-  }
-
-      .filter-bar {
-      grid-column: 1 / -1;
-      display: flex;
-      gap: 1rem;
-      align-items: center;
-      background: var(--surface);
-      padding: 1rem;
-      border-radius: var(--radius);
-      box-shadow: 0 2px 8px var(--shadow-light);
-      margin-bottom: var(--gap);
-    }
-    html.dark .filter-bar {
-      box-shadow: 0 2px 8px var(--shadow-dark);
-    }
-    .filter-bar label {
-      font-weight: 500;
-      color: var(--text);
-    }
-    .filter-bar input {
-      padding: 0.5rem;
-      border: 1px solid var(--muted);
-      border-radius: var(--radius);
-      background: var(--bg);
-      color: var(--text);
-      font-size: 1rem;
-      transition: border-color .2s, box-shadow .2s;
-    }
-    .filter-bar input:focus {
-      border-color: var(--primary);
-      box-shadow: 0 0 0 3px rgba(74,120,196,0.3);
-      outline: none;
-    }
-    html.dark .filter-bar input {
-      background: var(--surface);
-      border-color: var(--muted);
-      color: var(--text);
-    }
-    .filter-bar button {
-      padding: 0.6rem 1.2rem;
-      background: var(--primary);
-      color: var(--surface);
-      border-radius: var(--radius);
-      font-weight: 500;
-      box-shadow: 0 2px 8px var(--shadow-light);
-      transition: background-color .2s, transform .2s;
-    }
-    .filter-bar button:hover {
-      background: var(--accent);
-      transform: translateY(-2px);
-    }
-    html.dark .filter-bar button {
-      box-shadow: 0 2px 8px var(--shadow-dark);
-    }
-
-       .toast {
-      position: fixed;
-      bottom: 1.5rem;
-      left: 50%;
-      transform: translateX(-50%) translateY(100%);
-      background: var(--primary);
-      color: var(--surface);
-      padding: 0.75rem 1.5rem;
-      border-radius: var(--radius);
-      box-shadow: 0 2px 8px var(--shadow-light);
-      opacity: 0;
-      pointer-events: none;
-      transition: transform .3s ease, opacity .3s ease;
-      z-index: 200;
-      font-weight: 500;
-    }
-    html.dark .toast {
-      box-shadow: 0 2px 8px var(--shadow-dark);
-    }
-    .toast.visible {
-      transform: translateX(-50%) translateY(0);
-      opacity: 1;
-    }
-
-   #profileModal {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: rgba(0,0,0,0.5);
-      display: none; 
-      align-items: center;
-      justify-content: center;
-      z-index: 50;
-      opacity: 0;
-      transition: opacity 0.3s ease;
-    }
-    #profileModal:not([hidden]) {
-      display: flex;   
-      opacity: 1;
-    }
 
 
-    #profileModal .modal-content {
-      background: var(--surface);
-    border-radius: var(--radius);
-      padding: calc(var(--padding) * 1.2);
-      max-width: 400px;
-      width: 90%;
-      box-shadow: 0 8px 24px rgba(0,0,0,0.15);
-      position: relative;
-      transform: translateY(-20px);
-      animation: slideDown 0.3s forwards;
-    }
-
-    @keyframes slideDown {
-      to { transform: translateY(0); }
-    }
-
-    #profileModal h3 {
-      margin-bottom: 1rem;
-      font-size: 1.5rem;
-      color: var(--primary);
-      text-align: center;
-    }
-
-    #profileModal label {
-      display: block;
-      font-weight: 600;
-      margin-bottom: 0.5rem;
-      color: var(--text);
-    }
-
-    #profileModal input {
-      width: 100%;
-      padding: 0.75rem 1rem;
-      border: 1px solid var(--muted);
-      border-radius: var(--radius);
-     background: var(--bg);
-     color: var(--text);
-      font-size: 1rem;
-      margin-bottom: 1rem;
-    transition: border-color 0.2s ease, box-shadow 0.2s ease;
-    }
-    #profileModal input:focus {
-      outline: none;
-      border-color: var(--primary);
-      box-shadow: 0 0 0 3px rgba(var(--primary-rgb),0.15);
-    }
-
-    #profileModal button#saveProfileBtn {
-      width: 100%;
-      padding: 0.75rem;
-      background: var(--primary);
-      color: var(--secondary);
-      font-size: 1rem;
-      font-weight: 600;
-     border-radius: var(--radius);
-      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-      transition: background 0.2s ease, transform 0.2s ease;
-   }
-     #profileModal button#saveProfileBtn:hover {
-      background: #3A62A8;             
-      transform: translateY(-2px);
-    }
-
-    #profileModal .btn-close {
-      position: absolute;
-      top: 0.75rem;
-      right: 0.75rem;
-      background: transparent;
-      color: var(--muted);
-      font-size: 1.25rem;
-     border: none;
-      cursor: pointer;
-      transition: color 0.2s ease, transform 0.2s ease;
-    }
-    #profileModal .btn-close:hover {
-     color: var(--primary);
-      transform: scale(1.1);
-    }
-
-    html.dark #profileModal .modal-content {
-      background: var(--surface);
-      color: var(--text);
-    }
-    html.dark #profileModal input {
-      background: var(--bg);
-      color: var(--text);
-      border-color: var(--muted);
-    }
-    html.dark #profileModal button#saveProfileBtn {
-      background: var(--primary);
-      color: #fff;
-    }
-    html.dark #profileModal .btn-close {
-      color: var(--muted);
-    }
-@media screen and (max-width: 480px) {
-  .main {
-    margin-left: 0;
-    padding-bottom: 3rem; 
-  }
-
-  .topbar {
-    padding: 0.75rem 1rem;
-    justify-content: center;
-  }
-  .topbar .controls {
-    display: none; 
-  }
-
-  .content {
-    display: flex;
-    flex-direction: column;
-    gap: 0.75rem;
-    padding: 0.75rem 1rem;
-  }
-
-  .filter-bar {
-    flex-direction: column;
-    align-items: stretch;
-    gap: 0.5rem;
-    padding: 0.5rem 0.75rem;
-  }
-  .filter-bar label {
-    font-size: 0.85rem;
-  }
-  .filter-bar input,
-  .filter-bar button {
-    width: 100%;
-    font-size: 0.9rem;
-    padding: 0.5rem;
-  }
-
-  .card {
-    padding: 1rem;
-  }
-  .card h4 {
-    font-size: 1.1rem;
-  }
-  .card .stat {
-    font-size: 1.75rem;
-  }
-  .card a {
-    padding: 0.5rem;
-    font-size: 0.85rem;
-  }
-
-  .chart-card {
-    padding: 1rem;
-  }
-  .chart-container {
-    height: 200px;
-  }
-}
-
-@media screen and (max-width: 768px) {
-  .sidebar {
-    display: none;
-  }
-
-  header {
-  position: fixed;
-  top: 0;
-  left: var(--sidebar-w);
-  right: 0;
-  height: var(--header-h);
-  background: linear-gradient(135deg, var(--primary), var(--accent));
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 0 1.5rem;
-  z-index: 999;
-  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.15);
-  border-bottom-left-radius: 0.5rem;
-  border-bottom-right-radius: 0.5rem;
-  color: #fff;
-  transition: left 0.3s ease, background 0.3s ease;
-}
-
-aside#sidebar.collapsed ~ header {
-  left: var(--sidebar-collapsed-w);
-}
-
-header .left-group {
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-}
-
-header .hamburger {
-  font-size: 1.6rem;
-  cursor: pointer;
-  color: #fff;
-  display: none; 
-  transition: transform 0.2s ease;
-}
-header .hamburger:hover {
-  transform: scale(1.1);
-}
-
-@media (max-width: 1024px) {
-  header .hamburger {
-    display: block;
-  }
-}
-
-header h1 {
-  font-size: 1.6rem;
-  font-weight: 700;
-  letter-spacing: 0.5px;
-  margin: 0;
-}
-
-header .right-group {
-  display: flex;
-  align-items: center;
-  gap: 1.5rem;
-}
-
-header .welcome {
-  font-size: 1rem;
-  font-weight: 500;
-}
-
-header .theme-toggle {
-  font-size: 1.4rem;
-  cursor: pointer;
-  color: #fff;
-  transition: transform 0.2s ease;
-}
-header .theme-toggle:hover {
-  transform: scale(1.1);
-}
-
-header #signOutBtn {
+#upcomingAppointments h3 {
+  font-size: 1.75rem;
+  margin-bottom: 1rem;
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  background: rgba(255, 255, 255, 0.2);
-  color: #fff;
-  font-weight: 600;
-  padding: 0.6rem 1rem;
-  border-radius: 0.5rem;
-  border: 2px solid rgba(255, 255, 255, 0.3);
-  transition: background 0.2s ease, transform 0.2s ease;
+  color: var(--primary);
 }
-header #signOutBtn:hover {
-  background: rgba(255, 255, 255, 0.35);
+#upcomingAppointments .appointments-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--gap);
+}
+#upcomingAppointments .appointments-list .empty-message {
+  text-align: center;
+  color: var(--muted);
+  font-size: 1rem;
+  margin-top: var(--gap);
+}
+#upcomingAppointments .appt-card {
+  display: flex;
+  align-items: baseline;
+  background: var(--surface);
+  padding: var(--gap);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-light);
+  transition: transform var(--transition), box-shadow var(--transition);
+}
+html.dark #upcomingAppointments .appt-card {
+  background: var(--surface);
+  box-shadow: var(--shadow-dark);
+}
+#upcomingAppointments .appt-icon {
+  color: var(--primary);
+  min-width: 2.5rem;
+  margin-top: 0.15rem;
+}
+#upcomingAppointments .appt-card .details {
+  flex: 1;
+  margin-left: 1rem;
+}
+#upcomingAppointments .appt-card .details h4 {
+  font-size: 1.1rem;
+  color: var(--text);
+  margin-bottom: 0.25rem;
+  font-weight: 600;
+}
+#upcomingAppointments .appt-card .details p {
+  color: var(--muted);
+  font-size: 0.95rem;
+  margin-top: 0.15rem;
+}
+#upcomingAppointments .appt-card .actions {
+  display: flex;
+  gap: 0.5rem;
+}
+#upcomingAppointments .appt-card .btn-reschedule,
+#upcomingAppointments .appt-card .btn-cancel {
+  background: var(--primary);
+  color: #fff;
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  transition: background var(--transition), transform var(--transition);
+  box-shadow: var(--shadow-light);
+}
+html.dark #upcomingAppointments .appt-card .btn-reschedule,
+html.dark #upcomingAppointments .appt-card .btn-cancel {
+  box-shadow: var(--shadow-dark);
+}
+#upcomingAppointments .appt-card .btn-reschedule:hover {
+  background: #3A62A8;
+  transform: translateY(-2px);
+}
+  #upcomingAppointments .appt-card .btn-reschedule i,
+#upcomingAppointments .appt-card .btn-cancel i {
+  color: #fff;       
+  font-size: 1rem;
+}
+  html.dark #upcomingAppointments .appt-card .btn-reschedule,
+html.dark #upcomingAppointments .appt-card .btn-cancel {
+  background: var(--primary);
+  color: #fff;
+}
+#upcomingAppointments .appt-card .btn-cancel:hover {
+  background: #D4724F;
+  transform: translateY(-2px);
+}
+@media (max-width: 480px) {
+  #upcomingAppointments .appt-card {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  #upcomingAppointments .appt-card .actions {
+    margin-top: 0.5rem;
+  }
+}
+
+  .spinner {
+    display: inline-block;
+    width: 1rem;
+    height: 1rem;
+    margin-left: 0.5rem;
+    border: 2px solid rgba(255, 255, 255, 0.6);
+    border-top-color: var(--secondary);
+    border-radius: 50%;
+    animation: spin 0.6s linear infinite;
+    vertical-align: middle;
+  }
+
+  .hidden {
+    display: none !important;
+  }
+
+  @keyframes spin {
+    to { transform: rotate(360deg); }
+  }
+
+#filterSection .filter-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  background: var(--surface);
+  padding: 1rem;
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-light);
+}
+
+html.dark #filterSection .filter-bar {
+  box-shadow: var(--shadow-dark);
+}
+
+#filterSection .filter-bar .date-inputs {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+#filterSection .filter-bar label {
+  font-weight: 500;
+  color: var(--text);
+}
+
+#filterSection .filter-bar input {
+  padding: 0.5rem;
+  border: 1px solid var(--muted);
+  border-radius: var(--radius);
+  background: var(--bg);
+  color: var(--text);
+  font-size: 1rem;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+#filterSection .filter-bar input:focus {
+  outline: none;
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(74, 120, 196, 0.3);
+}
+
+html.dark #filterSection .filter-bar input {
+  background: var(--surface);
+  border-color: var(--muted);
+  color: var(--text);
+}
+
+#filterSection .filter-bar button {
+  padding: 0.6rem 1.2rem;
+  background: var(--primary);
+  color: var(--secondary);
+  border-radius: var(--radius);
+  font-weight: 500;
+  box-shadow: var(--shadow-light);
+  transition: background 0.2s, transform 0.2s;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+html.dark #filterSection .filter-bar button {
+  box-shadow: var(--shadow-dark);
+}
+
+#filterSection .filter-bar button:hover {
+  background: var(--accent);
   transform: translateY(-2px);
 }
 
-@media (max-width: 480px) {
-  header {
-    padding: 0 1rem;
-    border-bottom-left-radius: 0;
-    border-bottom-right-radius: 0;
-  }
-  header h1 {
-    font-size: 1.3rem;
-  }
-  header .welcome {
-    display: none; 
-  }
-  header #signOutBtn {
-    padding: 0.4rem 0.8rem;
-    font-size: 0.9rem;
-  }
-}
-
-  .main {
-    margin-left: 0;
-  }
-
-  .topbar {
-    padding: 0.75rem 1rem;
-  }
-
-  .content {
-    grid-template-columns: 1fr !important;
-    gap: 0.75rem;
-    padding: 1rem;
-  }
-
-  .filter-bar {
+@media (max-width: 600px) {
+  #filterSection .filter-bar {
     flex-wrap: wrap;
-    gap: 0.5rem;
   }
-  .filter-bar label,
-  .filter-bar input,
-  .filter-bar button {
-    font-size: 0.9rem;
+  #filterSection .filter-bar .date-inputs {
+    width: 100%;
+    justify-content: space-between;
   }
-
-  .card, .chart-card {
-    padding: 1rem;
-  }
-  .chart-container {
-    height: 250px;
+  #filterSection .filter-bar button {
+    width: 100%;
+    justify-content: center;
+    margin-top: 0.75rem;
   }
 }
-.hamburger-btn {
-    background: transparent;
-    border: none;
-    font-size: 1.5rem;
-    color: var(--text);
-    cursor: pointer;
-    display: none; 
-    margin-right: 1rem;
-  }
-  @media screen and (max-width: 768px) {
-    .hamburger-btn {
-      display: block; 
-    }
-  }
 
-@media screen and (max-width: 414px) and (orientation: portrait) {
-  .card h4 {
-    font-size: 1rem;
-  }
-  .card .stat {
-    font-size: 1.5rem;
-  }
-  .chart-card h4 {
-    font-size: 1.2rem;
-  }
-  .topbar .welcome {
-    font-size: 1rem;
-  }
-  .topbar i {
-    font-size: 1.25rem;
-  }
+  #insightsContainer .card a.btn-secondary {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  font-size: 0.95rem;
+  font-weight: 500;
+  color: var(--primary);
+  border: 2px solid var(--primary);
+  border-radius: var(--radius);
+  transition: background 0.2s, color 0.2s, transform 0.2s;
+  box-shadow: var(--shadow-light);
 }
-.content {
-     display: grid;
-     grid-template-columns: repeat(2, 1fr); 
-     gap: var(--gap);
-   }
-   .filter-bar {
-     grid-column: 1 / -1;
-   }
-   .chart-card {
-     grid-column: span 1;
-   }
- }
-  </style>
+html.dark #insightsContainer .card a.btn-secondary {
+  background: transparent;
+  color: var(--primary);
+  box-shadow: var(--shadow-dark);
+}
+#insightsContainer .card a.btn-secondary:hover {
+  background: var(--primary);
+  color: var(--secondary);
+  transform: translateY(-2px);
+}
+
+
+</style>
+
+  
 </head>
 
-<body>
- <aside id="sidebar">
-   <div class="logo">
-      <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" fill="var(--secondary)">
+  <body>
+
+    <nav class="navbar">
+    <div class="logo">
+      <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" fill="var(--primary)">
         <polygon points="10,10 25,90 50,40 75,90 90,10 65,10 50,70 35,10"/>
-     </svg>
+      </svg>
       <span class="logo-text">Vitra AI</span>
     </div>
-    <nav role="navigation">
-      <a href="#" class="active">
-        <i class="fas fa-chart-pie"></i>
-       <span>Dashboard</span>
-      </a>
-      <a href="herbal.html">
-       <i class="fas fa-leaf"></i>
-        <span>Herbal Medicine</span>
-      </a>
-      <a href="psychology.html">
-        <i class="fas fa-brain"></i>
-       <span>Psych &amp; Mental Health</span>
-      </a>
-      <a href="dietetics.html">
-        <i class="fas fa-utensils"></i>
-        <span>Dietetics</span>
-     </a>
-      <a href="epharmacy.html">
-        <i class="fas fa-pills"></i>
-        <span>E-Pharmacy</span>
-      </a>
-      <a href="consult.html">
-       <i class="fas fa-calendar-check"></i>
-        <span>Consultation</span>
-      </a>
-      <a href="#" id="profileLink">
-       <i class="fas fa-user-circle"></i>
-        <span>Profile</span>
-      </a>
-    </nav>
-    <button id="shrinkBtn" aria-label="Toggle sidebar">
-      <i class="fas fa-angle-double-left"></i>
-    </button>
+    <ul>
+      <li><a href="dashboard.html">Dashboard</a></li>
+      <li><a href="herbal.html">Herbal Medicine</a></li>
+      <li><a href="psychology.html">Mental Health</a></li>
+      <li><a href="dietetics.html">Dietetics</a></li>
+      <li><a href="epharmacy.html">E-Pharmacy</a></li>
+      <li><a href="consult.html">Consult Booking</a></li>
+      
+    </ul>
+    <div class="auth">
+      <button class="btn btn-secondary" id="userProfile">
+        <i class="fas fa-user-circle"></i> John Doe
+      </button>
+      <button class="btn btn-primary" id="signOut">
+        <i class="fas fa-sign-out-alt"></i> Sign Out
+      </button>
+    </div>
+    <i id="themeToggle" class="fas fa-moon"></i>
+    <i class="fas fa-bars hamburger" id="hamburger"></i>
+  </nav>
+
+  <!-- sidebar (mobile) -->
+  <div class="sidebar-overlay" id="sidebarOverlay"></div>
+  <aside class="sidebar" id="sidebar">
+    <ul class="sidebar-nav">
+      <li><a href="dashboard.html">Dashboard</a></li>
+      <li><a href="herbal.html">Herbal Medicine</a></li>
+      <li><a href="psychology.html">Mental Health</a></li>
+      <li><a href="dietetics.html">Dietetics</a></li>
+      <li><a href="epharmacy.html">E-Pharmacy</a></li>
+      <li><a href="consult.html">Consult Booking</a></li>
+    </ul>
+    <div class="sidebar-auth">
+      <button class="btn btn-secondary" id="profileLink">
+        <i class="fas fa-user-circle"></i> Edit Profile
+      </button>
+      <button class="btn btn-primary" id="sidebarSignOut">
+        <i class="fas fa-sign-out-alt"></i> Sign Out
+      </button>
+    </div>
+    <div class="sidebar-theme">
+      <i id="sidebarThemeToggle" class="fas fa-moon"></i>
+    </div>
   </aside>
-  
-   <div class="main">
-  <header>
-  <div class="left-group">
-    <i id="hamburger" class="fas fa-bars hamburger" aria-label="Toggle navigation"></i>
-    <h1>Vitra AI Dashboard</h1>
-  </div>
-  <div class="right-group">
-    <div class="welcome">Hello, <strong id="userName">User</strong>!</div>
-    <i id="themeToggle" class="fas fa-moon theme-toggle" aria-label="Toggle theme"></i>
-    <button id="signOutBtn"><i class="fas fa-sign-out-alt"></i> Sign Out</button>
-  </div>
-</header>
 
+  <main>
+    <section class="module" style="text-align:center; margin-bottom:2rem;">
+      <h2>Welcome back, John Doe!</h2>
+      <p style="color: var(--muted);">Here’s a quick overview of your AI-powered health dashboard.</p>
+    </section>
 
-     <section class="content">
-      <div class="filter-bar">
-        <label for="startDate">From:</label>
-        <input type="date" id="startDate" value="">
-        <label for="endDate">To:</label>
-        <input type="date" id="endDate" value="">
-        <button id="filterBtn"><i class="fas fa-filter"></i> Apply Filter</button>
+    <section id="quickAccess" class="module">
+      <div class="quick-access-inner">
+        <h2>Quick Access</h2>
+        <div class="quick-buttons">
+          <a href="consult.html" class="quick-btn btn-primary">
+            <i class="fas fa-calendar-check"></i> My Appointments
+          </a>
+          <a href="epharmacy.html" class="quick-btn btn-secondary">
+            <i class="fas fa-prescription-bottle-alt"></i> My Prescriptions
+          </a>
+          <a href="dietetics.html" class="quick-btn btn-primary">
+            <i class="fas fa-apple-alt"></i> Meal Plans
+          </a>
+          <a href="psychology.html#therapybot" class="quick-btn btn-secondary">
+            <i class="fas fa-brain"></i> Chat with AI Therapist
+          </a>
+          <a href="herbal.html" class="quick-btn btn-primary">
+            <i class="fas fa-leaf"></i> Herbal Recommendations
+          </a>
+        </div>
       </div>
+    </section>
 
-      <div class="card">
+   <section id="upcomingAppointments" class="dashboard-section">
+  <h3><i class="fas fa-calendar-alt"></i> Upcoming Appointments</h3>
+  <div id="appointmentsContainer" class="appointments-list">
+    <p class="empty-message">You have no upcoming appointments.</p>
+      </div>
+    </section>
+
+    <section id="recentPrescriptions" class="module">
+      <h2><i class="fas fa-pills"></i> Recent Prescriptions</h2>
+      <div id="prescriptionsContainer" style="margin-top:1rem;">
+        
+        <p style="color: var(--muted);">You have no recent prescriptions.</p>
+      </div>
+    </section>
+
+    <section id="nutritionSummary" class="module">
+      <h2><i class="fas fa-apple-alt"></i> Nutrition Summary</h2>
+      <div id="nutritionContainer" style="margin-top:1rem;">
+       
+        <p style="color: var(--muted);">No nutrition data available.</p>
+      </div>
+    </section>
+
+    <section id="aiInsights" class="module">
+      <h2><i class="fas fa-robot"></i> AI Insights</h2>
+      <div id="insightsContainer" style="margin-top:1rem;">
+       
+        <p style="color: var(--muted);">No AI insights available at this time.</p>
+      </div>
+    </section>
+
+<section id="filterSection" class="dashboard-section">
+    <h3><i class="fas fa-filter"></i> Filter AI Usage</h3>
+  <p style="color: var(--muted); margin-bottom: var(--gap);">
+    Select a date range below to update all AI‐query statistics (Herbal, Psychology, Dietetics, E-Pharmacy, Consultation).
+  </p>
+  <div class="filter-bar">
+    <div class="date-inputs">
+      <label for="startDate">From:</label>
+      <input type="date" id="startDate" value="">
+      <label for="endDate">To:</label>
+      <input type="date" id="endDate" value="">
+    </div>
+    <button id="filterBtn" class="btn btn-secondary">
+      <i class="fas fa-filter"></i> Apply Filter
+    </button>
+  </div>
+</section>
+
+      <section class="content">
+           <div class="card">
         <h4>Herbal Medicine AI</h4>
         <div class="stat" id="herbalQueries">0</div>
         <p>Total AI queries processed in Herbal Medicine</p>
@@ -931,14 +1407,32 @@ header #signOutBtn:hover {
       <button class="btn-close" id="closeProfileModal"><i class="fas fa-times"></i></button>
       <h3>Update Profile</h3>
       <label for="profileName"><i class="fas fa-user"></i> Name:</label>
-      <input type="text" id="profileName" placeholder="Enter your name" required/>
-      <button id="saveProfileBtn" class="btn"><i class="fas fa-save"></i> Save</button>
+     <input type="text" id="profileName" placeholder="Enter your name" required/>
+      <button id="saveProfileBtn" class="btn">
+        <i class="fas fa-save"></i> Save
+        <span id="saveSpinner" class="spinner hidden"></span>
+      </button>
     </div>
   </div>
   <div id="toast" class="toast"></div>
+    
+  </main>
 
+  <footer>
+    <p>&copy; 2025 Vitra AI. All rights reserved.</p>
+    <div class="socials">
+      <a href="#"><i class="fab fa-facebook-f"></i></a>
+      <a href="#"><i class="fab fa-twitter"></i></a>
+      <a href="#"><i class="fab fa-instagram"></i></a>
+      <a href="#"><i class="fab fa-linkedin-in"></i></a>
+    </div>
+  </footer>
 
-<script>
+  <!-- back2top  -->
+  <div id="backToTop"><i class="fas fa-arrow-up"></i></div>
+
+ <script>
+
    const firebaseConfig = {
     apiKey: "AIzaSyBhaYOcLMXuobCT-vaXr-zXTZnBfaheAIY",
     authDomain: "vitra-ai-712ea.firebaseapp.com",
@@ -948,128 +1442,256 @@ header #signOutBtn:hover {
     appId: "1:306868103753:web:e2d7700f8ad34c1e17ed98"
   };
   firebase.initializeApp(firebaseConfig);
+  const auth = firebase.auth();
 
-  document.addEventListener('DOMContentLoaded', () => {
+  document.addEventListener("DOMContentLoaded", () => {
 
- const sidebarLinks = document.querySelectorAll('aside#sidebar nav a');
-    sidebarLinks.forEach(link => {
-      const href = link.getAttribute('href') || '';
-      const current = window.location.pathname.split('/').pop() || '';
-      if ((href === '#' && current === '') || href === current) {
-        link.classList.add('active');
-      } else {
-        link.classList.remove('active');
+    const sidebar           = document.getElementById("sidebar");
+    const overlay           = document.getElementById("sidebarOverlay");
+    const hamburger         = document.getElementById("hamburger");
+    const sidebarThemeToggle= document.getElementById("sidebarThemeToggle");
+    const themeToggle       = document.getElementById("themeToggle");
+    const signOutBtn        = document.getElementById("signOut");
+    const sidebarSignOut    = document.getElementById("sidebarSignOut");
+    const appointmentsContainer   = document.getElementById("appointmentsContainer");
+    const prescriptionsContainer  = document.getElementById("prescriptionsContainer");
+    const nutritionContainer      = document.getElementById("nutritionContainer");
+    const insightsContainer       = document.getElementById("insightsContainer");
+    const backToTopBtn            = document.getElementById("backToTop");
+    const quickAccessSection      = document.getElementById("quickAccess");
+    const greetingSection         = quickAccessSection.previousElementSibling;
+    const userProfileBtn          = document.getElementById("userProfile");
+    const profileLinkBtn          = document.getElementById("profileLink");
+    const profileModal            = document.getElementById("profileModal");
+    const closeProfileModalBtn    = document.getElementById("closeProfileModal");
+    const profileNameInput        = document.getElementById("profileName");
+    const saveProfileBtn          = document.getElementById("saveProfileBtn");
+    const toastEl                 = document.getElementById("toast");
+    const startDateInput          = document.getElementById("startDate");
+    const endDateInput            = document.getElementById("endDate");
+    const filterBtn               = document.getElementById("filterBtn");
+    const herbalQueriesEl         = document.getElementById("herbalQueries");
+    const psychQueriesEl          = document.getElementById("psychQueries");
+    const dietQueriesEl           = document.getElementById("dietQueries");
+    const pharmacyQueriesEl       = document.getElementById("pharmacyQueries");
+    const consultQueriesEl        = document.getElementById("consultQueries");
+    const distributionCtx         = document.getElementById("distributionChart").getContext("2d");
+    const dailyCtx                = document.getElementById("dailyChart").getContext("2d");
+
+    auth.onAuthStateChanged(user => {
+      if (!user) {
+        window.location.href = "index.html";
+        return;
       }
+      const displayName = user.displayName || user.email.split("@")[0];
+      userProfileBtn.innerHTML = `<i class="fas fa-user-circle"></i> ${displayName}`;
+      greetingSection.innerHTML = `
+        <h2>Hello ${displayName}!</h2>
+        <p style="color: var(--muted);">Here’s a quick overview of your AI-powered health dashboard.</p>
+      `;
+
+      loadAppointments();
+      loadPrescriptions();
+      loadNutritionSummary();
+      loadAIInsights();
+      displayStats();
+      initializeCharts();
+      populateDailyCounts();
     });
 
-    
-    const sidebar = document.getElementById("sidebar");
-    const shrinkBtn = document.getElementById("shrinkBtn");
-    const hamburger = document.getElementById("hamburger");
-    const header = document.querySelector("header");
-
-    if (localStorage.getItem("sidebar-collapsed") === "true") {
-      sidebar.classList.add("collapsed");
-      shrinkBtn.querySelector("i").classList.replace("fa-angle-double-left", "fa-angle-double-right");
-      header.classList.add("sidebar-collapsed");
-    }
-    shrinkBtn.addEventListener("click", () => {
-      sidebar.classList.toggle("collapsed");
-      const icon = shrinkBtn.querySelector("i");
-      icon.classList.toggle("fa-angle-double-left");
-      icon.classList.toggle("fa-angle-double-right");
-      header.classList.toggle("sidebar-collapsed");
-     localStorage.setItem("sidebar-collapsed", sidebar.classList.contains("collapsed"));
-    const main = document.querySelector('.main');
-      if (sidebar.classList.contains('collapsed')) {
-        main.style.marginLeft = getComputedStyle(document.documentElement).getPropertyValue('--sidebar-collapsed-w');
-      } else {
-        main.style.marginLeft = getComputedStyle(document.documentElement).getPropertyValue('--sidebar-w');
-      }
-    });
-
-    function updateHamburgerVisibility() {
-      hamburger.style.display = window.matchMedia("(max-width: 1024px)").matches ? "block" : "none";
-    }
-    window.matchMedia("(max-width: 1024px)").addListener(updateHamburgerVisibility);
-    updateHamburgerVisibility();
-
-    hamburger.addEventListener("click", e => {
-      e.stopPropagation();
-      sidebar.classList.toggle("open");
-    });
-    document.addEventListener("click", e => {
-      if (!sidebar.classList.contains("open")) return;
-     if (sidebar.contains(e.target) || hamburger.contains(e.target)) return;
-      sidebar.classList.remove("open");
-    });
-
-      const adjustHeader = () => {
-      const sidebarW = sidebar.classList.contains('collapsed')
-        ? getComputedStyle(document.documentElement).getPropertyValue('--sidebar-collapsed-w')
-        : getComputedStyle(document.documentElement).getPropertyValue('--sidebar-w');
-      header.style.left = sidebarW;
-   };
-    adjustHeader();
-    window.addEventListener('resize', adjustHeader);
-    
-    document.querySelectorAll('aside#sidebar nav a').forEach(link => {
-      const linkHref = link.getAttribute("href").split("/").pop();
-      const pageNow = window.location.pathname.split("/").pop();
-      if (linkHref === pageNow) link.classList.add("active");
-      else link.classList.remove("active");
-    });
-   
-        const themeToggle = document.getElementById('themeToggle');
-    const signOutBtn = document.getElementById('signOutBtn');
-    const userNameEl = document.getElementById('userName');
-    const profileLink = document.getElementById('profileLink');
-    const profileModal = document.getElementById('profileModal');
-    const closeProfileModal = document.getElementById('closeProfileModal');
-    const profileNameInput = document.getElementById('profileName');
-    const saveProfileBtn = document.getElementById('saveProfileBtn');
-
-    const toastEl = document.getElementById('toast');
-    const startDateInput = document.getElementById('startDate');
-    const endDateInput = document.getElementById('endDate');
-    const filterBtn = document.getElementById('filterBtn');
-
-    const herbalQueriesEl = document.getElementById('herbalQueries');
-    const psychQueriesEl = document.getElementById('psychQueries');
-    const dietQueriesEl = document.getElementById('dietQueries');
-    const pharmacyQueriesEl = document.getElementById('pharmacyQueries');
-    const consultQueriesEl = document.getElementById('consultQueries');
-
-    firebase.auth().onAuthStateChanged(user => {
-      if (!user) return window.location.href = 'index.html';
-      const display = user.displayName || "";
-      userNameEl.textContent = display || "User";
-      profileNameInput.value = display;
-    });
-
-    themeToggle.onclick = () => {
-      document.documentElement.classList.toggle('dark');
-      themeToggle.classList.toggle('fa-moon');
-      themeToggle.classList.toggle('fa-sun');
-    };
-
-    signOutBtn.onclick = () => {
-      firebase.auth().signOut().then(() => {
-        window.location.href = 'index.html';
+    function handleSignOut() {
+      auth.signOut().then(() => {
+        window.location.href = "index.html";
       });
-    };
+    }
+    signOutBtn.addEventListener("click", handleSignOut);
+    sidebarSignOut.addEventListener("click", handleSignOut);
+
+    function openSidebar() {
+      sidebar.classList.add("show");
+      overlay.classList.add("show");
+    }
+    function closeSidebar() {
+      sidebar.classList.remove("show");
+      overlay.classList.remove("show");
+    }
+    hamburger.addEventListener("click", openSidebar);
+    overlay.addEventListener("click", closeSidebar);
+
+    themeToggle.addEventListener("click", () => {
+      document.documentElement.classList.toggle("dark");
+      themeToggle.classList.toggle("fa-moon");
+      themeToggle.classList.toggle("fa-sun");
+    });
+    sidebarThemeToggle.addEventListener("click", () => themeToggle.click());
+
+    window.addEventListener("scroll", () => {
+      backToTopBtn.style.display = window.scrollY > 400 ? "block" : "none";
+    });
+    backToTopBtn.addEventListener("click", () => {
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    });
+
+    function loadAppointments() {
+      appointmentsContainer.innerHTML = "";
+      const allAppointments = JSON.parse(localStorage.getItem("appointments") || "[]");
+      const today = new Date().setHours(0, 0, 0, 0);
+      const upcoming = allAppointments.filter(a => {
+        const apptDate = new Date(a.date).setHours(0, 0, 0, 0);
+        return apptDate >= today;
+      });
+      if (upcoming.length === 0) {
+        appointmentsContainer.innerHTML = `<p style="color: var(--muted);">You have no upcoming appointments.</p>`;
+        return;
+      }
+      upcoming.forEach(appt => {
+        const card = document.createElement("div");
+        card.className = "card appt-card";
+        card.dataset.id = appt.id;
+        card.innerHTML = `
+          <i class="fas fa-user-md fa-2x"></i>
+          <div class="details" style="margin-left:1rem;">
+            <h4><strong>${appt.name}</strong></h4>
+            <p>${appt.date} • ${formatTime(appt.time)}</p>
+          </div>
+          <div class="actions" style="margin-left:auto; display:flex; gap:0.5rem;">
+            <button class="btn-reschedule">
+              <i class="fas fa-sync-alt"></i>
+            </button>
+            <button class="btn-cancel">
+              <i class="fas fa-times"></i>
+            </button>
+          </div>
+        `;
+
+        card.querySelector(".btn-cancel").addEventListener("click", () => {
+          if (confirm("Are you sure you want to cancel this appointment?")) {
+            removeAppointment(appt.id);
+            card.remove();
+            if (appointmentsContainer.children.length === 0) {
+              appointmentsContainer.innerHTML = `<p style="color: var(--muted);">You have no upcoming appointments.</p>`;
+            }
+          }
+        });
+
+        card.querySelector(".btn-reschedule").addEventListener("click", () => {
+          window.location.href = `consult.html?rescheduleId=${encodeURIComponent(appt.id)}`;
+        });
+        appointmentsContainer.append(card);
+      });
+    }
+
+    function removeAppointment(id) {
+      const list = JSON.parse(localStorage.getItem("appointments") || "[]");
+      const updated = list.filter(a => a.id !== id);
+      localStorage.setItem("appointments", JSON.stringify(updated));
+    }
+    function formatTime(t) {
+      if (t.includes("AM") || t.includes("PM")) return t;
+      let [hh, mm] = t.split(":").map(Number);
+      const suffix = hh >= 12 ? "PM" : "AM";
+      hh = hh % 12 || 12;
+      return `${String(hh).padStart(2, "0")}:${String(mm).padStart(2, "0")} ${suffix}`;
+    }
+
+
+    function loadPrescriptions() {
+      prescriptionsContainer.innerHTML = "";
+      const allPrescriptions = JSON.parse(localStorage.getItem("prescriptions") || "[]");
+      if (allPrescriptions.length === 0) {
+        prescriptionsContainer.innerHTML = `<p style="color: var(--muted);">You have no recent prescriptions.</p>`;
+        return;
+      }
+      allPrescriptions.slice(-5).reverse().forEach(presc => {
+        const card = document.createElement("div");
+        card.className = "card";
+        card.style.display = "flex";
+        card.style.alignItems = "center";
+        card.style.gap = "1rem";
+        card.style.marginBottom = "1rem";
+        card.innerHTML = `
+          <div class="details">
+            <h4><strong>${presc.name}</strong></h4>
+            <p>Prescribed by ${presc.prescriber} on ${presc.date}</p>
+          </div>
+          <div class="actions" style="margin-left:auto;">
+            <button class="btn-secondary">
+              <i class="fas fa-download"></i> Refill
+            </button>
+          </div>
+        `;
+        card.querySelector("button").addEventListener("click", () => {
+          alert(`Refill requested for ${presc.name}`);
+        });
+        prescriptionsContainer.append(card);
+      });
+    }
+
+
+    function loadNutritionSummary() {
+      nutritionContainer.innerHTML = "";
+      const data = JSON.parse(localStorage.getItem("nutritionSummary") || "{}");
+      if (!data || !data.calories) {
+        nutritionContainer.innerHTML = `<p style="color: var(--muted);">No nutrition data available.</p>`;
+        return;
+      }
+      const summaryHTML = `
+        <p><strong>Today's Calories:</strong> ${data.calories} kcal</p>
+        <p>
+          <strong>Protein:</strong> ${data.protein} g · 
+          <strong>Carbs:</strong> ${data.carbs} g · 
+          <strong>Fats:</strong> ${data.fats} g
+        </p>
+        <a href="dietetics.html" class="btn btn-primary" style="margin-top:0.5rem; display:inline-flex; align-items:center; gap:0.5rem;">
+          <i class="fas fa-arrow-right"></i> View Full Meal Plan
+        </a>
+      `;
+      nutritionContainer.innerHTML = summaryHTML;
+    }
+
+    function loadAIInsights() {
+      insightsContainer.innerHTML = "";
+      const examples = [
+        {
+          title: "Herbal Tip of the Day",
+          text: "Based on your recent concerns, we recommend adding turmeric to your regimen for its anti-inflammatory properties.",
+          link: "herbal.html"
+        },
+        {
+          title: "Mental Health Check-In",
+          text: "Our AI noticed elevated stress keywords in your last chat. Consider a 5-minute guided breathing exercise today.",
+          link: "psychology.html#therapybot"
+        },
+        {
+          title: "Nutrition Insight",
+          text: "Your protein intake is slightly below target. Try adding a protein-rich snack like Greek yogurt this afternoon.",
+          link: "dietetics.html"
+        }
+      ];
+      const insight = examples[Math.floor(Math.random() * examples.length)];
+      const card = document.createElement("div");
+      card.className = "card";
+      card.style.padding = "1rem";
+      card.style.marginBottom = "1rem";
+      card.innerHTML = `
+        <div class="details">
+          <h4><strong>${insight.title}</strong></h4>
+          <p>${insight.text}</p>
+        </div>
+        <a href="${insight.link}" class="btn btn-secondary" style="margin-top:0.5rem; display:inline-flex; align-items:center; gap:0.5rem;">
+          Learn More
+        </a>
+      `;
+      insightsContainer.append(card);
+    }
 
     function showToast(message) {
       toastEl.textContent = message;
-      toastEl.classList.add('visible');
-      setTimeout(() => toastEl.classList.remove('visible'), 3000);
+      toastEl.classList.add("visible");
+      setTimeout(() => toastEl.classList.remove("visible"), 3000);
     }
 
-    function varColor(name) {
-      return getComputedStyle(document.documentElement).getPropertyValue(name).trim();
-    }
-
-       let statsData = {
+    let statsData = {
       herbal: 0,
       psych: 0,
       diet: 0,
@@ -1079,171 +1701,184 @@ header #signOutBtn:hover {
       labels: []
     };
 
-    function generateLast7Days() {
+    function generateLast7DaysLabels() {
       const labels = [];
       for (let i = 6; i >= 0; i--) {
         const d = new Date();
         d.setDate(d.getDate() - i);
-        labels.push(d.toLocaleDateString('default', { month: 'short', day: 'numeric' }));
+        labels.push(d.toLocaleDateString("default", { month: "short", day: "numeric" }));
       }
       return labels;
     }
-    statsData.labels = generateLast7Days();
 
     function displayStats() {
-      statsData.herbal   = parseInt(localStorage.getItem('statHerbal'))   || 0;
-      statsData.psych    = parseInt(localStorage.getItem('statPsych'))    || 0;
-      statsData.diet     = parseInt(localStorage.getItem('statDiet'))     || 0;
-      statsData.pharmacy = parseInt(localStorage.getItem('statPharmacy')) || 0;
-      statsData.consult  = parseInt(localStorage.getItem('statConsult'))  || 0;
+      statsData.herbal   = parseInt(localStorage.getItem("statHerbal"))   || 0;
+      statsData.psych    = parseInt(localStorage.getItem("statPsych"))    || 0;
+      statsData.diet     = parseInt(localStorage.getItem("statDiet"))     || 0;
+      statsData.pharmacy = parseInt(localStorage.getItem("statPharmacy")) || 0;
+      statsData.consult  = parseInt(localStorage.getItem("statConsult"))  || 0;
 
       herbalQueriesEl.textContent   = statsData.herbal;
       psychQueriesEl.textContent    = statsData.psych;
       dietQueriesEl.textContent     = statsData.diet;
       pharmacyQueriesEl.textContent = statsData.pharmacy;
       consultQueriesEl.textContent  = statsData.consult;
+
+      statsData.labels = generateLast7DaysLabels();
     }
-    displayStats();
 
-
-
-    const distCtx = document.getElementById('distributionChart').getContext('2d');
-   const distributionChart = new Chart(distCtx, {
-  type: 'doughnut',
-  data: {
-    labels: ['Herbal', 'Psych', 'Diet', 'Pharmacy', 'Consult'],
-    datasets: [{
-      data: [statsData.herbal, statsData.psych, statsData.diet, statsData.pharmacy, statsData.consult],
-      backgroundColor: [
-        'rgba(74,120,196,0.8)',      
-        'rgba(255,165,0,0.8)',      
-        'rgba(139,195,74,0.8)',     
-        'rgba(255,87,34,0.8)',      
-        'rgba(63,81,181,0.8)'      
-      ],
-      borderColor: 'rgba(255,255,255,0.9)',
-      borderWidth: 2
-    }]
-  },
-  options: {
-    responsive: true,
-    cutout: '50%',  
-    plugins: {
-      legend: {
-        position: 'bottom',
-        labels: {
-          color: varColor('--text'),
-          padding: 20,
-          boxWidth: 12
+    let distributionChart, dailyChart;
+    function initializeCharts() {
+      distributionChart = new Chart(distributionCtx, {
+        type: "doughnut",
+        data: {
+          labels: ["Herbal", "Psych", "Diet", "Pharmacy", "Consult"],
+          datasets: [{
+            data: [statsData.herbal, statsData.psych, statsData.diet, statsData.pharmacy, statsData.consult],
+            backgroundColor: [
+              "rgba(74,120,196,0.8)",
+              "rgba(255,165,0,0.8)",
+              "rgba(139,195,74,0.8)",
+              "rgba(255,87,34,0.8)",
+              "rgba(63,81,181,0.8)"
+            ],
+            borderColor: "rgba(255,255,255,0.9)",
+            borderWidth: 2
+          }]
+        },
+        options: {
+          responsive: true,
+          cutout: "50%",
+          plugins: {
+            legend: {
+              position: "bottom",
+              labels: {
+                color: getComputedStyle(document.documentElement).getPropertyValue("--text").trim(),
+                padding: 20,
+                boxWidth: 12
+              }
+            },
+            tooltip: {
+              backgroundColor: getComputedStyle(document.documentElement).getPropertyValue("--surface").trim(),
+              titleColor: getComputedStyle(document.documentElement).getPropertyValue("--text").trim(),
+              bodyColor: getComputedStyle(document.documentElement).getPropertyValue("--text").trim(),
+              borderColor: getComputedStyle(document.documentElement).getPropertyValue("--muted").trim(),
+              borderWidth: 1
+            }
+          }
         }
-      },
-      tooltip: {
-        backgroundColor: varColor('--surface'),
-        titleColor: varColor('--text'),
-        bodyColor: varColor('--text'),
-        borderColor: varColor('--muted'),
-        borderWidth: 1
+      });
+
+      dailyChart = new Chart(dailyCtx, {
+        type: "line",
+        data: {
+          labels: statsData.labels,
+          datasets: [{
+            label: "Daily Queries",
+            data: statsData.daily,
+            borderColor: "rgba(74,120,196,1)",
+            backgroundColor: "rgba(74,120,196,0.2)",
+            pointBackgroundColor: "rgba(74,120,196,1)",
+            pointBorderColor: getComputedStyle(document.documentElement).getPropertyValue("--surface").trim(),
+            pointBorderWidth: 2,
+            tension: 0.3,
+            fill: true,
+            borderWidth: 3,
+            pointRadius: 5,
+            pointHoverRadius: 7
+          }]
+        },
+        options: {
+          responsive: true,
+          scales: {
+            x: {
+              ticks: {
+                color: getComputedStyle(document.documentElement).getPropertyValue("--text").trim(),
+                maxRotation: 0,
+                minRotation: 0
+              },
+              grid: {
+                color: getComputedStyle(document.documentElement).getPropertyValue("--muted").trim(),
+                drawBorder: false
+              }
+            },
+            y: {
+              beginAtZero: true,
+              ticks: {
+                color: getComputedStyle(document.documentElement).getPropertyValue("--text").trim()
+              },
+              grid: {
+                color: getComputedStyle(document.documentElement).getPropertyValue("--muted").trim(),
+                borderDash: [5, 5]
+              }
+            }
+          },
+          plugins: {
+            legend: { display: false },
+            tooltip: {
+              backgroundColor: getComputedStyle(document.documentElement).getPropertyValue("--surface").trim(),
+              titleColor: getComputedStyle(document.documentElement).getPropertyValue("--text").trim(),
+              bodyColor: getComputedStyle(document.documentElement).getPropertyValue("--text").trim(),
+              borderColor: getComputedStyle(document.documentElement).getPropertyValue("--muted").trim(),
+              borderWidth: 1,
+              cornerRadius: 4
+            }
+          }
+        }
+      });
+    }
+
+    function populateDailyCounts() {
+      const dailyCounts = [];
+      for (let i = 6; i >= 0; i--) {
+        const dayStart = new Date();
+        dayStart.setHours(0, 0, 0, 0);
+        dayStart.setDate(dayStart.getDate() - i);
+        const dayEnd = new Date(dayStart);
+        dayEnd.setHours(23, 59, 59, 999);
+
+        function countDay(key) {
+          const raw = localStorage.getItem(key) || "[]";
+          const arr = JSON.parse(raw);
+          return arr.filter(ts => {
+            const d = new Date(ts);
+            return d >= dayStart && d <= dayEnd;
+          }).length;
+        }
+
+        const sumForDay =
+          countDay("timestampsHerbal") +
+          countDay("timestampsPsych") +
+          countDay("timestampsDiet") +
+          countDay("timestampsPharmacy") +
+          countDay("timestampsConsult");
+
+        dailyCounts.push(sumForDay);
+      }
+      statsData.daily = dailyCounts;
+      if (dailyChart) {
+        dailyChart.data.datasets[0].data = dailyCounts;
+        dailyChart.update();
       }
     }
-  }
-});
 
-
-    const dailyCtx = document.getElementById('dailyChart').getContext('2d');
-    const dailyChart = new Chart(dailyCtx, {
-  type: 'line',
-  data: {
-    labels: statsData.labels, 
-    datasets: [{
-      label: 'Daily Queries',
-      data: [], 
-      borderColor: 'rgba(74,120,196,1)',
-      backgroundColor: 'rgba(74,120,196,0.2)',
-      pointBackgroundColor: 'rgba(74,120,196,1)',
-      pointBorderColor: varColor('--surface'),
-      pointBorderWidth: 2,
-      tension: 0.3,
-      fill: true,
-      borderWidth: 3,
-      pointRadius: 5,
-      pointHoverRadius: 7
-    }]
-  },
-  options: {
-    responsive: true,
-    scales: {
-      x: {
-        ticks: { color: varColor('--text'), maxRotation: 0, minRotation: 0 },
-        grid: { color: varColor('--muted'), drawBorder: false }
-      },
-      y: {
-        beginAtZero: true,
-        ticks: { color: varColor('--text') },
-        grid: { color: varColor('--muted'), borderDash: [5, 5] }
-      }
-    },
-    plugins: {
-      legend: { display: false },
-      tooltip: {
-        backgroundColor: varColor('--surface'),
-        titleColor: varColor('--text'),
-        bodyColor: varColor('--text'),
-        borderColor: varColor('--muted'),
-        borderWidth: 1,
-        cornerRadius: 4
-      }
-    }
-  }
-});
-
-  const dailyCounts = [];
-for (let i = 6; i >= 0; i--) {
-  const dayStart = new Date();
-  dayStart.setHours(0, 0, 0, 0);
-  dayStart.setDate(dayStart.getDate() - i);
-
-  const dayEnd = new Date(dayStart);
-  dayEnd.setHours(23, 59, 59, 999);
-
-  function countDay(key) {
-    const raw = localStorage.getItem(key) || '[]';
-    const arr = JSON.parse(raw);
-    return arr.filter(ts => {
-      const d = new Date(ts);
-      return d >= dayStart && d <= dayEnd;
-    }).length;
-  }
-
-  const sumForDay =
-    countDay('timestampsHerbal') +
-    countDay('timestampsPsych') +
-    countDay('timestampsDiet') +
-    countDay('timestampsPharmacy') +
-    countDay('timestampsConsult');
-
-  dailyCounts.push(sumForDay);
-}
-
-dailyChart.data.datasets[0].data = dailyCounts;
-dailyChart.update();
-    
-    filterBtn.onclick = () => {
+    filterBtn.addEventListener("click", () => {
       const start = startDateInput.value;
       const end   = endDateInput.value;
       if (!start || !end) {
-        showToast('Please pick both dates');
+        showToast("Please pick both dates");
         return;
       }
       const startDate = new Date(start);
       const endDate   = new Date(end);
       endDate.setHours(23, 59, 59, 999);
       if (startDate > endDate) {
-        showToast('Start date cannot be after end date');
+        showToast("Start date cannot be after end date");
         return;
       }
 
       function countInRange(key) {
-        const raw = localStorage.getItem(key) || '[]';
+        const raw = localStorage.getItem(key) || "[]";
         const arr = JSON.parse(raw);
         return arr.filter(ts => {
           const d = new Date(ts);
@@ -1251,11 +1886,11 @@ dailyChart.update();
         }).length;
       }
 
-      statsData.herbal   = countInRange('timestampsHerbal');
-      statsData.psych    = countInRange('timestampsPsych');
-      statsData.diet     = countInRange('timestampsDiet');
-      statsData.pharmacy = countInRange('timestampsPharmacy');
-      statsData.consult  = countInRange('timestampsConsult');
+      statsData.herbal   = countInRange("timestampsHerbal");
+      statsData.psych    = countInRange("timestampsPsych");
+      statsData.diet     = countInRange("timestampsDiet");
+      statsData.pharmacy = countInRange("timestampsPharmacy");
+      statsData.consult  = countInRange("timestampsConsult");
 
       const last7Counts = [];
       const labels      = [];
@@ -1267,7 +1902,7 @@ dailyChart.update();
         dayEnd.setHours(23, 59, 59, 999);
 
         function countForDay(key) {
-          const raw = localStorage.getItem(key) || '[]';
+          const raw = localStorage.getItem(key) || "[]";
           const arr = JSON.parse(raw);
           return arr.filter(ts => {
             const d = new Date(ts);
@@ -1275,14 +1910,14 @@ dailyChart.update();
           }).length;
         }
 
-        const countHerbal   = countForDay('timestampsHerbal');
-        const countPsych    = countForDay('timestampsPsych');
-        const countDiet     = countForDay('timestampsDiet');
-        const countPharma   = countForDay('timestampsPharmacy');
-        const countConsult  = countForDay('timestampsConsult');
+        const countHerbal   = countForDay("timestampsHerbal");
+        const countPsych    = countForDay("timestampsPsych");
+        const countDiet     = countForDay("timestampsDiet");
+        const countPharma   = countForDay("timestampsPharmacy");
+        const countConsult  = countForDay("timestampsConsult");
 
         last7Counts.push(countHerbal + countPsych + countDiet + countPharma + countConsult);
-        labels.push(dayStart.toLocaleDateString('default', { month: 'short', day: 'numeric' }));
+        labels.push(dayStart.toLocaleDateString("default", { month: "short", day: "numeric" }));
       }
       statsData.daily  = last7Counts;
       statsData.labels = labels;
@@ -1306,46 +1941,60 @@ dailyChart.update();
       dailyChart.data.datasets[0].data = statsData.daily;
       dailyChart.update();
 
-      showToast('Statistics updated for selected range');
-    };
+      showToast("Statistics updated for selected range");
+    });
 
-    profileLink.onclick = () => {
+   userProfileBtn.addEventListener("click", () => {
+      const currentName =
+        firebase.auth().currentUser.displayName
+        || firebase.auth().currentUser.email.split("@")[0];
+      profileNameInput.value = currentName;
       profileModal.hidden = false;
       profileNameInput.focus();
-    };
-
-    closeProfileModal.onclick = () => {
+    });
+    profileLinkBtn.addEventListener("click", () => {
+      const currentName =
+        firebase.auth().currentUser.displayName
+        || firebase.auth().currentUser.email.split("@")[0];
+      profileNameInput.value = currentName;
+      profileModal.hidden = false;
+      profileNameInput.focus();
+    });
+    closeProfileModalBtn.addEventListener("click", () => {
       profileModal.hidden = true;
-    };
+    });
 
-    saveProfileBtn.onclick = async () => {
+   saveProfileBtn.addEventListener("click", async () => {
       const newName = profileNameInput.value.trim();
       if (!newName) {
-        showToast('Name cannot be empty');
+        showToast("Name cannot be empty");
         return;
       }
       const user = firebase.auth().currentUser;
       if (user) {
+        saveProfileBtn.disabled = true;
+        document.getElementById("saveSpinner").classList.remove("hidden");
         try {
           await user.updateProfile({ displayName: newName });
-          userNameEl.textContent = newName;
-          localStorage.setItem('displayName', newName);
-          showToast('Profile updated');
-          profileModal.hidden = true;
+          localStorage.setItem("displayName", newName);
+          window.location.reload();
         } catch (err) {
           console.error(err);
-          showToast('Could not update profile');
+          showToast("Could not update profile");
+          saveProfileBtn.disabled = false;
+          document.getElementById("saveSpinner").classList.add("hidden");
         }
       }
-    };
+    });
 
-    const storedName = localStorage.getItem('displayName');
+    const storedName = localStorage.getItem("displayName");
     if (storedName) {
-      userNameEl.textContent = storedName;
+      userProfileBtn.innerHTML = `<i class="fas fa-user-circle"></i> ${storedName}`;
     }
   });
 </script>
 
-  
 </body>
+
+
 </html>
