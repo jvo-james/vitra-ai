@@ -1,4 +1,3 @@
-// netlify/functions/openai-proxy.js
 const OpenAI = require("openai");
 const Busboy = require("busboy");
 
@@ -8,12 +7,10 @@ exports.handler = async (event, context) => {
     return { statusCode: 500, body: "Missing OPENAI_API_KEY" };
   }
 
-  // instantiate V4 client
   const openai = new OpenAI({ apiKey: OPENAI_API_KEY });
 
   const contentType = event.headers["content-type"] || event.headers["Content-Type"] || "";
 
-  // 1) IMAGE UPLOAD
   if (event.httpMethod === "POST" && contentType.startsWith("multipart/form-data")) {
     const bb = Busboy({ headers: event.headers });
     let fileBuffer;
@@ -32,7 +29,6 @@ exports.handler = async (event, context) => {
     if (!fileBuffer) return { statusCode: 400, body: "No file received." };
 
     try {
-      // for now use chat to generate a description; swap in the real Vision API when released
       const chat = await openai.chat.completions.create({
         model: "gpt-4o-mini",
         messages: [
@@ -49,7 +45,6 @@ exports.handler = async (event, context) => {
     }
   }
 
-  // 2) CHAT COMPLETIONS
   if (event.httpMethod === "POST") {
     let body;
     try { body = JSON.parse(event.body); }
@@ -77,7 +72,6 @@ exports.handler = async (event, context) => {
     }
   }
 
-  // Method not allowed
   return {
     statusCode: 405,
     headers: { Allow: "POST" },
