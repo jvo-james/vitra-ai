@@ -1537,7 +1537,6 @@ html.dark #insightsContainer .card a.btn-secondary {
       populateDailyCounts();
     });
 
-    // Sign-out handlers
     function handleSignOut() {
       auth.signOut().then(() => {
         window.location.href = "index.html";
@@ -1546,7 +1545,6 @@ html.dark #insightsContainer .card a.btn-secondary {
     signOutBtn.addEventListener("click", handleSignOut);
     sidebarSignOut.addEventListener("click", handleSignOut);
 
-    // Sidebar toggle
     function openSidebar() {
       sidebar.classList.add("show");
       overlay.classList.add("show");
@@ -1558,7 +1556,6 @@ html.dark #insightsContainer .card a.btn-secondary {
     hamburger.addEventListener("click", openSidebar);
     overlay.addEventListener("click", closeSidebar);
 
-    // Theme toggle
     themeToggle.addEventListener("click", () => {
       document.documentElement.classList.toggle("dark");
       themeToggle.classList.toggle("fa-moon");
@@ -1566,7 +1563,6 @@ html.dark #insightsContainer .card a.btn-secondary {
     });
     sidebarThemeToggle.addEventListener("click", () => themeToggle.click());
 
-    // Back-to-top button
     window.addEventListener("scroll", () => {
       backToTopBtn.style.display = window.scrollY > 400 ? "block" : "none";
     });
@@ -1574,7 +1570,6 @@ html.dark #insightsContainer .card a.btn-secondary {
       window.scrollTo({ top: 0, behavior: "smooth" });
     });
 
-    // Load upcoming appointments
     function loadAppointments() {
       appointmentsContainer.innerHTML = "";
       const allAppointments = JSON.parse(localStorage.getItem("appointments") || "[]");
@@ -1635,7 +1630,6 @@ html.dark #insightsContainer .card a.btn-secondary {
       return `${String(hh).padStart(2, "0")}:${String(mm).padStart(2, "0")} ${suffix}`;
     }
 
-    // Load purchased drugs
     function loadPurchasedDrugs() {
       purchasedContainer.innerHTML = "";
       const purchased = JSON.parse(localStorage.getItem("purchasedDrugs") || "[]");
@@ -1655,7 +1649,6 @@ html.dark #insightsContainer .card a.btn-secondary {
       });
     }
 
-    // Load nutrition summary
     function loadNutritionSummary() {
       nutritionContainer.innerHTML = "";
       const data = JSON.parse(localStorage.getItem("nutritionSummary") || "{}");
@@ -1677,7 +1670,6 @@ html.dark #insightsContainer .card a.btn-secondary {
       nutritionContainer.innerHTML = summaryHTML;
     }
 
-    // Record a timestamp each time the user visits the pharmacy section
     function recordPharmacyTimestamp() {
       const key = "timestampsPharmacy";
       const arr = JSON.parse(localStorage.getItem(key) || "[]");
@@ -1773,14 +1765,12 @@ html.dark #insightsContainer .card a.btn-secondary {
       insightsContainer.append(card);
     }
 
-    // Show a short toast message at bottom
     function showToast(message) {
       toastEl.textContent = message;
       toastEl.classList.add("visible");
       setTimeout(() => toastEl.classList.remove("visible"), 3000);
     }
 
-    // Stats data object
     let statsData = {
       herbal: 0,
       psych: 0,
@@ -1791,7 +1781,6 @@ html.dark #insightsContainer .card a.btn-secondary {
       labels: []
     };
 
-    // Generate labels for last 7 days: e.g. ["Jun 1", "Jun 2", …]
     function generateLast7DaysLabels() {
       const labels = [];
       for (let i = 6; i >= 0; i--) {
@@ -1802,9 +1791,7 @@ html.dark #insightsContainer .card a.btn-secondary {
       return labels;
     }
 
-    // —————————————————————
-    // PATCHED displayStats() — use Storage.getCount() instead of timestamps.length 
-    function displayStats() {
+     function displayStats() {
       statsData.herbal   = Storage.getCount("Herbal");
       statsData.psych    = Storage.getCount("Psych");
       statsData.diet     = Storage.getCount("Diet");
@@ -1822,7 +1809,7 @@ html.dark #insightsContainer .card a.btn-secondary {
 
     let distributionChart, dailyChart;
     function initializeCharts() {
-      // Doughnut chart for distribution by sector
+
       distributionChart = new Chart(distributionCtx, {
         type: "doughnut",
         data: {
@@ -1836,11 +1823,11 @@ html.dark #insightsContainer .card a.btn-secondary {
               statsData.consult
             ],
             backgroundColor: [
-               "rgba(34,139,34,0.8)", 
-              "rgba(255,0,0,0.8)",     
-              "rgba(255,255,179,0.8)", 
-              "rgba(0,100,0,0.8)",     
-              "rgba(75,0,130,0.8)" 
+               "#228B22",   
+                "#FF0000",  
+                "#F7DC6F",  
+                "#005f73",   
+                "#4B0082"   
             ],
             borderColor: "rgba(255,255,255,0.9)",
             borderWidth: 2
@@ -1869,7 +1856,6 @@ html.dark #insightsContainer .card a.btn-secondary {
         }
       });
 
-      // Line chart for daily counts (last 7 days)
       dailyChart = new Chart(dailyCtx, {
         type: "line",
         data: {
@@ -1929,7 +1915,6 @@ html.dark #insightsContainer .card a.btn-secondary {
       });
     }
 
-    // Populate dailyCounts array and update the line chart
     function populateDailyCounts() {
       const dailyCounts = [];
       for (let i = 6; i >= 0; i--) {
@@ -1964,7 +1949,6 @@ html.dark #insightsContainer .card a.btn-secondary {
       }
     }
 
-    // Filter button handler: recalculate stats for custom date range
     filterBtn.addEventListener("click", () => {
       const start = startDateInput.value;
       const end   = endDateInput.value;
@@ -2047,7 +2031,6 @@ html.dark #insightsContainer .card a.btn-secondary {
       showToast("Statistics updated for selected range");
     });
 
-    // Profile modal logic
     userProfileBtn.addEventListener("click", () => {
       const currentName =
         firebase.auth().currentUser.displayName
@@ -2091,7 +2074,6 @@ html.dark #insightsContainer .card a.btn-secondary {
       }
     });
 
-    // If user has manually stored a displayName in localStorage, use it
     const storedName = localStorage.getItem("displayName");
     if (storedName) {
       userProfileBtn.innerHTML = `<i class="fas fa-user-circle"></i> ${storedName}`;
