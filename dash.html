@@ -1,0 +1,1058 @@
+<!DOCTYPE html>
+<html lang="en" aria-theme="light">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+  <title>Vitra AI – Dashboard</title>
+
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"/>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+
+<style>
+  /* ─────────────────────────────────────────────────────────────────────────────
+     Root & Global Variables
+     ───────────────────────────────────────────────────────────────────────────── */
+  :root {
+    --primary: #4A78C4;
+    --secondary: #FFFFFF;
+    --bg: #F7FAFE;
+    --surface: #FFFFFF;
+    --text: #1A1A1A;
+    --muted: #555555;
+    --radius: 0.75rem;
+    --padding: 1.5rem;
+    --gap: 1rem;
+    --max-width: 1200px;
+    --shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    --transition: 0.3s ease;
+  }
+
+  html.dark {
+    --bg: #1F2233;
+    --surface: #2B2E44;
+    --text: #E0E0E0;
+    --muted: #888888;
+    --shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+  }
+
+  /* ─────────────────────────────────────────────────────────────────────────────
+     Global Reset & Base Styles
+     ───────────────────────────────────────────────────────────────────────────── */
+  *, *::before, *::after {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    transition: var(--transition);
+  }
+
+  html, body {
+    width: 100%;
+    height: 100%;
+    font-family: 'Montserrat', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    scroll-behavior: smooth;
+  }
+
+  a {
+    color: inherit;
+    text-decoration: none;
+  }
+
+  img {
+    max-width: 100%;
+    display: block;
+  }
+
+  ul {
+    list-style: none;
+  }
+
+  button {
+    font: inherit;
+    cursor: pointer;
+    border: none;
+    background: none;
+  }
+
+  /* ─────────────────────────────────────────────────────────────────────────────
+     Layout: Navbar (Fixed Top)
+     ───────────────────────────────────────────────────────────────────────────── */
+  .navbar {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    background: var(--surface);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.75rem var(--padding);
+    box-shadow: var(--shadow);
+    z-index: 1000;
+  }
+
+  .navbar .logo {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .navbar .logo svg {
+    width: 2.5rem;
+    height: 2.5rem;
+    fill: var(--primary);
+  }
+
+  .navbar .logo .logo-text {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: var(--primary);
+  }
+
+  .navbar ul {
+    display: flex;
+    gap: var(--gap);
+  }
+
+  .navbar ul li a {
+    padding: 0.5rem;
+    font-weight: 500;
+    color: var(--text);
+    transition: color 0.2s;
+  }
+
+  .navbar ul li a:hover {
+    color: var(--primary);
+  }
+
+  .navbar .auth {
+    display: flex;
+    gap: 0.75rem;
+  }
+
+  .navbar .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 1rem;
+    border-radius: var(--radius);
+    font-weight: 500;
+    transition: background 0.2s, transform 0.2s;
+  }
+
+  .btn-primary {
+    background: var(--primary);
+    color: #fff;
+  }
+
+  .btn-primary:hover {
+    background: #3A62A8;
+    transform: translateY(-2px);
+  }
+
+  .btn-secondary {
+    background: transparent;
+    color: var(--primary);
+    border: 2px solid var(--primary);
+  }
+
+  .btn-secondary:hover {
+    background: var(--primary);
+    color: var(--secondary);
+    transform: translateY(-2px);
+  }
+
+  #themeToggle {
+    font-size: 1.2rem;
+    color: var(--muted);
+    cursor: pointer;
+    margin-left: var(--gap);
+    transition: color 0.2s;
+  }
+
+  #themeToggle:hover {
+    color: var(--primary);
+  }
+
+  .hamburger {
+    display: none;
+    font-size: 1.5rem;
+    cursor: pointer;
+    color: var(--text);
+  }
+
+  @media (max-width: 768px) {
+    .navbar ul,
+    .navbar .auth {
+      display: none;
+    }
+    .hamburger {
+      display: block;
+    }
+  }
+
+  /* ─────────────────────────────────────────────────────────────────────────────
+     Layout: Sidebar (Slide-In)
+     ───────────────────────────────────────────────────────────────────────────── */
+  .sidebar-overlay {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 900;
+    display: none;
+    transition: opacity var(--transition);
+  }
+
+  .sidebar {
+    position: fixed;
+    top: 0; left: -250px;
+    width: 250px; height: 100%;
+    background: var(--surface);
+    color: var(--text);
+    padding: 2rem 1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    box-shadow: var(--shadow);
+    transition: left var(--transition);
+    z-index: 1000;
+  }
+
+  .sidebar.show {
+    left: 0;
+  }
+
+  .sidebar-overlay.show {
+    display: block;
+    opacity: 1;
+  }
+
+  .sidebar-nav a {
+    color: var(--text);
+    font-size: 1.2rem;
+    padding: 0.5rem 0;
+    transition: color 0.2s;
+  }
+
+  .sidebar-nav a:hover {
+    color: var(--primary);
+  }
+
+  .sidebar-auth {
+    margin-top: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  .sidebar-auth button {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .sidebar-theme {
+    margin-top: 1rem;
+    text-align: center;
+    font-size: 1.5rem;
+    cursor: pointer;
+    color: var(--muted);
+  }
+
+  .sidebar-theme:hover {
+    color: var(--primary);
+  }
+
+  /* ─────────────────────────────────────────────────────────────────────────────
+     Main Content & Sections
+     ───────────────────────────────────────────────────────────────────────────── */
+  main {
+    margin: auto;
+    padding: calc(var(--padding) + 4rem) var(--padding) var(--padding);
+    max-width: var(--max-width);
+  }
+
+  section {
+    margin-bottom: 3rem;
+  }
+
+  h2 {
+    font-size: 2rem;
+    margin-bottom: 1rem;
+    color: var(--primary);
+  }
+
+  p {
+    font-size: 1rem;
+    color: var(--text);
+    margin-bottom: 1rem;
+  }
+
+  /* ─────────────────────────────────────────────────────────────────────────────
+     Greeting Section (Above QuickAccess)
+     ───────────────────────────────────────────────────────────────────────────── */
+  #greetingSection {
+    text-align: center;
+    margin-bottom: 2rem;
+  }
+
+  #greetingSection h2 {
+    font-size: 2.25rem;
+    margin-bottom: 0.5rem;
+  }
+
+  #greetingSection p {
+    font-size: 1rem;
+    color: var(--muted);
+  }
+
+  /* ─────────────────────────────────────────────────────────────────────────────
+     Quick Access Buttons (Top of Dashboard)
+     ───────────────────────────────────────────────────────────────────────────── */
+  #quickAccess {
+    background: var(--surface);
+    padding: 3rem 0;
+  }
+
+  #quickAccess .quick-access-inner {
+    max-width: var(--max-width);
+    margin: 0 auto;
+    text-align: center;
+    padding: 0 var(--padding);
+  }
+
+  #quickAccess h2 {
+    font-size: 2rem;
+    margin-bottom: 1.5rem;
+    color: var(--text);
+  }
+
+  #quickAccess .quick-buttons {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+    justify-content: center;
+  }
+
+  #quickAccess .quick-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 1rem 1.5rem;
+    border-radius: var(--radius);
+    font-weight: 600;
+    font-size: 1rem;
+    color: var(--secondary);
+    background: var(--primary);
+    transition: background 0.2s, transform 0.2s;
+    box-shadow: var(--shadow);
+  }
+
+  #quickAccess .quick-btn:hover {
+    background: #3A62A8;
+    transform: translateY(-2px);
+  }
+
+  #quickAccess .quick-btn i {
+    font-size: 1.25rem;
+  }
+
+  @media(max-width: 600px) {
+    #quickAccess .quick-buttons {
+      flex-direction: column;
+      gap: 0.75rem;
+    }
+    #quickAccess .quick-btn {
+      width: 100%;
+      justify-content: center;
+    }
+  }
+
+  /* ─────────────────────────────────────────────────────────────────────────────
+     Dashboard Cards (Appointments, Prescriptions, etc.)
+     ───────────────────────────────────────────────────────────────────────────── */
+  .dashboard-section {
+    background: var(--surface);
+    border-radius: var(--radius);
+    padding: var(--padding);
+    box-shadow: var(--shadow);
+    margin-bottom: 2rem;
+  }
+
+  .dashboard-section h3 {
+    font-size: 1.5rem;
+    margin-bottom: 1rem;
+    color: var(--primary);
+  }
+
+  .dashboard-section .card {
+    display: flex;
+    align-items: center;
+    gap: var(--gap);
+    background: var(--bg);
+    border-radius: var(--radius);
+    padding: 1rem;
+    margin-bottom: 1rem;
+    box-shadow: var(--shadow);
+    position: relative;
+  }
+
+  .dashboard-section .card:last-child {
+    margin-bottom: 0;
+  }
+
+  .dashboard-section .card i {
+    font-size: 1.75rem;
+    color: var(--primary);
+  }
+
+  .dashboard-section .card .details {
+    flex: 1;
+  }
+
+  .dashboard-section .card .details h4 {
+    font-size: 1.1rem;
+    color: var(--text);
+    margin-bottom: 0.25rem;
+  }
+
+  .dashboard-section .card .details p {
+    font-size: 0.95rem;
+    color: var(--muted);
+  }
+
+  .dashboard-section .card .actions {
+    display: flex;
+    gap: 0.5rem;
+  }
+
+  .dashboard-section .card .btn-reschedule,
+  .dashboard-section .card .btn-cancel {
+    background: var(--primary);
+    color: #fff;
+    width: 36px;
+    height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    border: none;
+    transition: background var(--transition), transform var(--transition);
+  }
+
+  .dashboard-section .card .btn-reschedule i,
+  .dashboard-section .card .btn-cancel i {
+    font-size: 1rem;
+  }
+
+  .dashboard-section .card .btn-reschedule:hover {
+    background: #3A62A8;
+    transform: translateY(-2px);
+  }
+
+  .dashboard-section .card .btn-cancel:hover {
+    background: #D4724F;
+    transform: translateY(-2px);
+  }
+
+  /* ─────────────────────────────────────────────────────────────────────────────
+     Appointments Section
+     ───────────────────────────────────────────────────────────────────────────── */
+  #appointmentsContainer {
+    margin-top: 1rem;
+  }
+
+  /* If no cards, center the empty message */
+  #appointmentsContainer p {
+    text-align: center;
+    color: var(--muted);
+    font-size: 1rem;
+    margin-top: 1rem;
+  }
+
+  /* ─────────────────────────────────────────────────────────────────────────────
+     Prescriptions Section
+     ───────────────────────────────────────────────────────────────────────────── */
+  #prescriptionsContainer {
+    margin-top: 1rem;
+  }
+
+  #prescriptionsContainer .card {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  #prescriptionsContainer .card .actions button {
+    background: var(--primary);
+    color: #fff;
+    padding: 0.5rem 1rem;
+    border-radius: var(--radius);
+    font-size: 0.9rem;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    transition: background 0.2s, transform 0.2s;
+  }
+
+  #prescriptionsContainer .card .actions button:hover {
+    background: #3A62A8;
+    transform: translateY(-2px);
+  }
+
+  #prescriptionsContainer p {
+    text-align: center;
+    color: var(--muted);
+    margin-top: 1rem;
+  }
+
+  /* ─────────────────────────────────────────────────────────────────────────────
+     Nutrition Summary Section
+     ───────────────────────────────────────────────────────────────────────────── */
+  #nutritionContainer {
+    margin-top: 1rem;
+    text-align: center;
+    font-size: 1rem;
+  }
+
+  #nutritionContainer p {
+    margin-bottom: 0.5rem;
+    color: var(--text);
+  }
+
+  #nutritionContainer a.btn-primary {
+    margin-top: 0.75rem;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.95rem;
+  }
+
+  /* ─────────────────────────────────────────────────────────────────────────────
+     AI Insights Section
+     ───────────────────────────────────────────────────────────────────────────── */
+  #insightsContainer {
+    margin-top: 1rem;
+  }
+
+  #insightsContainer .card {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  #insightsContainer .card .details h4 {
+    font-size: 1.1rem;
+    margin-bottom: 0.5rem;
+  }
+
+  #insightsContainer .card .details p {
+    font-size: 0.95rem;
+    margin-bottom: 0.75rem;
+  }
+
+  #insightsContainer .card a.btn-secondary {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.95rem;
+  }
+
+  /* ─────────────────────────────────────────────────────────────────────────────
+     Back to Top Button
+     ───────────────────────────────────────────────────────────────────────────── */
+  #backToTop {
+    position: fixed;
+    bottom: 2rem; right: 2rem;
+    display: none;
+    background: var(--primary);
+    color: #fff;
+    padding: 0.75rem;
+    border-radius: 50%;
+    font-size: 1.2rem;
+    cursor: pointer;
+    box-shadow: var(--shadow);
+    z-index: 1000;
+    transition: transform 0.2s;
+  }
+
+  #backToTop:hover {
+    transform: scale(1.1);
+  }
+
+  /* ─────────────────────────────────────────────────────────────────────────────
+     Footer
+     ───────────────────────────────────────────────────────────────────────────── */
+  footer {
+    background: var(--surface);
+    padding: var(--padding);
+    text-align: center;
+    box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.05);
+    margin-top: 3rem;
+  }
+
+  footer p {
+    font-size: 0.9rem;
+    color: var(--muted);
+  }
+
+  footer .socials {
+    margin-top: 0.5rem;
+  }
+
+  footer .socials a {
+    margin: 0 0.5rem;
+    font-size: 1.2rem;
+    color: var(--muted);
+    transition: color 0.2s;
+  }
+
+  footer .socials a:hover {
+    color: var(--primary);
+  }
+</style>
+
+</head>
+
+  <body>
+  <!-- Navbar -->
+  <nav class="navbar">
+    <div class="logo">
+      <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" fill="var(--primary)">
+        <polygon points="10,10 25,90 50,40 75,90 90,10 65,10 50,70 35,10"/>
+      </svg>
+      <span class="logo-text">Vitra AI</span>
+    </div>
+    <ul>
+      <li><a href="dashboard.html">Dashboard</a></li>
+      <li><a href="herbal.html">Herbal Medicine</a></li>
+      <li><a href="psychology.html">Mental Health</a></li>
+      <li><a href="dietetics.html">Dietetics</a></li>
+      <li><a href="epharmacy.html">E-Pharmacy</a></li>
+      <li><a href="consult.html">Consult Booking</a></li>
+    </ul>
+    <div class="auth">
+      <button class="btn btn-secondary" id="userProfile">
+        <i class="fas fa-user-circle"></i> John Doe
+      </button>
+      <button class="btn btn-primary" id="signOut">
+        <i class="fas fa-sign-out-alt"></i> Sign Out
+      </button>
+    </div>
+    <i id="themeToggle" class="fas fa-moon"></i>
+    <i class="fas fa-bars hamburger" id="hamburger"></i>
+  </nav>
+
+  <!-- Sidebar (mobile) -->
+  <div class="sidebar-overlay" id="sidebarOverlay"></div>
+  <aside class="sidebar" id="sidebar">
+    <ul class="sidebar-nav">
+      <li><a href="dashboard.html">Dashboard</a></li>
+      <li><a href="herbal.html">Herbal Medicine</a></li>
+      <li><a href="psychology.html">Mental Health</a></li>
+      <li><a href="dietetics.html">Dietetics</a></li>
+      <li><a href="epharmacy.html">E-Pharmacy</a></li>
+      <li><a href="consult.html">Consult Booking</a></li>
+    </ul>
+    <div class="sidebar-auth">
+      <button class="btn btn-secondary" id="sidebarProfile">
+        <i class="fas fa-user-circle"></i> John Doe
+      </button>
+      <button class="btn btn-primary" id="sidebarSignOut">
+        <i class="fas fa-sign-out-alt"></i> Sign Out
+      </button>
+    </div>
+    <div class="sidebar-theme">
+      <i id="sidebarThemeToggle" class="fas fa-moon"></i>
+    </div>
+  </aside>
+
+  <!-- Main Content -->
+  <main>
+    <!-- Greeting Section -->
+    <section class="module" style="text-align:center; margin-bottom:2rem;">
+      <h2>Welcome back, John Doe!</h2>
+      <p style="color: var(--muted);">Here’s a quick overview of your AI-powered health dashboard.</p>
+    </section>
+
+    <!-- Quick Access Buttons -->
+    <section id="quickAccess" class="module">
+      <div class="quick-access-inner">
+        <h2>Quick Access</h2>
+        <div class="quick-buttons">
+          <a href="consult.html" class="quick-btn btn-primary">
+            <i class="fas fa-calendar-check"></i> My Appointments
+          </a>
+          <a href="epharmacy.html" class="quick-btn btn-secondary">
+            <i class="fas fa-prescription-bottle-alt"></i> My Prescriptions
+          </a>
+          <a href="dietetics.html" class="quick-btn btn-primary">
+            <i class="fas fa-apple-alt"></i> Meal Plans
+          </a>
+          <a href="psychology.html#therapybot" class="quick-btn btn-secondary">
+            <i class="fas fa-brain"></i> Chat with AI Therapist
+          </a>
+          <a href="herbal.html" class="quick-btn btn-primary">
+            <i class="fas fa-leaf"></i> Herbal Recommendations
+          </a>
+        </div>
+      </div>
+    </section>
+
+    <!-- Upcoming Appointments -->
+    <section id="upcomingAppointments" class="module">
+      <h2><i class="fas fa-calendar-alt"></i> Upcoming Appointments</h2>
+      <div id="appointmentsContainer" style="margin-top:1rem;">
+        <!--
+          Appointment cards will be injected here by your JavaScript.
+          Example structure for each card:
+          <div class="card" data-id="appt123">
+            <i class="fas fa-user-md fa-2x"></i>
+            <div class="details">
+              <h4><strong>Dr. Jane Smith</strong></h4>
+              <p>2025-06-15 • 10:30 AM</p>
+            </div>
+            <div class="actions">
+              <button class="btn-reschedule"><i class="fas fa-sync-alt"></i></button>
+              <button class="btn-cancel"><i class="fas fa-times"></i></button>
+            </div>
+          </div>
+        -->
+        <p style="color: var(--muted);">You have no upcoming appointments.</p>
+      </div>
+    </section>
+
+    <!-- Recent Prescriptions -->
+    <section id="recentPrescriptions" class="module">
+      <h2><i class="fas fa-pills"></i> Recent Prescriptions</h2>
+      <div id="prescriptionsContainer" style="margin-top:1rem;">
+        <!--
+          Prescription list items will be populated here.
+          Example:
+          <div class="card">
+            <div class="details">
+              <h4><strong>Lisinopril 10mg</strong></h4>
+              <p>Prescribed by Dr. Asante on 2025-05-20</p>
+            </div>
+            <div class="actions">
+              <button class="btn-secondary"><i class="fas fa-download"></i> Refill</button>
+            </div>
+          </div>
+        -->
+        <p style="color: var(--muted);">You have no recent prescriptions.</p>
+      </div>
+    </section>
+
+    <!-- Nutrition Summary -->
+    <section id="nutritionSummary" class="module">
+      <h2><i class="fas fa-apple-alt"></i> Nutrition Summary</h2>
+      <div id="nutritionContainer" style="margin-top:1rem;">
+        <!--
+          Nutritional stats or meal-plan preview injected here.
+          Example:
+          <p><strong>Today's Calories:</strong> 1,850 kcal</p>
+          <p><strong>Protein:</strong> 80 g · <strong>Carbs:</strong> 210 g · <strong>Fats:</strong> 65 g</p>
+          <a href="dietetics.html" class="btn btn-primary" style="margin-top:0.5rem;">
+            View Full Meal Plan
+          </a>
+        -->
+        <p style="color: var(--muted);">No nutrition data available.</p>
+      </div>
+    </section>
+
+    <!-- AI Insights -->
+    <section id="aiInsights" class="module">
+      <h2><i class="fas fa-robot"></i> AI Insights</h2>
+      <div id="insightsContainer" style="margin-top:1rem;">
+        <!--
+          Place to show AI‐generated summaries, e.g.:
+          <div class="card">
+            <div class="details">
+              <h4><strong>Herbal Tip of the Day</strong></h4>
+              <p>Based on your recent concerns, we recommend adding turmeric to your regimen...</p>
+            </div>
+            <a href="herbal.html" class="btn btn-secondary" style="margin-top:0.5rem;">
+              Learn More
+            </a>
+          </div>
+        -->
+        <p style="color: var(--muted);">No AI insights available at this time.</p>
+      </div>
+    </section>
+  </main>
+
+  <!-- Footer -->
+  <footer>
+    <p>&copy; 2025 Vitra AI. All rights reserved.</p>
+    <div class="socials">
+      <a href="#"><i class="fab fa-facebook-f"></i></a>
+      <a href="#"><i class="fab fa-twitter"></i></a>
+      <a href="#"><i class="fab fa-instagram"></i></a>
+      <a href="#"><i class="fab fa-linkedin-in"></i></a>
+    </div>
+  </footer>
+
+  <!-- Back to Top Button -->
+  <div id="backToTop"><i class="fas fa-arrow-up"></i></div>
+
+    <script>
+  // ─── Firebase Initialization ─────────────────────────────────────────────
+  // (Use the same config as on the homepage)
+  const firebaseConfig = {
+    apiKey: "AIzaSyBhaYOcLMXuobCT-vaXr-zXTZnBfaheAIY",
+    authDomain: "vitra-ai-712ea.firebaseapp.com",
+    projectId: "vitra-ai-712ea",
+    storageBucket: "vitra-ai-712ea.appspot.com",
+    messagingSenderId: "306868103753",
+    appId: "1:306868103753:web:e2d7700f8ad34c1e17ed98"
+  };
+  firebase.initializeApp(firebaseConfig);
+  const auth = firebase.auth();
+
+  document.addEventListener("DOMContentLoaded", () => {
+    const sidebar       = document.getElementById("sidebar");
+    const overlay       = document.getElementById("sidebarOverlay");
+    const hamburger     = document.querySelector(".hamburger");
+    const sidebarTheme  = document.getElementById("sidebarThemeToggle");
+    const themeToggle   = document.getElementById("themeToggle");
+    const signOutBtn    = document.getElementById("signOut");
+    const sidebarSignOut= document.getElementById("sidebarSignOut");
+    const appointmentsContainer   = document.getElementById("appointmentsContainer");
+    const prescriptionsContainer  = document.getElementById("prescriptionsContainer");
+    const nutritionContainer      = document.getElementById("nutritionContainer");
+    const insightsContainer       = document.getElementById("insightsContainer");
+    const backToTopBtn            = document.getElementById("backToTop");
+    const greetingSection         = document.querySelector("#quickAccess") // placeholder for greeting
+      .previousElementSibling; // the <section> just above quickAccess
+
+    // ─── AUTH STATE HANDLING ────────────────────────────────────────────────
+    auth.onAuthStateChanged(user => {
+      if (!user) {
+        // If not signed in, redirect to homepage
+        window.location.href = "index.html";
+        return;
+      }
+      // User is signed in
+      const displayName = user.displayName || user.email.split("@")[0];
+      // Update greeting text
+      // The greetingSection is the <section> containing <h2>Welcome back, John Doe!</h2>
+      greetingSection.innerHTML = `
+        <h2>Hello ${displayName}!</h2>
+        <p style="color: var(--muted);">Here’s a quick overview of your AI-powered health dashboard.</p>
+      `;
+      // Load dynamic content
+      loadAppointments();
+      loadPrescriptions();
+      loadNutritionSummary();
+      loadAIInsights();
+    });
+
+    // ─── SIGN-OUT HANDLERS ─────────────────────────────────────────────────
+    function handleSignOut() {
+      auth.signOut().then(() => {
+        window.location.href = "index.html";
+      });
+    }
+    signOutBtn.addEventListener("click", handleSignOut);
+    sidebarSignOut.addEventListener("click", handleSignOut);
+
+    // ─── SIDEBAR TOGGLE ────────────────────────────────────────────────────
+    function openSidebar() {
+      sidebar.classList.add("show");
+      overlay.classList.add("show");
+    }
+    function closeSidebar() {
+      sidebar.classList.remove("show");
+      overlay.classList.remove("show");
+    }
+    hamburger.addEventListener("click", openSidebar);
+    overlay.addEventListener("click", closeSidebar);
+
+    // ─── THEME TOGGLE ──────────────────────────────────────────────────────
+    themeToggle.addEventListener("click", () => {
+      document.documentElement.classList.toggle("dark");
+      themeToggle.classList.toggle("fa-moon");
+      themeToggle.classList.toggle("fa-sun");
+    });
+    sidebarTheme.addEventListener("click", () => themeToggle.click());
+
+    // ─── BACK TO TOP BUTTON ─────────────────────────────────────────────────
+    window.addEventListener("scroll", () => {
+      backToTopBtn.style.display = window.scrollY > 400 ? "block" : "none";
+    });
+    backToTopBtn.addEventListener("click", () => {
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    });
+
+    // ─── LOAD UPCOMING APPOINTMENTS ────────────────────────────────────────
+    function loadAppointments() {
+      appointmentsContainer.innerHTML = "";
+      const allAppointments = JSON.parse(localStorage.getItem("appointments") || "[]");
+      const today = new Date().setHours(0, 0, 0, 0);
+      // Filter for future or today appointments
+      const upcoming = allAppointments.filter(a => {
+        const apptDate = new Date(a.date).setHours(0, 0, 0, 0);
+        return apptDate >= today;
+      });
+      if (upcoming.length === 0) {
+        appointmentsContainer.innerHTML = `<p style="color: var(--muted);">You have no upcoming appointments.</p>`;
+        return;
+      }
+      upcoming.forEach(appt => {
+        const card = document.createElement("div");
+        card.className = "card";
+        card.dataset.id = appt.id;
+        card.innerHTML = `
+          <i class="fas fa-user-md fa-2x"></i>
+          <div class="details" style="margin-left:1rem;">
+            <h4><strong>${appt.name}</strong></h4>
+            <p>${appt.date} • ${formatTime(appt.time)}</p>
+          </div>
+          <div class="actions" style="margin-left:auto; display:flex; gap:0.5rem;">
+            <button class="btn-reschedule" style="background:var(--primary); color:#fff; width:36px; height:36px; border-radius:50%;">
+              <i class="fas fa-sync-alt"></i>
+            </button>
+            <button class="btn-cancel" style="background:var(--primary); color:#fff; width:36px; height:36px; border-radius:50%;">
+              <i class="fas fa-times"></i>
+            </button>
+          </div>
+        `;
+        // Cancel handler
+        card.querySelector(".btn-cancel").addEventListener("click", () => {
+          if (confirm("Are you sure you want to cancel this appointment?")) {
+            removeAppointment(appt.id);
+            card.remove();
+            if (appointmentsContainer.children.length === 0) {
+              appointmentsContainer.innerHTML = `<p style="color: var(--muted);">You have no upcoming appointments.</p>`;
+            }
+          }
+        });
+        // Reschedule handler
+        card.querySelector(".btn-reschedule").addEventListener("click", () => {
+          // Redirect to consult page for rescheduling; pass the appointment ID via query param
+          window.location.href = `consult.html?rescheduleId=${encodeURIComponent(appt.id)}`;
+        });
+        appointmentsContainer.append(card);
+      });
+    }
+
+    function removeAppointment(id) {
+      const list = JSON.parse(localStorage.getItem("appointments") || "[]");
+      const updated = list.filter(a => a.id !== id);
+      localStorage.setItem("appointments", JSON.stringify(updated));
+    }
+    function formatTime(t) {
+      // Expecting "HH:MM" or "HH:MM AM/PM"; if 24h format, convert to 12h
+      if (t.includes("AM") || t.includes("PM")) return t;
+      let [hh, mm] = t.split(":").map(Number);
+      const suffix = hh >= 12 ? "PM" : "AM";
+      hh = hh % 12 || 12;
+      return `${String(hh).padStart(2, "0")}:${String(mm).padStart(2, "0")} ${suffix}`;
+    }
+
+    // ─── LOAD RECENT PRESCRIPTIONS ─────────────────────────────────────────
+    function loadPrescriptions() {
+      prescriptionsContainer.innerHTML = "";
+      const allPrescriptions = JSON.parse(localStorage.getItem("prescriptions") || "[]");
+      if (allPrescriptions.length === 0) {
+        prescriptionsContainer.innerHTML = `<p style="color: var(--muted);">You have no recent prescriptions.</p>`;
+        return;
+      }
+      allPrescriptions.slice(-5).reverse().forEach(presc => {
+        const card = document.createElement("div");
+        card.className = "card";
+        card.style.display = "flex";
+        card.style.alignItems = "center";
+        card.style.gap = "1rem";
+        card.style.marginBottom = "1rem";
+        card.innerHTML = `
+          <div class="details">
+            <h4><strong>${presc.name}</strong></h4>
+            <p>Prescribed by ${presc.prescriber} on ${presc.date}</p>
+          </div>
+          <div class="actions" style="margin-left:auto;">
+            <button class="btn-secondary" style="padding:0.5rem 1rem; border-radius:var(--radius); display:flex; align-items:center; gap:0.5rem;">
+              <i class="fas fa-download"></i> Refill
+            </button>
+          </div>
+        `;
+        card.querySelector("button").addEventListener("click", () => {
+          alert(`Refill requested for ${presc.name}`);
+        });
+        prescriptionsContainer.append(card);
+      });
+    }
+
+    // ─── LOAD NUTRITION SUMMARY ─────────────────────────────────────────────
+    function loadNutritionSummary() {
+      nutritionContainer.innerHTML = "";
+      const data = JSON.parse(localStorage.getItem("nutritionSummary") || "{}");
+      if (!data || !data.calories) {
+        nutritionContainer.innerHTML = `<p style="color: var(--muted);">No nutrition data available.</p>`;
+        return;
+      }
+      const summaryHTML = `
+        <p><strong>Today's Calories:</strong> ${data.calories} kcal</p>
+        <p>
+          <strong>Protein:</strong> ${data.protein} g · 
+          <strong>Carbs:</strong> ${data.carbs} g · 
+          <strong>Fats:</strong> ${data.fats} g
+        </p>
+        <a href="dietetics.html" class="btn btn-primary" style="margin-top:0.5rem; display:inline-flex; align-items:center; gap:0.5rem;">
+          <i class="fas fa-arrow-right"></i> View Full Meal Plan
+        </a>
+      `;
+      nutritionContainer.innerHTML = summaryHTML;
+    }
+
+    // ─── LOAD AI INSIGHTS ───────────────────────────────────────────────────
+    function loadAIInsights() {
+      insightsContainer.innerHTML = "";
+      // Static example insights; in a real app, you might fetch from an API
+      const examples = [
+        {
+          title: "Herbal Tip of the Day",
+          text: "Based on your recent concerns, we recommend adding turmeric to your regimen for its anti-inflammatory properties.",
+          link: "herbal.html"
+        },
+        {
+          title: "Mental Health Check-In",
+          text: "Our AI noticed elevated stress keywords in your last chat. Consider a 5-minute guided breathing exercise today.",
+          link: "psychology.html#therapybot"
+        },
+        {
+          title: "Nutrition Insight",
+          text: "Your protein intake is slightly below target. Try adding a protein-rich snack like Greek yogurt this afternoon.",
+          link: "dietetics.html"
+        }
+      ];
+      // Pick one insight at random
+      const insight = examples[Math.floor(Math.random() * examples.length)];
+      const card = document.createElement("div");
+      card.className = "card";
+      card.style.padding = "1rem";
+      card.style.marginBottom = "1rem";
+      card.innerHTML = `
+        <div class="details">
+          <h4><strong>${insight.title}</strong></h4>
+          <p>${insight.text}</p>
+        </div>
+        <a href="${insight.link}" class="btn btn-secondary" style="margin-top:0.5rem; display:inline-flex; align-items:center; gap:0.5rem;">
+          Learn More
+        </a>
+      `;
+      insightsContainer.append(card);
+    }
+
+    // ─── UTILITY: REDIRECT IF NO USER ───────────────────────────────────────
+    // (Handled in auth.onAuthStateChanged)
+  });
+</script>
+
+</body>
+
+
+</html>
