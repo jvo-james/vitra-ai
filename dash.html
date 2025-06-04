@@ -10,8 +10,10 @@
 
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+
 
 <style>
   :root {
@@ -1430,10 +1432,8 @@ html.dark #insightsContainer .card a.btn-secondary {
 
   <!-- back2top  -->
   <div id="backToTop"><i class="fas fa-arrow-up"></i></div>
-
- <script>
-
-   const firebaseConfig = {
+<script>
+  const firebaseConfig = {
     apiKey: "AIzaSyBhaYOcLMXuobCT-vaXr-zXTZnBfaheAIY",
     authDomain: "vitra-ai-712ea.firebaseapp.com",
     projectId: "vitra-ai-712ea",
@@ -1443,6 +1443,7 @@ html.dark #insightsContainer .card a.btn-secondary {
   };
   firebase.initializeApp(firebaseConfig);
   const auth = firebase.auth();
+  const db   = firebase.firestore();
 
   document.addEventListener("DOMContentLoaded", () => {
 
@@ -1478,6 +1479,8 @@ html.dark #insightsContainer .card a.btn-secondary {
     const distributionCtx         = document.getElementById("distributionChart").getContext("2d");
     const dailyCtx                = document.getElementById("dailyChart").getContext("2d");
 
+    let distributionChart, dailyChart;
+
     auth.onAuthStateChanged(user => {
       if (!user) {
         window.location.href = "index.html";
@@ -1489,12 +1492,11 @@ html.dark #insightsContainer .card a.btn-secondary {
         <h2>Hello ${displayName}!</h2>
         <p style="color: var(--muted);">Here’s a quick overview of your AI-powered health dashboard.</p>
       `;
-
       loadAppointments();
       loadPrescriptions();
       loadNutritionSummary();
       loadAIInsights();
-      displayStats();
+      loadAndDisplayStats();
       initializeCharts();
       populateDailyCounts();
     });
@@ -1534,58 +1536,74 @@ html.dark #insightsContainer .card a.btn-secondary {
 
     function loadAppointments() {
       appointmentsContainer.innerHTML = "";
-      const allAppointments = JSON.parse(localStorage.getItem("appointments") || "[]");
-      const today = new Date().setHours(0, 0, 0, 0);
-      const upcoming = allAppointments.filter(a => {
-        const apptDate = new Date(a.date).setHours(0, 0, 0, 0);
-        return apptDate >= today;
-      });
-      if (upcoming.length === 0) {
-        appointmentsContainer.innerHTML = `<p style="color: var(--muted);">You have no upcoming appointments.</p>`;
-        return;
-      }
-      upcoming.forEach(appt => {
-        const card = document.createElement("div");
-        card.className = "card appt-card";
-        card.dataset.id = appt.id;
-        card.innerHTML = `
-          <i class="fas fa-user-md fa-2x"></i>
-          <div class="details" style="margin-left:1rem;">
-            <h4><strong>${appt.name}</strong></h4>
-            <p>${appt.date} • ${formatTime(appt.time)}</p>
-          </div>
-          <div class="actions" style="margin-left:auto; display:flex; gap:0.5rem;">
-            <button class="btn-reschedule">
-              <i class="fas fa-sync-alt"></i>
-            </button>
-            <button class="btn-cancel">
-              <i class="fas fa-times"></i>
-            </button>
-          </div>
-        `;
+      const user = firebase.auth().currentUser;
+      if (!user) return;
 
-        card.querySelector(".btn-cancel").addEventListener("click", () => {
-          if (confirm("Are you sure you want to cancel this appointment?")) {
-            removeAppointment(appt.id);
-            card.remove();
-            if (appointmentsContainer.children.length === 0) {
-              appointmentsContainer.innerHTML = `<p style="color: var(--muted);">You have no upcoming appointments.</p>`;
-            }
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+
+      db.collection("users")
+        .doc(user.uid)
+        .collection("appointments")
+        .where("date", ">=", today.toISOString().split("T")[0])
+        .orderBy("date", "asc")
+        .get()
+        .then(snapshot => {
+          if (snapshot.empty) {
+            appointmentsContainer.innerHTML = `<p style="color: var(--muted);">You have no upcoming appointments.</p>`;
+            return;
           }
+          snapshot.forEach(doc => {
+            const appt = doc.data();
+            const card = document.createElement("div");
+            card.className = "appt-card";
+            card.dataset.id = doc.id;
+            card.innerHTML = `
+              <i class="fas fa-user-md fa-2x appt-icon"></i>
+              <div class="details">
+                <h4><strong>${appt.name}</strong></h4>
+                <p>${appt.date} • ${formatTime(appt.time)}</p>
+              </div>
+              <div class="actions">
+                <button class="btn-reschedule">
+                  <i class="fas fa-sync-alt"></i>
+                </button>
+                <button class="btn-cancel">
+                  <i class="fas fa-times"></i>
+                </button>
+              </div>
+            `;
+            card.querySelector(".btn-cancel").addEventListener("click", () => {
+              if (confirm("Are you sure you want to cancel this appointment?")) {
+                db.collection("users")
+                  .doc(user.uid)
+                  .collection("appointments")
+                  .doc(doc.id)
+                  .delete()
+                  .then(() => {
+                    card.remove();
+                    if (appointmentsContainer.children.length === 0) {
+                      appointmentsContainer.innerHTML = `<p style="color: var(--muted);">You have no upcoming appointments.</p>`;
+                    }
+                  })
+                  .catch(err => {
+                    console.error("Error deleting appointment: ", err);
+                    showToast("Could not cancel appointment");
+                  });
+              }
+            });
+            card.querySelector(".btn-reschedule").addEventListener("click", () => {
+              window.location.href = `consult.html?rescheduleId=${encodeURIComponent(doc.id)}`;
+            });
+            appointmentsContainer.append(card);
+          });
+        })
+        .catch(err => {
+          console.error("Error fetching appointments: ", err);
+          appointmentsContainer.innerHTML = `<p style="color: var(--muted);">Could not load appointments.</p>`;
         });
-
-        card.querySelector(".btn-reschedule").addEventListener("click", () => {
-          window.location.href = `consult.html?rescheduleId=${encodeURIComponent(appt.id)}`;
-        });
-        appointmentsContainer.append(card);
-      });
     }
 
-    function removeAppointment(id) {
-      const list = JSON.parse(localStorage.getItem("appointments") || "[]");
-      const updated = list.filter(a => a.id !== id);
-      localStorage.setItem("appointments", JSON.stringify(updated));
-    }
     function formatTime(t) {
       if (t.includes("AM") || t.includes("PM")) return t;
       let [hh, mm] = t.split(":").map(Number);
@@ -1594,59 +1612,82 @@ html.dark #insightsContainer .card a.btn-secondary {
       return `${String(hh).padStart(2, "0")}:${String(mm).padStart(2, "0")} ${suffix}`;
     }
 
-
     function loadPrescriptions() {
       prescriptionsContainer.innerHTML = "";
-      const allPrescriptions = JSON.parse(localStorage.getItem("prescriptions") || "[]");
-      if (allPrescriptions.length === 0) {
-        prescriptionsContainer.innerHTML = `<p style="color: var(--muted);">You have no recent prescriptions.</p>`;
-        return;
-      }
-      allPrescriptions.slice(-5).reverse().forEach(presc => {
-        const card = document.createElement("div");
-        card.className = "card";
-        card.style.display = "flex";
-        card.style.alignItems = "center";
-        card.style.gap = "1rem";
-        card.style.marginBottom = "1rem";
-        card.innerHTML = `
-          <div class="details">
-            <h4><strong>${presc.name}</strong></h4>
-            <p>Prescribed by ${presc.prescriber} on ${presc.date}</p>
-          </div>
-          <div class="actions" style="margin-left:auto;">
-            <button class="btn-secondary">
-              <i class="fas fa-download"></i> Refill
-            </button>
-          </div>
-        `;
-        card.querySelector("button").addEventListener("click", () => {
-          alert(`Refill requested for ${presc.name}`);
-        });
-        prescriptionsContainer.append(card);
-      });
-    }
+      const user = firebase.auth().currentUser;
+      if (!user) return;
 
+      db.collection("users")
+        .doc(user.uid)
+        .collection("prescriptions")
+        .orderBy("date", "desc")
+        .limit(5)
+        .get()
+        .then(snapshot => {
+          if (snapshot.empty) {
+            prescriptionsContainer.innerHTML = `<p style="color: var(--muted);">You have no recent prescriptions.</p>`;
+            return;
+          }
+          snapshot.forEach(doc => {
+            const presc = doc.data();
+            const card = document.createElement("div");
+            card.className = "card";
+            card.innerHTML = `
+              <div class="details">
+                <h4><strong>${presc.name}</strong></h4>
+                <p>Prescribed by ${presc.prescriber} on ${presc.date}</p>
+              </div>
+              <div class="actions">
+                <button class="btn-secondary">
+                  <i class="fas fa-download"></i> Refill
+                </button>
+              </div>
+            `;
+            card.querySelector("button").addEventListener("click", () => {
+              showToast(`Refill requested for ${presc.name}`);
+            });
+            prescriptionsContainer.append(card);
+          });
+        })
+        .catch(err => {
+          console.error("Error fetching prescriptions: ", err);
+          prescriptionsContainer.innerHTML = `<p style="color: var(--muted);">Could not load prescriptions.</p>`;
+        });
+    }
 
     function loadNutritionSummary() {
       nutritionContainer.innerHTML = "";
-      const data = JSON.parse(localStorage.getItem("nutritionSummary") || "{}");
-      if (!data || !data.calories) {
-        nutritionContainer.innerHTML = `<p style="color: var(--muted);">No nutrition data available.</p>`;
-        return;
-      }
-      const summaryHTML = `
-        <p><strong>Today's Calories:</strong> ${data.calories} kcal</p>
-        <p>
-          <strong>Protein:</strong> ${data.protein} g · 
-          <strong>Carbs:</strong> ${data.carbs} g · 
-          <strong>Fats:</strong> ${data.fats} g
-        </p>
-        <a href="dietetics.html" class="btn btn-primary" style="margin-top:0.5rem; display:inline-flex; align-items:center; gap:0.5rem;">
-          <i class="fas fa-arrow-right"></i> View Full Meal Plan
-        </a>
-      `;
-      nutritionContainer.innerHTML = summaryHTML;
+      const user = firebase.auth().currentUser;
+      if (!user) return;
+
+      db.collection("users")
+        .doc(user.uid)
+        .collection("nutrition")
+        .doc("dailySummary")
+        .get()
+        .then(doc => {
+          if (!doc.exists) {
+            nutritionContainer.innerHTML = `<p style="color: var(--muted);">No nutrition data available.</p>`;
+            return;
+          }
+          const data = doc.data();
+          const summaryHTML = `
+            <p><strong>Today's Calories:</strong> ${data.calories} kcal</p>
+            <p>
+              <strong>Protein:</strong> ${data.protein} g · 
+              <strong>Carbs:</strong> ${data.carbs} g · 
+              <strong>Fats:</strong> ${data.fats} g
+            </p>
+            <a href="dietetics.html" class="btn btn-primary">
+              <i class="fas fa-arrow-right"></i> View Full Meal Plan
+            </a>
+          `;
+          nutritionContainer.innerHTML = summaryHTML;
+        })
+        .catch(err => {
+          console.error("Error fetching nutrition summary: ", err);
+          nutritionContainer.innerHTML = `<p style="color: var(--muted);">Could not load nutrition data.</p>`;
+        });
     }
 
     function loadAIInsights() {
@@ -1671,14 +1712,12 @@ html.dark #insightsContainer .card a.btn-secondary {
       const insight = examples[Math.floor(Math.random() * examples.length)];
       const card = document.createElement("div");
       card.className = "card";
-      card.style.padding = "1rem";
-      card.style.marginBottom = "1rem";
       card.innerHTML = `
         <div class="details">
           <h4><strong>${insight.title}</strong></h4>
           <p>${insight.text}</p>
         </div>
-        <a href="${insight.link}" class="btn btn-secondary" style="margin-top:0.5rem; display:inline-flex; align-items:center; gap:0.5rem;">
+        <a href="${insight.link}" class="btn btn-secondary">
           Learn More
         </a>
       `;
@@ -1701,6 +1740,44 @@ html.dark #insightsContainer .card a.btn-secondary {
       labels: []
     };
 
+    function loadAndDisplayStats() {
+      const user = firebase.auth().currentUser;
+      if (!user) return;
+
+      db.collection("users")
+        .doc(user.uid)
+        .collection("stats")
+        .doc("counts")
+        .get()
+        .then(doc => {
+          if (doc.exists) {
+            const data = doc.data();
+            statsData.herbal   = data.statHerbal   || 0;
+            statsData.psych    = data.statPsych    || 0;
+            statsData.diet     = data.statDiet     || 0;
+            statsData.pharmacy = data.statPharmacy || 0;
+            statsData.consult  = data.statConsult  || 0;
+          }
+          herbalQueriesEl.textContent   = statsData.herbal;
+          psychQueriesEl.textContent    = statsData.psych;
+          dietQueriesEl.textContent     = statsData.diet;
+          pharmacyQueriesEl.textContent = statsData.pharmacy;
+          consultQueriesEl.textContent  = statsData.consult;
+          statsData.labels = generateLast7DaysLabels();
+          if (distributionChart) {
+            distributionChart.data.datasets[0].data = [
+              statsData.herbal,
+              statsData.psych,
+              statsData.diet,
+              statsData.pharmacy,
+              statsData.consult
+            ];
+            distributionChart.update();
+          }
+        })
+        .catch(err => console.error("Error fetching stats: ", err));
+    }
+
     function generateLast7DaysLabels() {
       const labels = [];
       for (let i = 6; i >= 0; i--) {
@@ -1711,24 +1788,8 @@ html.dark #insightsContainer .card a.btn-secondary {
       return labels;
     }
 
-    function displayStats() {
-      statsData.herbal   = parseInt(localStorage.getItem("statHerbal"))   || 0;
-      statsData.psych    = parseInt(localStorage.getItem("statPsych"))    || 0;
-      statsData.diet     = parseInt(localStorage.getItem("statDiet"))     || 0;
-      statsData.pharmacy = parseInt(localStorage.getItem("statPharmacy")) || 0;
-      statsData.consult  = parseInt(localStorage.getItem("statConsult"))  || 0;
-
-      herbalQueriesEl.textContent   = statsData.herbal;
-      psychQueriesEl.textContent    = statsData.psych;
-      dietQueriesEl.textContent     = statsData.diet;
-      pharmacyQueriesEl.textContent = statsData.pharmacy;
-      consultQueriesEl.textContent  = statsData.consult;
-
-      statsData.labels = generateLast7DaysLabels();
-    }
-
-    let distributionChart, dailyChart;
     function initializeCharts() {
+      statsData.labels = generateLast7DaysLabels();
       distributionChart = new Chart(distributionCtx, {
         type: "doughnut",
         data: {
@@ -1829,37 +1890,46 @@ html.dark #insightsContainer .card a.btn-secondary {
     }
 
     function populateDailyCounts() {
-      const dailyCounts = [];
-      for (let i = 6; i >= 0; i--) {
-        const dayStart = new Date();
-        dayStart.setHours(0, 0, 0, 0);
-        dayStart.setDate(dayStart.getDate() - i);
-        const dayEnd = new Date(dayStart);
-        dayEnd.setHours(23, 59, 59, 999);
+      const user = firebase.auth().currentUser;
+      if (!user) return;
+      db.collection("users")
+        .doc(user.uid)
+        .collection("stats")
+        .doc("timestamps")
+        .get()
+        .then(doc => {
+          const data = doc.exists ? doc.data() : {};
+          const dailyCounts = [];
+          for (let i = 6; i >= 0; i--) {
+            const dayStart = new Date();
+            dayStart.setHours(0, 0, 0, 0);
+            dayStart.setDate(dayStart.getDate() - i);
+            const dayEnd = new Date(dayStart);
+            dayEnd.setHours(23, 59, 59, 999);
 
-        function countDay(key) {
-          const raw = localStorage.getItem(key) || "[]";
-          const arr = JSON.parse(raw);
-          return arr.filter(ts => {
-            const d = new Date(ts);
-            return d >= dayStart && d <= dayEnd;
-          }).length;
-        }
+            function countDay(key) {
+              const arr = data[key] || [];
+              return arr.filter(ts => {
+                const d = new Date(ts);
+                return d >= dayStart && d <= dayEnd;
+              }).length;
+            }
 
-        const sumForDay =
-          countDay("timestampsHerbal") +
-          countDay("timestampsPsych") +
-          countDay("timestampsDiet") +
-          countDay("timestampsPharmacy") +
-          countDay("timestampsConsult");
-
-        dailyCounts.push(sumForDay);
-      }
-      statsData.daily = dailyCounts;
-      if (dailyChart) {
-        dailyChart.data.datasets[0].data = dailyCounts;
-        dailyChart.update();
-      }
+            const sumForDay =
+              countDay("timestampsHerbal") +
+              countDay("timestampsPsych") +
+              countDay("timestampsDiet") +
+              countDay("timestampsPharmacy") +
+              countDay("timestampsConsult");
+            dailyCounts.push(sumForDay);
+          }
+          statsData.daily = dailyCounts;
+          if (dailyChart) {
+            dailyChart.data.datasets[0].data = dailyCounts;
+            dailyChart.update();
+          }
+        })
+        .catch(err => console.error("Error fetching daily timestamps: ", err));
     }
 
     filterBtn.addEventListener("click", () => {
@@ -1877,94 +1947,102 @@ html.dark #insightsContainer .card a.btn-secondary {
         return;
       }
 
-      function countInRange(key) {
-        const raw = localStorage.getItem(key) || "[]";
-        const arr = JSON.parse(raw);
-        return arr.filter(ts => {
-          const d = new Date(ts);
-          return d >= startDate && d <= endDate;
-        }).length;
-      }
+      const user = firebase.auth().currentUser;
+      if (!user) return;
 
-      statsData.herbal   = countInRange("timestampsHerbal");
-      statsData.psych    = countInRange("timestampsPsych");
-      statsData.diet     = countInRange("timestampsDiet");
-      statsData.pharmacy = countInRange("timestampsPharmacy");
-      statsData.consult  = countInRange("timestampsConsult");
+      db.collection("users")
+        .doc(user.uid)
+        .collection("stats")
+        .doc("timestamps")
+        .get()
+        .then(doc => {
+          const data = doc.exists ? doc.data() : {};
+          function countInRange(key) {
+            const arr = data[key] || [];
+            return arr.filter(ts => {
+              const d = new Date(ts);
+              return d >= startDate && d <= endDate;
+            }).length;
+          }
 
-      const last7Counts = [];
-      const labels      = [];
-      for (let i = 6; i >= 0; i--) {
-        const dayStart = new Date();
-        dayStart.setHours(0, 0, 0, 0);
-        dayStart.setDate(dayStart.getDate() - i);
-        const dayEnd = new Date(dayStart);
-        dayEnd.setHours(23, 59, 59, 999);
+          statsData.herbal   = countInRange("timestampsHerbal");
+          statsData.psych    = countInRange("timestampsPsych");
+          statsData.diet     = countInRange("timestampsDiet");
+          statsData.pharmacy = countInRange("timestampsPharmacy");
+          statsData.consult  = countInRange("timestampsConsult");
 
-        function countForDay(key) {
-          const raw = localStorage.getItem(key) || "[]";
-          const arr = JSON.parse(raw);
-          return arr.filter(ts => {
-            const d = new Date(ts);
-            return d >= dayStart && d <= dayEnd;
-          }).length;
-        }
+          herbalQueriesEl.textContent   = statsData.herbal;
+          psychQueriesEl.textContent    = statsData.psych;
+          dietQueriesEl.textContent     = statsData.diet;
+          pharmacyQueriesEl.textContent = statsData.pharmacy;
+          consultQueriesEl.textContent  = statsData.consult;
 
-        const countHerbal   = countForDay("timestampsHerbal");
-        const countPsych    = countForDay("timestampsPsych");
-        const countDiet     = countForDay("timestampsDiet");
-        const countPharma   = countForDay("timestampsPharmacy");
-        const countConsult  = countForDay("timestampsConsult");
+          if (distributionChart) {
+            distributionChart.data.datasets[0].data = [
+              statsData.herbal,
+              statsData.psych,
+              statsData.diet,
+              statsData.pharmacy,
+              statsData.consult
+            ];
+            distributionChart.update();
+          }
 
-        last7Counts.push(countHerbal + countPsych + countDiet + countPharma + countConsult);
-        labels.push(dayStart.toLocaleDateString("default", { month: "short", day: "numeric" }));
-      }
-      statsData.daily  = last7Counts;
-      statsData.labels = labels;
+          const last7Counts = [];
+          const labels      = [];
+          for (let i = 6; i >= 0; i--) {
+            const dayStart = new Date();
+            dayStart.setHours(0, 0, 0, 0);
+            dayStart.setDate(dayStart.getDate() - i);
+            const dayEnd = new Date(dayStart);
+            dayEnd.setHours(23, 59, 59, 999);
 
-      herbalQueriesEl.textContent   = statsData.herbal;
-      psychQueriesEl.textContent    = statsData.psych;
-      dietQueriesEl.textContent     = statsData.diet;
-      pharmacyQueriesEl.textContent = statsData.pharmacy;
-      consultQueriesEl.textContent  = statsData.consult;
+            function countForDay(key) {
+              const arr = data[key] || [];
+              return arr.filter(ts => {
+                const d = new Date(ts);
+                return d >= dayStart && d <= dayEnd;
+              }).length;
+            }
 
-      distributionChart.data.datasets[0].data = [
-        statsData.herbal,
-        statsData.psych,
-        statsData.diet,
-        statsData.pharmacy,
-        statsData.consult
-      ];
-      distributionChart.update();
+            const countHerbal   = countForDay("timestampsHerbal");
+            const countPsych    = countForDay("timestampsPsych");
+            const countDiet     = countForDay("timestampsDiet");
+            const countPharma   = countForDay("timestampsPharmacy");
+            const countConsult  = countForDay("timestampsConsult");
 
-      dailyChart.data.labels           = statsData.labels;
-      dailyChart.data.datasets[0].data = statsData.daily;
-      dailyChart.update();
-
-      showToast("Statistics updated for selected range");
+            last7Counts.push(countHerbal + countPsych + countDiet + countPharma + countConsult);
+            labels.push(dayStart.toLocaleDateString("default", { month: "short", day: "numeric" }));
+          }
+          statsData.daily  = last7Counts;
+          if (dailyChart) {
+            dailyChart.data.labels           = labels;
+            dailyChart.data.datasets[0].data = last7Counts;
+            dailyChart.update();
+          }
+          showToast("Statistics updated for selected range");
+        })
+        .catch(err => {
+          console.error("Error filtering stats: ", err);
+          showToast("Could not apply filter");
+        });
     });
 
-   userProfileBtn.addEventListener("click", () => {
-      const currentName =
-        firebase.auth().currentUser.displayName
-        || firebase.auth().currentUser.email.split("@")[0];
+    function openProfileModal() {
+      const user = firebase.auth().currentUser;
+      if (!user) return;
+      const currentName = user.displayName || user.email.split("@")[0];
       profileNameInput.value = currentName;
       profileModal.hidden = false;
       profileNameInput.focus();
-    });
-    profileLinkBtn.addEventListener("click", () => {
-      const currentName =
-        firebase.auth().currentUser.displayName
-        || firebase.auth().currentUser.email.split("@")[0];
-      profileNameInput.value = currentName;
-      profileModal.hidden = false;
-      profileNameInput.focus();
-    });
+    }
+    userProfileBtn.addEventListener("click", openProfileModal);
+    profileLinkBtn.addEventListener("click", openProfileModal);
     closeProfileModalBtn.addEventListener("click", () => {
       profileModal.hidden = true;
     });
 
-   saveProfileBtn.addEventListener("click", async () => {
+    saveProfileBtn.addEventListener("click", async () => {
       const newName = profileNameInput.value.trim();
       if (!newName) {
         showToast("Name cannot be empty");
@@ -1976,7 +2054,7 @@ html.dark #insightsContainer .card a.btn-secondary {
         document.getElementById("saveSpinner").classList.remove("hidden");
         try {
           await user.updateProfile({ displayName: newName });
-          localStorage.setItem("displayName", newName);
+          await db.collection("users").doc(user.uid).set({ displayName: newName }, { merge: true });
           window.location.reload();
         } catch (err) {
           console.error(err);
@@ -1993,6 +2071,7 @@ html.dark #insightsContainer .card a.btn-secondary {
     }
   });
 </script>
+
 
 </body>
 
