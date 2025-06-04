@@ -1212,6 +1212,38 @@ html.dark #insightsContainer .card a.btn-secondary {
   transform: translateY(-2px);
 }
 
+#purchasedContainer .purchased-item {
+  background: var(--surface);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-light);
+  padding: 1rem;
+  margin-bottom: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  transition: transform var(--transition), box-shadow var(--transition);
+}
+#purchasedContainer .purchased-item:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}
+#purchasedContainer .purchased-item h4 {
+  font-size: 1.1rem;
+  font-weight:600;
+  color: var(--text);
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+#purchasedContainer .purchased-item .price {
+  font-weight: 700;
+  color: var(--accent);
+  margin-top: 0.25rem;
+}
+#purchasedContainer .purchased-item p:last‐of‐type {
+  color: var(--muted);
+  font-size: 0.9rem;
+}
 
 </style>
 
@@ -1310,6 +1342,11 @@ html.dark #insightsContainer .card a.btn-secondary {
 
  <section id="purchasedDrugs" class="dashboard-section">
       <h3><i class="fas fa-shopping-bag"></i> Purchased Drugs</h3>
+   <p style="margin-bottom:0.75rem; font-style:italic; color:var(--muted);">
+    <a href="epharmacy.html" style="color: var(--primary); font-weight:500;">
+      Click here to purchase drugs from our pharmacy…
+    </a>
+  </p>
       <div id="purchasedContainer" class="appointments-list">
         <p class="empty-message" style="color: var(--muted);">You haven’t purchased any drugs yet.</p>
       </div>
@@ -1430,12 +1467,9 @@ html.dark #insightsContainer .card a.btn-secondary {
   <!-- back2top  -->
   <div id="backToTop"><i class="fas fa-arrow-up"></i></div>
 
-<!-- 1) Include storage.js so that Storage.getCount(...) exists: -->
 <script src="storage.js"></script>
 
-<!-- 2) Then replace your old <script>…</script> entirely with this: -->
 <script>
-  // Initialize Firebase (unchanged)
   const firebaseConfig = {
     apiKey: "AIzaSyBhaYOcLMXuobCT-vaXr-zXTZnBfaheAIY",
     authDomain: "vitra-ai-712ea.firebaseapp.com",
@@ -1448,7 +1482,7 @@ html.dark #insightsContainer .card a.btn-secondary {
   const auth = firebase.auth();
 
   document.addEventListener("DOMContentLoaded", () => {
-    // Element references
+
     const sidebar             = document.getElementById("sidebar");
     const overlay             = document.getElementById("sidebarOverlay");
     const hamburger           = document.getElementById("hamburger");
@@ -1481,14 +1515,14 @@ html.dark #insightsContainer .card a.btn-secondary {
     const distributionCtx        = document.getElementById("distributionChart").getContext("2d");
     const dailyCtx               = document.getElementById("dailyChart").getContext("2d");
 
-    // Auth state listener
     auth.onAuthStateChanged(user => {
       if (!user) {
         window.location.href = "index.html";
         return;
       }
       const displayName = user.displayName || user.email.split("@")[0];
-      userProfileBtn.innerHTML = `<i class="fas fa-user-circle"></i> ${displayName}`;
+      const firstName = displayName.split(" ")[0];
+      userProfileBtn.innerHTML = `<i class="fas fa-user-circle"></i> ${firstName}`;
       greetingSection.innerHTML = `
         <h2>Hello ${displayName}!</h2>
         <p style="color: var(--muted);">Here’s a quick overview of your AI-powered health dashboard.</p>
@@ -1652,26 +1686,76 @@ html.dark #insightsContainer .card a.btn-secondary {
     }
     recordPharmacyTimestamp();
 
-    // Load a random AI insight card
     function loadAIInsights() {
       insightsContainer.innerHTML = "";
       const examples = [
-        {
-          title: "Herbal Tip of the Day",
-          text: "Based on your recent concerns, we recommend adding turmeric to your regimen for its anti-inflammatory properties.",
-          link: "herbal.html"
-        },
-        {
-          title: "Mental Health Check-In",
-          text: "Our AI noticed elevated stress keywords in your last chat. Consider a 5-minute guided breathing exercise today.",
-          link: "psychology.html#therapybot"
-        },
-        {
-          title: "Nutrition Insight",
-          text: "Your protein intake is slightly below target. Try adding a protein-rich snack like Greek yogurt this afternoon.",
-          link: "dietetics.html"
-        }
-      ];
+  {
+    title: "Herbal Tip of the Day",
+    text: "Based on your recent concerns, we recommend adding turmeric to your regimen for its anti-inflammatory properties.",
+    link: "herbal.html"
+  },
+  {
+    title: "Mental Health Check-In",
+    text: "Our AI noticed elevated stress keywords in your last chat. Consider a 5-minute guided breathing exercise today.",
+    link: "psychology.html#therapybot"
+  },
+  {
+    title: "Nutrition Insight",
+    text: "Your protein intake is slightly below target. Try adding a protein-rich snack like Greek yogurt this afternoon.",
+    link: "dietetics.html"
+  },
+  {
+    title: "E-Pharmacy Spotlight",
+    text: "Your recent purchase history suggests you might consider stocking echinacea supplements for immune support.",
+    link: "epharmacy.html#buyDrugs"
+  },
+  {
+    title: "Consultation Reminder",
+    text: "You haven’t scheduled a follow-up appointment in a while—book a quick check-in to review your progress.",
+    link: "consult.html"
+  },
+  {
+    title: "Sleep Aid Suggestion",
+    text: "Melatonin levels dip late; consider drinking chamomile tea 30 minutes before bed for better sleep.",
+    link: "dietetics.html"
+  },
+  {
+    title: "Stress Management Tip",
+    text: "Lavender aromatherapy can ease stress—add a few drops to a diffuser this evening.",
+    link: "psychology.html#therapybot"
+  },
+  {
+    title: "Herbal Safety Alert",
+    text: "Avoid combining St. John’s Wort with certain antidepressants—consult your provider for personalized advice.",
+    link: "herbal.html"
+  },
+  {
+    title: "Immune Booster Tip",
+    text: "Elderberry syrup has been shown to reduce cold severity; consider adding it during flu season.",
+    link: "epharmacy.html#buyDrugs"
+  },
+  {
+    title: "Digestion Booster",
+    text: "Ginger tea can soothe nausea and improve digestion—try sipping after meals for relief.",
+    link: "dietetics.html"
+  },
+  {
+    title: "Mood Lifter Insight",
+    text: "A small daily dose of saffron extract may help stabilize mood—research suggests benefits for mild depression.",
+    link: "herbal.html"
+  },
+  {
+    title: "Joint Health Hint",
+    text: "Turmeric’s curcumin compound has anti-inflammatory effects—pair with black pepper to boost absorption.",
+    link: "dietetics.html"
+  },
+  {
+    title: "Heart Health Check",
+    text: "Hawthorn extract supports cardiovascular function—consider adding if you have mild high blood pressure.",
+    link: "herbal.html"
+  }
+];
+
       const insight = examples[Math.floor(Math.random() * examples.length)];
       const card = document.createElement("div");
       card.className = "card";
@@ -1752,11 +1836,11 @@ html.dark #insightsContainer .card a.btn-secondary {
               statsData.consult
             ],
             backgroundColor: [
-              "rgba(74,120,196,0.8)",
-              "rgba(255,165,0,0.8)",
-              "rgba(139,195,74,0.8)",
-              "rgba(255,87,34,0.8)",
-              "rgba(63,81,181,0.8)"
+               "rgba(34,139,34,0.8)", 
+              "rgba(255,0,0,0.8)",     
+              "rgba(255,255,179,0.8)", 
+              "rgba(0,100,0,0.8)",     
+              "rgba(75,0,130,0.8)" 
             ],
             borderColor: "rgba(255,255,255,0.9)",
             borderWidth: 2
