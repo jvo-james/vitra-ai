@@ -1400,7 +1400,6 @@ html.dark #insightsContainer .card a.btn-secondary {
         </div>
       </div>
     </section>
-  </div>
 
   <div id="profileModal" class="modal" hidden>
     <div class="modal-content">
@@ -1677,6 +1676,15 @@ html.dark #insightsContainer .card a.btn-secondary {
       nutritionContainer.innerHTML = summaryHTML;
     }
 
+     function recordPharmacyTimestamp() {
+     const key = "timestampsPharmacy";
+     const arr = JSON.parse(localStorage.getItem(key) || "[]");
+     arr.push(new Date().toISOString());
+     localStorage.setItem(key, JSON.stringify(arr));
+   }
+
+   recordPharmacyTimestamp();
+    
     function loadAIInsights() {
       insightsContainer.innerHTML = "";
       const examples = [
