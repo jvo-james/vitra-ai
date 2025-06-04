@@ -1432,7 +1432,9 @@ html.dark #insightsContainer .card a.btn-secondary {
 
   <!-- back2top  -->
   <div id="backToTop"><i class="fas fa-arrow-up"></i></div>
+
 <script>
+  // ─── Firebase Initialization (for Authentication Only) ─────────────────
   const firebaseConfig = {
     apiKey: "AIzaSyBhaYOcLMXuobCT-vaXr-zXTZnBfaheAIY",
     authDomain: "vitra-ai-712ea.firebaseapp.com",
@@ -1443,44 +1445,44 @@ html.dark #insightsContainer .card a.btn-secondary {
   };
   firebase.initializeApp(firebaseConfig);
   const auth = firebase.auth();
-  const db   = firebase.firestore();
 
   document.addEventListener("DOMContentLoaded", () => {
-
-    const sidebar           = document.getElementById("sidebar");
-    const overlay           = document.getElementById("sidebarOverlay");
-    const hamburger         = document.getElementById("hamburger");
-    const sidebarThemeToggle= document.getElementById("sidebarThemeToggle");
-    const themeToggle       = document.getElementById("themeToggle");
-    const signOutBtn        = document.getElementById("signOut");
-    const sidebarSignOut    = document.getElementById("sidebarSignOut");
+    // ─── Element References ─────────────────────────────────────────────────
+    const sidebar             = document.getElementById("sidebar");
+    const overlay             = document.getElementById("sidebarOverlay");
+    const hamburger           = document.getElementById("hamburger");
+    const sidebarThemeToggle  = document.getElementById("sidebarThemeToggle");
+    const themeToggle         = document.getElementById("themeToggle");
+    const signOutBtn          = document.getElementById("signOut");
+    const sidebarSignOut      = document.getElementById("sidebarSignOut");
     const appointmentsContainer   = document.getElementById("appointmentsContainer");
     const prescriptionsContainer  = document.getElementById("prescriptionsContainer");
     const nutritionContainer      = document.getElementById("nutritionContainer");
     const insightsContainer       = document.getElementById("insightsContainer");
-    const backToTopBtn            = document.getElementById("backToTop");
-    const quickAccessSection      = document.getElementById("quickAccess");
-    const greetingSection         = quickAccessSection.previousElementSibling;
-    const userProfileBtn          = document.getElementById("userProfile");
-    const profileLinkBtn          = document.getElementById("profileLink");
-    const profileModal            = document.getElementById("profileModal");
-    const closeProfileModalBtn    = document.getElementById("closeProfileModal");
-    const profileNameInput        = document.getElementById("profileName");
-    const saveProfileBtn          = document.getElementById("saveProfileBtn");
-    const toastEl                 = document.getElementById("toast");
-    const startDateInput          = document.getElementById("startDate");
-    const endDateInput            = document.getElementById("endDate");
-    const filterBtn               = document.getElementById("filterBtn");
-    const herbalQueriesEl         = document.getElementById("herbalQueries");
-    const psychQueriesEl          = document.getElementById("psychQueries");
-    const dietQueriesEl           = document.getElementById("dietQueries");
-    const pharmacyQueriesEl       = document.getElementById("pharmacyQueries");
-    const consultQueriesEl        = document.getElementById("consultQueries");
-    const distributionCtx         = document.getElementById("distributionChart").getContext("2d");
-    const dailyCtx                = document.getElementById("dailyChart").getContext("2d");
+    const backToTopBtn        = document.getElementById("backToTop");
+    const quickAccessSection  = document.getElementById("quickAccess");
+    const greetingSection     = quickAccessSection.previousElementSibling;
+    const userProfileBtn      = document.getElementById("userProfile");
+    const profileLinkBtn      = document.getElementById("profileLink");
+    const profileModal        = document.getElementById("profileModal");
+    const closeProfileModalBtn= document.getElementById("closeProfileModal");
+    const profileNameInput    = document.getElementById("profileName");
+    const saveProfileBtn      = document.getElementById("saveProfileBtn");
+    const toastEl             = document.getElementById("toast");
+    const startDateInput      = document.getElementById("startDate");
+    const endDateInput        = document.getElementById("endDate");
+    const filterBtn           = document.getElementById("filterBtn");
+    const herbalQueriesEl     = document.getElementById("herbalQueries");
+    const psychQueriesEl      = document.getElementById("psychQueries");
+    const dietQueriesEl       = document.getElementById("dietQueries");
+    const pharmacyQueriesEl   = document.getElementById("pharmacyQueries");
+    const consultQueriesEl    = document.getElementById("consultQueries");
+    const distributionCtx     = document.getElementById("distributionChart").getContext("2d");
+    const dailyCtx            = document.getElementById("dailyChart").getContext("2d");
 
     let distributionChart, dailyChart;
 
+    // ─── AUTH STATE HANDLING ────────────────────────────────────────────────
     auth.onAuthStateChanged(user => {
       if (!user) {
         window.location.href = "index.html";
@@ -1492,6 +1494,7 @@ html.dark #insightsContainer .card a.btn-secondary {
         <h2>Hello ${displayName}!</h2>
         <p style="color: var(--muted);">Here’s a quick overview of your AI-powered health dashboard.</p>
       `;
+      // Load all data from localStorage
       loadAppointments();
       loadPrescriptions();
       loadNutritionSummary();
@@ -1501,6 +1504,7 @@ html.dark #insightsContainer .card a.btn-secondary {
       populateDailyCounts();
     });
 
+    // ─── SIGN-OUT HANDLERS ─────────────────────────────────────────────────
     function handleSignOut() {
       auth.signOut().then(() => {
         window.location.href = "index.html";
@@ -1509,6 +1513,7 @@ html.dark #insightsContainer .card a.btn-secondary {
     signOutBtn.addEventListener("click", handleSignOut);
     sidebarSignOut.addEventListener("click", handleSignOut);
 
+    // ─── SIDEBAR TOGGLE ────────────────────────────────────────────────────
     function openSidebar() {
       sidebar.classList.add("show");
       overlay.classList.add("show");
@@ -1520,6 +1525,7 @@ html.dark #insightsContainer .card a.btn-secondary {
     hamburger.addEventListener("click", openSidebar);
     overlay.addEventListener("click", closeSidebar);
 
+    // ─── THEME TOGGLE ──────────────────────────────────────────────────────
     themeToggle.addEventListener("click", () => {
       document.documentElement.classList.toggle("dark");
       themeToggle.classList.toggle("fa-moon");
@@ -1527,6 +1533,7 @@ html.dark #insightsContainer .card a.btn-secondary {
     });
     sidebarThemeToggle.addEventListener("click", () => themeToggle.click());
 
+    // ─── BACK TO TOP BUTTON ─────────────────────────────────────────────────
     window.addEventListener("scroll", () => {
       backToTopBtn.style.display = window.scrollY > 400 ? "block" : "none";
     });
@@ -1534,74 +1541,60 @@ html.dark #insightsContainer .card a.btn-secondary {
       window.scrollTo({ top: 0, behavior: "smooth" });
     });
 
+    // ─── LOAD UPCOMING APPOINTMENTS ────────────────────────────────────────
     function loadAppointments() {
       appointmentsContainer.innerHTML = "";
-      const user = firebase.auth().currentUser;
-      if (!user) return;
-
-      const today = new Date();
-      today.setHours(0, 0, 0, 0);
-
-      db.collection("users")
-        .doc(user.uid)
-        .collection("appointments")
-        .where("date", ">=", today.toISOString().split("T")[0])
-        .orderBy("date", "asc")
-        .get()
-        .then(snapshot => {
-          if (snapshot.empty) {
-            appointmentsContainer.innerHTML = `<p style="color: var(--muted);">You have no upcoming appointments.</p>`;
-            return;
+      const allAppointments = JSON.parse(localStorage.getItem("appointments") || "[]");
+      const today = new Date().setHours(0, 0, 0, 0);
+      const upcoming = allAppointments.filter(a => {
+        const apptDate = new Date(a.date).setHours(0, 0, 0, 0);
+        return apptDate >= today;
+      });
+      if (upcoming.length === 0) {
+        appointmentsContainer.innerHTML = `<p style="color: var(--muted);">You have no upcoming appointments.</p>`;
+        return;
+      }
+      upcoming.forEach(appt => {
+        const card = document.createElement("div");
+        card.className = "appt-card";
+        card.dataset.id = appt.id;
+        card.innerHTML = `
+          <i class="fas fa-user-md fa-2x appt-icon"></i>
+          <div class="details">
+            <h4><strong>${appt.name}</strong></h4>
+            <p>${appt.date} • ${formatTime(appt.time)}</p>
+          </div>
+          <div class="actions">
+            <button class="btn-reschedule">
+              <i class="fas fa-sync-alt"></i>
+            </button>
+            <button class="btn-cancel">
+              <i class="fas fa-times"></i>
+            </button>
+          </div>
+        `;
+        // Cancel handler
+        card.querySelector(".btn-cancel").addEventListener("click", () => {
+          if (confirm("Are you sure you want to cancel this appointment?")) {
+            removeAppointment(appt.id);
+            card.remove();
+            if (appointmentsContainer.children.length === 0) {
+              appointmentsContainer.innerHTML = `<p style="color: var(--muted);">You have no upcoming appointments.</p>`;
+            }
           }
-          snapshot.forEach(doc => {
-            const appt = doc.data();
-            const card = document.createElement("div");
-            card.className = "appt-card";
-            card.dataset.id = doc.id;
-            card.innerHTML = `
-              <i class="fas fa-user-md fa-2x appt-icon"></i>
-              <div class="details">
-                <h4><strong>${appt.name}</strong></h4>
-                <p>${appt.date} • ${formatTime(appt.time)}</p>
-              </div>
-              <div class="actions">
-                <button class="btn-reschedule">
-                  <i class="fas fa-sync-alt"></i>
-                </button>
-                <button class="btn-cancel">
-                  <i class="fas fa-times"></i>
-                </button>
-              </div>
-            `;
-            card.querySelector(".btn-cancel").addEventListener("click", () => {
-              if (confirm("Are you sure you want to cancel this appointment?")) {
-                db.collection("users")
-                  .doc(user.uid)
-                  .collection("appointments")
-                  .doc(doc.id)
-                  .delete()
-                  .then(() => {
-                    card.remove();
-                    if (appointmentsContainer.children.length === 0) {
-                      appointmentsContainer.innerHTML = `<p style="color: var(--muted);">You have no upcoming appointments.</p>`;
-                    }
-                  })
-                  .catch(err => {
-                    console.error("Error deleting appointment: ", err);
-                    showToast("Could not cancel appointment");
-                  });
-              }
-            });
-            card.querySelector(".btn-reschedule").addEventListener("click", () => {
-              window.location.href = `consult.html?rescheduleId=${encodeURIComponent(doc.id)}`;
-            });
-            appointmentsContainer.append(card);
-          });
-        })
-        .catch(err => {
-          console.error("Error fetching appointments: ", err);
-          appointmentsContainer.innerHTML = `<p style="color: var(--muted);">Could not load appointments.</p>`;
         });
+        // Reschedule handler
+        card.querySelector(".btn-reschedule").addEventListener("click", () => {
+          window.location.href = `consult.html?rescheduleId=${encodeURIComponent(appt.id)}`;
+        });
+        appointmentsContainer.append(card);
+      });
+    }
+
+    function removeAppointment(id) {
+      let list = JSON.parse(localStorage.getItem("appointments") || "[]");
+      list = list.filter(a => a.id !== id);
+      localStorage.setItem("appointments", JSON.stringify(list));
     }
 
     function formatTime(t) {
@@ -1612,84 +1605,58 @@ html.dark #insightsContainer .card a.btn-secondary {
       return `${String(hh).padStart(2, "0")}:${String(mm).padStart(2, "0")} ${suffix}`;
     }
 
+    // ─── LOAD RECENT PRESCRIPTIONS ─────────────────────────────────────────
     function loadPrescriptions() {
       prescriptionsContainer.innerHTML = "";
-      const user = firebase.auth().currentUser;
-      if (!user) return;
-
-      db.collection("users")
-        .doc(user.uid)
-        .collection("prescriptions")
-        .orderBy("date", "desc")
-        .limit(5)
-        .get()
-        .then(snapshot => {
-          if (snapshot.empty) {
-            prescriptionsContainer.innerHTML = `<p style="color: var(--muted);">You have no recent prescriptions.</p>`;
-            return;
-          }
-          snapshot.forEach(doc => {
-            const presc = doc.data();
-            const card = document.createElement("div");
-            card.className = "card";
-            card.innerHTML = `
-              <div class="details">
-                <h4><strong>${presc.name}</strong></h4>
-                <p>Prescribed by ${presc.prescriber} on ${presc.date}</p>
-              </div>
-              <div class="actions">
-                <button class="btn-secondary">
-                  <i class="fas fa-download"></i> Refill
-                </button>
-              </div>
-            `;
-            card.querySelector("button").addEventListener("click", () => {
-              showToast(`Refill requested for ${presc.name}`);
-            });
-            prescriptionsContainer.append(card);
-          });
-        })
-        .catch(err => {
-          console.error("Error fetching prescriptions: ", err);
-          prescriptionsContainer.innerHTML = `<p style="color: var(--muted);">Could not load prescriptions.</p>`;
+      const allPrescriptions = JSON.parse(localStorage.getItem("prescriptions") || "[]");
+      if (allPrescriptions.length === 0) {
+        prescriptionsContainer.innerHTML = `<p style="color: var(--muted);">You have no recent prescriptions.</p>`;
+        return;
+      }
+      allPrescriptions.slice(-5).reverse().forEach(presc => {
+        const card = document.createElement("div");
+        card.className = "card";
+        card.innerHTML = `
+          <div class="details">
+            <h4><strong>${presc.name}</strong></h4>
+            <p>Prescribed by ${presc.prescriber} on ${presc.date}</p>
+          </div>
+          <div class="actions">
+            <button class="btn-secondary">
+              <i class="fas fa-download"></i> Refill
+            </button>
+          </div>
+        `;
+        card.querySelector("button").addEventListener("click", () => {
+          showToast(`Refill requested for ${presc.name}`);
         });
+        prescriptionsContainer.append(card);
+      });
     }
 
+    // ─── LOAD NUTRITION SUMMARY ─────────────────────────────────────────────
     function loadNutritionSummary() {
       nutritionContainer.innerHTML = "";
-      const user = firebase.auth().currentUser;
-      if (!user) return;
-
-      db.collection("users")
-        .doc(user.uid)
-        .collection("nutrition")
-        .doc("dailySummary")
-        .get()
-        .then(doc => {
-          if (!doc.exists) {
-            nutritionContainer.innerHTML = `<p style="color: var(--muted);">No nutrition data available.</p>`;
-            return;
-          }
-          const data = doc.data();
-          const summaryHTML = `
-            <p><strong>Today's Calories:</strong> ${data.calories} kcal</p>
-            <p>
-              <strong>Protein:</strong> ${data.protein} g · 
-              <strong>Carbs:</strong> ${data.carbs} g · 
-              <strong>Fats:</strong> ${data.fats} g
-            </p>
-            <a href="dietetics.html" class="btn btn-primary">
-              <i class="fas fa-arrow-right"></i> View Full Meal Plan
-            </a>
-          `;
-          nutritionContainer.innerHTML = summaryHTML;
-        })
-        .catch(err => {
-          console.error("Error fetching nutrition summary: ", err);
-          nutritionContainer.innerHTML = `<p style="color: var(--muted);">Could not load nutrition data.</p>`;
-        });
+      const data = JSON.parse(localStorage.getItem("nutritionSummary") || "{}");
+      if (!data || !data.calories) {
+        nutritionContainer.innerHTML = `<p style="color: var(--muted);">No nutrition data available.</p>`;
+        return;
+      }
+      const summaryHTML = `
+        <p><strong>Today's Calories:</strong> ${data.calories} kcal</p>
+        <p>
+          <strong>Protein:</strong> ${data.protein} g · 
+          <strong>Carbs:</strong> ${data.carbs} g · 
+          <strong>Fats:</strong> ${data.fats} g
+        </p>
+        <a href="dietetics.html" class="btn btn-primary">
+          <i class="fas fa-arrow-right"></i> View Full Meal Plan
+        </a>
+      `;
+      nutritionContainer.innerHTML = summaryHTML;
     }
 
+    // ─── LOAD AI INSIGHTS ───────────────────────────────────────────────────
     function loadAIInsights() {
       insightsContainer.innerHTML = "";
       const examples = [
@@ -1724,12 +1691,14 @@ html.dark #insightsContainer .card a.btn-secondary {
       insightsContainer.append(card);
     }
 
+    // ─── TOAST FUNCTION ─────────────────────────────────────────────────────
     function showToast(message) {
       toastEl.textContent = message;
       toastEl.classList.add("visible");
       setTimeout(() => toastEl.classList.remove("visible"), 3000);
     }
 
+    // ─── STATS DATA & FUNCTIONS ─────────────────────────────────────────────
     let statsData = {
       herbal: 0,
       psych: 0,
@@ -1741,41 +1710,29 @@ html.dark #insightsContainer .card a.btn-secondary {
     };
 
     function loadAndDisplayStats() {
-      const user = firebase.auth().currentUser;
-      if (!user) return;
+      statsData.herbal   = parseInt(localStorage.getItem("statHerbal"))   || 0;
+      statsData.psych    = parseInt(localStorage.getItem("statPsych"))    || 0;
+      statsData.diet     = parseInt(localStorage.getItem("statDiet"))     || 0;
+      statsData.pharmacy = parseInt(localStorage.getItem("statPharmacy")) || 0;
+      statsData.consult  = parseInt(localStorage.getItem("statConsult"))  || 0;
 
-      db.collection("users")
-        .doc(user.uid)
-        .collection("stats")
-        .doc("counts")
-        .get()
-        .then(doc => {
-          if (doc.exists) {
-            const data = doc.data();
-            statsData.herbal   = data.statHerbal   || 0;
-            statsData.psych    = data.statPsych    || 0;
-            statsData.diet     = data.statDiet     || 0;
-            statsData.pharmacy = data.statPharmacy || 0;
-            statsData.consult  = data.statConsult  || 0;
-          }
-          herbalQueriesEl.textContent   = statsData.herbal;
-          psychQueriesEl.textContent    = statsData.psych;
-          dietQueriesEl.textContent     = statsData.diet;
-          pharmacyQueriesEl.textContent = statsData.pharmacy;
-          consultQueriesEl.textContent  = statsData.consult;
-          statsData.labels = generateLast7DaysLabels();
-          if (distributionChart) {
-            distributionChart.data.datasets[0].data = [
-              statsData.herbal,
-              statsData.psych,
-              statsData.diet,
-              statsData.pharmacy,
-              statsData.consult
-            ];
-            distributionChart.update();
-          }
-        })
-        .catch(err => console.error("Error fetching stats: ", err));
+      herbalQueriesEl.textContent   = statsData.herbal;
+      psychQueriesEl.textContent    = statsData.psych;
+      dietQueriesEl.textContent     = statsData.diet;
+      pharmacyQueriesEl.textContent = statsData.pharmacy;
+      consultQueriesEl.textContent  = statsData.consult;
+
+      statsData.labels = generateLast7DaysLabels();
+      if (distributionChart) {
+        distributionChart.data.datasets[0].data = [
+          statsData.herbal,
+          statsData.psych,
+          statsData.diet,
+          statsData.pharmacy,
+          statsData.consult
+        ];
+        distributionChart.update();
+      }
     }
 
     function generateLast7DaysLabels() {
@@ -1788,6 +1745,7 @@ html.dark #insightsContainer .card a.btn-secondary {
       return labels;
     }
 
+    // ─── CHART INITIALIZATION ───────────────────────────────────────────────
     function initializeCharts() {
       statsData.labels = generateLast7DaysLabels();
       distributionChart = new Chart(distributionCtx, {
@@ -1889,49 +1847,47 @@ html.dark #insightsContainer .card a.btn-secondary {
       });
     }
 
+    // ─── POPULATE DAILY COUNTS ───────────────────────────────────────────────
     function populateDailyCounts() {
-      const user = firebase.auth().currentUser;
-      if (!user) return;
-      db.collection("users")
-        .doc(user.uid)
-        .collection("stats")
-        .doc("timestamps")
-        .get()
-        .then(doc => {
-          const data = doc.exists ? doc.data() : {};
-          const dailyCounts = [];
-          for (let i = 6; i >= 0; i--) {
-            const dayStart = new Date();
-            dayStart.setHours(0, 0, 0, 0);
-            dayStart.setDate(dayStart.getDate() - i);
-            const dayEnd = new Date(dayStart);
-            dayEnd.setHours(23, 59, 59, 999);
+      const timestamps = {
+        timestampsHerbal:   JSON.parse(localStorage.getItem("timestampsHerbal")   || "[]"),
+        timestampsPsych:    JSON.parse(localStorage.getItem("timestampsPsych")    || "[]"),
+        timestampsDiet:     JSON.parse(localStorage.getItem("timestampsDiet")     || "[]"),
+        timestampsPharmacy: JSON.parse(localStorage.getItem("timestampsPharmacy") || "[]"),
+        timestampsConsult:  JSON.parse(localStorage.getItem("timestampsConsult")  || "[]")
+      };
+      const dailyCounts = [];
+      for (let i = 6; i >= 0; i--) {
+        const dayStart = new Date();
+        dayStart.setHours(0, 0, 0, 0);
+        dayStart.setDate(dayStart.getDate() - i);
+        const dayEnd = new Date(dayStart);
+        dayEnd.setHours(23, 59, 59, 999);
 
-            function countDay(key) {
-              const arr = data[key] || [];
-              return arr.filter(ts => {
-                const d = new Date(ts);
-                return d >= dayStart && d <= dayEnd;
-              }).length;
-            }
+        function countDay(arr) {
+          return arr.filter(ts => {
+            const d = new Date(ts);
+            return d >= dayStart && d <= dayEnd;
+          }).length;
+        }
 
-            const sumForDay =
-              countDay("timestampsHerbal") +
-              countDay("timestampsPsych") +
-              countDay("timestampsDiet") +
-              countDay("timestampsPharmacy") +
-              countDay("timestampsConsult");
-            dailyCounts.push(sumForDay);
-          }
-          statsData.daily = dailyCounts;
-          if (dailyChart) {
-            dailyChart.data.datasets[0].data = dailyCounts;
-            dailyChart.update();
-          }
-        })
-        .catch(err => console.error("Error fetching daily timestamps: ", err));
+        const sumForDay =
+          countDay(timestamps.timestampsHerbal) +
+          countDay(timestamps.timestampsPsych) +
+          countDay(timestamps.timestampsDiet) +
+          countDay(timestamps.timestampsPharmacy) +
+          countDay(timestamps.timestampsConsult);
+
+        dailyCounts.push(sumForDay);
+      }
+      statsData.daily = dailyCounts;
+      if (dailyChart) {
+        dailyChart.data.datasets[0].data = dailyCounts;
+        dailyChart.update();
+      }
     }
 
+    // ─── FILTER BUTTON HANDLER ──────────────────────────────────────────────
     filterBtn.addEventListener("click", () => {
       const start = startDateInput.value;
       const end   = endDateInput.value;
@@ -1947,87 +1903,81 @@ html.dark #insightsContainer .card a.btn-secondary {
         return;
       }
 
-      const user = firebase.auth().currentUser;
-      if (!user) return;
+      const timestamps = {
+        timestampsHerbal:   JSON.parse(localStorage.getItem("timestampsHerbal")   || "[]"),
+        timestampsPsych:    JSON.parse(localStorage.getItem("timestampsPsych")    || "[]"),
+        timestampsDiet:     JSON.parse(localStorage.getItem("timestampsDiet")     || "[]"),
+        timestampsPharmacy: JSON.parse(localStorage.getItem("timestampsPharmacy") || "[]"),
+        timestampsConsult:  JSON.parse(localStorage.getItem("timestampsConsult")  || "[]")
+      };
 
-      db.collection("users")
-        .doc(user.uid)
-        .collection("stats")
-        .doc("timestamps")
-        .get()
-        .then(doc => {
-          const data = doc.exists ? doc.data() : {};
-          function countInRange(key) {
-            const arr = data[key] || [];
-            return arr.filter(ts => {
-              const d = new Date(ts);
-              return d >= startDate && d <= endDate;
-            }).length;
-          }
+      function countInRange(arr) {
+        return arr.filter(ts => {
+          const d = new Date(ts);
+          return d >= startDate && d <= endDate;
+        }).length;
+      }
 
-          statsData.herbal   = countInRange("timestampsHerbal");
-          statsData.psych    = countInRange("timestampsPsych");
-          statsData.diet     = countInRange("timestampsDiet");
-          statsData.pharmacy = countInRange("timestampsPharmacy");
-          statsData.consult  = countInRange("timestampsConsult");
+      statsData.herbal   = countInRange(timestamps.timestampsHerbal);
+      statsData.psych    = countInRange(timestamps.timestampsPsych);
+      statsData.diet     = countInRange(timestamps.timestampsDiet);
+      statsData.pharmacy = countInRange(timestamps.timestampsPharmacy);
+      statsData.consult  = countInRange(timestamps.timestampsConsult);
 
-          herbalQueriesEl.textContent   = statsData.herbal;
-          psychQueriesEl.textContent    = statsData.psych;
-          dietQueriesEl.textContent     = statsData.diet;
-          pharmacyQueriesEl.textContent = statsData.pharmacy;
-          consultQueriesEl.textContent  = statsData.consult;
+      herbalQueriesEl.textContent   = statsData.herbal;
+      psychQueriesEl.textContent    = statsData.psych;
+      dietQueriesEl.textContent     = statsData.diet;
+      pharmacyQueriesEl.textContent = statsData.pharmacy;
+      consultQueriesEl.textContent  = statsData.consult;
 
-          if (distributionChart) {
-            distributionChart.data.datasets[0].data = [
-              statsData.herbal,
-              statsData.psych,
-              statsData.diet,
-              statsData.pharmacy,
-              statsData.consult
-            ];
-            distributionChart.update();
-          }
+      if (distributionChart) {
+        distributionChart.data.datasets[0].data = [
+          statsData.herbal,
+          statsData.psych,
+          statsData.diet,
+          statsData.pharmacy,
+          statsData.consult
+        ];
+        distributionChart.update();
+      }
 
-          const last7Counts = [];
-          const labels      = [];
-          for (let i = 6; i >= 0; i--) {
-            const dayStart = new Date();
-            dayStart.setHours(0, 0, 0, 0);
-            dayStart.setDate(dayStart.getDate() - i);
-            const dayEnd = new Date(dayStart);
-            dayEnd.setHours(23, 59, 59, 999);
+      const last7Counts = [];
+      const labels      = [];
+      for (let i = 6; i >= 0; i--) {
+        const dayStart = new Date();
+        dayStart.setHours(0, 0, 0, 0);
+        dayStart.setDate(dayStart.getDate() - i);
+        const dayEnd = new Date(dayStart);
+        dayEnd.setHours(23, 59, 59, 999);
 
-            function countForDay(key) {
-              const arr = data[key] || [];
-              return arr.filter(ts => {
-                const d = new Date(ts);
-                return d >= dayStart && d <= dayEnd;
-              }).length;
-            }
+        function countForDay(arr) {
+          return arr.filter(ts => {
+            const d = new Date(ts);
+            return d >= dayStart && d <= dayEnd;
+          }).length;
+        }
 
-            const countHerbal   = countForDay("timestampsHerbal");
-            const countPsych    = countForDay("timestampsPsych");
-            const countDiet     = countForDay("timestampsDiet");
-            const countPharma   = countForDay("timestampsPharmacy");
-            const countConsult  = countForDay("timestampsConsult");
+        const countHerbal   = countForDay(timestamps.timestampsHerbal);
+        const countPsych    = countForDay(timestamps.timestampsPsych);
+        const countDiet     = countForDay(timestamps.timestampsDiet);
+        const countPharma   = countForDay(timestamps.timestampsPharmacy);
+        const countConsult  = countForDay(timestamps.timestampsConsult);
 
-            last7Counts.push(countHerbal + countPsych + countDiet + countPharma + countConsult);
-            labels.push(dayStart.toLocaleDateString("default", { month: "short", day: "numeric" }));
-          }
-          statsData.daily  = last7Counts;
-          if (dailyChart) {
-            dailyChart.data.labels           = labels;
-            dailyChart.data.datasets[0].data = last7Counts;
-            dailyChart.update();
-          }
-          showToast("Statistics updated for selected range");
-        })
-        .catch(err => {
-          console.error("Error filtering stats: ", err);
-          showToast("Could not apply filter");
-        });
+        last7Counts.push(countHerbal + countPsych + countDiet + countPharma + countConsult);
+        labels.push(dayStart.toLocaleDateString("default", { month: "short", day: "numeric" }));
+      }
+      statsData.daily  = last7Counts;
+      statsData.labels = labels;
+
+      if (dailyChart) {
+        dailyChart.data.labels           = labels;
+        dailyChart.data.datasets[0].data = last7Counts;
+        dailyChart.update();
+      }
+      showToast("Statistics updated for selected range");
     });
 
+    // ─── PROFILE MODAL HANDLERS ─────────────────────────────────────────────
     function openProfileModal() {
       const user = firebase.auth().currentUser;
       if (!user) return;
@@ -2054,7 +2004,7 @@ html.dark #insightsContainer .card a.btn-secondary {
         document.getElementById("saveSpinner").classList.remove("hidden");
         try {
           await user.updateProfile({ displayName: newName });
-          await db.collection("users").doc(user.uid).set({ displayName: newName }, { merge: true });
+          localStorage.setItem("displayName", newName);
           window.location.reload();
         } catch (err) {
           console.error(err);
@@ -2065,6 +2015,7 @@ html.dark #insightsContainer .card a.btn-secondary {
       }
     });
 
+    // ─── LOAD STORED DISPLAY NAME ───────────────────────────────────────────
     const storedName = localStorage.getItem("displayName");
     if (storedName) {
       userProfileBtn.innerHTML = `<i class="fas fa-user-circle"></i> ${storedName}`;
