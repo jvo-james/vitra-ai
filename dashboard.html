@@ -1430,8 +1430,12 @@ html.dark #insightsContainer .card a.btn-secondary {
   <!-- back2top  -->
   <div id="backToTop"><i class="fas fa-arrow-up"></i></div>
 
+<!-- 1) Include storage.js so that Storage.getCount(...) exists: -->
+<script src="storage.js"></script>
+
+<!-- 2) Then replace your old <script>…</script> entirely with this: -->
 <script>
-  // Initialize Firebase
+  // Initialize Firebase (unchanged)
   const firebaseConfig = {
     apiKey: "AIzaSyBhaYOcLMXuobCT-vaXr-zXTZnBfaheAIY",
     authDomain: "vitra-ai-712ea.firebaseapp.com",
@@ -1714,13 +1718,14 @@ html.dark #insightsContainer .card a.btn-secondary {
       return labels;
     }
 
-    // === displayStats() reads from the "timestamps…" arrays ===
+    // —————————————————————
+    // PATCHED displayStats() — use Storage.getCount() instead of timestamps.length 
     function displayStats() {
-      statsData.herbal   = (JSON.parse(localStorage.getItem("timestampsHerbal"))   || []).length;
-      statsData.psych    = (JSON.parse(localStorage.getItem("timestampsPsych"))    || []).length;
-      statsData.diet     = (JSON.parse(localStorage.getItem("timestampsDiet"))     || []).length;
-      statsData.pharmacy = (JSON.parse(localStorage.getItem("timestampsPharmacy")) || []).length;
-      statsData.consult  = (JSON.parse(localStorage.getItem("timestampsConsult"))  || []).length;
+      statsData.herbal   = Storage.getCount("Herbal");
+      statsData.psych    = Storage.getCount("Psych");
+      statsData.diet     = Storage.getCount("Diet");
+      statsData.pharmacy = Storage.getCount("Pharmacy");
+      statsData.consult  = Storage.getCount("Consult");
 
       herbalQueriesEl.textContent   = statsData.herbal;
       psychQueriesEl.textContent    = statsData.psych;
@@ -2009,6 +2014,7 @@ html.dark #insightsContainer .card a.btn-secondary {
     }
   });
 </script>
+
 
 </body>
 
