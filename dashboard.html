@@ -1187,6 +1187,60 @@ html.dark #filterSection .filter-bar button {
   }
 }
 
+   #purchasedDrugs {
+        background: linear-gradient(135deg, var(--accent), var(--primary));
+        color: #fff;
+        padding: var(--padding);
+        border-radius: var(--radius);
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+        margin-bottom: 2rem;
+      }
+      #purchasedDrugs h3 {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        font-size: 1.75rem;
+        margin-bottom: var(--gap);
+      }
+      #purchasedContainer {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: var(--gap);
+      }
+      .purchased-item {
+        background: #fff;
+        color: var(--text);
+        border-radius: var(--radius);
+        padding: 1rem;
+        box-shadow: var(--shadow-light);
+        position: relative;
+        overflow: hidden;
+        transition: transform var(--transition), box-shadow var(--transition);
+      }
+      .purchased-item:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 6px 24px rgba(0, 0, 0, 0.1);
+      }
+      .purchased-item h4 {
+        font-size: 1.1rem;
+        margin-bottom: 0.5rem;
+        color: var(--primary);
+      }
+      .purchased-item p {
+        font-size: 0.9rem;
+        margin: 0.25rem 0;
+        color: var(--muted);
+      }
+      .purchased-item .price {
+        font-weight: 600;
+        color: var(--accent);
+      }
+      .empty-message {
+        text-align: center;
+        color: #fff;
+        font-size: 1rem;
+        grid-column: 1 / -1;
+      }
   #insightsContainer .card a.btn-secondary {
   display: inline-flex;
   align-items: center;
@@ -1307,11 +1361,10 @@ html.dark #insightsContainer .card a.btn-secondary {
       </div>
     </section>
 
-    <section id="recentPrescriptions" class="module">
-      <h2><i class="fas fa-pills"></i> Recent Prescriptions</h2>
-      <div id="prescriptionsContainer" style="margin-top:1rem;">
-        
-        <p style="color: var(--muted);">You have no recent prescriptions.</p>
+   <section id="purchasedDrugs" class="dashboard-section">
+      <h3><i class="fas fa-shopping-bag"></i> Purchased Drugs</h3>
+      <div id="purchasedContainer" class="purchased-list">
+        <p class="empty-message">You haven’t purchased any drugs yet.</p>
       </div>
     </section>
 
@@ -1626,6 +1679,34 @@ html.dark #insightsContainer .card a.btn-secondary {
         prescriptionsContainer.append(card);
       });
     }
+
+     function loadPurchasedDrugs() {
+      const container = document.getElementById("purchasedContainer");
+      container.innerHTML = "";
+      const purchased = JSON.parse(localStorage.getItem("purchasedDrugs") || "[]");
+      if (!purchased.length) {
+        container.innerHTML = `<p class="empty-message">You haven’t purchased any drugs yet.</p>`;
+        return;
+      }
+      purchased.forEach(item => {
+        const card = document.createElement("div");
+        card.className = "purchased-item";
+        card.innerHTML = `
+          <h4><i class="fas fa-capsules"></i> ${item.name}</h4>
+          <p class="price">₵${item.price.toFixed(2)}</p>
+          <p>Purchased on: ${new Date(item.date).toLocaleDateString()}</p>
+        `;
+        container.append(card);
+      });
+    }
+
+    loadPurchasedDrugs();
+
+       /*
+    const purchased = JSON.parse(localStorage.getItem("purchasedDrugs") || "[]");
+    purchased.push({ name: selectedDrugName, price: selectedDrugPrice, date: new Date().toISOString() });
+    localStorage.setItem("purchasedDrugs", JSON.stringify(purchased));
+    */
 
 
     function loadNutritionSummary() {
