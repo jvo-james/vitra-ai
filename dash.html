@@ -1102,36 +1102,89 @@ html.dark #upcomingAppointments .appt-card .btn-cancel {
     to { transform: rotate(360deg); }
   }
 
-  #filterSection {
-  margin-bottom: 2rem;
-}
-.filter-header {
-  text-align: left;
-  margin-bottom: 0.75rem;
-}
-.filter-heading {
+#filterSection .filter-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
   background: var(--surface);
-  color: var(--text);
-  font-size: 1.25rem;
-  font-weight: 600;
-  padding: 0.5rem 1rem;
-  border: 2px solid var(--primary);
+  padding: 1rem;
   border-radius: var(--radius);
-  transition: background 0.2s, color 0.2s, transform 0.2s;
   box-shadow: var(--shadow-light);
 }
-html.dark .filter-heading {
-  background: var(--surface);
-  color: var(--text);
+
+html.dark #filterSection .filter-bar {
   box-shadow: var(--shadow-dark);
 }
-.filter-heading i {
-  margin-right: 0.5rem;
+
+#filterSection .filter-bar .date-inputs {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
 }
-.filter-heading:hover {
+
+#filterSection .filter-bar label {
+  font-weight: 500;
+  color: var(--text);
+}
+
+#filterSection .filter-bar input {
+  padding: 0.5rem;
+  border: 1px solid var(--muted);
+  border-radius: var(--radius);
+  background: var(--bg);
+  color: var(--text);
+  font-size: 1rem;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+#filterSection .filter-bar input:focus {
+  outline: none;
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(74, 120, 196, 0.3);
+}
+
+html.dark #filterSection .filter-bar input {
+  background: var(--surface);
+  border-color: var(--muted);
+  color: var(--text);
+}
+
+#filterSection .filter-bar button {
+  padding: 0.6rem 1.2rem;
   background: var(--primary);
   color: var(--secondary);
+  border-radius: var(--radius);
+  font-weight: 500;
+  box-shadow: var(--shadow-light);
+  transition: background 0.2s, transform 0.2s;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+html.dark #filterSection .filter-bar button {
+  box-shadow: var(--shadow-dark);
+}
+
+#filterSection .filter-bar button:hover {
+  background: var(--accent);
   transform: translateY(-2px);
+}
+
+@media (max-width: 600px) {
+  #filterSection .filter-bar {
+    flex-wrap: wrap;
+  }
+  #filterSection .filter-bar .date-inputs {
+    width: 100%;
+    justify-content: space-between;
+  }
+  #filterSection .filter-bar button {
+    width: 100%;
+    justify-content: center;
+    margin-top: 0.75rem;
+  }
 }
 
   #insightsContainer .card a.btn-secondary {
@@ -1279,16 +1332,16 @@ html.dark #insightsContainer .card a.btn-secondary {
     </section>
 
 <section id="filterSection" class="dashboard-section">
-  <div class="filter-header">
-    <button id="filterBtn" class="btn btn-secondary filter-heading">
+  <div class="filter-bar">
+    <div class="date-inputs">
+      <label for="startDate">From:</label>
+      <input type="date" id="startDate" value="">
+      <label for="endDate">To:</label>
+      <input type="date" id="endDate" value="">
+    </div>
+    <button id="filterBtn" class="btn btn-secondary">
       <i class="fas fa-filter"></i> Apply Filter
     </button>
-  </div>
-  <div class="filter-bar">
-    <label for="startDate">From:</label>
-    <input type="date" id="startDate" value="">
-    <label for="endDate">To:</label>
-    <input type="date" id="endDate" value="">
   </div>
 </section>
 
@@ -1489,7 +1542,7 @@ html.dark #insightsContainer .card a.btn-secondary {
       }
       upcoming.forEach(appt => {
         const card = document.createElement("div");
-        card.className = "card";
+        card.className = "card appt-card";
         card.dataset.id = appt.id;
         card.innerHTML = `
           <i class="fas fa-user-md fa-2x"></i>
