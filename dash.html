@@ -1011,6 +1011,120 @@
       height: 200px;
     }
   }
+
+  /* ─── Additional CSS for Upcoming Appointments ───────────────────────────────── */
+#upcomingAppointments {
+  /* Already part of .dashboard-section, so inherits background, padding, shadow, etc. */
+}
+#upcomingAppointments h3 {
+  font-size: 1.75rem;
+  margin-bottom: 1rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: var(--primary);
+}
+#upcomingAppointments .appointments-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--gap);
+}
+#upcomingAppointments .appointments-list .empty-message {
+  text-align: center;
+  color: var(--muted);
+  font-size: 1rem;
+  margin-top: var(--gap);
+}
+#upcomingAppointments .appt-card {
+  display: flex;
+  align-items: center;
+  background: var(--surface);
+  padding: var(--gap);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-light);
+  transition: transform var(--transition), box-shadow var(--transition);
+}
+html.dark #upcomingAppointments .appt-card {
+  background: var(--surface);
+  box-shadow: var(--shadow-dark);
+}
+#upcomingAppointments .appt-icon {
+  color: var(--primary);
+  min-width: 2.5rem;
+}
+#upcomingAppointments .appt-card .details {
+  flex: 1;
+  margin-left: 1rem;
+}
+#upcomingAppointments .appt-card .details h4 {
+  font-size: 1.1rem;
+  color: var(--text);
+  margin-bottom: 0.25rem;
+  font-weight: 600;
+}
+#upcomingAppointments .appt-card .details p {
+  color: var(--muted);
+  font-size: 0.95rem;
+}
+#upcomingAppointments .appt-card .actions {
+  display: flex;
+  gap: 0.5rem;
+}
+#upcomingAppointments .appt-card .btn-reschedule,
+#upcomingAppointments .appt-card .btn-cancel {
+  background: var(--primary);
+  color: #fff;
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  transition: background var(--transition), transform var(--transition);
+  box-shadow: var(--shadow-light);
+}
+html.dark #upcomingAppointments .appt-card .btn-reschedule,
+html.dark #upcomingAppointments .appt-card .btn-cancel {
+  box-shadow: var(--shadow-dark);
+}
+#upcomingAppointments .appt-card .btn-reschedule:hover {
+  background: #3A62A8;
+  transform: translateY(-2px);
+}
+#upcomingAppointments .appt-card .btn-cancel:hover {
+  background: #D4724F;
+  transform: translateY(-2px);
+}
+/* On very small screens, ensure cards stack nicely */
+@media (max-width: 480px) {
+  #upcomingAppointments .appt-card {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  #upcomingAppointments .appt-card .actions {
+    margin-top: 0.5rem;
+  }
+}
+
+  .spinner {
+    display: inline-block;
+    width: 1rem;
+    height: 1rem;
+    margin-left: 0.5rem;
+    border: 2px solid rgba(255, 255, 255, 0.6);
+    border-top-color: var(--secondary);
+    border-radius: 50%;
+    animation: spin 0.6s linear infinite;
+    vertical-align: middle;
+  }
+
+  .hidden {
+    display: none !important;
+  }
+
+  @keyframes spin {
+    to { transform: rotate(360deg); }
+  }
 </style>
 
   
@@ -1103,25 +1217,10 @@
     </section>
 
     <!-- Upcoming Appointments -->
-    <section id="upcomingAppointments" class="module">
-      <h2><i class="fas fa-calendar-alt"></i> Upcoming Appointments</h2>
-      <div id="appointmentsContainer" style="margin-top:1rem;">
-        <!--
-          Appointment cards will be injected here by your JavaScript.
-          Example structure for each card:
-          <div class="card" data-id="appt123">
-            <i class="fas fa-user-md fa-2x"></i>
-            <div class="details">
-              <h4><strong>Dr. Jane Smith</strong></h4>
-              <p>2025-06-15 • 10:30 AM</p>
-            </div>
-            <div class="actions">
-              <button class="btn-reschedule"><i class="fas fa-sync-alt"></i></button>
-              <button class="btn-cancel"><i class="fas fa-times"></i></button>
-            </div>
-          </div>
-        -->
-        <p style="color: var(--muted);">You have no upcoming appointments.</p>
+   <section id="upcomingAppointments" class="dashboard-section">
+  <h3><i class="fas fa-calendar-alt"></i> Upcoming Appointments</h3>
+  <div id="appointmentsContainer" class="appointments-list">
+    <p class="empty-message">You have no upcoming appointments.</p>
       </div>
     </section>
 
@@ -1249,8 +1348,11 @@
       <button class="btn-close" id="closeProfileModal"><i class="fas fa-times"></i></button>
       <h3>Update Profile</h3>
       <label for="profileName"><i class="fas fa-user"></i> Name:</label>
-      <input type="text" id="profileName" placeholder="Enter your name" required/>
-      <button id="saveProfileBtn" class="btn"><i class="fas fa-save"></i> Save</button>
+     <input type="text" id="profileName" placeholder="Enter your name" required/>
+      <button id="saveProfileBtn" class="btn">
+        <i class="fas fa-save"></i> Save
+        <span id="saveSpinner" class="spinner hidden"></span>
+      </button>
     </div>
   </div>
   <div id="toast" class="toast"></div>
@@ -1801,21 +1903,28 @@
     });
 
     // ─── PROFILE MODAL HANDLERS ─────────────────────────────────────────────
-    userProfileBtn.addEventListener("click", () => {
+   userProfileBtn.addEventListener("click", () => {
+      const currentName =
+        firebase.auth().currentUser.displayName
+        || firebase.auth().currentUser.email.split("@")[0];
+      profileNameInput.value = currentName;
       profileModal.hidden = false;
-      profileNameInput.value = ""; // Clear input
       profileNameInput.focus();
     });
     profileLinkBtn.addEventListener("click", () => {
+      // Also pre‐fill the input when “Edit Profile” is clicked:
+      const currentName =
+        firebase.auth().currentUser.displayName
+        || firebase.auth().currentUser.email.split("@")[0];
+      profileNameInput.value = currentName;
       profileModal.hidden = false;
-      profileNameInput.value = ""; // Clear input
       profileNameInput.focus();
     });
     closeProfileModalBtn.addEventListener("click", () => {
       profileModal.hidden = true;
     });
 
-    saveProfileBtn.addEventListener("click", async () => {
+   saveProfileBtn.addEventListener("click", async () => {
       const newName = profileNameInput.value.trim();
       if (!newName) {
         showToast("Name cannot be empty");
@@ -1823,15 +1932,20 @@
       }
       const user = firebase.auth().currentUser;
       if (user) {
+        // 2) Show spinner, disable button:
+        saveProfileBtn.disabled = true;
+        document.getElementById("saveSpinner").classList.remove("hidden");
         try {
           await user.updateProfile({ displayName: newName });
-          userProfileBtn.innerHTML = `<i class="fas fa-user-circle"></i> ${newName}`;
           localStorage.setItem("displayName", newName);
-          showToast("Profile updated");
-          profileModal.hidden = true;
+          // 2) On success, reload the page:
+          window.location.reload();
         } catch (err) {
           console.error(err);
           showToast("Could not update profile");
+          // Re‐enable button & hide spinner if error:
+          saveProfileBtn.disabled = false;
+          document.getElementById("saveSpinner").classList.add("hidden");
         }
       }
     });
