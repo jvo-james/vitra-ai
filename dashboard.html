@@ -1430,9 +1430,9 @@ html.dark #insightsContainer .card a.btn-secondary {
   <!-- back2top  -->
   <div id="backToTop"><i class="fas fa-arrow-up"></i></div>
 
-<script>
-  // Initialize Firebase
-  const firebaseConfig = {
+ <script>
+
+   const firebaseConfig = {
     apiKey: "AIzaSyBhaYOcLMXuobCT-vaXr-zXTZnBfaheAIY",
     authDomain: "vitra-ai-712ea.firebaseapp.com",
     projectId: "vitra-ai-712ea",
@@ -1444,41 +1444,39 @@ html.dark #insightsContainer .card a.btn-secondary {
   const auth = firebase.auth();
 
   document.addEventListener("DOMContentLoaded", () => {
-    // Element references
-    const sidebar             = document.getElementById("sidebar");
-    const overlay             = document.getElementById("sidebarOverlay");
-    const hamburger           = document.getElementById("hamburger");
-    const sidebarThemeToggle  = document.getElementById("sidebarThemeToggle");
-    const themeToggle         = document.getElementById("themeToggle");
-    const signOutBtn          = document.getElementById("signOut");
-    const sidebarSignOut      = document.getElementById("sidebarSignOut");
-    const appointmentsContainer  = document.getElementById("appointmentsContainer");
-    const prescriptionsContainer = document.getElementById("prescriptionsContainer"); // May be null if not present
-    const purchasedContainer     = document.getElementById("purchasedContainer");
-    const nutritionContainer     = document.getElementById("nutritionContainer");
-    const insightsContainer      = document.getElementById("insightsContainer");
-    const backToTopBtn           = document.getElementById("backToTop");
-    const quickAccessSection     = document.getElementById("quickAccess");
-    const greetingSection        = quickAccessSection.previousElementSibling;
-    const userProfileBtn         = document.getElementById("userProfile");
-    const profileLinkBtn         = document.getElementById("profileLink");
-    const profileModal           = document.getElementById("profileModal");
-    const closeProfileModalBtn   = document.getElementById("closeProfileModal");
-    const profileNameInput       = document.getElementById("profileName");
-    const saveProfileBtn         = document.getElementById("saveProfileBtn");
-    const toastEl                = document.getElementById("toast");
-    const startDateInput         = document.getElementById("startDate");
-    const endDateInput           = document.getElementById("endDate");
-    const filterBtn              = document.getElementById("filterBtn");
-    const herbalQueriesEl        = document.getElementById("herbalQueries");
-    const psychQueriesEl         = document.getElementById("psychQueries");
-    const dietQueriesEl          = document.getElementById("dietQueries");
-    const pharmacyQueriesEl      = document.getElementById("pharmacyQueries");
-    const consultQueriesEl       = document.getElementById("consultQueries");
-    const distributionCtx        = document.getElementById("distributionChart").getContext("2d");
-    const dailyCtx               = document.getElementById("dailyChart").getContext("2d");
 
-    // Fire authentication listener
+    const sidebar           = document.getElementById("sidebar");
+    const overlay           = document.getElementById("sidebarOverlay");
+    const hamburger         = document.getElementById("hamburger");
+    const sidebarThemeToggle= document.getElementById("sidebarThemeToggle");
+    const themeToggle       = document.getElementById("themeToggle");
+    const signOutBtn        = document.getElementById("signOut");
+    const sidebarSignOut    = document.getElementById("sidebarSignOut");
+    const appointmentsContainer   = document.getElementById("appointmentsContainer");
+    const prescriptionsContainer  = document.getElementById("prescriptionsContainer");
+    const nutritionContainer      = document.getElementById("nutritionContainer");
+    const insightsContainer       = document.getElementById("insightsContainer");
+    const backToTopBtn            = document.getElementById("backToTop");
+    const quickAccessSection      = document.getElementById("quickAccess");
+    const greetingSection         = quickAccessSection.previousElementSibling;
+    const userProfileBtn          = document.getElementById("userProfile");
+    const profileLinkBtn          = document.getElementById("profileLink");
+    const profileModal            = document.getElementById("profileModal");
+    const closeProfileModalBtn    = document.getElementById("closeProfileModal");
+    const profileNameInput        = document.getElementById("profileName");
+    const saveProfileBtn          = document.getElementById("saveProfileBtn");
+    const toastEl                 = document.getElementById("toast");
+    const startDateInput          = document.getElementById("startDate");
+    const endDateInput            = document.getElementById("endDate");
+    const filterBtn               = document.getElementById("filterBtn");
+    const herbalQueriesEl         = document.getElementById("herbalQueries");
+    const psychQueriesEl          = document.getElementById("psychQueries");
+    const dietQueriesEl           = document.getElementById("dietQueries");
+    const pharmacyQueriesEl       = document.getElementById("pharmacyQueries");
+    const consultQueriesEl        = document.getElementById("consultQueries");
+    const distributionCtx         = document.getElementById("distributionChart").getContext("2d");
+    const dailyCtx                = document.getElementById("dailyChart").getContext("2d");
+
     auth.onAuthStateChanged(user => {
       if (!user) {
         window.location.href = "index.html";
@@ -1495,14 +1493,11 @@ html.dark #insightsContainer .card a.btn-secondary {
       loadPrescriptions();
       loadNutritionSummary();
       loadAIInsights();
-
-      // Populate AI-query counts and charts
       displayStats();
       initializeCharts();
       populateDailyCounts();
     });
 
-    // Sign-out handlers
     function handleSignOut() {
       auth.signOut().then(() => {
         window.location.href = "index.html";
@@ -1511,7 +1506,6 @@ html.dark #insightsContainer .card a.btn-secondary {
     signOutBtn.addEventListener("click", handleSignOut);
     sidebarSignOut.addEventListener("click", handleSignOut);
 
-    // Sidebar toggle
     function openSidebar() {
       sidebar.classList.add("show");
       overlay.classList.add("show");
@@ -1523,7 +1517,6 @@ html.dark #insightsContainer .card a.btn-secondary {
     hamburger.addEventListener("click", openSidebar);
     overlay.addEventListener("click", closeSidebar);
 
-    // Theme toggle
     themeToggle.addEventListener("click", () => {
       document.documentElement.classList.toggle("dark");
       themeToggle.classList.toggle("fa-moon");
@@ -1531,7 +1524,6 @@ html.dark #insightsContainer .card a.btn-secondary {
     });
     sidebarThemeToggle.addEventListener("click", () => themeToggle.click());
 
-    // Back-to-top button
     window.addEventListener("scroll", () => {
       backToTopBtn.style.display = window.scrollY > 400 ? "block" : "none";
     });
@@ -1539,7 +1531,6 @@ html.dark #insightsContainer .card a.btn-secondary {
       window.scrollTo({ top: 0, behavior: "smooth" });
     });
 
-    // Load upcoming appointments
     function loadAppointments() {
       appointmentsContainer.innerHTML = "";
       const allAppointments = JSON.parse(localStorage.getItem("appointments") || "[]");
@@ -1602,9 +1593,8 @@ html.dark #insightsContainer .card a.btn-secondary {
       return `${String(hh).padStart(2, "0")}:${String(mm).padStart(2, "0")} ${suffix}`;
     }
 
-    // Load recent prescriptions (if the element exists)
+
     function loadPrescriptions() {
-      if (!prescriptionsContainer) return;
       prescriptionsContainer.innerHTML = "";
       const allPrescriptions = JSON.parse(localStorage.getItem("prescriptions") || "[]");
       if (allPrescriptions.length === 0) {
@@ -1630,19 +1620,18 @@ html.dark #insightsContainer .card a.btn-secondary {
           </div>
         `;
         card.querySelector("button").addEventListener("click", () => {
-          alert(\`Refill requested for \${presc.name}\`);
+          alert(`Refill requested for ${presc.name}`);
         });
         prescriptionsContainer.append(card);
       });
     }
 
-    // Load purchased drugs
-    function loadPurchasedDrugs() {
-      if (!purchasedContainer) return;
-      purchasedContainer.innerHTML = "";
+     function loadPurchasedDrugs() {
+      const container = document.getElementById("purchasedContainer");
+      container.innerHTML = "";
       const purchased = JSON.parse(localStorage.getItem("purchasedDrugs") || "[]");
       if (!purchased.length) {
-        purchasedContainer.innerHTML = `<p class="empty-message" style="color: var(--muted);">You haven’t purchased any drugs yet.</p>`;
+        container.innerHTML = `<p class="empty-message">You haven’t purchased any drugs yet.</p>`;
         return;
       }
       purchased.forEach(item => {
@@ -1653,14 +1642,19 @@ html.dark #insightsContainer .card a.btn-secondary {
           <p class="price">₵${item.price.toFixed(2)}</p>
           <p>Purchased on: ${new Date(item.date).toLocaleDateString()}</p>
         `;
-        purchasedContainer.append(card);
+        container.append(card);
       });
     }
 
-    // Immediately load purchased drugs
     loadPurchasedDrugs();
 
-    // Load nutrition summary
+       /*
+    const purchased = JSON.parse(localStorage.getItem("purchasedDrugs") || "[]");
+    purchased.push({ name: selectedDrugName, price: selectedDrugPrice, date: new Date().toISOString() });
+    localStorage.setItem("purchasedDrugs", JSON.stringify(purchased));
+    */
+
+
     function loadNutritionSummary() {
       nutritionContainer.innerHTML = "";
       const data = JSON.parse(localStorage.getItem("nutritionSummary") || "{}");
@@ -1682,16 +1676,15 @@ html.dark #insightsContainer .card a.btn-secondary {
       nutritionContainer.innerHTML = summaryHTML;
     }
 
-    // Record a timestamp each time the user visits the pharmacy section
-    function recordPharmacyTimestamp() {
-      const key = "timestampsPharmacy";
-      const arr = JSON.parse(localStorage.getItem(key) || "[]");
-      arr.push(new Date().toISOString());
-      localStorage.setItem(key, JSON.stringify(arr));
-    }
-    recordPharmacyTimestamp();
+     function recordPharmacyTimestamp() {
+     const key = "timestampsPharmacy";
+     const arr = JSON.parse(localStorage.getItem(key) || "[]");
+     arr.push(new Date().toISOString());
+     localStorage.setItem(key, JSON.stringify(arr));
+   }
 
-    // Load a random AI insight card
+   recordPharmacyTimestamp();
+    
     function loadAIInsights() {
       insightsContainer.innerHTML = "";
       const examples = [
@@ -1728,14 +1721,12 @@ html.dark #insightsContainer .card a.btn-secondary {
       insightsContainer.append(card);
     }
 
-    // Show a short toast message at bottom
     function showToast(message) {
       toastEl.textContent = message;
       toastEl.classList.add("visible");
       setTimeout(() => toastEl.classList.remove("visible"), 3000);
     }
 
-    // Stats data object
     let statsData = {
       herbal: 0,
       psych: 0,
@@ -1746,7 +1737,6 @@ html.dark #insightsContainer .card a.btn-secondary {
       labels: []
     };
 
-    // Generate labels for last 7 days: e.g. ["Jun 1", "Jun 2", …]
     function generateLast7DaysLabels() {
       const labels = [];
       for (let i = 6; i >= 0; i--) {
@@ -1757,14 +1747,12 @@ html.dark #insightsContainer .card a.btn-secondary {
       return labels;
     }
 
-    // === PATCHED displayStats() ===
-    // Instead of reading "statHerbal", count the length of "timestampsHerbal" arrays
     function displayStats() {
-      statsData.herbal   = (JSON.parse(localStorage.getItem("timestampsHerbal"))   || []).length;
-      statsData.psych    = (JSON.parse(localStorage.getItem("timestampsPsych"))    || []).length;
-      statsData.diet     = (JSON.parse(localStorage.getItem("timestampsDiet"))     || []).length;
-      statsData.pharmacy = (JSON.parse(localStorage.getItem("timestampsPharmacy")) || []).length;
-      statsData.consult  = (JSON.parse(localStorage.getItem("timestampsConsult"))  || []).length;
+       statsData.herbal   = (JSON.parse(localStorage.getItem("timestampsHerbal"))   || []).length;
+       statsData.psych    = (JSON.parse(localStorage.getItem("timestampsPsych"))    || []).length;
+       statsData.diet     = (JSON.parse(localStorage.getItem("timestampsDiet"))     || []).length;
+       statsData.pharmacy = (JSON.parse(localStorage.getItem("timestampsPharmacy")) || []).length;
+       statsData.consult  = (JSON.parse(localStorage.getItem("timestampsConsult"))  || []).length;
 
       herbalQueriesEl.textContent   = statsData.herbal;
       psychQueriesEl.textContent    = statsData.psych;
@@ -1777,19 +1765,12 @@ html.dark #insightsContainer .card a.btn-secondary {
 
     let distributionChart, dailyChart;
     function initializeCharts() {
-      // Doughnut chart for distribution by sector
       distributionChart = new Chart(distributionCtx, {
         type: "doughnut",
         data: {
           labels: ["Herbal", "Psych", "Diet", "Pharmacy", "Consult"],
           datasets: [{
-            data: [
-              statsData.herbal,
-              statsData.psych,
-              statsData.diet,
-              statsData.pharmacy,
-              statsData.consult
-            ],
+            data: [statsData.herbal, statsData.psych, statsData.diet, statsData.pharmacy, statsData.consult],
             backgroundColor: [
               "rgba(74,120,196,0.8)",
               "rgba(255,165,0,0.8)",
@@ -1824,7 +1805,6 @@ html.dark #insightsContainer .card a.btn-secondary {
         }
       });
 
-      // Line chart for daily counts (last 7 days)
       dailyChart = new Chart(dailyCtx, {
         type: "line",
         data: {
@@ -1884,7 +1864,6 @@ html.dark #insightsContainer .card a.btn-secondary {
       });
     }
 
-    // Populate dailyCounts array and update the line chart
     function populateDailyCounts() {
       const dailyCounts = [];
       for (let i = 6; i >= 0; i--) {
@@ -1919,7 +1898,6 @@ html.dark #insightsContainer .card a.btn-secondary {
       }
     }
 
-    // Filter button handler: recalculate stats for custom date range
     filterBtn.addEventListener("click", () => {
       const start = startDateInput.value;
       const end   = endDateInput.value;
@@ -2002,8 +1980,7 @@ html.dark #insightsContainer .card a.btn-secondary {
       showToast("Statistics updated for selected range");
     });
 
-    // Profile modal logic
-    userProfileBtn.addEventListener("click", () => {
+   userProfileBtn.addEventListener("click", () => {
       const currentName =
         firebase.auth().currentUser.displayName
         || firebase.auth().currentUser.email.split("@")[0];
@@ -2023,7 +2000,7 @@ html.dark #insightsContainer .card a.btn-secondary {
       profileModal.hidden = true;
     });
 
-    saveProfileBtn.addEventListener("click", async () => {
+   saveProfileBtn.addEventListener("click", async () => {
       const newName = profileNameInput.value.trim();
       if (!newName) {
         showToast("Name cannot be empty");
@@ -2046,14 +2023,12 @@ html.dark #insightsContainer .card a.btn-secondary {
       }
     });
 
-    // If user has manually stored a displayName in localStorage, use it
     const storedName = localStorage.getItem("displayName");
     if (storedName) {
       userProfileBtn.innerHTML = `<i class="fas fa-user-circle"></i> ${storedName}`;
     }
   });
 </script>
-
 
 </body>
 
