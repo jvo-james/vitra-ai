@@ -1138,6 +1138,32 @@
     padding: 0.5rem;
   }
 }
+#feature-rich-dashboard .card .actions .btn-reschedule,
+#feature-rich-dashboard .card .actions .btn-cancel {
+  background: var(--cb-primary);
+  color: #fff;
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  border: none;
+  transition: background var(--transition), transform var(--transition);
+  margin-left: 0.25rem;
+}
+#feature-rich-dashboard .card .actions .btn-reschedule i,
+#feature-rich-dashboard .card .actions .btn-cancel i {
+  font-size: 1rem;
+}
+#feature-rich-dashboard .card .actions .btn-reschedule:hover {
+  background: var(--cb-accent);
+  transform: translateY(-2px);
+}
+#feature-rich-dashboard .card .actions .btn-cancel:hover {
+  background: #d4724f;
+  transform: translateY(-2px);
+}
 
 
 </style>
@@ -2243,22 +2269,36 @@ ${providers.map(p => `
           .map(a => new Date(a.date).getDate())
       );
 
-      for (let d = 1; d <= days; d++) {
-        const cell = document.createElement("div");
-        const isMarked = marks.has(d);
-        cell.className = isMarked ? "cell open" : "cell";
-        cell.innerText = d;
-        if (isMarked) {
-          cell.addEventListener("click", () => {
-            const list = appointments.filter(a => {
-              const ad = new Date(a.date);
-              return ad.getFullYear() === widgetYear && ad.getMonth() === widgetMonth && ad.getDate() === d;
-            });
-            alert(list.map(a => `${a.name}: ${a.time}`).join("\n"));
-          });
-        }
-        grid.append(cell);
-      }
+     for (let d = 1; d <= days; d++) {
+  const cell = document.createElement("div");
+  const isMarked = marks.has(d);
+  cell.className = isMarked ? "cell open" : "cell";
+  cell.innerText = d;
+
+  const today = new Date();
+  if (
+    today.getFullYear() === widgetYear &&
+    today.getMonth() === widgetMonth &&
+    today.getDate() === d
+  ) {
+    cell.classList.add("today");
+  }
+
+  if (isMarked) {
+    cell.addEventListener("click", () => {
+      const list = appointments.filter(a => {
+        const ad = new Date(a.date);
+        return (
+          ad.getFullYear() === widgetYear &&
+          ad.getMonth() === widgetMonth &&
+          ad.getDate() === d
+        );
+      });
+      alert(list.map(a => `${a.name}: ${a.time}`).join("\n"));
+    });
+  }
+  grid.append(cell);
+}
 
       upcomingCalendarWidget.querySelectorAll("h4, .calendar-grid").forEach(n => n.remove());
       upcomingCalendarWidget.append(title, grid);
