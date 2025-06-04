@@ -567,6 +567,28 @@ html.dark .service-card .info ul li {
 #quickAccess .btn-primary:hover {
   background: #3A62A8; 
 }
+.btn-get-started {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1.75rem;
+  border-radius: var(--radius);
+  background: linear-gradient(135deg, #4A78C4 0%, #3A62A8 100%);
+  color: #FFFFFF;
+  font-weight: 600;
+  font-size: 1rem;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.btn-get-started i {
+  font-size: 1.1rem;
+}
+
+.btn-get-started:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.20);
+}
 
   </style>
 </head>
@@ -662,7 +684,10 @@ html.dark .service-card .info ul li {
     <p>Explore our innovative AI services for holistic wellness and care.</p>
     <div class="actions">
       <a href="#services" class="btn-primary"><i class="fas fa-th-large"></i> Explore Services</a>
-      <button class="btn-secondary" id="openSignUp"><i class="fas fa-rocket"></i> Get Started </button>
+<button class="btn-get-started" id="getStartedBtn">
+  <i class="fas fa-rocket"></i>
+  Get Started
+</button>
     </div>
   </div>
       <i class="fas fa-leaf float-icon"></i>
@@ -923,6 +948,13 @@ html.dark .service-card .info ul li {
         signUpModal.style.display = 'none';
       }
     });
+
+const getStartedBtn = document.getElementById('getStartedBtn');
+const signUpModal = document.getElementById('signUpModal');
+
+getStartedBtn.addEventListener('click', () => {
+  signUpModal.style.display = 'flex';
+});
 
     toSignUp.addEventListener('click', e => {
       e.preventDefault();
