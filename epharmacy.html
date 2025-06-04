@@ -844,8 +844,8 @@ html.dark .user-msg {
       position: absolute;
       top: 0.75rem;
       right: 1rem;
-      background: var(--pharm-primary-alt);
-      color: #fff;
+     background: var(--pharm-primary-alt) !important;
+     color: #fff;
       border: none;
       padding: 0.5rem 0.75rem;
       border-radius: var(--radius);
@@ -1490,6 +1490,56 @@ html.dark #buyDrugs #orderDetails textarea:focus {
   border-color: var(--pharm-secondary);
   box-shadow: 0 0 0 3px rgba(148, 210, 189, 0.3);
 }
+
+#symptomInput,
+#compoundList {
+  width: 100%;
+  padding: 0.75rem;
+  border: 2px solid var(--pharm-primary-alt);
+  border-radius: var(--radius);
+  background: var(--pharm-bg);
+  color: var(--pharm-text);
+  font-size: 1rem;
+  resize: vertical;
+  transition: border-color var(--transition), box-shadow var(--transition), background var(--transition), color var(--transition);
+ }
+#symptomInput:focus,
+#compoundList:focus {
+  outline: none;
+  border-color: var(--pharm-secondary);
+  box-shadow: 0 0 0 3px rgba(148,210,189,0.3);
+  background: var(--pharm-accent);
+}
+html.dark #symptomInput,
+html.dark #compoundList {
+ background: var(--pharm-surface);
+  color: var(--pharm-text);
+  border-color: var(--pharm-secondary);
+}
+html.dark #symptomInput:focus,
+html.dark #compoundList:focus {
+  background: var(--pharm-surface);
+  border-color: var(--pharm-secondary);
+  box-shadow: 0 0 0 3px rgba(148,210,189,0.3);
+}
+
+@media (max-width: 600px) {
+  #symptomInput,
+  #compoundList {
+    font-size: 0.9rem;
+    padding: 0.5rem;
+  }
+}
+#pharmacyExpert .feature-card a.btn i {
+  color: #fff;
+  font-size: 1rem;
+  transition: color var(--transition);
+}
+
+#pharmacyExpert .feature-card a.btn:hover i {
+  color: #fff;
+}
+  
 </style>
 
 
@@ -2095,28 +2145,40 @@ html.dark #buyDrugs #orderDetails textarea:focus {
     try {
       const sysPrompt = `
 You are a clinical pharmacist. A patient reports these symptoms: "${symptoms}". 
-From the list below, suggest exactly ONE drug (return only the name, matching the list):
+From the list below, suggest up to FIVE drugs (return only the names, comma-separated, matching the list). If only one is appropriate, that’s fine.
 ${drugsData.map(d => d.name).join(", ")}.
       `.trim();
 
-     const aiReply = await callOpenAI([
+      const aiReply = await callOpenAI([
         { role: "system", content: sysPrompt },
         { role: "user",   content: `Symptoms: ${symptoms}` }
       ]);
 
-      const suggestion = aiReply.split("\n")[0].trim();
-      const matchedIndex = drugsData.findIndex(
-        d => d.name.toLowerCase() === suggestion.toLowerCase()
-      );
-      if (matchedIndex >= 0) {
-        Array.from(drugSelect.options).forEach(opt => opt.selected = false);
-        drugSelect.options[matchedIndex].selected = true;
-        updateSinglePrice();
-        suggestionMsg.textContent = `Our AI suggests: "${drugsData[matchedIndex].name}".`;
-      } else {
-        suggestionMsg.textContent = `AI suggested "${suggestion}", which is not in our list. Please choose manually.`;
-      }
-    } catch (err) {
+     const rawNames = aiReply
+       .split(/[\r\n]+/)[0]          
+       .split(",")                
+       .map(s => s.trim())
+       .filter(s => s.length > 0)
+       .slice(0, 5);               
+
+     Array.from(drugSelect.options).forEach(opt => opt.selected = false);
+     const matchedNames = [];
+
+     rawNames.forEach(name => {
+       const idx = drugsData.findIndex(d => d.name.toLowerCase() === name.toLowerCase());
+       if (idx >= 0) {
+         drugSelect.options[idx].selected = true;
+         matchedNames.push(drugsData[idx].name);
+       }
+     });
+
+     if (matchedNames.length > 0) {
+       updateSinglePrice(); 
+       suggestionMsg.textContent = `AI suggests: ${matchedNames.map(n => `"${n}"`).join(", ")}.`;
+     } else {
+       suggestionMsg.textContent = `AI suggested "${rawNames.join(", ")}", which isn't in our list. Please choose manually.`;
+     }
+   } catch (err) {
       console.error(err);
       suggestionMsg.textContent = "⚠️ Unable to get suggestion right now. Please try again.";
     }
@@ -2772,6 +2834,15 @@ Format as a short report with bullet points.
     let pharmaLastDateHeader = null;
 
     let pharmaHistory = JSON.parse(localStorage.getItem("pharmaHistory") || "[]");
+    pharmaHistory = pharmaHistory.map(entry => {
+  let dt = new Date(entry.timestamp);
+  if (entry.timestamp && !entry.timestamp.includes("T") && dt.getHours() === 0 && dt.getMinutes() === 0) {
+    dt.setHours(12, 0, 0, 0);
+  }
+  return { ...entry, timestamp: dt.toISOString() };
+  });
+  localStorage.setItem("pharmaHistory", JSON.stringify(pharmaHistory));
+
     function pharmaFormatDateSeparator(date) {
       const today = new Date();
       const diffDays = Math.floor((today.setHours(0, 0, 0, 0) - date.setHours(0, 0, 0, 0)) / 86400000);
