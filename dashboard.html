@@ -1244,6 +1244,116 @@ html.dark #insightsContainer .card a.btn-secondary {
   color: var(--muted);
   font-size: 0.9rem;
 }
+#nutritionSummary {
+  background: var(--surface);
+  border-radius: var(--radius);
+  padding: var(--padding);
+  margin-bottom: 2rem;
+  box-shadow: var(--shadow-light);
+  
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 1rem;
+}
+
+#nutritionSummary h2 {
+  grid-column: 1 / -1;
+  font-size: 1.75rem;
+  color: var(--primary);
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.75rem;
+}
+
+.ns-calories {
+  background: var(--accent);
+  border-left: 4px solid var(--primary);
+  border-radius: var(--radius);
+  padding: var(--padding);
+  color: #fff;
+  box-shadow: var(--shadow-light);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.ns-calories .ns-label {
+  font-size: 0.95rem;
+  opacity: 0.9;
+}
+
+.ns-calories .ns-value {
+  font-size: 2.25rem;
+  font-weight: 700;
+  margin-top: 0.25rem;
+}
+
+.ns-calories .ns-bar-bg {
+  background: rgba(255, 255, 255, 0.3);
+  border-radius: var(--radius);
+  height: 8px;
+  margin-top: 0.75rem;
+  overflow: hidden;
+}
+
+.ns-calories .ns-bar-fill {
+  background: #ffffff;
+  height: 100%;
+  width: 0%; 
+  transition: width var(--transition);
+}
+
+.ns-micronutrients {
+  background: var(--surface);
+  border-radius: var(--radius);
+  padding: var(--padding);
+  box-shadow: var(--shadow-light);
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.ns-micronutrients .ns-label {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--text);
+  margin-bottom: 0.5rem;
+}
+
+.ns-micronutrients .ns-micro-item {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.95rem;
+  color: var(--text);
+}
+
+.ns-micronutrients .ns-micro-item::before {
+  content: "•";
+  color: var(--primary);
+  margin-right: 0.5rem;
+}
+
+.ns-macro-chart {
+  background: var(--surface);
+  border-radius: var(--radius);
+  padding: var(--padding);
+  box-shadow: var(--shadow-light);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.ns-macro-chart canvas {
+  width: 100% !important;
+  height: 150px !important;
+}
+
+.ns-macro-chart .ns-chart-label {
+  font-size: 0.95rem;
+  color: var(--muted);
+}
 
 </style>
 
@@ -1352,13 +1462,31 @@ html.dark #insightsContainer .card a.btn-secondary {
       </div>
     </section>
 
-    <section id="nutritionSummary" class="module">
-      <h2><i class="fas fa-apple-alt"></i> Nutrition Summary</h2>
-      <div id="nutritionContainer" style="margin-top:1rem;">
-       
-        <p style="color: var(--muted);">No nutrition data available.</p>
-      </div>
-    </section>
+   <section id="nutritionSummary" class="module">
+  <h2><i class="fas fa-apple-alt"></i> Nutrition Summary</h2>
+
+  <div class="ns-calories">
+    <div class="ns-label">Calories Today</div>
+    <div class="ns-value">— kcal</div>
+    <div class="ns-bar-bg">
+      <div class="ns-bar-fill" style="width: 0%;"></div>
+    </div>
+  </div>
+
+  <div class="ns-micronutrients">
+    <div class="ns-label">Micronutrients</div>
+    <div class="ns-micro-item"><span>Iron:</span> <span>—%</span></div>
+    <div class="ns-micro-item"><span>Calcium:</span> <span>—%</span></div>
+    <div class="ns-micro-item"><span>Vitamin C:</span> <span>—%</span></div>
+    <div class="ns-micro-item"><span>Vitamin D:</span> <span>—%</span></div>
+  </div>
+
+  <div class="ns-macro-chart">
+    <canvas id="nsMacroChart"></canvas>
+    <div class="ns-chart-label">Macros (%)</div>
+  </div>
+</section>
+
 
     <section id="aiInsights" class="module">
       <h2><i class="fas fa-robot"></i> AI Insights</h2>
@@ -2078,6 +2206,68 @@ html.dark #insightsContainer .card a.btn-secondary {
     if (storedName) {
       userProfileBtn.innerHTML = `<i class="fas fa-user-circle"></i> ${storedName}`;
     }
+
+(function populateNutritionGrid() {
+  const data = JSON.parse(localStorage.getItem("nutritionSummary") || "{}");
+  const caloriesBox = document.querySelector("#nutritionSummary .ns-calories");
+  const micronBox   = document.querySelector("#nutritionSummary .ns-micronutrients");
+  const macroChartEl = document.getElementById("nsMacroChart");
+
+  if (!data || !data.calories) {
+    return;
+  }
+
+  const dailyGoal = data.goal || 2000; 
+  const actualCals = data.calories;
+  const pct = Math.min(100, Math.round((actualCals / dailyGoal) * 100));
+  caloriesBox.querySelector(".ns-value").textContent = `${actualCals} kcal`;
+  caloriesBox
+    .querySelector(".ns-bar-fill")
+    .style.width = `${pct}%`;
+
+  if (data.micronutrients) {
+    micronBox.querySelectorAll(".ns-micro-item").forEach(item => {
+      const label = item.textContent.split(":")[0].trim().toLowerCase();
+      let key = "";
+      if (label === "iron") key = "iron";
+      else if (label === "calcium") key = "calcium";
+      else if (label === "vitamin c") key = "vitaminC";
+      else if (label === "vitamin d") key = "vitaminD";
+      if (key && data.micronutrients[key] != null) {
+        item.querySelector("span:last-child").textContent = `${data.micronutrients[key]}%`;
+      }
+    });
+  }
+
+  if (data.macros && macroChartEl) {
+    new Chart(macroChartEl.getContext("2d"), {
+      type: "pie",
+      data: {
+        labels: ["Carbs", "Protein", "Fat"],
+        datasets: [{
+          data: [
+            data.macros.carbs || 0,
+            data.macros.protein || 0,
+            data.macros.fats || 0
+          ],
+          backgroundColor: [
+            getComputedStyle(document.documentElement).getPropertyValue("--primary").trim(),
+            getComputedStyle(document.documentElement).getPropertyValue("--accent").trim(),
+            getComputedStyle(document.documentElement).getPropertyValue("--secondary").trim()
+          ]
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: { display: false }
+        }
+      }
+    });
+  }
+})();
+
   });
 </script>
 
