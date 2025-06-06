@@ -2130,8 +2130,10 @@ Storage.recordCategory("Diet");
       const panel = document.getElementById(panelId);
       panel.hidden = false;
       panel.classList.add("loading");
-      panel.querySelector(".result-content").innerHTML =
-        `<div class="spinner"></div><div class="spin-text">Please wait…</div>`;
+     const oldTools = panel.querySelector(".tool-row");
+    if (oldTools) oldTools.remove();
+    panel.querySelector(".result-content").innerHTML =
+     `<div class="spinner"></div><div class="spin-text">Please wait…</div>`;
       let userContent = "";
       for (const fid of fieldIds) {
         if (fid === "symptoms") {
