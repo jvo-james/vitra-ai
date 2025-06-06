@@ -21,7 +21,7 @@
     font-size: 16px;
     scroll-behavior: smooth;
     --primary: #F7DC6F;         
-    --primary-alt: #D4AC0D;     
+    --primary-alt: #A57A06;    
     --secondary: #C39BD3;       
     --accent: rgba(255, 249, 230, 0.9); 
     --bg: #FEF9E7;               
@@ -831,6 +831,12 @@ aside#sidebar.collapsed .logo .logo-text,
     color: var(--muted);
     margin: 1rem 0 0.5rem;
   }
+  .history-modal .history-date {
+  background: rgba(0,0,0,0.05);
+  padding: 0.25rem 0;
+  border-radius: 0.25rem;
+}
+
   .history-modal .history-row {
     display: grid;
     grid-template-columns: 1fr auto auto;
@@ -1978,10 +1984,8 @@ When responding to user questions:
      
 
     clearChatBtn.onclick = () => {
-      chatBox.innerHTML = "";
-      chatHistory = [];
-      localStorage.removeItem("dietChatHistory");
-      lastDateHeader = null;
+       chatBox.innerHTML = "";
+       lastDateHeader = null;
     };
 
     viewHistoryBtn.onclick = () => {
@@ -2175,87 +2179,110 @@ Storage.recordCategory("Diet");
 
 
 
-  wireModule("genPlan",
+ wireModule(
+  "genPlan",
   ["calories", "dietType", "allergyList", "budget"],
   ["calories", "dietType"],
   `
-You will receive user inputs as lines in exactly this format (one per line):
-  calories: <daily_calorie_number>
-  dietType: <diet choice or custom text>
-  allergyList: <comma-separated list>
-  budget: <Low|Medium|High>
+You are a professional dietetics AI. Input arrives exactly as:
+calories: <daily_calories_number>
+dietType: <diet_choice_or_custom_text>
+allergyList: <comma-separated_allergies_or_CustomText>
+budget: <Low|Medium|High>
 
-Parse each field exactly by its label (e.g. “calories: 2000”), then produce:
-  • A detailed 7-day meal plan with macronutrient breakdowns
-  • A complete shopping list
-  • Step-by-step recipes
+Your tasks:
+1. Validate each field by label. If dietType is “Other,” use the exact text from the “other-input” field, not the word “Other.”
+2. Use user’s nationality context via prior system message (e.g. “As a Ghanaian diet…”).
+3. Create a detailed 7-day meal plan, including:
+   • Daily menu for breakfast, lunch, dinner, snacks.
+   • macronutrient breakdown (grams of carbs/protein/fat) per meal.
+   • A single consolidated shopping list at end.
+   • Step-by-step recipes for each meal.
+4. Tailor recommendations to the allergyList: do NOT include ingredients to which user is allergic.
+5. Use budget tier to suggest cost-appropriate ingredients (e.g. staples for “Low”).
+6. Format output with headings (e.g., “Day 1 – Breakfast”, “Shopping List”), bullet lists, and clear separators.
 
-Rules:
-• If dietType was “Other,” do NOT output “Other.” Instead, use the exact custom text provided.
-• If allergyList includes “Other,” use the exact custom text instead.
-• Tailor all suggestions to the user’s nationality when possible.
+Do NOT say “Other” anywhere; always substitute the custom text. Keep each day’s plan under 250 words. Provide actionable, practical instructions.
 `.trim()
 );
 
-wireModule("analyzeNutri",
+
+wireModule(
+  "analyzeNutri",
   ["foodLog", "unitSelect"],
   ["foodLog"],
   `
-You will receive user inputs as lines in exactly this format (one per line):
-  foodLog: <ingredients or meal log text>
-  unitSelect: <grams|pieces|cups|tablespoons|servings|custom unit>
+You are a registered dietitian AI. Input arrives exactly as:
+foodLog: <ingredients_or_meal_log_text>
+unitSelect: <grams|pieces|cups|tablespoons|servings|custom_unit>
 
-Parse each field by its label (e.g. “foodLog: 200g rice, 1 egg, spinach…”). Then produce:
-  • A full macro‐ and micronutrient breakdown
-  • Total amounts and percentages
-  • Commentary on adequacy or imbalance
-  • Suggestions for correcting deficiencies or excesses
+Your objectives:
+1. Parse “foodLog:” by label; parse “unitSelect:” by label. If unitSelect was “Other,” use the exact custom text.
+2. Identify all ingredients and quantities. Convert everything into a consistent unit if possible.
+3. Provide a full macro‐ and micronutrient breakdown:
+   • Total calories, carbs, protein, fat.
+   • Major micronutrients (e.g., iron, calcium, vitamin C)—provide approximate amounts.
+4. Comment on adequacy or imbalance (e.g., “Protein is sufficient; carbs are low...”).
+5. Suggest two or three practical ways to correct any deficiencies or excesses (e.g., “Add a handful of spinach for vitamin A”).
+6. Reference user’s nationality: suggest local food examples (“As a Ghanaian, you could add plantain for potassium.”).
+7. Format output under headings: “Nutrient Breakdown:”, “Analysis:”, “Recommendations:”.
 
-Rules:
-• If unitSelect was “Other,” do NOT output “Other.” Use the exact custom text.
-• Reference the user’s nationality for local food examples.
+Keep response under 200 words.
 `.trim()
 );
 
-wireModule("getRecipes",
+
+wireModule(
+  "getRecipes",
   ["pantry", "cuisineType", "recipeDifficulty", "maxTime"],
   ["pantry"],
   `
-You will receive user inputs as lines in exactly this format (one per line):
-  pantry: <comma-separated pantry items>
-  cuisineType: <cuisine style or custom text>
-  recipeDifficulty: <Easy|Medium|Advanced>
-  maxTime: <number representing minutes>
+You are a recipe AI. Input arrives exactly as:
+pantry: <comma-separated_pantry_items>
+cuisineType: <cuisine_style_or_custom_text>
+recipeDifficulty: <Easy|Medium|Advanced>
+maxTime: <minutes_number>
 
-Parse each field by its label (e.g. “pantry: Rice, Beans, Plantain”). Then recommend three original recipes that include:
-  • Full ingredient lists
-  • Step-by-step instructions
-  • Estimated cooking times
-  • Nutritional breakdown (macros and major micronutrients)
-  • Local ingredient substitutes based on the user’s nationality
+Your instructions:
+1. Parse each field by label. If cuisineType was “Other,” use the actual custom value (not the word “Other”).
+2. Use user’s nationality (provided via earlier system messages) to suggest local ingredient substitutes when relevant.
+3. Generate exactly three original recipes:
+   • Title and cuisine style.
+   • Full ingredient list, including pantry items.
+   • Step-by-step instructions (with timings).
+   • Estimated total cooking time.
+   • Nutritional breakdown (macros: carbs/protein/fat; major micronutrients).
+   • If any ingredient is missing, suggest a substitute (based on user’s nationality context).
+4. Tailor tone to be friendly and concise. Use bullet points for ingredients and numbered steps for instructions.
 
-Rules:
-• If cuisineType was “Other,” do NOT output “Other.” Use the exact custom text instead.
+Format each recipe clearly (e.g., “Recipe 1: …”, bullet lists, etc.).
 `.trim()
 );
 
-wireModule("scanDef",
+wireModule(
+  "scanDef",
   ["symptoms", "dietOverview"],
   ["symptoms"],
   `
-You will receive user inputs as lines in exactly this format (one per line):
-  symptoms: <comma-separated or multiple checked symptoms; “Other” may be followed by custom text>
-  dietOverview: <brief description of current diet>
+You are a clinical nutrition AI. Input arrives exactly as:
+symptoms: <comma-separated_symptoms_or_custom_text>
+dietOverview: <brief_description_of_current_diet>
 
-Parse each field by its label (e.g. “symptoms: Fatigue, Hair Loss”). Then:
-  • Rank likely nutrient deficiencies in order of probability (e.g., iron, B12)
-  • Provide reasoning for each ranking
-  • List dietary sources or supplement suggestions
-  • Suggest simple meal tweaks to address each deficiency
+Your tasks:
+1. Parse “symptoms:” by label. If any “Other” appears, use the custom text exactly.
+2. Parse “dietOverview:” by label.
+3. Determine and rank likely nutrient deficiencies (e.g., iron, vitamin B12, vitamin D) in order of probability, based on symptoms and diet overview.
+4. For each deficiency:
+   • Provide concise reasoning (1–2 sentences) linking the symptom to that deficiency.
+   • List 2–3 dietary sources (local foods, using user nationality).
+   • If supplements are recommended, specify dosages.
+   • Suggest simple meal tweaks or snack additions to correct each deficiency.
+5. Format output as:
+   • “1. Iron Deficiency – Reason: …” (bullet lists beneath each).
+   • Use headings (e.g. “Likely Deficiencies:”, “Recommendations:”).
+6. Keep each deficiency section under 150 words.
 
-Rules:
-• If “Other” appears in symptoms, use the exact custom text instead of the word “Other.”
-• Tailor all suggestions to the user’s nationality and regional diet.
+Do NOT output the word “Other.” Always use custom text.
 `.trim()
 );
 
