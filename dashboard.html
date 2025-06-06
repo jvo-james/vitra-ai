@@ -1462,7 +1462,7 @@ html.dark #insightsContainer .card a.btn-secondary {
       </div>
     </section>
 
-   <section id="nutritionContainer" class="module">
+   <section id="nutritionSummary" class="module">
   <h2><i class="fas fa-apple-alt"></i> Nutrition Summary</h2>
 
   <div class="ns-calories">
@@ -1598,7 +1598,6 @@ html.dark #insightsContainer .card a.btn-secondary {
 <script src="storage.js"></script>
 
 <script>
-  // Initialize Firebase
   const firebaseConfig = {
     apiKey: "AIzaSyBhaYOcLMXuobCT-vaXr-zXTZnBfaheAIY",
     authDomain: "vitra-ai-712ea.firebaseapp.com",
@@ -1611,39 +1610,39 @@ html.dark #insightsContainer .card a.btn-secondary {
   const auth = firebase.auth();
 
   document.addEventListener("DOMContentLoaded", () => {
-    // Grab DOM elements
-    const sidebar              = document.getElementById("sidebar");
-    const overlay              = document.getElementById("sidebarOverlay");
-    const hamburger            = document.getElementById("hamburger");
-    const sidebarThemeToggle   = document.getElementById("sidebarThemeToggle");
-    const themeToggle          = document.getElementById("themeToggle");
-    const signOutBtn           = document.getElementById("signOut");
-    const sidebarSignOut       = document.getElementById("sidebarSignOut");
-    const appointmentsContainer = document.getElementById("appointmentsContainer");
-    const purchasedContainer    = document.getElementById("purchasedContainer");
-    const insightsContainer     = document.getElementById("insightsContainer");
-    const backToTopBtn          = document.getElementById("backToTop");
-    const quickAccessSection    = document.getElementById("quickAccess");
-    const greetingSection       = quickAccessSection.previousElementSibling;
-    const userProfileBtn        = document.getElementById("userProfile");
-    const profileLinkBtn        = document.getElementById("profileLink");
-    const profileModal          = document.getElementById("profileModal");
-    const closeProfileModalBtn  = document.getElementById("closeProfileModal");
-    const profileNameInput      = document.getElementById("profileName");
-    const saveProfileBtn        = document.getElementById("saveProfileBtn");
-    const toastEl               = document.getElementById("toast");
-    const startDateInput        = document.getElementById("startDate");
-    const endDateInput          = document.getElementById("endDate");
-    const filterBtn             = document.getElementById("filterBtn");
-    const herbalQueriesEl       = document.getElementById("herbalQueries");
-    const psychQueriesEl        = document.getElementById("psychQueries");
-    const dietQueriesEl         = document.getElementById("dietQueries");
-    const pharmacyQueriesEl     = document.getElementById("pharmacyQueries");
-    const consultQueriesEl      = document.getElementById("consultQueries");
-    const distributionCtx       = document.getElementById("distributionChart").getContext("2d");
-    const dailyCtx              = document.getElementById("dailyChart").getContext("2d");
 
-    // Redirect to login if not authenticated
+    const sidebar             = document.getElementById("sidebar");
+    const overlay             = document.getElementById("sidebarOverlay");
+    const hamburger           = document.getElementById("hamburger");
+    const sidebarThemeToggle  = document.getElementById("sidebarThemeToggle");
+    const themeToggle         = document.getElementById("themeToggle");
+    const signOutBtn          = document.getElementById("signOut");
+    const sidebarSignOut      = document.getElementById("sidebarSignOut");
+    const appointmentsContainer  = document.getElementById("appointmentsContainer");
+    const purchasedContainer     = document.getElementById("purchasedContainer");
+    const nutritionContainer     = document.getElementById("nutritionContainer");
+    const insightsContainer      = document.getElementById("insightsContainer");
+    const backToTopBtn           = document.getElementById("backToTop");
+    const quickAccessSection     = document.getElementById("quickAccess");
+    const greetingSection        = quickAccessSection.previousElementSibling;
+    const userProfileBtn         = document.getElementById("userProfile");
+    const profileLinkBtn         = document.getElementById("profileLink");
+    const profileModal           = document.getElementById("profileModal");
+    const closeProfileModalBtn   = document.getElementById("closeProfileModal");
+    const profileNameInput       = document.getElementById("profileName");
+    const saveProfileBtn         = document.getElementById("saveProfileBtn");
+    const toastEl                = document.getElementById("toast");
+    const startDateInput         = document.getElementById("startDate");
+    const endDateInput           = document.getElementById("endDate");
+    const filterBtn              = document.getElementById("filterBtn");
+    const herbalQueriesEl        = document.getElementById("herbalQueries");
+    const psychQueriesEl         = document.getElementById("psychQueries");
+    const dietQueriesEl          = document.getElementById("dietQueries");
+    const pharmacyQueriesEl      = document.getElementById("pharmacyQueries");
+    const consultQueriesEl       = document.getElementById("consultQueries");
+    const distributionCtx        = document.getElementById("distributionChart").getContext("2d");
+    const dailyCtx               = document.getElementById("dailyChart").getContext("2d");
+
     auth.onAuthStateChanged(user => {
       if (!user) {
         window.location.href = "index.html";
@@ -1659,13 +1658,13 @@ html.dark #insightsContainer .card a.btn-secondary {
 
       loadAppointments();
       loadPurchasedDrugs();
+      loadNutritionSummary();
       loadAIInsights();
       displayStats();
       initializeCharts();
       populateDailyCounts();
     });
 
-    // Sign-out functionality
     function handleSignOut() {
       auth.signOut().then(() => {
         window.location.href = "index.html";
@@ -1674,7 +1673,6 @@ html.dark #insightsContainer .card a.btn-secondary {
     signOutBtn.addEventListener("click", handleSignOut);
     sidebarSignOut.addEventListener("click", handleSignOut);
 
-    // Sidebar open/close
     function openSidebar() {
       sidebar.classList.add("show");
       overlay.classList.add("show");
@@ -1686,7 +1684,6 @@ html.dark #insightsContainer .card a.btn-secondary {
     hamburger.addEventListener("click", openSidebar);
     overlay.addEventListener("click", closeSidebar);
 
-    // Theme toggling
     themeToggle.addEventListener("click", () => {
       document.documentElement.classList.toggle("dark");
       themeToggle.classList.toggle("fa-moon");
@@ -1694,7 +1691,6 @@ html.dark #insightsContainer .card a.btn-secondary {
     });
     sidebarThemeToggle.addEventListener("click", () => themeToggle.click());
 
-    // Back-to-top button visibility
     window.addEventListener("scroll", () => {
       backToTopBtn.style.display = window.scrollY > 400 ? "block" : "none";
     });
@@ -1702,7 +1698,6 @@ html.dark #insightsContainer .card a.btn-secondary {
       window.scrollTo({ top: 0, behavior: "smooth" });
     });
 
-    // Load upcoming appointments from localStorage
     function loadAppointments() {
       appointmentsContainer.innerHTML = "";
       const allAppointments = JSON.parse(localStorage.getItem("appointments") || "[]");
@@ -1712,9 +1707,7 @@ html.dark #insightsContainer .card a.btn-secondary {
         return apptDate >= today;
       });
       if (upcoming.length === 0) {
-        appointmentsContainer.innerHTML = `
-          <p style="color: var(--muted);">You have no upcoming appointments.</p>
-        `;
+        appointmentsContainer.innerHTML = `<p style="color: var(--muted);">You have no upcoming appointments.</p>`;
         return;
       }
       upcoming.forEach(appt => {
@@ -1741,14 +1734,12 @@ html.dark #insightsContainer .card a.btn-secondary {
             removeAppointment(appt.id);
             card.remove();
             if (appointmentsContainer.children.length === 0) {
-              appointmentsContainer.innerHTML = `
-                <p style="color: var(--muted);">You have no upcoming appointments.</p>
-              `;
+              appointmentsContainer.innerHTML = `<p style="color: var(--muted);">You have no upcoming appointments.</p>`;
             }
           }
         });
         card.querySelector(".btn-reschedule").addEventListener("click", () => {
-          window.location.href = \`consult.html?rescheduleId=\${encodeURIComponent(appt.id)}\`;
+          window.location.href = `consult.html?rescheduleId=${encodeURIComponent(appt.id)}`;
         });
         appointmentsContainer.append(card);
       });
@@ -1759,25 +1750,19 @@ html.dark #insightsContainer .card a.btn-secondary {
       const updated = list.filter(a => a.id !== id);
       localStorage.setItem("appointments", JSON.stringify(updated));
     }
-
     function formatTime(t) {
       if (t.includes("AM") || t.includes("PM")) return t;
       let [hh, mm] = t.split(":").map(Number);
       const suffix = hh >= 12 ? "PM" : "AM";
       hh = hh % 12 || 12;
-      return \`\${String(hh).padStart(2, "0")}:\${String(mm).padStart(2, "0")} \${suffix}\`;
+      return `${String(hh).padStart(2, "0")}:${String(mm).padStart(2, "0")} ${suffix}`;
     }
 
-    // Load purchased drugs from localStorage
     function loadPurchasedDrugs() {
       purchasedContainer.innerHTML = "";
       const purchased = JSON.parse(localStorage.getItem("purchasedDrugs") || "[]");
       if (!purchased.length) {
-        purchasedContainer.innerHTML = `
-          <p class="empty-message" style="color: var(--muted);">
-            You haven’t purchased any drugs yet.
-          </p>
-        `;
+        purchasedContainer.innerHTML = `<p class="empty-message" style="color: var(--muted);">You haven’t purchased any drugs yet.</p>`;
         return;
       }
       purchased.forEach(item => {
@@ -1792,7 +1777,27 @@ html.dark #insightsContainer .card a.btn-secondary {
       });
     }
 
-    // Record a pharmacy timestamp for overall stats
+    function loadNutritionSummary() {
+      nutritionContainer.innerHTML = "";
+      const data = JSON.parse(localStorage.getItem("nutritionSummary") || "{}");
+      if (!data || !data.calories) {
+        nutritionContainer.innerHTML = `<p style="color: var(--muted);">No nutrition data available.</p>`;
+        return;
+      }
+      const summaryHTML = `
+        <p><strong>Today's Calories:</strong> ${data.calories} kcal</p>
+        <p>
+          <strong>Protein:</strong> ${data.protein} g · 
+          <strong>Carbs:</strong> ${data.carbs} g · 
+          <strong>Fats:</strong> ${data.fats} g
+        </p>
+        <a href="dietetics.html" class="btn btn-primary" style="margin-top:0.5rem; display:inline-flex; align-items:center; gap:0.5rem;">
+          <i class="fas fa-arrow-right"></i> View Full Meal Plan
+        </a>
+      `;
+      nutritionContainer.innerHTML = summaryHTML;
+    }
+
     function recordPharmacyTimestamp() {
       const key = "timestampsPharmacy";
       const arr = JSON.parse(localStorage.getItem(key) || "[]");
@@ -1801,76 +1806,76 @@ html.dark #insightsContainer .card a.btn-secondary {
     }
     recordPharmacyTimestamp();
 
-    // Load a random AI insight card
     function loadAIInsights() {
       insightsContainer.innerHTML = "";
       const examples = [
-        {
-          title: "Herbal Tip of the Day",
-          text: "Based on your recent concerns, we recommend adding turmeric to your regimen for its anti-inflammatory properties.",
-          link: "herbal.html"
-        },
-        {
-          title: "Mental Health Check-In",
-          text: "Our AI noticed elevated stress keywords in your last chat. Consider a 5-minute guided breathing exercise today.",
-          link: "psychology.html#therapybot"
-        },
-        {
-          title: "Nutrition Insight",
-          text: "Your protein intake is slightly below target. Try adding a protein-rich snack like Greek yogurt this afternoon.",
-          link: "dietetics.html"
-        },
-        {
-          title: "E-Pharmacy Spotlight",
-          text: "Your recent purchase history suggests you might consider stocking echinacea supplements for immune support.",
-          link: "epharmacy.html#buyDrugs"
-        },
-        {
-          title: "Consultation Reminder",
-          text: "You haven’t scheduled a follow-up appointment in a while—book a quick check-in to review your progress.",
-          link: "consult.html"
-        },
-        {
-          title: "Sleep Aid Suggestion",
-          text: "Melatonin levels dip late; consider drinking chamomile tea 30 minutes before bed for better sleep.",
-          link: "dietetics.html"
-        },
-        {
-          title: "Stress Management Tip",
-          text: "Lavender aromatherapy can ease stress—add a few drops to a diffuser this evening.",
-          link: "psychology.html#therapybot"
-        },
-        {
-          title: "Herbal Safety Alert",
-          text: "Avoid combining St. John’s Wort with certain antidepressants—consult your provider for personalized advice.",
-          link: "herbal.html"
-        },
-        {
-          title: "Immune Booster Tip",
-          text: "Elderberry syrup has been shown to reduce cold severity; consider adding it during flu season.",
-          link: "epharmacy.html#buyDrugs"
-        },
-        {
-          title: "Digestion Booster",
-          text: "Ginger tea can soothe nausea and improve digestion—try sipping after meals for relief.",
-          link: "dietetics.html"
-        },
-        {
-          title: "Mood Lifter Insight",
-          text: "A small daily dose of saffron extract may help stabilize mood—research suggests benefits for mild depression.",
-          link: "herbal.html"
-        },
-        {
-          title: "Joint Health Hint",
-          text: "Turmeric’s curcumin compound has anti-inflammatory effects—pair with black pepper to boost absorption.",
-          link: "dietetics.html"
-        },
-        {
-          title: "Heart Health Check",
-          text: "Hawthorn extract supports cardiovascular function—consider adding if you have mild high blood pressure.",
-          link: "herbal.html"
-        }
-      ];
+  {
+    title: "Herbal Tip of the Day",
+    text: "Based on your recent concerns, we recommend adding turmeric to your regimen for its anti-inflammatory properties.",
+    link: "herbal.html"
+  },
+  {
+    title: "Mental Health Check-In",
+    text: "Our AI noticed elevated stress keywords in your last chat. Consider a 5-minute guided breathing exercise today.",
+    link: "psychology.html#therapybot"
+  },
+  {
+    title: "Nutrition Insight",
+    text: "Your protein intake is slightly below target. Try adding a protein-rich snack like Greek yogurt this afternoon.",
+    link: "dietetics.html"
+  },
+  {
+    title: "E-Pharmacy Spotlight",
+    text: "Your recent purchase history suggests you might consider stocking echinacea supplements for immune support.",
+    link: "epharmacy.html#buyDrugs"
+  },
+  {
+    title: "Consultation Reminder",
+    text: "You haven’t scheduled a follow-up appointment in a while—book a quick check-in to review your progress.",
+    link: "consult.html"
+  },
+  {
+    title: "Sleep Aid Suggestion",
+    text: "Melatonin levels dip late; consider drinking chamomile tea 30 minutes before bed for better sleep.",
+    link: "dietetics.html"
+  },
+  {
+    title: "Stress Management Tip",
+    text: "Lavender aromatherapy can ease stress—add a few drops to a diffuser this evening.",
+    link: "psychology.html#therapybot"
+  },
+  {
+    title: "Herbal Safety Alert",
+    text: "Avoid combining St. John’s Wort with certain antidepressants—consult your provider for personalized advice.",
+    link: "herbal.html"
+  },
+  {
+    title: "Immune Booster Tip",
+    text: "Elderberry syrup has been shown to reduce cold severity; consider adding it during flu season.",
+    link: "epharmacy.html#buyDrugs"
+  },
+  {
+    title: "Digestion Booster",
+    text: "Ginger tea can soothe nausea and improve digestion—try sipping after meals for relief.",
+    link: "dietetics.html"
+  },
+  {
+    title: "Mood Lifter Insight",
+    text: "A small daily dose of saffron extract may help stabilize mood—research suggests benefits for mild depression.",
+    link: "herbal.html"
+  },
+  {
+    title: "Joint Health Hint",
+    text: "Turmeric’s curcumin compound has anti-inflammatory effects—pair with black pepper to boost absorption.",
+    link: "dietetics.html"
+  },
+  {
+    title: "Heart Health Check",
+    text: "Hawthorn extract supports cardiovascular function—consider adding if you have mild high blood pressure.",
+    link: "herbal.html"
+  }
+];
+
       const insight = examples[Math.floor(Math.random() * examples.length)];
       const card = document.createElement("div");
       card.className = "card";
@@ -1888,14 +1893,12 @@ html.dark #insightsContainer .card a.btn-secondary {
       insightsContainer.append(card);
     }
 
-    // Show toast messages
     function showToast(message) {
       toastEl.textContent = message;
       toastEl.classList.add("visible");
       setTimeout(() => toastEl.classList.remove("visible"), 3000);
     }
 
-    // Statistics data holder
     let statsData = {
       herbal: 0,
       psych: 0,
@@ -1906,7 +1909,6 @@ html.dark #insightsContainer .card a.btn-secondary {
       labels: []
     };
 
-    // Build labels for last 7 days
     function generateLast7DaysLabels() {
       const labels = [];
       for (let i = 6; i >= 0; i--) {
@@ -1917,8 +1919,7 @@ html.dark #insightsContainer .card a.btn-secondary {
       return labels;
     }
 
-    // Display raw category counts in the five AI‐Query cards
-    function displayStats() {
+     function displayStats() {
       statsData.herbal   = Storage.getCount("Herbal");
       statsData.psych    = Storage.getCount("Psych");
       statsData.diet     = Storage.getCount("Diet");
@@ -1934,11 +1935,9 @@ html.dark #insightsContainer .card a.btn-secondary {
       statsData.labels = generateLast7DaysLabels();
     }
 
-    // Chart instances
     let distributionChart, dailyChart;
-
-    // Initialize the doughnut (distribution) & line (daily) charts
     function initializeCharts() {
+
       distributionChart = new Chart(distributionCtx, {
         type: "doughnut",
         data: {
@@ -1952,11 +1951,11 @@ html.dark #insightsContainer .card a.btn-secondary {
               statsData.consult
             ],
             backgroundColor: [
-               "#228B22",   // Herbal
-               "#FF0000",   // Psych
-               "#F7DC6F",   // Diet
-               "#005f73",   // Pharmacy
-               "#4B0082"    // Consult
+               "#228B22",   
+                "#FF0000",  
+                "#F7DC6F",  
+                "#005f73",   
+                "#4B0082"   
             ],
             borderColor: "rgba(255,255,255,0.9)",
             borderWidth: 2
@@ -2044,7 +2043,6 @@ html.dark #insightsContainer .card a.btn-secondary {
       });
     }
 
-    // Build the daily‐counts array for the last 7 days
     function populateDailyCounts() {
       const dailyCounts = [];
       for (let i = 6; i >= 0; i--) {
@@ -2079,7 +2077,6 @@ html.dark #insightsContainer .card a.btn-secondary {
       }
     }
 
-    // “Apply Filter” button: recalculate stats in chosen date range
     filterBtn.addEventListener("click", () => {
       const start = startDateInput.value;
       const end   = endDateInput.value;
@@ -2162,7 +2159,6 @@ html.dark #insightsContainer .card a.btn-secondary {
       showToast("Statistics updated for selected range");
     });
 
-    // Profile modal open/close
     userProfileBtn.addEventListener("click", () => {
       const currentName =
         firebase.auth().currentUser.displayName
@@ -2183,7 +2179,6 @@ html.dark #insightsContainer .card a.btn-secondary {
       profileModal.hidden = true;
     });
 
-    // Save profile changes
     saveProfileBtn.addEventListener("click", async () => {
       const newName = profileNameInput.value.trim();
       if (!newName) {
@@ -2207,77 +2202,72 @@ html.dark #insightsContainer .card a.btn-secondary {
       }
     });
 
-    // If a name is already in localStorage, show it immediately
     const storedName = localStorage.getItem("displayName");
     if (storedName) {
       userProfileBtn.innerHTML = `<i class="fas fa-user-circle"></i> ${storedName}`;
     }
 
-    // -------------------------------------------------------------------
-    // Immediately‐invoked function to populate Nutrition Summary grid
-    (function populateNutritionGrid() {
-      const data = JSON.parse(localStorage.getItem("nutritionSummary") || "{}");
-      const caloriesBox = document.querySelector("#nutritionSummary .ns-calories");
-      const micronBox   = document.querySelector("#nutritionSummary .ns-micronutrients");
-      const macroChartEl = document.getElementById("nsMacroChart");
+(function populateNutritionGrid() {
+  const data = JSON.parse(localStorage.getItem("nutritionSummary") || "{}");
+  const caloriesBox = document.querySelector("#nutritionSummary .ns-calories");
+  const micronBox   = document.querySelector("#nutritionSummary .ns-micronutrients");
+  const macroChartEl = document.getElementById("nsMacroChart");
 
-      // If there is no nutritionSummary data or no calories field, leave placeholders
-      if (!data || !data.calories) {
-        return;
+  if (!data || !data.calories) {
+    return;
+  }
+
+  const dailyGoal = data.goal || 2000; 
+  const actualCals = data.calories;
+  const pct = Math.min(100, Math.round((actualCals / dailyGoal) * 100));
+  caloriesBox.querySelector(".ns-value").textContent = `${actualCals} kcal`;
+  caloriesBox
+    .querySelector(".ns-bar-fill")
+    .style.width = `${pct}%`;
+
+  if (data.micronutrients) {
+    micronBox.querySelectorAll(".ns-micro-item").forEach(item => {
+      const label = item.textContent.split(":")[0].trim().toLowerCase();
+      let key = "";
+      if (label === "iron") key = "iron";
+      else if (label === "calcium") key = "calcium";
+      else if (label === "vitamin c") key = "vitaminC";
+      else if (label === "vitamin d") key = "vitaminD";
+      if (key && data.micronutrients[key] != null) {
+        item.querySelector("span:last-child").textContent = `${data.micronutrients[key]}%`;
       }
+    });
+  }
 
-      // 1) Fill in calories box
-      const dailyGoal = data.goal || 2000;
-      const actualCals = data.calories;
-      const pct = Math.min(100, Math.round((actualCals / dailyGoal) * 100));
-      caloriesBox.querySelector(".ns-value").textContent = `${actualCals} kcal`;
-      caloriesBox.querySelector(".ns-bar-fill").style.width = `${pct}%`;
-
-      // 2) Fill in micronutrient percentages
-      if (data.micronutrients) {
-        micronBox.querySelectorAll(".ns-micro-item").forEach(item => {
-          const label = item.textContent.split(":")[0].trim().toLowerCase();
-          let key = "";
-          if (label === "iron")       key = "iron";
-          else if (label === "calcium")  key = "calcium";
-          else if (label === "vitamin c") key = "vitaminC";
-          else if (label === "vitamin d") key = "vitaminD";
-          if (key && data.micronutrients[key] != null) {
-            item.querySelector("span:last-child").textContent = `${data.micronutrients[key]}%`;
-          }
-        });
+  if (data.macros && macroChartEl) {
+    new Chart(macroChartEl.getContext("2d"), {
+      type: "pie",
+      data: {
+        labels: ["Carbs", "Protein", "Fat"],
+        datasets: [{
+          data: [
+            data.macros.carbs || 0,
+            data.macros.protein || 0,
+            data.macros.fats || 0
+          ],
+          backgroundColor: [
+            getComputedStyle(document.documentElement).getPropertyValue("--primary").trim(),
+            getComputedStyle(document.documentElement).getPropertyValue("--accent").trim(),
+            getComputedStyle(document.documentElement).getPropertyValue("--secondary").trim()
+          ]
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: { display: false }
+        }
       }
+    });
+  }
+})();
 
-      // 3) Draw macros pie chart
-      if (data.macros && macroChartEl) {
-        new Chart(macroChartEl.getContext("2d"), {
-          type: "pie",
-          data: {
-            labels: ["Carbs", "Protein", "Fat"],
-            datasets: [{
-              data: [
-                data.macros.carbs   || 0,
-                data.macros.protein || 0,
-                data.macros.fats    || 0
-              ],
-              backgroundColor: [
-                getComputedStyle(document.documentElement).getPropertyValue("--primary").trim(),
-                getComputedStyle(document.documentElement).getPropertyValue("--accent").trim(),
-                getComputedStyle(document.documentElement).getPropertyValue("--secondary").trim()
-              ]
-            }]
-          },
-          options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: {
-              legend: { display: false }
-            }
-          }
-        });
-      }
-    })();
-    // -------------------------------------------------------------------
   });
 </script>
 
