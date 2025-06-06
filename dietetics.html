@@ -2221,8 +2221,19 @@ Storage.recordCategory("Diet");
       } catch (err) {
       console.error("⛔ Meal Plan Generator Error:", err);
       panel.classList.remove("loading");
-      panel.querySelector(".result-content").innerText =
-        `⚠️ Error generating plan: ${err.message}`;
+      let userMsg;
+      if (err.message.includes("429") || err.message.toLowerCase().includes("rate limit")) {
+        userMsg = "⚠️ You’ve hit the rate limit. Please wait a moment and try again.";
+      } else if (
+        err.message.includes("Sandbox.Timedout") ||
+        err.message.toLowerCase().includes("timed out") ||
+        err.message.includes("502")
+      ) {
+        userMsg = "⚠️ The request timed out. Please try again in a few seconds.";
+      } else {
+        userMsg = "⚠️ Something went wrong. Please check your connection and try again.";
+      }
+      panel.querySelector(".result-content").innerText = userMsg;
       addCloseCopyDownload(panel);
       localStorage.setItem(panelId, panel.querySelector(".result-content").innerHTML);
 
