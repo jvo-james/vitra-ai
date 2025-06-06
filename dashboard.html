@@ -1655,12 +1655,23 @@ html.dark #insightsContainer .card a.btn-secondary {
         <p style="color: var(--muted);">Here’s a quick overview of your AI-powered health dashboard.</p>
       `;
 
+      if (!localStorage.getItem("nutritionSummary")) {
+      localStorage.setItem("nutritionSummary", JSON.stringify({
+        calories: 0,
+        goal: 2000,
+        micronutrients: { iron: 0, calcium: 0, vitaminC: 0, vitaminD: 0 },
+        macros: { carbs: 0, protein: 0, fats: 0 }
+      }));
+    }
+
+      
       loadAppointments();
       loadPurchasedDrugs();
       loadAIInsights();
       displayStats();
       initializeCharts();
       populateDailyCounts();
+      populateNutritionGrid();
     });
 
     function handleSignOut() {
