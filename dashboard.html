@@ -1777,26 +1777,56 @@ html.dark #insightsContainer .card a.btn-secondary {
       });
     }
 
-    function loadNutritionSummary() {
-      nutritionContainer.innerHTML = "";
-      const data = JSON.parse(localStorage.getItem("nutritionSummary") || "{}");
+    const data = JSON.parse(localStorage.getItem("nutritionSummary") || "{}");
       if (!data || !data.calories) {
-        nutritionContainer.innerHTML = `<p style="color: var(--muted);">No nutrition data available.</p>`;
         return;
       }
-      const summaryHTML = `
-        <p><strong>Today's Calories:</strong> ${data.calories} kcal</p>
-        <p>
-          <strong>Protein:</strong> ${data.protein} g · 
-          <strong>Carbs:</strong> ${data.carbs} g · 
-          <strong>Fats:</strong> ${data.fats} g
-        </p>
-        <a href="dietetics.html" class="btn btn-primary" style="margin-top:0.5rem; display:inline-flex; align-items:center; gap:0.5rem;">
-          <i class="fas fa-arrow-right"></i> View Full Meal Plan
-        </a>
-      `;
-      nutritionContainer.innerHTML = summaryHTML;
-    }
+      // 1) Fill in calories box:
+      const caloriesBoxValue = document.querySelector("#nutritionSummary .ns-calories .ns-value");
+      const caloriesBarFill = document.querySelector("#nutritionSummary .ns-calories .ns-bar-fill");
+      const dailyGoal = data.goal || 2000;
+      const actualCals = data.calories;
+      const pct = Math.min(100, Math.round((actualCals / dailyGoal) * 100));
+      caloriesBoxValue.textContent = `${actualCals} kcal`;
+      caloriesBarFill.style.width = `${pct}%`;
+
+      // 2) Fill in micronutrients (order: Iron, Calcium, Vitamin C, Vitamin D):
+      const microSpans = document.querySelectorAll("#nutritionSummary .ns-micronutrients .ns-micro-item span:last-child");
+      const keyMap = ["iron", "calcium", "vitaminC", "vitaminD"];
+      keyMap.forEach((key, idx) => {
+        if (data.micronutrients && data.micronutrients[key] != null) {
+          microSpans[idx].textContent = `${data.micronutrients[key]}%`;
+        }
+      });
+
+      // 3) Render macros pie chart into <canvas id="nsMacroChart">:
+      if (data.macros) {
+        const ctx = document.getElementById("nsMacroChart").getContext("2d");
+        new Chart(ctx, {
+          type: "pie",
+          data: {
+            labels: ["Carbs", "Protein", "Fat"],
+            datasets: [{
+              data: [
+                data.macros.carbs || 0,
+                data.macros.protein || 0,
+                data.macros.fats || 0
+              ],
+              backgroundColor: [
+                getComputedStyle(document.documentElement).getPropertyValue("--primary").trim(),
+                getComputedStyle(document.documentElement).getPropertyValue("--accent").trim(),
+                getComputedStyle(document.documentElement).getPropertyValue("--secondary").trim()
+             ]
+            }]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: { legend: { display: false } }
+          }
+        });
+      }
+  }
 
     function recordPharmacyTimestamp() {
       const key = "timestampsPharmacy";
