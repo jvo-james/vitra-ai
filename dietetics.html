@@ -2163,7 +2163,46 @@ Storage.recordCategory("Diet");
         ]);
         panel.classList.remove("loading");
         panel.querySelector(".result-content").innerHTML = sanitizeHTML(aiReply);
-        Storage.recordCategory("Diet");
+        let caloriesVal = 0;
+        let micron = { iron: 0, calcium: 0, vitaminC: 0, vitaminD: 0 };
+        let macros  = { carbs: 0, protein: 0, fats: 0 };
+        const lines = aiReply.split("\n");
+        lines.forEach(line => {
+          const col = line.split(":").map(s => s.trim());
+          if (col[0].toLowerCase() === "calories") {
+            caloriesVal = parseInt(col[1], 10) || 0;
+          }
+          if (col[0].toLowerCase() === "iron") {
+            micron.iron = parseInt(col[1].replace("%",""), 10) || 0;
+          }
+          if (col[0].toLowerCase() === "calcium") {
+            micron.calcium = parseInt(col[1].replace("%",""), 10) || 0;
+          }
+          if (col[0].toLowerCase() === "vitamin c") {
+            micron.vitaminC = parseInt(col[1].replace("%",""), 10) || 0;
+          }
+          if (col[0].toLowerCase() === "vitamin d") {
+            micron.vitaminD = parseInt(col[1].replace("%",""), 10) || 0;
+          }
+          if (col[0].toLowerCase() === "macros") {
+            const parts = col[1].split(",");
+            parts.forEach(p => {
+              const [k,v] = p.trim().split(" ").map(s => s.replace("%","").trim());
+              if (k.toLowerCase() === "carbs")   macros.carbs = parseInt(v,10) || 0;
+              if (k.toLowerCase() === "protein") macros.protein = parseInt(v,10) || 0;
+              if (k.toLowerCase() === "fats")    macros.fats = parseInt(v,10) || 0;
+            });
+          }
+        });
+        const goalInput = document.getElementById("calories");
+        const dailyGoal = goalInput ? parseInt(goalInput.value,10) : 2000;
+        localStorage.setItem("nutritionSummary", JSON.stringify({
+          calories:       caloriesVal,
+          goal:           dailyGoal,
+          micronutrients: micron,
+          macros:         macros
+        }));
+       Storage.recordCategory("Diet");
         addCloseCopyDownload(panel);
         localStorage.setItem(panelId, panel.querySelector(".result-content").innerHTML);
       } catch (err) {
