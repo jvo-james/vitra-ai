@@ -2206,14 +2206,12 @@ Storage.recordCategory("Diet");
         addCloseCopyDownload(panel);
         localStorage.setItem(panelId, panel.querySelector(".result-content").innerHTML);
       } catch (err) {
-        panel.classList.remove("loading");
-        panel.querySelector(
-          ".result-content"
-        ).innerText = err.message.includes("Sandbox.Timedout")
-          ? "⚠️ Server busy—please try again."
-          : `⚠️ ${err.message}`;
-        addCloseCopyDownload(panel);
- localStorage.setItem(panelId, panel.querySelector(".result-content").innerHTML);
+      console.error("⛔ Meal Plan Generator Error:", err);
+      panel.classList.remove("loading");
+      panel.querySelector(".result-content").innerText =
+        `⚠️ Error generating plan: ${err.message}`;
+      addCloseCopyDownload(panel);
+      localStorage.setItem(panelId, panel.querySelector(".result-content").innerHTML);
 
       }
     });
