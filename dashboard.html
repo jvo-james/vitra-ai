@@ -2196,6 +2196,10 @@ html.dark #insightsContainer .card a.btn-secondary {
     caloriesBox.querySelector(".ns-value").textContent = "— kcal";
       caloriesBox.querySelector(".ns-bar-fill").style.width = "0%";
       micronBox.querySelectorAll(".ns-micro-item span:last-child").forEach(el => el.textContent = "—%");
+    if (macroChartEl && macroChartEl._chartInstance) {
+        macroChartEl._chartInstance.destroy();
+        delete macroChartEl._chartInstance;
+      }
     return;
   }
 
@@ -2221,7 +2225,37 @@ html.dark #insightsContainer .card a.btn-secondary {
     });
   }
 
+if (data.macros && typeof Chart !== "undefined") {
+      const carbs   = data.macros.carbs   || 0;
+      const protein = data.macros.protein || 0;
+      const fats    = data.macros.fats    || 0;
 
+      if (macroChartEl._chartInstance) {
+        macroChartEl._chartInstance.destroy();
+      }
+
+      const ctx = macroChartEl.getContext("2d");
+      macroChartEl._chartInstance = new Chart(ctx, {
+        type: "pie",
+        data: {
+          labels: ["Carbs", "Protein", "Fats"],
+          datasets: [{
+            data: [carbs, protein, fats],
+            backgroundColor: [
+              getComputedStyle(document.documentElement).getPropertyValue("--accent").trim(),
+              getComputedStyle(document.documentElement).getPropertyValue("--primary").trim(),
+              getComputedStyle(document.documentElement).getPropertyValue("--secondary").trim()
+            ]
+          }]
+        },
+        options: {
+          responsive: true,
+          plugins: {
+            legend: { position: "bottom" }
+          }
+        }
+      });
+    }
 })();
 
   });
