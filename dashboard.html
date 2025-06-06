@@ -1620,7 +1620,6 @@ html.dark #insightsContainer .card a.btn-secondary {
     const sidebarSignOut      = document.getElementById("sidebarSignOut");
     const appointmentsContainer  = document.getElementById("appointmentsContainer");
     const purchasedContainer     = document.getElementById("purchasedContainer");
-    const nutritionContainer     = document.getElementById("nutritionContainer");
     const insightsContainer      = document.getElementById("insightsContainer");
     const backToTopBtn           = document.getElementById("backToTop");
     const quickAccessSection     = document.getElementById("quickAccess");
@@ -1658,7 +1657,6 @@ html.dark #insightsContainer .card a.btn-secondary {
 
       loadAppointments();
       loadPurchasedDrugs();
-      loadNutritionSummary();
       loadAIInsights();
       displayStats();
       initializeCharts();
@@ -1777,26 +1775,7 @@ html.dark #insightsContainer .card a.btn-secondary {
       });
     }
 
-    function loadNutritionSummary() {
-      nutritionContainer.innerHTML = "";
-      const data = JSON.parse(localStorage.getItem("nutritionSummary") || "{}");
-      if (!data || !data.calories) {
-        nutritionContainer.innerHTML = `<p style="color: var(--muted);">No nutrition data available.</p>`;
-        return;
-      }
-      const summaryHTML = `
-        <p><strong>Today's Calories:</strong> ${data.calories} kcal</p>
-        <p>
-          <strong>Protein:</strong> ${data.protein} g · 
-          <strong>Carbs:</strong> ${data.carbs} g · 
-          <strong>Fats:</strong> ${data.fats} g
-        </p>
-        <a href="dietetics.html" class="btn btn-primary" style="margin-top:0.5rem; display:inline-flex; align-items:center; gap:0.5rem;">
-          <i class="fas fa-arrow-right"></i> View Full Meal Plan
-        </a>
-      `;
-      nutritionContainer.innerHTML = summaryHTML;
-    }
+    
 
     function recordPharmacyTimestamp() {
       const key = "timestampsPharmacy";
@@ -2214,6 +2193,9 @@ html.dark #insightsContainer .card a.btn-secondary {
   const macroChartEl = document.getElementById("nsMacroChart");
 
   if (!data || !data.calories) {
+    caloriesBox.querySelector(".ns-value").textContent = "— kcal";
+      caloriesBox.querySelector(".ns-bar-fill").style.width = "0%";
+      micronBox.querySelectorAll(".ns-micro-item span:last-child").forEach(el => el.textContent = "—%");
     return;
   }
 
