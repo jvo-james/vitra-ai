@@ -1620,7 +1620,6 @@ html.dark #insightsContainer .card a.btn-secondary {
     const sidebarSignOut      = document.getElementById("sidebarSignOut");
     const appointmentsContainer  = document.getElementById("appointmentsContainer");
     const purchasedContainer     = document.getElementById("purchasedContainer");
-    const nutritionContainer     = document.getElementById("nutritionContainer");
     const insightsContainer      = document.getElementById("insightsContainer");
     const backToTopBtn           = document.getElementById("backToTop");
     const quickAccessSection     = document.getElementById("quickAccess");
@@ -1658,7 +1657,6 @@ html.dark #insightsContainer .card a.btn-secondary {
 
       loadAppointments();
       loadPurchasedDrugs();
-      loadNutritionSummary();
       loadAIInsights();
       displayStats();
       initializeCharts();
@@ -1739,7 +1737,7 @@ html.dark #insightsContainer .card a.btn-secondary {
           }
         });
         card.querySelector(".btn-reschedule").addEventListener("click", () => {
-          window.location.href = `consult.html?rescheduleId=${encodeURIComponent(appt.id)}`;
+          window.location.href = \`consult.html?rescheduleId=\${encodeURIComponent(appt.id)}\`;
         });
         appointmentsContainer.append(card);
       });
@@ -1750,14 +1748,16 @@ html.dark #insightsContainer .card a.btn-secondary {
       const updated = list.filter(a => a.id !== id);
       localStorage.setItem("appointments", JSON.stringify(updated));
     }
+
     function formatTime(t) {
       if (t.includes("AM") || t.includes("PM")) return t;
       let [hh, mm] = t.split(":").map(Number);
       const suffix = hh >= 12 ? "PM" : "AM";
       hh = hh % 12 || 12;
-      return `${String(hh).padStart(2, "0")}:${String(mm).padStart(2, "0")} ${suffix}`;
+      return \`\${String(hh).padStart(2, "0")}:\${String(mm).padStart(2, "0")} \${suffix}\`;
     }
 
+    // Load purchased drugs from localStorage
     function loadPurchasedDrugs() {
       purchasedContainer.innerHTML = "";
       const purchased = JSON.parse(localStorage.getItem("purchasedDrugs") || "[]");
@@ -1777,9 +1777,6 @@ html.dark #insightsContainer .card a.btn-secondary {
       });
     }
 
-   
-  
-
     function recordPharmacyTimestamp() {
       const key = "timestampsPharmacy";
       const arr = JSON.parse(localStorage.getItem(key) || "[]");
@@ -1791,73 +1788,72 @@ html.dark #insightsContainer .card a.btn-secondary {
     function loadAIInsights() {
       insightsContainer.innerHTML = "";
       const examples = [
-  {
-    title: "Herbal Tip of the Day",
-    text: "Based on your recent concerns, we recommend adding turmeric to your regimen for its anti-inflammatory properties.",
-    link: "herbal.html"
-  },
-  {
-    title: "Mental Health Check-In",
-    text: "Our AI noticed elevated stress keywords in your last chat. Consider a 5-minute guided breathing exercise today.",
-    link: "psychology.html#therapybot"
-  },
-  {
-    title: "Nutrition Insight",
-    text: "Your protein intake is slightly below target. Try adding a protein-rich snack like Greek yogurt this afternoon.",
-    link: "dietetics.html"
-  },
-  {
-    title: "E-Pharmacy Spotlight",
-    text: "Your recent purchase history suggests you might consider stocking echinacea supplements for immune support.",
-    link: "epharmacy.html#buyDrugs"
-  },
-  {
-    title: "Consultation Reminder",
-    text: "You haven’t scheduled a follow-up appointment in a while—book a quick check-in to review your progress.",
-    link: "consult.html"
-  },
-  {
-    title: "Sleep Aid Suggestion",
-    text: "Melatonin levels dip late; consider drinking chamomile tea 30 minutes before bed for better sleep.",
-    link: "dietetics.html"
-  },
-  {
-    title: "Stress Management Tip",
-    text: "Lavender aromatherapy can ease stress—add a few drops to a diffuser this evening.",
-    link: "psychology.html#therapybot"
-  },
-  {
-    title: "Herbal Safety Alert",
-    text: "Avoid combining St. John’s Wort with certain antidepressants—consult your provider for personalized advice.",
-    link: "herbal.html"
-  },
-  {
-    title: "Immune Booster Tip",
-    text: "Elderberry syrup has been shown to reduce cold severity; consider adding it during flu season.",
-    link: "epharmacy.html#buyDrugs"
-  },
-  {
-    title: "Digestion Booster",
-    text: "Ginger tea can soothe nausea and improve digestion—try sipping after meals for relief.",
-    link: "dietetics.html"
-  },
-  {
-    title: "Mood Lifter Insight",
-    text: "A small daily dose of saffron extract may help stabilize mood—research suggests benefits for mild depression.",
-    link: "herbal.html"
-  },
-  {
-    title: "Joint Health Hint",
-    text: "Turmeric’s curcumin compound has anti-inflammatory effects—pair with black pepper to boost absorption.",
-    link: "dietetics.html"
-  },
-  {
-    title: "Heart Health Check",
-    text: "Hawthorn extract supports cardiovascular function—consider adding if you have mild high blood pressure.",
-    link: "herbal.html"
-  }
-];
-
+        {
+          title: "Herbal Tip of the Day",
+          text: "Based on your recent concerns, we recommend adding turmeric to your regimen for its anti-inflammatory properties.",
+          link: "herbal.html"
+        },
+        {
+          title: "Mental Health Check-In",
+          text: "Our AI noticed elevated stress keywords in your last chat. Consider a 5-minute guided breathing exercise today.",
+          link: "psychology.html#therapybot"
+        },
+        {
+          title: "Nutrition Insight",
+          text: "Your protein intake is slightly below target. Try adding a protein-rich snack like Greek yogurt this afternoon.",
+          link: "dietetics.html"
+        },
+        {
+          title: "E-Pharmacy Spotlight",
+          text: "Your recent purchase history suggests you might consider stocking echinacea supplements for immune support.",
+          link: "epharmacy.html#buyDrugs"
+        },
+        {
+          title: "Consultation Reminder",
+          text: "You haven’t scheduled a follow-up appointment in a while—book a quick check-in to review your progress.",
+          link: "consult.html"
+        },
+        {
+          title: "Sleep Aid Suggestion",
+          text: "Melatonin levels dip late; consider drinking chamomile tea 30 minutes before bed for better sleep.",
+          link: "dietetics.html"
+        },
+        {
+          title: "Stress Management Tip",
+          text: "Lavender aromatherapy can ease stress—add a few drops to a diffuser this evening.",
+          link: "psychology.html#therapybot"
+        },
+        {
+          title: "Herbal Safety Alert",
+          text: "Avoid combining St. John’s Wort with certain antidepressants—consult your provider for personalized advice.",
+          link: "herbal.html"
+        },
+        {
+          title: "Immune Booster Tip",
+          text: "Elderberry syrup has been shown to reduce cold severity; consider adding it during flu season.",
+          link: "epharmacy.html#buyDrugs"
+        },
+        {
+          title: "Digestion Booster",
+          text: "Ginger tea can soothe nausea and improve digestion—try sipping after meals for relief.",
+          link: "dietetics.html"
+        },
+        {
+          title: "Mood Lifter Insight",
+          text: "A small daily dose of saffron extract may help stabilize mood—research suggests benefits for mild depression.",
+          link: "herbal.html"
+        },
+        {
+          title: "Joint Health Hint",
+          text: "Turmeric’s curcumin compound has anti-inflammatory effects—pair with black pepper to boost absorption.",
+          link: "dietetics.html"
+        },
+        {
+          title: "Heart Health Check",
+          text: "Hawthorn extract supports cardiovascular function—consider adding if you have mild high blood pressure.",
+          link: "herbal.html"
+        }
+      ];
       const insight = examples[Math.floor(Math.random() * examples.length)];
       const card = document.createElement("div");
       card.className = "card";
@@ -1901,7 +1897,7 @@ html.dark #insightsContainer .card a.btn-secondary {
       return labels;
     }
 
-     function displayStats() {
+    function displayStats() {
       statsData.herbal   = Storage.getCount("Herbal");
       statsData.psych    = Storage.getCount("Psych");
       statsData.diet     = Storage.getCount("Diet");
@@ -1918,8 +1914,8 @@ html.dark #insightsContainer .card a.btn-secondary {
     }
 
     let distributionChart, dailyChart;
-    function initializeCharts() {
 
+    function initializeCharts() {
       distributionChart = new Chart(distributionCtx, {
         type: "doughnut",
         data: {
@@ -1934,10 +1930,10 @@ html.dark #insightsContainer .card a.btn-secondary {
             ],
             backgroundColor: [
                "#228B22",   
-                "#FF0000",  
-                "#F7DC6F",  
-                "#005f73",   
-                "#4B0082"   
+               "#FF0000",  
+               "#F7DC6F",  
+               "#005f73",  
+               "#4B0082"    
             ],
             borderColor: "rgba(255,255,255,0.9)",
             borderWidth: 2
@@ -2189,66 +2185,62 @@ html.dark #insightsContainer .card a.btn-secondary {
       userProfileBtn.innerHTML = `<i class="fas fa-user-circle"></i> ${storedName}`;
     }
 
-(function populateNutritionGrid() {
-  const data = JSON.parse(localStorage.getItem("nutritionSummary") || "{}");
-  const caloriesBox = document.querySelector("#nutritionSummary .ns-calories");
-  const micronBox   = document.querySelector("#nutritionSummary .ns-micronutrients");
-  const macroChartEl = document.getElementById("nsMacroChart");
+    (function populateNutritionGrid() {
+      const data = JSON.parse(localStorage.getItem("nutritionSummary") || "{}");
+      const caloriesBox = document.querySelector("#nutritionSummary .ns-calories");
+      const micronBox   = document.querySelector("#nutritionSummary .ns-micronutrients");
+      const macroChartEl = document.getElementById("nsMacroChart");
 
-  if (!data || !data.calories) {
-    return;
-  }
-
-  const dailyGoal = data.goal || 2000; 
-  const actualCals = data.calories;
-  const pct = Math.min(100, Math.round((actualCals / dailyGoal) * 100));
-  caloriesBox.querySelector(".ns-value").textContent = `${actualCals} kcal`;
-  caloriesBox
-    .querySelector(".ns-bar-fill")
-    .style.width = `${pct}%`;
-
-  if (data.micronutrients) {
-    micronBox.querySelectorAll(".ns-micro-item").forEach(item => {
-      const label = item.textContent.split(":")[0].trim().toLowerCase();
-      let key = "";
-      if (label === "iron") key = "iron";
-      else if (label === "calcium") key = "calcium";
-      else if (label === "vitamin c") key = "vitaminC";
-      else if (label === "vitamin d") key = "vitaminD";
-      if (key && data.micronutrients[key] != null) {
-        item.querySelector("span:last-child").textContent = `${data.micronutrients[key]}%`;
+      if (!data || !data.calories) {
+        return;
       }
-    });
-  }
 
-  if (data.macros && macroChartEl) {
-    new Chart(macroChartEl.getContext("2d"), {
-      type: "pie",
-      data: {
-        labels: ["Carbs", "Protein", "Fat"],
-        datasets: [{
-          data: [
-            data.macros.carbs || 0,
-            data.macros.protein || 0,
-            data.macros.fats || 0
-          ],
-          backgroundColor: [
-            getComputedStyle(document.documentElement).getPropertyValue("--primary").trim(),
-            getComputedStyle(document.documentElement).getPropertyValue("--accent").trim(),
-            getComputedStyle(document.documentElement).getPropertyValue("--secondary").trim()
-          ]
-        }]
-      },
-      options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        plugins: {
-          legend: { display: false }
-        }
+      const dailyGoal = data.goal || 2000;
+      const actualCals = data.calories;
+      const pct = Math.min(100, Math.round((actualCals / dailyGoal) * 100));
+      caloriesBox.querySelector(".ns-value").textContent = `${actualCals} kcal`;
+      caloriesBox.querySelector(".ns-bar-fill").style.width = `${pct}%`;
+
+      if (data.micronutrients) {
+        micronBox.querySelectorAll(".ns-micro-item").forEach(item => {
+          const label = item.textContent.split(":")[0].trim().toLowerCase();
+          let key = "";
+          if (label === "iron")       key = "iron";
+          else if (label === "calcium")  key = "calcium";
+          else if (label === "vitamin c") key = "vitaminC";
+          else if (label === "vitamin d") key = "vitaminD";
+          if (key && data.micronutrients[key] != null) {
+            item.querySelector("span:last-child").textContent = `${data.micronutrients[key]}%`;
+          }
+        });
       }
-    });
-  }
-})();
+
+      if (data.macros && macroChartEl) {
+        new Chart(macroChartEl.getContext("2d"), {
+          type: "pie",
+          data: {
+            labels: ["Carbs", "Protein", "Fat"],
+            datasets: [{
+              data: [
+                data.macros.carbs    || 0,
+                data.macros.protein  || 0,
+                data.macros.fats     || 0
+              ],
+              backgroundColor: [
+                getComputedStyle(document.documentElement).getPropertyValue("--primary").trim(),
+                getComputedStyle(document.documentElement).getPropertyValue("--accent").trim(),
+                getComputedStyle(document.documentElement).getPropertyValue("--secondary").trim()
+              ]
+            }]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: { legend: { display: false } }
+          }
+        });
+      }
+    })();
 
   });
 </script>
