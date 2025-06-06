@@ -1655,14 +1655,21 @@ html.dark #insightsContainer .card a.btn-secondary {
         <p style="color: var(--muted);">Here’s a quick overview of your AI-powered health dashboard.</p>
       `;
 
-      if (!localStorage.getItem("nutritionSummary")) {
-      localStorage.setItem("nutritionSummary", JSON.stringify({
-        calories: 0,
-        goal: 2000,
-        micronutrients: { iron: 0, calcium: 0, vitaminC: 0, vitaminD: 0 },
-        macros: { carbs: 0, protein: 0, fats: 0 }
-      }));
-    }
+     localStorage.setItem("nutritionSummary", JSON.stringify({
+      calories: 1500,
+      goal:     2000,
+      micronutrients: {
+        iron:     80,    
+        calcium:  70,   
+        vitaminC: 60,    
+        vitaminD: 50    
+      },
+      macros: {
+        carbs:   50,    
+        protein: 30,     
+        fats:    20      
+      }
+    }));
 
       
       loadAppointments();
@@ -2203,16 +2210,55 @@ html.dark #insightsContainer .card a.btn-secondary {
   const micronBox   = document.querySelector("#nutritionSummary .ns-micronutrients");
   const macroChartEl = document.getElementById("nsMacroChart");
 
-  if (!data || !data.calories) {
-    caloriesBox.querySelector(".ns-value").textContent = "— kcal";
-      caloriesBox.querySelector(".ns-bar-fill").style.width = "0%";
-      micronBox.querySelectorAll(".ns-micro-item span:last-child").forEach(el => el.textContent = "—%");
-    if (macroChartEl && macroChartEl._chartInstance) {
-        macroChartEl._chartInstance.destroy();
-        delete macroChartEl._chartInstance;
+  const dailyGoal = data.goal || 2000;
+    const actualCals = data.calories;
+    const pct = Math.min(100, Math.round((actualCals / dailyGoal) * 100));
+    caloriesBox.querySelector(".ns-value").textContent = `${actualCals} kcal`;
+    caloriesBox.querySelector(".ns-bar-fill").style.width = `${pct}%`;
+
+    if (data.micronutrients) {
+      micronBox.querySelectorAll(".ns-micro-item").forEach(item => {
+        const label = item.textContent.split(":")[0].trim().toLowerCase();
+        let key = "";
+        if (label === "iron") key = "iron";
+        else if (label === "calcium") key = "calcium";
+        else if (label === "vitamin c") key = "vitaminC";
+        else if (label === "vitamin d") key = "vitaminD";
+        if (key && data.micronutrients[key] != null) {
+          item.querySelector("span:last-child").textContent = `${data.micronutrients[key]}%`;
+        }
+      });
+    }
+    if (data.macros && typeof Chart !== "undefined") {
+      const carbs   = data.macros.carbs   || 0;
+      const protein = data.macros.protein || 0;
+      const fats    = data.macros.fats    || 0;
+
+      if (macroChartEl._chartInstance) {+        macroChartEl._chartInstance.destroy();
       }
-    return;
-  }
+
+      const ctx = macroChartEl.getContext("2d");
+      macroChartEl._chartInstance = new Chart(ctx, {
+        type: "pie",
+        data: {
+          labels: ["Carbs", "Protein", "Fats"],
+          datasets: [{
+            data: [carbs, protein, fats],
+            backgroundColor: [
+              getComputedStyle(document.documentElement).getPropertyValue("--accent").trim(),
+              getComputedStyle(document.documentElement).getPropertyValue("--primary").trim(),
+              getComputedStyle(document.documentElement).getPropertyValue("--secondary").trim()
+            ]
+          }]
+        },
+        options: {
+          responsive: true,
+          plugins: {
+            legend: { position: "bottom" }
+          }
+        }
+     });
+    }
 
   const dailyGoal = data.goal || 2000; 
   const actualCals = data.calories;
