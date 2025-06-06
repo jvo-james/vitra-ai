@@ -1598,6 +1598,7 @@ html.dark #insightsContainer .card a.btn-secondary {
 <script src="storage.js"></script>
 
 <script>
+  // Initialize Firebase
   const firebaseConfig = {
     apiKey: "AIzaSyBhaYOcLMXuobCT-vaXr-zXTZnBfaheAIY",
     authDomain: "vitra-ai-712ea.firebaseapp.com",
@@ -1610,38 +1611,39 @@ html.dark #insightsContainer .card a.btn-secondary {
   const auth = firebase.auth();
 
   document.addEventListener("DOMContentLoaded", () => {
+    // Grab DOM elements
+    const sidebar              = document.getElementById("sidebar");
+    const overlay              = document.getElementById("sidebarOverlay");
+    const hamburger            = document.getElementById("hamburger");
+    const sidebarThemeToggle   = document.getElementById("sidebarThemeToggle");
+    const themeToggle          = document.getElementById("themeToggle");
+    const signOutBtn           = document.getElementById("signOut");
+    const sidebarSignOut       = document.getElementById("sidebarSignOut");
+    const appointmentsContainer = document.getElementById("appointmentsContainer");
+    const purchasedContainer    = document.getElementById("purchasedContainer");
+    const insightsContainer     = document.getElementById("insightsContainer");
+    const backToTopBtn          = document.getElementById("backToTop");
+    const quickAccessSection    = document.getElementById("quickAccess");
+    const greetingSection       = quickAccessSection.previousElementSibling;
+    const userProfileBtn        = document.getElementById("userProfile");
+    const profileLinkBtn        = document.getElementById("profileLink");
+    const profileModal          = document.getElementById("profileModal");
+    const closeProfileModalBtn  = document.getElementById("closeProfileModal");
+    const profileNameInput      = document.getElementById("profileName");
+    const saveProfileBtn        = document.getElementById("saveProfileBtn");
+    const toastEl               = document.getElementById("toast");
+    const startDateInput        = document.getElementById("startDate");
+    const endDateInput          = document.getElementById("endDate");
+    const filterBtn             = document.getElementById("filterBtn");
+    const herbalQueriesEl       = document.getElementById("herbalQueries");
+    const psychQueriesEl        = document.getElementById("psychQueries");
+    const dietQueriesEl         = document.getElementById("dietQueries");
+    const pharmacyQueriesEl     = document.getElementById("pharmacyQueries");
+    const consultQueriesEl      = document.getElementById("consultQueries");
+    const distributionCtx       = document.getElementById("distributionChart").getContext("2d");
+    const dailyCtx              = document.getElementById("dailyChart").getContext("2d");
 
-    const sidebar             = document.getElementById("sidebar");
-    const overlay             = document.getElementById("sidebarOverlay");
-    const hamburger           = document.getElementById("hamburger");
-    const sidebarThemeToggle  = document.getElementById("sidebarThemeToggle");
-    const themeToggle         = document.getElementById("themeToggle");
-    const signOutBtn          = document.getElementById("signOut");
-    const sidebarSignOut      = document.getElementById("sidebarSignOut");
-    const appointmentsContainer  = document.getElementById("appointmentsContainer");
-    const purchasedContainer     = document.getElementById("purchasedContainer");
-    const insightsContainer      = document.getElementById("insightsContainer");
-    const backToTopBtn           = document.getElementById("backToTop");
-    const quickAccessSection     = document.getElementById("quickAccess");
-    const greetingSection        = quickAccessSection.previousElementSibling;
-    const userProfileBtn         = document.getElementById("userProfile");
-    const profileLinkBtn         = document.getElementById("profileLink");
-    const profileModal           = document.getElementById("profileModal");
-    const closeProfileModalBtn   = document.getElementById("closeProfileModal");
-    const profileNameInput       = document.getElementById("profileName");
-    const saveProfileBtn         = document.getElementById("saveProfileBtn");
-    const toastEl                = document.getElementById("toast");
-    const startDateInput         = document.getElementById("startDate");
-    const endDateInput           = document.getElementById("endDate");
-    const filterBtn              = document.getElementById("filterBtn");
-    const herbalQueriesEl        = document.getElementById("herbalQueries");
-    const psychQueriesEl         = document.getElementById("psychQueries");
-    const dietQueriesEl          = document.getElementById("dietQueries");
-    const pharmacyQueriesEl      = document.getElementById("pharmacyQueries");
-    const consultQueriesEl       = document.getElementById("consultQueries");
-    const distributionCtx        = document.getElementById("distributionChart").getContext("2d");
-    const dailyCtx               = document.getElementById("dailyChart").getContext("2d");
-
+    // Redirect to login if not authenticated
     auth.onAuthStateChanged(user => {
       if (!user) {
         window.location.href = "index.html";
@@ -1663,6 +1665,7 @@ html.dark #insightsContainer .card a.btn-secondary {
       populateDailyCounts();
     });
 
+    // Sign-out functionality
     function handleSignOut() {
       auth.signOut().then(() => {
         window.location.href = "index.html";
@@ -1671,6 +1674,7 @@ html.dark #insightsContainer .card a.btn-secondary {
     signOutBtn.addEventListener("click", handleSignOut);
     sidebarSignOut.addEventListener("click", handleSignOut);
 
+    // Sidebar open/close
     function openSidebar() {
       sidebar.classList.add("show");
       overlay.classList.add("show");
@@ -1682,6 +1686,7 @@ html.dark #insightsContainer .card a.btn-secondary {
     hamburger.addEventListener("click", openSidebar);
     overlay.addEventListener("click", closeSidebar);
 
+    // Theme toggling
     themeToggle.addEventListener("click", () => {
       document.documentElement.classList.toggle("dark");
       themeToggle.classList.toggle("fa-moon");
@@ -1689,6 +1694,7 @@ html.dark #insightsContainer .card a.btn-secondary {
     });
     sidebarThemeToggle.addEventListener("click", () => themeToggle.click());
 
+    // Back-to-top button visibility
     window.addEventListener("scroll", () => {
       backToTopBtn.style.display = window.scrollY > 400 ? "block" : "none";
     });
@@ -1696,6 +1702,7 @@ html.dark #insightsContainer .card a.btn-secondary {
       window.scrollTo({ top: 0, behavior: "smooth" });
     });
 
+    // Load upcoming appointments from localStorage
     function loadAppointments() {
       appointmentsContainer.innerHTML = "";
       const allAppointments = JSON.parse(localStorage.getItem("appointments") || "[]");
@@ -1705,7 +1712,9 @@ html.dark #insightsContainer .card a.btn-secondary {
         return apptDate >= today;
       });
       if (upcoming.length === 0) {
-        appointmentsContainer.innerHTML = `<p style="color: var(--muted);">You have no upcoming appointments.</p>`;
+        appointmentsContainer.innerHTML = `
+          <p style="color: var(--muted);">You have no upcoming appointments.</p>
+        `;
         return;
       }
       upcoming.forEach(appt => {
@@ -1732,7 +1741,9 @@ html.dark #insightsContainer .card a.btn-secondary {
             removeAppointment(appt.id);
             card.remove();
             if (appointmentsContainer.children.length === 0) {
-              appointmentsContainer.innerHTML = `<p style="color: var(--muted);">You have no upcoming appointments.</p>`;
+              appointmentsContainer.innerHTML = `
+                <p style="color: var(--muted);">You have no upcoming appointments.</p>
+              `;
             }
           }
         });
@@ -1762,7 +1773,11 @@ html.dark #insightsContainer .card a.btn-secondary {
       purchasedContainer.innerHTML = "";
       const purchased = JSON.parse(localStorage.getItem("purchasedDrugs") || "[]");
       if (!purchased.length) {
-        purchasedContainer.innerHTML = `<p class="empty-message" style="color: var(--muted);">You haven’t purchased any drugs yet.</p>`;
+        purchasedContainer.innerHTML = `
+          <p class="empty-message" style="color: var(--muted);">
+            You haven’t purchased any drugs yet.
+          </p>
+        `;
         return;
       }
       purchased.forEach(item => {
@@ -1777,6 +1792,7 @@ html.dark #insightsContainer .card a.btn-secondary {
       });
     }
 
+    // Record a pharmacy timestamp for overall stats
     function recordPharmacyTimestamp() {
       const key = "timestampsPharmacy";
       const arr = JSON.parse(localStorage.getItem(key) || "[]");
@@ -1785,6 +1801,7 @@ html.dark #insightsContainer .card a.btn-secondary {
     }
     recordPharmacyTimestamp();
 
+    // Load a random AI insight card
     function loadAIInsights() {
       insightsContainer.innerHTML = "";
       const examples = [
@@ -1871,12 +1888,14 @@ html.dark #insightsContainer .card a.btn-secondary {
       insightsContainer.append(card);
     }
 
+    // Show toast messages
     function showToast(message) {
       toastEl.textContent = message;
       toastEl.classList.add("visible");
       setTimeout(() => toastEl.classList.remove("visible"), 3000);
     }
 
+    // Statistics data holder
     let statsData = {
       herbal: 0,
       psych: 0,
@@ -1887,6 +1906,7 @@ html.dark #insightsContainer .card a.btn-secondary {
       labels: []
     };
 
+    // Build labels for last 7 days
     function generateLast7DaysLabels() {
       const labels = [];
       for (let i = 6; i >= 0; i--) {
@@ -1897,6 +1917,7 @@ html.dark #insightsContainer .card a.btn-secondary {
       return labels;
     }
 
+    // Display raw category counts in the five AI‐Query cards
     function displayStats() {
       statsData.herbal   = Storage.getCount("Herbal");
       statsData.psych    = Storage.getCount("Psych");
@@ -1913,8 +1934,10 @@ html.dark #insightsContainer .card a.btn-secondary {
       statsData.labels = generateLast7DaysLabels();
     }
 
+    // Chart instances
     let distributionChart, dailyChart;
 
+    // Initialize the doughnut (distribution) & line (daily) charts
     function initializeCharts() {
       distributionChart = new Chart(distributionCtx, {
         type: "doughnut",
@@ -1929,11 +1952,11 @@ html.dark #insightsContainer .card a.btn-secondary {
               statsData.consult
             ],
             backgroundColor: [
-               "#228B22",   
-               "#FF0000",  
-               "#F7DC6F",  
-               "#005f73",  
-               "#4B0082"    
+               "#228B22",   // Herbal
+               "#FF0000",   // Psych
+               "#F7DC6F",   // Diet
+               "#005f73",   // Pharmacy
+               "#4B0082"    // Consult
             ],
             borderColor: "rgba(255,255,255,0.9)",
             borderWidth: 2
@@ -2021,6 +2044,7 @@ html.dark #insightsContainer .card a.btn-secondary {
       });
     }
 
+    // Build the daily‐counts array for the last 7 days
     function populateDailyCounts() {
       const dailyCounts = [];
       for (let i = 6; i >= 0; i--) {
@@ -2055,6 +2079,7 @@ html.dark #insightsContainer .card a.btn-secondary {
       }
     }
 
+    // “Apply Filter” button: recalculate stats in chosen date range
     filterBtn.addEventListener("click", () => {
       const start = startDateInput.value;
       const end   = endDateInput.value;
@@ -2137,6 +2162,7 @@ html.dark #insightsContainer .card a.btn-secondary {
       showToast("Statistics updated for selected range");
     });
 
+    // Profile modal open/close
     userProfileBtn.addEventListener("click", () => {
       const currentName =
         firebase.auth().currentUser.displayName
@@ -2157,6 +2183,7 @@ html.dark #insightsContainer .card a.btn-secondary {
       profileModal.hidden = true;
     });
 
+    // Save profile changes
     saveProfileBtn.addEventListener("click", async () => {
       const newName = profileNameInput.value.trim();
       if (!newName) {
@@ -2180,27 +2207,33 @@ html.dark #insightsContainer .card a.btn-secondary {
       }
     });
 
+    // If a name is already in localStorage, show it immediately
     const storedName = localStorage.getItem("displayName");
     if (storedName) {
       userProfileBtn.innerHTML = `<i class="fas fa-user-circle"></i> ${storedName}`;
     }
 
+    // -------------------------------------------------------------------
+    // Immediately‐invoked function to populate Nutrition Summary grid
     (function populateNutritionGrid() {
       const data = JSON.parse(localStorage.getItem("nutritionSummary") || "{}");
       const caloriesBox = document.querySelector("#nutritionSummary .ns-calories");
       const micronBox   = document.querySelector("#nutritionSummary .ns-micronutrients");
       const macroChartEl = document.getElementById("nsMacroChart");
 
+      // If there is no nutritionSummary data or no calories field, leave placeholders
       if (!data || !data.calories) {
         return;
       }
 
+      // 1) Fill in calories box
       const dailyGoal = data.goal || 2000;
       const actualCals = data.calories;
       const pct = Math.min(100, Math.round((actualCals / dailyGoal) * 100));
       caloriesBox.querySelector(".ns-value").textContent = `${actualCals} kcal`;
       caloriesBox.querySelector(".ns-bar-fill").style.width = `${pct}%`;
 
+      // 2) Fill in micronutrient percentages
       if (data.micronutrients) {
         micronBox.querySelectorAll(".ns-micro-item").forEach(item => {
           const label = item.textContent.split(":")[0].trim().toLowerCase();
@@ -2215,6 +2248,7 @@ html.dark #insightsContainer .card a.btn-secondary {
         });
       }
 
+      // 3) Draw macros pie chart
       if (data.macros && macroChartEl) {
         new Chart(macroChartEl.getContext("2d"), {
           type: "pie",
@@ -2222,9 +2256,9 @@ html.dark #insightsContainer .card a.btn-secondary {
             labels: ["Carbs", "Protein", "Fat"],
             datasets: [{
               data: [
-                data.macros.carbs    || 0,
-                data.macros.protein  || 0,
-                data.macros.fats     || 0
+                data.macros.carbs   || 0,
+                data.macros.protein || 0,
+                data.macros.fats    || 0
               ],
               backgroundColor: [
                 getComputedStyle(document.documentElement).getPropertyValue("--primary").trim(),
@@ -2236,12 +2270,14 @@ html.dark #insightsContainer .card a.btn-secondary {
           options: {
             responsive: true,
             maintainAspectRatio: false,
-            plugins: { legend: { display: false } }
+            plugins: {
+              legend: { display: false }
+            }
           }
         });
       }
     })();
-
+    // -------------------------------------------------------------------
   });
 </script>
 
