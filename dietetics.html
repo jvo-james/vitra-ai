@@ -2134,25 +2134,38 @@ Storage.recordCategory("Diet");
     if (oldTools) oldTools.remove();
     panel.querySelector(".result-content").innerHTML =
      `<div class="spinner"></div><div class="spin-text">Please wait…</div>`;
-      let userContent = "";
+       let userContent = "";
       for (const fid of fieldIds) {
         if (fid === "symptoms") {
           let vals = Array.from(document.querySelectorAll('input[name="symptom"]:checked')).map(cb => cb.value);
-          const otherSym = document.getElementById("otherSymptom");
-          if (otherSym && otherSym.value.trim()) vals.push(otherSym.value.trim());
-          userContent += `symptoms: ${vals.join(", ")}\n`;
+         const otherSym = document.getElementById("otherSymptom");
+          if (otherSym && otherSym.value.trim()) {
+            vals.push(otherSym.value.trim());
+          }
+          userContent += `symptoms: ${vals.length ? vals.join(", ") : "None"}\n`;
         } else {
           const el = document.getElementById(fid);
-          if (!el) continue;
-          if (el.tagName === "SELECT" && el.multiple) {
-            userContent += `${fid}: ${[...el.selectedOptions].map(o => o.value).join(", ")}\n`;
-          } else if (el.tagName === "SELECT") {
+          let val = "None";
+
+          if (!el) {
+            val = "None";
+         } else if (el.tagName === "SELECT" && el.multiple) {
+           const selected = [...el.selectedOptions].map(o => o.value).filter(v => v);
+            val = selected.length ? selected.join(", ") : "None";
+         } else if (el.tagName === "SELECT") {
             const oi = el.parentElement.querySelector(".other-input");
-            const val = (oi && el.value === "Other") ? oi.value.trim() : el.value;
-            userContent += `${fid}: ${val}\n`;
+            if (el.value === "Other" && oi && oi.value.trim()) {
+              val = oi.value.trim();
+            } else if (el.value) {
+              val = el.value;
+            } else {
+              val = "None";
+            }
           } else {
-            userContent += `${fid}: ${el.value}\n`;
+           const raw = el.value ? el.value.trim() : "";
+            val = raw.length ? raw : "None";
           }
+          userContent += `${fid}: ${val}\n`;
         }
       }
       try {
