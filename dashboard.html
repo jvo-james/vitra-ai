@@ -2204,77 +2204,36 @@ html.dark #insightsContainer .card a.btn-secondary {
       userProfileBtn.innerHTML = `<i class="fas fa-user-circle"></i> ${storedName}`;
     }
 
-(function populateNutritionGrid() {
-  const data = JSON.parse(localStorage.getItem("nutritionSummary") || "{}");
-  const caloriesBox = document.querySelector("#nutritionSummary .ns-calories");
-  const micronBox   = document.querySelector("#nutritionSummary .ns-micronutrients");
-  const macroChartEl = document.getElementById("nsMacroChart");
+ const data = JSON.parse(localStorage.getItem("nutritionSummary") || "{}");
+  const caloriesBox   = document.querySelector("#nutritionSummary .ns-calories");
+  const micronBox     = document.querySelector("#nutritionSummary .ns-micronutrients");
+  const macroChartEl  = document.getElementById("nsMacroChart");
+
+  if (!data || typeof data.calories !== "number") {
+    caloriesBox.querySelector(".ns-value").textContent = "— kcal";
+    caloriesBox.querySelector(".ns-bar-fill").style.width = "0%";
+    micronBox.querySelectorAll(".ns-micro-item span:last-child")
+             .forEach(el => el.textContent = "—%");
+    if (macroChartEl && macroChartEl._chartInstance) {
+      macroChartEl._chartInstance.destroy();
+      delete macroChartEl._chartInstance;
+    }
+    return;
+  }
 
   const dailyGoal = data.goal || 2000;
-    const actualCals = data.calories;
-    const pct = Math.min(100, Math.round((actualCals / dailyGoal) * 100));
-    caloriesBox.querySelector(".ns-value").textContent = `${actualCals} kcal`;
-    caloriesBox.querySelector(".ns-bar-fill").style.width = `${pct}%`;
-
-    if (data.micronutrients) {
-      micronBox.querySelectorAll(".ns-micro-item").forEach(item => {
-        const label = item.textContent.split(":")[0].trim().toLowerCase();
-        let key = "";
-        if (label === "iron") key = "iron";
-        else if (label === "calcium") key = "calcium";
-        else if (label === "vitamin c") key = "vitaminC";
-        else if (label === "vitamin d") key = "vitaminD";
-        if (key && data.micronutrients[key] != null) {
-          item.querySelector("span:last-child").textContent = `${data.micronutrients[key]}%`;
-        }
-      });
-    }
-    if (data.macros && typeof Chart !== "undefined") {
-      const carbs   = data.macros.carbs   || 0;
-      const protein = data.macros.protein || 0;
-      const fats    = data.macros.fats    || 0;
-
-      if (macroChartEl._chartInstance) {+        macroChartEl._chartInstance.destroy();
-      }
-
-      const ctx = macroChartEl.getContext("2d");
-      macroChartEl._chartInstance = new Chart(ctx, {
-        type: "pie",
-        data: {
-          labels: ["Carbs", "Protein", "Fats"],
-          datasets: [{
-            data: [carbs, protein, fats],
-            backgroundColor: [
-              getComputedStyle(document.documentElement).getPropertyValue("--accent").trim(),
-              getComputedStyle(document.documentElement).getPropertyValue("--primary").trim(),
-              getComputedStyle(document.documentElement).getPropertyValue("--secondary").trim()
-            ]
-          }]
-        },
-        options: {
-          responsive: true,
-          plugins: {
-            legend: { position: "bottom" }
-          }
-        }
-     });
-    }
-
-  const dailyGoal = data.goal || 2000; 
   const actualCals = data.calories;
   const pct = Math.min(100, Math.round((actualCals / dailyGoal) * 100));
   caloriesBox.querySelector(".ns-value").textContent = `${actualCals} kcal`;
-  caloriesBox
-    .querySelector(".ns-bar-fill")
-    .style.width = `${pct}%`;
+  caloriesBox.querySelector(".ns-bar-fill").style.width = `${pct}%`;
 
   if (data.micronutrients) {
     micronBox.querySelectorAll(".ns-micro-item").forEach(item => {
-      const label = item.textContent.split(":")[0].trim().toLowerCase();
+     const label = item.textContent.split(":")[0].trim().toLowerCase();
       let key = "";
-      if (label === "iron") key = "iron";
+     if (label === "iron")       key = "iron";
       else if (label === "calcium") key = "calcium";
-      else if (label === "vitamin c") key = "vitaminC";
+     else if (label === "vitamin c") key = "vitaminC";
       else if (label === "vitamin d") key = "vitaminD";
       if (key && data.micronutrients[key] != null) {
         item.querySelector("span:last-child").textContent = `${data.micronutrients[key]}%`;
@@ -2282,39 +2241,39 @@ html.dark #insightsContainer .card a.btn-secondary {
     });
   }
 
-if (data.macros && typeof Chart !== "undefined") {
-      const carbs   = data.macros.carbs   || 0;
-      const protein = data.macros.protein || 0;
-      const fats    = data.macros.fats    || 0;
+  if (data.macros && typeof Chart !== "undefined") {
+    const carbs   = data.macros.carbs   || 0;
+    const protein = data.macros.protein || 0;
+    const fats    = data.macros.fats    || 0;
 
-      if (macroChartEl._chartInstance) {
-        macroChartEl._chartInstance.destroy();
-      }
-
-      const ctx = macroChartEl.getContext("2d");
-      macroChartEl._chartInstance = new Chart(ctx, {
-        type: "pie",
-        data: {
-          labels: ["Carbs", "Protein", "Fats"],
-          datasets: [{
-            data: [carbs, protein, fats],
-            backgroundColor: [
-              getComputedStyle(document.documentElement).getPropertyValue("--accent").trim(),
-              getComputedStyle(document.documentElement).getPropertyValue("--primary").trim(),
-              getComputedStyle(document.documentElement).getPropertyValue("--secondary").trim()
-            ]
-          }]
-        },
-        options: {
-          responsive: true,
-          plugins: {
-            legend: { position: "bottom" }
-          }
-        }
-      });
+    if (macroChartEl._chartInstance) {
+      macroChartEl._chartInstance.destroy();
+      delete macroChartEl._chartInstance;
     }
-})();
 
+    const ctx = macroChartEl.getContext("2d");
+    macroChartEl._chartInstance = new Chart(ctx, {
+      type: "pie",
+      data: {
+        labels: ["Carbs", "Protein", "Fats"],
+        datasets: [{
+          data: [carbs, protein, fats],
+          backgroundColor: [
+            getComputedStyle(document.documentElement).getPropertyValue("--accent").trim(),
+            getComputedStyle(document.documentElement).getPropertyValue("--primary").trim(),
+            getComputedStyle(document.documentElement).getPropertyValue("--secondary").trim()
+          ]
+       }]
+      },
+     options: {
+        responsive: true,
+        plugins: {
+          legend: { position: "bottom" }
+        }
+      }
+    });
+ }
+})(); 
   });
 </script>
 
