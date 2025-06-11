@@ -1901,6 +1901,16 @@ html.dark .history-modal .history-content {
         throw err;
       }
     }
+    function callOpenAIWithTimeout(messages, ms = 15000) {
+      return Promise.race([
+        callOpenAI(messages),
+        new Promise((_, reject) =>
+          setTimeout(() => reject(new Error("timeout")), ms)
+        )
+      ]);
+    }
+
+
 Storage.recordCategory("Psych"); 
 
     const sidebar = document.getElementById("sidebar");
@@ -2058,7 +2068,7 @@ Storage.recordCategory("Psych");
         chatBox.scrollTop = chatBox.scrollHeight;
 
         const systemPrompt = `
-You are Dr. Avery Sinclair, a board‑certified clinical psychologist with 20 years of full‑spectrum practice in CBT, DBT, ACT, psychodynamic therapy, trauma‑informed care, and motivational interviewing. You are the single trusted therapist the user can come to for any issue—nothing is off limits. Follow this flow on every turn:
+You are Dr. Senu James, a board‑certified clinical psychologist with 20 years of full‑spectrum practice in CBT, DBT, ACT, psychodynamic therapy, trauma‑informed care, and motivational interviewing. You are the single trusted therapist the user can come to for any issue—nothing is off limits. Follow this flow on every turn:
 
 1. **Deep Empathy & Reflection (1–2 sentences)**  
    • Accurately mirror the user’s core emotion or situation (“It seems like failing your exams has left you feeling devastated and questioning your future.”).  
@@ -2097,13 +2107,25 @@ You are Dr. Avery Sinclair, a board‑certified clinical psychologist with 20 ye
           allMessages.push({ role: "user", content: userText });
 
           try {
-            const aiReply = await callOpenAI(allMessages);
+             sendChatBtn.disabled = true;
+        startSpeech.disabled = true;
+        let aiReply;
+        try {
+          aiReply = await callOpenAIWithTimeout(allMessages, 15000);
+        } catch (err) {
+          const msg = err.message === "timeout"
+            ? "🤖 I’m having trouble formulating a response right now. Let’s try again."
+            : "⚠️ Something went wrong. Please try again.";
+          spinnerDiv.innerHTML = `<div class="result-content">${msg}</div>`;
+          sendChatBtn.disabled = false;
+          startSpeech.disabled = false;
+          return;
+        }
             const replyTime = new Date();
             spinnerDiv.innerHTML = `
               ${formatHTML(aiReply)}
               <div class="timestamp">${replyTime.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit", hour12: true })}</div>
             `;
-            // add a “play” button so user can click to hear it
             const plainReply = aiReply.replace(/<\/?[^>]+(>|$)/g, "");
             const lastBot = chatBox.querySelector('.bot-msg:last-child');
             const play = document.createElement('button');
@@ -2119,6 +2141,8 @@ You are Dr. Avery Sinclair, a board‑certified clinical psychologist with 20 ye
             });
             chatHistory.push({ who: "Therapist", text: aiReply, timestamp: replyTime.toISOString() });
             localStorage.setItem("therapyChatHistory", JSON.stringify(chatHistory));
+            sendChatBtn.disabled = false;
+            startSpeech.disabled = false;         
           } catch (err) {
             spinnerDiv.innerHTML = `<div class="result-content">⚠️ Something went wrong. Please try again.</div>`;
           }
