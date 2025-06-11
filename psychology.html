@@ -1324,6 +1324,7 @@ html.dark .history-modal .history-content {
       </div>
       <div id="chatBox" class="chat-box" role="log" aria-live="polite"></div>
       <div class="chat-input-row">
+      <button id="startSpeech" title="Speak"><i class="fas fa-microphone"></i></button>
         <input id="chatInput" placeholder="Type your message…" aria-label="Type your question"/>
         <button id="sendChat" aria-label="Send message"><i class="fas fa-paper-plane"></i></button>
       </div>
@@ -1987,6 +1988,15 @@ Storage.recordCategory("Psych");
       const sendChatBtn = document.getElementById("sendChat");
       const viewHistoryBtn = document.getElementById("viewHistory");
       const clearChatBtn = document.getElementById("clearChat");
+      const startSpeech = document.getElementById("startSpeech");
+      const recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
+      recognition.lang = 'en-US';
+      recognition.interimResults = false;
+      startSpeech.addEventListener("click", () => recognition.start());
+      recognition.addEventListener("result", e => {
+        chatInput.value = e.results[0][0].transcript;
+      });
+      recognition.addEventListener("end", () => sendChatBtn.click());
       let lastDateHeader = null;
 
  let chatHistory = JSON.parse(localStorage.getItem("therapyChatHistory") || "[]");
@@ -2038,15 +2048,8 @@ Storage.recordCategory("Psych");
         chatBox.append(spinnerDiv);
         chatBox.scrollTop = chatBox.scrollHeight;
 
-        const systemPrompt = `
-You are a licensed clinical psychologist with expertise in Cognitive Behavioral Therapy (CBT), dialectical behavior therapy (DBT), and mindfulness-based stress reduction (MBSR).
-When the user asks a question:
-  • Respond empathically and non-judgmentally.
-  • Offer at least two actionable steps or exercises (e.g., breathing exercises, thought records).
-  • Use evidence-based interventions, referencing therapy models when appropriate (e.g., “In CBT, you might…“).
-  • If user input is unclear or incomplete, ask a clarifying question before proceeding.
-  • If they mention emergency (“kill myself,” “self-harm”), provide crisis resources but do not simulate therapy.
-  • Maintain a calm, reassuring tone. Keep each reply under 250 words unless explicitly asked for more detail.
+         const systemPrompt = `
+You are a warm, empathic human therapist. Engage in a true back‑and‑forth: if the user’s input is brief or unclear, ask a follow‑up or clarifying question (“Can you tell me more about…?”).Keep a calm, reassuring tone and be very friendly.
         `.trim();
 
         const allMessages = [];
@@ -2066,6 +2069,13 @@ When the user asks a question:
               ${formatHTML(aiReply)}
               <div class="timestamp">${replyTime.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit", hour12: true })}</div>
             `;
+            const plainReply = aiReply.replace(/<\/?[^>]+(>|$)/g, "");
+            if ('speechSynthesis' in window) {
+              const u = new SpeechSynthesisUtterance(plainReply);
+              u.lang = 'en-US';
+              u.rate = 1;
+              window.speechSynthesis.speak(u);
+            }
             chatHistory.push({ who: "Therapist", text: aiReply, timestamp: replyTime.toISOString() });
             localStorage.setItem("therapyChatHistory", JSON.stringify(chatHistory));
           } catch (err) {
