@@ -1815,6 +1815,10 @@ html.dark .history-modal .history-content {
 
   document.addEventListener("DOMContentLoaded", () => {
 
+    if ('speechSynthesis' in window) {
+      window.speechSynthesis.onvoiceschanged = () => window.speechSynthesis.getVoices();
+      window.speechSynthesis.getVoices();
+    }
         function escapeHtml(unsafe) {
       return unsafe
         .replace(/&/g, "&amp;")
@@ -2074,6 +2078,7 @@ You are Dr. Senu James, a board‑certified clinical psychologist with 20 years 
 • Answer *every* question thoroughly within your expertise.  
 • Maintain a warm, professional, non‑judgmental tone.  
 Also make sure this is like an actual therapy session. You can make sure there's a conversation. Ask questions where necessary and make sure you give actual response. Make sure the person feels better after the session.
+DON'T ASK TOO MUCH QUESTIONS.
 `.trim();
 
 
@@ -2117,8 +2122,13 @@ Also make sure this is like an actual therapy session. You can make sure there's
             lastBot.append(play);
             play.addEventListener('click', () => {
               if (!('speechSynthesis' in window)) return;
-              const u = new SpeechSynthesisUtterance(plainReply);
-              u.lang = 'en-US'; u.rate = 1;
+             const u = new SpeechSynthesisUtterance(plainReply);
+              const voices = window.speechSynthesis.getVoices();
+              const female = voices.find(v => /female|woman|zira|samantha/i.test(v.name))
+                           || voices.find(v => v.lang.startsWith('en'));
+              if (female) u.voice = female;
+              u.lang = 'en-US';
+              u.rate = 1;
               window.speechSynthesis.speak(u);
             });
             chatHistory.push({ who: "Therapist", text: aiReply, timestamp: replyTime.toISOString() });
