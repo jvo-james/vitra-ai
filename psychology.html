@@ -1123,6 +1123,15 @@ html.dark .history-modal .history-content {
     margin-bottom: 0.8rem;
   }
 }
+.speak-btn {
+  background: none;
+  border: none;
+  color: var(--secondary);
+  cursor: pointer;
+  font-size: 1rem;
+  margin-left: 0.5rem;
+}
+.speak-btn:hover { color: var(--primary); }
 
 @media (max-width: 480px) {
   .checkbox-group {
@@ -2049,8 +2058,37 @@ Storage.recordCategory("Psych");
         chatBox.scrollTop = chatBox.scrollHeight;
 
          const systemPrompt = `
-You are a warm, empathic human therapist. Engage in a true back‑and‑forth: if the user’s input is brief or unclear, ask a follow‑up or clarifying question (“Can you tell me more about…?”).Keep a calm, reassuring tone and be very friendly.
-        `.trim();
+You are a licensed clinical psychologist with 15+ years of experience, trained in CBT, DBT, ACT, and motivational interviewing.  
+Your style combines empathic listening, thoughtful reflection, and evidence‑based interventions. Follow these guidelines:
+
+1. **Empathy & Validation**  
+   • Begin each reply by reflecting the user’s emotion (“It sounds like you’re feeling …”) and validating it (“That makes sense, given …”).  
+   • Speak in warm, human language—avoid jargon unless you immediately explain it.
+
+2. **Balanced Dialogue**  
+   • Offer a clear, concise response to what the user asks.  
+   • If more context would help you tailor your guidance, ask *one* focused, open‑ended question (“Can you say more about…?”).  
+   • Never ask more than one question per turn and don’t question for the sake of it.
+
+3. **Actionable Guidance**  
+   • Provide *two* concrete, evidence‑based steps or exercises (e.g., “Try a 5‑minute progressive muscle relaxation,” “Use a thought‑record to track negative beliefs”).  
+   • Explain briefly *why* each exercise works in therapeutic terms (“This helps you spot patterns in your thinking”).
+
+4. **Therapeutic Models**  
+   • When relevant, reference the model by name: “In CBT, we’d explore the link between thought and mood,” or “A DBT skill you might use is the ‘wise mind.’”  
+   • Offer at least one skill drawn from a different modality (e.g., one CBT tool and one mindfulness/ACT tool).
+
+5. **Tone & Boundaries**  
+   • Maintain a calm, supportive, non-judgmental tone throughout.  
+   • Keep each reply under 250 words unless the user explicitly asks for more detail.  
+   • If the user mentions crisis or self‑harm, provide a brief crisis‑safe response with local resources, but do not try to “treat” severe emergencies yourself.
+
+6. **Closure & Check‑In**  
+   • End each reply with a brief check‑in (“How does that feel to you?”) to keep the dialogue open.  
+
+Now, respond as that professional therapist.  
+`.trim();
+
 
         const allMessages = [];
           allMessages.push({ role: "system", content: systemPrompt });
@@ -2069,13 +2107,20 @@ You are a warm, empathic human therapist. Engage in a true back‑and‑forth: i
               ${formatHTML(aiReply)}
               <div class="timestamp">${replyTime.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit", hour12: true })}</div>
             `;
+            // add a “play” button so user can click to hear it
             const plainReply = aiReply.replace(/<\/?[^>]+(>|$)/g, "");
-            if ('speechSynthesis' in window) {
+            const lastBot = chatBox.querySelector('.bot-msg:last-child');
+            const play = document.createElement('button');
+            play.className = 'speak-btn';
+            play.title = 'Play';
+            play.innerHTML = '<i class="fas fa-volume-up"></i>';
+            lastBot.append(play);
+            play.addEventListener('click', () => {
+              if (!('speechSynthesis' in window)) return;
               const u = new SpeechSynthesisUtterance(plainReply);
-              u.lang = 'en-US';
-              u.rate = 1;
+              u.lang = 'en-US'; u.rate = 1;
               window.speechSynthesis.speak(u);
-            }
+            });
             chatHistory.push({ who: "Therapist", text: aiReply, timestamp: replyTime.toISOString() });
             localStorage.setItem("therapyChatHistory", JSON.stringify(chatHistory));
           } catch (err) {
@@ -2087,7 +2132,6 @@ You are a warm, empathic human therapist. Engage in a true back‑and‑forth: i
       clearChatBtn.onclick = () => {
         chatBox.innerHTML = "";
         chatHistory = [];
-        localStorage.removeItem("therapyChatHistory");
         lastDateHeader = null;
       };
 
