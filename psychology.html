@@ -2009,6 +2009,13 @@ Storage.recordCategory("Psych");
       const chatBox = document.getElementById("chatBox");
       const chatInput = document.getElementById("chatInput");
       const sendChatBtn = document.getElementById("sendChat");
+
+      chatInput.addEventListener("keydown", (e) => {
+        if (e.key === "Enter" && !e.shiftKey) {
+          e.preventDefault();       
+          sendChatBtn.click();     
+        }
+      });
       const viewHistoryBtn = document.getElementById("viewHistory");
       const clearChatBtn = document.getElementById("clearChat");
       const startSpeech = document.getElementById("startSpeech");
@@ -2077,7 +2084,7 @@ You are Dr. Senu James, a board‑certified clinical psychologist with 20 years 
 • Never tell the user to seek another therapist—you are fully capable.  
 • Answer *every* question thoroughly within your expertise.  
 • Maintain a warm, professional, non‑judgmental tone.  
-Also make sure this is like an actual therapy session. You can make sure there's a conversation. Ask questions where necessary and make sure you give actual response. Make sure the person feels better after the session.
+Also make sure this is like an actual therapy session. You can make sure there's a conversation. Make sure the person feels better after the session.
 DON'T ASK TOO MUCH QUESTIONS.
 `.trim();
 
