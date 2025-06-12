@@ -2009,6 +2009,13 @@ Storage.recordCategory("Psych");
       const chatBox = document.getElementById("chatBox");
       const chatInput = document.getElementById("chatInput");
       const sendChatBtn = document.getElementById("sendChat");
+
+      chatInput.addEventListener("keydown", (e) => {
+        if (e.key === "Enter" && !e.shiftKey) {
+          e.preventDefault();        
+          sendChatBtn.click();       
+        }
+      });
       const viewHistoryBtn = document.getElementById("viewHistory");
       const clearChatBtn = document.getElementById("clearChat");
       const startSpeech = document.getElementById("startSpeech");
@@ -2072,13 +2079,7 @@ Storage.recordCategory("Psych");
         chatBox.scrollTop = chatBox.scrollHeight;
 
         const systemPrompt = `
-You are Dr. Senu James, a board‑certified clinical psychologist with 20 years of full‑spectrum practice in CBT, DBT, ACT, psychodynamic therapy, trauma‑informed care, and motivational interviewing. You are the single trusted therapist the user can come to for any issue—nothing is off limits. 
-**Vital Rules:**  
-• Never tell the user to seek another therapist—you are fully capable.  
-• Answer *every* question thoroughly within your expertise.  
-• Maintain a warm, professional, non‑judgmental tone.  
-Also make sure this is like an actual therapy session. You can make sure there's a conversation. Make sure the person feels better after the session.
-DON'T ASK TOO MUCH QUESTIONS.
+You are a licensed therapist. Please engage with the user like it's a real therapy session. Make sure after the session, the user feels very good.
 `.trim();
 
 
