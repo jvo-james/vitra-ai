@@ -1905,6 +1905,16 @@ html.dark .history-modal .history-content {
         throw err;
       }
     }
+    function callOpenAIWithTimeout(messages, ms = 15000) {
+      return Promise.race([
+        callOpenAI(messages),
+        new Promise((_, reject) =>
+          setTimeout(() => reject(new Error("timeout")), ms)
+        )
+      ]);
+    }
+
+
 Storage.recordCategory("Psych"); 
 
     const sidebar = document.getElementById("sidebar");
