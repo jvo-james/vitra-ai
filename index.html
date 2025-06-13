@@ -1014,20 +1014,12 @@ getStartedBtn.addEventListener('click', () => {
           return;
         }
 
-        if (err.code === 'auth/wrong-password' || err.code === 'auth/invalid-login-credentials') {
-           firebase.auth().fetchSignInMethodsForEmail(email)
-             .then(methods => {
-               if (methods.length === 0) {
-                signInMsg.textContent = 'No account found with that email. Please sign up.';
-              } else {
-                signInMsg.textContent = 'Incorrect password. Please try again.';
-              }
-             })
-            .catch(() => {
-               signInMsg.textContent = 'Incorrect password. Please try again.';
-             });
-          return;
-        }
+       if (err.code === 'auth/wrong-password' || err.code === 'auth/invalid-login-credentials') {
+   document.getElementById('loadingOverlay').style.display = 'none';
+   signInMsg.style.color = 'red';
+   signInMsg.textContent = 'Incorrect password. Please try again.';
+   return;
+ }
 
         if (err.code === 'auth/user-not-found') {
            signInMsg.textContent = 'No account found with that email. Please sign up.';
