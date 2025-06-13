@@ -1453,7 +1453,6 @@ auth.onAuthStateChanged(user => {
    initConsultPage();
   });
 function initConsultPage() {
- document.addEventListener("DOMContentLoaded", () => {
 
   const providers = [
     {
@@ -1793,22 +1792,6 @@ function initConsultPage() {
   const richUpcomingSection   = document.getElementById("rich-upcoming");
   const richPastSection       = document.getElementById("rich-past");
   const richFavoritesSection  = document.getElementById("rich-favorites");
-
-  const appointments = [];
-  db.collection('users').doc(uid)
-    .collection('appointments')
-    .get()
-    .then(snap => {
-      snap.docs.forEach(d => {
-        const a = d.data();
-        appointments.push(a);
-        addToRichDashboard(a);
-      });
-      renderUpcomingCalendarWidget();
-    })
-    .catch(err => console.error("Failed loading appointments:", err));
-
- 
 
   const draft = JSON.parse(localStorage.getItem("urgentDraft") || "{}");
   for (let key in draft) {
@@ -2425,7 +2408,7 @@ ${providers.map(p => `
       richFavoritesSection.hidden  = (btn.dataset.tab !== "rich-favorites");
     });
   });
-});
+
 }
 </script>
 
