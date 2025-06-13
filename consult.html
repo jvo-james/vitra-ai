@@ -1418,7 +1418,7 @@
 
  <script defer src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
   <script src="storage.js"></script>
-  <script>
+  <script defer>
  const firebaseConfig = {
    apiKey: "AIzaSyBhaYOcLMXuobCT-vaXr-zXTZnBfaheAIY",
    authDomain: "vitra-ai-712ea.firebaseapp.com",
@@ -1431,10 +1431,28 @@
  const auth = firebase.auth();
  const db   = firebase.firestore();
 
- auth.onAuthStateChanged(user => {
-   if (!user) location.href = "index.html?modal=signin";
- });
+auth.onAuthStateChanged(user => {
+    if (!user) {
+      location.href = "index.html?modal=signin";
+      return;
+    }
+   const uid = user.uid;
+   db.collection('users').doc(uid)
+     .collection('appointments')
+     .get()
+     .then(snap => {
+       snap.docs.forEach(d => {
+         const a = d.data();
+         appointments.push(a);
+         addToRichDashboard(a);
+       });
+       renderUpcomingCalendarWidget();
+     })
+     .catch(err => console.error("Failed loading appointments:", err));
 
+   initConsultPage();
+  });
+function initConsultPage() {
  document.addEventListener("DOMContentLoaded", () => {
 
   const providers = [
@@ -1777,7 +1795,6 @@
   const richFavoritesSection  = document.getElementById("rich-favorites");
 
   const appointments = [];
-  const uid = auth.currentUser.uid;
   db.collection('users').doc(uid)
     .collection('appointments')
     .get()
@@ -2409,6 +2426,7 @@ ${providers.map(p => `
     });
   });
 });
+}
 </script>
 
   
