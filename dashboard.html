@@ -1483,6 +1483,12 @@ html.dark #insightsContainer .card a.btn-secondary {
   firebase.initializeApp(firebaseConfig);
   const auth = firebase.auth();
   const db   = firebase.firestore();
+
+  firebase.auth().onAuthStateChanged(user => {
+  if (!user) {
+     window.location.href = "index.html?modal=signin";
+   }
+ });
   
   document.addEventListener("DOMContentLoaded", () => {
 
@@ -1531,6 +1537,9 @@ html.dark #insightsContainer .card a.btn-secondary {
         <p style="color: var(--muted);">Here’s a quick overview of your AI-powered health dashboard.</p>
       `;
 
+      statsData.labels = generateLast7DaysLabels();
+      populateDailyCounts();
+      
       loadAppointments();
       loadPurchasedDrugs();
       loadNutritionSummary();
@@ -1573,19 +1582,30 @@ html.dark #insightsContainer .card a.btn-secondary {
       window.scrollTo({ top: 0, behavior: "smooth" });
     });
 
-    function loadAppointments() {
-      appointmentsContainer.innerHTML = "";
-      const allAppointments = JSON.parse(localStorage.getItem("appointments") || "[]");
-      const today = new Date().setHours(0, 0, 0, 0);
-      const upcoming = allAppointments.filter(a => {
-        const apptDate = new Date(a.date).setHours(0, 0, 0, 0);
-        return apptDate >= today;
-      });
-      if (upcoming.length === 0) {
-        appointmentsContainer.innerHTML = `<p style="color: var(--muted);">You have no upcoming appointments.</p>`;
-        return;
-      }
-      upcoming.forEach(appt => {
+    function saveAppointmentToCloud(appt) {
+   const uid = auth.currentUser.uid;
+    db.collection('users').doc(uid)
+      .collection('appointments').doc(appt.id)
+      .set(appt);
+  }
+    
+   function loadAppointments() {
+   appointmentsContainer.innerHTML = "";
+   const uid = auth.currentUser.uid;
+   db.collection('users').doc(uid)
+     .collection('appointments')
+    .get()
+    .then(snapshot => {
+       const today = new Date().setHours(0, 0, 0, 0);
+       const upcoming = snapshot.docs
+         .map(doc => doc.data())
+         .filter(a => new Date(a.date).setHours(0,0,0,0) >= today);
+
+       if (!upcoming.length) {
+         appointmentsContainer.innerHTML = `<p style="color: var(--muted);">You have no upcoming appointments.</p>`;
+         return;
+       }
+       upcoming.forEach(appt => {
         const card = document.createElement("div");
         card.className = "card appt-card";
         card.dataset.id = appt.id;
@@ -1618,13 +1638,18 @@ html.dark #insightsContainer .card a.btn-secondary {
         });
         appointmentsContainer.append(card);
       });
-    }
+     })
+  .catch(err => console.error("Failed loading appointments:", err));
+ }
 
-    function removeAppointment(id) {
-      const list = JSON.parse(localStorage.getItem("appointments") || "[]");
-      const updated = list.filter(a => a.id !== id);
-      localStorage.setItem("appointments", JSON.stringify(updated));
-    }
+   function removeAppointment(id) {
+   const uid = auth.currentUser.uid;
+   db.collection('users').doc(uid)
+     .collection('appointments').doc(id)
+     .delete()
+     .catch(err => console.error("Failed to delete appointment:", err));
+ }
+
     function formatTime(t) {
       if (t.includes("AM") || t.includes("PM")) return t;
       let [hh, mm] = t.split(":").map(Number);
@@ -1633,46 +1658,72 @@ html.dark #insightsContainer .card a.btn-secondary {
       return `${String(hh).padStart(2, "0")}:${String(mm).padStart(2, "0")} ${suffix}`;
     }
 
-    function loadPurchasedDrugs() {
-      purchasedContainer.innerHTML = "";
-      const purchased = JSON.parse(localStorage.getItem("purchasedDrugs") || "[]");
-      if (!purchased.length) {
-        purchasedContainer.innerHTML = `<p class="empty-message" style="color: var(--muted);">You haven’t purchased any drugs yet.</p>`;
-        return;
-      }
-      purchased.forEach(item => {
-        const card = document.createElement("div");
-        card.className = "purchased-item";
-        card.innerHTML = `
-          <h4><i class="fas fa-capsules"></i> ${item.name}</h4>
-          <p class="price">₵${item.price.toFixed(2)}</p>
-          <p>Purchased on: ${new Date(item.date).toLocaleDateString()}</p>
-        `;
-        purchasedContainer.append(card);
-      });
-    }
+   function savePurchaseToCloud(item) {
+  const uid = auth.currentUser.uid;
+   db.collection('users').doc(uid)
+     .collection('purchasedDrugs').doc(item.id)
+     .set(item);
+ }
 
-    function loadNutritionSummary() {
-      nutritionContainer.innerHTML = "";
-      const data = JSON.parse(localStorage.getItem("nutritionSummary") || "{}");
-      if (!data || !data.calories) {
-        nutritionContainer.innerHTML = `<p style="color: var(--muted);">No nutrition data available.</p>`;
-        return;
-      }
-      const summaryHTML = `
-        <p><strong>Today's Calories:</strong> ${data.calories} kcal</p>
-        <p>
-          <strong>Protein:</strong> ${data.protein} g · 
-          <strong>Carbs:</strong> ${data.carbs} g · 
-          <strong>Fats:</strong> ${data.fats} g
-        </p>
-        <a href="dietetics.html" class="btn btn-primary" style="margin-top:0.5rem; display:inline-flex; align-items:center; gap:0.5rem;">
-          <i class="fas fa-arrow-right"></i> View Full Meal Plan
-        </a>
-      `;
-      nutritionContainer.innerHTML = summaryHTML;
-    }
+ function loadPurchasedDrugs() {
+   purchasedContainer.innerHTML = "";
+   const uid = auth.currentUser.uid;
+   db.collection('users').doc(uid)
+     .collection('purchasedDrugs')
+     .orderBy('date','desc')
+     .get()
+     .then(snap => {
+       const items = snap.docs.map(d => d.data());
+       if (!items.length) {
+         purchasedContainer.innerHTML = `<p class="empty-message" style="color: var(--muted);">You haven’t purchased any drugs yet.</p>`;
+         return;
+       }
+       items.forEach(item => {
+         const card = document.createElement("div");
+         card.className = "purchased-item";
+         card.innerHTML = `
+           <h4><i class="fas fa-capsules"></i> ${item.name}</h4>
+           <p class="price">₵${item.price.toFixed(2)}</p>
+          <p>Purchased on: ${new Date(item.date).toLocaleDateString()}</p>`;
+         purchasedContainer.append(card);
+       });
+     })
+     .catch(err => console.error("Failed loading purchases:", err));
+ }
+   
+    function saveNutritionToCloud(data) {
+   const uid = auth.currentUser.uid;
+   db.collection('users').doc(uid)
+     .collection('nutrition').doc('summary')
+     .set(data);
+ }
 
+ function loadNutritionSummary() {
+   nutritionContainer.innerHTML = "";
+   const uid = auth.currentUser.uid;
+   db.collection('users').doc(uid)
+     .collection('nutrition').doc('summary')
+     .get()
+     .then(doc => {
+       const data = doc.exists ? doc.data() : {};
+       if (!data.calories) {
+         nutritionContainer.innerHTML = `<p style="color: var(--muted);">No nutrition data available.</p>`;
+         return;
+       }
+       nutritionContainer.innerHTML = `
+         <p><strong>Today's Calories:</strong> ${data.calories} kcal</p>
+         <p>
+           <strong>Protein:</strong> ${data.protein} g ·
+           <strong>Carbs:</strong> ${data.carbs} g ·
+           <strong>Fats:</strong> ${data.fats} g
+         </p>
+         <a href="dietetics.html" class="btn btn-primary">
+           <i class="fas fa-arrow-right"></i> View Full Meal Plan
+         </a>`;
+     })
+     .catch(err => console.error("Failed loading nutrition:", err));
+ }
+    
     function recordPharmacyTimestamp() {
       const key = "timestampsPharmacy";
       const arr = JSON.parse(localStorage.getItem(key) || "[]");
@@ -1803,11 +1854,22 @@ html.dark #insightsContainer .card a.btn-secondary {
     db.collection('userStats').doc(uid).get()
       .then(doc => {
         const d = doc.exists ? doc.data() : {};
-        herbalQueriesEl.textContent   = d.herbal    || 0;
-       psychQueriesEl.textContent    = d.psych     || 0;
-        dietQueriesEl.textContent     = d.diet      || 0;
-        pharmacyQueriesEl.textContent = d.pharmacy  || 0;
-        consultQueriesEl.textContent  = d.consult   || 0;
+       statsData.herbal   = herbalQueriesEl.textContent   = d.herbal   || 0;
+        statsData.psych    = psychQueriesEl.textContent    = d.psych    || 0;
+        statsData.diet     = dietQueriesEl.textContent     = d.diet     || 0;
+        statsData.pharmacy = pharmacyQueriesEl.textContent = d.pharmacy || 0;
+        statsData.consult  = consultQueriesEl.textContent  = d.consult  || 0;
+
+        distributionChart.data.datasets[0].data = [
+          statsData.herbal,
+          statsData.psych,
+          statsData.diet,
+          statsData.pharmacy,
+          statsData.consult
+        ];
+        distributionChart.update();
+        dailyChart.data.datasets[0].data = statsData.daily;
+        dailyChart.update();
      })
       .catch(err => console.error('Stats fetch failed:', err));
   }
