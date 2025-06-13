@@ -1177,11 +1177,11 @@
 <body>
 
   <aside id="sidebar">
-   <div class="logo">
+ <a style="text-decoration: none;" href="dashboard.html">  <div class="logo">
       <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" fill="var(--primary)">
         <polygon points="10,10 25,90 50,40 75,90 90,10 65,10 50,70 35,10"/>
       </svg> <span class="logo-text">Vitra AI</span>
-    </div>
+    </div> </a>
 
     <nav>
       <ul>
@@ -1200,7 +1200,9 @@
  <a href="consult.html" id="consult-link" style="position:relative;">
       <i class="fas fa-calendar-check"></i><span>Consultation Booking</span></a>
         </li>
-       
+  <li>
+    <a href="dashboard.html"><i class="fas fa-tachometer-alt"></i><span>Dashboard</span></a>
+        </li>
       </ul>
     </nav>
     <button id="shrinkSidebar" title="Toggle sidebar">
@@ -1419,6 +1421,7 @@
  <script defer src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
   <script src="storage.js"></script>
   <script defer>
+     let uid;
  const firebaseConfig = {
    apiKey: "AIzaSyBhaYOcLMXuobCT-vaXr-zXTZnBfaheAIY",
    authDomain: "vitra-ai-712ea.firebaseapp.com",
@@ -1436,7 +1439,7 @@ auth.onAuthStateChanged(user => {
       location.href = "index.html?modal=signin";
       return;
     }
-   const uid = user.uid;
+   uid = user.uid;
    db.collection('users').doc(uid)
      .collection('appointments')
      .get()
