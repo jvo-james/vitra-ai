@@ -1001,32 +1001,29 @@ getStartedBtn.addEventListener('click', () => {
                     window.location.href = 'dashboard.html?mode=signin';
         })
         .catch(err => {
-         document.getElementById('loadingOverlay').style.display = 'none';
-       signInMsg.style.color = 'red';
+        document.getElementById('loadingOverlay').style.display = 'none';
+        signInMsg.style.color = 'red';
 
         if (err.code === 'auth/invalid-email') {
-           signInMsg.textContent = 'Please enter a valid email address.';
-           return;
-         }
-
-         if (err.code === 'auth/user-disabled') {
-         signInMsg.textContent = 'This account has been disabled. Contact support.';
+         signInMsg.textContent = 'Please enter a valid email address.';
+          return;
+        }
+        if (err.code === 'auth/user-disabled') {
+          signInMsg.textContent = 'This account has been disabled. Contact support.';
           return;
         }
 
-       if (err.code === 'auth/wrong-password' || err.code === 'auth/invalid-login-credentials') {
-   document.getElementById('loadingOverlay').style.display = 'none';
-   signInMsg.style.color = 'red';
-   signInMsg.textContent = 'Incorrect password. Please try again.';
-   return;
- }
-
         if (err.code === 'auth/user-not-found') {
-           signInMsg.textContent = 'No account found with that email. Please sign up.';
-           return;
+          signInMsg.textContent = 'No account found with that email. Please sign up.';
+          return;
         }
 
-         signInMsg.textContent = 'Error signing in: ' + err.message;
+        if (err.code === 'auth/wrong-password' || err.code === 'auth/invalid-login-credentials') {
+          signInMsg.textContent = 'Incorrect password. Please try again.';
+          return;
+        }
+
+        signInMsg.textContent = 'Error signing in: ' + err.message;
        });
 
     });
