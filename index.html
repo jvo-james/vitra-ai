@@ -1086,17 +1086,19 @@ getStartedBtn.addEventListener('click', () => {
      }
 
 
-    document.getElementById('loadingOverlay').style.display = 'flex';
 
       if (pass.length < 8 || !/\d/.test(pass)) {
+        document.getElementById('loadingOverlay').style.display = 'none';
                 signUpMsg.style.color = 'red';
         return signUpMsg.textContent = 'Password must be ≥8 characters and include a number.';
       }
       if (pass !== pass2) {
+        document.getElementById('loadingOverlay').style.display = 'none';
                signUpMsg.style.color = 'red';
         return signUpMsg.textContent = 'Passwords do not match.';
       }
-
+      document.getElementById('loadingOverlay').style.display = 'flex';
+      
       firebase.auth().createUserWithEmailAndPassword(email, pass)
         .then(({ user }) =>
           user.updateProfile({ displayName: name })
