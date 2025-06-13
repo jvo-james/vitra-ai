@@ -12,6 +12,10 @@
     href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
   />
  <script defer src="https://js.paystack.co/v1/inline.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+
 <style>
  
   :root {
@@ -1414,9 +1418,25 @@
 
  <script defer src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
   <script src="storage.js"></script>
-<script defer>
-document.addEventListener("DOMContentLoaded", () => {
-  
+  <script>
+ const firebaseConfig = {
+   apiKey: "AIzaSyBhaYOcLMXuobCT-vaXr-zXTZnBfaheAIY",
+   authDomain: "vitra-ai-712ea.firebaseapp.com",
+   projectId: "vitra-ai-712ea",
+   storageBucket: "vitra-ai-712ea.appspot.com",
+   messagingSenderId: "306868103753",
+   appId: "1:306868103753:web:e2d7700f8ad34c1e17ed98"
+ };
+ firebase.initializeApp(firebaseConfig);
+ const auth = firebase.auth();
+ const db   = firebase.firestore();
+
+ auth.onAuthStateChanged(user => {
+   if (!user) location.href = "index.html?modal=signin";
+ });
+
+ document.addEventListener("DOMContentLoaded", () => {
+
   const providers = [
     {
       id: "p1",
@@ -1634,24 +1654,24 @@ document.addEventListener("DOMContentLoaded", () => {
   ];
 
   const availability = {
-    p1:  { "2025-05-31": ["09:30","10:30","12:00"], "2025-06-10": ["09:00","10:00","11:00"], "2025-06-12": ["14:00","15:00"], "2025-06-15": ["08:30","09:30","10:30"] },
-    p2:  { "2025-05-31": ["09:30","10:30","12:00"], "2025-06-03": ["10:00","13:00","16:00"], "2025-06-04": ["09:00","11:00"], "2025-06-15": ["12:00","14:00"] },
-    p3:  { "2025-05-31": ["09:30","10:30","12:00"], "2025-06-08": ["08:00","09:00","10:00","11:00"], "2025-06-11": ["13:30","14:30"], "2025-06-16": ["15:00","16:00"] },
-    p4:  { "2025-05-31": ["09:30","10:30","12:00"], "2025-06-05": ["09:30","10:30","11:30"], "2025-06-09": ["14:00","15:00","16:00"], "2025-06-18": ["08:00","09:00"] },
-    p5:  { "2025-05-31": ["09:30","10:30","12:00"], "2025-06-07": ["08:15","09:15","10:15"], "2025-06-13": ["13:00","14:00"], "2025-06-17": ["10:00","11:00","12:00"] },
-    p6:  { "2025-05-31": ["09:30","10:30","12:00"], "2025-06-02": ["09:00","10:00"], "2025-06-14": ["11:00","12:00","13:00"], "2025-06-19": ["14:00","15:00"] },
-    p7:  { "2025-05-31": ["09:30","10:30","12:00"], "2025-06-06": ["08:30","09:30","10:30"], "2025-06-12": ["13:00","14:00","15:00"], "2025-06-20": ["09:00","10:00"] },
-    p8:  { "2025-05-31": ["09:30","10:30","12:00"], "2025-06-01": ["10:00","11:00","12:00"], "2025-06-11": ["14:30","15:30"], "2025-06-16": ["08:00","09:00","10:00"] },
-    p9:  { "2025-05-31": ["09:30","10:30","12:00"], "2025-06-04": ["09:00","10:00","11:00"], "2025-06-13": ["13:00","14:00"], "2025-06-18": ["15:00","16:00"] },
-    p10: { "2025-05-31": ["09:30","10:30","12:00"], "2025-06-03": ["08:00","09:00","10:00"], "2025-06-10": ["11:00","12:00","13:00"], "2025-06-17": ["14:00","15:00"] },
-    p11: { "2025-05-31": ["09:30","10:30","12:00"], "2025-06-05": ["09:30","10:30","11:30"], "2025-06-14": ["13:00","14:00","15:00"], "2025-06-19": ["08:00","09:00"] },
-    p12: { "2025-05-31": ["09:30","10:30","12:00"], "2025-06-02": ["10:00","11:00","12:00"], "2025-06-08": ["14:00","15:00"], "2025-06-20": ["09:00","10:00","11:00"] },
-    p13: { "2025-05-31": ["09:30","10:30","12:00"], "2025-06-07": ["08:00","09:00","10:00"], "2025-06-12": ["11:30","12:30","13:30"], "2025-06-18": ["14:00","15:00"] },
-    p14: { "2025-05-31": ["09:30","10:30","12:00"], "2025-06-03": ["09:15","10:15","11:15"], "2025-06-09": ["13:00","14:00","15:00"], "2025-06-16": ["08:00","09:00"] },
-    p15: { "2025-05-31": ["09:30","10:30","12:00"], "2025-06-05": ["08:30","09:30","10:30"], "2025-06-13": ["11:00","12:00","13:00"], "2025-06-19": ["14:30","15:30"] },
-    p16: { "2025-05-31": ["09:30","10:30","12:00"], "2025-06-02": ["10:00","11:00","12:00"], "2025-06-11": ["13:15","14:15"], "2025-06-17": ["09:00","10:00","11:00"] },
-    p17: { "2025-05-31": ["09:30","10:30","12:00"], "2025-06-04": ["09:00","10:00","11:00"], "2025-06-10": ["12:00","13:00","14:00"], "2025-06-15": ["15:00","16:00"] },
-    p18: { "2025-05-31": ["09:30","10:30","12:00"], "2025-06-01": ["08:00","09:00","10:00"], "2025-06-08": ["11:30","12:30","13:30"], "2025-06-20": ["14:00","15:00","16:00"] }
+    p1:  { "2025-06-15": ["09:30","10:30","12:00"], "2025-06-20": ["09:00","10:00","11:00"], "2025-06-17": ["14:00","15:00"], "2025-06-25": ["08:30","09:30","10:30"] },
+    p2:  { "2025-06-15": ["09:30","10:30","12:00"], "2025-06-23": ["10:00","13:00","16:00"], "2025-06-19": ["09:00","11:00"], "2025-06-25": ["12:00","14:00"] },
+    p3:  { "2025-06-15": ["09:30","10:30","12:00"], "2025-06-28": ["08:00","09:00","10:00","11:00"], "2025-06-18": ["13:30","14:30"], "2025-06-26": ["15:00","16:00"] },
+    p4:  { "2025-06-15": ["09:30","10:30","12:00"], "2025-06-25": ["09:30","10:30","11:30"], "2025-06-19": ["14:00","15:00","16:00"], "2025-06-28": ["08:00","09:00"] },
+    p5:  { "2025-06-15": ["09:30","10:30","12:00"], "2025-06-27": ["08:15","09:15","10:15"], "2025-06-17": ["13:00","14:00"], "2025-06-20": ["10:00","11:00","12:00"] },
+    p6:  { "2025-06-15": ["09:30","10:30","12:00"], "2025-06-22": ["09:00","10:00"], "2025-06-18": ["11:00","12:00","13:00"], "2025-06-29": ["14:00","15:00"] },
+    p7:  { "2025-06-15": ["09:30","10:30","12:00"], "2025-06-26": ["08:30","09:30","10:30"], "2025-06-17": ["13:00","14:00","15:00"], "2025-06-20": ["09:00","10:00"] },
+    p8:  { "2025-06-15": ["09:30","10:30","12:00"], "2025-06-21": ["10:00","11:00","12:00"], "2025-06-19": ["14:30","15:30"], "2025-06-26": ["08:00","09:00","10:00"] },
+    p9:  { "2025-06-15": ["09:30","10:30","12:00"], "2025-06-24": ["09:00","10:00","11:00"], "2025-06-18": ["13:00","14:00"], "2025-06-28": ["15:00","16:00"] },
+    p10: { "2025-06-15": ["09:30","10:30","12:00"], "2025-06-23": ["08:00","09:00","10:00"], "2025-06-17": ["11:00","12:00","13:00"], "2025-06-27": ["14:00","15:00"] },
+    p11: { "2025-06-15": ["09:30","10:30","12:00"], "2025-06-25": ["09:30","10:30","11:30"], "2025-06-19": ["13:00","14:00","15:00"], "2025-06-29": ["08:00","09:00"] },
+    p12: { "2025-06-15": ["09:30","10:30","12:00"], "2025-06-22": ["10:00","11:00","12:00"], "2025-06-18": ["14:00","15:00"], "2025-06-30": ["09:00","10:00","11:00"] },
+    p13: { "2025-06-15": ["09:30","10:30","12:00"], "2025-06-27": ["08:00","09:00","10:00"], "2025-06-18": ["11:30","12:30","13:30"], "2025-06-28": ["14:00","15:00"] },
+    p14: { "2025-06-15": ["09:30","10:30","12:00"], "2025-06-23": ["09:15","10:15","11:15"], "2025-06-19": ["13:00","14:00","15:00"], "2025-06-26": ["08:00","09:00"] },
+    p15: { "2025-06-15": ["09:30","10:30","12:00"], "2025-06-25": ["08:30","09:30","10:30"], "2025-06-16": ["11:00","12:00","13:00"], "2025-06-29": ["14:30","15:30"] },
+    p16: { "2025-06-15": ["09:30","10:30","12:00"], "2025-06-22": ["10:00","11:00","12:00"], "2025-06-17": ["13:15","14:15"], "2025-06-27": ["09:00","10:00","11:00"] },
+    p17: { "2025-06-15": ["09:30","10:30","12:00"], "2025-06-24": ["09:00","10:00","11:00"], "2025-06-18": ["12:00","13:00","14:00"], "2025-06-25": ["15:00","16:00"] },
+    p18: { "2025-06-15": ["09:30","10:30","12:00"], "2025-06-21": ["08:00","09:00","10:00"], "2025-06-18": ["11:30","12:30","13:30"], "2025-06-30": ["14:00","15:00","16:00"] }
   };
 
   const symptomMap = {
@@ -1675,8 +1695,6 @@ document.addEventListener("DOMContentLoaded", () => {
   };
 
   const URGENT_FEE_KOBO = 500 * 100;
-
-  const appointments = [];
 
   let year               = new Date().getFullYear();
   let month              = new Date().getMonth();
@@ -1758,16 +1776,22 @@ document.addEventListener("DOMContentLoaded", () => {
   const richPastSection       = document.getElementById("rich-past");
   const richFavoritesSection  = document.getElementById("rich-favorites");
 
+  const appointments = [];
+  const uid = auth.currentUser.uid;
+  db.collection('users').doc(uid)
+    .collection('appointments')
+    .get()
+    .then(snap => {
+      snap.docs.forEach(d => {
+        const a = d.data();
+        appointments.push(a);
+        addToRichDashboard(a);
+      });
+      renderUpcomingCalendarWidget();
+    })
+    .catch(err => console.error("Failed loading appointments:", err));
 
-  const stored = localStorage.getItem("appointments");
-  if (stored) {
-    const arr = JSON.parse(stored);
-    arr.forEach(a => {
-      appointments.push(a);
-      addToRichDashboard(a);
-    });
-    renderUpcomingCalendarWidget();
-  }
+ 
 
   const draft = JSON.parse(localStorage.getItem("urgentDraft") || "{}");
   for (let key in draft) {
@@ -2167,8 +2191,11 @@ ${providers.map(p => `
         onClose: function() {},
         callback: function(response) {
           const id = generateId("U");
-          appointments.push({ id, name: urgentProviderName, date: uDate, time: uTime, urgent: true });
-          localStorage.setItem("appointments", JSON.stringify(appointments));
+         const newAppt = { id, name: urgentProviderName, date: uDate, time: uTime, urgent: true };
+       appointments.push(newAppt);
+       db.collection('users').doc(uid)
+         .collection('appointments').doc(id)
+         .set(newAppt);
           addToRichDashboard({ id, name: urgentProviderName, date: uDate, time: uTime, urgent: true });
           renderUpcomingCalendarWidget();
           urgentFlow = false;
@@ -2178,8 +2205,11 @@ ${providers.map(p => `
       handler.openIframe();
     } else {
       const id = generateId();
-      appointments.push({ id, name: providerName, date: selDate, time: selTime, urgent: false });
-      localStorage.setItem("appointments", JSON.stringify(appointments));
+      const newAppt = { id, name: providerName, date: selDate, time: selTime, urgent: false };
+      appointments.push(newAppt);
+      db.collection('users').doc(uid)
+        .collection('appointments').doc(id)
+        .set(newAppt);
       addToRichDashboard({ id, name: providerName, date: selDate, time: selTime, urgent: false });
       renderUpcomingCalendarWidget();
       confirmModal.hidden = true;
@@ -2192,7 +2222,11 @@ ${providers.map(p => `
     const idx = appointments.findIndex(a => a.id === id);
     if (idx > -1) {
       appointments.splice(idx, 1);
-      localStorage.setItem("appointments", JSON.stringify(appointments));
+      const apptId = cancelYes.dataset.apptId;
+      db.collection('users').doc(uid)
+        .collection('appointments').doc(apptId)
+        .delete()
+        .catch(err => console.error("Failed delete:", err));
     }
     const card = document.querySelector(`.card[data-id="${id}"]`);
     if (card) card.remove();
