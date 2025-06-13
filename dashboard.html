@@ -9,9 +9,10 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"/>
 
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
 
 <style>
   :root {
@@ -1480,7 +1481,8 @@ html.dark #insightsContainer .card a.btn-secondary {
   };
   firebase.initializeApp(firebaseConfig);
   const auth = firebase.auth();
-
+  const db   = firebase.firestore();
+  
   document.addEventListener("DOMContentLoaded", () => {
 
     const sidebar             = document.getElementById("sidebar");
@@ -1517,7 +1519,7 @@ html.dark #insightsContainer .card a.btn-secondary {
 
     auth.onAuthStateChanged(user => {
       if (!user) {
-        window.location.href = "index.html";
+         window.location.href = "index.html?modal=signin";
         return;
       }
       const displayName = user.displayName || user.email.split("@")[0];
@@ -1675,6 +1677,10 @@ html.dark #insightsContainer .card a.btn-secondary {
       const arr = JSON.parse(localStorage.getItem(key) || "[]");
       arr.push(new Date().toISOString());
       localStorage.setItem(key, JSON.stringify(arr));
+      const uid = firebase.auth().currentUser.uid;
+    db.collection('userStats').doc(uid)
+      .set({ pharmacy: firebase.firestore.FieldValue.increment(1) }, { merge: true })
+      .catch(err => console.error('Firestore increment failed:', err));
     }
     recordPharmacyTimestamp();
 
@@ -1791,21 +1797,19 @@ html.dark #insightsContainer .card a.btn-secondary {
       return labels;
     }
 
-     function displayStats() {
-      statsData.herbal   = Storage.getCount("Herbal");
-      statsData.psych    = Storage.getCount("Psych");
-      statsData.diet     = Storage.getCount("Diet");
-      statsData.pharmacy = Storage.getCount("Pharmacy");
-      statsData.consult  = Storage.getCount("Consult");
-
-      herbalQueriesEl.textContent   = statsData.herbal;
-      psychQueriesEl.textContent    = statsData.psych;
-      dietQueriesEl.textContent     = statsData.diet;
-      pharmacyQueriesEl.textContent = statsData.pharmacy;
-      consultQueriesEl.textContent  = statsData.consult;
-
-      statsData.labels = generateLast7DaysLabels();
-    }
+    function displayStats() {
+    const uid = auth.currentUser.uid;
+    db.collection('userStats').doc(uid).get()
+      .then(doc => {
+        const d = doc.exists ? doc.data() : {};
+        herbalQueriesEl.textContent   = d.herbal    || 0;
+       psychQueriesEl.textContent    = d.psych     || 0;
+        dietQueriesEl.textContent     = d.diet      || 0;
+        pharmacyQueriesEl.textContent = d.pharmacy  || 0;
+        consultQueriesEl.textContent  = d.consult   || 0;
+     })
+      .catch(err => console.error('Stats fetch failed:', err));
+  }
 
     let distributionChart, dailyChart;
     function initializeCharts() {
