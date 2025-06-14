@@ -1867,7 +1867,6 @@ html.dark #compoundList:focus {
   <input type="text" id="drugFilter" placeholder="e.g. Paracetamol, Antibiotic…" style="width:100%; padding:0.5rem; margin-bottom:0.75rem; border:2px solid var(--pharm-primary-alt); border-radius:var(--radius);">
 
   <div id="drugList" style="max-height:200px; overflow-y:auto; border:1px solid var(--pharm-muted); border-radius:var(--radius); padding:0.5rem;">
-    <!-- JS will render each drug here as a row with thumbnail, checkbox, name, stock badge, price, quantity -->
   </div>
 
   <!-- Coupon code -->
@@ -1896,16 +1895,24 @@ html.dark #compoundList:focus {
   <label>Full Name:
       <input type="text" id="buyerName" placeholder="e.g. John Doe" required>
     </label>
-    <label>Phone Number:
-      <input 
-        type="tel" 
-        id="buyerPhone" 
-        placeholder="+233501234567" 
-        pattern="\+\d{10,15}" 
-        required
-      >
+     <label>Country & Phone Number:
+      <div style="display:flex; gap:0.5rem; align-items:center;">
+        <select id="countrySelect" required>
+          <option value="GH" data-dial="+233" selected>🇬🇭 Ghana</option>
+          <option value="US" data-dial="+1">🇺🇸 United States</option>
+          <option value="GB" data-dial="+44">🇬🇧 United Kingdom</option>
+          <option value="NG" data-dial="+234">🇳🇬 Nigeria</option>
+        </select>
+        <input
+          type="tel"
+          id="buyerPhone"
+          placeholder="+233 …"
+          pattern="\d{6,14}"
+          required
+        >
+      </div>
       <small style="display:block; font-size:0.85rem; color:var(--pharm-muted);">
-        Format: <code>+CountryCodeNumber</code> (10–15 digits). e.g. <code>+233501234567</code>
+        We’ll prefix with country code automatically.
       </small>
     </label>
     <label>Email Address:
@@ -2099,7 +2106,16 @@ html.dark #compoundList:focus {
   }
 
   document.addEventListener("DOMContentLoaded", () => {
-   
+
+    const countrySelect = document.getElementById("countrySelect");
+ const buyerPhone   = document.getElementById("buyerPhone");
+
+  countrySelect.addEventListener("change", () => {
+    const code = countrySelect.selectedOptions[0].dataset.dial;
+    buyerPhone.value = "";
+    buyerPhone.placeholder = code + " …";
+  });
+    
     const themeToggle = document.getElementById("themeToggle");
     const savedTheme = localStorage.getItem("epharmacy-theme");
     if (savedTheme === "dark") {
@@ -2192,7 +2208,7 @@ html.dark #compoundList:focus {
     name: "Amoxicillin 500mg",
     price: 48.00,
     thumb: "amoxicillin.jpg",
-    stock: false,
+    stock: true,
     category: "Antibiotic",
     bulkThreshold: 10,
     bulkPrice: 43.20
@@ -2201,7 +2217,7 @@ html.dark #compoundList:focus {
     name: "Ciprofloxacin 500mg",
     price: 30.00,
     thumb: "ciprofloxacin.jpg",
-    stock: true,
+    stock: false,
     category: "Antibiotic",
     bulkThreshold: 10,
     bulkPrice: 27.00
@@ -2216,7 +2232,7 @@ html.dark #compoundList:focus {
     bulkPrice: 36.00
   },
   {
-    name: "Metformin 500mg",
+    name: "Metformin 850mg",
     price: 20.00,
     thumb: "metformin.jpg",
     stock: true,
@@ -2495,7 +2511,7 @@ html.dark #compoundList:focus {
     bulkPrice: 19.80
   },
   {
-    name: "Ibuprofen 400mg",
+    name: "Ibuprofen 200mg",
     price: 15.00,
     thumb: "ibuprofen.jpg",
     stock: true,
@@ -2617,20 +2633,6 @@ addToCartBtns.forEach(btn => btn.addEventListener("click", updateCartPrice));
 
     const suggestDrugBtn = document.getElementById("suggestDrug");
   suggestDrugBtn.addEventListener("click", async () => {
-   
-    const pairingDiv = document.createElement("div");
-    pairingDiv.style.marginTop = "0.5rem";
-    pairingDiv.innerHTML = `
-      <strong>Recommended Pairings:</strong>
-      <ul>
-        <li>Electrolyte Drink (e.g. Oral Rehydration Salts)</li>
-        <li>Probiotic Capsule</li>
-      </ul>`;
-    document.getElementById("suggestionMsg").append(pairingDiv);
-  });
-    
- 
-  suggestDrugBtn.addEventListener("click", async () => {
     const symptoms = symptomInputBuy.value.trim();
     suggestionMsg.textContent = "";
     if (!symptoms) {
@@ -2640,8 +2642,8 @@ addToCartBtns.forEach(btn => btn.addEventListener("click", updateCartPrice));
     suggestionMsg.innerHTML = `Analyzing symptoms… <span class="spinner"></span>`;
     try {
       const sysPrompt = `
-You are a clinical pharmacist. A patient reports these symptoms: "${symptoms}". 
-From the list below, suggest up to FIVE drugs (return only the names, comma-separated, matching the list). If only one is appropriate, that’s fine.
+You are a clinical pharmacist. A patient reports these symptoms: "${symptoms}".
+From the list below, suggest up to FIVE drugs (return only the names, comma-separated, matching the list).
 ${drugsData.map(d => d.name).join(", ")}.
       `.trim();
 
@@ -2650,31 +2652,30 @@ ${drugsData.map(d => d.name).join(", ")}.
         { role: "user",   content: `Symptoms: ${symptoms}` }
       ]);
 
-     const rawNames = aiReply
-       .split(/[\r\n]+/)[0]          
-       .split(",")                
-       .map(s => s.trim())
-       .filter(s => s.length > 0)
-       .slice(0, 5);               
+      const rawNames = aiReply
+        .split(/[\r\n]+/)[0]
+        .split(",")
+        .map(s => s.trim())
+        .filter(s => s);
 
-     Array.from(drugSelect.options).forEach(opt => opt.selected = false);
-     const matchedNames = [];
+      document.querySelectorAll(".drug-check").forEach(cb => cb.checked = false);
 
-     rawNames.forEach(name => {
-       const idx = drugsData.findIndex(d => d.name.toLowerCase() === name.toLowerCase());
-       if (idx >= 0) {
-         drugSelect.options[idx].selected = true;
-         matchedNames.push(drugsData[idx].name);
-       }
-     });
+      const matched = [];
+      rawNames.forEach(name => {
+        const idx = drugsData.findIndex(d => d.name.toLowerCase() === name.toLowerCase());
+        if (idx >= 0) {
+          document.querySelector(`.drug-check[data-idx="${idx}"]`).checked = true;
+          matched.push(drugsData[idx].name);
+        }
+      });
 
-     if (matchedNames.length > 0) {
-       updateSinglePrice(); 
-       suggestionMsg.textContent = `AI suggests: ${matchedNames.map(n => `"${n}"`).join(", ")}.`;
-     } else {
-       suggestionMsg.textContent = `AI suggested "${rawNames.join(", ")}", which isn't in our list. Please choose manually.`;
-     }
-   } catch (err) {
+      if (matched.length) {
+        updateCartPrice();
+        suggestionMsg.textContent = `AI suggests: ${matched.join(", ")}.`;
+      } else {
+        suggestionMsg.textContent = `AI suggested: ${rawNames.join(", ")}, but none matched our list.`;
+      }
+    } catch (err) {
       console.error(err);
       suggestionMsg.textContent = "⚠️ Unable to get suggestion right now. Please try again.";
     }
@@ -2712,6 +2713,8 @@ ${drugsData.map(d => d.name).join(", ")}.
 
     orderDetails.style.display = "none";
   cartSummary.style.display  = "none";
+
+ const payButton = document.getElementById("payWithPaystack");
 
   payButton.addEventListener("click", () => {
   if (cartItems.length === 0) {
