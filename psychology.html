@@ -2055,8 +2055,9 @@ Storage.recordCategory("Psych");
        const startSpeech = document.getElementById("startSpeech");
       const recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
       recognition.lang = 'en-US';
-      recognition.interimResults = false;
-
+recognition.interimResults = true;
+recognition.maxAlternatives = 1;
+     
       startSpeech.addEventListener("click", () => {
         recognition.start();
         startSpeech.classList.add("listening");
@@ -2064,8 +2065,12 @@ Storage.recordCategory("Psych");
       });
 
       recognition.addEventListener("result", e => {
-        chatInput.value = e.results[0][0].transcript;
-      });
+  let combined = "";
+  for (let i = 0; i < e.results.length; i++) {
+    combined += e.results[i][0].transcript;
+  }
+  chatInput.value = combined;       
+});
 
       function stopAndSend() {
         sendChatBtn.click();
@@ -2077,7 +2082,8 @@ Storage.recordCategory("Psych");
      let lastDateHeader = null;
 
  let chatHistory = JSON.parse(localStorage.getItem("therapyChatHistory") || "[]");
-      function formatDateSeparator(date) {
+ const chatCleared = localStorage.getItem("chatCleared") === "1";  
+     function formatDateSeparator(date) {
         const today = new Date();
         const diffDays = Math.floor((today.setHours(0, 0, 0, 0) - date.setHours(0, 0, 0, 0)) / 86400000);
         if (diffDays === 0) return "Today";
@@ -2104,12 +2110,15 @@ Storage.recordCategory("Psych");
         chatBox.scrollTop = chatBox.scrollHeight;
       }
 
-      chatHistory.forEach(m => {
-        const ts = m.timestamp ? new Date(m.timestamp) : new Date();
-        addMessage(m.who, m.text, ts);
-      });
+      if (!chatCleared) {
+        chatHistory.forEach(m => {
+          const ts = m.timestamp ? new Date(m.timestamp) : new Date();
+          addMessage(m.who, m.text, ts);
+        });
+      }
       
       sendChatBtn.onclick = async (e) => {
+        localStorage.removeItem("chatCleared");
         e.preventDefault();
         const userText = chatInput.value.trim();
         if (!userText) return;
@@ -2221,7 +2230,9 @@ You are a warm, empathic, licensed clinical psychologist skilled in CBT, DBT, an
      clearChatBtn.onclick = () => {
         chatBox.innerHTML = "";
         lastDateHeader = null;
+        localStorage.setItem("chatCleared", "1");
       };
+     
       viewHistoryBtn.onclick = () => {
         const modal = document.createElement("div");
         modal.className = "history-modal";
