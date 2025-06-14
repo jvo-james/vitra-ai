@@ -2631,16 +2631,21 @@ html.dark #compoundList:focus {
   }
 ];
 
-    const d   = drugsData[idx];
-const md  = drugModalData[d.name];
-document.getElementById("drugModalImg").src = d.thumb;
-document.getElementById("drugModalImg").alt = d.name;
-document.getElementById("drugModalName").textContent= d.name;
-document.getElementById("drugModalDesc").textContent= md.desc;
-const ul = document.getElementById("drugModalDetails");
-ul.innerHTML = md.details.map(li => `<li>${li}</li>`).join("");
-document.getElementById("drugModal").hidden = false;
+function openDrugModal(idx) {
+  const d  = drugsData[idx];
+  const md = drugModalData[d.name];
 
+  document.getElementById("drugModalImg").src = d.thumb;
+  document.getElementById("drugModalImg").alt = d.name;
+  document.getElementById("drugModalName").textContent= d.name;
+  document.getElementById("drugModalDesc").textContent= md.desc;
+
+  const ul = document.getElementById("drugModalDetails");
+  ul.innerHTML = md.details.map(li => `<li>${li}</li>`).join("");
+
+  document.getElementById("drugModal").hidden = false;
+}
+    
 // ── Place this right after your drugsData definition ──
 const drugModalData = {
   "Paracetamol 500mg": {
@@ -3122,7 +3127,8 @@ function renderDrugList(filter="") {
         <div>₵${drug.price.toFixed(2)}</div>
         <input type="number" min="1" value="1" class="qty-input" data-idx="${idx}">
       `;
-      container.append(row);
+     row.addEventListener("click", () => openDrugModal(idx));
+     container.append(row);
     });
 }
 renderDrugList();
