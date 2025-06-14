@@ -1878,20 +1878,12 @@ html.dark #compoundList:focus {
     <div id="promoMsg" style="margin-top:0.5rem; font-size:0.9rem; color:var(--pharm-accent);"></div>
   </div>
 
-  <div style="margin-top:1rem; display:flex; justify-content:flex-start; align-items:center; gap:1rem;">
-    <button id="addToCart" class="btn"><i class="fas fa-cart-plus"></i> Add to Cart</button>
-    <div id="priceDisplay" style="font-weight:600; font-size:1rem;"></div>
+ <div class="action-row" style="margin-top:1rem; display:flex; align-items:center; gap:1rem;">
+    <button id="addToCartBtn" class="btn add-to-cart">
+      <i class="fas fa-cart-plus"></i> Add to Cart
+    </button>
+    <div id="priceDisplay" class="price-display" style="font-weight:600;"></div>
   </div>
- <div style="margin-top:0.5rem;">
-   <button id="addToCart" class="btn" style="background:var(--pharm-primary-alt);">
-     <i class="fas fa-cart-plus"></i> Add to Cart
-   </button>
- </div>
-  <div id="priceDisplay" style="margin-top:0.5rem; font-weight:600;"></div>
-<div style="margin-top:1rem; display:flex; align-items:center; gap:1rem;">
-  <button id="addToCart" class="btn"><i class="fas fa-cart-plus"></i> Add to Cart</button>
-   <div id="priceDisplay"></div>
- </div>
   
  <div id="cartSummary" style="margin-top:1rem; display:none; border:1px solid var(--pharm-secondary); border-radius:var(--radius); padding:var(--padding); background:var(--pharm-bg);">
    <h4 style="margin-bottom:0.75rem; color:var(--pharm-primary-alt);">Selected Items:</h4>
@@ -2595,6 +2587,9 @@ document.getElementById("applyPromo").onclick = () => {
   updateCartPrice();
 };
 
+const addToCartBtns = document.querySelectorAll(".add-to-cart");
+const priceDisplay  = document.getElementById("priceDisplay");
+
 function updateCartPrice() {
   const checks = Array.from(document.querySelectorAll(".drug-check:checked"));
   let total = 0;
@@ -2607,13 +2602,18 @@ function updateCartPrice() {
   });
   // promo
   total = total * (1 - promoDiscount);
-  document.getElementById("priceDisplay").innerHTML = `
+ priceDisplay.innerHTML = `
     <div>Subtotal: ₵${total.toFixed(2)}</div>
     <div style="font-size:0.9rem; color:var(--pharm-muted);">🚚 Est. delivery: 2–4 days</div>
   `;
 }
 
-document.getElementById("addToCart").onclick = updateCartPrice;
+addToCartBtns.forEach(btn => btn.addEventListener("click", updateCartPrice));
+ document.getElementById("drugList")
+   .addEventListener("input", e => {
+     if (e.target.matches(".drug-check, .qty-input")) updateCartPrice();
+   });
+    
 document.getElementById("drugList").addEventListener("input", e => {
   if (e.target.matches(".drug-check") || e.target.matches(".qty-input")) {
     updateCartPrice();
@@ -2638,7 +2638,6 @@ document.getElementById("drugList").addEventListener("input", e => {
   const suggestDrugBtn   = document.getElementById("suggestDrug");
   const suggestionMsg    = document.getElementById("suggestionMsg");
   const priceDisplay     = document.getElementById("priceDisplay");
-  const addToCartBtn     = document.getElementById("addToCart");
   const cartList         = document.getElementById("cartList");
   const cartTotal        = document.getElementById("cartTotal");
   const cartSummary      = document.getElementById("cartSummary");
