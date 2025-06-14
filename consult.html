@@ -12,10 +12,6 @@
     href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
   />
  <script defer src="https://js.paystack.co/v1/inline.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
-
 <style>
  
   :root {
@@ -816,7 +812,7 @@
 
   .modal .modal-content {
     background: var(--cb-surface);
-    padding: 2rem;
+    padding: 1.5rem;
     border-radius: var(--radius);
     max-width: 400px;
     width: 90%;
@@ -838,22 +834,18 @@
   }
 
   .modal .modal-content button {
-     margin: 0.5rem 0.5rem;
-  padding: 0.75rem 1.5rem;
-  font-size: 1rem;
-  border-radius: 0.5rem;
-  border: none;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.2);
-  cursor: pointer;
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
-  text-transform: uppercase;
-  font-weight: 600;
+    margin-right: 0.5rem;
+    padding: 0.5rem 1rem;
+    border: none;
+    border-radius: var(--radius);
+    cursor: pointer;
+    font-size: 0.9rem;
+    transition: background 0.2s ease, transform 0.2s ease;
   }
 
   .modal .modal-content button.btn-sm {
-   background: var(--cb-surface);
-  color: var(--cb-text);
- border: 2px solid var(--cb-primary-alt);
+    background: var(--cb-primary-alt);
+    color: #fff;
   }
 
   .modal .modal-content button.btn-sm:hover {
@@ -862,7 +854,7 @@
   }
 
   .modal .modal-content button.btn {
-    background: var(--cb-primary-alt);
+    background: var(--cb-accent);
     color: #fff;
   }
 
@@ -1017,7 +1009,7 @@
 
 #feature-rich-dashboard .card .actions .btn-reschedule i,
 #feature-rich-dashboard .card .actions .btn-cancel i {
-  font-size: 1rem; 
+  font-size: 1rem;     
   color: #fff;
 }
 
@@ -1173,15 +1165,6 @@
   background: #d4724f;
   transform: translateY(-2px);
 }
-.sidebar-overlay {
-  position: fixed;
-  top: 0; left: 0; right: 0; bottom: 0;
-  background: rgba(0,0,0,0.4);
-  z-index: 900;
-}
-.sidebar-overlay[hidden] {
-  display: none;
-}
 
 
 </style>
@@ -1189,16 +1172,19 @@
 
 
 <body>
- <div id="sidebarOverlay" class="sidebar-overlay" hidden></div>
+
   <aside id="sidebar">
- <a style="text-decoration: none;" href="dashboard.html">  <div class="logo">
+   <div class="logo">
       <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" fill="var(--primary)">
         <polygon points="10,10 25,90 50,40 75,90 90,10 65,10 50,70 35,10"/>
       </svg> <span class="logo-text">Vitra AI</span>
-    </div> </a>
+    </div>
 
     <nav>
       <ul>
+         <li>
+     <a href="dashboard.html"><i data-lucide="layout-dashboard"></i><span>Dashboard</span></a>
+        </li>
          <li>
      <a href="herbal.html"><i class="fas fa-seedling"></i><span>Herbal Medicine</span></a>
         </li>
@@ -1214,9 +1200,7 @@
  <a href="consult.html" id="consult-link" style="position:relative;">
       <i class="fas fa-calendar-check"></i><span>Consultation Booking</span></a>
         </li>
-  <li>
-    <a href="dashboard.html"><i class="fas fa-tachometer-alt"></i><span>Dashboard</span></a>
-        </li>
+       
       </ul>
     </nav>
     <button id="shrinkSidebar" title="Toggle sidebar">
@@ -1411,9 +1395,9 @@
     <div class="modal-content">
       <h3>Review Your Appointment</h3>
       <div id="confirmDetails"></div>
-      <button id="modalEdit" type="button" class="btn-sm">Edit</button>
-      <button id="modalConfirm" type="button" class="btn">Confirm Booking</button>
-      <button id="modalClose" type="button" class="btn-sm">Cancel</button>
+      <button id="modalEdit" class="btn-sm">Edit</button>
+      <button id="modalConfirm" class="btn">Confirm Booking</button>
+      <button id="modalClose" class="btn-sm">Cancel</button>
     </div>
   </div>
 
@@ -1421,8 +1405,8 @@
     <div class="modal-content">
       <h3>Cancel Appointment?</h3>
       <p id="cancelMsg"></p>
-      <button id="cancelNo" type="button" class="btn-sm">No, Keep It</button>
-      <button id="cancelYes" type="button" class="btn">Yes, Cancel</button>
+      <button id="cancelNo" class="btn-sm">No, Keep It</button>
+      <button id="cancelYes" class="btn">Yes, Cancel</button>
     </div>
   </div>
 
@@ -1434,55 +1418,9 @@
 
  <script defer src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
   <script src="storage.js"></script>
-  <script defer>
-     let uid;
-    const appointments = [];
- const firebaseConfig = {
-   apiKey: "AIzaSyBhaYOcLMXuobCT-vaXr-zXTZnBfaheAIY",
-   authDomain: "vitra-ai-712ea.firebaseapp.com",
-   projectId: "vitra-ai-712ea",
-   storageBucket: "vitra-ai-712ea.appspot.com",
-   messagingSenderId: "306868103753",
-   appId: "1:306868103753:web:e2d7700f8ad34c1e17ed98"
- };
- firebase.initializeApp(firebaseConfig);
- const auth = firebase.auth();
- const db   = firebase.firestore();
-
-auth.onAuthStateChanged(user => {
-    if (!user) {
-      location.href = "index.html?modal=signin";
-      return;
-    }
-   uid = user.uid;
-   db.collection('users').doc(uid)
-     .collection('appointments')
-     .get()
-     .then(snap => {
-       snap.docs.forEach(d => {
-         const a = d.data();
-         appointments.push(a);
-         addToRichDashboard(a);
-       });
-       renderUpcomingCalendarWidget();
-     })
-     .catch(err => console.error("Failed loading appointments:", err));
-
-   initConsultPage();
-  });
-function initConsultPage() {
-
-  const last = JSON.parse(localStorage.getItem("lastFlow") || "null");
-  if (last) {
-    providerName = last.providerName;
-   providerId   = last.providerId;
-    year         = last.year;
-   month        = last.month;
-    appointmentFlow.hidden = false;
-    chosenProvider.textContent = providerName;
-    buildCalendar(year, month);
-  }
-    
+<script defer>
+document.addEventListener("DOMContentLoaded", () => {
+  
   const providers = [
     {
       id: "p1",
@@ -1700,24 +1638,24 @@ function initConsultPage() {
   ];
 
   const availability = {
-    p1:  { "2025-06-15": ["09:30","10:30","12:00"], "2025-06-20": ["09:00","10:00","11:00"], "2025-06-17": ["14:00","15:00"], "2025-06-25": ["08:30","09:30","10:30"] },
-    p2:  { "2025-06-15": ["09:30","10:30","12:00"], "2025-06-23": ["10:00","13:00","16:00"], "2025-06-19": ["09:00","11:00"], "2025-06-25": ["12:00","14:00"] },
-    p3:  { "2025-06-15": ["09:30","10:30","12:00"], "2025-06-28": ["08:00","09:00","10:00","11:00"], "2025-06-18": ["13:30","14:30"], "2025-06-26": ["15:00","16:00"] },
-    p4:  { "2025-06-15": ["09:30","10:30","12:00"], "2025-06-25": ["09:30","10:30","11:30"], "2025-06-19": ["14:00","15:00","16:00"], "2025-06-28": ["08:00","09:00"] },
-    p5:  { "2025-06-15": ["09:30","10:30","12:00"], "2025-06-27": ["08:15","09:15","10:15"], "2025-06-17": ["13:00","14:00"], "2025-06-20": ["10:00","11:00","12:00"] },
-    p6:  { "2025-06-15": ["09:30","10:30","12:00"], "2025-06-22": ["09:00","10:00"], "2025-06-18": ["11:00","12:00","13:00"], "2025-06-29": ["14:00","15:00"] },
-    p7:  { "2025-06-15": ["09:30","10:30","12:00"], "2025-06-26": ["08:30","09:30","10:30"], "2025-06-17": ["13:00","14:00","15:00"], "2025-06-20": ["09:00","10:00"] },
-    p8:  { "2025-06-15": ["09:30","10:30","12:00"], "2025-06-21": ["10:00","11:00","12:00"], "2025-06-19": ["14:30","15:30"], "2025-06-26": ["08:00","09:00","10:00"] },
-    p9:  { "2025-06-15": ["09:30","10:30","12:00"], "2025-06-24": ["09:00","10:00","11:00"], "2025-06-18": ["13:00","14:00"], "2025-06-28": ["15:00","16:00"] },
-    p10: { "2025-06-15": ["09:30","10:30","12:00"], "2025-06-23": ["08:00","09:00","10:00"], "2025-06-17": ["11:00","12:00","13:00"], "2025-06-27": ["14:00","15:00"] },
-    p11: { "2025-06-15": ["09:30","10:30","12:00"], "2025-06-25": ["09:30","10:30","11:30"], "2025-06-19": ["13:00","14:00","15:00"], "2025-06-29": ["08:00","09:00"] },
-    p12: { "2025-06-15": ["09:30","10:30","12:00"], "2025-06-22": ["10:00","11:00","12:00"], "2025-06-18": ["14:00","15:00"], "2025-06-30": ["09:00","10:00","11:00"] },
-    p13: { "2025-06-15": ["09:30","10:30","12:00"], "2025-06-27": ["08:00","09:00","10:00"], "2025-06-18": ["11:30","12:30","13:30"], "2025-06-28": ["14:00","15:00"] },
-    p14: { "2025-06-15": ["09:30","10:30","12:00"], "2025-06-23": ["09:15","10:15","11:15"], "2025-06-19": ["13:00","14:00","15:00"], "2025-06-26": ["08:00","09:00"] },
-    p15: { "2025-06-15": ["09:30","10:30","12:00"], "2025-06-25": ["08:30","09:30","10:30"], "2025-06-16": ["11:00","12:00","13:00"], "2025-06-29": ["14:30","15:30"] },
-    p16: { "2025-06-15": ["09:30","10:30","12:00"], "2025-06-22": ["10:00","11:00","12:00"], "2025-06-17": ["13:15","14:15"], "2025-06-27": ["09:00","10:00","11:00"] },
-    p17: { "2025-06-15": ["09:30","10:30","12:00"], "2025-06-24": ["09:00","10:00","11:00"], "2025-06-18": ["12:00","13:00","14:00"], "2025-06-25": ["15:00","16:00"] },
-    p18: { "2025-06-15": ["09:30","10:30","12:00"], "2025-06-21": ["08:00","09:00","10:00"], "2025-06-18": ["11:30","12:30","13:30"], "2025-06-30": ["14:00","15:00","16:00"] }
+    p1:  { "2025-05-31": ["09:30","10:30","12:00"], "2025-06-10": ["09:00","10:00","11:00"], "2025-06-12": ["14:00","15:00"], "2025-06-15": ["08:30","09:30","10:30"] },
+    p2:  { "2025-05-31": ["09:30","10:30","12:00"], "2025-06-03": ["10:00","13:00","16:00"], "2025-06-04": ["09:00","11:00"], "2025-06-15": ["12:00","14:00"] },
+    p3:  { "2025-05-31": ["09:30","10:30","12:00"], "2025-06-08": ["08:00","09:00","10:00","11:00"], "2025-06-11": ["13:30","14:30"], "2025-06-16": ["15:00","16:00"] },
+    p4:  { "2025-05-31": ["09:30","10:30","12:00"], "2025-06-05": ["09:30","10:30","11:30"], "2025-06-09": ["14:00","15:00","16:00"], "2025-06-18": ["08:00","09:00"] },
+    p5:  { "2025-05-31": ["09:30","10:30","12:00"], "2025-06-07": ["08:15","09:15","10:15"], "2025-06-13": ["13:00","14:00"], "2025-06-17": ["10:00","11:00","12:00"] },
+    p6:  { "2025-05-31": ["09:30","10:30","12:00"], "2025-06-02": ["09:00","10:00"], "2025-06-14": ["11:00","12:00","13:00"], "2025-06-19": ["14:00","15:00"] },
+    p7:  { "2025-05-31": ["09:30","10:30","12:00"], "2025-06-06": ["08:30","09:30","10:30"], "2025-06-12": ["13:00","14:00","15:00"], "2025-06-20": ["09:00","10:00"] },
+    p8:  { "2025-05-31": ["09:30","10:30","12:00"], "2025-06-01": ["10:00","11:00","12:00"], "2025-06-11": ["14:30","15:30"], "2025-06-16": ["08:00","09:00","10:00"] },
+    p9:  { "2025-05-31": ["09:30","10:30","12:00"], "2025-06-04": ["09:00","10:00","11:00"], "2025-06-13": ["13:00","14:00"], "2025-06-18": ["15:00","16:00"] },
+    p10: { "2025-05-31": ["09:30","10:30","12:00"], "2025-06-03": ["08:00","09:00","10:00"], "2025-06-10": ["11:00","12:00","13:00"], "2025-06-17": ["14:00","15:00"] },
+    p11: { "2025-05-31": ["09:30","10:30","12:00"], "2025-06-05": ["09:30","10:30","11:30"], "2025-06-14": ["13:00","14:00","15:00"], "2025-06-19": ["08:00","09:00"] },
+    p12: { "2025-05-31": ["09:30","10:30","12:00"], "2025-06-02": ["10:00","11:00","12:00"], "2025-06-08": ["14:00","15:00"], "2025-06-20": ["09:00","10:00","11:00"] },
+    p13: { "2025-05-31": ["09:30","10:30","12:00"], "2025-06-07": ["08:00","09:00","10:00"], "2025-06-12": ["11:30","12:30","13:30"], "2025-06-18": ["14:00","15:00"] },
+    p14: { "2025-05-31": ["09:30","10:30","12:00"], "2025-06-03": ["09:15","10:15","11:15"], "2025-06-09": ["13:00","14:00","15:00"], "2025-06-16": ["08:00","09:00"] },
+    p15: { "2025-05-31": ["09:30","10:30","12:00"], "2025-06-05": ["08:30","09:30","10:30"], "2025-06-13": ["11:00","12:00","13:00"], "2025-06-19": ["14:30","15:30"] },
+    p16: { "2025-05-31": ["09:30","10:30","12:00"], "2025-06-02": ["10:00","11:00","12:00"], "2025-06-11": ["13:15","14:15"], "2025-06-17": ["09:00","10:00","11:00"] },
+    p17: { "2025-05-31": ["09:30","10:30","12:00"], "2025-06-04": ["09:00","10:00","11:00"], "2025-06-10": ["12:00","13:00","14:00"], "2025-06-15": ["15:00","16:00"] },
+    p18: { "2025-05-31": ["09:30","10:30","12:00"], "2025-06-01": ["08:00","09:00","10:00"], "2025-06-08": ["11:30","12:30","13:30"], "2025-06-20": ["14:00","15:00","16:00"] }
   };
 
   const symptomMap = {
@@ -1742,6 +1680,8 @@ function initConsultPage() {
 
   const URGENT_FEE_KOBO = 500 * 100;
 
+  const appointments = [];
+
   let year               = new Date().getFullYear();
   let month              = new Date().getMonth();
   let selDate            = "";    
@@ -1755,9 +1695,8 @@ function initConsultPage() {
   let widgetYear         = new Date().getFullYear(); 
   let widgetMonth        = new Date().getMonth();   
 
-  const sidebar    = document.getElementById("sidebar");
- const overlay    = document.getElementById("sidebarOverlay");
- const hamburger  = document.getElementById("hamburger");
+  const sidebar               = document.getElementById("sidebar");
+  const hamburger             = document.getElementById("hamburger");
   const shrinkSidebarBtn      = document.getElementById("shrinkSidebar");
   const themeToggle           = document.getElementById("themeToggle");
   const heroBookBtn           = document.getElementById("heroBookBtn");
@@ -1823,6 +1762,17 @@ function initConsultPage() {
   const richPastSection       = document.getElementById("rich-past");
   const richFavoritesSection  = document.getElementById("rich-favorites");
 
+
+  const stored = localStorage.getItem("appointments");
+  if (stored) {
+    const arr = JSON.parse(stored);
+    arr.forEach(a => {
+      appointments.push(a);
+      addToRichDashboard(a);
+    });
+    renderUpcomingCalendarWidget();
+  }
+
   const draft = JSON.parse(localStorage.getItem("urgentDraft") || "{}");
   for (let key in draft) {
     const el = document.getElementById("urgent" + key);
@@ -1854,17 +1804,22 @@ function initConsultPage() {
   }
 Storage.recordCategory("Consult");
 
-  function openSidebar() {
-   document.body.classList.add("sidebar-open");
-   overlay.removeAttribute("hidden");
- }
- function closeSidebar() {
-   document.body.classList.remove("sidebar-open");
-   overlay.setAttribute("hidden","");
- }
- hamburger.addEventListener("click", openSidebar);
- overlay.addEventListener("click", closeSidebar);
+  hamburger.addEventListener("click", () => {
+    document.body.classList.toggle("sidebar-open");
+  });
 
+  shrinkSidebarBtn.addEventListener("click", () => {
+    document.body.classList.toggle("sidebar-shrink");
+    const icon = shrinkSidebarBtn.querySelector("i");
+    icon.classList.toggle("fa-chevron-left");
+    icon.classList.toggle("fa-chevron-right");
+  });
+
+  themeToggle.addEventListener("click", () => {
+    document.documentElement.classList.toggle("dark");
+    themeToggle.classList.toggle("fa-moon");
+    themeToggle.classList.toggle("fa-sun");
+  });
 
   heroBookBtn.addEventListener("click", () => {
     const target = document.querySelector(heroBookBtn.dataset.target);
@@ -2216,47 +2171,23 @@ ${providers.map(p => `
         onClose: function() {},
         callback: function(response) {
           const id = generateId("U");
-         const newAppt = { id, name: urgentProviderName, date: uDate, time: uTime, urgent: true };
-       db.collection('users').doc(uid)
-    .collection('appointments').doc(id)
-    .set(newAppt)
-    .then(() => {
-      appointments.push(newAppt);
-      addToRichDashboard(newAppt);
-      renderUpcomingCalendarWidget();
-      showToast("✅ Urgent appointment booked!");
-    })
-    .catch(err => {
-      console.error("Failed saving urgent appointment:", err);
-      showToast("❌ Could not complete urgent booking.");
-    });
+          appointments.push({ id, name: urgentProviderName, date: uDate, time: uTime, urgent: true });
+          localStorage.setItem("appointments", JSON.stringify(appointments));
+          addToRichDashboard({ id, name: urgentProviderName, date: uDate, time: uTime, urgent: true });
+          renderUpcomingCalendarWidget();
+          urgentFlow = false;
+          confirmModal.hidden = true;
         }
       });
       handler.openIframe();
     } else {
       const id = generateId();
-      const newAppt = { id, name: providerName, date: selDate, time: selTime, urgent: false };
-db.collection('users').doc(uid)
-  .collection('appointments').doc(id)
-  .set(newAppt)
-  .then(() => {
-    appointments.push(newAppt);
-    addToRichDashboard(newAppt);
-    renderUpcomingCalendarWidget();
-    showToast("✅ Appointment booked!");
-  })
-  .catch(err => {
-    console.error("Failed to save appointment:", err);
-    showToast("❌ Could not save appointment. Check your connection.");
-  });
-
+      appointments.push({ id, name: providerName, date: selDate, time: selTime, urgent: false });
+      localStorage.setItem("appointments", JSON.stringify(appointments));
+      addToRichDashboard({ id, name: providerName, date: selDate, time: selTime, urgent: false });
+      renderUpcomingCalendarWidget();
       confirmModal.hidden = true;
-       showToast("✅ Appointment booked!");
     }
-    localStorage.setItem("lastFlow", JSON.stringify({
-      providerName, providerId,
-      year, month
-    }));
   });
 
 
@@ -2265,11 +2196,7 @@ db.collection('users').doc(uid)
     const idx = appointments.findIndex(a => a.id === id);
     if (idx > -1) {
       appointments.splice(idx, 1);
-      const apptId = cancelYes.dataset.apptId;
-      db.collection('users').doc(uid)
-        .collection('appointments').doc(apptId)
-        .delete()
-        .catch(err => console.error("Failed delete:", err));
+      localStorage.setItem("appointments", JSON.stringify(appointments));
     }
     const card = document.querySelector(`.card[data-id="${id}"]`);
     if (card) card.remove();
@@ -2451,33 +2378,7 @@ db.collection('users').doc(uid)
       richFavoritesSection.hidden  = (btn.dataset.tab !== "rich-favorites");
     });
   });
-
-   if (localStorage.getItem("vt-dark") === "1") {
-    document.documentElement.classList.add("dark");
-    themeToggle.classList.replace("fa-moon","fa-sun");
-  }
-  if (localStorage.getItem("vt-sidebar") === "1") {
-    document.body.classList.add("sidebar-shrink");
-    shrinkSidebarBtn.querySelector("i")
-      .classList.replace("fa-chevron-left","fa-chevron-right");
-  }
-
-  themeToggle.addEventListener("click", () => {
-    const isDark = document.documentElement.classList.toggle("dark");
-    themeToggle.classList.toggle("fa-moon");
-    themeToggle.classList.toggle("fa-sun");
-    localStorage.setItem("vt-dark", isDark ? "1" : "0");
-  });
-
-  shrinkSidebarBtn.addEventListener("click", () => {
-    const shrunk = document.body.classList.toggle("sidebar-shrink");
-    const icon = shrinkSidebarBtn.querySelector("i");
-    icon.classList.toggle("fa-chevron-left");
-    icon.classList.toggle("fa-chevron-right");
-    localStorage.setItem("vt-sidebar", shrunk ? "1" : "0");
-  });
-
-}
+});
 </script>
 
   
