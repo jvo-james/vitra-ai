@@ -1173,6 +1173,15 @@
   background: #d4724f;
   transform: translateY(-2px);
 }
+.sidebar-overlay {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0,0,0,0.4);
+  z-index: 900;
+}
+.sidebar-overlay[hidden] {
+  display: none;
+}
 
 
 </style>
@@ -1180,7 +1189,7 @@
 
 
 <body>
-
+ <div id="sidebarOverlay" class="sidebar-overlay" hidden></div>
   <aside id="sidebar">
  <a style="text-decoration: none;" href="dashboard.html">  <div class="logo">
       <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" fill="var(--primary)">
@@ -1463,6 +1472,17 @@ auth.onAuthStateChanged(user => {
   });
 function initConsultPage() {
 
+  const last = JSON.parse(localStorage.getItem("lastFlow") || "null");
+  if (last) {
+    providerName = last.providerName;
+   providerId   = last.providerId;
+    year         = last.year;
+   month        = last.month;
+    appointmentFlow.hidden = false;
+    chosenProvider.textContent = providerName;
+    buildCalendar(year, month);
+  }
+    
   const providers = [
     {
       id: "p1",
@@ -1735,8 +1755,9 @@ function initConsultPage() {
   let widgetYear         = new Date().getFullYear(); 
   let widgetMonth        = new Date().getMonth();   
 
-  const sidebar               = document.getElementById("sidebar");
-  const hamburger             = document.getElementById("hamburger");
+  const sidebar    = document.getElementById("sidebar");
+ const overlay    = document.getElementById("sidebarOverlay");
+ const hamburger  = document.getElementById("hamburger");
   const shrinkSidebarBtn      = document.getElementById("shrinkSidebar");
   const themeToggle           = document.getElementById("themeToggle");
   const heroBookBtn           = document.getElementById("heroBookBtn");
@@ -1833,9 +1854,16 @@ function initConsultPage() {
   }
 Storage.recordCategory("Consult");
 
-  hamburger.addEventListener("click", () => {
-    document.body.classList.toggle("sidebar-open");
-  });
+  function openSidebar() {
+   document.body.classList.add("sidebar-open");
+   overlay.removeAttribute("hidden");
+ }
+ function closeSidebar() {
+   document.body.classList.remove("sidebar-open");
+   overlay.setAttribute("hidden","");
+ }
+ hamburger.addEventListener("click", openSidebar);
+ overlay.addEventListener("click", closeSidebar);
 
 
   heroBookBtn.addEventListener("click", () => {
@@ -2213,6 +2241,10 @@ ${providers.map(p => `
       confirmModal.hidden = true;
        showToast("✅ Appointment booked!");
     }
+    localStorage.setItem("lastFlow", JSON.stringify({
+      providerName, providerId,
+      year, month
+    }));
   });
 
 
