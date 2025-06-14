@@ -2053,10 +2053,11 @@ Storage.recordCategory("Psych");
       const viewHistoryBtn = document.getElementById("viewHistory");
       const clearChatBtn = document.getElementById("clearChat");
        const startSpeech = document.getElementById("startSpeech");
-      const recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
+     const recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
       recognition.lang = 'en-US';
-recognition.interimResults = true;
-recognition.maxAlternatives = 1;
+      recognition.interimResults = false;            
+      recognition.maxAlternatives = 1;
+      recognition.continuous = false; 
      
       startSpeech.addEventListener("click", () => {
         recognition.start();
@@ -2065,20 +2066,21 @@ recognition.maxAlternatives = 1;
       });
 
       recognition.addEventListener("result", e => {
-  let combined = "";
-  for (let i = 0; i < e.results.length; i++) {
-    combined += e.results[i][0].transcript;
-  }
-  chatInput.value = combined;       
-});
+        const last = e.results[e.resultIndex];
+        if (last.isFinal) {
+          chatInput.value = last[0].transcript.trim();
+        }
+      });
 
-      function stopAndSend() {
-        sendChatBtn.click();
+     recognition.addEventListener("end", () => {
         startSpeech.classList.remove("listening");
         startSpeech.innerHTML = '<i class="fas fa-microphone"></i>';
-      }
-      recognition.addEventListener("end",    stopAndSend);
-      recognition.addEventListener("error",  stopAndSend);
+        if (chatInput.value.trim()) sendChatBtn.click();
+      });
+      recognition.addEventListener("error", () => {
+        startSpeech.classList.remove("listening");
+        startSpeech.innerHTML = '<i class="fas fa-microphone"></i>';
+      });
      let lastDateHeader = null;
 
  let chatHistory = JSON.parse(localStorage.getItem("therapyChatHistory") || "[]");
