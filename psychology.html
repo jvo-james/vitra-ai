@@ -1,4 +1,4 @@
- <!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en" aria-theme="light">
 <head>
   <meta charset="UTF-8">
@@ -1123,15 +1123,6 @@ html.dark .history-modal .history-content {
     margin-bottom: 0.8rem;
   }
 }
-.speak-btn {
-  background: none;
-  border: none;
-  color: var(--secondary);
-  cursor: pointer;
-  font-size: 1rem;
-  margin-left: 0.5rem;
-}
-.speak-btn:hover { color: var(--primary); }
 
 @media (max-width: 480px) {
   .checkbox-group {
@@ -1258,7 +1249,10 @@ html.dark .history-modal .history-content {
       <span class="logo-text">Vitra AI</span>
     </div>
     <nav role="navigation">
-          <a href="dashboard.html"><i class="fas fa-tachometer-alt"></i><span>Dashboard</span></a>
+      <a href="dashboard.html">
+        <i class="fas fa-tachometer-alt"></i>
+        <span>Dashboard</span>
+      </a>
       <a href="herbal.html">
         <i class="fas fa-seedling"></i>
         <span>Herbal Medicine</span>
@@ -1334,7 +1328,6 @@ html.dark .history-modal .history-content {
       </div>
       <div id="chatBox" class="chat-box" role="log" aria-live="polite"></div>
       <div class="chat-input-row">
-      <button id="startSpeech" title="Speak"><i class="fas fa-microphone"></i></button>
         <input id="chatInput" placeholder="Type your message…" aria-label="Type your question"/>
         <button id="sendChat" aria-label="Send message"><i class="fas fa-paper-plane"></i></button>
       </div>
@@ -1816,10 +1809,6 @@ html.dark .history-modal .history-content {
 
   document.addEventListener("DOMContentLoaded", () => {
 
-    if ('speechSynthesis' in window) {
-      window.speechSynthesis.onvoiceschanged = () => window.speechSynthesis.getVoices();
-      window.speechSynthesis.getVoices();
-    }
         function escapeHtml(unsafe) {
       return unsafe
         .replace(/&/g, "&amp;")
@@ -1906,16 +1895,6 @@ html.dark .history-modal .history-content {
         throw err;
       }
     }
-    function callOpenAIWithTimeout(messages, ms = 15000) {
-      return Promise.race([
-        callOpenAI(messages),
-        new Promise((_, reject) =>
-          setTimeout(() => reject(new Error("timeout")), ms)
-        )
-      ]);
-    }
-
-
 Storage.recordCategory("Psych"); 
 
     const sidebar = document.getElementById("sidebar");
@@ -2010,24 +1989,8 @@ Storage.recordCategory("Psych");
       const chatBox = document.getElementById("chatBox");
       const chatInput = document.getElementById("chatInput");
       const sendChatBtn = document.getElementById("sendChat");
-
-      chatInput.addEventListener("keydown", (e) => {
-        if (e.key === "Enter" && !e.shiftKey) {
-          e.preventDefault();        
-          sendChatBtn.click();       
-        }
-      });
       const viewHistoryBtn = document.getElementById("viewHistory");
       const clearChatBtn = document.getElementById("clearChat");
-      const startSpeech = document.getElementById("startSpeech");
-      const recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
-      recognition.lang = 'en-US';
-      recognition.interimResults = false;
-      startSpeech.addEventListener("click", () => recognition.start());
-      recognition.addEventListener("result", e => {
-        chatInput.value = e.results[0][0].transcript;
-      });
-      recognition.addEventListener("end", () => sendChatBtn.click());
       let lastDateHeader = null;
 
  let chatHistory = JSON.parse(localStorage.getItem("therapyChatHistory") || "[]");
@@ -2080,16 +2043,15 @@ Storage.recordCategory("Psych");
         chatBox.scrollTop = chatBox.scrollHeight;
 
         const systemPrompt = `
-You are a licensed clinical psychologist with expertise in Cognitive Behavioral Therapy, dialectical behavior therapy , and mindfulness-based stress reduction.
-You are a warm, empathic human therapist.
+You are a licensed clinical psychologist with expertise in Cognitive Behavioral Therapy (CBT), dialectical behavior therapy (DBT), and mindfulness-based stress reduction (MBSR).
 When the user asks a question:
   • Respond empathically and non-judgmentally.
-  • Offer VERY GOOD ADVICE to the user.
-  • Use evidence-based interventions, referencing therapy models when appropriate.
+  • Offer at least two actionable steps or exercises (e.g., breathing exercises, thought records).
+  • Use evidence-based interventions, referencing therapy models when appropriate (e.g., “In CBT, you might…“).
   • If user input is unclear or incomplete, ask a clarifying question before proceeding.
+  • If they mention emergency (“kill myself,” “self-harm”), provide crisis resources but do not simulate therapy.
   • Maintain a calm, reassuring tone. Keep each reply under 250 words unless explicitly asked for more detail.
         `.trim();
-
 
         const allMessages = [];
           allMessages.push({ role: "system", content: systemPrompt });
@@ -2102,47 +2064,14 @@ When the user asks a question:
           allMessages.push({ role: "user", content: userText });
 
           try {
-             sendChatBtn.disabled = true;
-        startSpeech.disabled = true;
-        let aiReply;
-        try {
-          aiReply = await callOpenAIWithTimeout(allMessages, 15000);
-        } catch (err) {
-          const msg = err.message === "timeout"
-            ? "🤖 I’m having trouble formulating a response right now. Let’s try again."
-            : "⚠️ Something went wrong. Please try again.";
-          spinnerDiv.innerHTML = `<div class="result-content">${msg}</div>`;
-          sendChatBtn.disabled = false;
-          startSpeech.disabled = false;
-          return;
-        }
+            const aiReply = await callOpenAI(allMessages);
             const replyTime = new Date();
             spinnerDiv.innerHTML = `
               ${formatHTML(aiReply)}
               <div class="timestamp">${replyTime.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit", hour12: true })}</div>
             `;
-            const plainReply = aiReply.replace(/<\/?[^>]+(>|$)/g, "");
-            const lastBot = chatBox.querySelector('.bot-msg:last-child');
-            const play = document.createElement('button');
-            play.className = 'speak-btn';
-            play.title = 'Play';
-            play.innerHTML = '<i class="fas fa-volume-up"></i>';
-            lastBot.append(play);
-            play.addEventListener('click', () => {
-              if (!('speechSynthesis' in window)) return;
-             const u = new SpeechSynthesisUtterance(plainReply);
-              const voices = window.speechSynthesis.getVoices();
-              const female = voices.find(v => /female|woman|zira|samantha/i.test(v.name))
-                           || voices.find(v => v.lang.startsWith('en'));
-              if (female) u.voice = female;
-              u.lang = 'en-US';
-              u.rate = 1;
-              window.speechSynthesis.speak(u);
-            });
             chatHistory.push({ who: "Therapist", text: aiReply, timestamp: replyTime.toISOString() });
             localStorage.setItem("therapyChatHistory", JSON.stringify(chatHistory));
-            sendChatBtn.disabled = false;
-            startSpeech.disabled = false;         
           } catch (err) {
             spinnerDiv.innerHTML = `<div class="result-content">⚠️ Something went wrong. Please try again.</div>`;
           }
@@ -2152,6 +2081,7 @@ When the user asks a question:
       clearChatBtn.onclick = () => {
         chatBox.innerHTML = "";
         chatHistory = [];
+        localStorage.removeItem("therapyChatHistory");
         lastDateHeader = null;
       };
 
