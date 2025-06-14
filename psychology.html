@@ -1899,9 +1899,10 @@ html.dark .history-modal .history-content {
           body: JSON.stringify({ messages })
         });
   if (!response.ok) {
-          const txt = await response.text();
-          console.error("OpenAI proxy error:", response.status, txt);
-          throw new Error("OpenAI request failed: " + txt);
+           const body = await response.json().catch(() => ({}));
+        const msg = body.error?.message || response.statusText;
+        const code = response.status;
+        throw new Error(`OPENAI_ERR_${code}: ${msg}`);
         }
        const data = await response.json();
         return data.choices?.[0]?.message?.content.trim() || "";
@@ -2071,6 +2072,17 @@ Storage.recordCategory("Psych");
         e.preventDefault();
         const userText = chatInput.value.trim();
         if (!userText) return;
+       const lower = userText.toLowerCase();
+       if (/suicidal|kill myself|harm myself/.test(lower)) {
+          addMessage("Therapist",
+            `I’m so sorry you’re in such deep pain. You don’t have to face this alone.  
+             • You could reach out right now to the Suicide & Crisis Lifeline by calling or texting 988 (US).  
+             • Consider telling someone you trust—even if it’s just one person.  
+             • If you feel unsafe with your own thoughts, please go to your nearest emergency department.  
+             You deserve help and hope—would you like some strategies for coping in the moment?`
+          );
+          return;
+        }
         const userTime = new Date();
         addMessage("You", userText, userTime);
         chatHistory.push({ who: "You", text: userText, timestamp: userTime.toISOString() });
@@ -2095,7 +2107,9 @@ You are a warm, empathic, licensed clinical psychologist skilled in CBT, DBT, an
 
         const allMessages = [];
           allMessages.push({ role: "system", content: systemPrompt });
-          chatHistory.forEach(m => {
+        allMessages.push({ role: "assistant", content:
+ `It sounds like you’re feeling: "${userText}". Let’s explore that in more detail.` });  
+       chatHistory.forEach(m => {
             allMessages.push({
               role: m.who === "You" ? "user" : "assistant",
               content: m.text
@@ -2110,12 +2124,15 @@ You are a warm, empathic, licensed clinical psychologist skilled in CBT, DBT, an
         try {
           aiReply = await callOpenAIWithTimeout(allMessages, 15000);
         } catch (err) {
-          const msg = err.message === "timeout"
-            ? "🤖 I’m having trouble formulating a response right now. Let’s try again."
-            : "⚠️ Something went wrong. Please try again.";
-          spinnerDiv.innerHTML = `<div class="result-content">${msg}</div>`;
-          sendChatBtn.disabled = false;
-          startSpeech.disabled = false;
+            let userMsg = "⚠️ Something went wrong. Please try again.";
+            if (/OPENAI_ERR_429/.test(err.message)) {
+              userMsg = "🤖 The therapist is a bit busy right now. Please wait a few moments and try again.";
+            } else if (/timeout/.test(err.message) || /OPENAI_ERR_5\d\d/.test(err.message)) {
+              userMsg = "⏱️ The response is taking longer than expected—let’s try once more.";
+            }
+            spinnerDiv.innerHTML = `<div class="result-content">${userMsg}</div>`;
+            sendChatBtn.disabled = false;
+            startSpeech.disabled = false;
           return;
         }
             const replyTime = new Date();
