@@ -9,7 +9,11 @@
   <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
   <link rel="stylesheet"
         href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-<script>
+  <script src="https://kit.fontawesome.com/a076d05399.js"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/17.0.8/css/intlTelInput.min.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/17.0.8/js/intlTelInput.min.js"></script>
+
+  <script>
 window.MathJax = {
   tex: { inlineMath: [['$', '$'], ['\\(', '\\)']] },
   svg: { fontCache: 'global' }
@@ -1647,6 +1651,7 @@ html.dark #compoundList:focus {
   border-radius: var(--radius);
   padding: 0.5rem;
 }
+ 
 </style>
 
 
@@ -1755,26 +1760,9 @@ html.dark #compoundList:focus {
   <label>Full Name:
       <input type="text" id="buyerName" placeholder="e.g. John Doe" required>
     </label>
-     <label>Country & Phone Number:
-      <div style="display:flex; gap:0.5rem; align-items:center;">
-        <select id="countrySelect" required>
-          <option value="GH" data-dial="+233" selected>🇬🇭 Ghana</option>
-          <option value="US" data-dial="+1">🇺🇸 United States</option>
-          <option value="GB" data-dial="+44">🇬🇧 United Kingdom</option>
-          <option value="NG" data-dial="+234">🇳🇬 Nigeria</option>
-        </select>
-        <input
-          type="tel"
-          id="buyerPhone"
-          placeholder="+233 …"
-          pattern="\d{6,14}"
-          required
-        >
-      </div>
-      <small style="display:block; font-size:0.85rem; color:var(--pharm-muted);">
-        We’ll prefix with country code automatically.
-      </small>
-    </label>
+   <label for="buyerPhone">Phone Number:</label>
+    <input id="buyerPhone" type="tel" required>
+
     <label>Email Address:
       <input 
         type="email" 
@@ -1800,6 +1788,16 @@ html.dark #compoundList:focus {
     </div>
   </div>
 
+    <div id="drugModal" class="modal" hidden>
+  <div class="modal-content">
+    <button id="drugModalClose" class="close-btn"><i class="fas fa-times"></i></button>
+    <img id="drugModalImg" src="" alt="" style="max-width:200px; display:block; margin:0 auto 1rem;">
+    <h3 id="drugModalName"></h3>
+    <p id="drugModalDesc" class="desc"></p>
+    <ul id="drugModalDetails" style="list-style:disc; padding-left:1.5rem;"></ul>
+  </div>
+</div>
+    
     <section id="prescriptionScanner" class="module">
       <h2><i class="fas fa-microscope"></i> Smart Prescription Builder</h2>
       <p class="desc">Upload or scan a handwritten prescription; AI will decode and structure it for you.</p>
@@ -2108,6 +2106,16 @@ html.dark #compoundList:focus {
 
   document.addEventListener("DOMContentLoaded", () => {
 
+    let savedCart  = JSON.parse(localStorage.getItem("cartItems") || "[]");
+   let savedPromo = parseFloat(localStorage.getItem("promoDiscount")) || 0;
+   if (savedPromo) {
+     promoDiscount = savedPromo;
+     document.getElementById("promoMsg").textContent = `${savedPromo*100}% discount applied!`;
+   }
+   if (savedCart.length) {
+     cartItems = savedCart;
+     rebuildCartUI();    
+   }
     const countrySelect = document.getElementById("countrySelect");
  const buyerPhone   = document.getElementById("buyerPhone");
 
@@ -2116,6 +2124,19 @@ html.dark #compoundList:focus {
     buyerPhone.value = "";
     buyerPhone.placeholder = code + " …";
   });
+
+    const iti = window.intlTelInput(document.querySelector("#buyerPhone"), {
+     initialCountry: "gh",
+     utilsScript: "https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/17.0.8/js/utils.js"
+   });
+
+   payButton.addEventListener("click", () => {
+     if (!iti.isValidNumber()) {
+       alert("⚠️ Please enter a valid phone number.");
+       return;
+     }
+     const phone = iti.getNumber();
+   });
     
     const themeToggle = document.getElementById("themeToggle");
     const savedTheme = localStorage.getItem("epharmacy-theme");
@@ -2565,8 +2586,526 @@ html.dark #compoundList:focus {
     bulkThreshold: 10,
     bulkPrice: 58.50
   }
+
+// ── 10 MORE GHANA DRUGS ──
+  ,{
+    name: "Rifampicin 300mg",
+    price: 25.00, thumb: "rifampicin.jpg", stock: true,
+    category: "Antitubercular", bulkThreshold: 10, bulkPrice: 22.50
+  },{
+    name: "Isoniazid 300mg",
+    price: 15.00, thumb: "isoniazid.jpg", stock: true,
+    category: "Antitubercular", bulkThreshold: 10, bulkPrice: 13.50
+  },{
+    name: "Ethambutol 400mg",
+    price: 18.00, thumb: "ethambutol.jpg", stock: true,
+    category: "Antitubercular", bulkThreshold: 10, bulkPrice: 16.20
+  },{
+    name: "Pyrazinamide 500mg",
+    price: 20.00, thumb: "pyrazinamide.jpg", stock: true,
+    category: "Antitubercular", bulkThreshold: 10, bulkPrice: 18.00
+  },{
+    name: "Metoclopramide 10mg",
+    price: 12.00, thumb: "metoclopramide.jpg", stock: true,
+    category: "Antiemetic", bulkThreshold: 10, bulkPrice: 10.80
+  },{
+    name: "Ranitidine 150mg",
+    price: 10.00, thumb: "ranitidine.jpg", stock: true,
+    category: "Gastrointestinal", bulkThreshold: 10, bulkPrice: 9.00
+  },{
+    name: "Methyldopa 250mg",
+    price: 30.00, thumb: "methyldopa.jpg", stock: true,
+    category: "Antihypertensive", bulkThreshold: 10, bulkPrice: 27.00
+  },{
+    name: "Codeine Phosphate 30mg",
+    price: 28.00, thumb: "codeine.jpg", stock: true,
+    category: "Pain relief", bulkThreshold: 10, bulkPrice: 25.20
+  },{
+    name: "Haloperidol 5mg",
+    price: 35.00, thumb: "haloperidol.jpg", stock: true,
+    category: "Antipsychotic", bulkThreshold: 10, bulkPrice: 31.50
+  },{
+    name: "Levonorgestrel 150µg",
+    price: 40.00, thumb: "levonorgestrel.jpg", stock: true,
+    category: "Contraceptive", bulkThreshold: 10, bulkPrice: 36.00
+  }
 ];
 
+    const d   = drugsData[idx];
+const md  = drugModalData[d.name];
+document.getElementById("drugModalImg").src = d.thumb;
+document.getElementById("drugModalImg").alt = d.name;
+document.getElementById("drugModalName").textContent= d.name;
+document.getElementById("drugModalDesc").textContent= md.desc;
+const ul = document.getElementById("drugModalDetails");
+ul.innerHTML = md.details.map(li => `<li>${li}</li>`).join("");
+document.getElementById("drugModal").hidden = false;
+
+// ── Place this right after your drugsData definition ──
+const drugModalData = {
+  "Paracetamol 500mg": {
+    desc: "A safe, effective analgesic and antipyretic for mild to moderate pain and fever.",
+    details: [
+      "Mechanism: Centrally inhibits prostaglandin synthesis",
+      "Indications: Headache, muscle aches, fever reduction",
+      "Dosage: 500 mg every 4–6 hrs (max 4 g/day)",
+      "Adverse: Hepatotoxicity in overdose; avoid alcohol"
+    ]
+  },
+  "Amoxicillin 500mg": {
+    desc: "A broad‑spectrum penicillin antibiotic for respiratory and urinary infections.",
+    details: [
+      "Mechanism: Inhibits bacterial cell wall synthesis",
+      "Indications: Otitis media, bronchitis, UTIs",
+      "Dosage: 500 mg every 8 hrs for 7–10 days",
+      "Adverse: GI upset, potential allergic reaction"
+    ]
+  },
+  "Ciprofloxacin 500mg": {
+    desc: "A fluoroquinolone antibiotic for complicated infections.",
+    details: [
+      "Mechanism: DNA gyrase inhibitor",
+      "Indications: UTIs, GI infections, prostatitis",
+      "Dosage: 500 mg twice daily for 7–14 days",
+      "Adverse: Tendonitis risk; avoid in pregnancy"
+    ]
+  },
+  "Azithromycin 250mg": {
+    desc: "A macrolide antibiotic with convenient once‑daily dosing.",
+    details: [
+      "Mechanism: Inhibits bacterial protein synthesis",
+      "Indications: Community‑acquired pneumonia, STIs",
+      "Dosage: 500 mg once, then 250 mg daily × 4 days",
+      "Adverse: QT prolongation; GI discomfort"
+    ]
+  },
+  "Metformin 850mg": {
+    desc: "First‑line biguanide for type 2 diabetes management.",
+    details: [
+      "Mechanism: Reduces hepatic glucose production",
+      "Indications: Type 2 diabetes mellitus",
+      "Dosage: 500–850 mg twice daily with meals",
+      "Adverse: GI upset; lactic acidosis rare"
+    ]
+  },
+  "Lisinopril 10mg": {
+    desc: "An ACE inhibitor for hypertension and heart failure.",
+    details: [
+      "Mechanism: Inhibits angiotensin‑converting enzyme",
+      "Indications: Hypertension, post‑MI heart failure",
+      "Dosage: 10 mg once daily",
+      "Adverse: Cough, hyperkalemia, hypotension"
+    ]
+  },
+  "Atorvastatin 20mg": {
+    desc: "A potent statin to lower LDL cholesterol.",
+    details: [
+      "Mechanism: HMG‑CoA reductase inhibitor",
+      "Indications: Hyperlipidemia, cardiovascular risk reduction",
+      "Dosage: 10–80 mg once daily",
+      "Adverse: Myopathy; monitor LFTs"
+    ]
+  },
+  "Omeprazole 20mg": {
+    desc: "A proton‑pump inhibitor for acid‑related disorders.",
+    details: [
+      "Mechanism: Irreversibly blocks H⁺/K⁺ ATPase in gastric parietal cells",
+      "Indications: GERD, peptic ulcer, Zollinger‑Ellison",
+      "Dosage: 20 mg once daily before breakfast",
+      "Adverse: Headache, increased fracture risk"
+    ]
+  },
+  "Amoxicillin‑Clavulanate 625mg": {
+    desc: "Combination antibiotic to overcome β‑lactamase resistance.",
+    details: [
+      "Mechanism: Amoxicillin + β‑lactamase inhibitor",
+      "Indications: Sinusitis, softe tissue infections",
+      "Dosage: 625 mg every 8 hrs",
+      "Adverse: Diarrhea; risk of cholestatic jaundice"
+    ]
+  },
+  "Ceftriaxone 1g Injection": {
+    desc: "A third‑generation cephalosporin for severe infections.",
+    details: [
+      "Mechanism: Inhibits bacterial cell wall synthesis",
+      "Indications: Meningitis, sepsis, pneumonia",
+      "Dosage: 1–2 g IV/IM once daily",
+      "Adverse: Biliary sludging; injection‑site pain"
+    ]
+  },
+  "Artemether‑Lumefantrine (Coartem) 80/480mg": {
+    desc: "A first‑line ACT for uncomplicated malaria.",
+    details: [
+      "Mechanism: Artemether + lumefantrine synergy",
+      "Indications: Plasmodium falciparum malaria",
+      "Dosage: Six‑dose regimen over 3 days",
+      "Adverse: GI upset; QT prolongation rare"
+    ]
+  },
+  "Quinine 300mg": {
+    desc: "An older antimalarial still used for severe cases.",
+    details: [
+      "Mechanism: Inhibits parasite heme polymerase",
+      "Indications: Severe malaria, babesiosis",
+      "Dosage: 600 mg three times daily",
+      "Adverse: Cinchonism (tinnitus, headache)"
+    ]
+  },
+  "Albendazole 400mg": {
+    desc: "Broad‑spectrum anthelmintic for parasitic worms.",
+    details: [
+      "Mechanism: Inhibits microtubule synthesis in helminths",
+      "Indications: Hydatid disease, neurocysticercosis",
+      "Dosage: 400 mg once daily for 3–7 days",
+      "Adverse: Mild GI discomfort; hepatotoxicity"
+    ]
+  },
+  "Ivermectin 6mg": {
+    desc: "Antiparasitic used in onchocerciasis and strongyloidiasis.",
+    details: [
+      "Mechanism: Opens glutamate‑gated chloride channels",
+      "Indications: River blindness, scabies",
+      "Dosage: 150–200 µg/kg single dose",
+      "Adverse: Mazzotti reaction in heavy infection"
+    ]
+  },
+  "Mebendazole 100mg": {
+    desc: "Anthelmintic for treatment of soil‑transmitted helminths.",
+    details: [
+      "Mechanism: Inhibits microtubule formation",
+      "Indications: Ascariasis, hookworm, trichuriasis",
+      "Dosage: 100 mg twice daily for 3 days",
+      "Adverse: Abdominal pain, diarrhea"
+    ]
+  },
+  "Vitamin C 500mg": {
+    desc: "Essential antioxidant vitamin for immune support.",
+    details: [
+      "Mechanism: Free‑radical scavenger",
+      "Indications: Scurvy prevention, immune health",
+      "Dosage: 500 mg once daily",
+      "Adverse: Large doses may cause GI upset"
+    ]
+  },
+  "Vitamin D 1000 IU": {
+    desc: "Fat‑soluble vitamin for bone health and immunity.",
+    details: [
+      "Mechanism: Calcium and phosphorus homeostasis",
+      "Indications: Osteoporosis, deficiency states",
+      "Dosage: 800–2000 IU daily",
+      "Adverse: Hypercalcemia risk with overuse"
+    ]
+  },
+  "Iron Sulphate 200mg": {
+    desc: "Oral iron supplement for iron‑deficiency anemia.",
+    details: [
+      "Mechanism: Replenishes body iron stores",
+      "Indications: Iron‑deficiency anemia",
+      "Dosage: 200 mg once or twice daily",
+      "Adverse: Constipation, dark stools"
+    ]
+  },
+  "Enalapril 5mg": {
+    desc: "ACE inhibitor for hypertension and heart failure.",
+    details: [
+      "Mechanism: Blocks angiotensin II formation",
+      "Indications: Hypertension, asymptomatic LV dysfunction",
+      "Dosage: 5–20 mg once daily",
+      "Adverse: Cough, hyperkalemia"
+    ]
+  },
+  "Metoprolol 50mg": {
+    desc: "Selective β₁‑blocker for hypertension and angina.",
+    details: [
+      "Mechanism: Blocks β₁‑adrenergic receptors",
+      "Indications: Hypertension, angina, post‑MI",
+      "Dosage: 50 mg twice daily",
+      "Adverse: Bradycardia, fatigue"
+    ]
+  },
+  "Atenolol 50mg": {
+    desc: "Hydrophilic β₁‑blocker for cardiovascular conditions.",
+    details: [
+      "Mechanism: Blocks cardiac β₁ receptors",
+      "Indications: Hypertension, angina",
+      "Dosage: 50 mg once daily",
+      "Adverse: Cold extremities, sleep disturbance"
+    ]
+  },
+  "Salbutamol Inhaler 100mcg": {
+    desc: "Short‑acting β₂‑agonist for acute bronchospasm relief.",
+    details: [
+      "Mechanism: Smooth muscle relaxation via β₂ activation",
+      "Indications: Asthma, COPD exacerbations",
+      "Dosage: 1–2 puffs every 4–6 hrs as needed",
+      "Adverse: Tremor, tachycardia"
+    ]
+  },
+  "Budesonide Inhaler 200mcg": {
+    desc: "Inhaled corticosteroid for asthma maintenance therapy.",
+    details: [
+      "Mechanism: Reduces airway inflammation",
+      "Indications: Persistent asthma",
+      "Dosage: 200–400 mcg twice daily",
+      "Adverse: Oral thrush; rinse mouth after use"
+    ]
+  },
+  "Salmeterol‑Fluticasone 50/250mcg": {
+    desc: "Combination LABA + ICS for moderate to severe asthma.",
+    details: [
+      "Mechanism: Long‑acting bronchodilation + anti‑inflammatory",
+      "Indications: Asthma, COPD maintenance",
+      "Dosage: 1 inhalation twice daily",
+      "Adverse: Thrush, tremor"
+    ]
+  },
+  "Regular Insulin (10mL vial)": {
+    desc: "Short‑acting insulin for mealtime glucose control.",
+    details: [
+      "Mechanism: Facilitates cellular glucose uptake",
+      "Indications: Type 1 and 2 diabetes",
+      "Dosage: Individualized per diet and glucose",
+      "Adverse: Hypoglycemia risk"
+    ]
+  },
+  "Insulin Glargine 100IU/mL": {
+    desc: "Long‑acting basal insulin analogue for diabetes.",
+    details: [
+      "Mechanism: Slow, peakless insulin release",
+      "Indications: Basal insulin in type 1 & 2 diabetes",
+      "Dosage: Once daily at bedtime",
+      "Adverse: Hypoglycemia; weight gain"
+    ]
+  },
+  "Metronidazole 400mg": {
+    desc: "Nitroimidazole antibiotic for anaerobic & protozoal infections.",
+    details: [
+      "Mechanism: DNA strand breakage in anaerobes",
+      "Indications: C. difficile colitis, trichomoniasis",
+      "Dosage: 400 mg every 8 hrs",
+      "Adverse: Metallic taste, disulfiram‑like reaction"
+    ]
+  },
+  "Tinidazole 500mg": {
+    desc: "Long‑acting nitroimidazole for protozoal infections.",
+    details: [
+      "Mechanism: Disrupts protozoal DNA",
+      "Indications: Giardiasis, amebiasis, BV",
+      "Dosage: 2 g single dose",
+      "Adverse: GI upset, headache"
+    ]
+  },
+  "Zinc Sulphate 20mg": {
+    desc: "Trace mineral supplement for immune support.",
+    details: [
+      "Mechanism: Cofactor for multiple enzymes",
+      "Indications: Zinc deficiency, wound healing",
+      "Dosage: 20–40 mg once daily",
+      "Adverse: Nausea; take with food"
+    ]
+  },
+  "Co-trimoxazole (Trimethoprim-Sulfamethoxazole) 480mg": {
+    desc: "Synergistic antibiotic for a wide range of infections.",
+    details: [
+      "Mechanism: Sequential folate synthesis blockade",
+      "Indications: UTIs, PCP prophylaxis",
+      "Dosage: 480 mg every 12 hrs",
+      "Adverse: Rash, hyperkalemia"
+    ]
+  },
+  "Nifedipine 20mg": {
+    desc: "Dihydropyridine CCB for hypertension and angina.",
+    details: [
+      "Mechanism: Inhibits L‑type calcium channels",
+      "Indications: Hypertension, variant angina",
+      "Dosage: 20 mg once daily",
+      "Adverse: Edema, headache"
+    ]
+  },
+  "Simvastatin 20mg": {
+    desc: "Moderately potent statin to lower cholesterol.",
+    details: [
+      "Mechanism: Inhibits HMG‑CoA reductase",
+      "Indications: Hypercholesterolemia",
+      "Dosage: 10–40 mg once daily",
+      "Adverse: Myopathy risk; avoid grapefruit"
+    ]
+  },
+  "Hydrochlorothiazide 25mg": {
+    desc: "Thiazide diuretic for hypertension and edema.",
+    details: [
+      "Mechanism: Inhibits Na⁺/Cl⁻ reabsorption in DCT",
+      "Indications: Hypertension, CHF",
+      "Dosage: 12.5–25 mg once daily",
+      "Adverse: Hypokalemia, hyperuricemia"
+    ]
+  },
+  "Prednisone 20mg": {
+    desc: "Oral corticosteroid for inflammatory and autoimmune conditions.",
+    details: [
+      "Mechanism: Broad anti‑inflammatory effects",
+      "Indications: Asthma exacerbations, arthritis",
+      "Dosage: 5–60 mg daily depending on indication",
+      "Adverse: Immunosuppression, hyperglycemia"
+    ]
+  },
+  "Naproxen 500mg": {
+    desc: "NSAID for pain, inflammation, and fever.",
+    details: [
+      "Mechanism: COX‑1/2 inhibition",
+      "Indications: Arthritis, dysmenorrhea",
+      "Dosage: 250–500 mg every 8–12 hrs",
+      "Adverse: GI bleeding risk"
+    ]
+  },
+  "Ibuprofen 200mg": {
+    desc: "Common OTC NSAID for mild pain and inflammation.",
+    details: [
+      "Mechanism: Nonselective COX inhibition",
+      "Indications: Headache, musculoskeletal pain",
+      "Dosage: 200–400 mg every 4–6 hrs",
+      "Adverse: Dyspepsia, renal impairment"
+    ]
+  },
+  "Diclofenac 50mg": {
+    desc: "Potent NSAID for moderate pain and inflammation.",
+    details: [
+      "Mechanism: COX‑2 preference",
+      "Indications: Osteoarthritis, acute pain",
+      "Dosage: 50 mg two to three times daily",
+      "Adverse: Cardiovascular risk"
+    ]
+  },
+  "Erythromycin 500mg": {
+    desc: "Macrolide antibiotic for atypical pathogens.",
+    details: [
+      "Mechanism: Inhibits 50S ribosomal subunit",
+      "Indications: Legionella, pertussis",
+      "Dosage: 500 mg four times daily",
+      "Adverse: GI cramping, QT prolongation"
+    ]
+  },
+  "Doxycycline 100mg": {
+    desc: "Tetracycline antibiotic with broad use.",
+    details: [
+      "Mechanism: Inhibits 30S ribosomal subunit",
+      "Indications: Lyme disease, acne, malaria prophylaxis",
+      "Dosage: 100 mg twice daily",
+      "Adverse: Photosensitivity, teeth discoloration"
+    ]
+  },
+  "Chloroquine 250mg": {
+    desc: "Antimalarial and autoimmune treatment agent.",
+    details: [
+      "Mechanism: Inhibits parasite heme detoxification",
+      "Indications: Malaria prophylaxis, rheumatoid arthritis",
+      "Dosage: 500 mg once weekly for prophylaxis",
+      "Adverse: Retinopathy risk with long use"
+    ]
+  },
+  "Artesunate 50mg": {
+    desc: "Rapid‑acting artemisinin derivative for severe malaria.",
+    details: [
+      "Mechanism: Generates free radicals in parasite",
+      "Indications: Severe falciparum malaria",
+      "Dosage: 2.4 mg/kg IV at 0, 12, 24 hrs",
+      "Adverse: Hemolysis in G6PD deficiency"
+    ]
+  },
+  // ── 10 Ghana‑specific additions ──
+  "Rifampicin 300mg": {
+    desc: "Key antitubercular agent used in multi‑drug therapy.",
+    details: [
+      "Mechanism: Inhibits DNA‑dependent RNA polymerase",
+      "Indications: Active TB, prophylaxis",
+      "Dosage: 600 mg once daily",
+      "Adverse: Red‑orange body fluids, hepatotoxicity"
+    ]
+  },
+  "Isoniazid 300mg": {
+    desc: "First‑line TB drug, potent but with hepatotoxic risk.",
+    details: [
+      "Mechanism: Mycolic acid synthesis inhibitor",
+      "Indications: Active and latent TB",
+      "Dosage: 300 mg once daily",
+      "Adverse: Peripheral neuropathy; supplement B6"
+    ]
+  },
+  "Ethambutol 400mg": {
+    desc: "TB therapy adjunct with optic neuritis risk.",
+    details: [
+      "Mechanism: Inhibits arabinosyl transferase",
+      "Indications: First‑line TB regimen",
+      "Dosage: 15–25 mg/kg once daily",
+      "Adverse: Visual acuity changes"
+    ]
+  },
+  "Pyrazinamide 500mg": {
+    desc: "TB bactericidal agent used in intensive phase.",
+    details: [
+      "Mechanism: Disrupts mycobacterial cell membrane",
+      "Indications: Active TB intensive phase",
+      "Dosage: 15–30 mg/kg once daily",
+      "Adverse: Hyperuricemia, hepatotoxicity"
+    ]
+  },
+  "Metoclopramide 10mg": {
+    desc: "Antiemetic and prokinetic for nausea and GERD.",
+    details: [
+      "Mechanism: Dopamine D₂ receptor antagonist",
+      "Indications: Nausea, gastroparesis",
+      "Dosage: 10 mg four times daily",
+      "Adverse: Extrapyramidal effects"
+    ]
+  },
+  "Ranitidine 150mg": {
+    desc: "H₂‑blocker for acid suppression (limited use).",
+    details: [
+      "Mechanism: Histamine H₂ receptor antagonist",
+      "Indications: GERD, peptic ulcer",
+      "Dosage: 150 mg twice daily",
+      "Adverse: Rare mental status changes"
+    ]
+  },
+  "Methyldopa 250mg": {
+    desc: "Central α₂‑agonist for hypertension, esp. in pregnancy.",
+    details: [
+      "Mechanism: Stimulates α₂‑receptors in CNS",
+      "Indications: Hypertension in pregnancy",
+      "Dosage: 250–500 mg two to three times daily",
+      "Adverse: Sedation, hepatotoxicity"
+    ]
+  },
+  "Codeine Phosphate 30mg": {
+    desc: "Mild opioid analgesic for moderate pain.",
+    details: [
+      "Mechanism: μ‑opioid receptor agonist",
+      "Indications: Cough suppression, pain relief",
+      "Dosage: 30–60 mg every 4–6 hrs",
+      "Adverse: Constipation, respiratory depression"
+    ]
+  },
+  "Haloperidol 5mg": {
+    desc: "High‑potency antipsychotic for acute agitation.",
+    details: [
+      "Mechanism: Dopamine D₂ receptor blockade",
+      "Indications: Schizophrenia, acute psychosis",
+      "Dosage: 2–5 mg two to three times daily",
+      "Adverse: Extrapyramidal symptoms"
+    ]
+  },
+  "Levonorgestrel 150µg": {
+    desc: "Emergency contraceptive for up to 72 hrs post‑coitus.",
+    details: [
+      "Mechanism: Ovulation inhibition",
+      "Indications: Emergency contraception",
+      "Dosage: Single 1.5 mg dose",
+      "Adverse: Nausea, menstrual changes"
+    ]
+  }
+};
+
+    
 function renderDrugList(filter="") {
   const container = document.getElementById("drugList");
   container.innerHTML = "";
@@ -2602,6 +3141,9 @@ document.getElementById("applyPromo").onclick = () => {
     document.getElementById("promoMsg").textContent = "Invalid code.";
   }
   updateCartPrice();
+  localStorage.setItem("cartItems", JSON.stringify(cartItems));
+ localStorage.setItem("promoDiscount", promoDiscount);
+
 };
 
 const addToCartBtns = document.querySelectorAll(".add-to-cart");
@@ -2629,6 +3171,9 @@ addToCartBtns.forEach(btn => btn.addEventListener("click", updateCartPrice));
  document.getElementById("drugList")
    .addEventListener("input", e => {
      if (e.target.matches(".drug-check, .qty-input")) updateCartPrice();
+ localStorage.setItem("cartItems", JSON.stringify(cartItems));
+   localStorage.setItem("promoDiscount", promoDiscount);
+
    });
     
 
@@ -2707,7 +3252,13 @@ ${drugsData.map(d => d.name).join(", ")}.
      cartList.appendChild(li);
      runningTotal += item.price;
    });
-   cartTotal.textContent = runningTotal.toFixed(2);
+   let discountAmt = runningTotal * promoDiscount;
+   let finalTotal  = runningTotal - discountAmt;
+   cartTotal.innerHTML = `
+     Original: ₵${runningTotal.toFixed(2)}<br>
+     Discount: ₵${discountAmt.toFixed(2)}<br>
+     <strong>Payable: ₵${finalTotal.toFixed(2)}</strong>
+   `;
    cartSummary.style.display = "block";
    orderDetails.style.display = "block";
  });
@@ -2748,7 +3299,9 @@ ${drugsData.map(d => d.name).join(", ")}.
     }
 
 
-    const totalGHS  = cartItems.reduce((sum, itm) => sum + itm.price, 0);
+   const originalTotal = cartItems.reduce((sum, itm) => sum + itm.price, 0);
+   const discountAmt   = originalTotal * promoDiscount;
+   const totalGHS      = originalTotal - discountAmt;
     const totalKobo = Math.round(totalGHS * 100);
 
     const handler = PaystackPop.setup({
@@ -2785,7 +3338,9 @@ key: "pk_test_297586e51710e83d3c159bfe71ff45c7e23411fa",
       Thank you, <strong>${escapeHtml(name)}</strong>!<br>
       You have successfully purchased:<br>
       ${itemLines}<br><br>
-      <strong>Total Paid: ₵${totalGHS.toFixed(2)}</strong><br>
+      Original: ₵${originalTotal.toFixed(2)}<br>
+     Discount: ₵${discountAmt.toFixed(2)}<br>
+     <strong>Total Paid: ₵${totalGHS.toFixed(2)}</strong><br>
       Transaction Reference: <em>${response.reference}</em><br>
       Delivery Address: <em>${escapeHtml(address)}</em><br>
       Contact: <em>${escapeHtml(phone)}</em><br>
