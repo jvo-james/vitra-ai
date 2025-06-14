@@ -9,7 +9,6 @@
   <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
   <link rel="stylesheet"
         href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-  <script src="https://kit.fontawesome.com/a076d05399.js"></script>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/17.0.8/css/intlTelInput.min.css">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/17.0.8/js/intlTelInput.min.js"></script>
 
@@ -2107,15 +2106,14 @@ html.dark #compoundList:focus {
   document.addEventListener("DOMContentLoaded", () => {
 
     let cartItems = [];
-
+  const payButton = document.getElementById("payWithPaystack");
  const symptomInputBuy = document.getElementById("symptomInputBuy");
    const suggestionMsg    = document.getElementById("suggestionMsg");
    const cartList         = document.getElementById("cartList");
    const cartTotal        = document.getElementById("cartTotal");
    const orderDetails     = document.getElementById("orderDetails");
    const cartSummary      = document.getElementById("cartSummary");
-   const countrySelect    = document.getElementById("countrySelect"); // if you don’t actually have one, remove the bits below that use it
-
+   
    // initialize empty if not on storage
    let savedCart  = JSON.parse(localStorage.getItem("cartItems") || "[]");
    let savedPromo = parseFloat(localStorage.getItem("promoDiscount")) || 0;
@@ -2127,14 +2125,7 @@ html.dark #compoundList:focus {
      cartItems = savedCart;
      rebuildCartUI();    
    }
-   if (countrySelect) {
-     const buyerPhone = document.getElementById("buyerPhone");
-     countrySelect.addEventListener("change", () => {
-       const code = countrySelect.selectedOptions[0].dataset.dial;
-       buyerPhone.value       = "";
-       buyerPhone.placeholder = code + " …";
-     });
-   }
+
 
     const iti = window.intlTelInput(document.querySelector("#buyerPhone"), {
      initialCountry: "gh",
@@ -3283,8 +3274,6 @@ document.getElementById("addToCartBtn").addEventListener("click", () => {
 
    orderDetails.style.display = "none";
    cartSummary.style.display  = "none";
-
- const payButton = document.getElementById("payWithPaystack");
 
   payButton.addEventListener("click", () => {
   if (cartItems.length === 0) {
