@@ -9,10 +9,9 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"/>
 
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
-   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
 
 <style>
   :root {
@@ -1254,7 +1253,7 @@ html.dark #insightsContainer .card a.btn-secondary {
   <body>
 
     <nav class="navbar">
-   <a style="text-decoration: none;" href="index.html"> <div class="logo">
+  <a style="text-decoration: none;" href="index.html">  <div class="logo">
       <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" fill="var(--primary)">
         <polygon points="10,10 25,90 50,40 75,90 90,10 65,10 50,70 35,10"/>
       </svg>
@@ -1262,11 +1261,11 @@ html.dark #insightsContainer .card a.btn-secondary {
     </div></a>
     <ul>
       <li><a href="dashboard.html">Dashboard</a></li>
-      <li><a href="herbal.html">Herbal Medicine</a></li>
+      <li><a href="herbal.html">Herbal</a></li>
       <li><a href="psychology.html">Mental Health</a></li>
-      <li><a href="dietetics.html">Dietetics</a></li>
-      <li><a href="epharmacy.html">E-Pharmacy</a></li>
-      <li><a href="consult.html">Consult Booking</a></li>
+      <li><a href="dietetics.html">Diet</a></li>
+      <li><a href="epharmacy.html">E-Pharm</a></li>
+      <li><a href="consult.html">Appointments</a></li>
       
     </ul>
     <div class="auth">
@@ -1286,11 +1285,11 @@ html.dark #insightsContainer .card a.btn-secondary {
   <aside class="sidebar" id="sidebar">
     <ul class="sidebar-nav">
       <li><a href="dashboard.html">Dashboard</a></li>
-      <li><a href="herbal.html">Herbal</a></li>
+      <li><a href="herbal.html">Herbal Medicine</a></li>
       <li><a href="psychology.html">Mental Health</a></li>
       <li><a href="dietetics.html">Dietetics</a></li>
-      <li><a href="epharmacy.html">E-Pharm</a></li>
-      <li><a href="consult.html">Appointments</a></li>
+      <li><a href="epharmacy.html">E-Pharmacy</a></li>
+      <li><a href="consult.html">Consult Booking</a></li>
     </ul>
     <div class="sidebar-auth">
       <button class="btn btn-secondary" id="profileLink">
@@ -1481,8 +1480,7 @@ html.dark #insightsContainer .card a.btn-secondary {
   };
   firebase.initializeApp(firebaseConfig);
   const auth = firebase.auth();
-  const db   = firebase.firestore();
-  
+
   document.addEventListener("DOMContentLoaded", () => {
 
     const sidebar             = document.getElementById("sidebar");
@@ -1519,7 +1517,7 @@ html.dark #insightsContainer .card a.btn-secondary {
 
     auth.onAuthStateChanged(user => {
       if (!user) {
-         window.location.href = "index.html?modal=signin";
+        window.location.href = "index.html?modal=signin";
         return;
       }
       const displayName = user.displayName || user.email.split("@")[0];
@@ -1677,10 +1675,6 @@ html.dark #insightsContainer .card a.btn-secondary {
       const arr = JSON.parse(localStorage.getItem(key) || "[]");
       arr.push(new Date().toISOString());
       localStorage.setItem(key, JSON.stringify(arr));
-      const uid = firebase.auth().currentUser.uid;
-    db.collection('userStats').doc(uid)
-      .set({ pharmacy: firebase.firestore.FieldValue.increment(1) }, { merge: true })
-      .catch(err => console.error('Firestore increment failed:', err));
     }
     recordPharmacyTimestamp();
 
@@ -1797,19 +1791,21 @@ html.dark #insightsContainer .card a.btn-secondary {
       return labels;
     }
 
-    function displayStats() {
-    const uid = auth.currentUser.uid;
-    db.collection('userStats').doc(uid).get()
-      .then(doc => {
-        const d = doc.exists ? doc.data() : {};
-        herbalQueriesEl.textContent   = d.herbal    || 0;
-       psychQueriesEl.textContent    = d.psych     || 0;
-        dietQueriesEl.textContent     = d.diet      || 0;
-        pharmacyQueriesEl.textContent = d.pharmacy  || 0;
-        consultQueriesEl.textContent  = d.consult   || 0;
-     })
-      .catch(err => console.error('Stats fetch failed:', err));
-  }
+     function displayStats() {
+      statsData.herbal   = Storage.getCount("Herbal");
+      statsData.psych    = Storage.getCount("Psych");
+      statsData.diet     = Storage.getCount("Diet");
+      statsData.pharmacy = Storage.getCount("Pharmacy");
+      statsData.consult  = Storage.getCount("Consult");
+
+      herbalQueriesEl.textContent   = statsData.herbal;
+      psychQueriesEl.textContent    = statsData.psych;
+      dietQueriesEl.textContent     = statsData.diet;
+      pharmacyQueriesEl.textContent = statsData.pharmacy;
+      consultQueriesEl.textContent  = statsData.consult;
+
+      statsData.labels = generateLast7DaysLabels();
+    }
 
     let distributionChart, dailyChart;
     function initializeCharts() {
