@@ -1423,6 +1423,21 @@ html.dark .bot-msg {
   align-self: flex-end;
   z-index: 10;
 }
+  #paymentModal .history-content .close-history {
+  position: sticky;
+  top: 0.5rem;       
+  right: 0.5rem;       
+  z-index: 20;         
+  background: var(--pharm-primary-alt);
+  color: #fff;
+}
+
+#paymentModal .history-content h3 {
+  position: sticky;
+  top: 0;
+  background: var(--pharm-surface);
+  z-index: 10;
+}
 #paymentModal .history-content .close-history:hover {
   background: var(--pharm-primary);
   transform: translateY(-2px);
@@ -1620,7 +1635,18 @@ html.dark #compoundList:focus {
 #drugFilter {
   margin-bottom: var(--padding);
 }
-  
+  #historyModal .close-modal,
+#historyModal .close-history {
+  display: block !important;
+  position: sticky;   
+  top: 0.5rem;
+  right: 0.5rem;
+  z-index: 20;        
+  background: var(--pharm-primary-alt);
+  color: var(--pharm-text);
+  border-radius: var(--radius);
+  padding: 0.5rem;
+}
 </style>
 
 
@@ -1862,7 +1888,11 @@ html.dark #compoundList:focus {
    </button>
  </div>
   <div id="priceDisplay" style="margin-top:0.5rem; font-weight:600;"></div>
-
+<div style="margin-top:1rem; display:flex; align-items:center; gap:1rem;">
+  <button id="addToCart" class="btn"><i class="fas fa-cart-plus"></i> Add to Cart</button>
+   <div id="priceDisplay"></div>
+ </div>
+  
  <div id="cartSummary" style="margin-top:1rem; display:none; border:1px solid var(--pharm-secondary); border-radius:var(--radius); padding:var(--padding); background:var(--pharm-bg);">
    <h4 style="margin-bottom:0.75rem; color:var(--pharm-primary-alt);">Selected Items:</h4>
    <ul id="cartList" style="list-style:disc; padding-left:1.5rem; color:var(--pharm-text);"></ul>
@@ -2528,7 +2558,6 @@ html.dark #compoundList:focus {
   }
 ];
 
-  // 2) Render the list
 function renderDrugList(filter="") {
   const container = document.getElementById("drugList");
   container.innerHTML = "";
@@ -2550,11 +2579,9 @@ function renderDrugList(filter="") {
 }
 renderDrugList();
 
-// 3) Live search
 document.getElementById("drugFilter")
   .addEventListener("input", e => renderDrugList(e.target.value));
 
-// 4) Promo code logic
 let promoDiscount = 0;
 document.getElementById("applyPromo").onclick = () => {
   const code = document.getElementById("promoCode").value.trim();
@@ -2568,7 +2595,6 @@ document.getElementById("applyPromo").onclick = () => {
   updateCartPrice();
 };
 
-// 5) Cart calculation (quantity, bulk pricing, promo, estimated delivery)
 function updateCartPrice() {
   const checks = Array.from(document.querySelectorAll(".drug-check:checked"));
   let total = 0;
@@ -2576,30 +2602,27 @@ function updateCartPrice() {
     const idx = +cb.dataset.idx;
     const qty = +document.querySelector(`.qty-input[data-idx="${idx}"]`).value;
     const drug = drugsData[idx];
-    // bulk price if applicable
     const unitPrice = (qty >= drug.bulkThreshold) ? drug.bulkPrice : drug.price;
     total += unitPrice * qty;
   });
-  // apply promo
+  // promo
   total = total * (1 - promoDiscount);
-  // display formatted
   document.getElementById("priceDisplay").innerHTML = `
     <div>Subtotal: ₵${total.toFixed(2)}</div>
     <div style="font-size:0.9rem; color:var(--pharm-muted);">🚚 Est. delivery: 2–4 days</div>
   `;
 }
 
-// 6) Hook addToCart & quantity/checkbox changes
 document.getElementById("addToCart").onclick = updateCartPrice;
-document.getElementById("drugList").addEventListener("change", e => {
-  if (e.target.classList.contains("drug-check") || e.target.classList.contains("qty-input")) 
+document.getElementById("drugList").addEventListener("input", e => {
+  if (e.target.matches(".drug-check") || e.target.matches(".qty-input")) {
     updateCartPrice();
+  }
 });
 
     const suggestDrugBtn = document.getElementById("suggestDrug");
   suggestDrugBtn.addEventListener("click", async () => {
-    // … your existing AI prescription logic …
-    // then:
+   
     const pairingDiv = document.createElement("div");
     pairingDiv.style.marginTop = "0.5rem";
     pairingDiv.innerHTML = `
@@ -2624,12 +2647,6 @@ document.getElementById("drugList").addEventListener("change", e => {
   const paymentModal     = document.getElementById("paymentModal");
   const confirmText      = document.getElementById("confirmText");
 
-  drugsData.forEach((drug, idx) => {
-    const opt = document.createElement("option");
-    opt.value = idx; 
-    opt.textContent = `${drug.name} — ₵${drug.price.toFixed(2)}`;
-    drugSelect.appendChild(opt);
-  });
 
  
   suggestDrugBtn.addEventListener("click", async () => {
