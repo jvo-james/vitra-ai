@@ -816,7 +816,7 @@
 
   .modal .modal-content {
     background: var(--cb-surface);
-    padding: 1.5rem;
+    padding: 2rem;
     border-radius: var(--radius);
     max-width: 400px;
     width: 90%;
@@ -838,18 +838,22 @@
   }
 
   .modal .modal-content button {
-    margin-right: 0.5rem;
-    padding: 0.5rem 1rem;
-    border: none;
-    border-radius: var(--radius);
-    cursor: pointer;
-    font-size: 0.9rem;
-    transition: background 0.2s ease, transform 0.2s ease;
+     margin: 0.5rem 0.5rem;
+  padding: 0.75rem 1.5rem;
+  font-size: 1rem;
+  border-radius: 0.5rem;
+  border: none;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+  cursor: pointer;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  text-transform: uppercase;
+  font-weight: 600;
   }
 
   .modal .modal-content button.btn-sm {
-    background: var(--cb-primary-alt);
-    color: #fff;
+   background: var(--cb-surface);
+  color: var(--cb-text);
+ border: 2px solid var(--cb-primary-alt);
   }
 
   .modal .modal-content button.btn-sm:hover {
@@ -858,7 +862,7 @@
   }
 
   .modal .modal-content button.btn {
-    background: var(--cb-accent);
+    background: var(--cb-primary-alt);
     color: #fff;
   }
 
@@ -1013,7 +1017,8 @@
 
 #feature-rich-dashboard .card .actions .btn-reschedule i,
 #feature-rich-dashboard .card .actions .btn-cancel i {
-  font-size: 1rem;                     
+  font-size: 1rem; 
+  color: #fff;
 }
 
 #feature-rich-dashboard .card .actions .btn-reschedule:hover {
@@ -2199,10 +2204,11 @@ ${providers.map(p => `
        db.collection('users').doc(uid)
          .collection('appointments').doc(id)
          .set(newAppt);
-          addToRichDashboard({ id, name: urgentProviderName, date: uDate, time: uTime, urgent: true });
+           addToRichDashboard(newAppt);
           renderUpcomingCalendarWidget();
           urgentFlow = false;
           confirmModal.hidden = true;
+          showToast("✅ Urgent appointment booked!");
         }
       });
       handler.openIframe();
@@ -2213,9 +2219,10 @@ ${providers.map(p => `
       db.collection('users').doc(uid)
         .collection('appointments').doc(id)
         .set(newAppt);
-      addToRichDashboard({ id, name: providerName, date: selDate, time: selTime, urgent: false });
+      addToRichDashboard(newAppt);
       renderUpcomingCalendarWidget();
       confirmModal.hidden = true;
+       showToast("✅ Appointment booked!");
     }
   });
 
@@ -2410,6 +2417,31 @@ ${providers.map(p => `
       richPastSection.hidden       = (btn.dataset.tab !== "rich-past");
       richFavoritesSection.hidden  = (btn.dataset.tab !== "rich-favorites");
     });
+  });
+
+   if (localStorage.getItem("vt-dark") === "1") {
+    document.documentElement.classList.add("dark");
+    themeToggle.classList.replace("fa-moon","fa-sun");
+  }
+  if (localStorage.getItem("vt-sidebar") === "1") {
+    document.body.classList.add("sidebar-shrink");
+    shrinkSidebarBtn.querySelector("i")
+      .classList.replace("fa-chevron-left","fa-chevron-right");
+  }
+
+  themeToggle.addEventListener("click", () => {
+    const isDark = document.documentElement.classList.toggle("dark");
+    themeToggle.classList.toggle("fa-moon");
+    themeToggle.classList.toggle("fa-sun");
+    localStorage.setItem("vt-dark", isDark ? "1" : "0");
+  });
+
+  shrinkSidebarBtn.addEventListener("click", () => {
+    const shrunk = document.body.classList.toggle("sidebar-shrink");
+    const icon = shrinkSidebarBtn.querySelector("i");
+    icon.classList.toggle("fa-chevron-left");
+    icon.classList.toggle("fa-chevron-right");
+    localStorage.setItem("vt-sidebar", shrunk ? "1" : "0");
   });
 
 }
