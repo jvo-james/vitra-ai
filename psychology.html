@@ -1245,8 +1245,36 @@ html.dark .history-modal .history-content {
     border-width: 1px !important;
   }
 }
+#startSpeech.listening {
+  color: var(--primary);
+  animation: pulse 1s infinite;
+}
+@keyframes pulse {
+  0%,100% { transform: scale(1); }
+  50%     { transform: scale(1.2); }
+}
 
-
+ @media (max-width: 640px) {
+  #shrinkBtn,
+  #startSpeech,
+  #sendChat,
+  .tool-row button,
+  #viewHistory,
+  #clearChat {
+    width: 36px !important;
+    height: 36px !important;
+    padding: 0 !important;
+    aspect-ratio: 1 / 1 !important;
+  }
+  .chat-input-row input,
+  input[type="text"],
+  select,
+  textarea {
+    padding: 0.5rem !important;
+    font-size: 0.9rem !important;
+    height: auto !important;
+  }
+ }
 </style>
 
   <body>
@@ -2024,16 +2052,29 @@ Storage.recordCategory("Psych");
       });
       const viewHistoryBtn = document.getElementById("viewHistory");
       const clearChatBtn = document.getElementById("clearChat");
-      const startSpeech = document.getElementById("startSpeech");
+       const startSpeech = document.getElementById("startSpeech");
       const recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
       recognition.lang = 'en-US';
       recognition.interimResults = false;
-      startSpeech.addEventListener("click", () => recognition.start());
+
+      startSpeech.addEventListener("click", () => {
+        recognition.start();
+        startSpeech.classList.add("listening");
+        startSpeech.innerHTML = '<i class="fas fa-microphone-slash"></i>';
+      });
+
       recognition.addEventListener("result", e => {
         chatInput.value = e.results[0][0].transcript;
       });
-      recognition.addEventListener("end", () => sendChatBtn.click());
-      let lastDateHeader = null;
+
+      function stopAndSend() {
+        sendChatBtn.click();
+        startSpeech.classList.remove("listening");
+        startSpeech.innerHTML = '<i class="fas fa-microphone"></i>';
+      }
+      recognition.addEventListener("end",    stopAndSend);
+      recognition.addEventListener("error",  stopAndSend);
+     let lastDateHeader = null;
 
  let chatHistory = JSON.parse(localStorage.getItem("therapyChatHistory") || "[]");
       function formatDateSeparator(date) {
@@ -2177,12 +2218,10 @@ You are a warm, empathic, licensed clinical psychologist skilled in CBT, DBT, an
           chatBox.scrollTop = chatBox.scrollHeight;
         };
 
-      clearChatBtn.onclick = () => {
+     clearChatBtn.onclick = () => {
         chatBox.innerHTML = "";
-        chatHistory = [];
         lastDateHeader = null;
       };
-
       viewHistoryBtn.onclick = () => {
         const modal = document.createElement("div");
         modal.className = "history-modal";
