@@ -2054,10 +2054,10 @@ Storage.recordCategory("Psych");
       const clearChatBtn = document.getElementById("clearChat");
        const startSpeech = document.getElementById("startSpeech");
      const recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
-      recognition.lang = 'en-US';
-      recognition.interimResults = false;            
+       recognition.lang            = 'en-US';
+      recognition.interimResults  = true;   
       recognition.maxAlternatives = 1;
-      recognition.continuous = false; 
+      recognition.continuous      = false;   
      
       startSpeech.addEventListener("click", () => {
         recognition.start();
@@ -2066,10 +2066,11 @@ Storage.recordCategory("Psych");
       });
 
       recognition.addEventListener("result", e => {
-        const last = e.results[e.resultIndex];
-        if (last.isFinal) {
-          chatInput.value = last[0].transcript.trim();
-        }
+        const transcript = Array
+          .from(e.results)
+          .map(r => r[0].transcript)
+          .join('');
+        chatInput.value = transcript.trim();
       });
 
      recognition.addEventListener("end", () => {
