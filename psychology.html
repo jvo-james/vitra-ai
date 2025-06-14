@@ -1898,8 +1898,12 @@ html.dark .history-modal .history-content {
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ messages })
         });
-        if (!response.ok) throw new Error("OpenAI request failed");
-        const data = await response.json();
+  if (!response.ok) {
+          const txt = await response.text();
+          console.error("OpenAI proxy error:", response.status, txt);
+          throw new Error("OpenAI request failed: " + txt);
+        }
+       const data = await response.json();
         return data.choices?.[0]?.message?.content.trim() || "";
       } catch (err) {
         console.error(err);
@@ -2079,15 +2083,13 @@ Storage.recordCategory("Psych");
         chatBox.append(spinnerDiv);
         chatBox.scrollTop = chatBox.scrollHeight;
 
-        const systemPrompt = `
-You are a licensed clinical psychologist with expertise in Cognitive Behavioral Therapy, dialectical behavior therapy , and mindfulness-based stress reduction.
-You are a warm, empathic human therapist.
-When the user asks a question:
-  • Respond empathically and non-judgmentally.
-  • Offer VERY GOOD ADVICE to the user.
-  • Use evidence-based interventions, referencing therapy models when appropriate.
-  • If user input is unclear or incomplete, ask a clarifying question before proceeding.
-  • Maintain a calm, reassuring tone. Keep each reply under 250 words unless explicitly asked for more detail.
+         const systemPrompt = `
+You are a warm, empathic, licensed clinical psychologist skilled in CBT, DBT, and mindfulness.
+• Speak in a caring, conversational tone (“I’m here for you,” “That sounds tough”).
+• Offer clear, evidence-based suggestions.
+• If you’re unsure, ask clarifying questions.
+• Keep replies under 250 words unless requested longer.
+• Check in with the user: “How does that feel?” or “Would you like to explore that more?”
         `.trim();
 
 
@@ -2128,16 +2130,25 @@ When the user asks a question:
             play.title = 'Play';
             play.innerHTML = '<i class="fas fa-volume-up"></i>';
             lastBot.append(play);
+             let currentUtterance = null;
             play.addEventListener('click', () => {
-              if (!('speechSynthesis' in window)) return;
-             const u = new SpeechSynthesisUtterance(plainReply);
-              const voices = window.speechSynthesis.getVoices();
-              const female = voices.find(v => /female|woman|zira|samantha/i.test(v.name))
-                           || voices.find(v => v.lang.startsWith('en'));
-              if (female) u.voice = female;
-              u.lang = 'en-US';
-              u.rate = 1;
-              window.speechSynthesis.speak(u);
+              if (speechSynthesis.speaking) {
+                speechSynthesis.cancel();
+                play.innerHTML = '<i class="fas fa-volume-up"></i>';
+                currentUtterance = null;
+              } else {
+                const u = new SpeechSynthesisUtterance(plainReply);
+                const voices = window.speechSynthesis.getVoices();
+                const female = voices.find(v => /female|woman|zira|samantha/i.test(v.name))
+                             || voices.find(v => v.lang.startsWith('en'));
+                if (female) u.voice = female;
+                u.lang = 'en-US';
+                u.rate = 1;
+                currentUtterance = u;
+                speechSynthesis.speak(u);
+                play.innerHTML = '<i class="fas fa-volume-mute"></i>';
+                u.onend = () => play.innerHTML = '<i class="fas fa-volume-up"></i>';
+              }
             });
             chatHistory.push({ who: "Therapist", text: aiReply, timestamp: replyTime.toISOString() });
             localStorage.setItem("therapyChatHistory", JSON.stringify(chatHistory));
