@@ -2106,7 +2106,17 @@ html.dark #compoundList:focus {
 
   document.addEventListener("DOMContentLoaded", () => {
 
-    let savedCart  = JSON.parse(localStorage.getItem("cartItems") || "[]");
+ const symptomInputBuy = document.getElementById("symptomInputBuy");
+   const suggestionMsg    = document.getElementById("suggestionMsg");
+   const cartList         = document.getElementById("cartList");
+   const cartTotal        = document.getElementById("cartTotal");
+   const orderDetails     = document.getElementById("orderDetails");
+   const cartSummary      = document.getElementById("cartSummary");
+   const payButton        = document.getElementById("payWithPaystack");
+   const countrySelect    = document.getElementById("countrySelect"); // if you don’t actually have one, remove the bits below that use it
+
+   // initialize empty if not on storage
+   let savedCart  = JSON.parse(localStorage.getItem("cartItems") || "[]");
    let savedPromo = parseFloat(localStorage.getItem("promoDiscount")) || 0;
    if (savedPromo) {
      promoDiscount = savedPromo;
@@ -2116,14 +2126,14 @@ html.dark #compoundList:focus {
      cartItems = savedCart;
      rebuildCartUI();    
    }
-    const countrySelect = document.getElementById("countrySelect");
- const buyerPhone   = document.getElementById("buyerPhone");
-
-  countrySelect.addEventListener("change", () => {
-    const code = countrySelect.selectedOptions[0].dataset.dial;
-    buyerPhone.value = "";
-    buyerPhone.placeholder = code + " …";
-  });
+   if (countrySelect) {
+     const buyerPhone = document.getElementById("buyerPhone");
+     countrySelect.addEventListener("change", () => {
+       const code = countrySelect.selectedOptions[0].dataset.dial;
+       buyerPhone.value       = "";
+       buyerPhone.placeholder = code + " …";
+     });
+   }
 
     const iti = window.intlTelInput(document.querySelector("#buyerPhone"), {
      initialCountry: "gh",
@@ -2135,8 +2145,7 @@ html.dark #compoundList:focus {
        alert("⚠️ Please enter a valid phone number.");
        return;
      }
-     const phone = iti.getNumber();
-   });
+  });
     
     const themeToggle = document.getElementById("themeToggle");
     const savedTheme = localStorage.getItem("epharmacy-theme");
@@ -3233,9 +3242,9 @@ ${drugsData.map(d => d.name).join(", ")}.
     }
   });
 
-  let cartItems = [];
+ let cartItems = [];
+document.getElementById("addToCartBtn").addEventListener("click", () => {
 
- addToCartBtn.addEventListener("click", () => {
   const checks = Array.from(document.querySelectorAll(".drug-check:checked"));
    if (checks.length === 0) {
      alert("⚠️ Please select at least one drug to add.");
@@ -3269,8 +3278,8 @@ ${drugsData.map(d => d.name).join(", ")}.
    orderDetails.style.display = "block";
  });
 
-    orderDetails.style.display = "none";
-  cartSummary.style.display  = "none";
+   orderDetails.style.display = "none";
+   cartSummary.style.display  = "none";
 
  const payButton = document.getElementById("payWithPaystack");
 
