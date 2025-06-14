@@ -2217,27 +2217,39 @@ ${providers.map(p => `
         callback: function(response) {
           const id = generateId("U");
          const newAppt = { id, name: urgentProviderName, date: uDate, time: uTime, urgent: true };
-       appointments.push(newAppt);
        db.collection('users').doc(uid)
-         .collection('appointments').doc(id)
-         .set(newAppt);
-           addToRichDashboard(newAppt);
-          renderUpcomingCalendarWidget();
-          urgentFlow = false;
-          confirmModal.hidden = true;
-          showToast("✅ Urgent appointment booked!");
+    .collection('appointments').doc(id)
+    .set(newAppt)
+    .then(() => {
+      appointments.push(newAppt);
+      addToRichDashboard(newAppt);
+      renderUpcomingCalendarWidget();
+      showToast("✅ Urgent appointment booked!");
+    })
+    .catch(err => {
+      console.error("Failed saving urgent appointment:", err);
+      showToast("❌ Could not complete urgent booking.");
+    });
         }
       });
       handler.openIframe();
     } else {
       const id = generateId();
       const newAppt = { id, name: providerName, date: selDate, time: selTime, urgent: false };
-      appointments.push(newAppt);
-      db.collection('users').doc(uid)
-        .collection('appointments').doc(id)
-        .set(newAppt);
-      addToRichDashboard(newAppt);
-      renderUpcomingCalendarWidget();
+db.collection('users').doc(uid)
+  .collection('appointments').doc(id)
+  .set(newAppt)
+  .then(() => {
+    appointments.push(newAppt);
+    addToRichDashboard(newAppt);
+    renderUpcomingCalendarWidget();
+    showToast("✅ Appointment booked!");
+  })
+  .catch(err => {
+    console.error("Failed to save appointment:", err);
+    showToast("❌ Could not save appointment. Check your connection.");
+  });
+
       confirmModal.hidden = true;
        showToast("✅ Appointment booked!");
     }
