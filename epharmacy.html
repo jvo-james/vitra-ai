@@ -2106,6 +2106,8 @@ html.dark #compoundList:focus {
 
   document.addEventListener("DOMContentLoaded", () => {
 
+    let cartItems = [];
+
  const symptomInputBuy = document.getElementById("symptomInputBuy");
    const suggestionMsg    = document.getElementById("suggestionMsg");
    const cartList         = document.getElementById("cartList");
@@ -2155,13 +2157,12 @@ html.dark #compoundList:focus {
       themeToggle.classList.remove("fa-moon");
       themeToggle.classList.add("fa-sun");
     }
-    const themeToggle = document.getElementById("themeToggle");
-    if (themeToggle) {
+
+        if (themeToggle) {
     themeToggle.addEventListener("click", () => {
       const htmlEl = document.documentElement;
       const isDark = htmlEl.classList.toggle("dark");
-      themeToggle.classList.toggle("fa-sun", isDark);
-      themeToggle.classList.toggle("fa-moon", !isDark);
+       themeToggleEl?.classList.replace("fa-moon","fa-sun");
       htmlEl.setAttribute("aria-theme", isDark ? "dark" : "light");
       localStorage.setItem("epharmacy-theme", isDark ? "dark" : "light");
    shrinkSidebar.style.color = isDark ? getComputedStyle(document.documentElement).getPropertyValue("--pharm-text") : getComputedStyle(document.documentElement).getPropertyValue("--pharm-surface");
@@ -2171,7 +2172,9 @@ html.dark #compoundList:focus {
     const shrinkSidebar = document.getElementById("shrinkSidebar");
     const hamburger = document.getElementById("hamburger");
 
-        shrinkSidebar.addEventListener("click", () => {
+        const shrinkSidebar = document.getElementById("shrinkSidebar");
+   if (shrinkSidebar) {
+    shrinkSidebar.addEventListener("click", () => {
       sidebar.classList.toggle("collapsed");
       const icon = shrinkSidebar.querySelector("i");
       icon.classList.toggle("fa-chevron-left");
@@ -2184,7 +2187,7 @@ html.dark #compoundList:focus {
        logoText.style.display = "inline"; 
      }
     });
-
+   }
         hamburger.addEventListener("click", () => {
       document.body.classList.toggle("sidebar-open");
     });
