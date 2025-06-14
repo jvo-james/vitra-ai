@@ -1708,6 +1708,98 @@ html.dark #compoundList:focus {
     <i class="fas fa-robot sticker sticker-6" style="top:30%; right:50%;"></i>
   </section>
 
+
+    <section id="buyDrugs" class="module">
+  <h2><i class="fas fa-shopping-cart"></i> Buy Drugs from Our Pharmacy</h2>
+  <p class="desc">
+    Describe what’s wrong and let our AI suggest the best medication, or simply pick a drug below. After selecting, fill in your details and proceed to payment.
+  </p>
+
+  <label for="symptomInputBuy">Describe your symptoms:</label>
+  <textarea id="symptomInputBuy" rows="2" placeholder="e.g. headache and fever…"></textarea>
+  <button id="suggestDrug" class="btn"><i class="fas fa-brain"></i> Suggest a Drug</button>
+  <small style="display:block; margin-top:0.5rem; color:var(--pharm-muted);">
+    (Our AI will analyze your symptoms and pre-select a suitable medication below.)
+  </small>
+  <div id="suggestionMsg" class="response" style="margin-top:0.75rem; color:var(--pharm-secondary);"></div>
+
+  <label for="drugFilter" style="margin-top:1rem; display:block; font-weight:500;">Search or filter drugs:</label>
+  <input type="text" id="drugFilter" placeholder="e.g. Paracetamol, Antibiotic…" style="width:100%; padding:0.5rem; margin-bottom:0.75rem; border:2px solid var(--pharm-primary-alt); border-radius:var(--radius);">
+
+  <div id="drugList" style="max-height:200px; overflow-y:auto; border:1px solid var(--pharm-muted); border-radius:var(--radius); padding:0.5rem;">
+  </div>
+
+  <!-- Coupon code -->
+  <div style="margin-top:1rem;">
+    <label for="promoCode" style="font-weight:500;">Have a promo code?</label>
+    <input type="text" id="promoCode" placeholder="Enter code" style="width:60%; padding:0.5rem; margin-right:0.5rem; border:2px solid var(--pharm-muted); border-radius:var(--radius);">
+    <button id="applyPromo" class="btn-secondary">Apply</button>
+    <div id="promoMsg" style="margin-top:0.5rem; font-size:0.9rem; color:var(--pharm-accent);"></div>
+  </div>
+
+ <div class="action-row" style="margin-top:1rem; display:flex; align-items:center; gap:1rem;">
+    <button id="addToCartBtn" class="btn add-to-cart">
+      <i class="fas fa-cart-plus"></i> Add to Cart
+    </button>
+    <div id="priceDisplay" class="price-display" style="font-weight:600;"></div>
+  </div>
+  
+ <div id="cartSummary" style="margin-top:1rem; display:none; border:1px solid var(--pharm-secondary); border-radius:var(--radius); padding:var(--padding); background:var(--pharm-bg);">
+   <h4 style="margin-bottom:0.75rem; color:var(--pharm-primary-alt);">Selected Items:</h4>
+   <ul id="cartList" style="list-style:disc; padding-left:1.5rem; color:var(--pharm-text);"></ul>
+   <p style="font-weight:600; margin-top:0.75rem;">Total: ₵<span id="cartTotal">0.00</span></p>
+ </div>
+
+  <div id="orderDetails" style="margin-top:1.5rem; display:none;">
+    <h3><i class="fas fa-user"></i> Your Details</h3>
+  <label>Full Name:
+      <input type="text" id="buyerName" placeholder="e.g. John Doe" required>
+    </label>
+     <label>Country & Phone Number:
+      <div style="display:flex; gap:0.5rem; align-items:center;">
+        <select id="countrySelect" required>
+          <option value="GH" data-dial="+233" selected>🇬🇭 Ghana</option>
+          <option value="US" data-dial="+1">🇺🇸 United States</option>
+          <option value="GB" data-dial="+44">🇬🇧 United Kingdom</option>
+          <option value="NG" data-dial="+234">🇳🇬 Nigeria</option>
+        </select>
+        <input
+          type="tel"
+          id="buyerPhone"
+          placeholder="+233 …"
+          pattern="\d{6,14}"
+          required
+        >
+      </div>
+      <small style="display:block; font-size:0.85rem; color:var(--pharm-muted);">
+        We’ll prefix with country code automatically.
+      </small>
+    </label>
+    <label>Email Address:
+      <input 
+        type="email" 
+        id="buyerEmail" 
+        placeholder="example@mail.com" 
+        required
+      >
+    </label>
+    <label>Delivery Address:
+      <textarea id="buyerAddress" rows="2" placeholder="Street, City, Region…" required></textarea>
+    </label>
+     <button id="payWithPaystack" class="btn" style="background: var(--pharm-primary-alt);">
+      <i class="fas fa-credit-card"></i> Proceed to Payment
+    </button>
+  </div>
+</section>
+ <!-- modal -->
+     <div id="paymentModal" class="history-modal" hidden>
+    <div class="history-content">
+      <h3><i class="fas fa-check-circle" style="color:green;"></i> Payment Successful!</h3>
+      <p id="confirmText"></p>
+      <button class="close-history"><i class="fas fa-times"></i> Close</button>
+    </div>
+  </div>
+
     <section id="prescriptionScanner" class="module">
       <h2><i class="fas fa-microscope"></i> Smart Prescription Builder</h2>
       <p class="desc">Upload or scan a handwritten prescription; AI will decode and structure it for you.</p>
@@ -1848,97 +1940,6 @@ html.dark #compoundList:focus {
         <div class="result-content"></div>
       </div>
     </section>
-
-<section id="buyDrugs" class="module">
-  <h2><i class="fas fa-shopping-cart"></i> Buy Drugs from Our Pharmacy</h2>
-  <p class="desc">
-    Describe what’s wrong and let our AI suggest the best medication, or simply pick a drug below. After selecting, fill in your details and proceed to payment.
-  </p>
-
-  <label for="symptomInputBuy">Describe your symptoms:</label>
-  <textarea id="symptomInputBuy" rows="2" placeholder="e.g. headache and fever…"></textarea>
-  <button id="suggestDrug" class="btn"><i class="fas fa-brain"></i> Suggest a Drug</button>
-  <small style="display:block; margin-top:0.5rem; color:var(--pharm-muted);">
-    (Our AI will analyze your symptoms and pre-select a suitable medication below.)
-  </small>
-  <div id="suggestionMsg" class="response" style="margin-top:0.75rem; color:var(--pharm-secondary);"></div>
-
-  <label for="drugFilter" style="margin-top:1rem; display:block; font-weight:500;">Search or filter drugs:</label>
-  <input type="text" id="drugFilter" placeholder="e.g. Paracetamol, Antibiotic…" style="width:100%; padding:0.5rem; margin-bottom:0.75rem; border:2px solid var(--pharm-primary-alt); border-radius:var(--radius);">
-
-  <div id="drugList" style="max-height:200px; overflow-y:auto; border:1px solid var(--pharm-muted); border-radius:var(--radius); padding:0.5rem;">
-  </div>
-
-  <!-- Coupon code -->
-  <div style="margin-top:1rem;">
-    <label for="promoCode" style="font-weight:500;">Have a promo code?</label>
-    <input type="text" id="promoCode" placeholder="Enter code" style="width:60%; padding:0.5rem; margin-right:0.5rem; border:2px solid var(--pharm-muted); border-radius:var(--radius);">
-    <button id="applyPromo" class="btn-secondary">Apply</button>
-    <div id="promoMsg" style="margin-top:0.5rem; font-size:0.9rem; color:var(--pharm-accent);"></div>
-  </div>
-
- <div class="action-row" style="margin-top:1rem; display:flex; align-items:center; gap:1rem;">
-    <button id="addToCartBtn" class="btn add-to-cart">
-      <i class="fas fa-cart-plus"></i> Add to Cart
-    </button>
-    <div id="priceDisplay" class="price-display" style="font-weight:600;"></div>
-  </div>
-  
- <div id="cartSummary" style="margin-top:1rem; display:none; border:1px solid var(--pharm-secondary); border-radius:var(--radius); padding:var(--padding); background:var(--pharm-bg);">
-   <h4 style="margin-bottom:0.75rem; color:var(--pharm-primary-alt);">Selected Items:</h4>
-   <ul id="cartList" style="list-style:disc; padding-left:1.5rem; color:var(--pharm-text);"></ul>
-   <p style="font-weight:600; margin-top:0.75rem;">Total: ₵<span id="cartTotal">0.00</span></p>
- </div>
-
-  <div id="orderDetails" style="margin-top:1.5rem; display:none;">
-    <h3><i class="fas fa-user"></i> Your Details</h3>
-  <label>Full Name:
-      <input type="text" id="buyerName" placeholder="e.g. John Doe" required>
-    </label>
-     <label>Country & Phone Number:
-      <div style="display:flex; gap:0.5rem; align-items:center;">
-        <select id="countrySelect" required>
-          <option value="GH" data-dial="+233" selected>🇬🇭 Ghana</option>
-          <option value="US" data-dial="+1">🇺🇸 United States</option>
-          <option value="GB" data-dial="+44">🇬🇧 United Kingdom</option>
-          <option value="NG" data-dial="+234">🇳🇬 Nigeria</option>
-        </select>
-        <input
-          type="tel"
-          id="buyerPhone"
-          placeholder="+233 …"
-          pattern="\d{6,14}"
-          required
-        >
-      </div>
-      <small style="display:block; font-size:0.85rem; color:var(--pharm-muted);">
-        We’ll prefix with country code automatically.
-      </small>
-    </label>
-    <label>Email Address:
-      <input 
-        type="email" 
-        id="buyerEmail" 
-        placeholder="example@mail.com" 
-        required
-      >
-    </label>
-    <label>Delivery Address:
-      <textarea id="buyerAddress" rows="2" placeholder="Street, City, Region…" required></textarea>
-    </label>
-     <button id="payWithPaystack" class="btn" style="background: var(--pharm-primary-alt);">
-      <i class="fas fa-credit-card"></i> Proceed to Payment
-    </button>
-  </div>
-</section>
- <!-- modal -->
-     <div id="paymentModal" class="history-modal" hidden>
-    <div class="history-content">
-      <h3><i class="fas fa-check-circle" style="color:green;"></i> Payment Successful!</h3>
-      <p id="confirmText"></p>
-      <button class="close-history"><i class="fas fa-times"></i> Close</button>
-    </div>
-  </div>
 
 
     <section id="compoundAdvisor" class="module">
@@ -2593,7 +2594,7 @@ document.getElementById("drugFilter")
 let promoDiscount = 0;
 document.getElementById("applyPromo").onclick = () => {
   const code = document.getElementById("promoCode").value.trim();
-  if (code === "SAVE10") {
+  if (code === "VITRA10") {
     promoDiscount = 0.10;
     document.getElementById("promoMsg").textContent = "10% discount applied!";
   } else {
@@ -2620,7 +2621,7 @@ function updateCartPrice() {
   total = total * (1 - promoDiscount);
  priceDisplay.innerHTML = `
     <div>Subtotal: ₵${total.toFixed(2)}</div>
-    <div style="font-size:0.9rem; color:var(--pharm-muted);">🚚 Est. delivery: 2–4 days</div>
+    <div style="font-size:0.9rem; color:var(--pharm-muted);">🚚 Est. delivery: 1–2 hours</div>
   `;
 }
 
