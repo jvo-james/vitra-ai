@@ -2614,11 +2614,6 @@ addToCartBtns.forEach(btn => btn.addEventListener("click", updateCartPrice));
      if (e.target.matches(".drug-check, .qty-input")) updateCartPrice();
    });
     
-document.getElementById("drugList").addEventListener("input", e => {
-  if (e.target.matches(".drug-check") || e.target.matches(".qty-input")) {
-    updateCartPrice();
-  }
-});
 
     const suggestDrugBtn = document.getElementById("suggestDrug");
   suggestDrugBtn.addEventListener("click", async () => {
@@ -2634,19 +2629,6 @@ document.getElementById("drugList").addEventListener("input", e => {
     document.getElementById("suggestionMsg").append(pairingDiv);
   });
     
-  const symptomInputBuy = document.getElementById("symptomInputBuy");
-  const suggestDrugBtn   = document.getElementById("suggestDrug");
-  const suggestionMsg    = document.getElementById("suggestionMsg");
-  const priceDisplay     = document.getElementById("priceDisplay");
-  const cartList         = document.getElementById("cartList");
-  const cartTotal        = document.getElementById("cartTotal");
-  const cartSummary      = document.getElementById("cartSummary");
-  const orderDetails     = document.getElementById("orderDetails");
-  const payButton        = document.getElementById("payWithPaystack");
-  const paymentModal     = document.getElementById("paymentModal");
-  const confirmText      = document.getElementById("confirmText");
-
-
  
   suggestDrugBtn.addEventListener("click", async () => {
     const symptoms = symptomInputBuy.value.trim();
@@ -2700,37 +2682,35 @@ ${drugsData.map(d => d.name).join(", ")}.
 
   let cartItems = [];
 
-  addToCartBtn.addEventListener("click", () => {
-    const selectedOptions = Array.from(drugSelect.selectedOptions);
-    if (selectedOptions.length === 0) {
-      alert("⚠️ Please select at least one drug to add.");
-      return;
-    }
+ addToCartBtn.addEventListener("click", () => {
+  const checks = Array.from(document.querySelectorAll(".drug-check:checked"));
+   if (checks.length === 0) {
+     alert("⚠️ Please select at least one drug to add.");
+     return;
+   }
 
-    cartItems = selectedOptions.map(opt => {
-      const idx = Number(opt.value);
-      return {
-        name:  drugsData[idx].name,
-        price: drugsData[idx].price
-      };
-    });
+   cartItems = checks.map(cb => {
+     const idx = +cb.dataset.idx;
+     const qty = +document.querySelector(`.qty-input[data-idx="${idx}"]`).value;
+     const drug = drugsData[idx];
+     const unitPrice = qty >= drug.bulkThreshold ? drug.bulkPrice : drug.price;
+     return { name: drug.name, price: unitPrice * qty };
+   });
 
-    cartList.innerHTML = "";
-    let total = 0;
-    cartItems.forEach(item => {
-      const li = document.createElement("li");
-      li.textContent = `${item.name} — ₵${item.price.toFixed(2)}`;
-      cartList.appendChild(li);
-      total += item.price;
-    });
-    cartTotal.textContent = total.toFixed(2);
-    cartSummary.style.display = "block";
+   cartList.innerHTML = "";
+   let runningTotal = 0;
+   cartItems.forEach(item => {
+     const li = document.createElement("li");
+     li.textContent = `${item.name} — ₵${item.price.toFixed(2)}`;
+     cartList.appendChild(li);
+     runningTotal += item.price;
+   });
+   cartTotal.textContent = runningTotal.toFixed(2);
+   cartSummary.style.display = "block";
+   orderDetails.style.display = "block";
+ });
 
-    orderDetails.style.display = "block";
-    priceDisplay.textContent = "";
-  });
-
-  orderDetails.style.display = "none";
+    orderDetails.style.display = "none";
   cartSummary.style.display  = "none";
 
   payButton.addEventListener("click", () => {
