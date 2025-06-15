@@ -1650,53 +1650,7 @@ html.dark #compoundList:focus {
   border-radius: var(--radius);
   padding: 0.5rem;
 }
-
-.modal .modal-content {
-  padding: calc(var(--padding) * 1.5);
-  max-width: 500px;
-  width: 90%;
-  box-shadow: 0 8px 24px rgba(0,0,0,0.2);
-  transition: transform var(--transition);
-}
-.modal .modal-content:hover {
-  transform: translateY(-4px);
- }  
-  .modal .modal-content img {
- max-width: 180px;
-   display: block;
-   margin: 0 auto 1rem;
-  border-radius: var(--radius);
-  box-shadow: var(--shadow);
- }
-   .modal .close-btn {
- background: var(--pharm-primary-alt);
-  color: #fff;
-  font-size: 1.1rem;
-  border: none;
-  padding: 0.25rem 0.5rem;
-  border-radius: 50%;
-  position: absolute;
-  top: calc(var(--padding) / 2);
-  right: calc(var(--padding) / 2);
-   cursor: pointer;
-   transition: background var(--transition), transform var(--transition);
- }
- .modal .close-btn:hover {
- background: var(--pharm-primary);
-   transform: scale(1.2);
- }
-  #buyerPhone {
-  padding-left: 56px !important;
-}
-
-.iti__flag-container {
-  left: 12px !important;
-}
-
-.iti__selected-flag {
-  top: 50% !important;
-  transform: translateY(-50%) !important;
-}
+ 
 </style>
 
 
@@ -1771,7 +1725,7 @@ html.dark #compoundList:focus {
   <small style="display:block; margin-top:0.5rem; color:var(--pharm-muted);">
     (Our AI will analyze your symptoms and pre-select a suitable medication below.)
   </small>
-  <div id="suggestionMsg" class="response" hidden style="margin-top:0.75rem; color:var(--pharm-secondary);"></div>
+  <div id="suggestionMsg" class="response" style="margin-top:0.75rem; color:var(--pharm-secondary);"></div>
 
   <label for="drugFilter" style="margin-top:1rem; display:block; font-weight:500;">Search or filter drugs:</label>
   <input type="text" id="drugFilter" placeholder="e.g. Paracetamol, Antibiotic…" style="width:100%; padding:0.5rem; margin-bottom:0.75rem; border:2px solid var(--pharm-primary-alt); border-radius:var(--radius);">
@@ -2160,6 +2114,7 @@ html.dark #compoundList:focus {
    const orderDetails     = document.getElementById("orderDetails");
    const cartSummary      = document.getElementById("cartSummary");
    
+   // initialize empty if not on storage
    let savedCart  = JSON.parse(localStorage.getItem("cartItems") || "[]");
    let savedPromo = parseFloat(localStorage.getItem("promoDiscount")) || 0;
    if (savedPromo) {
@@ -2694,6 +2649,7 @@ function openDrugModal(idx) {
   document.getElementById("drugModal").hidden = false;
 }
     
+// ── Place this right after your drugsData definition ──
 const drugModalData = {
   "Paracetamol 500mg": {
     desc: "A safe, effective analgesic and antipyretic for mild to moderate pain and fever.",
@@ -3174,12 +3130,8 @@ function renderDrugList(filter="") {
         <div>₵${drug.price.toFixed(2)}</div>
         <input type="number" min="1" value="1" class="qty-input" data-idx="${idx}">
       `;
-const nameDiv = row.querySelector(".drug-name");
-    nameDiv.style.cursor = "pointer";
-    nameDiv.addEventListener("click", (e) => {
-      e.stopPropagation();
-      openDrugModal(idx);
-    });     container.append(row);
+     row.addEventListener("click", () => openDrugModal(idx));
+     container.append(row);
     });
 }
 renderDrugList();
@@ -3237,7 +3189,6 @@ addToCartBtns.forEach(btn => btn.addEventListener("click", updateCartPrice));
     const suggestDrugBtn = document.getElementById("suggestDrug");
   suggestDrugBtn.addEventListener("click", async () => {
     const symptoms = symptomInputBuy.value.trim();
-    suggestionMsg.hidden = false;
     suggestionMsg.textContent = "";
     if (!symptoms) {
       suggestionMsg.textContent = "⚠️ Please describe your symptoms first.";
@@ -3426,12 +3377,8 @@ key: "pk_test_297586e51710e83d3c159bfe71ff45c7e23411fa",
     document.getElementById("buyerAddress").value = "";
   };
 
-  const drugModal = document.getElementById("drugModal");
-   document.getElementById("drugModalClose").addEventListener("click", () => {
-      drugModal.hidden = true;
-    });
-
-    function formatHTML(text) {
+ 
+       function formatHTML(text) {
       if (!text) return "";
       return text
         .replace(/^######\s*(.+)$/gm, "<h6>$1</h6>")
