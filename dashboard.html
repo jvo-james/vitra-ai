@@ -1270,6 +1270,69 @@ html.dark #insightsContainer .card a.btn-secondary {
 .actions {
   margin-top:auto; display:flex; gap:0.5rem;
 }
+
+  #purchasedContainer {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px,1fr));
+  gap: 1rem;
+}
+.purchased-card {
+  display: flex;
+  flex-direction: column;
+  background: var(--surface);
+  border-radius: var(--radius);
+  overflow: hidden;
+  box-shadow: var(--shadow-light);
+  transition: transform var(--transition), box-shadow var(--transition);
+}
+.purchased-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+}
+.purchased-card img {
+  width: 100%;
+  aspect-ratio: 4/3;
+  object-fit: cover;
+}
+.purchased-card .dosage,
+.purchased-card .purchase-date {
+  font-size: 0.9rem;
+  color: var(--muted);
+  margin: 0.25rem 1rem;
+}
+.purchased-card .price-row {
+  margin: 0.25rem 1rem;
+}
+.purchased-card .actions {
+  margin: 0.5rem 1rem 1rem;
+  display: flex;
+  gap: 0.5rem;
+}
+.purchased-card .btn-details {
+  flex: 1;
+  background: var(--secondary);
+  color: var(--primary);
+  border: 2px solid var(--primary);
+  padding: 0.5rem;
+  border-radius: var(--radius);
+  transition: background var(--transition), color var(--transition);
+}
+.purchased-card .btn-details:hover {
+  background: var(--primary);
+  color: var(--secondary);
+}
+.purchased-card .btn-reorder {
+  flex: 1;
+  background: var(--primary);
+  color: var(--secondary);
+  padding: 0.5rem;
+  border-radius: var(--radius);
+  transition: background var(--transition);
+}
+.purchased-card .btn-reorder:hover {
+  background: #3A62A8;
+}
+
 </style>
 
   
@@ -1668,9 +1731,18 @@ html.dark #insightsContainer .card a.btn-secondary {
    card.className = "card purchased-card";
    card.dataset.name = item.name;
    card.innerHTML = `
-     <img src="${item.thumb || 'placeholder.jpg'}" alt="${item.name}">
+    <img 
+      src="${item.imageUrl || item.thumb || 'placeholder.jpg'}" 
+      alt="${item.name}" 
+      onerror="this.src='placeholder.jpg'" 
+    >
      <h4 class="drug-name clickable">${item.name}</h4>
-     <p class="dosage">Dosage: ${item.dosage || 'N/A'}</p>
+     <p class="dosage">
+       Dosage: <strong>${item.dosage ?? '—'}</strong>
+    </p>
+     <p class="purchase-date">
+       Purchased: <time datetime="${item.date}">${item.date}</time>
+     </p>
      <div class="price-row">
        <span class="price">₵${item.price.toFixed(2)}</span>
        ${item.discount ? `<span class="discount-badge">–${item.discount*100}%</span>` : ''}
@@ -1687,7 +1759,7 @@ html.dark #insightsContainer .card a.btn-secondary {
     const card = e.target.closest(".purchased-card");
     if (!card) return;
     const name = card.dataset.name;
-   if (e.target.matches(".drug-name, .btn-details")) {
+   if (e.target.closest(".drug-name") || e.target.closest(".btn-details")) {
      openDrugModalByName(name);
    }
    if (e.target.matches(".btn-reorder")) {
