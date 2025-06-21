@@ -1332,7 +1332,14 @@ html.dark #insightsContainer .card a.btn-secondary {
 .purchased-card .btn-reorder:hover {
   background: #3A62A8;
 }
-
+.purchased-card .btn-reorder i {
+  color: var(--secondary);
+}
+  @media (max-width: 400px) {
+  #purchasedContainer {
+    grid-template-columns: 1fr !important;
+  }
+}
 </style>
 
   
@@ -1741,7 +1748,14 @@ html.dark #insightsContainer .card a.btn-secondary {
        Dosage: <strong>${item.dosage ?? '—'}</strong>
     </p>
      <p class="purchase-date">
-       Purchased: <time datetime="${item.date}">${item.date}</time>
+       Purchased:
+      ${new Date(item.date).toLocaleDateString([], {
+         month: "short", day: "numeric", year: "numeric"
+       })}
+      at
+      ${new Date(item.date).toLocaleTimeString([], {
+         hour: "2-digit", minute: "2-digit"
+       })}
      </p>
      <div class="price-row">
        <span class="price">₵${item.price.toFixed(2)}</span>
@@ -1756,15 +1770,18 @@ html.dark #insightsContainer .card a.btn-secondary {
   });
 
   purchasedContainer.addEventListener("click", e => {
-    const card = e.target.closest(".purchased-card");
-    if (!card) return;
-    const name = card.dataset.name;
-   if (e.target.closest(".drug-name") || e.target.closest(".btn-details")) {
-     openDrugModalByName(name);
-   }
-   if (e.target.matches(".btn-reorder")) {
-     window.location.href = `epharmacy.html?reorder=${encodeURIComponent(name)}`;
-    }
+    const card       = e.target.closest(".purchased-card");
+  const detailBtn  = e.target.closest(".btn-details");
+  const reorderBtn = e.target.closest(".btn-reorder");
+  if (!card) return;
+ const name = card.dataset.name;
+  if (detailBtn || e.target.closest(".drug-name")) {
+    openDrugModalByName(name);
+  }
+  if (reorderBtn) {
+    window.location.href = `epharmacy.html?reorder=${encodeURIComponent(name)}`;
+  }
+
   });
 }
 
