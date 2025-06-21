@@ -3317,7 +3317,11 @@ document.getElementById("addToCartBtn").addEventListener("click", () => {
      const qty = +document.querySelector(`.qty-input[data-idx="${idx}"]`).value;
      const drug = drugsData[idx];
      const unitPrice = qty >= drug.bulkThreshold ? drug.bulkPrice : drug.price;
-     return { name: drug.name, price: unitPrice * qty };
+     return { name: drug.name,
+             price: unitPrice * qty,
+            thumb:  drug.thumb,        
+           dosage: `${qty}×${drug.name}`
+            };
    });
 
    cartList.innerHTML = "";
@@ -3399,12 +3403,11 @@ key: "pk_test_297586e51710e83d3c159bfe71ff45c7e23411fa",
     cartItems.forEach(itm => {
         const drugObj = drugsData.find(d => d.name === itm.name) || {};
         prev.push({
-         name: itm.name,
-          price: itm.price,
-         
-          thumb:   drugObj.thumb || drugObj.imageUrl || 'placeholder.jpg',
-          dosage:  drugObj.name.match(/\d+mg|\d+ ?IU/)?.[0] || '—',  
-          date:    new Date().toISOString()
+     name:   itm.name,
+      price:  itm.price,
+      date:   new Date().toISOString(),
+      thumb:  itm.thumb,     
+     dosage: itm.dosage
         });
      });
     localStorage.setItem("purchasedDrugs", JSON.stringify(prev));
