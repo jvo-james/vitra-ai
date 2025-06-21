@@ -2160,16 +2160,34 @@ html.dark #compoundList:focus {
    const orderDetails     = document.getElementById("orderDetails");
    const cartSummary      = document.getElementById("cartSummary");
    
-   let savedCart  = JSON.parse(localStorage.getItem("cartItems") || "[]");
+ 
    let savedPromo = parseFloat(localStorage.getItem("promoDiscount")) || 0;
    if (savedPromo) {
      promoDiscount = savedPromo;
      document.getElementById("promoMsg").textContent = `${savedPromo*100}% discount applied!`;
    }
-   if (savedCart.length) {
-     cartItems = savedCart;
-     rebuildCartUI();    
-   }
+
+    let savedCart  = JSON.parse(localStorage.getItem("cartItems") || "[]");
+if (savedCart.length) {
+ cartItems = savedCart;
+   cartList.innerHTML = "";
+  let runningTotal = 0;
+ cartItems.forEach(item => {
+   const li = document.createElement("li");
+   li.textContent = `${item.name} — ₵${item.price.toFixed(2)}`;
+    cartList.appendChild(li);
+   runningTotal += item.price;
+  });
+  const discountAmt = runningTotal * promoDiscount;
+   const finalTotal  = runningTotal - discountAmt;
+  cartTotal.innerHTML = `
+    Original: ₵${runningTotal.toFixed(2)}<br>
+    Discount: ₵${discountAmt.toFixed(2)}<br>
+    <strong>Payable: ₵${finalTotal.toFixed(2)}</strong>
+  `;
+   cartSummary.style.display = "block";
+   orderDetails.style.display = "block";
+ }
 
 
     const iti = window.intlTelInput(document.querySelector("#buyerPhone"), {
@@ -4110,7 +4128,9 @@ You are a friendly, knowledgeable pharmacist. A user will ask questions about me
     function initCharts() {
       const colorText = getCSSVar("--pharm-text");
       const colorMuted = getCSSVar("--pharm-muted");
-      new Chart("chart1", {
+      new Chart(
+  document.getElementById("chart1").getContext("2d"),
+      {
         type: "line",
         data: {
           labels: ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul"],
@@ -4132,7 +4152,9 @@ You are a friendly, knowledgeable pharmacist. A user will ask questions about me
           plugins: { legend: { display: false } }
         }
       });
-      new Chart("chart2", {
+      new Chart(
+   document.getElementById("chart2").getContext("2d"),
+  {
         type: "bar",
         data: {
           labels: ["Week 1", "Week 2", "Week 3", "Week 4"],
