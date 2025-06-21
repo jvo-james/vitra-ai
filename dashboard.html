@@ -13,6 +13,7 @@
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
 
+
 <style>
   :root {
     --primary: #4A78C4;
@@ -1244,7 +1245,31 @@ html.dark #insightsContainer .card a.btn-secondary {
   color: var(--muted);
   font-size: 0.9rem;
 }
-
+.purchased-card {
+  display: flex; flex-direction: column; gap:0.5rem;
+  border-radius: var(--radius); overflow:hidden;
+  box-shadow: var(--shadow-light); position:relative;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+.purchased-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 6px 20px rgba(0,0,0,0.1);
+}
+.purchased-card img {
+  width:100%; height:150px; object-fit:cover;
+}
+.purchased-card .drug-name.clickable {
+  cursor:pointer; color: var(--primary);
+}
+.price-row {
+  display:flex; justify-content:space-between; align-items:center;
+}
+.discount-badge {
+  background: #e53e3e; color:#fff; border-radius:4px; padding:0.1em 0.5em; font-size:0.85rem;
+}
+.actions {
+  margin-top:auto; display:flex; gap:0.5rem;
+}
 </style>
 
   
@@ -1347,9 +1372,9 @@ html.dark #insightsContainer .card a.btn-secondary {
       Click here to purchase drugs from our pharmacy…
     </a>
   </p>
-      <div id="purchasedContainer" class="appointments-list">
-        <p class="empty-message" style="color: var(--muted);">You haven’t purchased any drugs yet.</p>
-      </div>
+  <div id="purchasedContainer" class="content">
+  </div>
+
     </section>
 
     <section id="nutritionSummary" class="module">
@@ -1480,6 +1505,7 @@ html.dark #insightsContainer .card a.btn-secondary {
   };
   firebase.initializeApp(firebaseConfig);
   const auth = firebase.auth();
+  
 
   document.addEventListener("DOMContentLoaded", () => {
 
@@ -1630,24 +1656,45 @@ html.dark #insightsContainer .card a.btn-secondary {
       return `${String(hh).padStart(2, "0")}:${String(mm).padStart(2, "0")} ${suffix}`;
     }
 
-    function loadPurchasedDrugs() {
-      purchasedContainer.innerHTML = "";
-      const purchased = JSON.parse(localStorage.getItem("purchasedDrugs") || "[]");
-      if (!purchased.length) {
-        purchasedContainer.innerHTML = `<p class="empty-message" style="color: var(--muted);">You haven’t purchased any drugs yet.</p>`;
-        return;
-      }
-      purchased.forEach(item => {
-        const card = document.createElement("div");
-        card.className = "purchased-item";
-        card.innerHTML = `
-          <h4><i class="fas fa-capsules"></i> ${item.name}</h4>
-          <p class="price">₵${item.price.toFixed(2)}</p>
-          <p>Purchased on: ${new Date(item.date).toLocaleDateString()}</p>
-        `;
-        purchasedContainer.append(card);
-      });
+  function loadPurchasedDrugs() {
+  purchasedContainer.innerHTML = "";
+ const purchased = JSON.parse(localStorage.getItem("purchasedDrugs") || "[]");
+ if (!purchased.length) {
+   purchasedContainer.innerHTML = `<p class="empty-message" style="color: var(--muted);">You haven’t purchased any drugs yet.</p>`;
+   return;
+ }
+ purchased.forEach(item => {
+    const card = document.createElement("div");
+   card.className = "card purchased-card";
+   card.dataset.name = item.name;
+   card.innerHTML = `
+     <img src="${item.thumb || 'placeholder.jpg'}" alt="${item.name}">
+     <h4 class="drug-name clickable">${item.name}</h4>
+     <p class="dosage">Dosage: ${item.dosage || 'N/A'}</p>
+     <div class="price-row">
+       <span class="price">₵${item.price.toFixed(2)}</span>
+       ${item.discount ? `<span class="discount-badge">–${item.discount*100}%</span>` : ''}
+      </div>
+      <div class="actions">
+        <button class="btn btn-secondary btn-details"><i class="fas fa-info-circle"></i> Details</button>
+        <button class="btn btn-primary btn-reorder"><i class="fas fa-cart-plus"></i> Reorder</button>
+     </div>
+    `;
+    purchasedContainer.append(card);
+  });
+
+  purchasedContainer.addEventListener("click", e => {
+    const card = e.target.closest(".purchased-card");
+    if (!card) return;
+    const name = card.dataset.name;
+   if (e.target.matches(".drug-name, .btn-details")) {
+     openDrugModalByName(name);
+   }
+   if (e.target.matches(".btn-reorder")) {
+     window.location.href = `epharmacy.html?reorder=${encodeURIComponent(name)}`;
     }
+  });
+}
 
     function loadNutritionSummary() {
       nutritionContainer.innerHTML = "";
