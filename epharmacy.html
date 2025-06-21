@@ -3397,12 +3397,16 @@ key: "pk_test_297586e51710e83d3c159bfe71ff45c7e23411fa",
 
     const prev = JSON.parse(localStorage.getItem("purchasedDrugs") || "[]");
     cartItems.forEach(itm => {
-      prev.push({
-        name: itm.name,
-        price: itm.price,
-        date: new Date().toISOString()
-      });
-    });
+        const drugObj = drugsData.find(d => d.name === itm.name) || {};
+        prev.push({
+         name: itm.name,
+          price: itm.price,
+         
+          thumb:   drugObj.thumb || drugObj.imageUrl || 'placeholder.jpg',
+          dosage:  drugObj.name.match(/\d+mg|\d+ ?IU/)?.[0] || '—',  
+          date:    new Date().toISOString()
+        });
+     });
     localStorage.setItem("purchasedDrugs", JSON.stringify(prev));
 
     const itemLines = cartItems
