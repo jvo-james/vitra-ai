@@ -1135,8 +1135,17 @@ section.module.hero-module {
   color: var(--color-text);
   line-height: var(--line-height-base);
 }
-
-/* Dark mode overrides */
+ #genetics-form {
+ flex-wrap: wrap; }
+   @media (max-width: var(--breakpoint-md)) {
+ #genetics-form {
+    flex-direction: column;
+  }
+  #genetics-form input[type="file"],
+  #genetics-form button {
+    width: 100%;
+  }
+}
 :root.dark .culture-input-wrapper,
 :root.dark #cultureResult {
   background: var(--color-gray-800);
@@ -1441,9 +1450,6 @@ section.module.hero-module {
   background-color: var(--color-secondary-hover);
 }
 
-/* ---------------------------------------------
-   5.6 MODULE STYLES: Chat History Modal
-   --------------------------------------------- */
 .history-modal {
   position: fixed;
   inset: 0;
@@ -1456,11 +1462,12 @@ section.module.hero-module {
 .history-content {
   background-color: var(--color-bg);
   padding: var(--spacer-xl);
+  display: flex;
+  flex-direction: column;
   border-radius: var(--border-radius-lg);
   width: 90%;
   max-width: 600px;
   max-height: 80%;
-  overflow-y: auto;
   box-shadow: var(--shadow-lg);
   position: relative;
   z-index: var(--z-index-modal);
@@ -1471,8 +1478,11 @@ section.module.hero-module {
   font-size: var(--font-size-xl);
   margin-bottom: var(--spacer-md);
 }
+.history-table-wrapper {
+  flex: 1 1 auto;
+  overflow-y: auto;
+}
 
-/* History table (borderless look) */
 .history-table {
   width: 100%;
   border-collapse: collapse;
@@ -1497,12 +1507,15 @@ section.module.hero-module {
   background-color: var(--color-gray-100);
 }
 
-/* Delete & Clear buttons */
 .history-actions {
   display: flex;
   justify-content: flex-end;
   gap: var(--spacer-sm);
   margin-top: var(--spacer-md);
+  position: sticky;
+ bottom: 0;
+  background: var(--color-bg);
+  padding-top: var(--spacer-md);
 }
 .history-actions button {
   padding: var(--spacer-sm) var(--spacer-md);
@@ -1528,7 +1541,6 @@ section.module.hero-module {
   transform: translateY(-1px);
 }
 
-/* Dark-mode overrides */
 :root.dark .history-content {
   background-color: var(--color-gray-800);
 }
@@ -1819,9 +1831,6 @@ section.module.hero-module {
   margin-top: var(--spacer-xs);
 }
 
-/* ---------------------------------------------
-   5.14 MODULE STYLES: Meet a Herbal Health Expert
-   --------------------------------------------- */
 .meet-module {
   background: linear-gradient(135deg, var(--color-secondary), var(--color-primary));
   color: #fff;
@@ -1853,9 +1862,6 @@ section.module.hero-module {
   color: #fff;
 }
 
-/* ---------------------------------------------
-   5.15 SUPPORT: Toasts, Spinners & CATCH-ALL
-   --------------------------------------------- */
 .spinner {
  width: 1.25em; height: 1.25em;
   border: 3px solid var(--color-gray-300);
@@ -1865,7 +1871,6 @@ section.module.hero-module {
   box-shadow: var(--shadow-xs);
 }
 
-/* Toast */
 .copy-toast {
   position: fixed;
   bottom: var(--spacer-lg);
@@ -1886,7 +1891,6 @@ section.module.hero-module {
   to { opacity: 0; }
 }
 
-/* Catch-all transition on all modules */
 section.module, .chart-card, .meet-module {
   transition: transform var(--transition-fast), box-shadow var(--transition-fast);
 }
@@ -1924,25 +1928,20 @@ background: var(--color-gray-800) !important;
  }
    
 @media (max-width: var(--breakpoint-md)) {
-  /* Stack modules */
   section.module {
     padding: var(--spacer-lg);
     margin: var(--spacer-xl) 0;
   }
-  /* Sidebar hidden, header fixed */
   aside#sidebar, header { display: none; }
-  /* Full-width buttons */
   .btn-primary, .btn-secondary, .btn-tertiary, button { width: 100%; }
-  /* Chat adjustments */
   .chat-box { height: 200px; }
-  /* Form inputs full width */
   #pf-form, #research-form, #inventory-form, #interaction-form, #roi-form, #dose-form {
     flex-direction: column;
   }
 }
 
  @media (max-width: 414px) {
-   html { font-size: 14px; } /* slightly smaller text */
+   html { font-size: 14px; } 
    main { margin-left: 0; padding: var(--spacer-md); }
      aside#sidebar { display: none; }
   header {
@@ -1952,17 +1951,14 @@ background: var(--color-gray-800) !important;
     z-index: var(--z-index-sticky);
  }
 
-   /* Buttons full width */
    .btn-primary, .btn-secondary, .btn-tertiary, button {
      width: 100%; text-align: center;
    }
 
-   /* Hero images smaller */
    .hero-image img {
      max-width: 90%;
    }
 
-   /* Reduce chat height */
    .chat-box { height: 180px; }
 
    .sym-form,
@@ -1972,7 +1968,6 @@ background: var(--color-gray-800) !important;
    }
  }
 
-   /* replace your existing .spinner rule with: */
 .spinner {
   display: inline-block;
   width: 2em;
@@ -1982,10 +1977,10 @@ background: var(--color-gray-800) !important;
   border-radius: 50%;
   animation: spin 1s linear infinite;
   box-shadow: var(--shadow-xs);
-  margin: var(--spacer-md) auto;        /* center horizontally */
+  margin: var(--spacer-md) auto;      
 }
 .response .spinner {
-  background: rgba(0,0,0,0.05);          /* light backdrop */
+  background: rgba(0,0,0,0.05);         
   padding: var(--spacer-sm);
   border-radius: var(--border-radius-lg);
   display: block;
@@ -2032,7 +2027,6 @@ background: var(--color-gray-800) !important;
   background: var(--color-secondary-hover);
 }
 
-/* On phones, stack */
 @media (max-width: 480px) {
   #research-form {
     grid-template-columns: 1fr;
@@ -2061,7 +2055,6 @@ background: var(--color-gray-800) !important;
   transform: translateY(-2px);
 }
 
-/* full-width on small screens */
 @media (max-width: 480px) {
   .btn-export {
     width: 100%;
@@ -2109,24 +2102,20 @@ background: var(--color-gray-800) !important;
   background: var(--color-secondary-hover);
 }
 
-/* mobile: stack */
 @media (max-width: 480px) {
   .interaction-form {
     grid-template-columns: 1fr;
   }
 }
-   /* prevent text loss on small screens */
 section.module {
   overflow-wrap: break-word;
   word-break: break-word;
 }
 
-/* ensure forms never exceed width */
 form, .chart-card, .meet-module {
   max-width: 100%;
 }
 
-/* unified padding on small */
 @media (max-width: 414px) {
   section.module {
     padding: var(--spacer-lg);
@@ -2138,6 +2127,15 @@ form, .chart-card, .meet-module {
   --color-form-bg:   var(--color-gray-800);
   --color-input-bg:  var(--color-gray-900);
   --color-border:    var(--color-gray-700);
+}
+:root.dark section.module { background: var(--color-gray-800); }
+:root.light section.module { background: var(--color-gray-100); }
+
+   :root.dark .response,
+:root.dark .chart-card,
+:root.dark form {
+  background: var(--color-gray-800);
+  border-color: var(--color-gray-700);
 }
 
 section.module,
