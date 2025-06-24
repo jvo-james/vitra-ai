@@ -64,6 +64,14 @@
   --spacer-xl:  2rem;      /* 32px */
   --spacer-xxl:3rem;       /* 48px */
 
+  .fa,
+.fas,
+.far,
+.fal,
+.fab {
+  font-family: "Font Awesome 6 Free";
+  font-weight: 900; /* solid icons */
+}
   /* --------------------------------------------------
      TYPOGRAPHY
      -------------------------------------------------- */
@@ -181,7 +189,7 @@ a:hover, a:focus {
 
 /* Form elements reset */
 button, input, select, textarea {
-  font: inherit;
+  font-family: var(--font-family-sans);
   background: none;
   border: none;
   outline: none;
@@ -256,7 +264,6 @@ p {
   padding-inline: var(--spacer-md);
 }
 
-/* Utility spacing */
 .mt-xs { margin-top: var(--spacer-xs) !important; }
 .mt-sm { margin-top: var(--spacer-sm) !important; }
 .mt-md { margin-top: var(--spacer-md) !important; }
@@ -269,7 +276,6 @@ p {
 .mb-lg { margin-bottom: var(--spacer-lg) !important; }
 .mb-xl { margin-bottom: var(--spacer-xl) !important; }
 
-/* Utility flex helpers */
 .flex { display: flex !important; }
 .inline-flex { display: inline-flex !important; }
 .items-center { align-items: center !important; }
@@ -279,7 +285,6 @@ p {
 .gap-md { gap: var(--spacer-md) !important; }
 .gap-lg { gap: var(--spacer-lg) !important; }
 
-/* Links that look like buttons */
 .btn-link {
   background: none;
   border: none;
@@ -291,13 +296,7 @@ p {
   color: var(--color-primary-hover);
   text-decoration: underline;
 }
-/* ---------------------------------------------
-   3. LAYOUT COMPONENTS: Sidebar & Header
-   --------------------------------------------- */
 
-/* -------------------
-   SIDEBAR
-   ------------------- */
 aside#sidebar {
   position: fixed;
   top: 0; left: 0; bottom: 0;
@@ -398,9 +397,11 @@ aside#sidebar.collapsed nav a::after {
 aside#sidebar.collapsed nav a:hover::after {
   opacity: 1;
 }
+aside#sidebar.collapsed ~ main {
+  margin-left: 80px;
+}
 
-/* Shrink button */
-#shrinkBtn {
+   #shrinkBtn {
   background: none;
   border: none;
   font-size: 1.5rem;
@@ -420,9 +421,7 @@ aside#sidebar.collapsed #shrinkBtn i {
   transform: rotate(180deg);
 }
 
-/* -------------------
-   HEADER
-   ------------------- */
+
 header {
   position: fixed;
   top: 0;
@@ -440,18 +439,12 @@ header {
   z-index: var(--z-index-sticky);
 }
 
-aside#sidebar.collapsed + header {
-  left: 80px;
-}
-
-/* Header title */
 header h1 {
   font-size: var(--font-size-lg);
   font-weight: var(--font-weight-medium);
   color: var(--color-text);
 }
 
-/* Hamburger (mobile toggle) */
 .hamburger {
   display: none;
   font-size: 1.5rem;
@@ -464,7 +457,6 @@ header h1 {
   transform: scale(1.1);
 }
 
-/* Theme toggle */
 .theme-toggle {
   font-size: 1.5rem;
   color: var(--color-text-muted);
@@ -478,9 +470,12 @@ header h1 {
 .theme-toggle.fa-sun {
   color: var(--color-secondary);
 }
+main {
+  margin-left: 250px;
+  transition: margin-left var(--transition-base);
+}
 
-/* Responsive sidebar & header */
-@media (max-width: var(--breakpoint-lg)) {
+   @media (max-width: var(--breakpoint-lg)) {
   .hamburger {
     display: inline-block;
   }
@@ -494,9 +489,6 @@ header h1 {
     transform: translateX(0);
   }
 }
-/* ---------------------------------------------
-   4. HERO SECTION & DECORATIVE ICONS
-   --------------------------------------------- */
 section.module.hero-module {
   position: relative;
   background-color: var(--color-bg-alt);
@@ -1162,9 +1154,6 @@ section.module.hero-module {
     border-radius: var(--border-radius-md);
   }
 }
-/* ---------------------------------------------
-   5.4 MODULE STYLES: Safety Checker
-   --------------------------------------------- */
 #hero–safety {
   background-color: var(--color-gray-100);
   border-top: 4px solid var(--color-primary);
@@ -1177,7 +1166,6 @@ section.module.hero-module {
 
 #hero–safety::before {
   content: '\f shield-alt';
-  /* Note: Correct FontAwesome code is \f shield-alt; ensure font-family set below */
   content: '\f3ed';
   font-family: 'Font Awesome 6 Free';
   font-weight: 900;
@@ -1326,9 +1314,6 @@ section.module.hero-module {
     width: 100%;
   }
 }
-/* ---------------------------------------------
-   5.5 MODULE STYLES: AI Herbalist Chat (“WhatsApp-style”)
-   --------------------------------------------- */
 #hero–chat {
   background-color: var(--color-gray-100);
   border-top: 4px solid var(--color-secondary);
@@ -1543,9 +1528,6 @@ section.module.hero-module {
 :root.dark .history-table tbody tr:nth-child(even) {
   background-color: var(--color-gray-700);
 }
-/* ---------------------------------------------
-   5.7 MODULE STYLES: Personalized Formulations
-   --------------------------------------------- */
 #formulations {
   background-color: var(--color-gray-100);
   border-top: 4px solid var(--color-primary);
@@ -1606,9 +1588,6 @@ section.module.hero-module {
 #pfResult .result-content { color: var(--color-text); }
 #pfResult .hint { font-size: var(--font-size-sm); color: var(--color-text-muted); }
 
-/* ---------------------------------------------
-   5.8 MODULE STYLES: Research Summaries
-   --------------------------------------------- */
 #research {
   background-color: var(--color-gray-100);
   border-top: 4px solid var(--color-secondary);
@@ -1648,9 +1627,6 @@ section.module.hero-module {
   box-shadow: var(--shadow-xs);
 }
 
-/* ---------------------------------------------
-   5.9 MODULE STYLES: Inventory Forecast
-   --------------------------------------------- */
 #inventory {
   background-color: var(--color-gray-100);
   border-top: 4px solid var(--color-primary);
@@ -1692,9 +1668,6 @@ section.module.hero-module {
   box-shadow: var(--shadow-xs);
 }
 
-/* ---------------------------------------------
-   5.10 MODULE STYLES: Genetics Match
-   --------------------------------------------- */
 #genetics {
   background-color: var(--color-gray-100);
   border-top: 4px solid var(--color-secondary);
@@ -1726,9 +1699,6 @@ section.module.hero-module {
   box-shadow: var(--shadow-xs);
 }
 
-/* ---------------------------------------------
-   5.11 MODULE STYLES: Dosage Calculator
-   --------------------------------------------- */
 #dosage {
   background-color: var(--color-gray-100);
   border-top: 4px solid var(--color-primary);
@@ -1768,9 +1738,6 @@ section.module.hero-module {
   box-shadow: var(--shadow-xs);
 }
 
-/* ---------------------------------------------
-   5.12 MODULE STYLES: Interaction Checker & ROI Calculator
-   --------------------------------------------- */
 #interaction, #roi {
   background-color: var(--color-gray-100);
   padding: var(--spacer-xxl) var(--spacer-lg);
@@ -1815,9 +1782,6 @@ section.module.hero-module {
   box-shadow: var(--shadow-xs);
 }
 
-/* ---------------------------------------------
-   5.13 MODULE STYLES: Executive Analytics & KPIs
-   --------------------------------------------- */
 #analytics {
   background-color: var(--color-gray-100);
   border-top: 4px solid var(--color-secondary);
@@ -1885,13 +1849,13 @@ section.module.hero-module {
 /* ---------------------------------------------
    5.15 SUPPORT: Toasts, Spinners & CATCH-ALL
    --------------------------------------------- */
-/* Spinner */
 .spinner {
-  width: 1em; height: 1em;
-  border: 2px solid var(--color-border);
-  border-top-color: var(--color-primary);
+ width: 1.25em; height: 1.25em;
+  border: 3px solid var(--color-gray-300);
+  border-top-color: var(--color-secondary);
   border-radius: 50%;
-  animation: spin 0.75s linear infinite;
+  animation: spin 0.8s ease-in-out infinite;
+  box-shadow: var(--shadow-xs);
 }
 
 /* Toast */
@@ -1924,10 +1888,7 @@ section.module:hover, .chart-card:hover, .meet-module:hover {
   box-shadow: var(--shadow-md);
 }
 
-/* ---------------------------------------------
-   6. DARK MODE OVERRIDES
-   --------------------------------------------- */
-/* Many modules already cover but ensure fallback */
+
 :root.dark {
   background-color: var(--color-gray-900);
 }
@@ -1946,9 +1907,15 @@ section.module:hover, .chart-card:hover, .meet-module:hover {
   color: #fff;
 }
 
-/* ---------------------------------------------
-   7. MOBILE & IPHONE-11 RESPONSIVENESS
-   --------------------------------------------- */
+   .dark section.module,
+.dark .chart-card,
+.dark .meet-module {
+  background-color: var(--color-bg-alt) !important;
+ }
+.dark .response {
+background: var(--color-gray-800) !important;
+ }
+   
 @media (max-width: var(--breakpoint-md)) {
   /* Stack modules */
   section.module {
@@ -1967,6 +1934,30 @@ section.module:hover, .chart-card:hover, .meet-module:hover {
   }
 }
 
+ @media (max-width: 414px) {
+   html { font-size: 14px; } /* slightly smaller text */
+   main { margin-left: 0; padding: var(--spacer-md); }
+   aside#sidebar, header { display: none; }
+
+   /* Buttons full width */
+   .btn-primary, .btn-secondary, .btn-tertiary, button {
+     width: 100%; text-align: center;
+   }
+
+   /* Hero images smaller */
+   .hero-image img {
+     max-width: 90%;
+   }
+
+   /* Reduce chat height */
+   .chat-box { height: 180px; }
+
+   .sym-form,
+   #iden-form,
+   {
+     grid-template-columns: 1fr !important;
+   }
+ }
 
    
  </style>
