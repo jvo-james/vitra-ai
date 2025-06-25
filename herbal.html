@@ -618,7 +618,7 @@ header .hamburger {
     color: var(--secondary);
   }
 #hero-identifier {
-  background-color: var(--color-gray-100);
+  background-color: var(--bg-alt);
   border-top: 4px solid var(--color-primary);
   padding: var(--spacer-xxl) var(--spacer-lg);
   position: relative;
@@ -659,7 +659,7 @@ header .hamburger {
   display: grid;
   grid-template-columns: 1fr auto;
   gap: var(--spacer-md);
-  background: #fff;
+ background: var(--surface);
   padding: var(--spacer-lg);
   border-radius: var(--border-radius-md);
   box-shadow: var(--shadow-xs);
@@ -733,7 +733,7 @@ header .hamburger {
   }
 }
 #hero-symptom {
-  background-color: var(--color-gray-100);
+ background-color: var(--bg-alt);
   border-top: 4px solid var(--color-secondary);
   padding: var(--spacer-xxl) var(--spacer-lg);
   position: relative;
@@ -745,7 +745,7 @@ header .hamburger {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
   gap: var(--spacer-lg);
-  background: #fff;
+  background: var(--surface);
   padding: var(--spacer-lg);
   border-radius: var(--border-radius-md);
   box-shadow: var(--shadow-xs);
@@ -825,7 +825,7 @@ header .hamburger {
   }
 }
 #hero-cultural {
-  background-color: var(--color-gray-100);
+   background-color: var(--bg-alt);
   border-top: 4px solid var(--color-secondary);
   padding: var(--spacer-xxl) var(--spacer-lg);
   position: relative;
@@ -869,7 +869,21 @@ header .hamburger {
   overflow: hidden;
   box-shadow: var(--shadow-xs);
 }
-
+  #hero-identifier,
+  #hero-symptom,
+  #hero-cultural,
+  #hero-safety,
+  #formulations,
+  #research,
+  #inventory,
+  #genetics,
+  #dosage,
+  #interaction,
+  #roi {
+    background-color: var(--bg-alt) !important;}
+ 
+ 
+ 
 .culture-input-wrapper input[type="text"] {
   flex: 1;
   padding: var(--spacer-sm) var(--spacer-md);
@@ -3249,13 +3263,16 @@ Storage.recordCategory("Herbal");
     }
 
     function addClose(panel) {
-      if (panel.querySelector(".close-btn")) return;
-      const btn = document.createElement("button");
-      btn.className = "close-btn";
-      btn.setAttribute("aria-label", "Close result");
-      btn.textContent = "×";
-      btn.onclick = () => (panel.hidden = true);
-      panel.prepend(btn);
+     if (panel.querySelector(".close-btn")) return;
+  const btn = document.createElement("button");
+  btn.className = "close-btn";
+  btn.setAttribute("aria-label", "Close result");
+  btn.textContent = "×";
+  btn.onclick = () => {
+    panel.hidden = true;
+    if (panel.id) localStorage.removeItem(panel.id);
+  };
+  panel.prepend(btn);
     }
 
     function addTools(panel) {
@@ -3336,7 +3353,14 @@ Storage.recordCategory("Herbal");
       icon.classList.toggle("fa-angle-double-right");
     });
 
-    hamburger.addEventListener("click", () => {
+   document.addEventListener("click", (e) => {
+      if (!sidebar.classList.contains("open")) return;
+      if (sidebar.contains(e.target) || hamburger.contains(e.target)) return;
+      sidebar.classList.remove("open");
+    });
+
+    hamburger.addEventListener("click", (e) => {
+      e.stopPropagation();
       sidebar.classList.toggle("open");
     });
 
