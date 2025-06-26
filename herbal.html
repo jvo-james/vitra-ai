@@ -801,7 +801,7 @@ header .hamburger {
 .range-field #sevValue {
   position: absolute;
   top: 50%;
-  right: var(--spacer-sm);
+ right: var(--spacer-lg);
   transform: translateY(-50%);
   font-weight: var(--font-weight-bold);
   color: var(--color-secondary);
@@ -2543,7 +2543,17 @@ html.dark .response { background: rgba(142,108,75,0.15); border-color: var(--acc
     flex-direction: column;
     gap: 0.5rem;
   }
-
+@media (max-width: 640px) {
+.history-content .del-msg {
+  width: auto !important;
+  height: auto !important;
+  border-radius: var(--radius) !important;
+  padding: 0.3rem 0.6rem !important;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+}
   .history-modal .history-content {
     width: 95%;
     padding: 1rem;
@@ -2740,6 +2750,14 @@ html.dark .response { background: rgba(142,108,75,0.15); border-color: var(--acc
     width: 100% !important;
     min-width: 0 !important;
   }
+}
+.response .close-btn:hover {
+  background: transparent !important;
+  color: var(--primary);
+}
+   @media (max-width: 768px) {
+    min-height: 3.5rem;
+   }
 }
 
 @media (max-width: 640px) {
@@ -3421,7 +3439,10 @@ Storage.recordCategory("Herbal");
   btn.textContent = "×";
   btn.onclick = () => {
     panel.hidden = true;
-    if (panel.id) localStorage.removeItem(panel.id);
+     if (panel.id) {
+      localStorage.setItem(panel.id + "-closed", "true");
+       localStorage.removeItem(panel.id);
+     }
   };
   panel.prepend(btn);
     }
@@ -3762,10 +3783,11 @@ You are a safety expert in herbal and pharmaceutical interactions. Given two her
       chatBox.append(msgDiv);
       chatBox.scrollTop = chatBox.scrollHeight;
     }
-
+    if (!localStorage.getItem("chatViewCleared")) {
     chatHistory.forEach(m => addMessage(m.who, m.text, new Date(m.timestamp)));
-
+    }
    sendChatBtn.onclick = async () => {
+     localStorage.removeItem("chatViewCleared");
       const userText = chatInput.value.trim();
       if (!userText) return;
       const userTime = new Date();
@@ -3810,7 +3832,9 @@ You are a friendly, knowledgeable herbalist. A user will ask questions about her
 
     clearChatBtn.onclick = () => {
     chatBox.innerHTML = "";
-    lastDateHeader = null;
+  lastDateHeader = null;
+  localStorage.setItem("chatViewCleared", "true");
+
  };
     viewHistoryBtn.onclick = () => {
      const modal = document.createElement("div");
@@ -4315,9 +4339,10 @@ Conclude with final ROI percentage and a short summary line.
    "pfResult","researchResults","inventoryResult","geneticResult",
    "dosageResult","interactionResult","roiResult"]
   .forEach(id => {
-    const panel = document.getElementById(id);
-    const saved = localStorage.getItem(id);
-    if (saved) {
+   if (localStorage.getItem(id + "-closed")) return;
+   const panel = document.getElementById(id);
+   const saved = localStorage.getItem(id);
+   if (saved) {
       panel.innerHTML = saved;
       panel.hidden = false;
 
