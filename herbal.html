@@ -204,7 +204,7 @@
     height: 100vh;
     background: var(--surface);
     box-shadow: 2px 0 12px rgba(0, 0, 0, 0.05);
-    transition: flex var(--transition), background var(--transition);
+    transition: transform var(--transition), background var(--transition);
     overflow: hidden;
     z-index: 1000;
     display: flex;
@@ -1761,32 +1761,7 @@ html.dark .response { background: rgba(142,108,75,0.15); border-color: var(--acc
     color: var(--primary);
     transform: scale(1.1);
   }
-  #roiResult .tool-row {
-    position: absolute;
-    bottom: 0.5rem;
-    right: 0.5rem;
-    display: flex;
-    gap: 0.5rem;
-  }
-  #roiResult .tool-row button {
-    font-size: 0.85rem;
-    width: 1.6rem;
-    height: 1.6rem;
-    padding: 0.2rem;
-    background: var(--surface);
-    border: 1px solid var(--muted);
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: var(--secondary);
-    transition: background var(--transition), color var(--transition), transform var(--transition);
-  }
-  #roiResult .tool-row button:hover {
-    background: var(--primary);
-    color: #fff;
-    transform: scale(1.1);
-  }
+ 
 
     .copy-toast {
     position: fixed;
@@ -2793,6 +2768,33 @@ html.dark .response { background: rgba(142,108,75,0.15); border-color: var(--acc
   font-size: 0.9rem;
 }
 
+   .tool-row {
+  position: absolute;
+  bottom: 0.5rem;
+  right: 0.5rem;
+  display: flex;
+  gap: 0.5rem;
+}
+.tool-row button {
+  font-size: 0.85rem;
+  width: 1.6rem;
+  height: 1.6rem;
+  padding: 0.2rem;
+  background: var(--surface);
+  border: 1px solid var(--muted);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--secondary);
+  transition: background var(--transition), color var(--transition), transform var(--transition);
+}
+.tool-row button:hover {
+  background: var(--primary);
+  color: #fff;
+  transform: scale(1.1);
+}
+
  </style>
 
 
@@ -3337,27 +3339,7 @@ html.dark .response { background: rgba(142,108,75,0.15); border-color: var(--acc
   }
 </script>
 
-<script>
-  document.addEventListener("DOMContentLoaded", () => {
-    const sidebar = document.getElementById("sidebar");
-    const hamburger = document.getElementById("hamburger");
 
-    document.addEventListener("click", (e) => {
-      if (!sidebar.classList.contains("open")) return;
-
-      if (sidebar.contains(e.target) || hamburger.contains(e.target)) {
-        return;
-      }
-
-      sidebar.classList.remove("open");
-    });
-
-    hamburger.addEventListener("click", (e) => {
-      e.stopPropagation();
-      sidebar.classList.toggle("open");
-    });
-  });
-</script>
   
 <script>
   function escapeHtml(unsafe) {
@@ -3525,17 +3507,24 @@ Storage.recordCategory("Herbal");
       icon.classList.toggle("fa-angle-double-right");
     });
 
-   document.addEventListener("click", (e) => {
-      if (!sidebar.classList.contains("open")) return;
-      if (sidebar.contains(e.target) || hamburger.contains(e.target)) return;
-      sidebar.classList.remove("open");
-    });
-
     hamburger.addEventListener("click", (e) => {
       e.stopPropagation();
       sidebar.classList.toggle("open");
     });
+    
+   document.addEventListener("click", e => {
+    if (!sidebar.classList.contains("open")) return;
+    if (sidebar.contains(e.target) || e.target === hamburger) return;
+    sidebar.classList.remove("open");
+  });
 
+    const mq = window.matchMedia("(max-width: 1024px)");
+  function updateBurger() {
+    hamburger.style.display = mq.matches ? "block" : "none";
+  }
+  mq.addEventListener("change", updateBurger);
+  updateBurger();
+    
     themeToggle.addEventListener("click", () => {
       const htmlEl = document.documentElement;
       const isDark = htmlEl.classList.toggle("dark");
@@ -3544,14 +3533,6 @@ Storage.recordCategory("Herbal");
       htmlEl.setAttribute("aria-theme", isDark ? "dark" : "light");
        localStorage.setItem("vitra-theme", isDark ? "dark" : "light");
     });
-
-   const mq = window.matchMedia("(max-width: 1024px)");
- function updateHamburgerVisibility(e) {
-  const matches = e.matches ?? mq.matches;
-  hamburger.style.display = matches ? "block" : "none";
- }
- mq.addEventListener("change", updateHamburgerVisibility);
- updateHamburgerVisibility({ matches: mq.matches });
 
     document.querySelectorAll("select").forEach((sel) => {
       sel.addEventListener("change", (e) => {
@@ -4327,14 +4308,18 @@ Conclude with final ROI percentage and a short summary line.
   });
 
   
-    document.querySelectorAll(".response .close-btn").forEach((btn) => {
-      btn.onclick = () => {
-        const panel = btn.closest(".response");
-        if (panel) panel.hidden = true;
-    const id = panel.id;
-    if (id) localStorage.removeItem(id);
-      };
-    });
+   document.querySelectorAll(".response .close-btn").forEach((btn) => {
+    btn.onclick = () => {
+      const panel = btn.closest(".response");
+      if (!panel) return;
+      panel.hidden = true;
+      const id = panel.id;
+      if (id) {
+        localStorage.setItem(id + "-closed", "true");
+        localStorage.removeItem(id);
+      }
+    };
+  });
       ["idenResult","symResult","cultureResult","safetyResult",
    "pfResult","researchResults","inventoryResult","geneticResult",
    "dosageResult","interactionResult","roiResult"]
