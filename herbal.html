@@ -2364,22 +2364,73 @@ html.dark .response { background: rgba(142,108,75,0.15); border-color: var(--acc
   body {
     flex-direction: column;
   }
+  #shrinkBtn { display: none !important; }
   aside#sidebar {
     position: fixed;
+    top: 0;
+    left: 0;
     width: 100%;
-    height: auto;
-    bottom: 0;
-    top: auto;
-    flex-direction: row;
-    justify-content: space-around;
+    height: 100vh;
+    transform: translateX(-100%);
+    background: rgba(0,0,0,0.85);
+    padding-top: 4rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    transition: transform var(--transition);
+    z-index: 2000;
+  }
+ 
+  aside#sidebar.open {
+    transform: translateX(0);
+  }
+ 
+  aside#sidebar nav {
+    width: 100%;
+    margin-top: 2rem;
+  }
+  aside#sidebar nav a {
+    width: 90%;
+    margin: 0.5rem auto;
+    padding: 1rem;
+    font-size: 1.1rem;
+    color: #fff;
+    background: transparent;
+    border-bottom: 1px solid rgba(255,255,255,0.2);
+    border-radius: 0;
+    justify-content: center;
+    transition: background var(--transition);
+  }
+  aside#sidebar nav a:hover,
+  aside#sidebar nav a.active {
+    background: rgba(255,255,255,0.1);
+    padding-left: 1rem;
+  }
+
+  aside#sidebar nav a i {
+    margin-right: 0.5rem;
+  }
+
+  body::after {
+    content: "";
+    display: block;
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    background: rgba(0,0,0,0.6);
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity var(--transition);
+    z-index: 1500;
+  }
+ aside#sidebar.open ~ body::after {
+    opacity: 1;
   }
   aside#sidebar .logo {
     display: none;  
   }
-  aside#sidebar nav a {
-    padding: 0.5rem;
-    font-size: 0.9rem;
-  }
+
   header {
     left: 0 !important;
     position: fixed;
