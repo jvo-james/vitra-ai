@@ -318,6 +318,22 @@
   aside#sidebar.collapsed ~ header {
     left: var(--sidebar-collapsed-w);
   }
+   @media (min-width: 1024px) {
+ header .hamburger {
+    display: none !important;
+  }
+}
+@media (max-width: 1023px) {
+  header .hamburger {
+    display: block !important;
+  }
+  aside#sidebar {
+    transform: translateX(-100%);
+  }
+  aside#sidebar.open {
+    transform: translateX(0);
+  }
+}
   header h1 {
     font-size: 1.5rem;
     font-weight: 600;
@@ -1859,7 +1875,45 @@ html.dark .response { background: rgba(142,108,75,0.15); border-color: var(--acc
     box-shadow: 0 5px 14px rgba(0, 0, 0, 0.12);
     background: var(--secondary);
   }
+#interaction-form {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: var(--spacer-sm);
+  background: var(--surface);
+  padding: var(--spacer-lg);
+  border-radius: var(--border-radius-md);
+  box-shadow: var(--shadow-xs);
+}
+ #interaction-form select,
+ #interaction-form button {
+  padding: var(--spacer-sm) var(--spacer-md);
+  border-radius: var(--border-radius-pill);
+}
+ #interaction-form button {
+  background: var(--primary);
+  color: #fff;
+}
+ #interaction-form button:hover {
+  background: var(--secondary);
+}
 
+#interactionResult {
+ background: rgba(42,111,78,0.1);
+  border-left: 4px solid var(--primary);
+  padding: var(--padding);
+  border-radius: var(--radius);
+  position: relative;
+  transition: background var(--transition);
+}
+ @media (prefers-color-scheme: dark), html.dark {
+ #interactionResult {
+    background: rgba(142,108,75,0.15) !important;
+    color: var(--text-dark) !important;
+  }
+  #interactionResult .result-content {
+    color: var(--text-dark) !important;
+  }
+ }
 
    footer {
     background: var(--surface);
@@ -2222,6 +2276,27 @@ html.dark .response { background: rgba(142,108,75,0.15); border-color: var(--acc
     background: var(--secondary);
     transform: translateY(-1px);
   }
+   .history-content .history-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 1rem;
+  position: sticky;
+  bottom: 0;
+  background: var(--surface);
+  padding: var(--padding);
+  z-index: 1;
+}
+   .history-content button {
+ padding: 0.6rem 1rem;
+  border-radius: var(--radius);
+  font-size: 0.9rem;
+}
+   @media (max-width: 640px) {
+ .history-content .history-actions button {
+    flex: 1;
+    padding: 0.6rem 0;
+  }
+ }
     #roi-form input,
       #roi-form select {
           padding: 0.75rem;
@@ -2681,6 +2756,25 @@ html.dark .response { background: rgba(142,108,75,0.15); border-color: var(--acc
     height: 180px !important;
   }
 }
+   @media (max-width: 640px) {
+  .module form input,
+  .module form select,
+  .module form textarea {
+    padding: 0.4rem !important;
+    font-size: 0.9rem !important;
+    max-height: 3rem !important;
+  }
+}
+   .sev-wrapper {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+.sev-wrapper .max {
+  opacity: 0.6;
+  font-size: 0.9rem;
+}
+
  </style>
 
 
@@ -2826,7 +2920,9 @@ html.dark .response { background: rgba(142,108,75,0.15); border-color: var(--acc
     <div class="field range-field">
       <label for="severity">Severity</label>
       <input type="range" id="severity" min="1" max="10" value="5"/>
-      <span id="sevValue">5</span>/10
+      <div class="sev-wrapper">
+      <span id="sevValue">5</span><span class="max">/10</span>
+    </div>
     </div>
 
     <div class="field">
@@ -3587,6 +3683,11 @@ Duration: ${duration} days`
           }
         ]);
         panel.innerHTML = `<div class="result-content">${formatHTML(aiReply)}</div>`;
+        const rc = panel.querySelector(".result-content");
+    rc.innerHTML = rc.innerHTML.replace(
+      /\b(dosage|precautions|contraindications|recommended herbs)\b/gi,
+      '<strong>$1</strong>'
+    );
         localStorage.setItem("symResult", panel.innerHTML);
         addClose(panel);
         addTools(panel);
@@ -3623,6 +3724,12 @@ You are a safety expert in herbal and pharmaceutical interactions. Given two her
     const chatBox = document.getElementById("chatBox");
     const sendChatBtn = document.getElementById("sendChat");
     const chatInput = document.getElementById("chatInput");
+    chatInput.addEventListener("keypress", e => {
+      if (e.key === "Enter" && !e.shiftKey) {
+        e.preventDefault();
+        sendChatBtn.click();
+      }
+    });
     const viewHistoryBtn = document.getElementById("viewHistory");
     const clearChatBtn = document.getElementById("clearChat");
     let lastDateHeader = null;
