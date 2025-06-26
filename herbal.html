@@ -300,6 +300,16 @@
     transform: translateX(-50%) scale(1.1);
   }
    
+ @media (max-width: 600px) {
+ aside#sidebar {
+   transform: translateX(-100%);
+  }
+
+  aside#sidebar.open {
+   transform: translateX(0) !important;
+  }
+ }
+
   header {
     position: fixed;
     top: 0;
@@ -1960,9 +1970,8 @@ html.dark .response { background: rgba(142,108,75,0.15); border-color: var(--acc
 
    @media (max-width: 1024px) {
     aside#sidebar {
-      position: fixed !important;
       transform: translateX(-100%);
-      z-index: 900;
+      z-index: 1002;
       flex: 0 0 var(--sidebar-w);
     }
     aside#sidebar.open {
@@ -2051,9 +2060,7 @@ html.dark .response { background: rgba(142,108,75,0.15); border-color: var(--acc
     #shrinkBtn {
       bottom: 0.5rem;
     }
-    aside#sidebar:not(.open) {
-      display: none;
-    }
+   
   }
   @media (max-width: 480px) {
     input, select, textarea, button {
@@ -2445,9 +2452,7 @@ html.dark .response { background: rgba(142,108,75,0.15); border-color: var(--acc
     font-size: 0.9rem !important;
   }
 
-  aside#sidebar {
-    display: none;
-  }
+ 
   header {
     left: 0 !important;
     width: 100%;
@@ -4333,7 +4338,14 @@ Conclude with final ROI percentage and a short summary line.
 
       addClose(panel);
       addTools(panel);
-      panel.querySelectorAll(".close-btn").forEach(btn => btn.onclick = () => panel.hidden = true);
+      panel.querySelectorAll(".close-btn").forEach(btn => 
+        btn.onclick = () => panel.hidden = true
+        btn.onclick = () => {
+        panel.hidden = true;
+        localStorage.setItem(id + "-closed", "true");
+        localStorage.removeItem(id);
+      }
+      );
       panel.querySelectorAll(".copy-btn").forEach(cb => {
         cb.onclick = () => {
           const content = panel.querySelector(".result-content").innerText;
