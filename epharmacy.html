@@ -3197,7 +3197,16 @@ const nameDiv = row.querySelector(".drug-name");
     nameDiv.addEventListener("click", (e) => {
       e.stopPropagation();
       openDrugModal(idx);
-    });     container.append(row);
+    });   
+      const img = row.querySelector("img.drug-thumb");
+      img.style.cursor = "pointer";
+      img.addEventListener("click", e => {
+        e.stopPropagation();
+        const cb = row.querySelector(".drug-check");
+        cb.checked = !cb.checked;
+        updateCartPrice();
+      });
+      container.append(row);
     });
 }
 renderDrugList();
@@ -4187,8 +4196,8 @@ You are a friendly, knowledgeable pharmacist. A user will ask questions about me
         }
       });
     }
-    window.addEventListener("load", () => {
-      if (typeof Chart !== "undefined" && document.getElementById("chart1")) {
+  document.addEventListener("DOMContentLoaded", () => {
+     if (typeof Chart !== "undefined" && document.getElementById("chart1")) {
         initCharts();
       }
     });
