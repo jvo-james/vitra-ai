@@ -811,7 +811,41 @@ html.dark .user-msg {
 @keyframes spin {
   to { transform: rotate(360deg); }
 }
- 
+  #backToTop {
+    position: fixed;
+    bottom: 2rem;
+    right: 2rem;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    width: 3rem;
+    height: 3rem;
+    background: var(--pharm-primary-alt);
+    color: #fff;
+    border: none;
+    border-radius: 50%;
+    box-shadow: var(--shadow);
+    cursor: pointer;
+    z-index: 1500;
+    transition: opacity var(--transition), transform var(--transition);
+    opacity: 0;
+  }
+  #backToTop.visible {
+    display: flex;
+    opacity: 1;
+  }
+  #backToTop:hover {
+    background: var(--pharm-primary);
+   transform: translateY(-2px);
+  }
+  @media (max-width: 480px) {
+    #backToTop {
+      bottom: 1rem;
+      right: 1rem;
+      width: 2.5rem;
+      height: 2.5rem;
+    }
+  }
     .chat-box {
     background: var(--pharm-bg);
     border: 1px solid rgba(0, 0, 0, 0.1);
@@ -2219,7 +2253,7 @@ html.dark #compoundList:focus {
       </div>
       <div class="chart-wrapper" style="margin-top:1.5rem;">
         <h3>Weekly Drug Lookups</h3>
-+       <canvas id="chart2" width="400" height="250"></canvas>
+       <canvas id="chart2" width="400" height="250"></canvas>
         <p class="desc" style="margin-top:0.5rem;">
          This bar chart displays the total number of drug lookup requests for each week of the current month.
        </p>
@@ -2245,7 +2279,9 @@ html.dark #compoundList:focus {
         </div>
       </div>
     </section>
-
+<button id="backToTop" title="Back to top">
+    <i class="fas fa-chevron-up"></i>
+  </button>
     <footer>
       <p style="text-align:center; margin-top:2rem; color:var(--pharm-muted);">
         &copy; 2025 Vitra AI E-Pharmacy. All Rights Reserved.
@@ -4351,6 +4387,20 @@ You are a friendly, knowledgeable pharmacist. A user will ask questions about me
     updateHamburgerVisibility();
   });
 
+   (function() {
+    const btn = document.getElementById('backToTop');
+    window.addEventListener('scroll', () => {
+      if (window.scrollY > window.innerHeight / 2) {
+        btn.classList.add('visible');
+      } else {
+        btn.classList.remove('visible');
+      }
+    });
+    btn.addEventListener('click', () => {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    });
+  })();
+  
    window.addEventListener('pageshow', function(event) {
     if (event.persisted) {
       window.location.reload();
