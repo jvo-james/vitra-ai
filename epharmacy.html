@@ -442,110 +442,135 @@ aside#sidebar nav li a:hover i {
     transform: scale(1.1);
   }
 
+
   #hero {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    max-width: 1000px;
+    margin: 2rem auto;
     background: var(--pharm-surface);
     border-radius: var(--radius);
     box-shadow: var(--shadow);
-    margin-bottom: 1.5rem;
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: var(--padding);
-    max-width: 1200px;
-    margin-left: auto;
-    margin-right: auto;
     overflow: hidden;
-    position: relative;
-    padding: var(--padding);
-  }
-  #hero .hero-text {
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    gap: 1rem;
-  }
-  #hero h2 {
-    font-size: 2rem;
-    color: var(--pharm-primary);
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-  }
-  #hero p.desc {
-    font-size: 1rem;
-    color: var(--pharm-muted);
-  }
-  #hero .hero-actions {
-    display: flex;
-    gap: 1rem;
-    flex-wrap: wrap;
-    margin-top: 1rem;
-  }
-  #hero .hero-actions a.btn {
-    background: var(--pharm-primary-alt);
-    color: #fff;
-    padding: 0.75rem 1.5rem;
-    border-radius: var(--radius);
-    font-weight: 600;
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    transition: background var(--transition), transform var(--transition), box-shadow var(--transition);
-  }
-  #hero .hero-actions a.btn:hover {
-    background: var(--pharm-primary);
-    transform: translateY(-2px);
-    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
-  }
-  #hero .hero-image {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-  }
-  #hero .hero-image img {
-    width: 100%;
-    border-radius: var(--radius);
-    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
-  }
-  .sticker {
-    position: absolute;
-    font-size: 3rem;
-    opacity: 0.15;
-    color: var(--pharm-primary-alt);
-    transition: transform var(--transition), opacity var(--transition);
-  }
-  .sticker:hover {
-    opacity: 0.25;
-    transform: scale(1.1);
+    padding: 2rem;
   }
 
-   #hero {
-    display: grid;
-    grid-template-columns: 1fr;
-    gap: 2rem;
-    align-items: center;
-    padding: 2rem 1rem;
-  }
-  @media (min-width: 1024px) {
-    #hero {
-      grid-template-columns: repeat(2, 1fr);
-      padding: 3rem 2rem;
-    }
+  #hero .hero-text {
+    flex: 1 1 400px;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
   }
 
   #hero .hero-text h2 {
-    font-size: 2.5rem;
+    font-size: 2.25rem;
     line-height: 1.2;
+    color: var(--pharm-primary);
     margin-bottom: 0.5rem;
   }
-  @media (min-width: 1024px) {
-    #hero .hero-text h2 {
-      font-size: 3rem;
+
+  #hero .hero-text p.desc {
+    font-size: 1.1rem;
+    color: var(--pharm-muted);
+  }
+
+  #hero .hero-actions {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(100px, 1fr));
+    gap: 1rem;
+    margin-top: 1.5rem;
+  }
+  @media (min-width: 640px) {
+    #hero .hero-actions {
+      grid-template-columns: repeat(3, minmax(100px, 1fr));
     }
   }
-  #hero .hero-text .desc {
-    font-size: 1.125rem;
+  @media (min-width: 1024px) {
+    #hero .hero-actions {
+      grid-template-columns: repeat(4, minmax(100px, 1fr));
+    }
+  }
+
+  #hero .hero-actions a.feature-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-decoration: none;
+    color: var(--pharm-text);
+    transition: transform var(--transition), color var(--transition);
+  }
+  #hero .hero-actions a.feature-item:hover {
+    transform: translateY(-4px);
+    color: var(--pharm-primary);
+  }
+  #hero .hero-actions .icon-wrapper {
+    width: 3.5rem;
+    height: 3.5rem;
+    background: var(--pharm-primary-alt);
+    color: #fff;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    transition: background var(--transition), transform var(--transition);
+  }
+  #hero .hero-actions a.feature-item:hover .icon-wrapper {
+    background: var(--pharm-primary);
+    transform: scale(1.1);
+  }
+  #hero .hero-actions small {
+    margin-top: 0.5rem;
+    font-size: 0.75rem;
+    text-align: center;
     color: var(--pharm-muted);
-    max-width: 600px;
+  }
+
+  #hero .hero-image {
+    flex: 1 1 350px;
+    position: relative;
+    text-align: center;
+  }
+  #hero .hero-image img {
+    width: 100%;
+    max-height: 280px;
+    object-fit: cover;
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    transition: transform var(--transition);
+  }
+  #hero .hero-image img:hover {
+    transform: scale(1.03);
+  }
+
+  #hero .sticker {
+    position: absolute;
+    font-size: 2rem;
+    color: var(--pharm-accent);
+    opacity: 0.12;
+    transition: opacity var(--transition), transform var(--transition);
+  }
+  #hero .sticker:hover {
+    opacity: 0.25;
+    transform: scale(1.2);
+  }
+
+  html.dark #hero {
+    background: var(--pharm-surface);
+  }
+  html.dark #hero .hero-text h2 {
+    color: var(--pharm-secondary);
+  }
+  html.dark #hero .hero-text p.desc,
+  html.dark #hero .hero-actions small {
+    color: var(--pharm-muted);
+  }
+  html.dark #hero .hero-actions .icon-wrapper {
+    background: var(--pharm-secondary);
+  }
+  html.dark #hero .hero-actions a.feature-item:hover .icon-wrapper {
+    background: var(--pharm-primary-alt);
   }
 
   #heroSearch {
