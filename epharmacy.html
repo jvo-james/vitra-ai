@@ -2094,14 +2094,14 @@ html.dark #compoundList:focus {
       <p class="desc">These charts update in real time—showing this month’s prescription scans and weekly drug lookups.</p>
       <div class="chart-wrapper">
         <h3>Monthly Prescription Scans</h3>
-        <canvas id="chart1"></canvas>
+        <canvas id="chart1" width="400" height="250"></canvas>
           <p class="desc" style="margin-top:0.5rem;">
          This line chart shows how many prescriptions were scanned each month over the past 7 months.
        </p>
       </div>
       <div class="chart-wrapper" style="margin-top:1.5rem;">
         <h3>Weekly Drug Lookups</h3>
-        <canvas id="chart2"></canvas>
++       <canvas id="chart2" width="400" height="250"></canvas>
         <p class="desc" style="margin-top:0.5rem;">
          This bar chart displays the total number of drug lookup requests for each week of the current month.
        </p>
@@ -4196,11 +4196,11 @@ You are a friendly, knowledgeable pharmacist. A user will ask questions about me
         }
       });
     }
-  document.addEventListener("DOMContentLoaded", () => {
-     if (typeof Chart !== "undefined" && document.getElementById("chart1")) {
-        initCharts();
-      }
-    });
+ window.addEventListener("load", () => {
+   if (window.Chart && document.getElementById("chart1") && document.getElementById("chart2")) {
+      initCharts();
+    }
+  });
 
     const exportChartsDataBtn = document.getElementById("exportChartsData");
     exportChartsDataBtn.addEventListener("click", () => {
