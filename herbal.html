@@ -513,109 +513,188 @@ header .hamburger {
     transform: scale(1.1);
   }
 
-  .hero-module {
-    background: var(--surface);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    text-align: left;
-    border-radius: var(--radius);
-    padding: 4rem 2rem;
-    position: relative;
-    overflow: hidden;
-    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.05);
-    transition: background var(--transition), box-shadow var(--transition);
+ 
+#backToTop {
+  position: fixed;
+  bottom: 2rem;
+  right: 2rem;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  width: 3rem;
+  height: 3rem;
+  background: var(--primary);
+  color: #fff;
+  border: none;
+  border-radius: 50%;
+  box-shadow: var(--shadow-md);
+  cursor: pointer;
+  z-index: 1500;
+  opacity: 0;
+  transition: opacity 0.3s ease, transform 0.3s ease;
+}
+#backToTop.visible {
+  display: flex;
+  opacity: 1;
+}
+#backToTop:hover {
+  background: var(--secondary);
+  transform: translateY(-3px);
+}
+@media (max-width: 480px) {
+  #backToTop {
+    bottom: 1rem;
+    right: 1rem;
+    width: 2.5rem;
+    height: 2.5rem;
   }
-  .hero-module:hover {
-    box-shadow: 0 6px 24px rgba(0, 0, 0, 0.08);
+}
+#hero.hero-ep {
+  position: relative;
+  overflow: hidden;
+  background: linear-gradient(135deg, rgba(42,111,78,0.95), rgba(212,197,162,0.95)) no-repeat center/cover;
+  color: #fff;
+  padding: 0; 
+}
+
+.hero-ep .hero-inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 4rem 2rem;
+  gap: 2rem;
+  z-index: 1;
+}
+
+.hero-ep .hero-text {
+  flex: 1;
+}
+.hero-ep .hero-text h1 {
+  font-size: 3rem;
+  line-height: 1.1;
+  margin-bottom: 0.75rem;
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  text-shadow: 0 2px 8px rgba(0,0,0,0.4);
+}
+.hero-ep .hero-text h1 i {
+  font-size: 1.4em;
+  color: #f0f0f0;
+}
+
+.hero-ep .hero-text p {
+  font-size: 1.15rem;
+  margin-bottom: 2rem;
+  opacity: 0.9;
+  max-width: 550px;
+  text-shadow: 0 1px 4px rgba(0,0,0,0.3);
+}
+
+.hero-ep .hero-quicklinks {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  gap: 1rem;
+}
+.hero-ep .hero-quicklinks a {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.8rem 1.2rem;
+  background: rgba(255,255,255,0.15);
+  border-radius: var(--radius);
+  text-decoration: none;
+  color: #fff;
+  font-weight: 500;
+  font-size: 0.95rem;
+  backdrop-filter: blur(6px);
+  transition: 
+    background 0.3s var(--transition-base),
+    transform 0.3s var(--transition-base),
+    box-shadow 0.3s var(--transition-base);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+}
+.hero-ep .hero-quicklinks a i {
+  font-size: 1.2rem;
+}
+.hero-ep .hero-quicklinks a:hover {
+  background: rgba(255,255,255,0.3);
+  transform: translateY(-3px) scale(1.02);
+  box-shadow: 0 6px 18px rgba(0,0,0,0.3);
+}
+
+.hero-ep .hero-img {
+  flex: 1;
+  text-align: right;
+}
+.hero-ep .hero-img img {
+  max-width: 100%;
+  height: auto;
+  border-radius: var(--radius);
+  box-shadow: 0 8px 24px rgba(0,0,0,0.3);
+  transition: transform 0.5s var(--transition-base), filter 0.5s var(--transition-base);
+  will-change: transform;
+}
+.hero-ep .hero-img img:hover {
+  transform: translateY(-8px) rotate(-1deg);
+  filter: brightness(1.05);
+}
+
+.hero-ep .sticker {
+  position: absolute;
+  font-size: 2.5rem;
+  color: rgba(255,255,255,0.25);
+  top: var(--y);
+  left: var(--x);
+  animation: float var(--d) ease-in-out infinite;
+  transform-origin: center;
+  pointer-events: none;
+}
+@keyframes float {
+  0%, 100% { transform: translateY(0) rotate(0deg); }
+  25%      { transform: translateY(-12px) rotate(4deg); }
+  50%      { transform: translateY(0)    rotate(0deg); }
+  75%      { transform: translateY(-8px) rotate(-3deg); }
+}
+
+html.dark .hero-ep {
+  background: linear-gradient(135deg, rgba(20,40,35,0.9), rgba(80,70,50,0.9));
+}
+html.dark .hero-ep .hero-quicklinks a {
+  background: rgba(255,255,255,0.1);
+}
+html.dark .hero-ep .hero-quicklinks a:hover {
+  background: rgba(255,255,255,0.2);
+}
+
+@media (max-width: 1024px) {
+  .hero-ep .hero-inner {
+    flex-direction: column-reverse;
+    padding: 2.5rem 1.5rem;
+    text-align: center;
   }
-  .hero-inner {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    width: 100%;
-    max-width: 1200px;
-    margin: 0 auto;
-    gap: 2rem;
+  .hero-ep .hero-quicklinks {
+    grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
   }
-  .hero-content {
-    flex: 1;
-    padding-right: 2rem;
-  }
-  .hero-content h1 {
-    font-size: 2.8rem;
-    margin-bottom: 0.5rem;
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    color: var(--primary);
-  }
-  .hero-subtitle {
-    font-size: 1.1rem;
+  .hero-ep .hero-img {
     margin-bottom: 2rem;
-    color: var(--muted);
   }
-  .hero-actions {
-    display: flex;
-    gap: 1rem;
-    flex-wrap: wrap;
-    margin-bottom: 2rem;
+}
+
+@media (max-width: 600px) {
+  .hero-ep .hero-text h1 { font-size: 2.2rem; }
+  .hero-ep .hero-text p  { font-size: 1rem; }
+  .hero-ep .hero-quicklinks a {
+    padding: 0.6rem 0.8rem;
+    font-size: 0.85rem;
   }
-  .hero-actions .btn-primary,
-  .hero-actions .btn-secondary,
-  .hero-actions .btn-tertiary {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    border-radius: var(--radius);
-    padding: 0.75rem 1.5rem;
-    font-weight: 600;
-    border: none;
-    transition: transform var(--transition), box-shadow var(--transition), background var(--transition);
+  .hero-ep .hero-quicklinks {
+    gap: 0.6rem;
   }
-  .hero-actions .btn-primary {
-    background: var(--primary);
-    color: #fff;
-  }
-  .hero-actions .btn-secondary {
-    background: var(--secondary);
-    color: #fff;
-  }
-  .hero-actions .btn-tertiary {
-    background: var(--bg);
-    color: var(--primary);
-    border: 2px solid var(--primary);
-  }
-  .hero-actions a:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-  }
-  .hero-image {
-    flex: 1;
-    text-align: right;
-  }
-  .hero-image img {
-    max-width: 100%;
-    height: auto;
-    border-radius: var(--radius);
-    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.05);
-    transition: transform var(--transition), box-shadow var(--transition);
-  }
-  .hero-image img:hover {
-    transform: translateY(-4px);
-    box-shadow: 0 6px 24px rgba(0, 0, 0, 0.08);
-  }
-  .hero-bg-icon {
-    position: absolute;
-    font-size: 9rem;
-    color: rgba(42, 111, 78, 0.05);
-    pointer-events: none;
-    user-select: none;
-    transition: color var(--transition);
-  }
-  html.dark .hero-bg-icon {
-    color: rgba(212, 197, 162, 0.05);
-  }
+  .hero-ep .sticker { display: none; }
+}
 
    #hero–identifier form {
     display: flex;
@@ -2903,35 +2982,43 @@ html.dark .response { background: rgba(142,108,75,0.15); border-color: var(--acc
   </header>
 
   <main role="main">
-    <section id="hero" class="module hero-module">
-      <div class="hero-inner">
-        <div class="hero-content">
-          <h1><i class="fas fa-seedling"></i> Empower Your Herbal Journey</h1>
-          <p class="hero-subtitle">
-            Explore our AI-powered toolkit to identify plants, analyze symptoms, discover cultural wisdom, and manage inventory—all in one place.
-          </p>
-          <div class="hero-actions">
-            <a href="#hero–identifier" class="btn-primary">
-              <i class="fas fa-camera"></i> Scan a Plant
-            </a>
-            <a href="#hero-symptom" class="btn-secondary">
-              <i class="fas fa-notes-medical"></i> Check Symptoms
-            </a>
-            <a href="#hero–chat" class="btn-tertiary">
-              <i class="fas fa-comments"></i> Chat with Herbalist
-            </a>
-          </div>
-        </div>
-        <div class="hero-image">
-          <img src="herbs.webp" alt="Assortment of medicinal herbs">
-        </div>
+   <section id="hero" class="hero-ep">
+  <div class="hero-inner">
+    <div class="hero-text">
+      <h1><i class="fas fa-seedling"></i> Empower Your Herbal Journey</h1>
+      <p>Jump straight to any AI‑powered herbal tool—identify plants, check symptoms, chat with an expert, and more.</p>
+      <div class="hero-quicklinks">
+        <a href="#hero–identifier"><i class="fas fa-camera"></i><span>Scan Plant</span></a>
+        <a href="#hero-symptom"><i class="fas fa-notes-medical"></i><span>Symptom Checker</span></a>
+        <a href="#hero–cultural"><i class="fas fa-globe"></i><span>Cultural Wisdom</span></a>
+        <a href="#hero–safety"><i class="fas fa-shield-alt"></i><span>Safety Checker</span></a>
+        <a href="#hero–chat"><i class="fas fa-comments"></i><span>Chat Herbalist</span></a>
+        <a href="#formulations"><i class="fas fa-prescription-bottle"></i><span>Formulations</span></a>
+        <a href="#research"><i class="fas fa-book-reader"></i><span>Research</span></a>
+        <a href="#inventory"><i class="fas fa-warehouse"></i><span>Inventory</span></a>
+        <a href="#genetics"><i class="fas fa-dna"></i><span>Genetics</span></a>
+        <a href="#dosage"><i class="fas fa-calculator"></i><span>Dosage Calc</span></a>
+        <a href="#interaction"><i class="fas fa-exchange-alt"></i><span>Interaction</span></a>
+        <a href="#roi"><i class="fas fa-dollar-sign"></i><span>ROI Calc</span></a>
+        <a href="#analytics"><i class="fas fa-chart-line"></i><span>Analytics</span></a>
+        <a href="#meet-professional"><i class="fas fa-user-md"></i><span>Meet Expert</span></a>
       </div>
-      <i class="fas fa-seedling hero-bg-icon" style="top: 8%; left: 7%;"></i>
-      <i class="fas fa-leaf     hero-bg-icon" style="top: 5%; right: 9%;"></i>
-      <i class="fas fa-flask    hero-bg-icon" style="bottom: 10%; left: 12%;"></i>
-      <i class="fas fa-stethoscope hero-bg-icon" style="bottom: 8%; right: 15%;"></i>
-      <i class="fas fa-chart-line  hero-bg-icon" style="top: 45%; left: 45%;"></i>
-    </section>
+    </div>
+    <div class="hero-img">
+      <img src="herbs.jpg" alt="Herbs and AI illustration">
+    </div>
+  </div>
+  <i class="fas fa-seedling sticker" style="--x:10%; --y:20%; --d:8s;"></i>
+  <i class="fas fa-leaf     sticker" style="--x:85%; --y:10%; --d:11s;"></i>
+  <i class="fas fa-flask    sticker" style="--x:25%; --y:80%; --d:7s;"></i>
+  <i class="fas fa-mortar-pestle sticker" style="--x:70%; --y:75%; --d:12s;"></i>
+  <i class="fas fa-flower   sticker" style="--x:50%; --y:5%;  --d:9s;"></i>
+  <i class="fas fa-spa      sticker" style="--x:30%; --y:40%; --d:6s;"></i>
+  <i class="fas fa-brain    sticker" style="--x:80%; --y:55%; --d:10s;"></i>
+  <i class="fas fa-chart-pie sticker" style="--x:15%; --y:60%; --d:5s;"></i>
+  <i class="fas fa-calendar-check sticker" style="--x:45%; --y:90%; --d:13s;"></i>
+</section>
+
 
     <section id="hero–identifier" class="module">
       <h2><i class="fas fa-camera"></i> AI Plant Scanner</h2>
@@ -3379,6 +3466,10 @@ html.dark .response { background: rgba(142,108,75,0.15); border-color: var(--acc
     </div>
   </section>
 
+    <button id="backToTop" title="Back to top">
+   <i class="fas fa-chevron-up"></i>
+  </button>
+    
       <footer>
     <p>&copy; 2025 Vitra AI. <a href="#privacy">Privacy Policy</a> | <a href="#terms">Terms &amp; Conditions</a></p>
   </footer>
@@ -4571,6 +4662,20 @@ Conclude with final ROI percentage and a short summary line.
     });
   }
 
+  (function() {
+   const btn = document.getElementById('backToTop');
+    window.addEventListener('scroll', () => {
+      if (window.scrollY > window.innerHeight / 2) {
+        btn.classList.add('visible');
+      } else {
+        btn.classList.remove('visible');
+      }
+    });
+    btn.addEventListener('click', () => {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    });
+  })();
+  
   window.addEventListener("load", () => {
     if (typeof Chart !== "undefined" && document.getElementById("chartAdoption")) {
       initRealCharts();
