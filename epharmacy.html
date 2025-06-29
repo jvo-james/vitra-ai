@@ -518,6 +518,78 @@ aside#sidebar nav li a:hover i {
     transform: scale(1.1);
   }
 
+  #hero {
+  padding: 2rem 1rem;
+  display: grid;
+}
+
+.hero-text h2 {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.feature-item {
+  text-decoration: none;
+}
+
+.icon-wrapper {
+  width: 3.5rem;
+  height: 3.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.sticker {
+  position: absolute;
+  font-size: 2.5rem;
+  opacity: 0.1;
+  transition: transform 0.3s ease, opacity 0.3s ease;
+}
+.hero-image .sticker-1 {
+  top: 10%;
+  left: 8%;
+}
+.hero-image .sticker-2 {
+  bottom: 15%;
+  right: 12%;
+}
+.hero-image .sticker-3 {
+  top: 50%;
+  right: 20%;
+}
+.hero-image .sticker:hover {
+  opacity: 0.2;
+  transform: scale(1.2);
+}
+
+@media (max-width: 768px) {
+  #hero {
+    grid-template-columns: 1fr;
+    text-align: center;
+  }
+  .hero-text .grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+@media (min-width: 769px) and (max-width: 1024px) {
+  #hero {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .hero-text .grid {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+@media (min-width: 1025px) {
+  #hero {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .hero-text .grid {
+    grid-template-columns: repeat(6, 1fr);
+  }
+}
+
 
   html.dark .bot-msg {
     background: var(--pharm-surface);
@@ -1735,28 +1807,145 @@ html.dark #compoundList:focus {
 
   <main>
 
-  <section id="hero" class="module">
-    <div class="hero-text">
-      <h2><i class="fas fa-prescription"></i> Empower Your E-Pharmacy Experience</h2>
-      <p class="desc">AI-powered tools for prescription scanning, drug lookup, interaction checking, dosage planning & more.</p>
-      <div class="hero-actions">
-        <a href="#buyDrugs" class="btn"><i class="fas fa-shopping-cart"></i> Purhcase Drugs</a>
-        <a href="#drugInfo" class="btn"><i class="fas fa-search"></i> Lookup Drug</a>
-        <a href="#interactionChecker" class="btn"><i class="fas fa-shield-alt"></i> Check Interactions</a>
-        <a href="#dosageCalculator" class="btn"><i class="fas fa-calculator"></i> Plan Dosage</a>
-      </div>
-    </div>
-    <div class="hero-image">
-      <img src="pills.jpg" alt="E-Pharmacy Illustration">
+<section id="hero" class="module mx-auto max-w-6xl grid gap-8 lg:grid-cols-2 items-center">
+  <div class="hero-text space-y-6">
+    <h2 class="text-4xl lg:text-5xl font-bold text-primary">
+      <i class="fas fa-prescription"></i>
+      Empower Your E‑Pharmacy Experience
+    </h2>
+    <p class="desc text-lg">
+      AI-powered tools for prescription scanning, drug lookup, interaction checking, dosage planning & more.
+    </p>
+
+    <div class="relative w-full">
+      <input
+        type="search"
+        id="heroSearch"
+        placeholder="Quickly jump to any feature…"
+        class="w-full py-3 pl-4 pr-12 rounded-full border-2 border-primary-alt focus:outline-none focus:ring-2 focus:ring-secondary transition"
+      />
+      <button
+        class="absolute right-2 top-1/2 transform -translate-y-1/2 p-2 rounded-full bg-primary-alt text-white hover:bg-primary transition"
+        aria-label="Search"
+      >
+        <i class="fas fa-search"></i>
+      </button>
     </div>
 
-    <i class="fas fa-capsules sticker sticker-1" style="top:10%; left:15%;"></i>
+<div class="grid gap-4 grid-cols-3 sm:grid-cols-4 md:grid-cols-6">
+  <a href="#buyDrugs" class="feature-item group">
+    <div class="icon-wrapper bg-primary-alt text-white p-4 rounded-full group-hover:scale-110 transition">
+      <i class="fas fa-shopping-cart text-2xl"></i>
+    </div>
+    <small class="block mt-2 text-center text-xs text-muted group-hover:text-primary transition">
+      Purchase
+    </small>
+  </a>
+  <a href="#drugInfo" class="feature-item group">
+    <div class="icon-wrapper bg-primary-alt text-white p-4 rounded-full group-hover:scale-110 transition">
+      <i class="fas fa-search text-2xl"></i>
+    </div>
+    <small class="block mt-2 text-center text-xs text-muted group-hover:text-primary transition">
+      Lookup
+    </small>
+  </a>
+  <a href="#interactionChecker" class="feature-item group">
+    <div class="icon-wrapper bg-primary-alt text-white p-4 rounded-full group-hover:scale-110 transition">
+      <i class="fas fa-exchange-alt text-2xl"></i>
+    </div>
+    <small class="block mt-2 text-center text-xs text-muted group-hover:text-primary transition">
+      Interactions
+    </small>
+  </a>
+  <a href="#dosageCalculator" class="feature-item group">
+    <div class="icon-wrapper bg-primary-alt text-white p-4 rounded-full group-hover:scale-110 transition">
+      <i class="fas fa-calculator text-2xl"></i>
+    </div>
+    <small class="block mt-2 text-center text-xs text-muted group-hover:text-primary transition">
+      Dosage
+    </small>
+  </a>
+  <a href="#prescriptionScanner" class="feature-item group">
+    <div class="icon-wrapper bg-primary-alt text-white p-4 rounded-full group-hover:scale-110 transition">
+      <i class="fas fa-microscope text-2xl"></i>
+    </div>
+    <small class="block mt-2 text-center text-xs text-muted group-hover:text-primary transition">
+      Scanner
+    </small>
+  </a>
+  <a href="#drugChatbot" class="feature-item group">
+    <div class="icon-wrapper bg-primary-alt text-white p-4 rounded-full group-hover:scale-110 transition">
+      <i class="fas fa-robot text-2xl"></i>
+    </div>
+    <small class="block mt-2 text-center text-xs text-muted group-hover:text-primary transition">
+      Chatbot
+    </small>
+  </a>
+  <a href="#symptomAdvisor" class="feature-item group">
+    <div class="icon-wrapper bg-primary-alt text-white p-4 rounded-full group-hover:scale-110 transition">
+      <i class="fas fa-notes-medical text-2xl"></i>
+    </div>
+    <small class="block mt-2 text-center text-xs text-muted group-hover:text-primary transition">
+      Symptom Advisor
+    </small>
+  </a>
+  <a href="#compoundAdvisor" class="feature-item group">
+    <div class="icon-wrapper bg-primary-alt text-white p-4 rounded-full group-hover:scale-110 transition">
+      <i class="fas fa-flask text-2xl"></i>
+    </div>
+    <small class="block mt-2 text-center text-xs text-muted group-hover:text-primary transition">
+      Compound Formulation
+    </small>
+  </a>
+  <a href="#sideEffectPredictor" class="feature-item group">
+    <div class="icon-wrapper bg-primary-alt text-white p-4 rounded-full group-hover:scale-110 transition">
+      <i class="fas fa-exclamation-circle text-2xl"></i>
+    </div>
+    <small class="block mt-2 text-center text-xs text-muted group-hover:text-primary transition">
+      Side‑Effects
+    </small>
+  </a>
+  <a href="#refillScheduler" class="feature-item group">
+    <div class="icon-wrapper bg-primary-alt text-white p-4 rounded-full group-hover:scale-110 transition">
+      <i class="fas fa-sync-alt text-2xl"></i>
+    </div>
+    <small class="block mt-2 text-center text-xs text-muted group-hover:text-primary transition">
+      Refill Scheduler
+    </small>
+  </a>
+  <a href="#charts" class="feature-item group">
+    <div class="icon-wrapper bg-primary-alt text-white p-4 rounded-full group-hover:scale-110 transition">
+      <i class="fas fa-chart-line text-2xl"></i>
+    </div>
+    <small class="block mt-2 text-center text-xs text-muted group-hover:text-primary transition">
+      Statistics
+    </small>
+  </a>
+  <a href="#pharmacyExpert" class="feature-item group">
+    <div class="icon-wrapper bg-primary-alt text-white p-4 rounded-full group-hover:scale-110 transition">
+      <i class="fas fa-user-md text-2xl"></i>
+    </div>
+    <small class="block mt-2 text-center text-xs text-muted group-hover:text-primary transition">
+      Pharmacist Chat
+    </small>
+  </a>
+</div>
+
+  </div>
+
+  <div class="hero-image relative">
+    <img src="pills.jpg" alt="E‑Pharmacy Illustration" class="rounded-xl shadow-lg" />
+ <i class="fas fa-capsules sticker sticker-1" style="top:10%; left:15%;"></i>
     <i class="fas fa-vial sticker sticker-2" style="top:5%; right:20%;"></i>
     <i class="fas fa-notes-medical sticker sticker-3" style="bottom:10%; left:20%;"></i>
     <i class="fas fa-tag sticker sticker-4" style="bottom:15%; right:10%;"></i>
     <i class="fas fa-flask sticker sticker-5" style="top:50%; left:60%;"></i>
-    <i class="fas fa-robot sticker sticker-6" style="top:30%; right:50%;"></i>
-  </section>
+    <i class="fas fa-robot sticker sticker-6" style="top:30%; right:50%;"></i>    <i class="fas fa-capsules sticker sticker-1"></i>
+    <i class="fas fa-vial sticker sticker-2"></i>
+    <i class="fas fa-notes-medical sticker sticker-3"></i>
+  </div>
+</section>
+
 
 
     <section id="buyDrugs" class="module">
