@@ -83,7 +83,7 @@
     box-shadow: var(--shadow);
     display: flex;
     flex-direction: column;
-    z-index: 1000;
+    z-index: 1002;
     overflow: hidden;
   }
 
@@ -374,6 +374,21 @@
     font-size: 1rem;
   }
 
+ #hero .tips {
+   background: rgba(255,255,255,0.1);
+   padding: 0.5rem 1rem;
+   border-radius: var(--radius);
+   font-weight: 600;
+   display: inline-flex;
+   align-items: center;
+   gap: 0.5rem;
+ }
+ #hero .tips .link-style {
+   color: var(--cb-accent);
+   font-size: 1.05rem;
+   text-decoration-thickness: 2px;
+ }
+
   input,
   select,
   textarea,
@@ -481,6 +496,20 @@
     font-size: 1.1rem;
     color: var(--cb-primary);
   }
+
+  #appointmentFlow .btn-sm.back {
+  position: absolute;
+  top: var(--padding);
+  left: var(--padding);
+  background: var(--cb-primary-alt);
+  color: #fff;
+  padding: 0.5rem 1rem;
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+}
+#appointmentFlow .btn-sm.back:hover {
+  background: var(--cb-accent);
+}
 
   #matchResults .card .details p,
   #urgentMatchResults .card .details p {
@@ -1345,13 +1374,12 @@ html.dark .modal .modal-content .close-btn:hover {
           />
         </label>
         <label>
-          <i class="fas fa-exclamation-circle"></i> Urgency:
-          <select id="urgencyInput">
-            <option>Low</option>
-            <option>Medium</option>
-            <option>High</option>
-          </select>
-        </label>
+         <i class="fas fa-calendar-day"></i> Preferred Appointment Mode:
+         <select id="modeInput">
+           <option>In‑Person</option>
+           <option>Tele‑Consult</option>
+         </select>
+       </label>
         <label>
           <i class="fas fa-language"></i> Language:
           <select id="languageInput">
@@ -1379,8 +1407,13 @@ html.dark .modal .modal-content .close-btn:hover {
       </div>
 
       <div id="appointmentFlow" hidden>
-        <button class="btn-sm close-btn" id="appointmentFlowClose"><i class="fas fa-times"></i></button>
+<button class="btn-sm back" id="appointmentFlowClose">
+          <i class="fas fa-arrow-left"></i> Back
+        </button>
         <h3><i class="fas fa-calendar-alt"></i> Schedule with <span id="chosenProvider"></span></h3>
+        <p class="desc" style="margin-bottom:1rem;">
+         Choose an available date below. Once you see the highlighted days, click one to view time slots.
+       </p>
         <div class="month-nav">
           <button id="prevMonth" class="btn-sm"><i class="fas fa-chevron-left"></i></button>
           <div id="calendarHeader"></div>
@@ -1843,6 +1876,15 @@ Storage.recordCategory("Consult");
     document.body.classList.toggle("sidebar-open");
   });
 
+   document.addEventListener("click", e => {
+    if (window.innerWidth <= 768
+        && document.body.classList.contains("sidebar-open")
+        && !sidebar.contains(e.target)
+        && e.target !== hamburger) {
+      document.body.classList.remove("sidebar-open");
+    }
+  });
+  
   shrinkSidebarBtn.addEventListener("click", () => {
     document.body.classList.toggle("sidebar-shrink");
     const icon = shrinkSidebarBtn.querySelector("i");
@@ -2160,6 +2202,10 @@ ${providers.map(p => `
       ul.append(li);
     });
     timeSlots.append(ul);
+     const hint = document.createElement("p");
+    hint.textContent = "🕑 Now pick a time slot:";
+    timeSlots.insertBefore(hint, ul);
+    timeSlots.scrollIntoView({ behavior: "smooth" });
   }
 
   function selectTime(t) {
@@ -2351,6 +2397,12 @@ ${providers.map(p => `
     const card = document.createElement("div");
     card.className = "card";
     card.dataset.id = appt.id;
+     const apptDate = new Date(appt.date);
+  if (apptDate < new Date().setHours(0,0,0,0)) {
+    richPastSection.append(card);
+  } else {
+    richUpcomingSection.append(card);
+  }
     card.innerHTML = `
       <i class="fas fa-user-md fa-2x"></i>
       <div class="details">
@@ -2358,11 +2410,25 @@ ${providers.map(p => `
         <p>${appt.date} • ${appt.time}</p>
       </div>
       <div class="actions">
+      <button class="btn-fav" title="Add to favorites"><i class="far fa-heart"></i></button>
         <button class="btn-reschedule"><i class="fas fa-sync-alt"></i></button>
         <button class="btn-cancel"><i class="fas fa-times"></i></button>
       </div>
     `;
 
+    const fav = card.querySelector(".btn-fav");
+  fav.addEventListener("click", () => {
+    const isFav = fav.classList.toggle("favorited");
+    fav.innerHTML = isFav ? '<i class="fas fa-heart"></i>' : '<i class="far fa-heart"></i>';
+    if (isFav) {
+      richFavoritesSection.append(card);
+    } else {
+      const d = new Date(appt.date) < new Date().setHours(0,0,0,0)
+        ? richPastSection : richUpcomingSection;
+      d.append(card);
+    }
+});
+    
     const btnReschedule = card.querySelector(".btn-reschedule");
     btnReschedule.addEventListener("click", () => {
       if (appt.urgent) {
@@ -2384,6 +2450,7 @@ ${providers.map(p => `
           chosenProvider.textContent = providerName;
           buildCalendar(year, month);
         }
+         appointmentFlow.scrollIntoView({ behavior: "smooth" });
       }
       document.getElementById("confirmDetails").innerHTML = `
         <p><strong>${appt.name}</strong></p>
