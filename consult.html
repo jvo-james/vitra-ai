@@ -1048,7 +1048,45 @@ html.dark .modal .modal-content .close-btn:hover {
     }
   }
 
+  #feature-rich-dashboard .card .actions .btn-fav.favorited i {
+  color: #fff !important;
+}
+
+  html.dark #calendar {
+  background: var(--cb-bg);
+}
+html.dark #calendar .cell {
+  background: var(--cb-surface);
+  color: var(--cb-text);
+}
+html.dark #calendar .cell.closed {
+  background: #3b3f88;
+  color: #aaa;
+}
+html.dark #calendar .cell.open {
+  background: var(--cb-accent);
+  color: #111;
+}
+html.dark #calendar .cell.today {
+  border-color: var(--cb-primary);
+}
+#hero .btn.hero-btn,
+#hero .tips .link-style {
+  color: var(--cb-primary-alt) !important;
   
+}
+html.dark #hero .btn.hero-btn,
+html.dark #hero .tips .link-style {
+  color: var(--cb-primary-alt) !important;
+  background: #fff !important;
+}
+
+#urgentMatchResults .btn-sm.back,
+#urgentCalendarFlow .btn-sm.back,
+#urgentDetailsForm .btn-sm.back {
+  display: inline-flex !important;
+}
+
    html.dark body {
     background: var(--cb-bg);
     color: var(--cb-text);
@@ -2192,6 +2230,8 @@ ${providers.map(p => `
     document.getElementById("findContainer").hidden = true;
     chosenProvider.textContent = providerName;
     buildCalendar(year, month);
+    document.querySelector('#appointmentFlow .btn-sm.back')
+        .style.display = 'inline-flex';
   });
 
    appointmentFlow.querySelector(".btn-sm.back").style.display = "inline-flex";
@@ -2345,7 +2385,8 @@ ${providers.map(p => `
           addToRichDashboard({ id, name: urgentProviderName, date: uDate, time: uTime, urgent: true });
           renderUpcomingCalendarWidget();
           urgentFlow = false;
-          confirmModal.hidden = true;
+        confirmModal.hidden = true;
+       showToast("Urgent appointment booked!");
         }
       });
       handler.openIframe();
