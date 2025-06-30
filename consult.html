@@ -275,6 +275,10 @@ html { scroll-padding-top: 60px; }
     text-align: center;
   }
 
+  html.dark #hero {
+ background: var(--cb-surface) !important;
+}
+  
   #hero .hero-graphic img {
     max-width: 90%;
     border-radius: var(--radius);
@@ -540,6 +544,48 @@ html { scroll-padding-top: 60px; }
   #urgentScheduleBtn:hover {
     background: #d4724f;
   }
+
+ #appointmentFlow .btn-sm.back {
+   position: relative;
+   display: inline-flex !important;
+   margin-bottom: var(--padding);
+   background: var(--cb-primary-alt);
+   color: #fff;
+   padding: 0.5rem 1rem;
+   border-radius: var(--radius);
+   box-shadow: var(--shadow);
+   transition: background var(--transition), transform var(--transition);
+ }
+
+
+ #urgentMatchResults .btn-sm.back,
+ #urgentCalendarFlow .btn-sm.back,
+ #urgentDetailsForm .btn-sm.back {
+   position: relative;
+   display: inline-flex !important;
+   margin-bottom: var(--padding);
+   background: var(--cb-primary-alt);
+   color: #fff;
+   padding: 0.5rem 1rem;
+   border-radius: var(--radius);
+   box-shadow: var(--shadow);
+   transition: background var(--transition), transform var(--transition);
+ }
+
+ #appointmentFlow h3,
+ #urgentMatchResults h4,
+ #urgentCalendarFlow label,
+ #urgentDetailsForm label {
+   margin-top: var(--padding);
+ }
+
+ #appointmentFlow .btn-sm.back:hover,
+ #urgentMatchResults .btn-sm.back:hover,
+ #urgentCalendarFlow .btn-sm.back:hover,
+ #urgentDetailsForm .btn-sm.back:hover {
+   background: var(--cb-accent);
+   transform: translateY(-2px);
+ }
 
    #urgentMatchResults .close-btn,
   #urgentCalendarFlow .close-btn,
@@ -2003,6 +2049,11 @@ document.addEventListener("DOMContentLoaded", () => {
     if (el) el.value = draft[key];
   }
 
+ const storedTheme = localStorage.getItem('theme');
+ if (storedTheme === 'dark') {
+   document.documentElement.classList.add('dark');
+   themeToggle.classList.replace('fa-moon','fa-sun');
+ }
 
   function generateId(prefix = "") {
     return prefix + Date.now().toString();
@@ -2052,6 +2103,7 @@ Storage.recordCategory("Consult");
     document.documentElement.classList.toggle("dark");
     themeToggle.classList.toggle("fa-moon");
     themeToggle.classList.toggle("fa-sun");
+     localStorage.setItem('theme', document.documentElement.classList.contains('dark') ? 'dark' : 'light');
   });
 
   heroBookBtn.addEventListener("click", () => {
@@ -2126,6 +2178,7 @@ ${providers.map(p => `
 
     urgentMatchResults.hidden = false;
     urgentStep1.hidden = true;
+   urgentStep2Back.style.display = 'inline-flex';
   });
 
   urgentStep2Back.addEventListener("click", () => {
@@ -2140,6 +2193,7 @@ ${providers.map(p => `
   urgentScheduleBtn.addEventListener("click", () => {
     urgentMatchResults.hidden = true;
     urgentCalendarFlow.hidden = false;
+    urgentStep3Back.style.display = 'inline-flex';
   });
 
   urgentDate.min = new Date().toISOString().split("T")[0];
@@ -2163,6 +2217,7 @@ ${providers.map(p => `
     urgentCalendarFlow.hidden = true;
     urgentDetailsForm.hidden = false;
     urgentDetailsForm.scrollIntoView({ behavior: "smooth" });
+     urgentStep4Back.style.display = 'inline-flex';
   });
 
   urgentStep4Back.addEventListener("click", () => {
@@ -2283,6 +2338,7 @@ ${providers.map(p => `
   back.style.display = "inline-flex";
   back.style.position = "relative";
   back.style.zIndex = "10";
+     appointmentFlowClose.style.display = 'inline-flex';
   });
 
    appointmentFlow.querySelector(".btn-sm.back").style.display = "inline-flex";
