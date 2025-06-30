@@ -1070,13 +1070,11 @@ html.dark #calendar .cell.open {
 html.dark #calendar .cell.today {
   border-color: var(--cb-primary);
 }
-#hero .btn.hero-btn,
-#hero .tips .link-style {
+#hero .btn.hero-btn {
   color: var(--cb-primary-alt) !important;
   
 }
-html.dark #hero .btn.hero-btn,
-html.dark #hero .tips .link-style {
+html.dark #hero .btn.hero-btn {
   color: var(--cb-primary-alt) !important;
   background: #fff !important;
 }
@@ -1085,6 +1083,57 @@ html.dark #hero .tips .link-style {
 #urgentCalendarFlow .btn-sm.back,
 #urgentDetailsForm .btn-sm.back {
   display: inline-flex !important;
+}
+
+#urgentMatchResults .btn-sm.back {
+ display: inline-flex;
+ position: absolute;
+ top: var(--padding);
+ left: var(--padding);
+ width: auto;
+ padding: 0.25rem 0.75rem;
+ font-size: 0.85rem;
+}
+
+#urgentCalendarFlow .btn-sm.back {
+ display: inline-flex;
+ position: absolute;
+ top: var(--padding);
+ left: var(--padding);
+ width: auto;
+ padding: 0.25rem 0.75rem;
+ font-size: 0.85rem;
+}
+
+#urgentDetailsForm .btn-sm.back {
+ display: inline-flex;
+ position: absolute;
+ top: var(--padding);
+ left: var(--padding);
+ width: auto;
+ padding: 0.25rem 0.75rem;
+ font-size: 0.85rem;
+}
+
+#appointmentFlowClose {
+display: inline-flex;
+ position: absolute;
+ top: var(--padding);
+ left: var(--padding);
+ width: auto;
+ padding: 0.25rem 0.75rem;
+ font-size: 0.85rem;
+}
+
+
+  html.dark header h1,
+html.dark section.module h2,
+html.dark section.module h3,
+html.dark .details h4,
+html.dark #calendarHeader,
+html.dark #upcomingCalendarWidget h4,
+html.dark #confirmForm h4 {
+  color: #fff !important;
 }
 
    html.dark body {
@@ -2230,8 +2279,10 @@ ${providers.map(p => `
     document.getElementById("findContainer").hidden = true;
     chosenProvider.textContent = providerName;
     buildCalendar(year, month);
-    document.querySelector('#appointmentFlow .btn-sm.back')
-        .style.display = 'inline-flex';
+   const back = document.getElementById("appointmentFlowClose");
+  back.style.display = "inline-flex";
+  back.style.position = "relative";
+  back.style.zIndex = "10";
   });
 
    appointmentFlow.querySelector(".btn-sm.back").style.display = "inline-flex";
@@ -2390,7 +2441,6 @@ ${providers.map(p => `
         }
       });
       handler.openIframe();
-       showToast("Urgent appointment booked!");
     } else {
       const id = generateId();
      appointments.push({
