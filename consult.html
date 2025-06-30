@@ -2277,8 +2277,15 @@ ${providers.map(p => `
         ref: generateId("U"),
         onClose: function() {},
         callback: function(response) {
-          const id = generateId("U");
-          appointments.push({ id, name: urgentProviderName, date: uDate, time: uTime, urgent: true });
+          const id = generateId();
+      appointments.push({
+        id,
+        name: providerName,
+        date: selDate,
+        time: selTime,
+        urgent: false,
+        isFav: false            
+      });
           localStorage.setItem("appointments", JSON.stringify(appointments));
           addToRichDashboard({ id, name: urgentProviderName, date: uDate, time: uTime, urgent: true });
           renderUpcomingCalendarWidget();
@@ -2289,7 +2296,14 @@ ${providers.map(p => `
       handler.openIframe();
     } else {
       const id = generateId();
-      appointments.push({ id, name: providerName, date: selDate, time: selTime, urgent: false });
+     appointments.push({
+            id,
+            name: urgentProviderName,
+            date: uDate,
+            time: uTime,
+            urgent: true,
+            isFav: false     
+          });
       localStorage.setItem("appointments", JSON.stringify(appointments));
       addToRichDashboard({ id, name: providerName, date: selDate, time: selTime, urgent: false });
       renderUpcomingCalendarWidget();
@@ -2531,16 +2545,88 @@ dashTabs.forEach(btn => {
     richUpcomingSection.append(card);
   }
 
+ let currentTab = "rich-upcoming";
+
+  function renderDashboard(tab) {
+    currentTab = tab;
+    const now = new Date().setHours(0,0,0,0);
+
+    richUpcomingSection.innerHTML  = "";
+    richPastSection.innerHTML      = "";
+    richFavoritesSection.innerHTML = "";
+
+    appointments.forEach(appt => {
+      const ts = new Date(appt.date).getTime();
+      if (tab === "rich-upcoming" && ts >= now) {
+        renderCard(appt, richUpcomingSection);
+      }
+      if (tab === "rich-past"     && ts  < now) {
+        renderCard(appt, richPastSection);
+      }
+      if (tab === "rich-favorites" && appt.isFav) {
+        renderCard(appt, richFavoritesSection);
+      }
+    });
+
+    [
+      { el: richUpcomingSection,  msg: "No upcoming appointments." },
+      { el: richPastSection,      msg: "No past appointments."     },
+      { el: richFavoritesSection, msg: "No favorites yet."          }
+    ].forEach(({el,msg}) => {
+      if (!el.children.length) {
+        const p = document.createElement("p");
+        p.className = "empty-placeholder";
+        p.textContent = msg;
+        p.style.color = "var(--cb-muted)";
+        p.style.fontStyle = "italic";
+        el.append(p);
+      }
+    });
+
+    richUpcomingSection.hidden   = (tab !== "rich-upcoming");
+    richPastSection.hidden       = (tab !== "rich-past");
+    richFavoritesSection.hidden  = (tab !== "rich-favorites");
+  }
+
+  function renderCard(appt, container) {
+    const card = document.createElement("div");
+    card.className = "card";
+    card.dataset.id = appt.id;
+    card.innerHTML = `
+      <i class="fas fa-user-md fa-2x"></i>
+      <div class="details">
+        <h4><strong>${appt.name}</strong></h4>
+        <p>${appt.date} • ${appt.time}</p>
+      </div>
+      <div class="actions">
+        <button class="btn-fav" title="${appt.isFav ? "Remove from favorites" : "Add to favorites"}">
+          <i class="${appt.isFav ? "fas" : "far"} fa-heart"></i>
+        </button>
+        <button class="btn-reschedule"><i class="fas fa-sync-alt"></i></button>
+        <button class="btn-cancel"><i class="fas fa-times"></i></button>
+      </div>
+    `;
+    container.append(card);
+
+    const fav = card.querySelector(".btn-fav");
+    fav.addEventListener("click", () => {
+      appt.isFav = !appt.isFav;
+      localStorage.setItem("appointments", JSON.stringify(appointments));
+      renderDashboard(currentTab);
+    });
+
+  }
+
   dashTabs.forEach(btn => {
     btn.addEventListener("click", () => {
       dashTabs.forEach(b => b.classList.remove("active"));
       btn.classList.add("active");
-      richUpcomingSection.hidden   = (btn.dataset.tab !== "rich-upcoming");
-      richPastSection.hidden       = (btn.dataset.tab !== "rich-past");
-      richFavoritesSection.hidden  = (btn.dataset.tab !== "rich-favorites");
+      renderDashboard(btn.dataset.tab);
     });
   });
-});
+
+  renderDashboard("rich-upcoming");
+  
 </script>
 
   
