@@ -86,7 +86,11 @@ html { scroll-padding-top: 60px; }
     z-index: 1002;
     overflow: hidden;
   }
-
+ @media (max-width: 768px) {
+   aside#sidebar {
+      position: fixed !important;
+    }
+ }
   aside#sidebar .logo {
     display: flex;
     align-items: center;
@@ -755,16 +759,27 @@ html { scroll-padding-top: 60px; }
     transition: background 0.2s ease, transform 0.2s ease;
   }
 
+   html.dark body {
+    background: var(--cb-bg);
+    color: var(--cb-text);
+   color: #fff !important;
+  }
+ html.dark h2, html.dark h3, html.dark p, html.dark label, html.dark button, html.dark span {
+   color: #fff !important;
+ }
+  
   #feature-rich-dashboard .dashboard-tabs button.active,
   #feature-rich-dashboard .dashboard-tabs button:hover {
     background: var(--cb-accent);
     transform: translateY(-1px);
   }
 
-  #feature-rich-dashboard .dashboard-cards {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-    gap: var(--padding);
+ #feature-rich-dashboard .dashboard-cards {
+    display: block;
+  }
+  #feature-rich-dashboard .dashboard-cards .card {
+    width: 100%;
+    margin-bottom: var(--padding);
   }
 
   #feature-rich-dashboard .card {
@@ -1441,9 +1456,10 @@ html.dark .modal .modal-content .close-btn:hover {
             <option>Ga</option>
           </select>
         </label>
-        <button type="button" id="findMatchBtn" class="btn">
+       <button type="button" id="findMatchBtn" class="btn">
           <i class="fas fa-search"></i>Find Specialist
         </button>
+        <input type="hidden" id="urgencyInput" value="Normal" />
       </form>
 </div>
       <div id="matchResults" class="response" hidden>
@@ -2103,6 +2119,7 @@ ${providers.map(p => `
       showToast("Enter your concern.");
       return;
     }
+     findMatchBtn.disabled = false;
     const lower = rawConcern.toLowerCase();
 
     let matchedProviderId = null;
@@ -2118,7 +2135,7 @@ ${providers.map(p => `
 
     if (!chosenProviderObj) {
       findMatchBtn.disabled = true;
-      findMatchBtn.innerHTML = `Matching… <span class="spinner"></span>`;
+      findMatchBtn.innerHTML = `Matching…`;
 
       const sys = `
 You are an AI‐powered medical triage system. A patient will describe their symptoms, urgency level, and language preference. Your job is to pick exactly ONE provider ID (p1…p18) who best matches that patient’s needs. Respond only with the provider ID (e.g. "p7"), with no extra commentary.
@@ -2177,6 +2194,13 @@ ${providers.map(p => `
     buildCalendar(year, month);
   });
 
+   appointmentFlow.querySelector(".btn-sm.back").style.display = "inline-flex";
+  appointmentFlowClose.addEventListener("click", () => {
+    appointmentFlow.hidden = true;
+    document.getElementById("findContainer").hidden = false;
+    matchForm.hidden = false;
+  });
+  
   appointmentFlowClose.addEventListener("click", () => {
     appointmentFlow.hidden = true;
     document.getElementById("findContainer").hidden = false;
