@@ -2329,37 +2329,6 @@ ${providers.map(p => `
     cancelModal.hidden = true;
   });
 
-
-function checkEmptySections() {
-  const sections = [
-    { el: richUpcomingSection,   msg: "No upcoming appointments." },
-    { el: richPastSection,       msg: "No past appointments."     },
-    { el: richFavoritesSection,  msg: "No favorites yet."          },
-  ];
-  sections.forEach(({ el, msg }) => {
-    if (el.children.length === 0) {
-      if (!el.querySelector(".empty-placeholder")) {
-        const p = document.createElement("p");
-        p.className = "empty-placeholder";
-        p.textContent = msg;
-        p.style.color = "var(--cb-muted)";
-        p.style.fontStyle = "italic";
-        el.append(p);
-      }
-    } else {
-      const ph = el.querySelector(".empty-placeholder");
-      if (ph) ph.remove();
-    }
-  });
-}
-
-checkEmptySections();
-dashTabs.forEach(btn => {
-  btn.addEventListener("click", () => {
-     checkEmptySections();
-  });
-});
-
   function renderUpcomingCalendarWidget() {
     upcomingCalendarWidget.innerHTML = "";
     const ctrl = document.createElement("div");
@@ -2615,6 +2584,41 @@ dashTabs.forEach(btn => {
       renderDashboard(currentTab);
     });
 
+    card.querySelector(".btn-reschedule").addEventListener("click", () => {
+    if (appt.urgent) {
+      urgentProviderName = appt.name;
+      urgentBooking.hidden = false;
+      urgentStep1.hidden   = true;
+      urgentMatchResults.hidden = true;
+      urgentCalendarFlow.hidden  = false;
+      urgentDate.value = appt.date;
+      urgentTime.value = appt.time;
+      uDate = appt.date; uTime = appt.time;
+    } else {
+      const found = providers.find(p => p.name === appt.name);
+      if (found) {
+        providerId   = found.id;
+        providerName = appt.name;
+        appointmentFlow.hidden = false;
+        chosenProvider.textContent = appt.name;
+        buildCalendar(year, month);
+      }
+      appointmentFlow.scrollIntoView({ behavior: "smooth" });
+    }
+    document.getElementById("confirmDetails").innerHTML = `
+      <p><strong>${appt.name}</strong></p>
+      <p><strong>Date:</strong> ${appt.date}</p>
+      <p><strong>Time:</strong> ${appt.time}</p>
+    `;
+  });
+
+  card.querySelector(".btn-cancel").addEventListener("click", () => {
+    cancelMsg.innerText = appt.urgent
+      ? "This was an urgent booking (₵500 non-refundable). Cancel anyway?"
+      : "Are you sure you want to cancel this appointment?";
+    cancelYes.dataset.apptId = appt.id;
+    cancelModal.hidden = false;
+  });
   }
 
   dashTabs.forEach(btn => {
