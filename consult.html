@@ -68,7 +68,7 @@
   ol {
     list-style: none;
   }
-
+html { scroll-padding-top: 60px; }
   button {
     font-family: inherit;
   }
@@ -537,6 +537,29 @@
     background: #d4724f;
   }
 
+   #urgentMatchResults .close-btn,
+  #urgentCalendarFlow .close-btn,
+  #urgentDetailsForm .close-btn {
+    display: none;
+  }
+
+  #urgentMatchResults .btn-sm,
+  #urgentCalendarFlow .btn-sm,
+  #urgentDetailsForm .btn-sm {
+    background: var(--cb-primary-alt);
+    color: #fff;
+    padding: 0.5rem 1rem;
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    margin: 0.5rem;
+    transition: background var(--transition), transform var(--transition);
+  }
+  #urgentMatchResults .btn-sm:hover,
+  #urgentCalendarFlow .btn-sm:hover,
+  #urgentDetailsForm .btn-sm:hover {
+    background: var(--cb-accent);
+    transform: translateY(-2px);
+  }
     .month-nav {
     display: flex;
     align-items: center;
@@ -1517,6 +1540,7 @@ html.dark .modal .modal-content .close-btn:hover {
   <script src="storage.js"></script>
 <script defer>
 document.addEventListener("DOMContentLoaded", () => {
+  const dashboardTabs = Array.from(dashTabs);
   
   const providers = [
     {
@@ -1936,6 +1960,7 @@ Storage.recordCategory("Consult");
 
   urgentCareLink.addEventListener("click", () => {
     urgentBooking.hidden = false;
+    urgentBooking.scrollIntoView({ behavior: "smooth" });
   });
 
 
@@ -2300,6 +2325,7 @@ ${providers.map(p => `
         }
       });
       handler.openIframe();
+       showToast("Urgent appointment booked!");
     } else {
       const id = generateId();
      appointments.push({
@@ -2314,6 +2340,7 @@ ${providers.map(p => `
       addToRichDashboard({ id, name: providerName, date: selDate, time: selTime, urgent: false });
       renderUpcomingCalendarWidget();
       confirmModal.hidden = true;
+      showToast("Appointment booked!");
     }
   });
 
@@ -2543,20 +2570,20 @@ ${providers.map(p => `
       }
     });
 
-    [
-      { el: richUpcomingSection,  msg: "No upcoming appointments." },
-      { el: richPastSection,      msg: "No past appointments."     },
-      { el: richFavoritesSection, msg: "No favorites yet."          }
-    ].forEach(({el,msg}) => {
-      if (!el.children.length) {
-        const p = document.createElement("p");
-        p.className = "empty-placeholder";
-        p.textContent = msg;
-        p.style.color = "var(--cb-muted)";
-        p.style.fontStyle = "italic";
-        el.append(p);
-      }
-    });
+   const placeholders = {
+      "rich-upcoming": "No upcoming appointments.",
+      "rich-past":     "No past appointments.",
+      "rich-favorites":"No favorites yet."
+    };
+    const activeEl = document.getElementById(tab);
+    if (!activeEl.children.length) {
+      const p = document.createElement("p");
+      p.className = "empty-placeholder";
+      p.textContent = placeholders[tab];
+      p.style.color = "var(--cb-muted)";
+      p.style.fontStyle = "italic";
+      activeEl.append(p);
+    }
 
     richUpcomingSection.hidden   = (tab !== "rich-upcoming");
     richPastSection.hidden       = (tab !== "rich-past");
