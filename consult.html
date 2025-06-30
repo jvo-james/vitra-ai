@@ -572,6 +572,28 @@
     overflow: hidden;
   }
 
+   section.module {
+    scroll-margin-top: calc(60px + 1rem);
+ }
+
+  #feature-rich-dashboard .card .actions .btn-fav {
+  background: var(--cb-primary);
+  color: #fff;
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  border: none;
+  transition: background var(--transition), transform var(--transition);
+  font-size: 1rem;
+ }
+ #feature-rich-dashboard .card .actions .btn-fav:hover {
+  background: var(--cb-accent);
+  transform: translateY(-2px);
+ }
+
   #calendar .cell:first-child,
   .calendar-grid .cell:first-child {
     font-weight: 600;
@@ -1360,6 +1382,7 @@ html.dark .modal .modal-content .close-btn:hover {
     </section>
 
     <section id="providerMatch" class="module">
+      <div id="findContainer">
       <h2><i class="fas fa-user-md"></i> Find Your Specialist</h2>
       <p class="desc">Describe your health concern and let our AI pick the best in-network professional.</p>
 
@@ -1392,7 +1415,7 @@ html.dark .modal .modal-content .close-btn:hover {
           <i class="fas fa-search"></i>Find Specialist
         </button>
       </form>
-
+</div>
       <div id="matchResults" class="response" hidden>
 <button class="close-btn" id="matchResultsClose"><i class="fas fa-times"></i></button>
     <button class="btn-sm back" id="matchResultsBack" style="display: none;">Back</button>
@@ -2118,12 +2141,15 @@ ${providers.map(p => `
   scheduleMatchBtn.addEventListener("click", () => {
     matchResults.hidden = true;
     appointmentFlow.hidden = false;
+    document.getElementById("findContainer").hidden = true;
     chosenProvider.textContent = providerName;
     buildCalendar(year, month);
   });
 
   appointmentFlowClose.addEventListener("click", () => {
     appointmentFlow.hidden = true;
+    document.getElementById("findContainer").hidden = false;
+    matchForm.hidden = false;
   });
 
 
@@ -2290,6 +2316,36 @@ ${providers.map(p => `
   });
 
 
+function checkEmptySections() {
+  const sections = [
+    { el: richUpcomingSection,   msg: "No upcoming appointments." },
+    { el: richPastSection,       msg: "No past appointments."     },
+    { el: richFavoritesSection,  msg: "No favorites yet."          },
+  ];
+  sections.forEach(({ el, msg }) => {
+    if (el.children.length === 0) {
+      if (!el.querySelector(".empty-placeholder")) {
+        const p = document.createElement("p");
+        p.className = "empty-placeholder";
+        p.textContent = msg;
+        p.style.color = "var(--cb-muted)";
+        p.style.fontStyle = "italic";
+        el.append(p);
+      }
+    } else {
+      const ph = el.querySelector(".empty-placeholder");
+      if (ph) ph.remove();
+    }
+  });
+}
+
+checkEmptySections();
+dashTabs.forEach(btn => {
+  btn.addEventListener("click", () => {
+     checkEmptySections();
+  });
+});
+
   function renderUpcomingCalendarWidget() {
     upcomingCalendarWidget.innerHTML = "";
     const ctrl = document.createElement("div");
@@ -2420,6 +2476,10 @@ ${providers.map(p => `
   fav.addEventListener("click", () => {
     const isFav = fav.classList.toggle("favorited");
     fav.innerHTML = isFav ? '<i class="fas fa-heart"></i>' : '<i class="far fa-heart"></i>';
+    fav.setAttribute(
+    "title",
+    isFav ? "Remove from favorites" : "Add to Favorites"
+  );
     if (isFav) {
       richFavoritesSection.append(card);
     } else {
