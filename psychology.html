@@ -1277,7 +1277,7 @@ html.dark .history-modal .history-content {
  }
 
  /* ——— Therapy Section Layout ——— */
-.therapy-section { position: relative; padding: 0; }
+.therapy-inner { position: relative; }
 .crisis-btn {
   position: fixed; top: 1rem; right: 1rem;
   background: var(--primary); color: #fff;
@@ -1286,11 +1286,7 @@ html.dark .history-modal .history-content {
 }
 .therapy-inner { display: flex; gap: 1rem; }
 /* Sessions List */
-.sessions-list {
-  width: 220px; background: var(--surface);
-  border-radius: var(--radius); overflow: hidden;
-  display: flex; flex-direction: column;
-}
+.sessions-list { display: none; }
 .sessions-list header {
   padding: 0.75rem; display: flex; justify-content: space-between; align-items: center;
   border-bottom: 1px solid rgba(0,0,0,0.1);
@@ -1335,6 +1331,7 @@ html.dark .history-modal .history-content {
   position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
   background: var(--bg); z-index: 3000; display: flex; flex-direction: column;
 }
+ #expandedChat.active { display: flex; }
 .expanded-header {
   display: flex; justify-content: space-between; align-items: center;
   padding: var(--padding); background: var(--surface);
@@ -1510,7 +1507,7 @@ html.dark .history-modal .history-content {
       </div>
 
       <!-- EXPANDED FULL-SCREEN -->
-      <div id="expandedChat" class="expanded-chat" hidden>
+     <div id="expandedChat" class="expanded-chat">
         <div class="expanded-header">
           <h2><i class="fas fa-robot"></i> Deep Dive</h2>
           <button id="collapseChat" aria-label="Exit full-screen"><i class="fas fa-compress"></i></button>
@@ -3388,19 +3385,26 @@ sendChatBtn .addEventListener("click",()=>sendChatFlow(chatInput.value,chatBox))
 sendExpBtn .addEventListener("click",()=>sendChatFlow(chatInputExp.value,chatBoxExp));
 
 // ——— Expand / Collapse ———
-expandBtn.addEventListener("click",()=>{
-  expandedChat.hidden=false;
-  miniChat.style.opacity=0.3;
-  chatBoxExp.innerHTML = chatBox.innerHTML;
-});
-collapseBtn.addEventListener("click",()=>{
-  expandedChat.hidden=true;
-  miniChat.style.opacity=1;
-  // generate summary bullets
-  const sumList = document.getElementById("sessionSummary");
-  sumList.innerHTML = sessions[0].summary.map(s=>`<li>${s}</li>`).join("");
-});
+expandBtn.addEventListener("click", () => {
+    // copy current mini‐chat into expanded
+   chatBoxExp.innerHTML = chatBox.innerHTML;
+    // show expanded
+    expandedChat.classList.add("active");
+    // dim mini
+    miniChat.style.opacity = 0.3;
+ });
 
+  collapseBtn.addEventListener("click", () => {
+    // hide expanded
+    expandedChat.classList.remove("active");
+    // restore mini
+    miniChat.style.opacity = 1;
+    // fill session summary only inside expanded when shown
+    const sumList = document.getElementById("sessionSummary");
+    sumList.innerHTML = currentSession
+      ? currentSession.summary.map(s=>`<li>${s}</li>`).join("")
+      : "";
+  });
 // ——— Clear Chat ———
 clearChatBtn.addEventListener("click", ()=>{
   if (!currentSession) return;
