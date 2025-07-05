@@ -130,10 +130,7 @@
     }
     @keyframes spin { to { transform: rotate(360deg); } }
 
-    /*==================================
-      4. Messages & Bubbles
-    ==================================*/
-    .message { display:flex; align-items:flex-end; margin-bottom:0.75rem; max-width:75%; position:relative; }
+      .message { display:flex; align-items:flex-end; margin-bottom:1.2rem; max-width:75%; position:relative; }
     .therapist-msg { flex-direction:row; }
     .user-msg { flex-direction:row-reverse; margin-left:auto; }
     .avatar-small {
@@ -147,16 +144,18 @@
       background:var(--primary); color:#fff;
     }
     .bubble time {
-      position:absolute; bottom:-1.25rem; right:0.5rem;
+      position:absolute; bottom:-1.5rem; right:0.5rem;
       font-size:0.8rem; color:var(--muted);
     }
     /* Copy button */
     .copy-btn {
-      position:absolute; top:4px; right:4px; display:none;
-      background:rgba(0,0,0,0.1); border:none; padding:4px; border-radius:50%;
+ position:absolute;
+    bottom:4px;    right:4px; display: none;      background:rgba(0,0,0,0.1); border:none; padding:4px; border-radius:50%;
       cursor:pointer;
-    }
-    .copy-btn i { color:var(--muted); }
+    font-size:0;    
+   }
+   .copy-btn i {   color:var(--muted);
+   }
     .bubble:hover .copy-btn { display:block; }
 
     /* Speaker button */
@@ -186,16 +185,32 @@
     /*==================================
       6. Controls & Quick Replies
     ==================================*/
-    #chatControls { display:flex; gap:0.5rem; padding:0 var(--spacing); }
-    #chatControls button {
-      background:var(--surface); border:1px solid var(--muted);
-      border-radius:50%; width:36px; height:36px; cursor:pointer;
-      transition:all var(--transition);
-    }
-    #chatControls button:hover {
-      background:var(--primary); color:#fff; border-color:var(--primary);
-    }
-    #quickReplies {
+   #chatControls button,
+ #dataControls button {
+   padding: 0.5rem 1rem;
+   background: #fff;
+   border: 1px solid var(--primary);
+   border-radius: 1.5rem;
+   min-width: 48px;
+   min-height: 36px;
+   display: flex;
+   align-items: center;
+   justify-content: center;
+   box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+   cursor: pointer;
+   transition: background var(--transition), border-color var(--transition), color var(--transition);
+ }
+ #chatControls button i,
+ #dataControls button i {
+   margin-right: 0.25rem;
+ }
+ #chatControls button:hover,
+ #dataControls button:hover {
+   background: var(--primary-hover);
+   border-color: var(--primary-hover);
+   color: #fff;
+ }
+   #quickReplies {
       display:flex; gap:0.5rem; padding:0 var(--spacing) var(--spacing);
     }
     .quick-reply {
@@ -298,6 +313,7 @@
   100% { opacity: 0; }
 }
 
+    
 @media(max-width:1024px) {
   #menuToggle { display: inline-flex; background:none; border:none; 
     color:var(--primary); font-size:1.25rem; cursor:pointer; }
@@ -320,17 +336,44 @@ aside#sessionList.open { display: block; }
   }
 }
 
+    .confirm-modal {
+   position: fixed;
+   top: 0; left: 0; width: 100%; height: 100%;
+   background: rgba(0,0,0,0.4);
+   display: flex; align-items: center; justify-content: center;
+   z-index: 2000;
+ }
+ .confirm-dialog {
+   background: var(--surface);
+   padding: 1.5rem;
+   border-radius: var(--radius);
+   box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+   max-width: 90%; width: 320px;
+   text-align: center;
+ }
+ .confirm-actions {
+   margin-top: 1rem;
+   display: flex; gap: 0.5rem; justify-content: center;
+ }
+ .confirm-actions button {
+   flex: 1; padding: 0.5rem;
+   border: none; border-radius: var(--radius);
+   cursor: pointer;
+   transition: background var(--transition);
+ }
+ #confirmYes { background: var(--error); color: #fff; }
+ #confirmYes:hover { background: darken(var(--error), 10%); }
+ #confirmNo { background: var(--muted); color: #fff; }
+ #confirmNo:hover { background: darken(var(--muted), 10%); }
+
   </style>
 </head>
 
 <body>
   <!-- 1. Header -->
-  <header id="therapyHeader">
+<header id="therapyHeader">
     <button id="collapseBtn" title="Back to dashboard"><i class="fas fa-arrow-left"></i></button>
-<button id="menuToggle" title="Toggle sessions" hidden>
-      <i class="fas fa-bars"></i>
-    </button>  <i class="fas fa-bars"></i>
-</button>
+    <button id="menuToggle" title="Toggle sessions"><i class="fas fa-bars"></i></button>
     <div class="therapist-info">
       <img src="https://i.pravatar.cc/100?img=32" alt="Therapist avatar" class="avatar">
       <h1>Dr. Amina Mensah</h1>
@@ -413,10 +456,12 @@ aside#sessionList.open { display: block; }
         const li = document.createElement('li');
         li.dataset.id = id;
         if (id===currentId) li.classList.add('active');
-       li.innerHTML = `
+        li.innerHTML = `
   <div class="session-title" contenteditable="true">${s.title}</div>
-  <span class="snippet">…</span>
-  <time>…</time>`;
+  ${s.history && s.history.length
+     ? `<span class="snippet">${s.history[s.history.length-1].text.slice(0,30)}…</span>
+        <time>${new Date(s.history[s.history.length-1].time).toLocaleDateString()}</time>`
+     : ''}`;
 const titleDiv = li.querySelector('.session-title');
 titleDiv.addEventListener('blur', ()=>{
   sessions[id].title = titleDiv.textContent.trim() || s.title;
@@ -429,7 +474,6 @@ titleDiv.addEventListener('blur', ()=>{
     }
 
   const menuToggle = document.getElementById('menuToggle');
-    menuToggle.hidden = false;
     menuToggle.addEventListener('click', ()=>{
       document.getElementById('sessionList')
         .classList.toggle('open');
@@ -478,8 +522,9 @@ titleDiv.addEventListener('blur', ()=>{
             speechSynthesis.cancel();
             return isSpeaking=false;
           }
+          const voices = speechSynthesis.getVoices();
           utter = new SpeechSynthesisUtterance(text);
-          utter.voice = speechSynthesis.getVoices().find(v=>/female/i.test(v.name))||speechSynthesis.getVoices()[0];
+          utter.voice = voices.find(v => /female/i.test(v.name)) || voices[0];
           utter.rate = 0.9;
           isSpeaking = true;
           utter.onend = ()=> isSpeaking = false;
@@ -506,6 +551,16 @@ titleDiv.addEventListener('blur', ()=>{
       chatLog.append(s);
       chatLog.scrollTop = chatLog.scrollHeight;
     }
+
+       let userProfile = JSON.parse(localStorage.getItem('userProfile')||'null');
+  if (!userProfile) {
+    const info = prompt('Hi there! To make this therapy more personal, please share a little about yourself (e.g., goals or background):');
+    if (info) {
+      userProfile = { info, savedAt: new Date().toISOString() };
+      localStorage.setItem('userProfile', JSON.stringify(userProfile));
+    }
+  }
+    
     function isHighRisk(t) { return /suicidal|harm myself|kill myself/i.test(t); }
     async function callAI(msgs) {
       const res = await fetch('/.netlify/functions/openai-proxy',{
@@ -543,13 +598,29 @@ titleDiv.addEventListener('blur', ()=>{
       loadSessionList();
       alert('Session ended and saved.');
     });
-    clearHistBtn.addEventListener('click', ()=>{
-      if (!currentId) return;
-      if (!confirm('Clear this session?')) return;
-      chatHistory = [];
-      saveCurrent();
-      renderHistory();
-    });
+   clearHistBtn.addEventListener('click', () => {
+     if (!currentId) return;
+     const modal = document.createElement('div');
+     modal.className = 'confirm-modal';
+     modal.innerHTML = `
+       <div class="confirm-dialog">
+         <p>Are you sure you want to clear this session? This action cannot be undone.</p>
+         <div class="confirm-actions">
+           <button id="confirmYes">Yes, clear</button>
+           <button id="confirmNo">Cancel</button>
+       </div>
+       </div>`;
+     document.body.append(modal);
+     document.getElementById('confirmYes').addEventListener('click', () => {
+       chatHistory = [];
+       saveCurrent();
+       renderHistory();
+     modal.remove();
+     });
+     document.getElementById('confirmNo').addEventListener('click', () => {
+       modal.remove();
+     });
+   });
     exportBtn.addEventListener('click', ()=>{
       const txt = chatHistory.map(m=>`${m.who}: ${m.text}`).join('\n');
       const blob = new Blob([txt],{type:'text/plain'});
@@ -607,18 +678,30 @@ titleDiv.addEventListener('blur', ()=>{
     });
 
  let isListening = false;
-    const rec = new (window.SpeechRecognition||window.webkitSpeechRecognition)();
-    rec.lang = 'en-US'; rec.interimResults = true;
+    const SpeechRec = window.SpeechRecognition || window.webkitSpeechRecognition;
+  const rec = new SpeechRec();
+  rec.lang = 'en-US';
+  rec.continuous = true;         
+  rec.interimResults = true;  
     rec.onresult = e => {
-      chatInput.value = Array.from(e.results).map(r=>r[0].transcript).join('');
+ const transcript = Array.from(e.results)
+      .map(r => r[0].transcript)
+      .join('');
+    chatInput.value = transcript;
+    chatInput.focus();
     };
-    micBtn.addEventListener('click', ()=>{
-      isListening = !isListening;
-      micBtn.innerHTML = isListening
-        ? '<i class="fas fa-microphone-slash"></i>'
-        : '<i class="fas fa-microphone"></i>';
-      isListening ? rec.start() : rec.stop();
-    });
+   micBtn.addEventListener('click', () => {
+    isListening = !isListening;
+    micBtn.innerHTML = isListening
+      ? '<i class="fas fa-microphone-slash"></i>'
+      : '<i class="fas fa-microphone"></i>';
+    try {
+      if (isListening) rec.start();
+      else rec.stop();
+    } catch (err) {
+      console.error('Speech recognition error:', err);
+    }
+  });
 
 
     //—— Quick replies ——//
@@ -628,11 +711,15 @@ titleDiv.addEventListener('blur', ()=>{
     }));
 
     //—— Regenerate & Edit ——//
-    regenBtn.addEventListener('click', ()=>{
-      if (!lastUserMsg) return;
-      chatInput.value = lastUserMsg;
-      chatForm.dispatchEvent(new Event('submit'));
-    });
+   regenBtn.addEventListener('click', () => {
+    if (!lastUserMsg) return;
+    chatInput.value = lastUserMsg;
+    if (typeof chatForm.requestSubmit === 'function') {
+      chatForm.requestSubmit();
+    } else {
+      chatForm.dispatchEvent(new Event('submit', { bubbles: true, cancelable: true }));
+    }
+  });
     editBtn.addEventListener('click', ()=>{
       if (!chatHistory.length) return;
       const last = chatHistory.pop();
