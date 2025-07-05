@@ -1,0 +1,773 @@
+ <!DOCTYPE html>
+<html lang="en" aria-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1.0">
+  <title>Vitra AI – Neuropharma Command Center</title>
+
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;600;700&display=swap" rel="stylesheet">
+  <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+  <style>
+  /* Root Variables */
+  :root {
+    --primary: #4A90E2;
+    --primary-light: #D0E7FF;
+    --secondary: #50C878;
+    --bg: #F3F6FB;
+    --surface: #FFFFFF;
+    --text: #333333;
+    --muted: #888888;
+    --radius: 0.75rem;
+    --padding: 1rem;
+    --transition: 0.3s ease;
+  }
+  /* Global Reset */
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body {
+    font-family: 'Montserrat', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    display: flex;
+    height: 100vh;
+    overflow: hidden;
+  }
+
+  /* 2. Header */
+  header#therapyHeader {
+    position: fixed; top:0; left:0; right:0;
+    height: 64px; background: var(--surface);
+    display: flex; align-items:center; justify-content: space-between;
+    padding: 0 1rem; box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    z-index: 1000;
+  }
+  #collapseBtn {
+    background: none; border: none; font-size:1.2rem;
+    color: var(--primary); cursor: pointer;
+    transition: color var(--transition);
+  }
+  #collapseBtn:hover { color: var(--secondary); }
+  .therapist-info { display:flex; align-items:center; gap:0.5rem; }
+  .therapist-info .avatar {
+    width:40px; height:40px; border-radius:50%; object-fit:cover;
+    border:2px solid var(--primary-light);
+  }
+  .therapist-info h1 {
+    font-size:1.1rem; font-weight:600;
+  }
+  .session-meta {
+    display:flex; align-items:center; gap:1rem; font-size:0.9rem;
+    color: var(--muted);
+  }
+
+  /* 2. Sidebar / Session List */
+  aside#sessionList {
+    width:280px; background: var(--surface);
+    padding:1rem; margin-top:64px;
+    box-shadow:2px 0 8px rgba(0,0,0,0.05);
+    overflow-y:auto;
+  }
+  #sessionList .session-search {
+    display:flex; gap:0.5rem; margin-bottom:1rem;
+  }
+  #searchSessions {
+    flex:1; padding:0.5rem; border:1px solid var(--muted);
+    border-radius:var(--radius);
+  }
+  #filterBtn {
+    background: var(--primary); color:#fff; border:none;
+    padding:0 0.75rem; border-radius:var(--radius); cursor:pointer;
+  }
+  #sessionList ul { list-style:none; }
+  #sessionList li {
+    padding:0.5rem; border-radius:var(--radius);
+    margin-bottom:0.5rem; cursor:pointer;
+    transition: background var(--transition);
+  }
+  #sessionList li.unread {
+    background: var(--primary-light);
+  }
+  #sessionList li:hover {
+    background: var(--primary-light);
+  }
+  #sessionList li strong { display:block; font-weight:600; }
+  #sessionList li .snippet {
+    font-size:0.85rem; color: var(--muted);
+  }
+  #sessionList li time {
+    font-size:0.75rem; color: var(--muted);
+    float:right;
+  }
+  #newSession {
+    width:100%; padding:0.75rem;
+    background: var(--secondary); color:#fff;
+    border:none; border-radius:var(--radius);
+    font-weight:600; cursor:pointer;
+    transition: background var(--transition);
+  }
+  #newSession:hover { background: darken(var(--secondary),10%); }
+
+  /* 4. Main Chat Area */
+  main#chatArea {
+    flex:1; margin-top:64px; margin-left:280px;
+    display:flex; flex-direction:column; justify-content:stretch;
+    background: var(--bg); padding:1rem; position:relative;
+  }
+  #chatLog {
+    flex:1; overflow-y:auto; padding-right:1rem;
+  }
+  .date-separator {
+    text-align:center; margin:1rem 0;
+    font-size:0.85rem; color: var(--muted);
+  }
+  .message {
+    display:flex; align-items:flex-end; margin-bottom:0.75rem;
+    max-width:80%;
+  }
+  .therapist-msg {
+    flex-direction:row;
+  }
+  .user-msg {
+    flex-direction:row-reverse; margin-left:auto;
+  }
+  .avatar-small {
+    width:32px; height:32px; border-radius:50%;
+    margin:0 0.5rem;
+  }
+  .bubble {
+    background: var(--surface); padding:0.75rem;
+    border-radius:var(--radius); position:relative;
+    box-shadow:0 2px 6px rgba(0,0,0,0.05);
+  }
+  .user-msg .bubble {
+    background: var(--primary); color:#fff;
+  }
+  .bubble p {
+    margin-bottom:0.25rem; line-height:1.4;
+  }
+  .bubble time {
+    font-size:0.7rem; position:absolute; bottom:-1.2rem; right:0.5rem;
+    color: var(--muted);
+  }
+
+  /* Typing Indicator */
+  #typingIndicator {
+    display:flex; align-items:center; gap:0.5rem;
+    margin-bottom:1rem; font-size:0.85rem; color: var(--muted);
+  }
+  #typingIndicator .dots {
+    animation: blink 1s infinite;
+  }
+  @keyframes blink {
+    0%,100% { opacity:0; }
+    50% { opacity:1; }
+  }
+
+  /* 5. Chat Controls & Quick Replies */
+  #chatControls {
+    display:flex; gap:0.5rem; margin-bottom:0.5rem;
+  }
+  #chatControls button {
+    background: var(--surface); border:1px solid var(--muted);
+    border-radius:50%; width:36px; height:36px; cursor:pointer;
+    transition: background var(--transition), color var(--transition);
+  }
+  #chatControls button:hover {
+    background: var(--primary); color:#fff;
+  }
+  #quickReplies {
+    display:flex; gap:0.5rem; margin-bottom:0.5rem;
+  }
+  .quick-reply {
+    background: var(--primary-light); border:none;
+    padding:0.5rem 1rem; border-radius:var(--radius);
+    cursor:pointer; transition: background var(--transition);
+  }
+  .quick-reply:hover { background: var(--primary); color:#fff; }
+
+  /* 5. Input Area */
+  #chatInputForm {
+    display:flex; align-items:center; gap:0.5rem;
+  }
+  #chatInputForm input {
+    flex:1; padding:0.75rem;
+    border:1px solid var(--muted); border-radius:var(--radius);
+    font-size:1rem;
+  }
+  #chatInputForm button {
+    background: var(--primary); border:none; color:#fff;
+    width:36px; height:36px; border-radius:50%;
+    display:flex; align-items:center; justify-content:center;
+    cursor:pointer; transition: background var(--transition);
+  }
+  #chatInputForm button:hover { background: var(--secondary); }
+
+  /* 6. Modal / Overlay */
+  .modal {
+    position: fixed; top:0; left:0; width:100%; height:100%;
+    background: rgba(0,0,0,0.4); display:flex;
+    align-items:center; justify-content:center; padding:1rem;
+    z-index:2000;
+  }
+  .modal-content {
+    background: var(--surface); border-radius:var(--radius);
+    width:100%; max-width:500px; padding:1.5rem;
+    box-shadow:0 4px 16px rgba(0,0,0,0.1);
+  }
+  .close-modal {
+    background:none; border:none; font-size:1.2rem;
+    float:right; cursor:pointer; color: var(--muted);
+  }
+  .close-modal:hover { color: var(--primary); }
+  #worksheetForm label {
+    display:block; margin-bottom:1rem;
+    font-size:0.9rem; color: var(--text);
+  }
+  #worksheetForm textarea {
+    width:100%; padding:0.5rem; border:1px solid var(--muted);
+    border-radius:var(--radius); resize:vertical;
+  }
+  #worksheetForm input[type="range"] {
+    width:100%;
+  }
+  #worksheetForm button {
+    background: var(--secondary); color:#fff; border:none;
+    padding:0.75rem 1rem; border-radius:var(--radius);
+    cursor:pointer; transition: background var(--transition);
+  }
+  #worksheetForm button:hover { background: darken(var(--secondary),10%); }
+
+  /* 8. Rich Content */
+  #guidedAudio {
+    margin-top:1rem; width:100%;
+  }
+  #moodWheel {
+    display:block; margin:1rem auto; border-radius:50%;
+    box-shadow:0 2px 8px rgba(0,0,0,0.1);
+  }
+
+  /* 9. Session Summary */
+  #sessionSummary {
+    position: absolute; bottom:80px; right:1rem;
+    background: var(--surface); padding:1rem; border-radius:var(--radius);
+    box-shadow:0 4px 16px rgba(0,0,0,0.1); width:250px;
+  }
+  #sessionSummary h2 {
+    margin-bottom:0.5rem; color: var(--primary);
+  }
+  #sessionSummary ul { list-style:disc; padding-left:1.25rem; }
+  #sessionSummary button {
+    margin-top:0.5rem; background: var(--primary);
+    color:#fff; border:none; padding:0.5rem; border-radius:var(--radius);
+    width:100%; cursor:pointer;
+  }
+  #sessionSummary button:hover { background: var(--secondary); }
+
+  /* 10. Notifications / Reminders */
+  #reminderBanner {
+    position:fixed; top:64px; right:1rem;
+    background: var(--primary-light); padding:0.75rem 1rem;
+    border-radius:var(--radius); box-shadow:0 2px 8px rgba(0,0,0,0.1);
+    display:flex; align-items:center; gap:1rem;
+  }
+  #reminderBanner button {
+    background: var(--primary); border:none; color:#fff;
+    padding:0.5rem 1rem; border-radius:var(--radius);
+    cursor:pointer;
+  }
+
+  /* 12. Consent Banner */
+  #consentBanner {
+    position:fixed; bottom:0; left:0; width:100%;
+    background: var(--surface); padding:1rem;
+    box-shadow:0 -2px 8px rgba(0,0,0,0.1);
+    display:flex; flex-wrap:wrap; align-items:center; gap:1rem;
+    font-size:0.9rem;
+  }
+  #consentBanner p { flex:1 1 60%; }
+  #consentBanner label {
+    display:flex; align-items:center; gap:0.5rem;
+  }
+  #consentBanner button {
+    background: var(--secondary); color:#fff; border:none;
+    padding:0.75rem 1rem; border-radius:var(--radius);
+    cursor:pointer;
+  }
+
+  /* 11. Offline Toast */
+  .toast {
+    position:fixed; bottom:80px; left:50%;
+    transform:translateX(-50%);
+    background: var(--primary); color:#fff;
+    padding:0.5rem 1rem; border-radius:var(--radius);
+    box-shadow:0 2px 8px rgba(0,0,0,0.1);
+  }
+
+  /* 13. Data Controls Footer */
+  footer#dataControls {
+    position:fixed; bottom:0; right:1rem;
+    display:flex; gap:0.5rem; padding:0.5rem;
+  }
+  footer#dataControls button {
+    background: var(--surface); border:1px solid var(--muted);
+    padding:0.5rem; border-radius:var(--radius); cursor:pointer;
+    transition: background var(--transition), color var(--transition);
+  }
+  footer#dataControls button:hover {
+    background: var(--primary); color:#fff;
+  }
+
+  /* Responsive */
+  @media(max-width:1024px) {
+    aside#sessionList { display:none; }
+    main#chatArea { margin-left:0; }
+  }
+  @media(max-width:480px) {
+    header#therapyHeader { flex-direction:column; align-items:flex-start; height:auto; padding:0.5rem; }
+    .session-meta { display:none; }
+    #chatInputForm { flex-direction:column; }
+    #chatInputForm input { width:100%; }
+  }
+</style>
+
+</head>
+
+
+   <body>
+  <!-- 1. Goals & Overview (hidden metadata or data-attributes for JS) -->
+  <div id="fullTherapy" data-goals="transform,chatgpt-whatsapp,empathic">
+    
+    <!-- 2. Header -->
+    <header id="therapyHeader" role="banner">
+      <button id="collapseBtn" aria-label="Back to dashboard">← Dashboard</button>
+      <div class="therapist-info">
+        <img src="avatar-therapist.jpg" alt="Dr. Amina Mensah avatar" class="avatar">
+        <h1>Dr. Amina Mensah, Clinical Psychologist</h1>
+      </div>
+      <div class="session-meta">
+        <span id="sessionNumber">Session #<span>3</span></span>
+        <span id="sessionTimer">00:00:00</span>
+      </div>
+    </header>
+    
+    <!-- 2. Sidebar / Home (ChatGPT-style) -->
+    <aside id="sessionList" role="navigation" aria-label="Previous sessions">
+      <div class="session-search">
+        <input type="search" id="searchSessions" placeholder="Search sessions…" aria-label="Search sessions">
+        <button id="filterBtn" aria-label="Filter by date/topic">⚙️</button>
+      </div>
+      <ul>
+        <li data-session="1" class="unread">
+          <strong>Anxiety check-in</strong>
+          <span class="snippet">“…and then I felt my heart racing…”</span>
+          <time datetime="2025-07-01">Jul 1</time>
+        </li>
+        <li data-session="2">
+          <strong>Sleep issues</strong>
+          <span class="snippet">“…couldn’t fall asleep until 3 AM…”</span>
+          <time datetime="2025-07-03">Jul 3</time>
+        </li>
+      </ul>
+      <button id="newSession">+ New Session</button>
+    </aside>
+    
+    <!-- 4. Main Chat Area -->
+    <main id="chatArea" role="main">
+      <div id="chatLog" role="log" aria-live="polite">
+        <!-- Date separator -->
+        <div class="date-separator">Today</div>
+        
+        <!-- Therapist bubble -->
+        <div class="message therapist-msg" data-status="read">
+          <img src="avatar-therapist.jpg" alt="" class="avatar-small">
+          <div class="bubble">
+            <p>Hi there! How have you been since our last session?</p>
+            <time datetime="2025-07-05T19:00">7:00 PM</time>
+          </div>
+        </div>
+        
+        <!-- User bubble -->
+        <div class="message user-msg" data-status="✓✓">
+          <div class="bubble">
+            <p>I’ve been feeling more anxious at work.</p>
+            <time datetime="2025-07-05T19:02">7:02 PM</time>
+          </div>
+        </div>
+        
+        <!-- Typing indicator -->
+        <div id="typingIndicator" class="typing">
+          <span>Dr. Mensah is typing</span><span class="dots">…</span>
+        </div>
+      </div>
+      
+      <!-- 5. Conversation controls (ChatGPT-style) -->
+      <div id="chatControls">
+        <button id="regenerateReply" title="Regenerate reply">⟳</button>
+        <button id="editLast" title="Edit last message">✎</button>
+      </div>
+      
+      <!-- 5. Quick-reply suggestions -->
+      <div id="quickReplies" role="region" aria-label="Suggested replies">
+        <button class="quick-reply">Tell me more about that.</button>
+        <button class="quick-reply">Show me a breathing exercise.</button>
+      </div>
+      
+      <!-- 5. Input Area -->
+      <form id="chatInputForm" autocomplete="off">
+        <button id="attachBtn" type="button" aria-label="Attach file">📎</button>
+        <input type="text" id="chatInput" placeholder="Type your message…" aria-label="Chat input">
+        <button id="micBtn" type="button" aria-label="Speak">🎤</button>
+        <button id="sendBtn" type="submit" aria-label="Send message">➤</button>
+      </form>
+    </main>
+    
+    <!-- 6. Modal/Overlay for Journaling & Worksheets -->
+    <div id="worksheetModal" class="modal" role="dialog" aria-modal="true" hidden>
+      <div class="modal-content">
+        <button class="close-modal" aria-label="Close">×</button>
+        <h2>CBT Thought Record</h2>
+        <form id="worksheetForm">
+          <label>
+            Situation:
+            <textarea name="situation" required></textarea>
+          </label>
+          <label>
+            Thoughts:
+            <textarea name="thoughts" required></textarea>
+          </label>
+          <label>
+            Emotions (rate 1–10):
+            <input type="range" name="emotionRating" min="1" max="10" value="5">
+          </label>
+          <button type="submit">Save Worksheet</button>
+        </form>
+      </div>
+    </div>
+    
+    <!-- 8. Rich Content Rendering Placeholders -->
+    <audio id="guidedAudio" controls hidden>
+      <source src="breathing-exercise.mp3" type="audio/mpeg">
+      Your browser does not support the audio element.
+    </audio>
+    <canvas id="moodWheel" width="300" height="300" hidden></canvas>
+    
+    <!-- 9. Session Summary & Controls -->
+    <section id="sessionSummary" hidden>
+      <h2>Session Summary</h2>
+      <ul>
+        <li>Key insight: Identified negative thought patterns</li>
+        <li>Homework: Practice 5-minute breathing daily</li>
+      </ul>
+      <button id="exportSummary">Download Summary</button>
+    </section>
+    
+    <!-- 10. Notifications & Reminders -->
+    <aside id="reminderBanner" role="region" aria-live="assertive" hidden>
+      It’s been 3 days since your last session. <button id="checkInNow">Check in now</button>
+    </aside>
+    
+    <!-- 12. Privacy & Security -->
+    <div id="consentBanner" class="banner" role="alertdialog" hidden>
+      <p>This chat is confidential but not a substitute for emergency care. By continuing, you consent to anonymized data use.</p>
+      <label><input type="checkbox" id="consentCheckbox"> I agree</label>
+      <button id="startChat" disabled>Start Chat</button>
+    </div>
+    
+    <!-- 11. Offline Drafts Indicator -->
+    <div id="offlineToast" class="toast" hidden>
+      You’re offline. Messages will send when you reconnect.
+    </div>
+    
+    <!-- 13. Data Controls -->
+    <footer id="dataControls">
+      <button id="clearHistory">Clear History</button>
+      <button id="exportTranscript">Export Transcript</button>
+    </footer>
+    
+  </div>
+
+     <script>
+(() => {
+  // --- 1. Goals & Overview (read-only metadata) ---
+  const fullTherapy = document.getElementById('fullTherapy');
+  console.log('Therapy goals:', fullTherapy.dataset.goals.split(','));
+
+  // --- 2. Header & Collapse Button ---
+  const collapseBtn = document.getElementById('collapseBtn');
+  collapseBtn.addEventListener('click', () => {
+    window.location.href = 'dashboard.html';
+  });
+
+  // Session timer
+  let timerInterval, startTime = Date.now();
+  const sessionTimer = document.getElementById('sessionTimer');
+  function updateTimer() {
+    const diff = Date.now() - startTime;
+    const h = String(Math.floor(diff / 3600000)).padStart(2,'0');
+    const m = String(Math.floor((diff % 3600000) / 60000)).padStart(2,'0');
+    const s = String(Math.floor((diff % 60000) / 1000)).padStart(2,'0');
+    sessionTimer.textContent = `${h}:${m}:${s}`;
+  }
+  timerInterval = setInterval(updateTimer, 1000);
+
+  // --- 2. Sidebar / Session List Navigation ---
+  document.querySelectorAll('#sessionList li').forEach(li => {
+    li.addEventListener('click', () => {
+      document.querySelectorAll('#sessionList li.unread').forEach(u => u.classList.remove('unread'));
+      li.classList.remove('unread');
+      // Load session logic placeholder
+      alert(`Loading Session ${li.dataset.session}`);
+    });
+  });
+  document.getElementById('newSession').addEventListener('click', () => {
+    // Reset chat
+    chatLog.innerHTML = '';
+    chatHistory = [];
+    saveHistory();
+    alert('New session started.');
+  });
+
+  // --- 12. Consent Banner ---
+  const consentBanner = document.getElementById('consentBanner');
+  const consentCheckbox = document.getElementById('consentCheckbox');
+  const startChat = document.getElementById('startChat');
+  consentBanner.hidden = false;
+  consentCheckbox.addEventListener('change', () => {
+    startChat.disabled = !consentCheckbox.checked;
+  });
+  startChat.addEventListener('click', () => {
+    consentBanner.hidden = true;
+  });
+
+  // --- 4,5,6: Chat Logic, Bubbles & Controls ---
+  const chatLog = document.getElementById('chatLog');
+  const chatInputForm = document.getElementById('chatInputForm');
+  const chatInput = document.getElementById('chatInput');
+  const sendBtn = document.getElementById('sendBtn');
+  const micBtn = document.getElementById('micBtn');
+  let chatHistory = JSON.parse(localStorage.getItem('chatHistory') || '[]');
+  let lastUserMessage = '';
+
+  // Render existing history
+  function renderHistory() {
+    chatLog.innerHTML = '';
+    chatHistory.forEach(msg => appendMessage(msg.who, msg.text, msg.time, msg.status));
+  }
+  renderHistory();
+
+  // Append message bubble
+  function appendMessage(who, text, time = new Date().toISOString(), status = '') {
+    const wrapper = document.createElement('div');
+    wrapper.classList.add('message', who === 'user' ? 'user-msg' : 'therapist-msg');
+    if (status) wrapper.dataset.status = status;
+    wrapper.innerHTML = `
+      ${who === 'therapist' ? `<img src="avatar-therapist.jpg" alt="" class="avatar-small">` : ''}
+      <div class="bubble"><p>${text}</p><time datetime="${time}">${new Date(time).toLocaleTimeString()}</time></div>
+    `;
+    chatLog.append(wrapper);
+    chatLog.scrollTop = chatLog.scrollHeight;
+  }
+
+  // Save & load
+  function saveHistory() {
+    localStorage.setItem('chatHistory', JSON.stringify(chatHistory));
+  }
+
+  // High-risk detection
+  function isHighRisk(text) {
+    return /suicidal|harm myself|kill myself/.test(text.toLowerCase());
+  }
+
+  // Call OpenAI proxy
+  async function callAI(messages) {
+    const resp = await fetch('/.netlify/functions/openai-proxy', {
+      method: 'POST',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({ messages })
+    });
+    const data = await resp.json();
+    return data.choices[0].message.content.trim();
+  }
+
+  // Send user message
+  chatInputForm.addEventListener('submit', async e => {
+    e.preventDefault();
+    const text = chatInput.value.trim();
+    if (!text) return;
+    const time = new Date().toISOString();
+    appendMessage('user', text, time, '✓');
+    chatHistory.push({ who: 'user', text, time, status: '✓' });
+    saveHistory();
+    chatInput.value = '';
+    lastUserMessage = text;
+
+    // High-risk
+    if (isHighRisk(text)) {
+      appendMessage('therapist',
+        "I’m so sorry you’re feeling like this. You don't have to face this alone. If you think you might act on these thoughts, please reach out to emergency services right now.",
+        new Date().toISOString(), '✓✓'
+      );
+      return;
+    }
+
+    // Typing indicator
+    const typing = document.getElementById('typingIndicator');
+    typing.hidden = false;
+
+    // Build prompt
+    const systemPrompt = "You are a licensed clinical psychologist. Speak in a warm, empathic tone, use evidence-based CBT/DBT/mindfulness methods, and always check in with the user after an intervention.";
+    const messages = [{role:'system', content:systemPrompt}];
+    chatHistory.forEach(m => messages.push({role: m.who==='user'?'user':'assistant', content: m.text}));
+    messages.push({role:'user', content: text});
+
+    try {
+      const reply = await callAI(messages);
+      typing.hidden = true;
+      const replyTime = new Date().toISOString();
+      appendMessage('therapist', reply, replyTime, '✓✓');
+      chatHistory.push({ who: 'therapist', text: reply, time: replyTime, status: '✓✓' });
+      saveHistory();
+      speak(reply);
+    } catch (err) {
+      typing.hidden = true;
+      appendMessage('therapist', "⚠️ Something went wrong. Please try again.", new Date().toISOString(), '✓✓');
+    }
+  });
+
+  // --- 3. Speech Recognition ---
+  if ('SpeechRecognition' in window || 'webkitSpeechRecognition' in window) {
+    const Recognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    const recog = new Recognition();
+    recog.lang = 'en-US';
+    recog.interimResults = false;
+    micBtn.addEventListener('click', () => recog.start());
+    recog.onresult = e => {
+      chatInput.value = e.results[0][0].transcript;
+    };
+  }
+
+  // --- 3. Text-to-Speech (female voice) ---
+  function speak(text) {
+    if (!('speechSynthesis' in window)) return;
+    const utter = new SpeechSynthesisUtterance(text);
+    const voices = speechSynthesis.getVoices();
+    const female = voices.find(v => /female|woman|zira|samantha/i.test(v.name)) || voices[0];
+    utter.voice = female;
+    utter.rate = 1;
+    speechSynthesis.speak(utter);
+  }
+
+  // --- 5. Regenerate & Edit ---
+  document.getElementById('regenerateReply').addEventListener('click', () => {
+    if (lastUserMessage) {
+      chatInput.value = lastUserMessage;
+      chatInputForm.dispatchEvent(new Event('submit'));
+    }
+  });
+  document.getElementById('editLast').addEventListener('click', () => {
+    if (chatHistory.length && chatHistory[chatHistory.length-1].who==='user') {
+      chatInput.value = chatHistory.pop().text;
+      saveHistory();
+      renderHistory();
+    }
+  });
+
+  // --- 5. Quick Replies ---
+  document.querySelectorAll('.quick-reply').forEach(btn => {
+    btn.addEventListener('click', () => {
+      chatInput.value = btn.textContent;
+      chatInputForm.dispatchEvent(new Event('submit'));
+    });
+  });
+
+  // --- 6. Worksheet Modal ---
+  const worksheetModal = document.getElementById('worksheetModal');
+  const attachBtn = document.getElementById('attachBtn');
+  attachBtn.addEventListener('click', () => worksheetModal.hidden = false);
+  worksheetModal.querySelector('.close-modal').addEventListener('click', () => worksheetModal.hidden = true);
+  worksheetModal.querySelector('#worksheetForm').addEventListener('submit', e => {
+    e.preventDefault();
+    alert('Worksheet saved!');
+    worksheetModal.hidden = true;
+  });
+
+  // --- 8. Rich Content (audio & canvas) ---
+  // Play guided audio when user requests exercise
+  document.addEventListener('click', e => {
+    if (e.target.classList.contains('quick-reply') && e.target.textContent.includes('breathing')) {
+      const audio = document.getElementById('guidedAudio');
+      audio.hidden = false;
+      audio.play();
+    }
+  });
+  // Draw simple mood wheel
+  const wheel = document.getElementById('moodWheel');
+  const ctx = wheel.getContext('2d');
+  ['#E24A4A','#4A90E2','#F3F6FB','#6B6B6B'].forEach((col,i) => {
+    ctx.beginPath();
+    ctx.moveTo(150,150);
+    ctx.arc(150,150,140,i*Math.PI/2,(i+1)*Math.PI/2);
+    ctx.closePath();
+    ctx.fillStyle = col;
+    ctx.fill();
+  });
+
+  // --- 9. Session Summary & Export ---
+  const sessionSummary = document.getElementById('sessionSummary');
+  document.getElementById('exportSummary').addEventListener('click', () => {
+    const blob = new Blob([sessionSummary.textContent], {type:'text/plain'});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url; a.download = 'session-summary.txt';
+    a.click();
+    URL.revokeObjectURL(url);
+  });
+  // Show summary at end
+  document.getElementById('newSession').addEventListener('click', () => {
+    sessionSummary.hidden = false;
+  });
+
+  // --- 10. Notifications & Reminders ---
+  const reminderBanner = document.getElementById('reminderBanner');
+  setTimeout(() => { reminderBanner.hidden = false; }, 3000);
+  document.getElementById('checkInNow').addEventListener('click', () => {
+    reminderBanner.hidden = true;
+    chatInput.value = 'I’d like to check in now.';
+    chatInputForm.dispatchEvent(new Event('submit'));
+  });
+
+  // --- 11. Offline Drafts & Sync ---
+  const offlineToast = document.getElementById('offlineToast');
+  window.addEventListener('offline', () => offlineToast.hidden = false);
+  window.addEventListener('online', () => {
+    offlineToast.hidden = true;
+    if (chatHistory.length) {
+      saveHistory();
+      renderHistory();
+    }
+  });
+
+  // --- 12. Privacy & Data Control ---
+  document.getElementById('clearHistory').addEventListener('click', () => {
+    if (confirm('Clear all chat history?')) {
+      chatHistory = [];
+      saveHistory();
+      renderHistory();
+    }
+  });
+  document.getElementById('exportTranscript').addEventListener('click', () => {
+    const text = chatHistory.map(m => `${m.who}: ${m.text}`).join('\n');
+    const blob = new Blob([text], {type:'text/plain'});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url; a.download = 'transcript.txt';
+    a.click();
+    URL.revokeObjectURL(url);
+  });
+
+})();
+</script>
+
+</body>
+</html>
