@@ -30,13 +30,14 @@
     }
     * { margin:0; padding:0; box-sizing:border-box; }
     body {
-      font-family: var(--font-base);
-      background: var(--bg);
-      color: var(--text);
-      display: flex;
-      min-height: 100vh;
-      overflow: hidden;
-    }
+  font-family: var(--font-base);
+  background: var(--bg);
+  color: var(--text);
+  display: flex;
+  min-height: 100vh;
+  overflow: auto;
+}
+
     h1, h2 { font-weight:600; color:var(--primary); }
 
     /*==================================
@@ -248,6 +249,53 @@
       #chatInputForm { flex-direction:column; }
       #chatInputForm input { width:100%; }
     }
+
+    .bubble-actions {
+  margin-top: 0.5rem;
+  display: flex;
+  justify-content: flex-start;
+}
+.toast {
+  position: fixed;
+  bottom: 1rem;
+  left: 50%;
+  transform: translateX(-50%);
+  background: #4A90E2;
+  color: white;
+  padding: 0.75rem 1.25rem;
+  border-radius: var(--radius);
+  box-shadow: 0 2px 10px rgba(0,0,0,0.15);
+  z-index: 9999;
+  animation: fadeout 2s forwards;
+}
+@keyframes fadeout {
+  0% { opacity: 1; }
+  80% { opacity: 1; }
+  100% { opacity: 0; }
+}
+
+@media(max-width:1024px) {
+  #menuToggle { display: inline-flex; background:none; border:none; 
+    color:var(--primary); font-size:1.25rem; cursor:pointer; }
+}
+aside#sessionList.open { display: block; }
+
+    @media(max-width:600px) {
+  header#therapyHeader { flex-wrap:wrap; height:auto; padding:.5rem; }
+  #chatInputForm {
+    flex-direction: row !important;
+    flex-wrap: nowrap;
+    align-items: center;
+  }
+  #chatInputForm input {
+    flex:1;
+    margin: 0 .5rem 0 0;
+  }
+  #chatInputForm button {
+    margin: 0;
+  }
+}
+
   </style>
 </head>
 
@@ -255,6 +303,9 @@
   <!-- 1. Header -->
   <header id="therapyHeader">
     <button id="collapseBtn" title="Back to dashboard"><i class="fas fa-arrow-left"></i></button>
+    <button id="menuToggle" title="Show sessions" style="display:none">
+  <i class="fas fa-bars"></i>
+</button>
     <div class="therapist-info">
       <img src="https://i.pravatar.cc/100?img=32" alt="Therapist avatar" class="avatar">
       <h1>Dr. Amina Mensah</h1>
@@ -337,13 +388,35 @@
         const li = document.createElement('li');
         li.dataset.id = id;
         if (id===currentId) li.classList.add('active');
-        li.innerHTML = `<strong>${s.title}</strong>
-                        <span class="snippet">${(s.history.slice(-1)[0]?.text||'').slice(0,30)}</span>
-                        <time>${new Date(+id).toLocaleDateString()}</time>`;
+       li.innerHTML = `
+  <div class="session-title" contenteditable="true">${s.title}</div>
+  <span class="snippet">…</span>
+  <time>…</time>`;
+const titleDiv = li.querySelector('.session-title');
+titleDiv.addEventListener('blur', ()=>{
+  sessions[id].title = titleDiv.textContent.trim() || s.title;
+  saveSessions();
+  loadSessionList();
+});
         li.addEventListener('click', ()=>switchSession(id));
         sessionListEl.append(li);
       });
     }
+
+    const menuToggle = document.getElementById('menuToggle');
+menuToggle.addEventListener('click', ()=>{
+  document.getElementById('sessionList')
+    .classList.toggle('open');
+});
+
+    function formatText(text) {
+  text = text
+    .replace(/[#*_`>~-]+/g, '')      
+    .replace(/\n\s*\n/g, '</p><p>')  
+    .replace(/\n/g, '<br>');         
+  return `<p>${text}</p>`;
+}
+
     function appendMessage(who, text, time=new Date().toISOString(), status='') {
       // remove spinner if present
       const sp = chatLog.querySelector('.spinner');
@@ -355,9 +428,11 @@
       div.innerHTML = `
         ${who==='therapist'?'<img src="https://i.pravatar.cc/50?img=32" class="avatar-small">':''}
         <div class="bubble">
-          <p>${text}</p>
-          <button class="copy-btn" title="Copy"><i class="fas fa-copy"></i></button>
-          <time>${new Date(time).toLocaleTimeString()}</time>
+         <p>${formatText(text)}</p>
+<div class="bubble-actions">
+  <button class="copy-btn" title="Copy"><i class="fas fa-copy"></i> Copy</button>
+</div>
+<time>${new Date(time).toLocaleTimeString()}</time>
         </div>
         ${who==='therapist'?'<button class="speak-btn" title="Play"><i class="fas fa-volume-up"></i></button>':''}
       `;
@@ -367,18 +442,38 @@
       // copy
       div.querySelector('.copy-btn').addEventListener('click', ()=>
         navigator.clipboard.writeText(text)
+        showToast('Copied to clipboard');
       );
       // speak
       if (who==='therapist') {
         const btn = div.querySelector('.speak-btn');
-        btn.addEventListener('click', ()=>{
-          speechSynthesis.cancel();
-          const u = new SpeechSynthesisUtterance(text);
-          u.voice = speechSynthesis.getVoices().find(v=>/female/i.test(v.name))||speechSynthesis.getVoices()[0];
-          speechSynthesis.speak(u);
-        });
+       let isSpeaking = false;
+let utterance = null;
+
+btn.addEventListener('click', () => {
+  if (isSpeaking) {
+    speechSynthesis.cancel();
+    isSpeaking = false;
+    return;
+  }
+  utterance = new SpeechSynthesisUtterance(text);
+  utterance.voice = speechSynthesis.getVoices().find(v => /female/i.test(v.name)) || speechSynthesis.getVoices()[0];
+  utterance.rate = 0.9;
+  isSpeaking = true;
+  utterance.onend = () => isSpeaking = false;
+  speechSynthesis.speak(utterance);
+});
       }
     }
+
+    function showToast(message) {
+  const t = document.createElement('div');
+  t.className = 'toast';
+  t.textContent = message;
+  document.body.appendChild(t);
+  setTimeout(() => t.remove(), 2000);
+}
+
     function renderHistory() {
       chatLog.innerHTML = '';
       chatHistory.forEach(m=>appendMessage(m.who,m.text,m.time,m.status));
@@ -461,6 +556,18 @@
         return;
       }
 
+      if (chatHistory.length === 2 && sessions[currentId].title.startsWith('Session ')) {
+  // ask AI to summarize title
+  callAI([
+    {role:'system', content:'Give me a 3‑word session title summarizing the conversation so far.'},
+    {role:'user', content: chatHistory.map(m=>m.text).join('\n')}
+  ]).then(newTitle => {
+    sessions[currentId].title = newTitle;
+    saveSessions();
+    loadSessionList();
+  });
+}
+
       showSpinner();
       const system = "You are a licensed clinical psychologist. Speak in a warm, empathic tone, ...";
       const msgs = [{role:'system',content:system}, 
@@ -478,17 +585,30 @@
       }
     });
 
-    //—— Mic live transcript ——//
-    if ('SpeechRecognition' in window || 'webkitSpeechRecognition' in window) {
-      const Rec = window.SpeechRecognition||window.webkitSpeechRecognition;
-      const rec = new Rec();
-      rec.lang = 'en-US'; rec.interimResults = true;
-      rec.onresult = e => {
-        const txt = Array.from(e.results).map(r=>r[0].transcript).join('');
-        chatInput.value = txt;
-      };
-      micBtn.addEventListener('click', ()=> rec.start());
-    }
+   let isListening = false;
+const rec = new (window.SpeechRecognition||window.webkitSpeechRecognition)();
+rec.lang = 'en-US';
+rec.interimResults = true;
+rec.onresult = e => {
+  chatInput.value = Array.from(e.results)
+    .map(r=>r[0].transcript).join('');
+};
+rec.onend = () => {
+  if (isListening) rec.start(); // keep going until user stops
+};
+
+micBtn.addEventListener('click', ()=>{
+  isListening = !isListening;
+  micBtn.innerHTML = isListening
+    ? '<i class="fas fa-microphone-slash"></i>'
+    : '<i class="fas fa-microphone"></i>';
+  if (isListening) {
+    rec.start();
+  } else {
+    rec.stop();
+  }
+});
+
 
     //—— Quick replies ——//
     quickBtns.forEach(b=>b.addEventListener('click',()=>{
