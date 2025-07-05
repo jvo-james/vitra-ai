@@ -485,53 +485,52 @@
     
   </div>
 
-    <script>
+  <script>
 document.addEventListener('DOMContentLoaded', () => {
+  // --- Helpers ---
+  const $$ = s => Array.from(document.querySelectorAll(s));
+  const $  = s => document.querySelector(s);
+  const log = (...args) => console.log('[TherapyBot]', ...args);
 
-  // --- 1. Goals & Overview (read-only metadata) ---
-  const fullTherapy = document.getElementById('fullTherapy');
-  console.log('Therapy goals:', fullTherapy.dataset.goals.split(','));
+  // --- Section 1: Goals & Metadata ---
+  const fullTherapy = $('#fullTherapy');
+  log('Goals:', fullTherapy.dataset.goals);
 
-  // --- 2. Header & Collapse Button ---
-  const collapseBtn = document.getElementById('collapseBtn');
-  collapseBtn.addEventListener('click', () => {
+  // --- Section 2: Header & Collapse ---
+  $('#collapseBtn').addEventListener('click', () => {
     window.location.href = 'dashboard.html';
   });
 
-  // Session timer
-  let timerInterval, startTime = Date.now();
-  const sessionTimer = document.getElementById('sessionTimer');
-  function updateTimer() {
-    const diff = Date.now() - startTime;
-    const h = String(Math.floor(diff / 3600000)).padStart(2,'0');
-    const m = String(Math.floor((diff % 3600000) / 60000)).padStart(2,'0');
-    const s = String(Math.floor((diff % 60000) / 1000)).padStart(2,'0');
+  // Timer
+  const sessionTimer = $('#sessionTimer');
+  let start = Date.now();
+  setInterval(() => {
+    const d = Date.now() - start;
+    const h = String(Math.floor(d/3600000)).padStart(2,'0'),
+          m = String(Math.floor(d%3600000/60000)).padStart(2,'0'),
+          s = String(Math.floor(d%60000/1000)).padStart(2,'0');
     sessionTimer.textContent = `${h}:${m}:${s}`;
-  }
-  timerInterval = setInterval(updateTimer, 1000);
+  }, 1000);
 
-  // --- 2. Sidebar / Session List Navigation ---
-  document.querySelectorAll('#sessionList li').forEach(li => {
-    li.addEventListener('click', () => {
-      document.querySelectorAll('#sessionList li.unread').forEach(u => u.classList.remove('unread'));
-      li.classList.remove('unread');
-      // Load session logic placeholder
-      alert(`Loading Session ${li.dataset.session}`);
-    });
-  });
-  document.getElementById('newSession').addEventListener('click', () => {
-    // Reset chat
-    chatLog.innerHTML = '';
+  // --- Section 2: Sessions List ---
+  $$('#sessionList li').forEach(li => li.addEventListener('click', () => {
+    $$('#sessionList li.unread').forEach(u => u.classList.remove('unread'));
+    li.classList.remove('unread');
+    log('Load session', li.dataset.session);
+    alert(`Loading session ${li.dataset.session}`);
+  }));
+  $('#newSession').addEventListener('click', () => {
     chatHistory = [];
     saveHistory();
-    alert('New session started.');
+    renderHistory();
+    alert('New session!');
   });
 
-  // --- 12. Consent Banner ---
-  const consentBanner = document.getElementById('consentBanner');
-  const consentCheckbox = document.getElementById('consentCheckbox');
-  const startChat = document.getElementById('startChat');
- consentBanner.hidden = true;
+  // --- Section 12: Consent Banner ---
+  const consentBanner = $('#consentBanner');
+  const consentCheckbox = $('#consentCheckbox');
+  const startChat = $('#startChat');
+  consentBanner.hidden = true;  // start hidden
   consentCheckbox.addEventListener('change', () => {
     startChat.disabled = !consentCheckbox.checked;
   });
@@ -539,235 +538,175 @@ document.addEventListener('DOMContentLoaded', () => {
     consentBanner.hidden = true;
   });
 
-  // --- 4,5,6: Chat Logic, Bubbles & Controls ---
-  const chatLog = document.getElementById('chatLog');
-  const chatInputForm = document.getElementById('chatInputForm');
-  const chatInput = document.getElementById('chatInput');
-  const sendBtn = document.getElementById('sendBtn');
-  const micBtn = document.getElementById('micBtn');
-  let chatHistory = JSON.parse(localStorage.getItem('chatHistory') || '[]');
-  let lastUserMessage = '';
+  // --- Section 4/5/6: Chat Setup ---
+  const chatLog = $('#chatLog'),
+        chatForm = $('#chatInputForm'),
+        chatInput = $('#chatInput'),
+        micBtn    = $('#micBtn'),
+        attachBtn = $('#attachBtn'),
+        typing    = $('#typingIndicator');
 
-  // Render existing history
-  function renderHistory() {
-    chatLog.innerHTML = '';
-    chatHistory.forEach(msg => appendMessage(msg.who, msg.text, msg.time, msg.status));
-  }
-  renderHistory();
+  let chatHistory = JSON.parse(localStorage.getItem('chatHistory') || '[]'),
+      lastUserMsg = '';
 
-  // Append message bubble
-  function appendMessage(who, text, time = new Date().toISOString(), status = '') {
-    const wrapper = document.createElement('div');
-    wrapper.classList.add('message', who === 'user' ? 'user-msg' : 'therapist-msg');
-    if (status) wrapper.dataset.status = status;
-    wrapper.innerHTML = `
-      ${who === 'therapist' ? `<img src="avatar-therapist.jpg" alt="" class="avatar-small">` : ''}
-      <div class="bubble"><p>${text}</p><time datetime="${time}">${new Date(time).toLocaleTimeString()}</time></div>
-    `;
-    chatLog.append(wrapper);
-    chatLog.scrollTop = chatLog.scrollHeight;
-  }
-
-  // Save & load
   function saveHistory() {
     localStorage.setItem('chatHistory', JSON.stringify(chatHistory));
   }
+  function appendMessage(who, text, time = new Date().toISOString(), status = '') {
+    const div = document.createElement('div');
+    div.className = `message ${who}-msg`;
+    if (status) div.dataset.status = status;
+    div.innerHTML = `
+      ${who==='therapist' ? '<img src="avatar-therapist.jpg" class="avatar-small">' : ''}
+      <div class="bubble">
+        <p>${text}</p>
+        <time>${new Date(time).toLocaleTimeString()}</time>
+      </div>`;
+    chatLog.append(div);
+    chatLog.scrollTop = chatLog.scrollHeight;
+  }
+  function renderHistory() {
+    chatLog.innerHTML = '';
+    chatHistory.forEach(m => appendMessage(m.who, m.text, m.time, m.status));
+  }
+  renderHistory();
 
-  // High-risk detection
-  function isHighRisk(text) {
-    return /suicidal|harm myself|kill myself/.test(text.toLowerCase());
+  function isHighRisk(txt) {
+    return /suicidal|kill myself|harm myself/i.test(txt);
   }
 
-  // Call OpenAI proxy
   async function callAI(messages) {
-    const resp = await fetch('/.netlify/functions/openai-proxy', {
+    const res = await fetch('/.netlify/functions/openai-proxy', {
       method: 'POST',
-      headers: {'Content-Type':'application/json'},
+      headers: { 'Content-Type':'application/json' },
       body: JSON.stringify({ messages })
     });
-    const data = await resp.json();
-    return data.choices[0].message.content.trim();
+    const { choices } = await res.json();
+    return choices[0].message.content.trim();
   }
 
-  // Send user message
-  chatInputForm.addEventListener('submit', async e => {
+  chatForm.addEventListener('submit', async e => {
     e.preventDefault();
-    const text = chatInput.value.trim();
-    if (!text) return;
-    const time = new Date().toISOString();
-    appendMessage('user', text, time, '✓');
-    chatHistory.push({ who: 'user', text, time, status: '✓' });
+    const txt = chatInput.value.trim();
+    if (!txt) return;
+    const now = new Date().toISOString();
+    appendMessage('user', txt, now, '✓');
+    chatHistory.push({ who:'user', text:txt, time:now, status:'✓' });
     saveHistory();
     chatInput.value = '';
-    lastUserMessage = text;
+    lastUserMsg = txt;
 
-    // High-risk
-    if (isHighRisk(text)) {
+    if (isHighRisk(txt)) {
       appendMessage('therapist',
-        "I’m so sorry you’re feeling like this. You don't have to face this alone. If you think you might act on these thoughts, please reach out to emergency services right now.",
-        new Date().toISOString(), '✓✓'
+        "I'm so sorry you feel this way. Please reach out to emergency services or someone you trust right now.",
+        new Date().toISOString(),'✓✓'
       );
       return;
     }
 
-    // Typing indicator
-    const typing = document.getElementById('typingIndicator');
     typing.hidden = false;
-
-    // Build prompt
-    const systemPrompt = "You are a licensed clinical psychologist. Speak in a warm, empathic tone, use evidence-based CBT/DBT/mindfulness methods, and always check in with the user after an intervention.";
-    const messages = [{role:'system', content:systemPrompt}];
-    chatHistory.forEach(m => messages.push({role: m.who==='user'?'user':'assistant', content: m.text}));
-    messages.push({role:'user', content: text});
+    const sys = "You are a licensed clinical psychologist..."; // full prompt here
+    const msgs = [{ role:'system', content:sys }, ...chatHistory.map(m=>({
+      role: m.who==='user'?'user':'assistant', content: m.text
+    })), { role:'user', content: txt }];
 
     try {
-      const reply = await callAI(messages);
+      const reply = await callAI(msgs);
       typing.hidden = true;
-      const replyTime = new Date().toISOString();
-      appendMessage('therapist', reply, replyTime, '✓✓');
-      chatHistory.push({ who: 'therapist', text: reply, time: replyTime, status: '✓✓' });
+      const rTime = new Date().toISOString();
+      appendMessage('therapist', reply, rTime, '✓✓');
+      chatHistory.push({ who:'therapist', text:reply, time:rTime, status:'✓✓' });
       saveHistory();
-      speak(reply);
-    } catch (err) {
+      // TTS
+      const utt = new SpeechSynthesisUtterance(reply);
+      utt.voice = speechSynthesis.getVoices().find(v=>/female/i.test(v.name)) || speechSynthesis.getVoices()[0];
+      speechSynthesis.speak(utt);
+    } catch {
       typing.hidden = true;
-      appendMessage('therapist', "⚠️ Something went wrong. Please try again.", new Date().toISOString(), '✓✓');
+      appendMessage('therapist', "⚠️ Something went wrong.", new Date().toISOString(),'✓✓');
     }
   });
 
-  // --- 3. Speech Recognition ---
+  // Speech Rec
   if ('SpeechRecognition' in window || 'webkitSpeechRecognition' in window) {
-    const Recognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-    const recog = new Recognition();
-    recog.lang = 'en-US';
-    recog.interimResults = false;
-    micBtn.addEventListener('click', () => recog.start());
-    recog.onresult = e => {
-      chatInput.value = e.results[0][0].transcript;
-    };
+    const Rec = window.SpeechRecognition||window.webkitSpeechRecognition;
+    const rec = new Rec();
+    rec.lang = 'en-US';
+    micBtn.addEventListener('click', ()=>rec.start());
+    rec.onresult = e => chatInput.value = e.results[0][0].transcript;
   }
 
-  // --- 3. Text-to-Speech (female voice) ---
-  function speak(text) {
-    if (!('speechSynthesis' in window)) return;
-    const utter = new SpeechSynthesisUtterance(text);
-    const voices = speechSynthesis.getVoices();
-    const female = voices.find(v => /female|woman|zira|samantha/i.test(v.name)) || voices[0];
-    utter.voice = female;
-    utter.rate = 1;
-    speechSynthesis.speak(utter);
-  }
+  // Quick replies
+  $$('.quick-reply').forEach(b=>b.addEventListener('click', ()=>{
+    chatInput.value = b.textContent;
+    chatForm.dispatchEvent(new Event('submit'));
+  }));
 
-  // --- 5. Regenerate & Edit ---
-  document.getElementById('regenerateReply').addEventListener('click', () => {
-    if (lastUserMessage) {
-      chatInput.value = lastUserMessage;
-      chatInputForm.dispatchEvent(new Event('submit'));
+  // Regenerate & edit
+  $('#regenerateReply').addEventListener('click', ()=> {
+    if (lastUserMsg) {
+      chatInput.value = lastUserMsg;
+      chatForm.dispatchEvent(new Event('submit'));
     }
   });
-  document.getElementById('editLast').addEventListener('click', () => {
-    if (chatHistory.length && chatHistory[chatHistory.length-1].who==='user') {
-      chatInput.value = chatHistory.pop().text;
+  $('#editLast').addEventListener('click', ()=> {
+    if (!chatHistory.length) return;
+    const last = chatHistory.pop();
+    if (last.who==='user') {
+      chatInput.value = last.text;
       saveHistory();
       renderHistory();
     }
   });
 
-  // --- 5. Quick Replies ---
-  document.querySelectorAll('.quick-reply').forEach(btn => {
-    btn.addEventListener('click', () => {
-      chatInput.value = btn.textContent;
-      chatInputForm.dispatchEvent(new Event('submit'));
-    });
-  });
-
-// --- 6. Worksheet Modal (always hidden at start) ---
- const worksheetModal = document.getElementById('worksheetModal');
- worksheetModal.hidden = true;
- const attachBtn = document.getElementById('attachBtn');
+  // Worksheet Modal
   worksheetModal.hidden = true;
-  attachBtn.addEventListener('click', () => worksheetModal.hidden = false);
-  worksheetModal.querySelector('.close-modal').addEventListener('click', () => worksheetModal.hidden = true);
-  worksheetModal.querySelector('#worksheetForm').addEventListener('submit', e => {
+  attachBtn.addEventListener('click', ()=> worksheetModal.hidden = false);
+  $('.close-modal').addEventListener('click', ()=> worksheetModal.hidden = true);
+  $('#worksheetForm').addEventListener('submit', e=>{
     e.preventDefault();
-    alert('Worksheet saved!');
+    alert('Saved!');
     worksheetModal.hidden = true;
   });
 
-  // --- 8. Rich Content (audio & canvas) ---
-  // Play guided audio when user requests exercise
-  document.addEventListener('click', e => {
-    if (e.target.classList.contains('quick-reply') && e.target.textContent.includes('breathing')) {
-      const audio = document.getElementById('guidedAudio');
-      audio.hidden = false;
-      audio.play();
-    }
-  });
-  // Draw simple mood wheel
-  const wheel = document.getElementById('moodWheel');
-  const ctx = wheel.getContext('2d');
-  ['#E24A4A','#4A90E2','#F3F6FB','#6B6B6B'].forEach((col,i) => {
-    ctx.beginPath();
-    ctx.moveTo(150,150);
-    ctx.arc(150,150,140,i*Math.PI/2,(i+1)*Math.PI/2);
-    ctx.closePath();
-    ctx.fillStyle = col;
-    ctx.fill();
-  });
-
-  // --- 9. Session Summary & Export ---
-  const sessionSummary = document.getElementById('sessionSummary');
-  document.getElementById('exportSummary').addEventListener('click', () => {
-    const blob = new Blob([sessionSummary.textContent], {type:'text/plain'});
+  // Session Summary
+  $('#exportSummary').addEventListener('click', ()=>{
+    const blob = new Blob([$('#sessionSummary').textContent],{type:'text/plain'});
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
-    a.href = url; a.download = 'session-summary.txt';
-    a.click();
-    URL.revokeObjectURL(url);
+    a.href=url; a.download='summary.txt'; a.click();
   });
-  // Show summary at end
-  document.getElementById('newSession').addEventListener('click', () => {
-    sessionSummary.hidden = false;
+  $('#newSession').addEventListener('click', ()=> $('#sessionSummary').hidden=false);
+
+  // Reminders
+  setTimeout(()=> $('#reminderBanner').hidden=false, 3000);
+  $('#checkInNow').addEventListener('click', ()=>{
+    $('#reminderBanner').hidden = true;
+    chatInput.value = 'Checking in now.';
+    chatForm.dispatchEvent(new Event('submit'));
   });
 
-  // --- 10. Notifications & Reminders ---
-  const reminderBanner = document.getElementById('reminderBanner');
-  setTimeout(() => { reminderBanner.hidden = false; }, 3000);
-  document.getElementById('checkInNow').addEventListener('click', () => {
-    reminderBanner.hidden = true;
-    chatInput.value = 'I’d like to check in now.';
-    chatInputForm.dispatchEvent(new Event('submit'));
-  });
+  // Offline
+  window.addEventListener('offline', ()=> $('#offlineToast').hidden=false);
+  window.addEventListener('online', ()=> $('#offlineToast').hidden=true);
 
-  // --- 11. Offline Drafts & Sync ---
-  const offlineToast = document.getElementById('offlineToast');
-  window.addEventListener('offline', () => offlineToast.hidden = false);
-  window.addEventListener('online', () => {
-    offlineToast.hidden = true;
-    if (chatHistory.length) {
-      saveHistory();
-      renderHistory();
+  // Data controls
+  $('#clearHistory').addEventListener('click', ()=>{
+    if (confirm('Clear history?')) {
+      chatHistory=[]; saveHistory(); renderHistory();
     }
   });
-
-  // --- 12. Privacy & Data Control ---
-  document.getElementById('clearHistory').addEventListener('click', () => {
-    if (confirm('Clear all chat history?')) {
-      chatHistory = [];
-      saveHistory();
-      renderHistory();
-    }
-  });
-  document.getElementById('exportTranscript').addEventListener('click', () => {
-    const text = chatHistory.map(m => `${m.who}: ${m.text}`).join('\n');
-    const blob = new Blob([text], {type:'text/plain'});
+  $('#exportTranscript').addEventListener('click', ()=>{
+    const txt = chatHistory.map(m=>`${m.who}: ${m.text}`).join('\n');
+    const blob = new Blob([txt],{type:'text/plain'});
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
-    a.href = url; a.download = 'transcript.txt';
-    a.click();
-    URL.revokeObjectURL(url);
+    a.href=url; a.download='transcript.txt'; a.click();
   });
 
+  log('All bindings complete.');
 });
 </script>
+
 </body>
 </html>
