@@ -332,8 +332,7 @@
 
 </head>
 
-
-   <body>
+<body>
   <!-- 1. Goals & Overview (hidden metadata or data-attributes for JS) -->
   <div id="fullTherapy" data-goals="transform,chatgpt-whatsapp,empathic">
     
@@ -532,6 +531,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const consentBanner = document.getElementById('consentBanner');
   const consentCheckbox = document.getElementById('consentCheckbox');
   const startChat = document.getElementById('startChat');
+ consentBanner.hidden = true;
   consentCheckbox.addEventListener('change', () => {
     startChat.disabled = !consentCheckbox.checked;
   });
@@ -680,8 +680,10 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   });
 
-  const worksheetModal = document.getElementById('worksheetModal');
-  const attachBtn = document.getElementById('attachBtn');
+// --- 6. Worksheet Modal (always hidden at start) ---
+ const worksheetModal = document.getElementById('worksheetModal');
+ worksheetModal.hidden = true;
+ const attachBtn = document.getElementById('attachBtn');
   worksheetModal.hidden = true;
   attachBtn.addEventListener('click', () => worksheetModal.hidden = false);
   worksheetModal.querySelector('.close-modal').addEventListener('click', () => worksheetModal.hidden = true);
