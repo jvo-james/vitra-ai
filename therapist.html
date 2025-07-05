@@ -48,9 +48,9 @@
     line-height: var(--line-height);
     background: var(--color-bg);
     color: var(--color-text);
-    display: flex;
-    height: 100vh;
-    overflow: hidden;
+   display: flex;
+   min-height: 100vh;
+   overflow: auto; 
   }
   h1, h2, h3, h4, h5 { font-weight: 600; color: var(--color-primary); }
 
@@ -164,7 +164,7 @@
     margin-top: 64px; margin-left: 280px;
     flex: 1; display: flex; flex-direction: column;
     background: var(--color-bg); padding: var(--spacing);
-    position: relative;
+    position: relative; overflow: hidden; 
   }
   #chatLog {
     flex: 1; overflow-y: auto; padding-right: 1rem;
@@ -288,7 +288,7 @@
     background: rgba(0,0,0,0.4);
     display: flex; align-items: center; justify-content: center;
     padding: var(--spacing);
-    z-index: 2000; display: none !important; 
+    z-index: 2000; display: none !important; overflow-y: auto; 
   }
   .modal-content {
     background: var(--color-surface);
@@ -448,8 +448,7 @@
     #chatArea { margin-left: 0; }
   }
   @media (max-width: 600px) {
-    #therapyHeader { flex-direction: column; align-items: flex-start; height: auto; padding: 0.5rem; }
-    .session-meta { display: none; }
+#therapyHeader { flex-wrap: wrap; height: auto; }    .session-meta { display: none; }
     #chatInputForm { flex-direction: column; }
     #chatInputForm input { width: 100%; }
   }
@@ -478,7 +477,7 @@
     <aside id="sessionList" role="navigation" aria-label="Previous sessions">
       <div class="session-search">
         <input type="search" id="searchSessions" placeholder="Search sessions…" aria-label="Search sessions">
-        <button id="filterBtn" aria-label="Filter by date/topic">⚙️</button>
+  <button id="filterBtn" aria-label="Filter by date/topic"><i class="fas fa-filter"></i></button>
       </div>
       <ul>
         <li data-session="1" class="unread">
@@ -492,7 +491,7 @@
           <time datetime="2025-07-03">Jul 3</time>
         </li>
       </ul>
-      <button id="newSession">+ New Session</button>
+    <button id="newSession"><i class="fas fa-plus"></i> New Session</button>
     </aside>
     
     <!-- 4. Main Chat Area -->
@@ -538,10 +537,10 @@
       
       <!-- 5. Input Area -->
       <form id="chatInputForm" autocomplete="off">
-        <button id="attachBtn" type="button" aria-label="Attach file">📎</button>
+        <button id="attachBtn" type="button" aria-label="Attach file"><i class="fas fa-paperclip"></i></button>
         <input type="text" id="chatInput" placeholder="Type your message…" aria-label="Chat input">
-        <button id="micBtn" type="button" aria-label="Speak">🎤</button>
-        <button id="sendBtn" type="submit" aria-label="Send message">➤</button>
+        <button id="micBtn" type="button" aria-label="Speak"><i class="fas fa-microphone"></i></button>
+        <button id="sendBtn" type="submit" aria-label="Send message"><i class="fas fa-paper-plane"></i></button>
       </form>
     </main>
     
@@ -638,12 +637,14 @@ document.addEventListener('DOMContentLoaded', () => {
   }, 1000);
 
   // --- Section 2: Sessions List ---
-  $$('#sessionList li').forEach(li => li.addEventListener('click', () => {
-    $$('#sessionList li.unread').forEach(u => u.classList.remove('unread'));
-    li.classList.remove('unread');
-    log('Load session', li.dataset.session);
-    alert(`Loading session ${li.dataset.session}`);
-  }));
+ $$('#sessionList li').forEach(li => li.addEventListener('click', async () => {
+   $$('#sessionList li.unread').forEach(u => u.classList.remove('unread'));
+   li.classList.remove('unread');
+   const id = li.dataset.session;
+   const saved = localStorage.getItem(`session_${id}`) || '[]';
+   chatHistory = JSON.parse(saved);
+   renderHistory();
+ }));
   $('#newSession').addEventListener('click', () => {
     chatHistory = [];
     saveHistory();
@@ -675,7 +676,9 @@ document.addEventListener('DOMContentLoaded', () => {
       lastUserMsg = '';
 
   function saveHistory() {
-    localStorage.setItem('chatHistory', JSON.stringify(chatHistory));
+   localStorage.setItem('chatHistory', JSON.stringify(chatHistory));
+   const active = document.querySelector('#sessionList li:not(.unread)').dataset.session;
+   if (active) localStorage.setItem(`session_${active}`, JSON.stringify(chatHistory));
   }
   function appendMessage(who, text, time = new Date().toISOString(), status = '') {
     const div = document.createElement('div');
@@ -686,9 +689,26 @@ document.addEventListener('DOMContentLoaded', () => {
       <div class="bubble">
         <p>${text}</p>
         <time>${new Date(time).toLocaleTimeString()}</time>
-      </div>`;
+      </div>
+       ${who==='therapist' ? `
+    <button class="speak-btn" title="Play response">
+      <i class="fas fa-volume-up"></i>
+    </button>` : ''}
+      `;
     chatLog.append(div);
     chatLog.scrollTop = chatLog.scrollHeight;
+
+   if (who==='therapist') {
+     const btn = div.querySelector('.speak-btn');
+     btn.addEventListener('click', () => {
+      const utter = new SpeechSynthesisUtterance(text);
+       utter.voice = speechSynthesis.getVoices()
+          .find(v=>/female|zira|samantha/i.test(v.name)) 
+          || speechSynthesis.getVoices()[0];
+       utter.rate = 1;
+       speechSynthesis.speak(utter);
+     });
+   }
   }
   function renderHistory() {
     chatLog.innerHTML = '';
