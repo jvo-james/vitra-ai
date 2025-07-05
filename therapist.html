@@ -246,8 +246,32 @@
     }
     @media(max-width:600px) {
       header#therapyHeader { flex-wrap:wrap; height:auto; padding:.5rem; }
-      #chatInputForm { flex-direction:column; }
-      #chatInputForm input { width:100%; }
+     #chatInputForm {
+        flex-direction: row !important;
+        flex-wrap: nowrap;
+        align-items: center;
+      }
+      #chatInputForm input { flex:1; margin-right:0.5rem; }
+      #chatInputForm button { margin:0; }
+    }
+ @media(max-width:1024px) {
+      #menuToggle { display: inline-flex; background:none; border:none; 
+       color:var(--primary); font-size:1.25rem; cursor:pointer; }
+      aside#sessionList.open { display: block; }
+    }
+
+    /* 2️⃣ Toast & bubble-actions */
+    .bubble-actions { margin-top:0.5rem; display:flex; }
+    .toast {
+      position: fixed; bottom:1rem; left:50%;
+      transform: translateX(-50%);
+      background:var(--primary); color:#fff;
+      padding:0.75rem 1.25rem; border-radius:var(--radius);
+      animation: fadeout 2s forwards;
+    }
+    @keyframes fadeout {
+      0%,80% { opacity:1; }
+      100% { opacity:0; }
     }
 
     .bubble-actions {
@@ -303,8 +327,9 @@ aside#sessionList.open { display: block; }
   <!-- 1. Header -->
   <header id="therapyHeader">
     <button id="collapseBtn" title="Back to dashboard"><i class="fas fa-arrow-left"></i></button>
-    <button id="menuToggle" title="Show sessions" style="display:none">
-  <i class="fas fa-bars"></i>
+<button id="menuToggle" title="Toggle sessions" hidden>
+      <i class="fas fa-bars"></i>
+    </button>  <i class="fas fa-bars"></i>
 </button>
     <div class="therapist-info">
       <img src="https://i.pravatar.cc/100?img=32" alt="Therapist avatar" class="avatar">
@@ -403,12 +428,12 @@ titleDiv.addEventListener('blur', ()=>{
       });
     }
 
-    const menuToggle = document.getElementById('menuToggle');
-menuToggle.addEventListener('click', ()=>{
-  document.getElementById('sessionList')
-    .classList.toggle('open');
-});
-
+  const menuToggle = document.getElementById('menuToggle');
+    menuToggle.hidden = false;
+    menuToggle.addEventListener('click', ()=>{
+      document.getElementById('sessionList')
+        .classList.toggle('open');
+    });
     function formatText(text) {
   text = text
     .replace(/[#*_`>~-]+/g, '')      
@@ -428,7 +453,7 @@ menuToggle.addEventListener('click', ()=>{
       div.innerHTML = `
         ${who==='therapist'?'<img src="https://i.pravatar.cc/50?img=32" class="avatar-small">':''}
         <div class="bubble">
-         <p>${formatText(text)}</p>
+          ${formatText(text)}
 <div class="bubble-actions">
   <button class="copy-btn" title="Copy"><i class="fas fa-copy"></i> Copy</button>
 </div>
@@ -440,29 +465,26 @@ menuToggle.addEventListener('click', ()=>{
       chatLog.scrollTop = chatLog.scrollHeight;
 
       // copy
-      div.querySelector('.copy-btn').addEventListener('click', ()=>
-        navigator.clipboard.writeText(text)
+      div.querySelector('.copy-btn').addEventListener('click', ()=>{
+        navigator.clipboard.writeText(text);
         showToast('Copied to clipboard');
-      );
+      });
       // speak
-      if (who==='therapist') {
+       if (who==='therapist') {
         const btn = div.querySelector('.speak-btn');
-       let isSpeaking = false;
-let utterance = null;
-
-btn.addEventListener('click', () => {
-  if (isSpeaking) {
-    speechSynthesis.cancel();
-    isSpeaking = false;
-    return;
-  }
-  utterance = new SpeechSynthesisUtterance(text);
-  utterance.voice = speechSynthesis.getVoices().find(v => /female/i.test(v.name)) || speechSynthesis.getVoices()[0];
-  utterance.rate = 0.9;
-  isSpeaking = true;
-  utterance.onend = () => isSpeaking = false;
-  speechSynthesis.speak(utterance);
-});
+        let isSpeaking = false, utter;
+        btn.addEventListener('click',()=>{
+          if(isSpeaking){
+            speechSynthesis.cancel();
+            return isSpeaking=false;
+          }
+          utter = new SpeechSynthesisUtterance(text);
+          utter.voice = speechSynthesis.getVoices().find(v=>/female/i.test(v.name))||speechSynthesis.getVoices()[0];
+          utter.rate = 0.9;
+          isSpeaking = true;
+          utter.onend = ()=> isSpeaking = false;
+          speechSynthesis.speak(utter);
+        });
       }
     }
 
@@ -556,17 +578,16 @@ btn.addEventListener('click', () => {
         return;
       }
 
-      if (chatHistory.length === 2 && sessions[currentId].title.startsWith('Session ')) {
-  // ask AI to summarize title
-  callAI([
-    {role:'system', content:'Give me a 3‑word session title summarizing the conversation so far.'},
-    {role:'user', content: chatHistory.map(m=>m.text).join('\n')}
-  ]).then(newTitle => {
-    sessions[currentId].title = newTitle;
-    saveSessions();
-    loadSessionList();
-  });
-}
+   if (chatHistory.length === 2 && sessions[currentId].title.startsWith('Session ')) {
+        callAI([
+          {role:'system',content:'Give a 3‑word session title.'},
+          {role:'user',content:chatHistory.map(m=>m.text).join('\n')}
+        ]).then(title=>{
+          sessions[currentId].title = title;
+          saveSessions();
+          loadSessionList();
+        });
+      }
 
       showSpinner();
       const system = "You are a licensed clinical psychologist. Speak in a warm, empathic tone, ...";
@@ -585,29 +606,19 @@ btn.addEventListener('click', () => {
       }
     });
 
-   let isListening = false;
-const rec = new (window.SpeechRecognition||window.webkitSpeechRecognition)();
-rec.lang = 'en-US';
-rec.interimResults = true;
-rec.onresult = e => {
-  chatInput.value = Array.from(e.results)
-    .map(r=>r[0].transcript).join('');
-};
-rec.onend = () => {
-  if (isListening) rec.start(); // keep going until user stops
-};
-
-micBtn.addEventListener('click', ()=>{
-  isListening = !isListening;
-  micBtn.innerHTML = isListening
-    ? '<i class="fas fa-microphone-slash"></i>'
-    : '<i class="fas fa-microphone"></i>';
-  if (isListening) {
-    rec.start();
-  } else {
-    rec.stop();
-  }
-});
+ let isListening = false;
+    const rec = new (window.SpeechRecognition||window.webkitSpeechRecognition)();
+    rec.lang = 'en-US'; rec.interimResults = true;
+    rec.onresult = e => {
+      chatInput.value = Array.from(e.results).map(r=>r[0].transcript).join('');
+    };
+    micBtn.addEventListener('click', ()=>{
+      isListening = !isListening;
+      micBtn.innerHTML = isListening
+        ? '<i class="fas fa-microphone-slash"></i>'
+        : '<i class="fas fa-microphone"></i>';
+      isListening ? rec.start() : rec.stop();
+    });
 
 
     //—— Quick replies ——//
