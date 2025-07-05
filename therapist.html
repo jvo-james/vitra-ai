@@ -317,7 +317,6 @@
   footer#dataControls button:hover {
     background: var(--primary); color:#fff;
   }
-#worksheetModal {dispaly: none; }
   /* Responsive */
   @media(max-width:1024px) {
     aside#sessionList { display:none; }
@@ -487,8 +486,9 @@
     
   </div>
 
-     <script>
-(() => {
+    <script>
+document.addEventListener('DOMContentLoaded', () => {
+
   // --- 1. Goals & Overview (read-only metadata) ---
   const fullTherapy = document.getElementById('fullTherapy');
   console.log('Therapy goals:', fullTherapy.dataset.goals.split(','));
@@ -532,7 +532,6 @@
   const consentBanner = document.getElementById('consentBanner');
   const consentCheckbox = document.getElementById('consentCheckbox');
   const startChat = document.getElementById('startChat');
-  consentBanner.hidden = false;
   consentCheckbox.addEventListener('change', () => {
     startChat.disabled = !consentCheckbox.checked;
   });
@@ -681,9 +680,9 @@
     });
   });
 
-  // --- 6. Worksheet Modal ---
   const worksheetModal = document.getElementById('worksheetModal');
   const attachBtn = document.getElementById('attachBtn');
+  worksheetModal.hidden = true;
   attachBtn.addEventListener('click', () => worksheetModal.hidden = false);
   worksheetModal.querySelector('.close-modal').addEventListener('click', () => worksheetModal.hidden = true);
   worksheetModal.querySelector('#worksheetForm').addEventListener('submit', e => {
@@ -766,8 +765,7 @@
     URL.revokeObjectURL(url);
   });
 
-})();
+});
 </script>
-
 </body>
 </html>
