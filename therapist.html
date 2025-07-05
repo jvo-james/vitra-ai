@@ -9,324 +9,449 @@
   <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
-  <style>
-  /* Root Variables */
+ <style>
+  /*--------------------------------------
+    0. Color Palette & Typography
+  --------------------------------------*/
   :root {
-    --primary: #4A90E2;
-    --primary-light: #D0E7FF;
-    --secondary: #50C878;
-    --bg: #F3F6FB;
-    --surface: #FFFFFF;
-    --text: #333333;
-    --muted: #888888;
+    /* Primary Brand Colors */
+    --color-primary: #4A90E2;
+    --color-primary-hover: #357ABD;
+    --color-secondary: #50C878;
+    --color-secondary-hover: #3EA664;
+    /* Neutrals */
+    --color-bg: #F3F6FB;
+    --color-surface: #FFFFFF;
+    --color-text: #333333;
+    --color-muted: #777777;
+    --color-error: #E24A4A;
+    /* Accents */
+    --color-info: #4A90E2;
+    --color-success: #50C878;
     --radius: 0.75rem;
-    --padding: 1rem;
+    --spacing: 1rem;
     --transition: 0.3s ease;
+    /* Typography */
+    --font-base: 'Montserrat', sans-serif;
+    --font-size-base: 1rem;
+    --font-size-lg: 1.125rem;
+    --font-size-sm: 0.875rem;
+    --line-height: 1.5;
   }
-  /* Global Reset */
-  * { margin:0; padding:0; box-sizing:border-box; }
+
+  * {
+    margin: 0; padding: 0; box-sizing: border-box;
+  }
   body {
-    font-family: 'Montserrat', sans-serif;
-    background: var(--bg);
-    color: var(--text);
+    font-family: var(--font-base);
+    font-size: var(--font-size-base);
+    line-height: var(--line-height);
+    background: var(--color-bg);
+    color: var(--color-text);
     display: flex;
     height: 100vh;
     overflow: hidden;
   }
+  h1, h2, h3, h4, h5 { font-weight: 600; color: var(--color-primary); }
 
-  /* 2. Header */
-  header#therapyHeader {
-    position: fixed; top:0; left:0; right:0;
-    height: 64px; background: var(--surface);
-    display: flex; align-items:center; justify-content: space-between;
-    padding: 0 1rem; box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  a {
+    color: var(--color-primary);
+    text-decoration: none;
+    transition: color var(--transition);
+  }
+  a:hover {
+    color: var(--color-primary-hover);
+  }
+
+  /*--------------------------------------
+    1. Header
+  --------------------------------------*/
+  #therapyHeader {
+    position: fixed; top: 0; left: 0; right: 0;
+    height: 64px; background: var(--color-surface);
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 0 var(--spacing); box-shadow: 0px 2px 8px rgba(0,0,0,0.05);
     z-index: 1000;
   }
   #collapseBtn {
-    background: none; border: none; font-size:1.2rem;
-    color: var(--primary); cursor: pointer;
-    transition: color var(--transition);
+    font-size: 1.2rem; color: var(--color-primary);
+    background: none; border: 2px solid var(--color-primary);
+    border-radius: 50%; width: 36px; height: 36px;
+    cursor: pointer; transition: all var(--transition);
   }
-  #collapseBtn:hover { color: var(--secondary); }
-  .therapist-info { display:flex; align-items:center; gap:0.5rem; }
+  #collapseBtn:hover {
+    background: var(--color-primary-hover);
+    color: var(--color-surface);
+    border-color: var(--color-primary-hover);
+  }
+  .therapist-info {
+    display: flex; align-items: center; gap: 0.75rem;
+  }
   .therapist-info .avatar {
-    width:40px; height:40px; border-radius:50%; object-fit:cover;
-    border:2px solid var(--primary-light);
-  }
-  .therapist-info h1 {
-    font-size:1.1rem; font-weight:600;
+    width: 40px; height: 40px; border-radius: 50%;
+    object-fit: cover; border: 2px solid var(--color-primary);
   }
   .session-meta {
-    display:flex; align-items:center; gap:1rem; font-size:0.9rem;
-    color: var(--muted);
+    display: flex; align-items: center; gap: var(--spacing);
+    font-size: var(--font-size-sm); color: var(--color-muted);
   }
 
-  /* 2. Sidebar / Session List */
-  aside#sessionList {
-    width:280px; background: var(--surface);
-    padding:1rem; margin-top:64px;
-    box-shadow:2px 0 8px rgba(0,0,0,0.05);
-    overflow-y:auto;
+  /*--------------------------------------
+    2. Sidebar / Session List
+  --------------------------------------*/
+  #sessionList {
+    position: fixed; top: 64px; left: 0;
+    width: 280px; height: calc(100% - 64px);
+    background: var(--color-surface);
+    padding: var(--spacing);
+    box-shadow: 2px 0 8px rgba(0,0,0,0.05);
+    overflow-y: auto;
   }
   #sessionList .session-search {
-    display:flex; gap:0.5rem; margin-bottom:1rem;
+    display: flex; gap: 0.5rem; margin-bottom: var(--spacing);
   }
   #searchSessions {
-    flex:1; padding:0.5rem; border:1px solid var(--muted);
-    border-radius:var(--radius);
+    flex: 1; padding: 0.5rem; border: 1px solid var(--color-muted);
+    border-radius: var(--radius);
   }
   #filterBtn {
-    background: var(--primary); color:#fff; border:none;
-    padding:0 0.75rem; border-radius:var(--radius); cursor:pointer;
-  }
-  #sessionList ul { list-style:none; }
-  #sessionList li {
-    padding:0.5rem; border-radius:var(--radius);
-    margin-bottom:0.5rem; cursor:pointer;
+    background: var(--color-primary); color: #fff;
+    border: none; border-radius: var(--radius);
+    padding: 0 0.75rem; cursor: pointer;
     transition: background var(--transition);
+  }
+  #filterBtn:hover {
+    background: var(--color-primary-hover);
+  }
+  #sessionList ul { list-style: none; }
+  #sessionList li {
+    display: flex; flex-direction: column;
+    padding: 0.75rem; margin-bottom: 0.5rem;
+    border-radius: var(--radius);
+    cursor: pointer; transition: background var(--transition);
   }
   #sessionList li.unread {
-    background: var(--primary-light);
+    background: var(--color-primary-light, rgba(74,144,226,0.1));
   }
   #sessionList li:hover {
-    background: var(--primary-light);
+    background: var(--color-primary-light, rgba(74,144,226,0.1));
   }
-  #sessionList li strong { display:block; font-weight:600; }
+  #sessionList li strong {
+    font-size: var(--font-size-sm); margin-bottom: 0.25rem;
+  }
   #sessionList li .snippet {
-    font-size:0.85rem; color: var(--muted);
+    font-size: var(--font-size-sm); color: var(--color-muted);
   }
   #sessionList li time {
-    font-size:0.75rem; color: var(--muted);
-    float:right;
+    font-size: var(--font-size-sm); color: var(--color-muted);
+    align-self: flex-end;
   }
   #newSession {
-    width:100%; padding:0.75rem;
-    background: var(--secondary); color:#fff;
-    border:none; border-radius:var(--radius);
-    font-weight:600; cursor:pointer;
+    display: block; width: 100%; padding: 0.75rem;
+    background: var(--color-secondary); color: #fff;
+    border: none; border-radius: var(--radius);
+    font-weight: 600; cursor: pointer;
     transition: background var(--transition);
   }
-  #newSession:hover { background: darken(var(--secondary),10%); }
+  #newSession:hover {
+    background: var(--color-secondary-hover);
+  }
 
-  /* 4. Main Chat Area */
-  main#chatArea {
-    flex:1; margin-top:64px; margin-left:280px;
-    display:flex; flex-direction:column; justify-content:stretch;
-    background: var(--bg); padding:1rem; position:relative;
+  /*--------------------------------------
+    3. Main Chat Layout
+  --------------------------------------*/
+  #chatArea {
+    margin-top: 64px; margin-left: 280px;
+    flex: 1; display: flex; flex-direction: column;
+    background: var(--color-bg); padding: var(--spacing);
+    position: relative;
   }
   #chatLog {
-    flex:1; overflow-y:auto; padding-right:1rem;
+    flex: 1; overflow-y: auto; padding-right: 1rem;
   }
   .date-separator {
-    text-align:center; margin:1rem 0;
-    font-size:0.85rem; color: var(--muted);
+    text-align: center; margin: var(--spacing) 0;
+    font-size: var(--font-size-sm); color: var(--color-muted);
   }
+
+  /*--------------------------------------
+    4. Message Bubbles
+  --------------------------------------*/
   .message {
-    display:flex; align-items:flex-end; margin-bottom:0.75rem;
-    max-width:80%;
+    display: flex; align-items: flex-end; margin-bottom: 0.75rem;
+    max-width: 75%;
   }
   .therapist-msg {
-    flex-direction:row;
+    flex-direction: row;
   }
   .user-msg {
-    flex-direction:row-reverse; margin-left:auto;
+    margin-left: auto; flex-direction: row-reverse;
   }
   .avatar-small {
-    width:32px; height:32px; border-radius:50%;
-    margin:0 0.5rem;
+    width: 32px; height: 32px; border-radius: 50%;
+    margin: 0 0.5rem;
   }
   .bubble {
-    background: var(--surface); padding:0.75rem;
-    border-radius:var(--radius); position:relative;
-    box-shadow:0 2px 6px rgba(0,0,0,0.05);
+    position: relative;
+    padding: 0.75rem; border-radius: var(--radius);
+    background: var(--color-surface);
+    box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+    color: var(--color-text);
+    line-height: 1.4;
   }
   .user-msg .bubble {
-    background: var(--primary); color:#fff;
-  }
-  .bubble p {
-    margin-bottom:0.25rem; line-height:1.4;
+    background: var(--color-primary);
+    color: #fff;
   }
   .bubble time {
-    font-size:0.7rem; position:absolute; bottom:-1.2rem; right:0.5rem;
-    color: var(--muted);
+    position: absolute; bottom: -1.25rem; right: 0.5rem;
+    font-size: var(--font-size-sm); color: var(--color-muted);
   }
 
-  /* Typing Indicator */
+  /*--------------------------------------
+    5. Typing Indicator
+  --------------------------------------*/
   #typingIndicator {
-    display:flex; align-items:center; gap:0.5rem;
-    margin-bottom:1rem; font-size:0.85rem; color: var(--muted);
+    display: flex; align-items: center; gap: 0.5rem;
+    font-size: var(--font-size-sm); color: var(--color-muted);
+    margin-bottom: 0.75rem;
   }
   #typingIndicator .dots {
-    animation: blink 1s infinite;
+    display: inline-block; width: 1rem; text-align: left;
+    animation: typing 1s steps(3,end) infinite;
   }
-  @keyframes blink {
-    0%,100% { opacity:0; }
-    50% { opacity:1; }
+  @keyframes typing {
+    0%,100% { content: ''; }
+    33% { content: '.'; }
+    66% { content: '..'; }
   }
 
-  /* 5. Chat Controls & Quick Replies */
+  /*--------------------------------------
+    6. Chat Controls & Quick Replies
+  --------------------------------------*/
   #chatControls {
-    display:flex; gap:0.5rem; margin-bottom:0.5rem;
+    display: flex; gap: 0.5rem; margin-bottom: 0.5rem;
   }
   #chatControls button {
-    background: var(--surface); border:1px solid var(--muted);
-    border-radius:50%; width:36px; height:36px; cursor:pointer;
-    transition: background var(--transition), color var(--transition);
+    background: var(--color-surface); color: var(--color-muted);
+    border: 1px solid var(--color-muted); border-radius: 50%;
+    width: 36px; height: 36px; cursor: pointer;
+    transition: all var(--transition);
   }
   #chatControls button:hover {
-    background: var(--primary); color:#fff;
+    background: var(--color-primary);
+    color: #fff; border-color: var(--color-primary);
   }
   #quickReplies {
-    display:flex; gap:0.5rem; margin-bottom:0.5rem;
+    display: flex; gap: 0.5rem; margin-bottom: 0.75rem;
   }
   .quick-reply {
-    background: var(--primary-light); border:none;
-    padding:0.5rem 1rem; border-radius:var(--radius);
-    cursor:pointer; transition: background var(--transition);
-  }
-  .quick-reply:hover { background: var(--primary); color:#fff; }
-
-  /* 5. Input Area */
-  #chatInputForm {
-    display:flex; align-items:center; gap:0.5rem;
-  }
-  #chatInputForm input {
-    flex:1; padding:0.75rem;
-    border:1px solid var(--muted); border-radius:var(--radius);
-    font-size:1rem;
-  }
-  #chatInputForm button {
-    background: var(--primary); border:none; color:#fff;
-    width:36px; height:36px; border-radius:50%;
-    display:flex; align-items:center; justify-content:center;
-    cursor:pointer; transition: background var(--transition);
-  }
-  #chatInputForm button:hover { background: var(--secondary); }
-
-  /* 6. Modal / Overlay */
-  .modal {
-    position: fixed; top:0; left:0; width:100%; height:100%;
-    background: rgba(0,0,0,0.4); display:flex;
-    align-items:center; justify-content:center; padding:1rem;
-    z-index:2000; display: none !important;
-  }
-  .modal-content {
-    background: var(--surface); border-radius:var(--radius);
-    width:100%; max-width:500px; padding:1.5rem;
-    box-shadow:0 4px 16px rgba(0,0,0,0.1);
-  }
-  .close-modal {
-    background:none; border:none; font-size:1.2rem;
-    float:right; cursor:pointer; color: var(--muted);
-  }
-  .close-modal:hover { color: var(--primary); }
-  #worksheetForm label {
-    display:block; margin-bottom:1rem;
-    font-size:0.9rem; color: var(--text);
-  }
-  #worksheetForm textarea {
-    width:100%; padding:0.5rem; border:1px solid var(--muted);
-    border-radius:var(--radius); resize:vertical;
-  }
-  #worksheetForm input[type="range"] {
-    width:100%;
-  }
-  #worksheetForm button {
-    background: var(--secondary); color:#fff; border:none;
-    padding:0.75rem 1rem; border-radius:var(--radius);
-    cursor:pointer; transition: background var(--transition);
-  }
-  #worksheetForm button:hover { background: darken(var(--secondary),10%); }
-
-  /* 8. Rich Content */
-  #guidedAudio {
-    margin-top:1rem; width:100%;
-  }
-  #moodWheel {
-    display:block; margin:1rem auto; border-radius:50%;
-    box-shadow:0 2px 8px rgba(0,0,0,0.1);
-  }
-
-  /* 9. Session Summary */
-  #sessionSummary {
-    position: absolute; bottom:80px; right:1rem;
-    background: var(--surface); padding:1rem; border-radius:var(--radius);
-    box-shadow:0 4px 16px rgba(0,0,0,0.1); width:250px;
-  }
-  #sessionSummary h2 {
-    margin-bottom:0.5rem; color: var(--primary);
-  }
-  #sessionSummary ul { list-style:disc; padding-left:1.25rem; }
-  #sessionSummary button {
-    margin-top:0.5rem; background: var(--primary);
-    color:#fff; border:none; padding:0.5rem; border-radius:var(--radius);
-    width:100%; cursor:pointer;
-  }
-  #sessionSummary button:hover { background: var(--secondary); }
-
-  /* 10. Notifications / Reminders */
-  #reminderBanner {
-    position:fixed; top:64px; right:1rem;
-    background: var(--primary-light); padding:0.75rem 1rem;
-    border-radius:var(--radius); box-shadow:0 2px 8px rgba(0,0,0,0.1);
-    display:flex; align-items:center; gap:1rem;
-  }
-  #reminderBanner button {
-    background: var(--primary); border:none; color:#fff;
-    padding:0.5rem 1rem; border-radius:var(--radius);
-    cursor:pointer;
-  }
-
-  /* 12. Consent Banner */
-  #consentBanner {
-    position:fixed; bottom:0; left:0; width:100%;
-    background: var(--surface); padding:1rem;
-    box-shadow:0 -2px 8px rgba(0,0,0,0.1);
-    display:flex; flex-wrap:wrap; align-items:center; gap:1rem;
-    font-size:0.9rem;
-  }
-  #consentBanner p { flex:1 1 60%; }
-  #consentBanner label {
-    display:flex; align-items:center; gap:0.5rem;
-  }
-  #consentBanner button {
-    background: var(--secondary); color:#fff; border:none;
-    padding:0.75rem 1rem; border-radius:var(--radius);
-    cursor:pointer;
-  }
-
-  /* 11. Offline Toast */
-  .toast {
-    position:fixed; bottom:80px; left:50%;
-    transform:translateX(-50%);
-    background: var(--primary); color:#fff;
-    padding:0.5rem 1rem; border-radius:var(--radius);
-    box-shadow:0 2px 8px rgba(0,0,0,0.1);
-  }
-
-  /* 13. Data Controls Footer */
-  footer#dataControls {
-    position:fixed; bottom:0; right:1rem;
-    display:flex; gap:0.5rem; padding:0.5rem;
-  }
-  footer#dataControls button {
-    background: var(--surface); border:1px solid var(--muted);
-    padding:0.5rem; border-radius:var(--radius); cursor:pointer;
+    background: var(--color-primary-light, rgba(74,144,226,0.1));
+    color: var(--color-primary);
+    border: none; padding: 0.5rem 1rem;
+    border-radius: var(--radius); cursor: pointer;
     transition: background var(--transition), color var(--transition);
   }
-  footer#dataControls button:hover {
-    background: var(--primary); color:#fff;
+  .quick-reply:hover {
+    background: var(--color-primary);
+    color: #fff;
   }
-  /* Responsive */
-  @media(max-width:1024px) {
-    aside#sessionList { display:none; }
-    main#chatArea { margin-left:0; }
+
+  /*--------------------------------------
+    7. Input Area
+  --------------------------------------*/
+  #chatInputForm {
+    display: flex; align-items: center; gap: 0.5rem;
   }
-  @media(max-width:480px) {
-    header#therapyHeader { flex-direction:column; align-items:flex-start; height:auto; padding:0.5rem; }
-    .session-meta { display:none; }
-    #chatInputForm { flex-direction:column; }
-    #chatInputForm input { width:100%; }
+  #chatInputForm input {
+    flex: 1; padding: 0.75rem;
+    border: 1px solid var(--color-muted);
+    border-radius: var(--radius);
+    font-size: var(--font-size-base);
+  }
+  #chatInputForm button {
+    background: var(--color-primary); color: #fff;
+    width: 36px; height: 36px;
+    border: none; border-radius: 50%; cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    transition: background var(--transition);
+  }
+  #chatInputForm button:hover {
+    background: var(--color-primary-hover);
+  }
+
+  /*--------------------------------------
+    8. Modal / Worksheet
+  --------------------------------------*/
+  .modal {
+    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+    background: rgba(0,0,0,0.4);
+    display: flex; align-items: center; justify-content: center;
+    padding: var(--spacing);
+    z-index: 2000;
+  }
+  .modal-content {
+    background: var(--color-surface);
+    border-radius: var(--radius);
+    width: 100%; max-width: 500px;
+    padding: var(--spacing);
+    box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+    position: relative;
+  }
+  .modal-content h2 {
+    margin-bottom: 0.75rem;
+  }
+  .close-modal {
+    position: absolute; top: 0.75rem; right: 0.75rem;
+    font-size: 1.2rem; color: var(--color-muted);
+    background: none; border: none; cursor: pointer;
+    transition: color var(--transition);
+  }
+  .close-modal:hover {
+    color: var(--color-error);
+  }
+  #worksheetForm label {
+    display: block; margin-bottom: var(--spacing);
+    font-size: var(--font-size-sm);
+  }
+  #worksheetForm textarea {
+    width: 100%; padding: 0.5rem;
+    border: 1px solid var(--color-muted);
+    border-radius: var(--radius);
+    resize: vertical;
+  }
+  #worksheetForm input[type="range"] {
+    width: 100%;
+  }
+  #worksheetForm button {
+    display: block; margin-top: var(--spacing);
+    background: var(--color-secondary); color: #fff;
+    border: none; padding: 0.75rem 1rem;
+    border-radius: var(--radius); cursor: pointer;
+    transition: background var(--transition);
+  }
+  #worksheetForm button:hover {
+    background: var(--color-secondary-hover);
+  }
+
+  /*--------------------------------------
+    9. Rich Content Placeholders
+  --------------------------------------*/
+  #guidedAudio {
+    margin-top: var(--spacing); width: 100%;
+  }
+  #moodWheel {
+    display: block; margin: var(--spacing) auto;
+    border-radius: 50%; box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  }
+
+  /*--------------------------------------
+    10. Session Summary
+  --------------------------------------*/
+  #sessionSummary {
+    position: absolute; bottom: 80px; right: var(--spacing);
+    background: var(--color-surface); padding: var(--spacing);
+    border-radius: var(--radius);
+    box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+    width: 240px; display: none;
+  }
+  #sessionSummary[hidden] { display: none !important; }
+  #sessionSummary ul { list-style: disc; padding-left: 1.25rem; }
+  #exportSummary {
+    display: block; margin-top: var(--spacing);
+    width: 100%; padding: 0.5rem;
+    background: var(--color-primary); color: #fff;
+    border: none; border-radius: var(--radius);
+    cursor: pointer; transition: background var(--transition);
+  }
+  #exportSummary:hover {
+    background: var(--color-primary-hover);
+  }
+
+  /*--------------------------------------
+    11. Notifications & Reminders
+  --------------------------------------*/
+  #reminderBanner {
+    position: fixed; top: 64px; right: var(--spacing);
+    background: var(--color-info-light, rgba(74,144,226,0.1));
+    padding: var(--spacing); border-radius: var(--radius);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    display: none;
+  }
+  #reminderBanner[hidden] { display: none !important; }
+  #checkInNow {
+    background: var(--color-primary); color: #fff;
+    border: none; padding: 0.5rem 1rem;
+    border-radius: var(--radius); cursor: pointer;
+    transition: background var(--transition);
+  }
+  #checkInNow:hover {
+    background: var(--color-primary-hover);
+  }
+
+  /*--------------------------------------
+    12. Consent Banner
+  --------------------------------------*/
+  #consentBanner {
+    position: fixed; bottom: 0; left: 0; width: 100%;
+    background: var(--color-surface); padding: var(--spacing);
+    box-shadow: 0 -2px 8px rgba(0,0,0,0.1);
+    display: flex; flex-wrap: wrap; align-items: center;
+    gap: var(--spacing); font-size: var(--font-size-sm);
+  }
+  #consentBanner[hidden] { display: none !important; }
+  #consentBanner p { flex: 1; }
+  #consentCheckbox { margin-right: 0.5rem; }
+  #startChat {
+    background: var(--color-secondary); color: #fff;
+    border: none; padding: 0.5rem 1rem;
+    border-radius: var(--radius); cursor: pointer;
+    transition: background var(--transition);
+  }
+  #startChat:hover {
+    background: var(--color-secondary-hover);
+  }
+
+  /*--------------------------------------
+    13. Offline Indicator & Data Controls
+  --------------------------------------*/
+  .toast {
+    position: fixed; bottom: 80px; left: 50%;
+    transform: translateX(-50%);
+    background: var(--color-error); color: #fff;
+    padding: 0.5rem 1rem; border-radius: var(--radius);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    display: none;
+  }
+  .toast[hidden] { display: none !important; }
+
+  #dataControls {
+    position: fixed; bottom: 0; right: var(--spacing);
+    display: flex; gap: 0.5rem; padding: var(--spacing);
+  }
+  #clearHistory, #exportTranscript {
+    background: var(--color-surface); color: var(--color-text);
+    border: 1px solid var(--color-muted);
+    padding: 0.5rem; border-radius: var(--radius);
+    cursor: pointer; transition: all var(--transition);
+  }
+  #clearHistory:hover, #exportTranscript:hover {
+    background: var(--color-primary); color: #fff;
+    border-color: var(--color-primary);
+  }
+
+  /*--------------------------------------
+    Responsive Breakpoints
+  --------------------------------------*/
+  @media (max-width: 1024px) {
+    #sessionList { display: none; }
+    #chatArea { margin-left: 0; }
+  }
+  @media (max-width: 600px) {
+    #therapyHeader { flex-direction: column; align-items: flex-start; height: auto; padding: 0.5rem; }
+    .session-meta { display: none; }
+    #chatInputForm { flex-direction: column; }
+    #chatInputForm input { width: 100%; }
   }
 </style>
 
