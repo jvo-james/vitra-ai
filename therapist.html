@@ -1132,7 +1132,7 @@ html.dark #darkModeToggle:hover {
     <i class="fas fa-moon"></i>
   </button>
   <button id="endSession" title="End session">
-    <i class="fas fa-sign-out-alt"> End Session</i>
+    <i class="fas fa-sign-out-alt"> </i>
   </button>
    </div>
 </header>
@@ -1264,10 +1264,22 @@ document.addEventListener('DOMContentLoaded', () => {
   // 2. SESSION MANAGEMENT
   //───────────────────────────────────────────────────────────────────────────────
   let sessions    = JSON.parse(localStorage.getItem('sessions') || '{}');
+  Object.values(sessions).forEach(s=>{
+   if (typeof s.number !== 'number') s.number = 1;
+ });
+
+ let nextSessionNumber = parseInt(localStorage.getItem('nextSessionNumber') || '1', 10);
+
   let currentId   = null;
   let chatHistory = [];
   let lastUserMsg = '';
 
+  const savedCurrent = localStorage.getItem('currentId');
+ if (savedCurrent && sessions[savedCurrent]) {
+   currentId   = savedCurrent;
+   chatHistory = [...sessions[currentId].history];
+ }
+  
   let nextSessionNumber = parseInt(localStorage.getItem('nextSessionNumber') || '1', 10);
 
   function persistSessions() {
@@ -1397,6 +1409,7 @@ const count = Object.keys(sessions).length + 1;
  endSessionBtn.addEventListener('click', async () => {
     if (!currentId) return;
     showOverlaySpinner();
+   try {
    sessions[currentId].updated = Date.now();
    persistCurrent();
  if (!sessions[currentId].aiRenamed) {
@@ -1428,10 +1441,10 @@ const count = Object.keys(sessions).length + 1;
     renderSessionList();
     renderChat();
    localStorage.removeItem('currentId');
+        alert('Session ended and saved.');
    } finally {
      hideOverlaySpinner();
    }
-   alert('Session ended and saved.');
   });
 
   //───────────────────────────────────────────────────────────────────────────────
@@ -1767,23 +1780,6 @@ clearBtn.addEventListener('click', async () => {
   }
 });
 
-    (() => {
-  const toggle = document.getElementById('darkModeToggle');
-  // initialize from localStorage
-  if (localStorage.getItem('theme') === 'dark') {
-    document.documentElement.classList.add('dark');
-    toggle.querySelector('i').classList.replace('fa-moon','fa-sun');
-  }
-
-  toggle.addEventListener('click', () => {
-    const isDark = document.documentElement.classList.toggle('dark');
-    // swap icon
-    toggle.querySelector('i').classList.toggle('fa-moon', !isDark);
-    toggle.querySelector('i').classList.toggle('fa-sun', isDark);
-    // persist
-    localStorage.setItem('theme', isDark ? 'dark' : 'light');
-  });
-})();
 
   //───────────────────────────────────────────────────────────────────────────────
   // INITIALIZE
