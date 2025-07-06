@@ -1107,6 +1107,37 @@ html.dark #darkModeToggle:hover {
   background: var(--muted);
   color: var(--bg);
 }
+#therapyHeader .header-right {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+  @media (max-width: 600px) {
+  #endSession .end-text {
+    display: none;
+  }
+}
+
+
+html.dark #chatControls button,
+html.dark .quick-reply {
+  background: linear-gradient(135deg, rgba(50,50,50,0.8), rgba(30,30,30,0.8));
+  border-color: var(--primary);
+  color: #fff;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.8);
+}
+
+html.dark .dots-dropdown button {
+  background: linear-gradient(135deg, rgba(40,40,40,0.9), rgba(20,20,20,0.9));
+  border-radius: var(--radius);
+  color: var(--text);
+  transition: background 0.3s ease;
+}
+
+html.dark .dots-dropdown button:hover {
+  background: linear-gradient(135deg, var(--primary-dark), var(--primary));
+  color: #fff;
+}
 
 </style>
 
@@ -1132,7 +1163,8 @@ html.dark #darkModeToggle:hover {
     <i class="fas fa-moon"></i>
   </button>
   <button id="endSession" title="End session">
-    <i class="fas fa-sign-out-alt"> </i>
+    <i class="fas fa-sign-out-alt"></i> 
+    <span class="end-text"> End Session</span>
   </button>
    </div>
 </header>
@@ -1263,12 +1295,22 @@ document.addEventListener('DOMContentLoaded', () => {
   //───────────────────────────────────────────────────────────────────────────────
   // 2. SESSION MANAGEMENT
   //───────────────────────────────────────────────────────────────────────────────
-  let sessions    = JSON.parse(localStorage.getItem('sessions') || '{}');
   Object.values(sessions).forEach(s=>{
    if (typeof s.number !== 'number') s.number = 1;
  });
+let sessions = JSON.parse(localStorage.getItem('sessions') || '{}');
 
- let nextSessionNumber = parseInt(localStorage.getItem('nextSessionNumber') || '1', 10);
+  let storedNext = parseInt(localStorage.getItem('nextSessionNumber'), 10);
+  let nextSessionNumber;
+  if (storedNext && !isNaN(storedNext)) {
+    nextSessionNumber = storedNext;
+  } else {
+    // no saved counter yet — pick max(existing numbers)+1
+    const maxNum = Object.values(sessions)
+                       .map(s => s.number || 0)
+                       .reduce((m, n) => Math.max(m, n), 0);
+    nextSessionNumber = maxNum + 1;
+  }
 
   let currentId   = null;
   let chatHistory = [];
@@ -1649,7 +1691,9 @@ filterBtn.addEventListener('click', () => {
  });
 
  if ('webkitSpeechRecognition' in window) {
-    const rec = new webkitSpeechRecognition();
+   const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+ if (SpeechRecognition) {
+   const rec = new SpeechRecognition();
     rec.lang            = 'en-US';
     rec.interimResults  = true;
     rec.maxAlternatives = 1;
@@ -1669,14 +1713,25 @@ filterBtn.addEventListener('click', () => {
       micBtn.innerHTML = '<i class="fas fa-microphone-slash"></i>';
     };
 
-    rec.onresult = e => {
-      chatInput.value += ' ' + e.results[0][0].transcript;
-    };
+    rec.onresult = event => {
+     let transcript = '';
+     for (let i = event.resultIndex; i < event.results.length; i++) {
+       if (event.results[i].isFinal) {
+         transcript += event.results[i][0].transcript;
+       }
+     }
+     chatInput.value += transcript;
+   };
 
     rec.onend = () => {
       micBtn.classList.remove('listening');
       micBtn.innerHTML = '<i class="fas fa-microphone"></i>';
     };
+   rec.onerror = err => {
+     console.error('SpeechRecognition error', err);
+     micBtn.classList.remove('listening');
+     micBtn.innerHTML = '<i class="fas fa-microphone"></i>';
+   };
   }
 
   //───────────────────────────────────────────────────────────────────────────────
