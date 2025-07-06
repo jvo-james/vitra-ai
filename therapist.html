@@ -1295,24 +1295,18 @@ document.addEventListener('DOMContentLoaded', () => {
   //───────────────────────────────────────────────────────────────────────────────
   // 2. SESSION MANAGEMENT
   //───────────────────────────────────────────────────────────────────────────────
- let sessions = JSON.parse(localStorage.getItem('sessions') || '{}');
 
-  // 2) Ensure every session has a .number
-  Object.values(sessions).forEach(s => {
-    if (typeof s.number !== 'number') s.number = 1;
-  });
+ let storedNext = parseInt(localStorage.getItem('nextSessionNumber'), 10);
+ let nextSessionNumber;
+ if (storedNext && !isNaN(storedNext)) {
+   nextSessionNumber = storedNext;
+ } else {
+   const maxNum = Object.values(sessions)
+                      .map(s => s.number || 0)
+                      .reduce((m, n) => Math.max(m, n), 0);
+   nextSessionNumber = maxNum + 1;
+ }
 
-  let storedNext = parseInt(localStorage.getItem('nextSessionNumber'), 10);
-  let nextSessionNumber;
-  if (storedNext && !isNaN(storedNext)) {
-    nextSessionNumber = storedNext;
-  } else {
-    // no saved counter yet — pick max(existing numbers)+1
-    const maxNum = Object.values(sessions)
-                       .map(s => s.number || 0)
-                       .reduce((m, n) => Math.max(m, n), 0);
-    nextSessionNumber = maxNum + 1;
-  }
 
   let currentId   = null;
   let chatHistory = [];
