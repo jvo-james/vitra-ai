@@ -141,7 +141,7 @@ html, body {
 /* mobile stacking */
 @media (max-width: 600px) {
   #therapyHeader {
-    flex-wrap: wrap;
+    flex-wrap: nowrap;
     height: auto;
     padding: 0.5rem;
     gap: 0.5rem;
@@ -151,7 +151,6 @@ html, body {
   }
   .therapist-info {
     order: 2;
-    width: 100%;
     justify-content: center;
   }
   #endSession {
@@ -267,11 +266,15 @@ background: #c12e3a; }
   3. MAIN CHAT AREA
 ─────────────────────────────────────────────────────────────────────────────*/
 #chatArea {
-  position: absolute; top: calc(var(--header-height) + 1px); left: var(--sidebar-width);
+ position: absolute;
+  top: calc(var(--header-height) + 1px);
+  left: var(--sidebar-width);
   right: 0; bottom: 0;
-  background: var(--bg); padding-bottom: calc(var(--padding) + 3.5rem);
+  background: var(--bg);
+  padding-bottom: 0;
   display: flex; flex-direction: column;
 }
+
 #chatLog {
   flex: 1; overflow-y: auto; padding-right: var(--padding);
   position: relative;
@@ -634,7 +637,7 @@ position: absolute;
 
 #dataControls {
   position: fixed;            
-   top: calc(var(--header-height) + var(--padding));
+   bottom: calc(var(--padding));
  right: var(--padding);  
   display: flex;
   gap: 0.5rem;
@@ -712,8 +715,8 @@ position: absolute;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 1rem;
-  margin-bottom: 0.4rem;
+  gap: 0.5rem;
+  margin-bottom: 0;
 }
 
 #chatControls {
@@ -873,6 +876,31 @@ position: absolute;
   color: #fff;
 }
 
+  #overlaySpinner {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0,0,0,0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2000;
+}
+#overlaySpinner[hidden] {
+  display: none;
+}
+.overlay-content {
+  text-align: center;
+  color: #fff;
+}
+.spinner-large {
+  font-size: 3rem;
+  margin-bottom: 1rem;
+}
+.overlay-content p {
+  font-size: 1.25rem;
+  margin: 0;
+}
+
 </style>
 
   
@@ -954,6 +982,12 @@ position: absolute;
 <div id="copyToast" class="toast" aria-live="polite" aria-atomic="true" hidden>
   Copied to clipboard!
 </div>
+  <div id="overlaySpinner" hidden>
+  <div class="overlay-content">
+    <i class="fas fa-spinner fa-spin spinner-large"></i>
+    <p>Ending session…</p>
+  </div>
+</div>
   <script>
 document.addEventListener('DOMContentLoaded', () => {
    const sidebar       = document.getElementById('sessionList');
@@ -985,7 +1019,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
   sessionsUl.addEventListener('click', () => sidebar.classList.remove('visible'));
   newSessionBtn.addEventListener('click', () => sidebar.classList.remove('visible'));
-
+ 
+  function showOverlaySpinner() {
+      document.getElementById('overlaySpinner').removeAttribute('hidden');
+    }
+    function hideOverlaySpinner() {
+      document.getElementById('overlaySpinner').setAttribute('hidden', '');
+    }
 
   let currentUtterance = null;
   
@@ -1009,7 +1049,7 @@ document.addEventListener('DOMContentLoaded', () => {
     sessionsUl.innerHTML = '';
    sessionCounter = 0;
   Object.entries(sessions)
-    .sort((a,b)=>b[0]-a[0])
+    .sort((a,b)=> (b[1].updated || b[0]) - (a[1].updated || a[0]))
     .forEach(([id, data]) => {
       sessionCounter++;
       const li = document.createElement('li');
@@ -1056,8 +1096,9 @@ document.addEventListener('DOMContentLoaded', () => {
       ddEdit.addEventListener('click', e => {
         e.stopPropagation();
         const newTitle = prompt('New session title:', sessions[id].title);
-        if (newTitle) {
-          sessions[id].title = newTitle;
+       if (newTitle) {
+          sessions[id].title   = newTitle;
+          sessions[id].updated = Date.now();
           persistSessions();
           renderSessionList();
         }
@@ -1106,14 +1147,20 @@ const count = Object.keys(sessions).length + 1;
     if (!title) return;
     persistCurrent();
     const id = Date.now().toString();
-     sessions[id] = { title, history: [], aiRenamed: false };
+   sessions[id] = {
+      title,
+      history: [],
+      aiRenamed: false,
+      updated: Date.now()        
+      };
     switchSession(id);
   });
 
  endSessionBtn.addEventListener('click', async () => {
     if (!currentId) return;
-   showSpinner();
-   
+   if (!currentId) return;
+    showOverlaySpinner();
+   sessions[currentId].updated = Date.now();
    persistCurrent();
  if (!sessions[currentId].aiRenamed) {
       const transcript = sessions[currentId].history
@@ -1121,7 +1168,7 @@ const count = Object.keys(sessions).length + 1;
       let aiTitle = '';
       try {
         aiTitle = await callAI([
-          { role:'system', content: 'Suggest a concise session title.' },
+          { role:'system', content: 'Suggest a very short concise session title.' },
           { role:'user', content: transcript }
         ]);
       } catch {
@@ -1132,20 +1179,19 @@ const count = Object.keys(sessions).length + 1;
         .replace(/\b[Tt]itle[:\-]?\s*/g, '')
         .trim();
       // Truncate to 30 chars with ellipsis
-      if (aiTitle.length > 30) {
-        aiTitle = aiTitle.slice(0, 30).trim() + '…';
+      if (aiTitle.length > 15) {
+        aiTitle = aiTitle.slice(0, 15).trim() + '…';
       }
       sessions[currentId].title     = aiTitle;
       sessions[currentId].aiRenamed = true;
       persistSessions();
     } 
-    const sp = document.querySelector('.spinner');
-    if (sp) sp.remove();
    currentId = null;
    chatHistory = [];
     renderSessionList();
     renderChat();
-    alert('Session ended and saved.');
+   hideOverlaySpinner();
+   alert('Session ended and saved.');
   });
 
   //───────────────────────────────────────────────────────────────────────────────
@@ -1157,7 +1203,22 @@ const count = Object.keys(sessions).length + 1;
       chatLog.innerHTML = '<div class="date-separator">Select or start a session.</div>';
       return;
     }
-    chatHistory.forEach(m => appendMessage(m.who, m.text, m.time, m.status));
+    let lastDate = null;
+    const todayStr     = new Date().toDateString();
+    const yesterdayStr = new Date(Date.now() - 864e5).toDateString();
+    chatHistory.forEach(m => {
+      const msgDate = new Date(m.time).toDateString();
+      if (msgDate !== lastDate) {
+        lastDate = msgDate;
+        const sep = document.createElement('div');
+        sep.className = 'date-separator';
+        if (msgDate === todayStr)       sep.textContent = 'Today';
+       else if (msgDate === yesterdayStr) sep.textContent = 'Yesterday';
+        else                              sep.textContent = new Date(m.time).toLocaleDateString();
+        chatLog.append(sep);
+      }
+      appendMessage(m.who, m.text, m.time, m.status);
+    });
     scrollToBottom();
   }
 
@@ -1224,7 +1285,7 @@ const count = Object.keys(sessions).length + 1;
    const voices = speechSynthesis.getVoices();
    u.voice = voices.find(v =>
      /(female|zira|samantha|victoria|karen)/i.test(v.name)
-   ) || voices.find(v => v.lang.startsWith('en')) || voices[0];
+   ) || voices.find(v => v.name.toLowerCase().includes('female')) || voices[0];
    u.rate = 1;
    currentUtterance = u;
    speechSynthesis.speak(u);
@@ -1271,6 +1332,7 @@ if (!currentId) {
 
     appendMessage('user', text, now, '✓');
     chatHistory.push({ who:'user', text, time:now, status:'✓' });
+    sessions[currentId].updated = Date.now();
     persistCurrent();
     lastUserMsg = text;
     chatInput.value = '';
@@ -1281,6 +1343,7 @@ if (!currentId) {
         new Date().toISOString(), '✓✓'
       );
       chatHistory.push({ who:'therapist', text:chatLog.lastChild.querySelector('p').textContent, time:new Date().toISOString(), status:'✓✓' });
+      sessions[currentId].updated = Date.now();
       persistCurrent();
       return;
     }
@@ -1334,7 +1397,7 @@ filterBtn.addEventListener('click', () => {
     const rec = new Rec();
     rec.lang = 'en-US';
     rec.interimResults = true;
-    rec.continuous = false;  
+    rec.continuous = true;  
     
     rec.onstart = () => {
       micBtn.classList.add('listening');
@@ -1359,6 +1422,10 @@ filterBtn.addEventListener('click', () => {
       } else {
         rec.start();
           }
+    });
+  } else {
+    micBtn.addEventListener('click', ()=> {
+      alert('Speech recognition not supported in this browser.');
     });
   }
 
