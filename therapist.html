@@ -136,9 +136,8 @@
     }
     .copy-btn {
  position:absolute;
-    bottom:4px;    right:4px; display: none;      background:rgba(0,0,0,0.1); border:none; padding:4px; border-radius:50%;
+    bottom:4px;    right:4px;     background:rgba(0,0,0,0.1); border:none; padding:4px; border-radius:50%;
       cursor:pointer;
-    font-size:0;    
    }
    .copy-btn i {   color:var(--muted);
    }
@@ -392,8 +391,11 @@ aside#sessionList.open { display: block; }
   background:rgba(74,144,226,0.1);
 }
     #chatAreaControls {
-  position: fixed;
-  bottom: 0; left: 0; right: 0;
+  position: absolute;
+  bottom: 0;
+  left: 280px;              
+  width: calc(100% - 280px);
+  max-height: 25vh;
   background: var(--surface);
   box-shadow: 0 -2px 8px rgba(0,0,0,0.05);
   padding: var(--spacing);
@@ -512,13 +514,16 @@ aside#sessionList.open { display: block; }
               <button class="delete-session"><i class="fas fa-trash-alt"></i> Delete</button>
             </div>
           </div>`;
-        // toggle dropdown
         const ell = li.querySelector('.fas.fa-ellipsis-h');
         const dd  = li.querySelector('.session-actions-dropdown');
-        ell.addEventListener('click', e=>{
-          e.stopPropagation();
-          dd.style.display = dd.style.display==='block'?'none':'block';
-        });
+        ell.addEventListener('click', e => {
+        e.stopPropagation();
+        document.querySelectorAll('.session-actions-dropdown')
+          .forEach(d=>{ if (d!==dd) d.style.display='none' });
+        dd.style.display = dd.style.display==='block'?'none':'block';
+      });
+      document.addEventListener('click', () => dd.style.display = 'none');
+
         // share
         li.querySelector('.share-session').addEventListener('click', ()=>{
           navigator.clipboard.writeText(window.location.href + '?session=' + id);
@@ -555,10 +560,12 @@ titleDiv.addEventListener('blur', ()=>{
     }
 
   const menuToggle = document.getElementById('menuToggle');
-    menuToggle.addEventListener('click', ()=>{
-      document.getElementById('sessionList')
-        .classList.toggle('open');
-    });
+    menuToggle.hidden = false;
+  menuToggle.addEventListener('click', () => {
+    const list = document.getElementById('sessionList');
+    list.classList.toggle('open');
+  });
+
     function formatText(text) {
   text = text
     .replace(/[#*_`>~-]+/g, '')      
@@ -568,7 +575,6 @@ titleDiv.addEventListener('blur', ()=>{
 }
 
     function appendMessage(who, text, time=new Date().toISOString(), status='') {
-      // remove spinner if present
       const sp = chatLog.querySelector('.spinner');
       if (sp) sp.remove();
 
@@ -580,7 +586,7 @@ titleDiv.addEventListener('blur', ()=>{
         <div class="bubble">
           ${formatText(text)}
 <div class="bubble-actions">
-  <button class="copy-btn" title="Copy"><i class="fas fa-copy"></i> Copy</button>
+  <button class="copy-btn" title="Copy"><i class="fas fa-copy"></i></button>
 </div>
 <time>${new Date(time).toLocaleTimeString()}</time>
         </div>
@@ -592,7 +598,7 @@ titleDiv.addEventListener('blur', ()=>{
       // copy
       div.querySelector('.copy-btn').addEventListener('click', ()=>{
         navigator.clipboard.writeText(text);
-        showToast('Copied to clipboard');
+        showToast('Copied');
       });
       // speak
        if (who==='therapist') {
@@ -603,22 +609,19 @@ titleDiv.addEventListener('blur', ()=>{
             speechSynthesis.cancel();
             return isSpeaking=false;
           }
-            let voices = speechSynthesis.getVoices();
-          if (!voices.length) {
-            speechSynthesis.addEventListener('voiceschanged',()=>{ voices = speechSynthesis.getVoices(); });
-          }
-         utter = new SpeechSynthesisUtterance(text);
-       if (!voices.length) {
-  speechSynthesis.onvoiceschanged = () => {
-    voices = speechSynthesis.getVoices();
-    setFemaleVoice();
-  };
-}
-function setFemaleVoice() {
-  utter.voice = voices.find(v=>/female/i.test(v.name) && v.lang.startsWith('en'))
-             || voices.find(v=>/female/i.test(v.name))
-             || voices[0];
-}
+         function pickFemale() {
+          const vs = speechSynthesis.getVoices();
+          return vs.find(v=>/female/i.test(v.name) && v.lang.startsWith('en'))
+              || vs.find(v=>/female/i.test(v.name))
+              || vs[0];
+        }
+       utter = new SpeechSynthesisUtterance(text);
+        if (!speechSynthesis.getVoices().length) {
+          speechSynthesis.onvoiceschanged = () => { utter.voice = pickFemale(); };
+        } else {
+          utter.voice = pickFemale();
+        }
+
 setFemaleVoice();
           utter.rate = 0.9;
           isSpeaking = true;
@@ -781,10 +784,11 @@ setFemaleVoice();
 rec.lang = 'en-US';
 rec.continuous = true;
 rec.interimResults = true; 
-  rec.onresult = e => {
-  const { transcript } = e.results[e.results.length - 1][0];
-  chatInput.value = transcript;
-};
+rec.onresult = e => {
+   const last = e.results[e.results.length - 1];
+   chatInput.value = last[0].transcript;
+ };
+ rec.onend = () => { if (isListening) rec.start(); };
 rec.onend = () => { if (isListening) rec.start(); };
     rec.onend = () => { if (isListening) rec.start(); };
    micBtn.addEventListener('click', () => {
@@ -808,13 +812,11 @@ document.getElementById('searchSessions').addEventListener('input', e=>{
         li.style.display = (title.includes(q)||snippet.includes(q)) ? '' : 'none';
       });
     });
-    //—— Quick replies ——//
     quickBtns.forEach(b=>b.addEventListener('click',()=>{
       chatInput.value = b.textContent;
       chatForm.dispatchEvent(new Event('submit'));
     }));
 
-    //—— Regenerate & Edit ——//
    regenBtn.addEventListener('click', () => {
     if (!lastUserMsg) return;
     chatInput.value = lastUserMsg;
@@ -834,7 +836,6 @@ document.getElementById('searchSessions').addEventListener('input', e=>{
       }
     });
 
-    //—— Initialize ——//
     loadSessionList();
   });
   </script>
