@@ -608,17 +608,10 @@ position: absolute;
 #offlineToast[open] { display: block; }
 
 #dataControls {
-  position: absolute;
-  bottom: calc(var(--padding) +  var(--header-height) * 0.1); 
-  right: var(--padding);
   display: flex;
+  align-items: center;
   gap: 0.5rem;
-  background: var(--surface);
-  padding: 0.25rem;
-  border-radius: var(--radius);
-  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-  max-width: 220px;           
- z-index: 1000;
+  margin-left: 1rem;       
 }
 #dataControls button {
   flex: 1;                   
@@ -1154,6 +1147,10 @@ html.dark #chatInputForm input {
   <button id="darkModeToggle" title="Toggle dark mode">
     <i class="fas fa-moon"></i>
   </button>
+       <div id="dataControls" hidden>
+      <button id="clearHistory"><i class="fas fa-trash"></i> </button>
+      <button id="exportTranscript"><i class="fas fa-file-export"></i></button>
+    </div>
   <button id="endSession" title="End session">
     <i class="fas fa-sign-out-alt"></i> 
     <span class="end-text"> End Session</span>
@@ -1194,10 +1191,6 @@ html.dark #chatInputForm input {
       <button id="micBtn" type="button" title="Speak"><i class="fas fa-microphone"></i></button>
       <button id="sendBtn" type="submit" title="Send"><i class="fas fa-paper-plane"></i></button>
     </form>
-   <div id="dataControls" hidden>
-      <button id="clearHistory"><i class="fas fa-trash"></i> </button>
-      <button id="exportTranscript"><i class="fas fa-file-export"></i></button>
-    </div>
 </div>
   </main>
 
@@ -1215,7 +1208,7 @@ html.dark #chatInputForm input {
 </div>
 
   <div id="copyToast" class="toast" aria-live="polite" aria-atomic="true" hidden>
-  Copied to clipboard!
+  Copied!
 </div>
   <div id="overlaySpinner" hidden>
   <div class="overlay-content">
@@ -1696,25 +1689,26 @@ filterBtn.addEventListener('click', () => {
       micBtn.innerHTML = '<i class="fas fa-microphone-slash"></i>';
     };
 
-   let finalTranscript   = '';
-   let interimTranscript = '';
-     for (let i = event.resultIndex; i < event.results.length; i++) {
-       const part = event.results[i][0].transcript;
-   if (event.results[i].isFinal) {
-     finalTranscript   += part;
-   } else {
-     interimTranscript += part;
-   }
-     }
-    chatInput.value = lastInterim || '';    
- chatInput.value += interimTranscript;     
- if (finalTranscript) {
-   chatInput.value += finalTranscript;    
-   lastInterim = '';                 
- } else {
-   lastInterim = interimTranscript;       
- }
-   };
+   rec.onresult = event => {
+       let finalTranscript   = '';
+       let interimTranscript = '';
+       for (let i = event.resultIndex; i < event.results.length; i++) {
+         const part = event.results[i][0].transcript;
+         if (event.results[i].isFinal) {
+           finalTranscript   += part;
+         } else {
+           interimTranscript += part;
+         }
+       }
+
+     chatInput.value = (chatInput.value.replace(lastInterim, '')) + interimTranscript;
+       if (finalTranscript) {
+         chatInput.value += finalTranscript;
+         lastInterim = '';
+       } else {
+         lastInterim = interimTranscript;
+      }
+     };
 
     rec.onend = () => {
       micBtn.classList.remove('listening');
