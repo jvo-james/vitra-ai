@@ -188,6 +188,20 @@ html, body {
 #sessionList .session-search {
   display: flex; gap: 0.5rem; margin-bottom: var(--padding);
 }
+  @media (max-width: 724px) {
+ #sessionList {
+    display: none;
+    position: absolute;
+    top: 0;                       
+    left: 0;
+    width: var(--sidebar-width);
+    height: 100vh;             
+     z-index: 1100;
+     background: var(--surface);
+     flex-direction: column;
+     box-shadow: 2px 0 8px rgba(0,0,0,0.05);
+   }
+  }
 #searchSessions {
   flex: 1; padding: 0.5rem; border: 1px solid var(--muted);
   border-radius: var(--radius);
@@ -225,7 +239,7 @@ html, body {
   font-size: var(--font-size-sm); color: var(--muted);
   align-self: flex-end;
 }
-#newSession, #endSession {
+#newSession {
   width: 100%; padding: 0.75rem; margin-top: 0.5rem;
   border: none; border-radius: var(--radius);
   font-weight: 600; cursor: pointer;
@@ -242,12 +256,18 @@ html, body {
 }
 #endSession:hover {
 background: #c12e3a; }
+.dots-dropdown button {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+}
 
 /*─────────────────────────────────────────────────────────────────────────────
   3. MAIN CHAT AREA
 ─────────────────────────────────────────────────────────────────────────────*/
 #chatArea {
-  position: absolute; top: var(--header-height); left: var(--sidebar-width);
+  position: absolute; top: calc(var(--header-height) + 1px); left: var(--sidebar-width);
   right: 0; bottom: 0;
   background: var(--bg); padding: var(--padding);
   display: flex; flex-direction: column;
@@ -261,8 +281,9 @@ background: #c12e3a; }
   font-size: var(--font-size-sm); color: var(--muted);
 }
 .listening {
-  background: var(--secondary);
-}
+ background: var(--secondary);
+  color: #fff;
+ }
 /*─────────────────────────────────────────────────────────────────────────────
   4. MESSAGE BUBBLES
 ─────────────────────────────────────────────────────────────────────────────*/
@@ -294,12 +315,31 @@ background: #c12e3a; }
 }
 .bubble p { margin-bottom: 0.25rem; }
 
-.bubble .copy-btn,
-.speak-btn {
-  position: absolute; top: 0.5rem; opacity: 0;
-  background: none; border: none; cursor: pointer;
-  transition: opacity var(--transition);
-}
+ .bubble .copy-btn {
+ position: absolute;
+  bottom: 0.5rem; 
+  top: auto;      
+  right: 0.75rem; 
+  opacity: 0;
+   background: none;
+   border: none;
+   cursor: pointer;
+   transition: opacity var(--transition);
+ }
+
+ 
+ .speak-btn {
+position: absolute;
+ right: -2rem;          
+  top: 50%;             
+  transform: translateY(-50%);
+  color: var(--info);
+   background: none;
+   border: none;
+   cursor: pointer;
+   transition: opacity var(--transition);
+ }
+
 .bubble .copy-btn { right: 1.5rem; color: var(--muted); }
 .speak-btn       { right: 0.5rem; color: var(--info); }
 
@@ -357,12 +397,14 @@ background: #c12e3a; }
   border-top: 1px solid var(--muted);
   padding: 0.75rem var(--padding);
   display: flex;
-  align-items: center;
-  justify-content: space-between;
+   flex-direction: column;      
+  align-items: stretch;   
   gap: 1rem;
   box-shadow: 0 -2px 6px rgba(0,0,0,0.05);
 }
- 
+  #chatQuickToolbar {
+ margin-bottom: 1rem;
+ }
  #chatControls {
  display: flex; gap: 0.5rem;
 }
@@ -418,7 +460,10 @@ background: #c12e3a; }
 #chatInputForm button:hover {
   background: var(--primary-dark);
 }
-
+ #sessionsUl li:hover .dots-btn {
+  opacity: 1;
+  color: var(--primary-dark);  
+ }
 /*─────────────────────────────────────────────────────────────────────────────
   8. MODAL & OVERLAYS
 ─────────────────────────────────────────────────────────────────────────────*/
@@ -586,7 +631,16 @@ background: #c12e3a; }
 #offlineToast[open] { display: block; }
 
 #dataControls {
-  display: flex; gap: 0.5rem;
+  position: fixed;            
+  bottom: var(--padding);     
+  right: var(--padding);     
+  display: flex;
+  gap: 0.5rem;
+  background: var(--surface);
+  padding: 0.5rem;
+  border-radius: var(--radius);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  z-index: 1000;
 }
 #clearHistory, #exportTranscript {
   background: var(--surface); color: var(--text);
@@ -750,6 +804,22 @@ background: #c12e3a; }
 #copyToast.show {
   opacity: 1;
 }
+#sessionsUl li .session-title {
+  font-weight: 600;
+  font-size: var(--font-size-base);
+  margin-bottom: 0.25rem;
+}
+
+#sessionsUl li .snippet {
+  color: var(--muted);
+  font-size: var(--font-size-sm);
+  margin-bottom: 0.25rem;
+}
+
+#sessionsUl li .session-date {
+  color: var(--muted);
+  font-size: var(--font-size-sm);
+}
 
 </style>
 
@@ -855,6 +925,16 @@ document.addEventListener('DOMContentLoaded', () => {
    sidebar.classList.toggle('visible');
  });
 
+   document.addEventListener('click', e => {
+   if (!e.target.closest('#sessionList') && !e.target.closest('#menuToggle')) {
+      sidebar.classList.remove('visible');
+    }
+  });
+
+  sessionsUl.addEventListener('click', () => sidebar.classList.remove('visible'));
+  newSessionBtn.addEventListener('click', () => sidebar.classList.remove('visible'));
+
+
   let currentUtterance = null;
   
   //───────────────────────────────────────────────────────────────────────────────
@@ -882,16 +962,14 @@ document.addEventListener('DOMContentLoaded', () => {
       sessionCounter++;
       const li = document.createElement('li');
       li.innerHTML = `
-        <div class="session-entry">
-          <strong>${data.title}</strong>
-          <span class="snippet">${(data.history.slice(-1)[0]?.text||'').slice(0,30)}</span>
-          <time>${new Date(+id).toLocaleDateString()}</time>
-        </div>
+        <div class="session-title">${data.title}</div>
+        <div class="snippet">${(data.history.slice(-1)[0]?.text||'…').slice(0,30)}…</div>
+        <div class="session-date">${new Date(+id).toLocaleDateString()}</div>
         <button class="dots-btn" aria-label="Actions">⋮</button>
         <div class="dots-dropdown">
-          <button class="edit-title">Rename</button>
-          <button class="delete-session">Delete</button>
-          <button class="export-session">Export</button>
+          <button class="edit-title"><i class="fas fa-i-cursor"></i> Rename</button>
+          <button class="delete-session"><i class="fas fa-trash-alt"></i> Delete</button>
+          <button class="export-session"><i class="fas fa-file-export"></i> Export</button>
         </div>
       `;
       sessionsUl.append(li);
@@ -902,7 +980,6 @@ document.addEventListener('DOMContentLoaded', () => {
       // click to switch
       li.addEventListener('click', ()=>switchSession(id));
 
-      // ── ▼ Dots menu handlers must be INSIDE the loop! ▼ ──
       const btnDots    = li.querySelector('.dots-btn');
       const ddEdit    = li.querySelector('.edit-title');
       const ddDelete  = li.querySelector('.delete-session');
@@ -914,6 +991,13 @@ document.addEventListener('DOMContentLoaded', () => {
                 .forEach(el=>el.classList.remove('open'));
         li.classList.toggle('open');
       });
+      
+      let pressTimer;
+      li.addEventListener('touchstart', () => {
+        pressTimer = setTimeout(() => li.classList.add('open'), 600);
+      });
+      li.addEventListener('touchend', () => clearTimeout(pressTimer));
+
       ddEdit.addEventListener('click', e => {
         e.stopPropagation();
         const newTitle = prompt('New session title:', sessions[id].title);
@@ -961,7 +1045,8 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   newSessionBtn.addEventListener('click', () => {
-    const title = prompt('Session title:', `Session ${new Date().toLocaleDateString()}`);
+const count = Object.keys(sessions).length + 1;
+  const title = prompt('Session title:', `Session ${count}`);
     if (!title) return;
     persistCurrent();
     const id = Date.now().toString();
@@ -969,9 +1054,24 @@ document.addEventListener('DOMContentLoaded', () => {
     switchSession(id);
   });
 
-  endSessionBtn.addEventListener('click', () => {
+ endSessionBtn.addEventListener('click', async () => {
     if (!currentId) return;
     persistCurrent();
+   const transcript = sessions[currentId].history
+      .map(m => `${m.who}: ${m.text}`).join('\n');
+    let aiTitle;
+    try {
+      aiTitle = await callAI([
+        { role:'system', content: 'You are a helpful assistant.' },
+        { role:'user', content: `Suggest a brief, descriptive title for this therapy session:\n\n${transcript}` }
+      ]);
+    } catch {
+      aiTitle = sessions[currentId].title; // fallback
+    }
+    // Update and persist the session title
+    sessions[currentId].title = aiTitle;
+    persistSessions();
+
     currentId = null;
     chatHistory = [];
     renderSessionList();
@@ -1013,15 +1113,21 @@ document.addEventListener('DOMContentLoaded', () => {
    });
    const html = converter.makeHtml(text);
 
-   msg.innerHTML = `
-     ${who==='therapist' ? '<img src="https://i.pravatar.cc/50?img=32" class="avatar-small">' : ''}
-     <div class="bubble">
-       ${html}
-       <time>${formattedTime}</time>
-       <button class="copy-btn" title="Copy"><i class="fas fa-copy"></i></button>
-     </div>
-     ${who==='therapist' ? '<button class="speak-btn" title="Play"><i class="fas fa-volume-up"></i></button>' : ''}
-   `;
+  const avatarHTML = who==='therapist'
+    ? '<img src="https://i.pravatar.cc/50?img=32" class="avatar-small">'
+    : '';
+  const speakHTML = who==='therapist'
+    ? '<button class="speak-btn" title="Play"><i class="fas fa-volume-up"></i></button>'
+    : '';
+  msg.innerHTML = `
+    ${avatarHTML}
+    <div class="bubble">
+      ${html}
+      <time>${formattedTime}</time>
+      <button class="copy-btn" title="Copy"><i class="fas fa-copy"></i></button>
+    </div>
+    ${speakHTML}
+  `;
     chatLog.append(msg);
     scrollToBottom();
 
@@ -1065,9 +1171,6 @@ document.addEventListener('DOMContentLoaded', () => {
     scrollToBottom();
   }
 
-  //───────────────────────────────────────────────────────────────────────────────
-  // 4. OPENAI INTEGRATION
-  //───────────────────────────────────────────────────────────────────────────────
   function isHighRisk(txt) {
     return /suicidal|kill myself|harm myself/i.test(txt);
   }
@@ -1162,6 +1265,12 @@ filterBtn.addEventListener('click', () => {
     const rec = new Rec();
     rec.lang = 'en-US';
     rec.interimResults = true;
+    rec.continuous = false;  
+    
+    rec.onstart = () => {
+      micBtn.classList.add('listening');
+      micBtn.innerHTML = '<i class="fas fa-microphone-slash"></i>';
+    };
 
     rec.onresult = e => {
       chatInput.value = Array.from(e.results)
@@ -1180,9 +1289,7 @@ filterBtn.addEventListener('click', () => {
         // icon will reset in rec.onend()
       } else {
         rec.start();
-        micBtn.classList.add('listening');
-        micBtn.innerHTML = '<i class="fas fa-microphone-slash"></i>';
-      }
+          }
     });
   }
 
@@ -1271,23 +1378,13 @@ clearBtn.addEventListener('click', async () => {
   renderChat();
 });
 
-// —— Wire up sidebar “Delete Session” action (in your dropdown handler)
-li.querySelector('.delete-session').addEventListener('click', async e => {
-  e.stopPropagation();
-  const ok = await askConfirm({
-    title: 'Delete Session?',
-    message: 'This will permanently delete the session and all its messages.',
-    confirmText: 'Yes, delete'
-  });
-  if (!ok) return;
-  delete sessions[id];
-  persistSessions();
-  if (currentId === id) {
-    currentId = null;
-    chatHistory = [];
-    renderChat();
+  document.addEventListener('click', e => {
+  if (!e.target.closest('#sessionsUl .dots-btn')
+   && !e.target.closest('#sessionsUl .dots-dropdown')) {
+    document
+      .querySelectorAll('#sessionsUl li.open')
+      .forEach(li => li.classList.remove('open'));
   }
-  renderSessionList();
 });
 
   //───────────────────────────────────────────────────────────────────────────────
