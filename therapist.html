@@ -74,14 +74,15 @@
     }
     #sessionList input { flex:1; padding:0.5rem; border:1px solid var(--muted); border-radius:var(--radius); }
     #sessionList button { background:var(--primary); color:#fff; border:none; border-radius:var(--radius); padding:0.5rem; cursor:pointer; }
-    #sessionList ul { list-style:none; }
+   #sessionList ul { list-style:none; padding:0; margin:0; }
     #sessionList li {
       padding:0.75rem; margin-bottom:0.5rem;
       border-radius:var(--radius); cursor:pointer;
       transition: background var(--transition);
     }
-    #sessionList li.active, #sessionList li:hover {
-      background:rgba(74,144,226,0.1);
+  #sessionList li.active,
+#sessionList li:hover {
+  background:rgba(74,144,226,0.1);
     }
     #sessionList li strong { display:block; margin-bottom:0.25rem; }
     #sessionList li .snippet { font-size:0.9rem; color:var(--muted); }
@@ -350,6 +351,13 @@ aside#sessionList.open { display: block; }
   box-shadow: 0 2px 8px rgba(0,0,0,0.1);
   z-index: 1500;
 }
+    #sessionList li .session-actions {
+  display: none;
+  position: absolute;
+  top: 50%;
+  right: 1rem;
+  transform: translateY(-50%);
+}
 #sessionList li .session-actions-dropdown button {
   display: flex; align-items:center;
   padding: 0.5rem 1rem;
@@ -358,6 +366,30 @@ aside#sessionList.open { display: block; }
 }
 #sessionList li .session-actions-dropdown button:hover {
   background: rgba(0,0,0,0.05);
+}
+    #sessionList li:hover .session-actions { display:flex; gap:0.5rem; }
+#sessionList li .session-actions i {
+  font-size:1rem; color:var(--muted); cursor:pointer;
+}
+#sessionList li .session-actions-dropdown {
+  display:none;
+  position:absolute; top:120%; right:0;
+  background:var(--surface);
+  border:1px solid var(--muted);
+  border-radius:var(--radius);
+  box-shadow:0 2px 8px rgba(0,0,0,0.1);
+  overflow:hidden;
+ z-index:1500;
+}
+#sessionList li .session-actions-dropdown button {
+  width:100%; padding:0.5rem 1rem;
+  text-align:left; background:none; border:none;
+  display:flex; align-items:center; gap:0.5rem;
+  color:var(--text); font-size:0.9rem;
+  transition:background var(--transition);
+}
+#sessionList li .session-actions-dropdown button:hover {
+  background:rgba(74,144,226,0.1);
 }
     #chatAreaControls {
   position: fixed;
@@ -370,6 +402,17 @@ aside#sessionList.open { display: block; }
 }
 #chatAreaControls > * { flex-shrink: 0; }
 
+    +#chatAreaControls { 
+      position:sticky; bottom:0; left:0; right:0;
+  background:var(--surface);
+  box-shadow:0 -2px 8px rgba(0,0,0,0.05);
+  padding:var(--spacing);
+  display:flex; flex-wrap:wrap; gap:0.5rem;
+  align-items:center; z-index:100;
+}
+#chatAreaControls > * { flex-shrink:0; }
+.bubble {
+ padding:0.75rem; padding-bottom:1.25rem;  }
   </style>
 </head>
 
@@ -397,7 +440,7 @@ aside#sessionList.open { display: block; }
     <div id="chatLog" role="log" aria-live="polite">
       <div class="date-separator">Welcome! Start a session or click “New Session”.</div>
     </div>
-
+<div id="chatAreaControls">
     <div id="chatControls">
       <button id="regenerateReply" title="Regenerate"><i class="fas fa-redo"></i></button>
       <button id="editLast" title="Edit last"><i class="fas fa-edit"></i></button>
@@ -419,6 +462,7 @@ aside#sessionList.open { display: block; }
       <button id="clearHistory"><i class="fas fa-trash"></i> Clear History</button>
       <button id="exportTranscript"><i class="fas fa-file-export"></i> Export Transcript</button>
     </div>
+</div>
   </main>
 
   <script>
@@ -442,7 +486,6 @@ aside#sessionList.open { display: block; }
     let chatHistory = [];
     let lastUserMsg = '';
 
-    //—— Utilities ——//
     function saveSessions() {
       localStorage.setItem('sessions', JSON.stringify(sessions));
     }
@@ -565,9 +608,19 @@ titleDiv.addEventListener('blur', ()=>{
             speechSynthesis.addEventListener('voiceschanged',()=>{ voices = speechSynthesis.getVoices(); });
           }
          utter = new SpeechSynthesisUtterance(text);
-          utter.voice = voices.find(v=>/female/i.test(v.name) && v.lang.startsWith('en')) 
-                     || voices.find(v=>/female/i.test(v.name))
-                     || voices[0];          utter.rate = 0.9;
+       if (!voices.length) {
+  speechSynthesis.onvoiceschanged = () => {
+    voices = speechSynthesis.getVoices();
+    setFemaleVoice();
+  };
+}
+function setFemaleVoice() {
+  utter.voice = voices.find(v=>/female/i.test(v.name) && v.lang.startsWith('en'))
+             || voices.find(v=>/female/i.test(v.name))
+             || voices[0];
+}
+setFemaleVoice();
+          utter.rate = 0.9;
           isSpeaking = true;
           utter.onend = ()=> isSpeaking = false;
           speechSynthesis.speak(utter);
@@ -614,7 +667,6 @@ titleDiv.addEventListener('blur', ()=>{
       return choices[0].message.content.trim();
     }
 
-    //—— Session management ——//
     function switchSession(id) {
       saveCurrent();
       currentId = id;
@@ -624,32 +676,27 @@ titleDiv.addEventListener('blur', ()=>{
       loadSessionList();
       renderHistory();
     }
-    newSessionBtn.addEventListener('click', ()=>{
-      const title = prompt('Enter session title:',`Session ${new Date().toLocaleDateString()}`);
-      if (!title) return;
-      saveCurrent();
-      const id = Date.now().toString();
-      sessions[id] = {title, history:[]};
-      switchSession(id);
-    });
-    endSessionBtn.addEventListener('click', ()=>{
-      saveCurrent();
-      currentId = null;
-      chatHistory = [];
-      renderHistory();
+   newSessionBtn.addEventListener('click', ()=>{
+  saveCurrent();
+  const num = Object.keys(sessions).length + 1;
+  const id = Date.now().toString();
+  sessions[id] = { title:`Session ${num}`, history:[] };
+  switchSession(id);
+});
+   endSessionBtn.addEventListener('click', ()=>{
+  saveCurrent();
+  if (chatHistory.length) {
+    callAI([
+      { role:'system', content:'Generate a concise session title.' },
+      { role:'user', content: chatHistory.map(m=>m.text).join('\n') }
+    ]).then(title=>{
+      sessions[currentId].title = title || sessions[currentId].title;
+      saveSessions();
       loadSessionList();
-      if (chatHistory.length) {
-        callAI([
-          { role:'system', content: 'Generate a concise title for this therapy session.' },
-          { role:'user', content: chatHistory.map(m=>m.text).join('\n') }
-        ]).then(title=>{
-          sessions[currentId].title = title || 'New Session';
-          saveSessions();
-          loadSessionList();
-        });
-      }
-      alert('Session ended and saved.');
     });
+  }
+  currentId = null; chatHistory=[]; renderHistory(); loadSessionList();
+});
    clearHistBtn.addEventListener('click', () => {
      if (!currentId) return;
      const modal = document.createElement('div');
@@ -681,7 +728,6 @@ titleDiv.addEventListener('blur', ()=>{
       a.href=url; a.download='transcript.txt'; a.click();
     });
 
-    //—— Chat logic ——//
     chatForm.addEventListener('submit', async e=>{
       e.preventDefault();
       const txt = chatInput.value.trim(); if (!txt||!currentId) return;
@@ -735,12 +781,11 @@ titleDiv.addEventListener('blur', ()=>{
 rec.lang = 'en-US';
 rec.continuous = true;
 rec.interimResults = true; 
-    rec.onresult = e => {
-const last = e.results.length - 1;
-  const transcript = e.results[last][0].transcript;
+  rec.onresult = e => {
+  const { transcript } = e.results[e.results.length - 1][0];
   chatInput.value = transcript;
-  chatInput.focus();
-    };
+};
+rec.onend = () => { if (isListening) rec.start(); };
     rec.onend = () => { if (isListening) rec.start(); };
    micBtn.addEventListener('click', () => {
     isListening = !isListening;
