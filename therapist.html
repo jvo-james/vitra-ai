@@ -637,20 +637,33 @@ position: absolute;
 #offlineToast[open] { display: block; }
 
 #dataControls {
-
+  position: absolute;
+  bottom: calc(var(--padding) +  var(--header-height) * 0.1); /* tuck it in */
+  right: var(--padding);
   display: flex;
   gap: 0.5rem;
   background: var(--surface);
-  padding: 0.5rem;
+  padding: 0.25rem;
   border-radius: var(--radius);
   box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-  z-index: 1000;
+  max-width: 220px;            /* prevent it from stretching too wide */
+ z-index: 1000;
 }
-#clearHistory, #exportTranscript {
-  background: var(--surface); color: var(--text);
+#dataControls button {
+  flex: 1;                     /* equal sizing */
+  padding: 0.5rem 0.75rem;     /* comfortable tap targets */
+  background: var(--surface);
+  color: var(--text);
   border: 1px solid var(--muted);
-  padding: 0.5rem; border-radius: var(--radius);
-  cursor: pointer; transition: all var(--transition);
+  border-radius: var(--radius);
+  font-size: var(--font-size-base);
+  cursor: pointer;
+  transition: background var(--transition), border-color var(--transition);
+}
+#dataControls button:hover {
+  background: var(--primary);
+  color: #fff;
+  border-color: var(--primary);
 }
 #clearHistory:hover, #exportTranscript:hover {
   background: var(--primary); color: #fff;
@@ -668,7 +681,23 @@ position: absolute;
 /* Tablet to Phone */
 @media (max-width: 600px) {
   #therapyHeader {
-    flex-wrap: wrap; height: auto; padding: 0.5rem;
+    display: flex !important;     /* force same flex‐layout */
+    flex-wrap: nowrap;
+    height: auto;
+    padding: 0.5rem;
+    gap: 0.5rem;
+  }
+  /* preserve natural DOM order: left → center → right */
+  #therapyHeader .header-left { order: 0; }
+  #therapyHeader .therapist-info { order: 1; }
+  #therapyHeader .header-right { order: 2; margin-left: auto; }
+
+  /* smaller title for mobile */
+  #therapyHeader .therapist-info h1 {
+    font-size: 1rem;             /* down from 1.5rem */
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
   .session-meta { display: none; }
 #chatAreaControls {
@@ -1139,6 +1168,39 @@ html.dark .dots-dropdown button:hover {
   color: #fff;
 }
 
+  html.dark #searchSessions {
+ background: var(--surface);
+  border-color: var(--muted);
+  color: var(--text);
+}
+html.dark #filterBtn {
+  background: var(--secondary-light);
+  color: var(--text);
+  border: 1px solid var(--secondary);
+}
+html.dark #filterBtn:hover {
+  background: var(--secondary);
+  color: var(--bg);
+}
+
+html.dark #chatInputForm button {
+  background: var(--surface);
+  border: 1px solid var(--muted);
+  color: var(--text);
+}
+html.dark #chatInputForm button:hover {
+  background: var(--primary);
+  border-color: var(--primary);
+  color: #fff;
+}
+
+html.dark #chatInputForm input {
+  background: var(--surface);
+  border-color: var(--muted);
+  color: var(--text);
+}
+
+
 </style>
 
   
@@ -1234,7 +1296,9 @@ html.dark .dots-dropdown button:hover {
 </div>
   <script>
 document.addEventListener('DOMContentLoaded', () => {
-   const sidebar       = document.getElementById('sessionList');
+   let lastInterim = '';
+  
+  const sidebar       = document.getElementById('sessionList');
   const sessionsUl    = document.getElementById('sessionsUl');
   const newSessionBtn = document.getElementById('newSession');
   const endSessionBtn = document.getElementById('endSession');
@@ -1619,17 +1683,25 @@ const count = Object.keys(sessions).length + 1;
 
   chatForm.addEventListener('submit', async e => {
     e.preventDefault();
-if (!currentId) {
-     const count = Object.keys(sessions).length + 1;
-     const title = `Session ${count}`;
-     persistCurrent();
-     const id = Date.now().toString();
-     sessions[id] = { title, history: [] };
-     currentId   = id;
-     chatHistory = [];
-     persistSessions();
-     renderSessionList();
-   }
+ if (!currentId) {
+    const id    = Date.now().toString();
+    const title = `Session ${nextSessionNumber}`;
+    persistCurrent();
+    sessions[id] = {
+      title,
+      history: [],
+      aiRenamed: false,
+      updated:   Date.now(),
+      number:    nextSessionNumber
+    };
+    nextSessionNumber++;
+    localStorage.setItem('nextSessionNumber', nextSessionNumber);
+
+    currentId   = id;
+    chatHistory = [];
+    persistSessions();
+    renderSessionList();
+  }
     const text = chatInput.value.trim(); if (!text) return;
     const now  = new Date().toISOString();
 
@@ -1715,14 +1787,24 @@ filterBtn.addEventListener('click', () => {
       micBtn.innerHTML = '<i class="fas fa-microphone-slash"></i>';
     };
 
-    rec.onresult = event => {
-     let transcript = '';
+   let finalTranscript   = '';
+   let interimTranscript = '';
      for (let i = event.resultIndex; i < event.results.length; i++) {
-       if (event.results[i].isFinal) {
-         transcript += event.results[i][0].transcript;
-       }
+       const part = event.results[i][0].transcript;
+   if (event.results[i].isFinal) {
+     finalTranscript   += part;
+   } else {
+     interimTranscript += part;
+   }
      }
-     chatInput.value += transcript;
+    chatInput.value = lastInterim || '';      // clear previous interim
+ chatInput.value += interimTranscript;     // show live feedback
+ if (finalTranscript) {
+   chatInput.value += finalTranscript;     // commit final result
+   lastInterim = '';                       // reset
+ } else {
+   lastInterim = interimTranscript;        // store for next update
+ }
    };
 
     rec.onend = () => {
