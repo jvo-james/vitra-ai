@@ -304,6 +304,7 @@ background: #c12e3a; }
   flex-shrink: 0;
 }
 .bubble {
+  position: relative;
   background: var(--surface);
   padding: 0.75rem 1rem 0.75rem 0.75rem;
   border-radius: var(--radius);
@@ -333,9 +334,9 @@ background: #c12e3a; }
  
  .speak-btn {
 position: absolute;
- right: -2rem;          
-  top: 50%;             
-  transform: translateY(-50%);
+  bottom: 0.5rem;
+  left: 50%;
+  transform: translateX(-50%);
   color: var(--info);
    background: none;
    border: none;
@@ -1274,24 +1275,31 @@ const count = Object.keys(sessions).length + 1;
          }, 2000);
        });
     // speak handler
-    if (who==='therapist') {
-     msg.querySelector('.speak-btn').addEventListener('click', () => {
-   if (currentUtterance && speechSynthesis.speaking) {
-     speechSynthesis.cancel();
-     currentUtterance = null;
-     return;
-   }
-   const u = new SpeechSynthesisUtterance(text);
-   const voices = speechSynthesis.getVoices();
-   u.voice = voices.find(v =>
-     /(female|zira|samantha|victoria|karen)/i.test(v.name)
-   ) || voices.find(v => v.name.toLowerCase().includes('female')) || voices[0];
-   u.rate = 1;
-   currentUtterance = u;
-   speechSynthesis.speak(u);
- });
+    if (who === 'therapist') {
+      const play = msg.querySelector('.speak-btn');
+      let currentUtterance = null;
+      play.addEventListener('click', () => {
+        if (speechSynthesis.speaking) {
+          speechSynthesis.cancel();
+          play.innerHTML = '<i class="fas fa-volume-up"></i>';
+          return;
+        }
+        const utter = new SpeechSynthesisUtterance(text);
+        const allVoices = window.speechSynthesis.getVoices();
+        // exactly as in psychology.html: prefer woman/female identifiers
+        const female = allVoices.find(v => /female|woman|zira|samantha/i.test(v.name))
+                     || allVoices.find(v => v.lang.startsWith('en'));
+        if (female) utter.voice = female;
+        utter.lang = 'en-US';
+        utter.rate = 1;
+        play.innerHTML = '<i class="fas fa-volume-mute"></i>';
+        utter.onend = () => {
+          play.innerHTML = '<i class="fas fa-volume-up"></i>';
+        };
+       speechSynthesis.speak(utter);
+     });
     }
-  }
+ }
 
   function showSpinner() {
     const s = document.createElement('div');
