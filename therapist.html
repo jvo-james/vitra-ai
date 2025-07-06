@@ -1296,6 +1296,12 @@ document.addEventListener('DOMContentLoaded', () => {
   // 2. SESSION MANAGEMENT
   //───────────────────────────────────────────────────────────────────────────────
 
+   let sessions = JSON.parse(localStorage.getItem('sessions') || '{}');
+
+   Object.values(sessions).forEach(s => {
+   if (typeof s.number !== 'number') s.number = 1;
+ });
+  
  let storedNext = parseInt(localStorage.getItem('nextSessionNumber'), 10);
  let nextSessionNumber;
  if (storedNext && !isNaN(storedNext)) {
