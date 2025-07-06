@@ -1397,44 +1397,18 @@ filterBtn.addEventListener('click', () => {
   filterBtn.classList.toggle('active');
  });
 
-  //───────────────────────────────────────────────────────────────────────────────
-  // 5. MICROPHONE TRANSCRIPTION
-  //───────────────────────────────────────────────────────────────────────────────
-  if ('SpeechRecognition' in window || 'webkitSpeechRecognition' in window) {
-    const Rec = window.SpeechRecognition || window.webkitSpeechRecognition;
-    const rec = new Rec();
-    rec.lang = 'en-US';
-    rec.interimResults = true;
-    rec.continuous = true;  
-    
-    rec.onstart = () => {
-      micBtn.classList.add('listening');
-      micBtn.innerHTML = '<i class="fas fa-microphone-slash"></i>';
-    };
+  if ('webkitSpeechRecognition' in window) {
+    const rec = new webkitSpeechRecognition();
+    rec.lang            = 'en-US';
+    rec.interimResults  = true;
+    rec.maxAlternatives = 1;
+    rec.continuous      = false;
+
+    micBtn.addEventListener('click', () => rec.start());
 
     rec.onresult = e => {
-      chatInput.value = Array.from(e.results)
-                           .map(r => r[0].transcript)
-                           .join('');
+      chatInput.value += ' ' + e.results[0][0].transcript;
     };
-    rec.onend = () => {
-      // turn off listening state when recognition stops
-      micBtn.classList.remove('listening');
-      micBtn.innerHTML = '<i class="fas fa-microphone"></i>';
-    };
-
-    micBtn.addEventListener('click', () => {
-      if (micBtn.classList.contains('listening')) {
-        rec.stop();
-        // icon will reset in rec.onend()
-      } else {
-        rec.start();
-          }
-    });
-  } else {
-    micBtn.addEventListener('click', ()=> {
-      alert('Speech recognition not supported in this browser.');
-    });
   }
 
   //───────────────────────────────────────────────────────────────────────────────
