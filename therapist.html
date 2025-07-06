@@ -5,15 +5,11 @@
   <meta name="viewport" content="width=device-width,initial-scale=1.0">
   <title>Vitra AI – Neuropharma Command Center</title>
 
-  <!-- Google Font & FontAwesome -->
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
   <style>
-    /*==================================
-      Variables & Global Reset
-    ==================================*/
-    :root {
+       :root {
       --primary: #4A90E2;
       --primary-hover: #357ABD;
       --secondary: #50C878;
@@ -40,10 +36,7 @@
 
     h1, h2 { font-weight:600; color:var(--primary); }
 
-    /*==================================
-      1. Header
-    ==================================*/
-    header#therapyHeader {
+      header#therapyHeader {
       position: fixed; top:0; left:0; right:0;
       height:64px; background:var(--surface);
       display:flex; align-items:center; gap:1rem;
@@ -69,10 +62,7 @@
       border:2px solid var(--primary); object-fit:cover;
     }
 
-    /*==================================
-      2. Sidebar / Sessions
-    ==================================*/
-    aside#sessionList {
+       aside#sessionList {
       position:fixed; top:64px; left:0;
       width:280px; bottom:0;
       background:var(--surface); padding:var(--spacing);
@@ -106,10 +96,7 @@
     }
     #newSession:hover { background:var(--secondary-hover); }
 
-    /*==================================
-      3. Chat Area (full screen)
-    ==================================*/
-    main#chatArea {
+     main#chatArea {
       margin-top:64px; margin-left:280px;
       flex:1; display:flex; flex-direction:column;
       background:var(--bg); position:relative;
@@ -122,7 +109,6 @@
       color:var(--muted); font-size:0.9rem;
     }
 
-    /*==== Spinner ====*/
     .spinner { display:flex; justify-content:center; padding:1rem; }
     .spinner i {
       font-size:1.5rem; color:var(--primary);
@@ -147,7 +133,6 @@
       position:absolute; bottom:-1.5rem; right:0.5rem;
       font-size:0.8rem; color:var(--muted);
     }
-    /* Copy button */
     .copy-btn {
  position:absolute;
     bottom:4px;    right:4px; display: none;      background:rgba(0,0,0,0.1); border:none; padding:4px; border-radius:50%;
@@ -158,15 +143,12 @@
    }
     .bubble:hover .copy-btn { display:block; }
 
-    /* Speaker button */
     .speak-btn {
       background:none; border:none; margin-left:0.5rem; cursor:pointer;
       color:var(--primary); font-size:1rem;
     }
 
-    /*==================================
-      5. Typing Indicator
-    ==================================*/
+   
     #typingIndicator {
       display:flex; align-items:center; gap:0.5rem;
       padding:0 var(--spacing);
@@ -182,10 +164,7 @@
       66% { content:'..'; }
     }
 
-    /*==================================
-      6. Controls & Quick Replies
-    ==================================*/
-   #chatControls button,
+  
  #dataControls button {
    padding: 0.5rem 1rem;
    background: #fff;
@@ -220,9 +199,7 @@
     }
     .quick-reply:hover { background:var(--primary); color:#fff; }
 
-    /*==================================
-      7. Input & Data Controls
-    ==================================*/
+
     #chatInputForm {
       display:flex; align-items:center; gap:0.5rem;
       padding:0 var(--spacing) var(--spacing);
@@ -252,9 +229,7 @@
       background:var(--primary); color:#fff; border-color:var(--primary);
     }
 
-    /*==================================
-      RESPONSIVE
-    ==================================*/
+   
     @media(max-width:1024px) {
       aside#sessionList { display:none; }
       main#chatArea { margin-left:0; }
@@ -275,7 +250,6 @@
       aside#sessionList.open { display: block; }
     }
 
-    /* 2️⃣ Toast & bubble-actions */
     .bubble-actions { margin-top:0.5rem; display:flex; }
     .toast {
       position: fixed; bottom:1rem; left:50%;
@@ -366,22 +340,50 @@ aside#sessionList.open { display: block; }
  #confirmNo { background: var(--muted); color: #fff; }
  #confirmNo:hover { background: darken(var(--muted), 10%); }
 
+    #sessionList li .session-actions-dropdown {
+  display: none;
+  position: absolute;
+  top: 2rem; right: 0;
+  background: var(--surface);
+  border: 1px solid var(--muted);
+  border-radius: var(--radius);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  z-index: 1500;
+}
+#sessionList li .session-actions-dropdown button {
+  display: flex; align-items:center;
+  padding: 0.5rem 1rem;
+  width: 100%; background: none; border: none;
+  cursor: pointer; gap: 0.5rem;
+}
+#sessionList li .session-actions-dropdown button:hover {
+  background: rgba(0,0,0,0.05);
+}
+    #chatAreaControls {
+  position: fixed;
+  bottom: 0; left: 0; right: 0;
+  background: var(--surface);
+  box-shadow: 0 -2px 8px rgba(0,0,0,0.05);
+  padding: var(--spacing);
+  display: flex; flex-direction: column; gap: var(--spacing);
+  z-index: 100;
+}
+#chatAreaControls > * { flex-shrink: 0; }
+
   </style>
 </head>
 
 <body>
-  <!-- 1. Header -->
 <header id="therapyHeader">
     <button id="collapseBtn" title="Back to dashboard"><i class="fas fa-arrow-left"></i></button>
     <button id="menuToggle" title="Toggle sessions"><i class="fas fa-bars"></i></button>
     <div class="therapist-info">
       <img src="https://i.pravatar.cc/100?img=32" alt="Therapist avatar" class="avatar">
-      <h1>Dr. Amina Mensah</h1>
+      <h1>Vitra Therapist</h1>
     </div>
     <button id="endSession" title="End session"><i class="fas fa-sign-out-alt"></i></button>
   </header>
 
-  <!-- 2. Sidebar -->
   <aside id="sessionList">
     <div class="session-search">
       <input type="search" id="searchSessions" placeholder="Search sessions…">
@@ -391,7 +393,6 @@ aside#sessionList.open { display: block; }
     <button id="newSession"><i class="fas fa-plus"></i> New Session</button>
   </aside>
 
-  <!-- 3. Chat Area -->
   <main id="chatArea">
     <div id="chatLog" role="log" aria-live="polite">
       <div class="date-separator">Welcome! Start a session or click “New Session”.</div>
@@ -454,14 +455,51 @@ aside#sessionList.open { display: block; }
       sessionListEl.innerHTML = '';
       Object.entries(sessions).sort((a,b)=>b[0]-a[0]).forEach(([id, s])=>{
         const li = document.createElement('li');
+         li.innerHTML = `
+          <div>
+            <div class="session-title">${s.title}</div>
+            <span class="snippet">${s.history.length? s.history[s.history.length-1].text.slice(0,30)+'…' : ''}</span>
+            <time>${s.history.length ? new Date(s.history[s.history.length-1].time).toLocaleDateString() : ''}</time>
+          </div>
+          <div class="session-actions">
+            <i class="fas fa-ellipsis-h"></i>
+            <div class="session-actions-dropdown">
+              <button class="share-session"><i class="fas fa-share-alt"></i> Share</button>
+              <button class="rename-session"><i class="fas fa-edit"></i> Rename</button>
+              <button class="delete-session"><i class="fas fa-trash-alt"></i> Delete</button>
+            </div>
+          </div>`;
+        // toggle dropdown
+        const ell = li.querySelector('.fas.fa-ellipsis-h');
+        const dd  = li.querySelector('.session-actions-dropdown');
+        ell.addEventListener('click', e=>{
+          e.stopPropagation();
+          dd.style.display = dd.style.display==='block'?'none':'block';
+        });
+        // share
+        li.querySelector('.share-session').addEventListener('click', ()=>{
+          navigator.clipboard.writeText(window.location.href + '?session=' + id);
+          alert('Link copied to clipboard');
+       });
+        // rename
+        li.querySelector('.rename-session').addEventListener('click', ()=>{
+          const newTitle = prompt('New session name:', s.title);
+          if (newTitle) {
+            sessions[id].title = newTitle;
+            saveSessions();
+            loadSessionList();
+          }
+        });
+        // delete
+        li.querySelector('.delete-session').addEventListener('click', ()=>{
+          if (confirm('Delete this session permanently?')) {
+            delete sessions[id];
+            saveSessions();
+            loadSessionList();
+          }
+        });
         li.dataset.id = id;
         if (id===currentId) li.classList.add('active');
-        li.innerHTML = `
-  <div class="session-title" contenteditable="true">${s.title}</div>
-  ${s.history && s.history.length
-     ? `<span class="snippet">${s.history[s.history.length-1].text.slice(0,30)}…</span>
-        <time>${new Date(s.history[s.history.length-1].time).toLocaleDateString()}</time>`
-     : ''}`;
 const titleDiv = li.querySelector('.session-title');
 titleDiv.addEventListener('blur', ()=>{
   sessions[id].title = titleDiv.textContent.trim() || s.title;
@@ -522,10 +560,14 @@ titleDiv.addEventListener('blur', ()=>{
             speechSynthesis.cancel();
             return isSpeaking=false;
           }
-          const voices = speechSynthesis.getVoices();
-          utter = new SpeechSynthesisUtterance(text);
-          utter.voice = voices.find(v => /female/i.test(v.name)) || voices[0];
-          utter.rate = 0.9;
+            let voices = speechSynthesis.getVoices();
+          if (!voices.length) {
+            speechSynthesis.addEventListener('voiceschanged',()=>{ voices = speechSynthesis.getVoices(); });
+          }
+         utter = new SpeechSynthesisUtterance(text);
+          utter.voice = voices.find(v=>/female/i.test(v.name) && v.lang.startsWith('en')) 
+                     || voices.find(v=>/female/i.test(v.name))
+                     || voices[0];          utter.rate = 0.9;
           isSpeaking = true;
           utter.onend = ()=> isSpeaking = false;
           speechSynthesis.speak(utter);
@@ -596,6 +638,16 @@ titleDiv.addEventListener('blur', ()=>{
       chatHistory = [];
       renderHistory();
       loadSessionList();
+      if (chatHistory.length) {
+        callAI([
+          { role:'system', content: 'Generate a concise title for this therapy session.' },
+          { role:'user', content: chatHistory.map(m=>m.text).join('\n') }
+        ]).then(title=>{
+          sessions[currentId].title = title || 'New Session';
+          saveSessions();
+          loadSessionList();
+        });
+      }
       alert('Session ended and saved.');
     });
    clearHistBtn.addEventListener('click', () => {
@@ -679,17 +731,17 @@ titleDiv.addEventListener('blur', ()=>{
 
  let isListening = false;
     const SpeechRec = window.SpeechRecognition || window.webkitSpeechRecognition;
-  const rec = new SpeechRec();
-  rec.lang = 'en-US';
-  rec.continuous = true;         
-  rec.interimResults = true;  
+ const rec = new SpeechRec();
+rec.lang = 'en-US';
+rec.continuous = true;
+rec.interimResults = true; 
     rec.onresult = e => {
- const transcript = Array.from(e.results)
-      .map(r => r[0].transcript)
-      .join('');
-    chatInput.value = transcript;
-    chatInput.focus();
+const last = e.results.length - 1;
+  const transcript = e.results[last][0].transcript;
+  chatInput.value = transcript;
+  chatInput.focus();
     };
+    rec.onend = () => { if (isListening) rec.start(); };
    micBtn.addEventListener('click', () => {
     isListening = !isListening;
     micBtn.innerHTML = isListening
@@ -703,7 +755,14 @@ titleDiv.addEventListener('blur', ()=>{
     }
   });
 
-
+document.getElementById('searchSessions').addEventListener('input', e=>{
+      const q = e.target.value.toLowerCase();
+      Array.from(sessionListEl.children).forEach(li=>{
+        const title = li.querySelector('.session-title').textContent.toLowerCase();
+        const snippet = li.querySelector('.snippet')?.textContent.toLowerCase() || '';
+        li.style.display = (title.includes(q)||snippet.includes(q)) ? '' : 'none';
+      });
+    });
     //—— Quick replies ——//
     quickBtns.forEach(b=>b.addEventListener('click',()=>{
       chatInput.value = b.textContent;
