@@ -114,21 +114,21 @@ html, body {
 
 /* the “End Session” button */
 #endSession {
-  background: var(--error);
+  background: linear-gradient(135deg, #E24A4A, #C72E3A);
   color: #fff;
-  width: 32px;
-  height: 32px;
+  padding: 0.5rem 1rem;
   border: none;
-  border-radius: 50%;
-  font-size: 1rem;
+  border-radius: var(--radius);
+  font-size: var(--font-size-sm);
   display: flex;
   align-items: center;
-  justify-content: center;
-  transition: background var(--transition);
+  gap: 0.5rem;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+  transition: transform 0.2s ease, box-shadow var(--transition);
 }
-
 #endSession:hover {
-  background: #c72e3a; /* slightly darker red */
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(0,0,0,0.3);
 }
 
 
@@ -1295,10 +1295,12 @@ document.addEventListener('DOMContentLoaded', () => {
   //───────────────────────────────────────────────────────────────────────────────
   // 2. SESSION MANAGEMENT
   //───────────────────────────────────────────────────────────────────────────────
-  Object.values(sessions).forEach(s=>{
-   if (typeof s.number !== 'number') s.number = 1;
- });
-let sessions = JSON.parse(localStorage.getItem('sessions') || '{}');
+ let sessions = JSON.parse(localStorage.getItem('sessions') || '{}');
+
+  // 2) Ensure every session has a .number
+  Object.values(sessions).forEach(s => {
+    if (typeof s.number !== 'number') s.number = 1;
+  });
 
   let storedNext = parseInt(localStorage.getItem('nextSessionNumber'), 10);
   let nextSessionNumber;
