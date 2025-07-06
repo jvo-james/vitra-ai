@@ -269,7 +269,7 @@ background: #c12e3a; }
 #chatArea {
   position: absolute; top: calc(var(--header-height) + 1px); left: var(--sidebar-width);
   right: 0; bottom: 0;
-  background: var(--bg); padding: var(--padding);
+  background: var(--bg); padding-bottom: calc(var(--padding) + 3.5rem);
   display: flex; flex-direction: column;
 }
 #chatLog {
@@ -547,7 +547,9 @@ position: absolute;
 #sessionsUl li:hover .dots-btn {
   opacity: 1;
 }
-
+.modal[open] {
+  display: flex;
+}
 .dots-dropdown {
   position: absolute;
   top: 2rem; right: 0.5rem;
@@ -632,8 +634,8 @@ position: absolute;
 
 #dataControls {
   position: fixed;            
-  bottom: var(--padding);     
-  right: var(--padding);     
+   top: calc(var(--header-height) + var(--padding));
+ right: var(--padding);  
   display: flex;
   gap: 0.5rem;
   background: var(--surface);
@@ -672,7 +674,7 @@ position: absolute;
   }
   #chatInputForm {
     display: flex; flex: 1; min-width: 0;
-    gap: 0.5rem;
+    gap: 0.5rem; margin-top: 0.25rem;  
   }
   #chatInputForm input { width: 100%; }
 }
@@ -711,7 +713,7 @@ position: absolute;
   align-items: center;
   justify-content: space-between;
   gap: 1rem;
-  margin-bottom: 0.75rem;
+  margin-bottom: 0.4rem;
 }
 
 #chatControls {
@@ -742,6 +744,16 @@ position: absolute;
   #chatQuickToolbar {
     flex-wrap: wrap;
   }
+}
+#sessionsUl li .session-meta-line {
+  display: flex;
+  justify-content: space-between;
+  font-size: var(--font-size-sm);
+  color: var(--muted);
+}
+
+#sessionsUl li .session-number {
+  margin-left: auto; /* push to right */
 }
 
   /* Confirmation Modal Overrides */
@@ -808,6 +820,9 @@ position: absolute;
   font-weight: 600;
   font-size: var(--font-size-base);
   margin-bottom: 0.25rem;
+  white-space: nowrap;         
+  overflow: hidden;           
+  text-overflow: ellipsis; 
 }
 
 #sessionsUl li .snippet {
@@ -819,6 +834,43 @@ position: absolute;
 #sessionsUl li .session-date {
   color: var(--muted);
   font-size: var(--font-size-sm);
+}
+
+  .modal {
+  background: rgba(0, 0, 0, 0.6);  
+}
+
+#confirmModal .modal-content {
+  max-width: 320px;
+  padding: 1.5rem;
+  border-radius: var(--radius);
+  text-align: center;
+}
+
+#confirmModal h2 {
+  font-size: 1.25rem;
+  color: var(--error);
+  margin-bottom: 0.75rem;
+}
+
+#confirmModal p {
+  margin-bottom: 1.25rem;
+  line-height: 1.4;
+}
+
+#confirmModal .modal-buttons .cancel,
+#confirmModal .modal-buttons .confirm {
+  min-width: 100px;
+}
+
+#confirmModal .modal-buttons .confirm {
+  background: var(--error);
+  color: #fff;
+}
+
+#confirmModal .modal-buttons .cancel {
+  background: var(--muted);
+  color: #fff;
 }
 
 </style>
@@ -964,8 +1016,11 @@ document.addEventListener('DOMContentLoaded', () => {
       li.innerHTML = `
         <div class="session-title">${data.title}</div>
         <div class="snippet">${(data.history.slice(-1)[0]?.text||'…').slice(0,30)}…</div>
-        <div class="session-date">${new Date(+id).toLocaleDateString()}</div>
-        <button class="dots-btn" aria-label="Actions">⋮</button>
+        <div class="session-meta-line">
+          <span class="session-date">${new Date(+id).toLocaleDateString()}</span>
+          <span class="session-number">Session ${sessionCounter}</span>
+        </div>
+      <button class="dots-btn" aria-label="Actions">⋮</button>
         <div class="dots-dropdown">
           <button class="edit-title"><i class="fas fa-i-cursor"></i> Rename</button>
           <button class="delete-session"><i class="fas fa-trash-alt"></i> Delete</button>
@@ -1009,20 +1064,21 @@ document.addEventListener('DOMContentLoaded', () => {
       });
       ddDelete.addEventListener('click', async e => {
         e.stopPropagation();
-        if (await askConfirm({
-            title: 'Delete Session?',
-            message: 'This will permanently delete the session.',
-            confirmText: 'Yes, delete'
-          })) {
-          delete sessions[id];
-          persistSessions();
-          if (currentId===id) {
-            currentId = null;
-            chatHistory = [];
-            renderChat();
-          }
-          renderSessionList();
+      const ok = await askConfirm({
+          title:        'Delete Session?',
+          message:      'Are you sure you want to delete this session permanently?',
+          confirmText:  'Yes, Delete'
+        });
+        if (!ok) return;
+        // Proceed with deletion
+        delete sessions[id];
+        persistSessions();
+        if (currentId === id) {
+          currentId   = null;
+          chatHistory = [];
+          renderChat();
         }
+        renderSessionList();
       });
       ddExport.addEventListener('click', e => {
         e.stopPropagation();
@@ -1050,30 +1106,43 @@ const count = Object.keys(sessions).length + 1;
     if (!title) return;
     persistCurrent();
     const id = Date.now().toString();
-    sessions[id] = { title, history: [] };
+     sessions[id] = { title, history: [], aiRenamed: false };
     switchSession(id);
   });
 
  endSessionBtn.addEventListener('click', async () => {
     if (!currentId) return;
-    persistCurrent();
-   const transcript = sessions[currentId].history
-      .map(m => `${m.who}: ${m.text}`).join('\n');
-    let aiTitle;
-    try {
-      aiTitle = await callAI([
-        { role:'system', content: 'You are a helpful assistant.' },
-        { role:'user', content: `Suggest a brief, descriptive title for this therapy session:\n\n${transcript}` }
-      ]);
-    } catch {
-      aiTitle = sessions[currentId].title; // fallback
-    }
-    // Update and persist the session title
-    sessions[currentId].title = aiTitle;
-    persistSessions();
-
-    currentId = null;
-    chatHistory = [];
+   showSpinner();
+   
+   persistCurrent();
+ if (!sessions[currentId].aiRenamed) {
+      const transcript = sessions[currentId].history
+        .map(m => `${m.who}: ${m.text}`).join('\n');
+      let aiTitle = '';
+      try {
+        aiTitle = await callAI([
+          { role:'system', content: 'Suggest a concise session title.' },
+          { role:'user', content: transcript }
+        ]);
+      } catch {
+        aiTitle = sessions[currentId].title;
+      }
+     aiTitle = aiTitle
+        .replace(/["*]/g, '')
+        .replace(/\b[Tt]itle[:\-]?\s*/g, '')
+        .trim();
+      // Truncate to 30 chars with ellipsis
+      if (aiTitle.length > 30) {
+        aiTitle = aiTitle.slice(0, 30).trim() + '…';
+      }
+      sessions[currentId].title     = aiTitle;
+      sessions[currentId].aiRenamed = true;
+      persistSessions();
+    } 
+    const sp = document.querySelector('.spinner');
+    if (sp) sp.remove();
+   currentId = null;
+   chatHistory = [];
     renderSessionList();
     renderChat();
     alert('Session ended and saved.');
@@ -1318,14 +1387,20 @@ filterBtn.addEventListener('click', () => {
   //───────────────────────────────────────────────────────────────────────────────
   // 7. CLEAR & EXPORT
   //───────────────────────────────────────────────────────────────────────────────
-  clearBtn.addEventListener('click', ()=>{
-    if (!currentId) return;
-    if (confirm('Clear this session?')) {
-      chatHistory = [];
-      persistCurrent();
-      renderChat();
-    }
+ clearBtn.addEventListener('click', async () => {
+  if (!currentId) return;
+  // show custom confirmation modal
+  const ok = await askConfirm({
+    title:       'Clear Session?',
+    message:     'This will permanently clear the chat history for this session. Proceed?',
+    confirmText: 'Yes, Clear'
   });
+  if (!ok) return;
+  // user confirmed
+  chatHistory = [];
+  persistCurrent();
+  renderChat();
++});
   exportBtn.addEventListener('click', ()=>{
     if (!currentId) return;
     const txt = chatHistory.map(m=>`${m.who}: ${m.text}`).join('\n');
@@ -1339,13 +1414,13 @@ filterBtn.addEventListener('click', () => {
 function askConfirm({ title, message, confirmText }) {
   return new Promise(resolve => {
     const modal = document.getElementById('confirmModal');
-    modal.setAttribute('aria-hidden', 'false');
+    modal.setAttribute('open', ''); 
     document.getElementById('confirmTitle').textContent   = title;
     document.getElementById('confirmMessage').textContent = message;
     document.getElementById('confirmOk').textContent      = confirmText;
 
     const cleanup = () => {
-      modal.setAttribute('aria-hidden', 'true');
+       modal.removeAttribute('open'); 
       cancelBtn.removeEventListener('click', onCancel);
       okBtn.removeEventListener('click', onOk);
       closeBtn.removeEventListener('click', onCancel);
