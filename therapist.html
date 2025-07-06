@@ -875,12 +875,25 @@ document.addEventListener('DOMContentLoaded', () => {
   }
   function renderSessionList() {
     sessionsUl.innerHTML = '';
-sessionCounter = 0;
+   sessionCounter = 0;
   Object.entries(sessions)
     .sort((a,b)=>b[0]-a[0])
     .forEach(([id, data]) => {
+      sessionCounter++;
       const li = document.createElement('li');
-      /* … build li.innerHTML … */
+      li.innerHTML = `
+        <div class="session-entry">
+          <strong>${data.title}</strong>
+          <span class="snippet">${(data.history.slice(-1)[0]?.text||'').slice(0,30)}</span>
+          <time>${new Date(+id).toLocaleDateString()}</time>
+        </div>
+        <button class="dots-btn" aria-label="Actions">⋮</button>
+        <div class="dots-dropdown">
+          <button class="edit-title">Rename</button>
+          <button class="delete-session">Delete</button>
+          <button class="export-session">Export</button>
+        </div>
+      `;
       sessionsUl.append(li);
 
       // mark active
@@ -937,51 +950,7 @@ sessionCounter = 0;
       });
     });
   }
-  let sessionCounter = 0;
-
-// After you append each `li`:
-li.querySelector('.dots-btn').addEventListener('click', e => {
-  e.stopPropagation();
-  // close others
-  document.querySelectorAll('#sessionsUl li.open').forEach(el=>el.classList.remove('open'));
-  li.classList.toggle('open');
-});
-
-// Edit Title
-li.querySelector('.edit-title').addEventListener('click', e => {
-  e.stopPropagation();
-  const newTitle = prompt('New session title:', sessions[id].title);
-  if (newTitle) {
-    sessions[id].title = newTitle;
-    persistSessions();
-    renderSessionList();
-  }
-});
-
-// Delete Session
-li.querySelector('.delete-session').addEventListener('click', e => {
-  e.stopPropagation();
-  if (!confirm('Delete this session permanently?')) return;
-  delete sessions[id];
-  persistSessions();
-  if (currentId === id) {
-    currentId = null;
-    chatHistory = [];
-    renderChat();
-  }
-  renderSessionList();
-});
-
-// Export Session
-li.querySelector('.export-session').addEventListener('click', e => {
-  e.stopPropagation();
-  const text = sessions[id].history.map(m=>`${m.who}: ${m.text}`).join('\n');
-  const blob = new Blob([text], { type:'text/plain' });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url; a.download = `Session-${id}.txt`; a.click();
-});
-
+  
   function switchSession(id) {
     persistCurrent();
     currentId = id;
