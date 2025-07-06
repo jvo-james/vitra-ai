@@ -24,13 +24,11 @@
   --muted: #777777;
   --error: #E24A4A;
   --info: #4A90E2;
-  /* Typography */
   --font-base: 'Montserrat', sans-serif;
   --font-size-base: 1rem;
   --font-size-sm: 0.875rem;
   --font-size-lg: 1.125rem;
   --line-height: 1.5;
-  /* Spacing & Sizing */
   --radius: 0.75rem;
   --padding: 1rem;
   --transition: 0.3s ease;
@@ -51,9 +49,6 @@ html, body {
   overflow: hidden;
 }
 
-/*─────────────────────────────────────────────────────────────────────────────
-  1. SCROLLBAR
-─────────────────────────────────────────────────────────────────────────────*/
 ::-webkit-scrollbar {
   width: 8px; height: 8px;
 }
@@ -69,9 +64,6 @@ html, body {
   background: var(--primary);
 }
 
-/* ——————————————————————————————————————————————————————————————————————
-   Header Layout & Buttons
-   —————————————————————————————————————————————————————————————————————— */
 #therapyHeader {
   position: fixed;
   top: 0; left: 0; right: 0;
@@ -249,8 +241,7 @@ html, body {
   background: var(--error); color: #fff;
 }
 #endSession:hover {
-  background: darken(var(--error), 10%);
-}
+background: #c12e3a; }
 
 /*─────────────────────────────────────────────────────────────────────────────
   3. MAIN CHAT AREA
@@ -884,28 +875,67 @@ document.addEventListener('DOMContentLoaded', () => {
   }
   function renderSessionList() {
     sessionsUl.innerHTML = '';
-    Object.entries(sessions)
-      .sort((a,b)=>b[0]-a[0])
-      .forEach(([id, data]) => {
-        const li = document.createElement('li');
-        li.dataset.id = id;
-        li.className = id===currentId ? 'active' : '';
-       li.innerHTML = `
-   <div class="session-entry">
-     <strong>Session ${++sessionCounter}</strong>
-     <span class="snippet">${(data.history.slice(-1)[0]?.text||'').slice(0,30)}</span>
-     <time>${new Date(+id).toLocaleDateString()}</time>
-   </div>
-   <button class="dots-btn" aria-label="Actions">⋮</button>
-   <div class="dots-dropdown">
-     <button class="edit-title">Rename</button>
-     <button class="delete-session">Delete</button>
-     <button class="export-session">Export</button>
-   </div>
- `;
-        li.addEventListener('click', ()=>switchSession(id));
-        sessionsUl.append(li);
+sessionCounter = 0;
+  Object.entries(sessions)
+    .sort((a,b)=>b[0]-a[0])
+    .forEach(([id, data]) => {
+      const li = document.createElement('li');
+      /* … build li.innerHTML … */
+      sessionsUl.append(li);
+
+      // mark active
+      li.classList.toggle('active', id===currentId);
+
+      // click to switch
+      li.addEventListener('click', ()=>switchSession(id));
+
+      // ── ▼ Dots menu handlers must be INSIDE the loop! ▼ ──
+      const btnDots    = li.querySelector('.dots-btn');
+      const ddEdit    = li.querySelector('.edit-title');
+      const ddDelete  = li.querySelector('.delete-session');
+      const ddExport  = li.querySelector('.export-session');
+
+      btnDots.addEventListener('click', e => {
+        e.stopPropagation();
+        document.querySelectorAll('#sessionsUl li.open')
+                .forEach(el=>el.classList.remove('open'));
+        li.classList.toggle('open');
       });
+      ddEdit.addEventListener('click', e => {
+        e.stopPropagation();
+        const newTitle = prompt('New session title:', sessions[id].title);
+        if (newTitle) {
+          sessions[id].title = newTitle;
+          persistSessions();
+          renderSessionList();
+        }
+      });
+      ddDelete.addEventListener('click', async e => {
+        e.stopPropagation();
+        if (await askConfirm({
+            title: 'Delete Session?',
+            message: 'This will permanently delete the session.',
+            confirmText: 'Yes, delete'
+          })) {
+          delete sessions[id];
+          persistSessions();
+          if (currentId===id) {
+            currentId = null;
+            chatHistory = [];
+            renderChat();
+          }
+          renderSessionList();
+        }
+      });
+      ddExport.addEventListener('click', e => {
+        e.stopPropagation();
+        const text = sessions[id].history.map(m=>`${m.who}: ${m.text}`).join('\n');
+        const blob = new Blob([text], { type:'text/plain' });
+        const url  = URL.createObjectURL(blob);
+        const a    = document.createElement('a');
+        a.href = url; a.download = `Session-${id}.txt`; a.click();
+      });
+    });
   }
   let sessionCounter = 0;
 
