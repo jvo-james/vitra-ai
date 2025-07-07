@@ -1335,124 +1335,6 @@ html.dark #chatInputForm input {
 }
 
 
-@media (max-width: 414x) {
-
-  #therapyHeader {
-    display: grid;
-    grid-template-columns: auto 1fr;
-    align-items: center;
-    padding: 0.5rem;
-    height: 56px;
-  }
-  #therapyHeader .header-left { order: 0; }
-  #therapyHeader .header-center {
-    text-align: center;
-    font-size: 1rem;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-  }
- 
-
-  #sessionList {
-    position: fixed;
-    top: 56px; left: -100%;
-    width: 75%;
-    max-width: 280px;
-    height: calc(100% - 56px);
-    transition: left 0.3s ease;
-    z-index: 1000;
-  }
-  #sessionList.visible {
-    left: 0;
-  }
-  #sessionList::before {
-    content: "";
-    display: block;
-    height: 56px;
-    background: var(--surface);
-    position: sticky;
-    top: 0;
-    z-index: 10;
-  }
-  #mobileControls {
-    display: flex;
-    flex-direction: column;
-    gap: 0.5rem;
-    padding: 1rem;
-    background: var(--bg);
-  }
-  #sessionList.visible .header-right { display: none; }
-  #sessionList.visible .mobile-placeholder {
-    display: none;
-  }
-
-  #chatAreaControls {
-    position: fixed;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    padding: 0.5rem;
-    background: var(--surface);
-    border-top: 1px solid var(--muted);
-    z-index: 500;
-  }
-  #chatLog {
-    margin-bottom: calc(56px + env(safe-area-inset-bottom));
-  }
-  #chatInputForm {
-    width: 100%;
-    display: flex;
-    gap: 0.5rem;
-  }
-  #chatInputForm input {
-    flex: 1;
-    height: 40px;
-  }
-  #chatInputForm button {
-    width: 40px; height: 40px;
-  }
-
-  #chatInput:focus {
-    scroll-margin-bottom: calc(56px + env(safe-area-inset-bottom));
-  }
-
-  body.sidebar-open #sessionList { left: 0; }
-  body.sidebar-open #chatArea,
-  body.sidebar-open #therapyHeader {
-    filter: brightness(0.7);
-    pointer-events: none;
-  }
-}
-@media (max-width: 414px) {
-  #endSession .end-text {
-    display: none;
-  }
-
-  #therapyHeader .header-right > #menuToggle,
-  #therapyHeader .header-right > #endSession {
-    display: inline-flex;
-  }
-
-  #therapyHeader #mobileControls {
-    display: none;
-  }
-  #sessionList.visible #mobileControls {
-    display: flex;
-    flex-direction: column;
-    gap: 0.5rem;
-    padding: 1rem;
-    background: var(--bg);
-  }
-
-  #sessionList::before {
-    content: "";
-    display: block;
-    height: 56px; 
-    background: var(--surface);
-  }
-}
-
 
 </style>
 
@@ -1471,22 +1353,21 @@ html.dark #chatInputForm input {
   </div>
   <div class="therapist-info">
     <img src="https://i.pravatar.cc/100?img=32" alt="Therapist avatar" class="avatar">
-  </div>
-  <div class="header-center">
     <h1>Vitra Therapist</h1>
   </div>
    <div class="header-right">
-    <button id="menuToggle" title="Menu"><i class="fas fa-bars"></i></button>
-    <button id="endSession" title="End session">
-      <i class="fas fa-sign-out-alt"></i><span class="end-text"> End</span>
-    </button>
-
-    <div id="mobileControls">
-     <button id="darkModeToggle"><i class="fas fa-moon"></i></button>
-      <button id="clearHistory"><i class="fas fa-trash"></i></button>
-      <button id="exportTranscript"><i class="fas fa-file-export"></i></button>
+  <button id="darkModeToggle" title="Toggle dark mode">
+    <i class="fas fa-moon"></i>
+  </button>
+       <div id="dataControls" hidden>
+      <button id="clearHistory"><i class="fas fa-trash" title="Clear Chat"></i> </button>
+      <button id="exportTranscript"><i class="fas fa-file-export"title="Export Chat"></i></button>
     </div>
-  </div>
+  <button id="endSession" title="End session">
+    <i class="fas fa-sign-out-alt"></i> 
+    <span class="end-text"> End Session</span>
+  </button>
+   </div>
 </header>
 
 
@@ -1547,34 +1428,6 @@ html.dark #chatInputForm input {
     <p>Ending session…</p>
   </div>
 </div>
-
-  <script>
-  const mobileControls = document.getElementById('mobileControls');
-  const sessionList    = document.getElementById('sessionList');
-
-  function relocateControls() {
-    if (window.innerWidth <= 600) {
-      if (!sessionList.contains(mobileControls)) {
-        sessionList.prepend(mobileControls);
-      }
-    } else {
-      const headerRight = document.querySelector('#therapyHeader .header-right');
-      if (!headerRight.contains(mobileControls)) {
-        headerRight.appendChild(mobileControls);
-      }
-    }
-  }
-
-  document.getElementById('menuToggle').onclick = () => {
-    sessionList.classList.toggle('visible');
-    document.body.classList.toggle('sidebar-open');
-  };
-
-  window.addEventListener('resize', relocateControls);
-  document.addEventListener('DOMContentLoaded', relocateControls);
-</script>
-
-  
   <script>
 document.addEventListener('DOMContentLoaded', () => {
    let lastInterim = '';
