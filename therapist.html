@@ -1181,12 +1181,104 @@ html.dark #chatInputForm input {
     padding: 0; margin: 0;
   }
 
- #sessionList {
+  #therapyHeader {
+    flex-wrap: nowrap;
+    padding: 0.5rem;
+    height: 56px;
+  }
+  #therapyHeader .header-left,
+  #therapyHeader .header-right {
+    gap: 0.25rem;
+  }
+  #therapyHeader .therapist-info h1 {
+    font-size: 1rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  #therapyHeader button {
+    width: 32px; height: 32px;
+  }
+  #endSession .end-text {
+    display: none; 
+  }
+
+  #sessionList {
     display: none;
-    flex-direction: column;
+    position: fixed;
+    top: 56px; left: 0;
+    width: 280px; height: calc(100vh - 56px);
+    z-index: 1100;
   }
   #sessionList.visible {
-    display: flex !important;
+    display: flex;
+  }
+
+  #chatArea {
+    top: 56px;
+    left: 0 !important;
+    padding: 0.5rem;
+  }
+  #chatLog {
+    padding-right: 0;
+  }
+
+  .date-separator {
+    margin: 0.75rem 0;
+    font-size: 0.8rem;
+  }
+
+  .avatar, .avatar-small {
+    width: 32px; height: 32px;
+  }
+  .bubble {
+    max-width: 100%;
+    padding: 0.6rem;
+    border-radius: 0.5rem;
+    font-size: 0.9rem;
+  }
+  .user-msg .bubble {
+    padding-right: 1.5rem; 
+  }
+
+  #chatAreaControls {
+    flex-wrap: wrap;
+    padding: 0.5rem 0;
+    gap: 0.5rem;
+  }
+  #chatQuickToolbar {
+    flex-wrap: wrap;
+    width: 100%;
+    gap: 0.5rem;
+  }
+  #chatControls, #quickReplies {
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    width: 100%;
+  }
+  #chatControls button,
+  #quickReplies .quick-reply {
+    width: 32px; height: 32px;
+    padding: 0;
+    font-size: 1rem;
+  }
+  .quick-reply {
+    flex: 1;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  #chatInputForm {
+    width: 100%;
+    gap: 0.25rem;
+  }
+  #chatInputForm input {
+    flex: 1;
+    height: 36px;
+    font-size: 0.95rem;
+  }
+  #chatInputForm button {
+    width: 36px; height: 36px;
   }
 
   .modal-content, #confirmModal .modal-content {
@@ -1243,138 +1335,6 @@ html.dark #chatInputForm input {
 }
 
 
-
-@media only screen 
-  and (device-width: 414px) 
-  and (device-height: 896px) 
-  and (-webkit-device-pixel-ratio: 2) {
-
-  #collapseBtn,
-  #darkModeToggle,
-  .therapist-info,
-  #clearHistory,
-  #exportTranscript {
-    display: none !important;
-  }
-
- 
-  #newSession {
-    order: -1;
-    margin-bottom: 1rem;
-  }
-
-  #quickReplies {
-    overflow-x: auto;
-    flex-wrap: nowrap !important;
-    -webkit-overflow-scrolling: touch;
-  }
-  .quick-reply {
-    flex: 0 0 auto;
-    white-space: nowrap;
-  }
-
-  html, body {
-    height: 100vh;
-    overflow: hidden;
-  }
-  #therapyHeader {
-    position: fixed;
-    top: 0; left: 0; right: 0;
-    height: 56px;         
-    padding: 0.5rem;
-  }
-  input, button, select, textarea {
-    -webkit-text-size-adjust: none;
-  }
-
-  #chatControls {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-  }
-  #chatControls #clearHistory,
-  #chatControls #exportTranscript {
-    display: flex !important;
-  }
-
-  #chatInputForm {
-    padding: 0.5rem;
-    background: var(--surface);
-    border-top: 1px solid var(--muted);
-    gap: 0.5rem;
-  }
-  #attachBtn {
-    display: none;  
-  }
-  #chatInputForm input {
-    flex: 1;
-    height: 40px;
-    padding: 0 1rem;
-    border-radius: 20px;
-    border: 1px solid var(--muted);
-  }
-  #chatInputForm button {
-    width: 40px; height: 40px;
-    border-radius: 50%;
-  }
-
-  #chatArea {
-    top: 56px !important;
-  }
-}
- @media only screen 
-   and (device-width: 414px) 
-   and (device-height: 896px) 
-   and (-webkit-device-pixel-ratio: 2) {
- #therapyHeader #collapseBtn,
-  #therapyHeader #darkModeToggle {
-    display: none !important;
-  }
-
-  #chatControls #clearHistory,
-  #chatControls #exportTranscript {
-    display: inline-flex !important;
-  }
-
-  #therapyHeader {
-    position: fixed !important;
-    top: 0; left: 0; right: 0;
-    height: 56px !important;
-  }
-  html, body {
-    height: 100vh !important;
-    overflow: hidden !important;
-  }
-  #chatInputForm input {
-    font-size: 16px !important;
-  }
-
-  #quickReplies {
-    overflow-x: auto;
-    white-space: nowrap;
-  }
-  .quick-reply {
-    display: inline-block;
-    flex: none !important;
-  }
-
-  #attachBtn {
-    display: none !important;
-  }
-  #chatInputForm input {
-    height: 40px !important;
-    border-radius: 20px !important;
-    padding: 0 1rem !important;
-  }
-  #chatInputForm button {
-    width: 40px !important;
-    height: 40px !important;
-    border-radius: 50% !important;
-  }
-  #chatArea {
-    top: 56px !important;
-  }
- }
 
 </style>
 
@@ -1468,34 +1428,6 @@ html.dark #chatInputForm input {
     <p>Ending session…</p>
   </div>
 </div>
-  
-  <script>
-document.addEventListener('DOMContentLoaded', () => {
-  const mq = window.matchMedia(
-    'only screen and (device-width: 414px) and (device-height: 896px) and (-webkit-device-pixel-ratio: 2)'
-  );
-  if (!mq.matches) return;
-
-  const sidebar     = document.getElementById('sessionList');
-  const searchBlock = sidebar.querySelector('.session-search');
-  const ctrlWrapper = document.createElement('div');
-  ctrlWrapper.className = 'sidebar-controls';
-  ctrlWrapper.style.display = 'flex';
-  ctrlWrapper.style.gap = '0.5rem';
-  ctrlWrapper.style.paddingBottom = '1rem';
-
-  ['collapseBtn', 'darkModeToggle'].forEach(id => {
-    const btn = document.getElementById(id);
-    if (btn) {
-      const clone = btn.cloneNode(true);
-      ctrlWrapper.appendChild(clone);
-    }
-  });
-
-  sidebar.insertBefore(ctrlWrapper, searchBlock);
-});
-</script>
-
   <script>
 document.addEventListener('DOMContentLoaded', () => {
    let lastInterim = '';
