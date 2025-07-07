@@ -1334,92 +1334,6 @@ html.dark #chatInputForm input {
   }
 }
 
-/*──────────────────────────────────────────────────────────*/
-/* MOBILE (≤600px): mimic ChatGPT iOS — minimal header + slide‑out sidebar */
-/*──────────────────────────────────────────────────────────*/
-@media (max-width: 600px) {
-  /* 1) Header: fixed height, 3 visible items */
-  #therapyHeader {
-    display: grid;
-    grid-template-columns: auto 1fr auto;
-    align-items: center;
-    padding: 0.5rem;
-    height: 56px;
-  }
-  /* hide any leftover text */
-  #therapyHeader .end-text,
-  #therapyHeader .therapist-info h1 { /* avatar-only in therapist-info */
-    display: none;
-  }
-  /* ensure only back, menu, and end remain */
-  #therapyHeader .header-left,
-  #therapyHeader .header-right > button {
-    display: inline-flex;
-  }
-  #therapyHeader .header-center h1 {
-    font-size: 1rem;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    display: block;
-  }
-
-  /* 2) Sidebar: slide-in from left */
-  #sessionList {
-    position: fixed;
-    top: 56px; left: -100%;
-    width: 75%;       /* ~280px max */
-    max-width: 280px;
-    height: calc(100% - 56px);
-    background: var(--surface);
-    transition: left 0.3s ease;
-    z-index: 1000;
-  }
-  #sessionList.visible {
-    left: 0;
-  }
-  /* placeholder to push sessions below header */
-  #sessionList::before {
-    content: "";
-    display: block;
-    height: 56px;
-    background: var(--surface);
-    position: sticky; top: 0; z-index: 10;
-  }
-  /* show our mobileControls at top of sidebar */
-  #mobileControls {
-    display: none;
-  }
-  #sessionList.visible #mobileControls {
-    display: flex;
-    flex-direction: column;
-    gap: 0.5rem;
-    padding: 1rem;
-    background: var(--bg);
-  }
-
-  /* 3) Pin chat input & toolbar */
-  #chatAreaControls {
-    position: fixed;
-    bottom: 0; left: 0; right: 0;
-    padding: 0.5rem;
-    background: var(--surface);
-    border-top: 1px solid var(--muted);
-    z-index: 500;
-  }
-  /* leave room for it */
-  #chatLog {
-    margin-bottom: 56px;
-  }
-
-  /* 4) Tweak button sizes */
-  #chatInputForm input,
-  #chatControls button,
-  #quickReplies .quick-reply {
-    min-height: 36px;
-    font-size: 0.9rem;
-  }
-}
 
 
 </style>
@@ -1437,32 +1351,23 @@ html.dark #chatInputForm input {
       <i class="fas fa-bars"></i>
     </button>
   </div>
- <div class="header-left">
-    <button id="collapseBtn" title="Back"><i class="fas fa-arrow-left"></i></button>
-    <button id="menuToggle"  title="Menu"><i class="fas fa-bars"></i></button>
-  </div>
-
-  <!-- center: just the avatar -->
   <div class="therapist-info">
     <img src="https://i.pravatar.cc/100?img=32" alt="Therapist avatar" class="avatar">
-  </div>
-
-  <!-- true title -->
-  <div class="header-center">
     <h1>Vitra Therapist</h1>
   </div>
-
-  <!-- right: only end-session icon -->
-  <div class="header-right">
-    <button id="endSession" title="End"><i class="fas fa-sign-out-alt"></i><span class="end-text"> End</span></button>
-
-    <!-- these move into sidebar on mobile -->
-    <div id="mobileControls">
-      <button id="darkModeToggle"><i class="fas fa-moon"></i></button>
-      <button id="clearHistory"><i class="fas fa-trash"></i></button>
-      <button id="exportTranscript"><i class="fas fa-file-export"></i></button>
+   <div class="header-right">
+  <button id="darkModeToggle" title="Toggle dark mode">
+    <i class="fas fa-moon"></i>
+  </button>
+       <div id="dataControls" hidden>
+      <button id="clearHistory"><i class="fas fa-trash" title="Clear Chat"></i> </button>
+      <button id="exportTranscript"><i class="fas fa-file-export"title="Export Chat"></i></button>
     </div>
-  </div>
+  <button id="endSession" title="End session">
+    <i class="fas fa-sign-out-alt"></i> 
+    <span class="end-text"> End Session</span>
+  </button>
+   </div>
 </header>
 
 
@@ -1523,32 +1428,6 @@ html.dark #chatInputForm input {
     <p>Ending session…</p>
   </div>
 </div>
-  <script>
-  const mobileControls = document.getElementById('mobileControls');
-  const sessionList    = document.getElementById('sessionList');
-
-  function relocateControls() {
-    if (window.innerWidth <= 600) {
-      if (!sessionList.contains(mobileControls)) {
-        sessionList.prepend(mobileControls);
-      }
-    } else {
-      const hdrR = document.querySelector('#therapyHeader .header-right');
-      if (!hdrR.contains(mobileControls)) {
-        hdrR.appendChild(mobileControls);
-      }
-    }
-  }
-
-  // toggle sidebar
-  document.getElementById('menuToggle').onclick = () => {
-    sessionList.classList.toggle('visible');
-  };
-
-  window.addEventListener('resize', relocateControls);
-  document.addEventListener('DOMContentLoaded', relocateControls);
-</script>
-
   <script>
 document.addEventListener('DOMContentLoaded', () => {
    let lastInterim = '';
