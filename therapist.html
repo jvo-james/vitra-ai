@@ -2,7 +2,8 @@
 <html lang="en" aria-theme="light">
 <head>
   <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<head>
+ <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
   <title>Vitra AI Therapist</title>
 
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;600;700&display=swap" rel="stylesheet">
@@ -1222,16 +1223,11 @@ html.dark #chatInputForm input {
     padding: 0.5rem 0;
     gap: 0.5rem;
   }
-  #chatQuickToolbar {
-    flex-wrap: wrap;
-    width: 100%;
-    gap: 0.5rem;
+    #quickReplies {
+   width: 100%;
+    flex-wrap: nowrap;
   }
-  #chatControls, #quickReplies {
-    flex-wrap: wrap;
-    gap: 0.5rem;
-    width: 100%;
-  }
+  
   #chatControls button {
     width: 32px; height: 32px;
     padding: 0;
@@ -1307,6 +1303,7 @@ html.dark #chatInputForm input {
   display: flex;
   gap: 0.5rem;
   overflow-x: auto;
+  flex-wrap: nowrap !important;
   padding: 0.5rem 0;
   -webkit-overflow-scrolling: touch;
   background: var(--surface);
@@ -1463,6 +1460,14 @@ html.dark .quick-reply:hover {
 </div>
   <script>
 document.addEventListener('DOMContentLoaded', () => {
+
+  document.addEventListener('touchstart', e => {
+    const form = document.getElementById('chatInputForm');
+    if (!e.target.closest('#chatInputForm')) {
+      document.getElementById('chatInput').blur();
+    }
+  });
+  
    let lastInterim = '';
   
   const sidebar       = document.getElementById('sessionList');
