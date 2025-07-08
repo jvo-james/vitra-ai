@@ -418,33 +418,6 @@ position: absolute;
   color: #fff; border-color: var(--primary);
 }
 
-#quickReplies {
-  display: flex; gap: 0.5rem; margin-bottom: 0.75rem;
-}
-.quick-reply {
-  background: var(--primary-light); color: var(--primary);
-  border: none; padding: 0.5rem 1rem; border-radius: var(--radius);
-  cursor: pointer; transition: background var(--transition), color var(--transition);
-}
-.quick-reply:hover {
-  background: var(--primary);
-  color: #fff;
-}
-
-#quickReplies {
-  display: flex !important;
-  flex-wrap: nowrap !important;    
-  overflow-x: auto;                
-  -webkit-overflow-scrolling: touch;
-  gap: 0.5rem;
-  margin-bottom: 0.75rem;
-}
-
-#quickReplies .quick-reply {
-  flex: 0 0 auto;     
-  white-space: nowrap; 
-}
-
 #chatInputForm {
   display: flex; align-items: center; gap: 0.5rem;
 }
@@ -729,25 +702,6 @@ position: absolute;
 #chatControls {
   display: flex;
   gap: 0.5rem;
-}
-
-#quickReplies {
-  display: flex;
-  gap: 0.5rem;
-}
-
-.quick-reply {
-  background: var(--primary-light);
-  color: var(--primary);
-  border: none;
-  padding: 0.5rem 1rem;
-  border-radius: var(--radius);
-  cursor: pointer;
-  transition: background var(--transition), color var(--transition);
-}
-.quick-reply:hover {
-  background: var(--primary);
-  color: #fff;
 }
 
 @media (max-width: 600px) {
@@ -1278,8 +1232,7 @@ html.dark #chatInputForm input {
     gap: 0.5rem;
     width: 100%;
   }
-  #chatControls button,
-  #quickReplies .quick-reply {
+  #chatControls button {
     width: 32px; height: 32px;
     padding: 0;
     font-size: 1rem;
@@ -1350,23 +1303,90 @@ html.dark #chatInputForm input {
     display: none;
   }
 }
+#quickReplies {
+  display: flex;
+  gap: 0.5rem;
+  overflow-x: auto;
+  padding: 0.5rem 0;
+  -webkit-overflow-scrolling: touch;
+  background: var(--surface);
+}
+#quickReplies::-webkit-scrollbar { display: none; }
+
+#quickReplies .quick-reply {
+  flex: 0 0 auto;
+  white-space: nowrap;
+  padding: 0.5rem 1rem;
+  border: 1px solid var(--primary);
+  border-radius: var(--radius);
+  background: var(--primary-light);
+  color: var(--primary);
+  font-size: var(--font-size-sm);
+  cursor: pointer;
+  transition: background var(--transition), color var(--transition);
+}
+#quickReplies .quick-reply:hover {
+  background: var(--primary);
+  color: #fff;
+}
+
+  #chatAreaControls {
+  position: fixed;
+  bottom: 0;
+  left: var(--sidebar-width);
+  right: 0;
+  background: var(--surface);
+  border-top: 1px solid var(--muted);
+  padding: 0.5rem var(--padding);
+  display: flex;
+  flex-direction: column;
+  z-index: 1000;
+}
+
+#chatLog {
+  position: absolute;
+  top: calc(var(--header-height) + 1px);
+  bottom: calc( var(--padding) * 2 + 2rem ); 
+  left: var(--sidebar-width);
+  right: 0;
+  overflow-y: auto;
+  padding: var(--padding);
+}
+
 html.dark {
-  --muted: #aaaaaa;                     
-  --primary-light: #2E5BB8;             
-  --accent: #D17AFF;                    
+  --bg: #121212;
+  --surface: #1e1e1e;
+  --text: #e0e0e0;
+  --muted: #555555;
+  --primary: #4A90E2;
+  --primary-light: rgba(74,144,226,0.2);
+  --primary-dark: #357ABD;
 }
 
 html.dark #therapyHeader {
-  background: linear-gradient(90deg, var(--primary-dark), var(--accent));
-}
-
-html.dark .bubble {
-  border: 1px solid var(--primary-light);
-}
-
-html.dark .quick-reply {
   background: var(--primary-dark);
-  color: var(--accent);
+}
+html.dark .bubble {
+  background: var(--surface);
+  border: 1px solid var(--primary);
+}
+html.dark .user-msg .bubble {
+  background: var(--primary);
+  color: #fff;
+}
+html.dark #chatInputForm button,
+html.dark #chatControls button {
+  background: var(--primary);
+  color: #fff;
+  border-color: var(--primary);
+}
+html.dark .quick-reply {
+  background: var(--primary-light);
+  color: var(--primary);
+}
+html.dark .quick-reply:hover {
+  background: var(--primary);
+  color: #fff;
 }
 
 
