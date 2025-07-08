@@ -1368,6 +1368,43 @@ html.dark .quick-reply:hover {
   color: #fff;
 }
 
+@media (max-width: 1024px) {
+  #chatArea,
+  #chatAreaControls {
+    left: 0 !important;
+  }
+}
+
+  /* ─── 1) Reset chat offsets ───────────────────────────────────────── */
+#chatAreaControls {
+  /* replace left: var(--sidebar-width); with: */
+  left: var(--sidebar-width);
+  /* rest of your styles… */
+}
+#chatLog {
+  /* remove any `left:` or `right:` declarations */
+}
+
+/* ─── 2) Sidebar toggles ──────────────────────────────────────────── */
+@media (max-width: 1024px) {
+  #sessionList {
+    display: none;
+  }
+  #chatArea,
+  #chatAreaControls {
+    left: 0 !important;
+  }
+}
+
+/* ─── 3) Ensure chatLog fills parent ─────────────────────────────── */
+#chatLog {
+  position: absolute;
+  top: calc(var(--header-height) + 1px);
+  bottom: calc( /* height of #chatAreaControls */ 3.5rem + var(--padding) );
+  width: 100%;
+  overflow-y: auto;
+  padding: var(--padding);
+}
 
 </style>
 
