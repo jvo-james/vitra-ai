@@ -10,8 +10,8 @@
   <script src="https://cdn.jsdelivr.net/npm/showdown@2.1.0/dist/showdown.min.js"></script>
 
 <style>
-/* ==========================================================================
-   1. Root & Theming
+  /* ==========================================================================
+   1. Root, Variables & Theming
    ========================================================================== */
 :root {
   --clr-bg: #f9f9fb;
@@ -20,312 +20,2209 @@
   --clr-primary-light: #8a84ff;
   --clr-primary-dark: #524ecc;
   --clr-accent: #ff6584;
-  --clr-text: #333333;
-  --clr-text-light: #777777;
-  --clr-border: #e0e0e5;
-  --clr-overlay-bg: rgba(0,0,0,.5);
-  --radius-sm: .25rem;
-  --radius-md: .5rem;
-  --radius-lg: 1rem;
-  --space-xs: .25rem;
-  --space-sm: .5rem;
+  --clr-text: #1a1a1f;
+  --clr-text-light: #777a8c;
+  --clr-text-muted: #a0a0aa;
+  --clr-border: #e2e2e8;
+  --clr-overlay: rgba(0, 0, 0, 0.5);
+  --clr-success: #34c759;
+  --clr-warning: #f39c12;
+  --clr-error: #e74c3c;
+
+  --radius-xs: 4px;
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 16px;
+  --radius-xl: 24px;
+  --radius-full: 999px;
+
+  --space-xs: 0.25rem;
+  --space-sm: 0.5rem;
   --space-md: 1rem;
   --space-lg: 1.5rem;
   --space-xl: 2rem;
-  --shadow-sm: 0 1px 2px rgba(0,0,0,.08);
-  --shadow-md: 0 4px 8px rgba(0,0,0,.1);
-  --shadow-lg: 0 8px 16px rgba(0,0,0,.15);
-  --transition-fast: all .2s ease-in-out;
-  --transition-medium: all .4s ease-in-out;
-}
-html.dark {
-  --clr-bg: #1e1e28;
-  --clr-surface: #2a2a35;
-  --clr-text: #f1f1f5;
-  --clr-text-light: #c0c0c8;
-  --clr-border: #3a3a45;
-}
-html {
-  box-sizing: border-box;
-  font-family: 'Montserrat', sans-serif;
-  background-color: var(--clr-bg);
-  color: var(--clr-text);
+  --space-2xl: 3rem;
+
+  --font-sans: 'Inter', 'Segoe UI', sans-serif;
+  --font-mono: 'JetBrains Mono', monospace;
+
+  --shadow-sm: 0 1px 2px rgba(0,0,0,0.06);
+  --shadow-md: 0 2px 8px rgba(0,0,0,0.08);
+  --shadow-lg: 0 4px 20px rgba(0,0,0,0.12);
+
+  --transition-fast: all 0.2s ease-in-out;
+  --transition-medium: all 0.35s ease-in-out;
+  --transition-slow: all 0.5s ease;
+
   scroll-behavior: smooth;
 }
-*, *::before, *::after { box-sizing: inherit; }
+
+html.dark {
+  --clr-bg: #1a1a24;
+  --clr-surface: #2a2a35;
+  --clr-text: #f4f4f8;
+  --clr-text-light: #c2c2d1;
+  --clr-border: #3a3a45;
+}
 
 /* ==========================================================================
-   2. Layout Utilities
+   2. Global Resets
    ========================================================================== */
-/* Flex utilities */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html, body {
+  height: 100%;
+  width: 100%;
+  font-family: var(--font-sans);
+  background: var(--clr-bg);
+  color: var(--clr-text);
+  font-size: 16px;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+img {
+  max-width: 100%;
+  height: auto;
+  display: block;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+input, textarea, select, button {
+  font: inherit;
+  color: inherit;
+  background: none;
+  border: none;
+  outline: none;
+  appearance: none;
+  box-shadow: none;
+}
+
+button {
+  cursor: pointer;
+}
+
+::selection {
+  background-color: var(--clr-primary);
+  color: #fff;
+}
+
+/* Scrollbars */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-thumb {
+  background: var(--clr-border);
+  border-radius: var(--radius-sm);
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--clr-primary-light);
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+/* ==========================================================================
+   3. Utility Classes (Flex/Grid/Spacing)
+   ========================================================================== */
 .flex { display: flex; }
-.flex-col { flex-direction: column; }
+.inline-flex { display: inline-flex; }
 .flex-row { flex-direction: row; }
+.flex-col { flex-direction: column; }
+.items-start { align-items: flex-start; }
 .items-center { align-items: center; }
+.items-end { align-items: flex-end; }
+.justify-start { justify-content: flex-start; }
 .justify-center { justify-content: center; }
-.space-x-sm > * + * { margin-left: var(--space-sm); }
-.space-y-sm > * + * { margin-top: var(--space-sm); }
-/* Grid utilities */
+.justify-between { justify-content: space-between; }
+.justify-end { justify-content: flex-end; }
+.flex-wrap { flex-wrap: wrap; }
+.flex-1 { flex: 1 1 0%; }
+
 .grid { display: grid; }
+.grid-cols-2 { grid-template-columns: repeat(2, 1fr); }
+.grid-cols-3 { grid-template-columns: repeat(3, 1fr); }
+.grid-cols-4 { grid-template-columns: repeat(4, 1fr); }
+.grid-cols-auto { grid-template-columns: repeat(auto-fit, minmax(0, 1fr)); }
+.gap-xs { gap: var(--space-xs); }
 .gap-sm { gap: var(--space-sm); }
 .gap-md { gap: var(--space-md); }
-/* Hide/show */
-.hidden { display: none !important; }
-.visible { visibility: visible !important; }
-.invisible { visibility: hidden !important; }
-/* Responsive */
-@media (max-width: 768px) {
-  .md\\:hidden { display: none !important; }
-  .md\\:flex { display: flex !important; }
-  .md\\:grid { display: grid !important; }
-}
-/* iPhone 11 specific tweaks */
-@supports (-webkit-touch-callout: none) and (not (translate: none)) {
-  /* iPhone 11 is a WebKit device with these supports */
-  body { padding-bottom: calc(env(safe-area-inset-bottom) + var(--space-lg)); }
+.gap-lg { gap: var(--space-lg); }
+.gap-xl { gap: var(--space-xl); }
+
+.px-sm { padding-left: var(--space-sm); padding-right: var(--space-sm); }
+.py-sm { padding-top: var(--space-sm); padding-bottom: var(--space-sm); }
+.px-md { padding-left: var(--space-md); padding-right: var(--space-md); }
+.py-md { padding-top: var(--space-md); padding-bottom: var(--space-md); }
+.p-md { padding: var(--space-md); }
+
+.mt-sm { margin-top: var(--space-sm); }
+.mb-sm { margin-bottom: var(--space-sm); }
+.mt-md { margin-top: var(--space-md); }
+.mb-md { margin-bottom: var(--space-md); }
+.ml-auto { margin-left: auto; }
+.mr-auto { margin-right: auto; }
+
+.w-full { width: 100%; }
+.max-w-screen { max-width: 100vw; }
+.max-h-screen { max-height: 100vh; }
+
+.text-center { text-align: center; }
+.text-right { text-align: right; }
+.text-left { text-align: left; }
+
+.rounded { border-radius: var(--radius-md); }
+.rounded-full { border-radius: var(--radius-full); }
+.shadow-sm { box-shadow: var(--shadow-sm); }
+.shadow-md { box-shadow: var(--shadow-md); }
+.shadow-lg { box-shadow: var(--shadow-lg); }
+
+.transition { transition: var(--transition-fast); }
+
+  /* ==========================================================================
+   4. Typography & Headings
+   ========================================================================== */
+
+/* Base text */
+body, input, button, textarea, select {
+  font-family: var(--font-sans);
+  font-size: 1rem;
+  line-height: 1.5;
+  color: var(--clr-text);
 }
 
-/* ==========================================================================
-   3. Global Resets & Typography
-   ========================================================================== */
-* { margin: 0; padding: 0; outline: none; }
-button, input { border: none; background: none; font: inherit; cursor: pointer; }
-a { text-decoration: none; color: inherit; }
-ul { list-style: none; }
-img { max-width: 100%; display: block; }
-h1,h2,h3,h4,h5,h6 { color: var(--clr-text); margin-bottom: var(--space-sm); }
-p { line-height: 1.6; margin-bottom: var(--space-md); }
-small { font-size: .875rem; color: var(--clr-text-light); }
-::-webkit-scrollbar { width: 8px; }
-::-webkit-scrollbar-track { background: var(--clr-bg); }
-::-webkit-scrollbar-thumb { background: var(--clr-border); border-radius: var(--radius-md); }
-
-/* ==========================================================================
-   4. Header & Navbar
-   ========================================================================== */
-#therapyHeader {
-  position: fixed; top: 0; left: 0; right: 0;
-  height: 4rem; padding: 0 var(--space-lg);
-  background: var(--clr-surface); box-shadow: var(--shadow-md);
-  display: flex; align-items: center; justify-content: space-between;
-  z-index: 100;
-  transition: var(--transition-fast);
-}
-#therapyHeader .header-left,
-#therapyHeader .header-right {
-  display: flex; align-items: center; gap: var(--space-md);
-}
-#therapyHeader #collapseBtn,
-#therapyHeader #menuToggle {
-  font-size: 1.25rem; color: var(--clr-text-light);
-  padding: var(--space-xs); border-radius: var(--radius-sm);
-  transition: var(--transition-fast);
-}
-#therapyHeader button:hover {
-  background: var(--clr-primary-light); color: #fff;
-}
-#therapyHeader .therapist-info {
-  display: flex; align-items: center; gap: var(--space-sm);
-}
-#therapyHeader .avatar { width: 2.5rem; height: 2.5rem; border-radius: 50%; }
-#therapyHeader h1 { font-weight: 600; font-size: 1.125rem; }
-
-/* ==========================================================================
-   5. Sidebar & Session List
-   ========================================================================== */
-#sessionList {
-  position: fixed; top: 4rem; left: 0; bottom: 0;
-  width: 16rem; background: var(--clr-surface);
-  border-right: 1px solid var(--clr-border); 
-  padding: var(--space-md);
-  transform: translateX(-100%); transition: var(--transition-medium);
-  overflow-y: auto; z-index: 90;
-}
-#sessionList.visible { transform: translateX(0); }
-#sessionList .session-search {
-  display: flex; align-items: center; gap: var(--space-sm);
+/* Headings */
+h1 {
+  font-size: 2.25rem;
+  font-weight: 700;
+  line-height: 1.2;
   margin-bottom: var(--space-md);
 }
-#sessionList input[type="search"] {
-  flex: 1; padding: var(--space-sm);
-  border: 1px solid var(--clr-border); border-radius: var(--radius-sm);
-  background: var(--clr-bg);
-}
-#sessionList button { color: var(--clr-text-light); }
-#sessionList #newSession {
-  margin-top: auto; width: 100%;
-  padding: var(--space-sm); background: var(--clr-primary);
-  color: #fff; border-radius: var(--radius-md);
-  transition: var(--transition-fast);
-}
-#sessionList #newSession:hover { background: var(--clr-primary-dark); }
-/* Sessions */
-#sessionsUl li {
-  display: flex; flex-direction: column;
-  padding: var(--space-sm); margin-bottom: var(--space-xs);
-  border-radius: var(--radius-sm); transition: var(--transition-fast);
-}
-#sessionsUl li:hover { background: var(--clr-primary-light); color: #fff; }
-#sessionsUl li.active { background: var(--clr-primary); color: #fff; }
-#sessionsUl .session-title { font-weight: 600; }
-#sessionsUl .snippet { font-size: .875rem; color: var(--clr-text-light); }
-#sessionsUl .session-meta-line { font-size: .75rem; display: flex; gap: var(--space-sm); }
-
-/* ==========================================================================
-   6. Chat Area
-   ========================================================================== */
-#chatArea {
-  position: absolute; top: 4rem; left: 16rem; right: 0; bottom: 0;
-  display: flex; flex-direction: column;
-}
-#chatLog {
-  flex: 1; overflow-y: auto; padding: var(--space-lg);
-}
-.date-separator {
-  text-align: center; margin: var(--space-md) 0;
-  font-size: .875rem; color: var(--clr-text-light);
-}
-/* Message bubbles */
-.message {
-  display: flex; align-items: flex-start; gap: var(--space-sm);
-  margin-bottom: var(--space-md);
-  opacity: 0; animation: fadeIn .3s forwards;
-}
-@keyframes fadeIn { to { opacity: 1; } }
-.message.user-msg { flex-direction: row-reverse; }
-.message .avatar-small {
-  width: 2rem; height: 2rem; border-radius: 50%;
-}
-.bubble {
-  position: relative;
-  max-width: 70%; padding: var(--space-md);
-  border-radius: var(--radius-lg);
-  background: var(--clr-surface);
-  box-shadow: var(--shadow-sm);
-  line-height: 1.4;
-}
-.user-msg .bubble { background: var(--clr-primary); color: #fff; }
-.bubble time {
-  position: absolute; bottom: var(--space-xs); right: var(--space-xs);
-  font-size: .75rem; color: var(--clr-text-light);
-}
-.bubble .copy-btn {
-  position: absolute; top: var(--space-xs); right: var(--space-xs);
-  font-size: 1rem; opacity: 0.6;
-}
-.bubble .copy-btn:hover { opacity: 1; }
-
-/* ==========================================================================
-   7. Controls & Toolbars
-   ========================================================================== */
-/* Chat controls wrapper */
-#chatAreaControls {
-  padding: var(--space-sm) var(--space-lg);
-  border-top: 1px solid var(--clr-border);
-  background: var(--clr-surface);
-}
-#chatQuickToolbar {
-  display: flex; justify-content: space-between;
+h2 {
+  font-size: 1.875rem;
+  font-weight: 600;
   margin-bottom: var(--space-sm);
 }
-#chatControls button,
-#quickReplies .quick-reply {
-  padding: var(--space-xs) var(--space-sm);
+h3 {
+  font-size: 1.5rem;
+  font-weight: 500;
+  margin-bottom: var(--space-sm);
+}
+h4 {
+  font-size: 1.25rem;
+  font-weight: 500;
+  margin-bottom: var(--space-xs);
+}
+h5 {
+  font-size: 1rem;
+  font-weight: 500;
+  margin-bottom: var(--space-xs);
+}
+h6 {
+  font-size: 0.875rem;
+  font-weight: 500;
+  margin-bottom: var(--space-xs);
+}
+
+/* Paragraphs & text elements */
+p {
+  margin-bottom: var(--space-md);
+}
+small, .text-small {
+  font-size: 0.875rem;
+  color: var(--clr-text-light);
+}
+strong {
+  font-weight: 600;
+}
+em {
+  font-style: italic;
+}
+
+/* Links */
+a.primary {
+  color: var(--clr-primary);
+  text-decoration: underline;
+  transition: var(--transition-fast);
+}
+a.primary:hover {
+  color: var(--clr-primary-dark);
+}
+
+/* Lists */
+ul.list-disc {
+  list-style: disc;
+  padding-left: var(--space-lg);
+}
+ol.list-decimal {
+  list-style: decimal;
+  padding-left: var(--space-lg);
+}
+ul .list-item,
+ol .list-item {
+  margin-bottom: var(--space-xs);
+}
+
+/* Blockquotes */
+blockquote {
+  border-left: 4px solid var(--clr-primary);
+  padding-left: var(--space-md);
+  color: var(--clr-text-light);
+  font-style: italic;
+  margin: var(--space-md) 0;
+}
+
+/* Code blocks */
+pre, code {
+  font-family: var(--font-mono);
+  background: var(--clr-bg);
+  border: 1px solid var(--clr-border);
+  border-radius: var(--radius-sm);
+}
+pre {
+  padding: var(--space-sm);
+  overflow-x: auto;
+}
+
+/* ==========================================================================
+   5. Layout Structure
+   ========================================================================== */
+
+/* Header */
+header#therapyHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 4.5rem;
+  padding: 0 var(--space-lg);
+  background: var(--clr-surface);
+  box-shadow: var(--shadow-md);
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 1000;
+}
+header#therapyHeader .header-left,
+header#therapyHeader .header-right {
+  display: flex;
+  align-items: center;
+  gap: var(--space-md);
+}
+header#therapyHeader .therapist-info {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+}
+header#therapyHeader .therapist-info .avatar {
+  width: 2.75rem;
+  height: 2.75rem;
+  border-radius: 50%;
+  box-shadow: var(--shadow-sm);
+}
+
+/* Sidebar */
+aside#sessionList {
+  position: fixed;
+  top: 4.5rem;
+  bottom: 0;
+  left: 0;
+  width: 18rem;
+  background: var(--clr-surface);
+  border-right: 1px solid var(--clr-border);
+  padding: var(--space-md);
+  overflow-y: auto;
+  transform: translateX(-100%);
+  transition: transform 0.35s ease-in-out;
+  z-index: 900;
+}
+aside#sessionList.visible {
+  transform: translateX(0);
+}
+aside#sessionList::-webkit-scrollbar {
+  width: 6px;
+}
+aside#sessionList::-webkit-scrollbar-thumb {
+  background: var(--clr-border);
+  border-radius: var(--radius-lg);
+}
+
+/* Main Chat Area */
+main#chatArea {
+  position: absolute;
+  top: 4.5rem;
+  left: 18rem;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  flex-direction: column;
+  background: var(--clr-bg);
+}
+@media (max-width: 768px) {
+  /* Collapsed sidebar on tablet/mobile */
+  aside#sessionList {
+    width: 100%;
+    transform: translateY(-100%);
+  }
+  main#chatArea {
+    left: 0;
+  }
+}
+
+/* Chat Log Container */
+#chatLog {
+  flex: 1;
+  overflow-y: auto;
+  padding: var(--space-lg);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+}
+
+/* Date Separators */
+#chatLog .date-separator {
+  text-align: center;
+  font-size: 0.875rem;
+  color: var(--clr-text-muted);
+  margin: var(--space-sm) 0;
+}
+
+/* ==========================================================================
+   6. Navigation Dropdowns & Filters
+   ========================================================================== */
+
+/* Session Search */
+#sessionList .session-search {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  margin-bottom: var(--space-md);
+}
+#sessionList .session-search input[type="search"] {
+  flex: 1;
+  padding: var(--space-sm);
+  border: 1px solid var(--clr-border);
+  border-radius: var(--radius-sm);
+  background: var(--clr-bg);
+  transition: var(--transition-fast);
+}
+#sessionList .session-search input[type="search"]:focus {
+  border-color: var(--clr-primary);
+}
+
+/* Filter Button */
+#filterBtn {
+  font-size: 1.125rem;
+  color: var(--clr-text-light);
+  padding: var(--space-xs);
   border-radius: var(--radius-sm);
   transition: var(--transition-fast);
 }
-#chatControls button:hover { background: var(--clr-primary-light); color: #fff; }
-#quickReplies { display: flex; gap: var(--space-sm); overflow-x: auto; }
-.quick-reply {
-  font-size: .875rem; background: var(--clr-bg);
+#filterBtn.active,
+#filterBtn:hover {
+  background: var(--clr-primary-light);
+  color: #fff;
+}
+
+/* Session List Items */
+#sessionsUl li {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  padding: var(--space-sm);
+  margin-bottom: var(--space-xs);
+  border-radius: var(--radius-sm);
+  transition: var(--transition-fast);
+  cursor: pointer;
+}
+#sessionsUl li:hover {
+  background: var(--clr-primary-light);
+  color: #fff;
+}
+#sessionsUl li.active {
+  background: var(--clr-primary);
+  color: #fff;
+}
+#sessionsUl li .dots-btn {
+  position: absolute;
+  top: var(--space-sm);
+  right: var(--space-sm);
+  font-size: 1rem;
+  background: transparent;
+}
+#sessionsUl li.open .dots-dropdown {
+  display: flex;
+}
+
+/* Dots Dropdown */
+#sessionsUl .dots-dropdown {
+  display: none;
+  flex-direction: column;
+  position: absolute;
+  top: calc(100% + var(--space-xs));
+  right: var(--space-xs);
+  background: var(--clr-surface);
   border: 1px solid var(--clr-border);
+  border-radius: var(--radius-sm);
+  box-shadow: var(--shadow-lg);
+  z-index: 950;
 }
-.quick-reply:hover { background: var(--clr-primary); color: #fff; }
-/* Input form */
-#chatInputForm {
-  display: flex; align-items: center; gap: var(--space-sm);
+#sessionsUl .dots-dropdown button {
+  padding: var(--space-xs) var(--space-sm);
+  text-align: left;
+  width: 100%;
+  transition: var(--transition-fast);
 }
-#chatInputForm input[type="text"] {
-  flex: 1; padding: var(--space-sm);
-  border: 1px solid var(--clr-border); border-radius: var(--radius-lg);
+#sessionsUl .dots-dropdown button:hover {
+  background: var(--clr-primary-light);
+  color: #fff;
+}
+
+  /* ==========================================================================
+   7. Chat Message Bubbles & Avatars
+   ========================================================================== */
+
+/* Base message container */
+.message {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-sm);
+  opacity: 0;
+  animation: fadeIn 0.25s forwards;
+  position: relative;
+}
+
+/* Fade-in animation */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* User vs Therapist alignment */
+.message.user-msg {
+  flex-direction: row-reverse;
+}
+.message.therapist-msg {
+  flex-direction: row;
+}
+
+/* Avatars */
+.avatar-small {
+  width: 2rem;
+  height: 2rem;
+  border-radius: 50%;
+  flex-shrink: 0;
+  box-shadow: var(--shadow-sm);
+}
+
+/* Message bubble */
+.bubble {
+  max-width: 70%;
+  padding: var(--space-md);
+  border-radius: var(--radius-lg);
+  background: var(--clr-surface);
+  box-shadow: var(--shadow-sm);
+  position: relative;
+  line-height: 1.4;
+  word-wrap: break-word;
+}
+
+/* User bubble variation */
+.user-msg .bubble {
+  background: var(--clr-primary);
+  color: #fff;
+}
+
+/* Timestamps */
+.bubble time {
+  position: absolute;
+  bottom: var(--space-xs);
+  right: var(--space-xs);
+  font-size: 0.75rem;
+  color: var(--clr-text-light);
+}
+
+/* Copy button inside bubble */
+.copy-btn {
+  position: absolute;
+  top: var(--space-xs);
+  right: var(--space-xs);
+  font-size: 1rem;
+  opacity: 0.6;
+  transition: var(--transition-fast);
+  background: transparent;
+}
+.copy-btn:hover {
+  opacity: 1;
+}
+
+/* Spinner for loading messages */
+.spinner {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  padding: var(--space-md);
+}
+.spinner i {
+  font-size: 1.5rem;
+  animation: spin 1s linear infinite;
+}
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* Text selection within chat */
+#chatLog ::selection {
+  background: var(--clr-primary);
+  color: #fff;
+}
+
+/* ==========================================================================
+   8. Chat Controls & Quick Toolbar
+   ========================================================================== */
+
+#chatAreaControls {
+  display: flex;
+  flex-direction: column;
+  border-top: 1px solid var(--clr-border);
+  background: var(--clr-surface);
+  padding: var(--space-sm) var(--space-lg);
+}
+
+#chatQuickToolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--space-sm);
+}
+
+/* Regenerate & Edit buttons */
+#chatControls button {
   background: var(--clr-bg);
+  padding: var(--space-xs) var(--space-sm);
+  border-radius: var(--radius-full);
+  font-size: 1rem;
+  color: var(--clr-text-light);
+  transition: var(--transition-fast);
 }
+#chatControls button:hover {
+  background: var(--clr-primary-light);
+  color: #fff;
+}
+#regenerateReply { margin-right: var(--space-sm); }
+#editLast { margin-left: var(--space-sm); }
+
+/* Quick Reply Pills */
+#quickReplies {
+  display: flex;
+  gap: var(--space-sm);
+  overflow-x: auto;
+  padding-bottom: var(--space-xs);
+}
+.quick-reply {
+  flex-shrink: 0;
+  padding: var(--space-xs) var(--space-sm);
+  background: var(--clr-bg);
+  border: 1px solid var(--clr-border);
+  border-radius: var(--radius-full);
+  font-size: 0.875rem;
+  color: var(--clr-text);
+  transition: var(--transition-fast);
+  white-space: nowrap;
+}
+.quick-reply:hover {
+  background: var(--clr-primary);
+  color: #fff;
+}
+.quick-reply:focus {
+  outline: 2px dashed var(--clr-primary);
+  outline-offset: 2px;
+}
+
+/* ==========================================================================
+   9. Chat Input Form & Buttons
+   ========================================================================== */
+
+#chatInputForm {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+}
+
+#chatInputForm input[type="text"] {
+  flex: 1;
+  padding: var(--space-sm) var(--space-md);
+  border: 1px solid var(--clr-border);
+  border-radius: var(--radius-lg);
+  background: var(--clr-bg);
+  font-size: 1rem;
+  transition: var(--transition-fast);
+}
+#chatInputForm input[type="text"]:focus {
+  border-color: var(--clr-primary);
+}
+
 #chatInputForm button {
-  font-size: 1.25rem; color: var(--clr-text-light);
+  background: transparent;
+  font-size: 1.25rem;
+  color: var(--clr-text-light);
   padding: var(--space-xs);
   border-radius: var(--radius-full);
   transition: var(--transition-fast);
 }
-#chatInputForm button:hover { background: var(--clr-primary-light); color: #fff; }
+#chatInputForm button:hover {
+  background: var(--clr-primary-light);
+  color: #fff;
+}
+
+/* Specific Input Buttons */
+#attachBtn { margin-left: 0; }
+#micBtn.listening { color: var(--clr-error); }
+#sendBtn { color: var(--clr-success); }
+
+/* Disabled states */
+button:disabled,
+button[disabled] {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
 
 /* ==========================================================================
-   8. Modals & Toasts
+   10. Scrollbar Styling for Chat Area
+   ========================================================================== */
+
+#chatLog::-webkit-scrollbar {
+  width: 6px;
+}
+#chatLog::-webkit-scrollbar-thumb {
+  background: var(--clr-border);
+  border-radius: var(--radius-sm);
+}
+#chatLog::-webkit-scrollbar-thumb:hover {
+  background: var(--clr-primary-light);
+}
+#chatLog::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+/* ==========================================================================
+   11. Dark Mode Overrides for Message & Controls
+   ========================================================================== */
+
+html.dark .bubble {
+  background: var(--clr-surface);
+  box-shadow: var(--shadow-sm);
+}
+html.dark .user-msg .bubble {
+  background: var(--clr-primary-dark);
+}
+html.dark #chatAreaControls {
+  background: var(--clr-surface);
+  border-top-color: var(--clr-border);
+}
+html.dark #chatQuickToolbar button,
+html.dark #chatInputForm button {
+  color: var(--clr-text-light);
+}
+html.dark #chatInputForm input[type="text"] {
+  background: #252533;
+  border-color: var(--clr-border);
+  color: var(--clr-text);
+}
+
+/* ==========================================================================
+   12. Confirm & Info Modals
    ========================================================================== */
 .modal {
-  position: fixed; top: 50%; left: 50%;
-  transform: translate(-50%,-50%) scale(0.8);
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  width: 90%;
+  max-width: 28rem;
   background: var(--clr-surface);
-  border-radius: var(--radius-md);
+  border-radius: var(--radius-lg);
   box-shadow: var(--shadow-lg);
+  transform: translate(-50%, -50%) scale(0.8);
+  opacity: 0;
+  pointer-events: none;
+  transition: var(--transition-medium);
+  z-index: 10000;
   padding: var(--space-lg);
-  opacity: 0; pointer-events: none;
-  transition: var(--transition-fast);
-  z-index: 200;
 }
 .modal[open] {
-  opacity: 1; pointer-events: auto; transform: translate(-50%,-50%) scale(1);
+  opacity: 1;
+  transform: translate(-50%, -50%) scale(1);
+  pointer-events: auto;
 }
-.modal .modal-content { display: flex; flex-direction: column; gap: var(--space-md); }
-.modal h2 { font-size: 1.25rem; }
-.modal-buttons { display: flex; justify-content: flex-end; gap: var(--space-sm); }
-.modal .cancel { background: var(--clr-bg); color: var(--clr-text-light); }
-.modal .confirm { background: var(--clr-accent); color: #fff; }
-.close-modal { position: absolute; top: var(--space-sm); right: var(--space-sm); font-size: 1.25rem; }
-
-/* Toast */
-.toast {
-  position: fixed; bottom: var(--space-lg); right: var(--space-lg);
-  background: var(--clr-text); color: #fff;
-  padding: var(--space-sm) var(--space-md); border-radius: var(--radius-sm);
-  box-shadow: var(--shadow-md);
-  opacity: 0; transform: translateY(1rem);
+.modal .modal-content {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+}
+.modal h2 {
+  font-size: 1.5rem;
+  font-weight: 600;
+  margin-bottom: var(--space-sm);
+}
+.modal p {
+  font-size: 1rem;
+  color: var(--clr-text);
+}
+.modal .modal-buttons {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--space-sm);
+}
+.modal .modal-buttons .cancel,
+.modal .modal-buttons .confirm {
+  padding: var(--space-sm) var(--space-md);
+  border-radius: var(--radius-sm);
+  font-size: 0.875rem;
   transition: var(--transition-fast);
 }
-.toast.show { opacity: 1; transform: translateY(0); }
+.modal .modal-buttons .cancel {
+  background: var(--clr-bg);
+  color: var(--clr-text-light);
+  border: 1px solid var(--clr-border);
+}
+.modal .modal-buttons .confirm {
+  background: var(--clr-accent);
+  color: #fff;
+  border: none;
+}
+.modal .modal-buttons .cancel:hover {
+  background: var(--clr-border);
+}
+.modal .modal-buttons .confirm:hover {
+  background: var(--clr-error);
+}
+
+/* Modal Close Button */
+.modal .close-modal {
+  position: absolute;
+  top: var(--space-sm);
+  right: var(--space-sm);
+  font-size: 1.25rem;
+  color: var(--clr-text-light);
+  background: transparent;
+  transition: var(--transition-fast);
+}
+.modal .close-modal:hover {
+  color: var(--clr-text);
+}
 
 /* ==========================================================================
-   9. Overlays & Spinners
+   13. Toast Notifications
+   ========================================================================== */
+.toast {
+  position: fixed;
+  bottom: var(--space-lg);
+  right: var(--space-lg);
+  background: var(--clr-text);
+  color: #fff;
+  padding: var(--space-sm) var(--space-lg);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-md);
+  opacity: 0;
+  transform: translateY(1rem);
+  transition: var(--transition-fast);
+  z-index: 11000;
+}
+.toast.show {
+  opacity: 1;
+  transform: translateY(0);
+}
+.toast.hide {
+  opacity: 0;
+  transform: translateY(1rem);
+}
+
+/* ==========================================================================
+   14. Overlay Spinner & End Session Overlay
    ========================================================================== */
 #overlaySpinner {
-  position: fixed; top:0; left:0; right:0; bottom:0;
-  background: var(--clr-overlay-bg); display: flex;
-  align-items: center; justify-content: center; z-index: 150;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: var(--clr-overlay);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 12000;
 }
-.spinner-large { font-size: 2rem; color: #fff; }
-@keyframes spin { to { transform: rotate(360deg); } }
-.fa-spinner { animation: spin 1s linear infinite; }
+#overlaySpinner .overlay-content {
+  text-align: center;
+  color: #fff;
+}
+#overlaySpinner .spinner-large {
+  font-size: 2.5rem;
+  margin-bottom: var(--space-sm);
+  animation: spin 1s linear infinite;
+}
+#overlaySpinner p {
+  font-size: 1rem;
+}
 
 /* ==========================================================================
-   10. Component Variants & Edge Cases
+   15. Header Controls: Data Buttons & Dark Mode Toggle
    ========================================================================== */
-/* Regenerate/Edit/Dark/New session buttons all share base */
-#regenerateReply, #editLast, #darkModeToggle, #newSession {
-  background: var(--clr-bg); border-radius: var(--radius-full);
+/* Data controls group (hidden by default) */
+#dataControls {
+  display: flex;
+  gap: var(--space-sm);
+  align-items: center;
 }
-#regenerateReply:hover, #editLast:hover,
-#darkModeToggle:hover, #newSession:hover {
-  background: var(--clr-primary-light); color: #fff;
+#dataControls button {
+  background: transparent;
+  font-size: 1.25rem;
+  color: var(--clr-text-light);
+  padding: var(--space-xs);
+  border-radius: var(--radius-full);
+  transition: var(--transition-fast);
 }
-/* Hide native focus outlines, but provide custom */
-button:focus, input:focus { outline: 2px dashed var(--clr-primary); outline-offset: 2px; }
-/* Mobile tweaks */
-@media (max-width: 480px) {
-  #therapyHeader { padding: 0 var(--space-md); }
-  #sessionList { width: 100%; top: 4rem; left: 0; transform: translateY(-100%); }
-  #chatArea { left: 0; top: 4rem; }
-  .bubble { max-width: 85%; padding: var(--space-sm); }
+#dataControls button:hover {
+  background: var(--clr-primary-light);
+  color: #fff;
 }
 
+/* Dark Mode Toggle */
+#darkModeToggle {
+  background: transparent;
+  font-size: 1.25rem;
+  color: var(--clr-text-light);
+  padding: var(--space-xs);
+  border-radius: var(--radius-full);
+  transition: var(--transition-fast);
+}
+#darkModeToggle:hover {
+  background: var(--clr-primary-light);
+  color: #fff;
+}
+
+/* End Session Button */
+#endSession {
+  display: flex;
+  align-items: center;
+  gap: var(--space-xs);
+  background: var(--clr-error);
+  color: #fff;
+  padding: var(--space-sm) var(--space-md);
+  border-radius: var(--radius-md);
+  font-size: 0.875rem;
+  transition: var(--transition-fast);
+}
+#endSession .end-text {
+  display: inline-block;
+}
+#endSession:hover {
+  background: #c0392b;
+}
+#endSession:active {
+  transform: scale(0.98);
+}
+
+/* ==========================================================================
+   16. New Session & Collapse/Menu Buttons
+   ========================================================================== */
+#collapseBtn, #menuToggle {
+  font-size: 1.25rem;
+  color: var(--clr-text-light);
+  padding: var(--space-xs);
+  border-radius: var(--radius-full);
+  transition: var(--transition-fast);
+  background: transparent;
+}
+#collapseBtn:hover, #menuToggle:hover {
+  background: var(--clr-primary-light);
+  color: #fff;
+}
+
+/* ==========================================================================
+   17. Mobile Layout Tweaks (iPhone 11 & Small Screens)
+   ========================================================================== */
+@media (max-width: 600px) {
+  /* Header height adjustment */
+  header#therapyHeader {
+    height: 4rem;
+    padding: 0 var(--space-sm);
+  }
+  /* Sidebar becomes top drawer */
+  aside#sessionList {
+    top: 4rem;
+    left: 0;
+    width: 100%;
+    height: calc(100% - 4rem);
+    transform: translateY(-100%);
+  }
+  aside#sessionList.visible {
+    transform: translateY(0);
+  }
+  /* Chat area full width */
+  main#chatArea {
+    left: 0 !important;
+  }
+  /* Reduce bubble max-width */
+  .bubble {
+    max-width: 85%;
+    padding: var(--space-sm);
+  }
+  /* Toolbar condensed */
+  #chatAreaControls {
+    padding: var(--space-xs) var(--space-sm);
+  }
+  #chatQuickToolbar {
+    flex-direction: column;
+    align-items: stretch;
+    gap: var(--space-xs);
+  }
+  #chatControls {
+    justify-content: space-around;
+  }
+  #quickReplies {
+    overflow-x: scroll;
+  }
+}
+
+/* ==========================================================================
+   18. Button Variants & States
+   ========================================================================== */
+
+/* Primary Button */
+.btn-primary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-sm) var(--space-md);
+  background: var(--clr-primary);
+  color: #fff;
+  border-radius: var(--radius-md);
+  font-size: 1rem;
+  font-weight: 600;
+  transition: var(--transition-fast);
+}
+.btn-primary:hover {
+  background: var(--clr-primary-dark);
+}
+.btn-primary:active {
+  transform: scale(0.98);
+}
+.btn-primary:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* Secondary Button */
+.btn-secondary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-sm) var(--space-md);
+  background: var(--clr-surface);
+  color: var(--clr-text);
+  border: 1px solid var(--clr-border);
+  border-radius: var(--radius-md);
+  font-size: 1rem;
+  transition: var(--transition-fast);
+}
+.btn-secondary:hover {
+  background: var(--clr-bg);
+}
+.btn-secondary:active {
+  transform: scale(0.98);
+}
+
+/* Icon Button */
+.btn-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.5rem;
+  height: 2.5rem;
+  background: var(--clr-bg);
+  color: var(--clr-text-light);
+  border-radius: var(--radius-full);
+  transition: var(--transition-fast);
+}
+.btn-icon:hover {
+  background: var(--clr-primary-light);
+  color: #fff;
+}
+
+/* Success, Warning, Error Buttons */
+.btn-success {
+  background: var(--clr-success);
+  color: #fff;
+}
+.btn-success:hover {
+  background: #28a745;
+}
+.btn-warning {
+  background: var(--clr-warning);
+  color: #fff;
+}
+.btn-warning:hover {
+  background: #e08e0b;
+}
+.btn-error {
+  background: var(--clr-error);
+  color: #fff;
+}
+.btn-error:hover {
+  background: #c0392b;
+}
+
+/* ==========================================================================
+   19. Form Elements (Selects, Textareas, Checkboxes, Radios)
+   ========================================================================== */
+
+select, textarea {
+  width: 100%;
+  padding: var(--space-sm);
+  border: 1px solid var(--clr-border);
+  border-radius: var(--radius-sm);
+  background: var(--clr-bg);
+  font-size: 1rem;
+  transition: var(--transition-fast);
+}
+select:focus, textarea:focus {
+  border-color: var(--clr-primary);
+}
+
+textarea {
+  resize: vertical;
+  min-height: 6rem;
+}
+
+input[type="checkbox"],
+input[type="radio"] {
+  accent-color: var(--clr-primary);
+  width: 1rem;
+  height: 1rem;
+  margin-right: var(--space-sm);
+}
+
+/* Form field groups */
+.form-group {
+  margin-bottom: var(--space-md);
+}
+.form-group label {
+  display: block;
+  margin-bottom: var(--space-xs);
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--clr-text-light);
+}
+.form-group .form-control {
+  width: 100%;
+}
+
+/* ==========================================================================
+   20. Tooltips & Helper Text
+   ========================================================================== */
+
+/* Tooltip container */
+.tooltip {
+  position: relative;
+  display: inline-block;
+}
+
+/* Tooltip text */
+.tooltip .tooltip-text {
+  visibility: hidden;
+  width: max-content;
+  background-color: var(--clr-text);
+  color: #fff;
+  text-align: center;
+  padding: var(--space-xs) var(--space-sm);
+  border-radius: var(--radius-sm);
+  font-size: 0.75rem;
+  position: absolute;
+  z-index: 10000;
+  bottom: 125%;
+  left: 50%;
+  transform: translateX(-50%);
+  opacity: 0;
+  transition: var(--transition-fast);
+}
+
+/* Tooltip arrow */
+.tooltip .tooltip-text::after {
+  content: '';
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  margin-left: -5px;
+  border-width: 5px;
+  border-style: solid;
+  border-color: var(--clr-text) transparent transparent transparent;
+}
+
+/* Show on hover */
+.tooltip:hover .tooltip-text {
+  visibility: visible;
+  opacity: 1;
+}
+
+/* Helper text below inputs */
+.helper-text {
+  font-size: 0.75rem;
+  color: var(--clr-text-muted);
+  margin-top: var(--space-xs);
+}
+
+/* ==========================================================================
+   21. Animations & Transitions
+   ========================================================================== */
+
+/* Breathe animation for attention */
+@keyframes breathe {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.05); }
+}
+.animate-breathe {
+  animation: breathe 2s ease-in-out infinite;
+}
+
+/* Pulse for new notification */
+@keyframes pulse {
+  0% { transform: scale(1); opacity: 1; }
+  50% { transform: scale(1.1); opacity: 0.7; }
+  100% { transform: scale(1); opacity: 1; }
+}
+.animate-pulse {
+  animation: pulse 1.5s ease-in-out infinite;
+}
+
+/* Slide-in for sidebar */
+@keyframes slideInLeft {
+  from { transform: translateX(-100%); }
+  to { transform: translateX(0); }
+}
+.slide-in {
+  animation: slideInLeft 0.3s ease-out forwards;
+}
+
+/* Fade-up for messages */
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.animate-fade-up {
+  animation: fadeUp 0.4s ease-in-out forwards;
+}
+
+/* ==========================================================================
+   22. Accessibility Helpers
+   ========================================================================== */
+
+/* Focus outlines */
+:focus-visible {
+  outline: 2px dashed var(--clr-primary);
+  outline-offset: 2px;
+}
+
+/* Screen-reader only */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip: rect(0,0,0,0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* ==========================================================================
+   23. Session List: Snippets & Date
+   ========================================================================== */
+
+.session-title {
+  font-size: 0.975rem;
+  font-weight: 600;
+  line-height: 1.2;
+}
+.snippet {
+  font-size: 0.85rem;
+  color: var(--clr-text-muted);
+  margin-top: var(--space-xs);
+}
+.session-meta-line {
+  display: flex;
+  gap: var(--space-sm);
+  font-size: 0.75rem;
+  color: var(--clr-text-light);
+  margin-top: var(--space-xs);
+}
+
+/* ==========================================================================
+   24. Session Title Editing Inline
+   ========================================================================== */
+.session-title[contenteditable="true"] {
+  border-bottom: 1px dashed var(--clr-primary);
+  padding-bottom: var(--space-xs);
+  transition: var(--transition-fast);
+}
+.session-title[contenteditable="true"]:focus {
+  outline: none;
+  border-bottom-style: solid;
+  background: var(--clr-bg);
+}
+
+/* ==========================================================================
+   25. Inline Search Clear Icon
+   ========================================================================== */
+.session-search {
+  position: relative;
+}
+.session-search input[type="search"] {
+  width: 100%;
+  padding-right: var(--space-lg);
+}
+.session-search .clear-search {
+  position: absolute;
+  top: 50%;
+  right: var(--space-sm);
+  transform: translateY(-50%);
+  font-size: 1rem;
+  color: var(--clr-text-light);
+  cursor: pointer;
+  transition: var(--transition-fast);
+}
+.session-search .clear-search:hover {
+  color: var(--clr-primary);
+}
+
+/* ==========================================================================
+   26. Filter Dropdown Panel
+   ========================================================================== */
+.filter-panel {
+  position: absolute;
+  top: calc(100% + var(--space-xs));
+  right: 0;
+  background: var(--clr-surface);
+  border: 1px solid var(--clr-border);
+  border-radius: var(--radius-sm);
+  box-shadow: var(--shadow-lg);
+  padding: var(--space-sm);
+  display: none;
+  flex-direction: column;
+  gap: var(--space-xs);
+  z-index: 950;
+}
+.filter-panel.active {
+  display: flex;
+}
+.filter-panel label {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  font-size: 0.875rem;
+}
+.filter-panel input[type="checkbox"] {
+  accent-color: var(--clr-primary);
+}
+
+/* ==========================================================================
+   27. Session Action Buttons (Rename, Delete, Export)
+   ========================================================================== */
+.session-action {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-xs);
+  padding: var(--space-xs) var(--space-sm);
+  font-size: 0.85rem;
+  border-radius: var(--radius-sm);
+  transition: var(--transition-fast);
+}
+.session-action.rename {
+  background: var(--clr-bg);
+  color: var(--clr-text-light);
+}
+.session-action.rename:hover {
+  background: var(--clr-primary-light);
+  color: #fff;
+}
+.session-action.delete {
+  background: var(--clr-error);
+  color: #fff;
+}
+.session-action.delete:hover {
+  background: #c0392b;
+}
+.session-action.export {
+  background: var(--clr-success);
+  color: #fff;
+}
+.session-action.export:hover {
+  background: #28a745;
+}
+
+/* ==========================================================================
+   28. Export/Import Transcript Styles
+   ========================================================================== */
+#importExportModal .modal-content {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+}
+#importExportModal textarea {
+  font-family: var(--font-mono);
+  font-size: 0.875rem;
+  height: 10rem;
+  resize: vertical;
+}
+#importExportModal .btn-primary {
+  align-self: flex-end;
+}
+
+/* ==========================================================================
+   29. File Attachment Preview & Cancel
+   ========================================================================== */
+.attach-preview {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  margin-top: var(--space-sm);
+  background: var(--clr-bg);
+  border: 1px solid var(--clr-border);
+  border-radius: var(--radius-sm);
+  padding: var(--space-xs) var(--space-sm);
+}
+.attach-preview img,
+.attach-preview .file-icon {
+  width: 2rem;
+  height: 2rem;
+  object-fit: cover;
+  border-radius: var(--radius-sm);
+}
+.attach-preview .file-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--clr-primary-light);
+  color: #fff;
+}
+.attach-preview .remove-attach {
+  margin-left: auto;
+  font-size: 1rem;
+  color: var(--clr-text-light);
+  cursor: pointer;
+  transition: var(--transition-fast);
+}
+.attach-preview .remove-attach:hover {
+  color: var(--clr-error);
+}
+
+/* ==========================================================================
+   30. Markdown Preview & Code Syntax Highlight
+   ========================================================================== */
+.markdown-preview {
+  background: var(--clr-bg);
+  border: 1px solid var(--clr-border);
+  border-radius: var(--radius-sm);
+  padding: var(--space-md);
+  overflow-x: auto;
+}
+.markdown-preview code {
+  background: var(--clr-surface);
+  padding: var(--space-xs);
+  border-radius: var(--radius-xs);
+}
+.markdown-preview pre {
+  background: var(--clr-surface);
+  padding: var(--space-sm);
+  border-radius: var(--radius-sm);
+  overflow-x: auto;
+}
+
+/* ==========================================================================
+   31. Dark Mode Overrides for Session List & Attachments
+   ========================================================================== */
+html.dark .session-search input[type="search"],
+html.dark .filter-panel,
+html.dark .attach-preview {
+  background: var(--clr-surface);
+  border-color: var(--clr-border);
+  color: var(--clr-text);
+}
+
+/* ==========================================================================
+   32. Responsive Adjustments for Session Components
+   ========================================================================== */
+@media (max-width: 768px) {
+  .session-search {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .filter-panel {
+    right: var(--space-sm);
+    width: calc(100% - var(--space-md));
+  }
+  .session-action {
+    font-size: 0.75rem;
+    padding: var(--space-xs);
+  }
+  .attach-preview {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}
+/* ==========================================================================
+   33. Session List Entrance Animation
+   ========================================================================== */
+aside#sessionList.slide-in {
+  animation: slideInLeft 0.3s ease-out forwards;
+}
+
+/* ==========================================================================
+   34. Empty State for Chat Area
+   ========================================================================== */
+.chat-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  color: var(--clr-text-light);
+  text-align: center;
+  gap: var(--space-md);
+}
+.chat-empty h2 {
+  font-size: 1.5rem;
+  font-weight: 500;
+}
+.chat-empty p {
+  max-width: 70%;
+  font-size: 1rem;
+}
+.chat-empty .btn-primary {
+  margin-top: var(--space-md);
+}
+
+/* ==========================================================================
+   35. Date Separators Styling
+   ========================================================================== */
+.date-separator {
+  position: relative;
+  text-align: center;
+  margin: var(--space-lg) 0;
+  font-size: 0.875rem;
+  color: var(--clr-text-muted);
+}
+.date-separator::before,
+.date-separator::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  width: 40%;
+  height: 1px;
+  background: var(--clr-border);
+}
+.date-separator::before {
+  left: 0;
+}
+.date-separator::after {
+  right: 0;
+}
+
+/* ==========================================================================
+   36. Scroll Anchors & Jump Buttons
+   ========================================================================== */
+.scroll-anchor {
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 2rem;
+  height: 2rem;
+  background: var(--clr-primary);
+  color: #fff;
+  border-radius: var(--radius-full);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: var(--shadow-md);
+  transition: var(--transition-fast);
+}
+.scroll-anchor:hover {
+  background: var(--clr-primary-dark);
+}
+
+/* ==========================================================================
+   37. Contextual Toolbar on Message Hover
+   ========================================================================== */
+.message:hover .msg-toolbar {
+  opacity: 1;
+  pointer-events: auto;
+}
+.msg-toolbar {
+  position: absolute;
+  top: var(--space-sm);
+  right: var(--space-sm);
+  display: flex;
+  gap: var(--space-xs);
+  opacity: 0;
+  pointer-events: none;
+  transition: var(--transition-fast);
+}
+.msg-toolbar button {
+  background: var(--clr-bg);
+  padding: var(--space-xs);
+  border-radius: var(--radius-sm);
+  font-size: 0.875rem;
+  color: var(--clr-text-light);
+  transition: var(--transition-fast);
+}
+.msg-toolbar button:hover {
+  background: var(--clr-primary-light);
+  color: #fff;
+}
+
+/* ==========================================================================
+   38. Chat Area Padding Adjustments
+   ========================================================================== */
+#chatArea {
+  display: flex;
+  flex-direction: column;
+  padding-bottom: var(--space-lg);
+}
+#chatArea .chat-container {
+  flex: 1;
+  overflow-y: auto;
+  padding: var(--space-lg) var(--space-md);
+}
+
+/* ==========================================================================
+   39. Quick Jump to Bottom Button
+   ========================================================================== */
+.jump-bottom {
+  position: fixed;
+  bottom: var(--space-lg);
+  right: var(--space-lg);
+  background: var(--clr-primary);
+  color: #fff;
+  padding: var(--space-sm);
+  border-radius: var(--radius-full);
+  font-size: 1.25rem;
+  box-shadow: var(--shadow-md);
+  cursor: pointer;
+  opacity: 0;
+  transition: var(--transition-fast);
+  z-index: 800;
+}
+.jump-bottom.show {
+  opacity: 1;
+}
+
+/* ==========================================================================
+   40. Dark Mode Overrides for Toolbar & Empty States
+   ========================================================================== */
+html.dark .chat-empty {
+  color: var(--clr-text-light);
+}
+html.dark .msg-toolbar button {
+  color: var(--clr-text-light);
+}
+html.dark .scroll-anchor,
+html.dark .jump-bottom {
+  background: var(--clr-primary-dark);
+}
+
+/* ==========================================================================
+   41. Mobile Adjustments: Chat Empty & Jump Button
+   ========================================================================== */
+@media (max-width: 600px) {
+  .chat-empty h2 {
+    font-size: 1.25rem;
+  }
+  .chat-empty p {
+    max-width: 90%;
+  }
+  .scroll-anchor,
+  .jump-bottom {
+    bottom: env(safe-area-inset-bottom, var(--space-lg));
+    right: var(--space-md);
+  }
+}
+
+/* ==========================================================================
+   42. Accessibility Settings Panel
+   ========================================================================== */
+#accessibilityPanel {
+  position: fixed;
+  top: 4.5rem;
+  right: 0;
+  width: 20rem;
+  max-width: 100%;
+  height: calc(100% - 4.5rem);
+  background: var(--clr-surface);
+  border-left: 1px solid var(--clr-border);
+  box-shadow: var(--shadow-lg);
+  transform: translateX(100%);
+  transition: transform 0.35s ease-in-out;
+  z-index: 900;
+  padding: var(--space-lg);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+}
+#accessibilityPanel.visible {
+  transform: translateX(0);
+}
+#accessibilityPanel h2 {
+  font-size: 1.25rem;
+  margin-bottom: var(--space-sm);
+}
+#accessibilityPanel label {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  font-size: 0.875rem;
+}
+#accessibilityPanel input[type="range"] {
+  width: 100%;
+}
+
+/* ==========================================================================
+   43. Voice Recognition & Mic Indicator
+   ========================================================================== */
+#micBtn {
+  position: relative;
+}
+#micBtn.listening::after {
+  content: '';
+  position: absolute;
+  top: -6px;
+  right: -6px;
+  width: 0.75rem;
+  height: 0.75rem;
+  background: var(--clr-success);
+  border: 2px solid var(--clr-surface);
+  border-radius: 50%;
+  animation: pulse 1.5s ease-in-out infinite;
+}
+
+/* ==========================================================================
+   44. Exporting Transcript Progress Bar
+   ========================================================================== */
+#exportProgress {
+  position: fixed;
+  top: 4.5rem;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 50%;
+  max-width: 30rem;
+  height: 0.5rem;
+  background: var(--clr-border);
+  border-radius: var(--radius-full);
+  overflow: hidden;
+  z-index: 10000;
+  opacity: 0;
+  transition: opacity var(--transition-fast);
+}
+#exportProgress.active {
+  opacity: 1;
+}
+#exportProgress .progress-bar {
+  height: 100%;
+  width: 0;
+  background: var(--clr-primary);
+  transition: width 0.2s ease;
+}
+
+/* ==========================================================================
+   45. Theme Settings Panel
+   ========================================================================== */
+#themePanel {
+  position: fixed;
+  top: 4.5rem;
+  left: 50%;
+  transform: translateX(-50%) translateY(-150%);
+  width: 20rem;
+  background: var(--clr-surface);
+  border: 1px solid var(--clr-border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-lg);
+  padding: var(--space-lg);
+  opacity: 0;
+  pointer-events: none;
+  transition: var(--transition-medium);
+  z-index: 950;
+}
+#themePanel.open {
+  transform: translateX(-50%) translateY(0);
+  opacity: 1;
+  pointer-events: auto;
+}
+#themePanel h3 {
+  font-size: 1.125rem;
+  margin-bottom: var(--space-md);
+}
+#themePanel .theme-option {
+  display: flex;
+  align-items: center;
+  gap: var(--space-md);
+  margin-bottom: var(--space-sm);
+}
+#themePanel .theme-option:last-child {
+  margin-bottom: 0;
+}
+#themePanel input[type="radio"] {
+  accent-color: var(--clr-primary);
+}
+#themePanel .theme-label {
+  font-size: 1rem;
+}
+
+/* ==========================================================================
+   46. Advanced Dark Mode Tweaks
+   ========================================================================== */
+/* Invert sidebar borders */
+html.dark aside#sessionList {
+  border-color: var(--clr-border);
+}
+/* Dark scrollbars */
+html.dark ::-webkit-scrollbar-thumb {
+  background: var(--clr-border);
+}
+html.dark ::-webkit-scrollbar-track {
+  background: var(--clr-bg);
+}
+/* Dark overlays */
+html.dark #overlaySpinner {
+  background: rgba(0,0,0,0.7);
+}
+html.dark .modal {
+  background: #2a2a35;
+}
+/* Syntax highlight for dark */
+.markdown-preview code {
+  background: #333;
+  color: #f1f1f1;
+}
+.markdown-preview pre {
+  background: #333;
+}
+
+/* ==========================================================================
+   47. Content Editable Chat Bubbles (Rich Text Editing)
+   ========================================================================== */
+.bubble[contenteditable="true"] {
+  outline: 2px dashed var(--clr-primary);
+  padding: var(--space-sm);
+}
+.bubble[contenteditable="true"]:focus {
+  background: var(--clr-bg);
+}
+
+/* ==========================================================================
+   48. Reaction Emojis at Messages
+   ========================================================================== */
+.msg-reactions {
+  display: flex;
+  gap: var(--space-xs);
+  margin-top: var(--space-xs);
+}
+.msg-reactions button {
+  background: transparent;
+  font-size: 1rem;
+  opacity: 0.8;
+  transition: var(--transition-fast);
+}
+.msg-reactions button:hover {
+  transform: scale(1.1);
+  opacity: 1;
+}
+
+/* ==========================================================================
+   49. Fullscreen Mode Styles
+   ========================================================================== */
+.fullscreen {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: var(--clr-bg);
+  z-index: 20000;
+  display: flex;
+  flex-direction: column;
+}
+.fullscreen header,
+.fullscreen aside {
+  display: none;
+}
+.fullscreen main#chatArea {
+  top: 0;
+  left: 0;
+}
+
+/* ==========================================================================
+   50. Hover Portrait of Therapist
+   ========================================================================== */
+.therapist-info:hover .avatar {
+  transform: scale(1.05);
+  box-shadow: var(--shadow-lg);
+  transition: var(--transition-fast);
+}
+
+/* ==========================================================================
+   End of Part 8 (200+ lines)
+   ========================================================================== */
+/* ==========================================================================
+   51. Speech Synthesis Play/Pause Button
+   ========================================================================== */
+.speak-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.125rem;
+  color: var(--clr-text-light);
+  background: transparent;
+  padding: var(--space-xs);
+  border-radius: var(--radius-full);
+  transition: var(--transition-fast);
+}
+.speak-btn:hover {
+  background: var(--clr-primary-light);
+  color: #fff;
+}
+.speak-btn.mute {
+  color: var(--clr-error);
+}
+
+/* ==========================================================================
+   52. Error Message Bubbles & Alerts
+   ========================================================================== */
+.message.error-msg .bubble {
+  background: var(--clr-error);
+  color: #fff;
+}
+.alert-banner {
+  position: fixed;
+  top: 4.5rem;
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--clr-warning);
+  color: #fff;
+  padding: var(--space-sm) var(--space-md);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-md);
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  z-index: 11000;
+}
+.alert-banner button {
+  margin-left: auto;
+  background: transparent;
+  font-size: 1rem;
+  color: #fff;
+  transition: var(--transition-fast);
+}
+.alert-banner button:hover {
+  opacity: 0.8;
+}
+
+/* ==========================================================================
+   53. Copy & Share Buttons
+   ========================================================================== */
+.copy-btn-global,
+.share-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-xs);
+  font-size: 0.875rem;
+  padding: var(--space-xs) var(--space-sm);
+  border-radius: var(--radius-sm);
+  background: var(--clr-bg);
+  color: var(--clr-text-light);
+  transition: var(--transition-fast);
+}
+.copy-btn-global:hover,
+.share-btn:hover {
+  background: var(--clr-primary-light);
+  color: #fff;
+}
+
+/* ==========================================================================
+   54. Loading Skeletons
+   ========================================================================== */
+.skeleton {
+  background: var(--clr-border);
+  border-radius: var(--radius-sm);
+  position: relative;
+  overflow: hidden;
+}
+.skeleton::after {
+  content: '';
+  position: absolute;
+  top: 0; left: -100%;
+  height: 100%; width: 100%;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255,255,255,0.6),
+    transparent
+  );
+  animation: loading 1.2s infinite;
+}
+@keyframes loading {
+  0% { left: -100%; }
+  50% { left: 100%; }
+  100% { left: 100%; }
+}
+
+/* ==========================================================================
+   55. Smart Scroll Indicator
+   ========================================================================== */
+.scroll-indicator {
+  position: sticky;
+  top: 4.5rem;
+  height: 4px;
+  background: var(--clr-primary);
+  width: 0%;
+  transition: width 0.2s ease;
+  z-index: 1050;
+}
+
+/* ==========================================================================
+   56. Read Receipts & Status Indicators
+   ========================================================================== */
+.message[data-status="✓"] .bubble::after,
+.message[data-status="✓✓"] .bubble::after {
+  content: attr(data-status);
+  position: absolute;
+  bottom: var(--space-xs);
+  left: var(--space-xs);
+  font-size: 0.75rem;
+  color: var(--clr-text-light);
+}
+.message[data-status="✓✓"] .bubble::after {
+  color: var(--clr-primary);
+}
+
+/* ==========================================================================
+   57. Quick Export Dropdown
+   ========================================================================== */
+#exportTranscript {
+  position: relative;
+}
+#exportTranscript .export-menu {
+  display: none;
+  position: absolute;
+  top: calc(100% + var(--space-xs));
+  right: 0;
+  background: var(--clr-surface);
+  border: 1px solid var(--clr-border);
+  border-radius: var(--radius-sm);
+  box-shadow: var(--shadow-lg);
+  flex-direction: column;
+  z-index: 950;
+}
+#exportTranscript:hover .export-menu {
+  display: flex;
+}
+#exportTranscript .export-menu button {
+  padding: var(--space-xs) var(--space-sm);
+  text-align: left;
+  font-size: 0.875rem;
+}
+#exportTranscript .export-menu button:hover {
+  background: var(--clr-primary-light);
+  color: #fff;
+}
+
+/* ==========================================================================
+   58. Dark Mode Overrides for Alerts & Skeletons
+   ========================================================================== */
+html.dark .alert-banner {
+  background: #f1c40f;
+}
+html.dark .skeleton {
+  background: #3a3a45;
+}
+
+/* ==========================================================================
+   59. Mobile Tweaks: Skeleton & Alerts
+   ========================================================================== */
+@media (max-width: 600px) {
+  .alert-banner {
+    top: 4rem;
+    width: 100%;
+    border-radius: 0;
+    justify-content: center;
+  }
+  .skeleton {
+    height: 1rem;
+  }
+}
+
+/* ==========================================================================
+   60. Keyboard Shortcut Hints
+   ========================================================================== */
+.kbd {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.1rem 0.4rem;
+  margin: 0 0.1rem;
+  background: var(--clr-bg);
+  border: 1px solid var(--clr-border);
+  border-radius: var(--radius-xs);
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  color: var(--clr-text-muted);
+  box-shadow: var(--shadow-sm);
+}
+.kbd + .kbd {
+  margin-left: var(--space-xs);
+}
+
+/* ==========================================================================
+   61. Context Menu for Messages & Sessions
+   ========================================================================== */
+.context-menu {
+  position: absolute;
+  display: none;
+  flex-direction: column;
+  background: var(--clr-surface);
+  border: 1px solid var(--clr-border);
+  border-radius: var(--radius-sm);
+  box-shadow: var(--shadow-lg);
+  z-index: 12000;
+}
+.context-menu.open {
+  display: flex;
+}
+.context-menu button {
+  padding: var(--space-xs) var(--space-sm);
+  font-size: 0.875rem;
+  text-align: left;
+  transition: var(--transition-fast);
+}
+.context-menu button:hover {
+  background: var(--clr-primary-light);
+  color: #fff;
+}
+
+/* ==========================================================================
+   62. Full Loading Overlay (App Initialization)
+   ========================================================================== */
+#loadingOverlay {
+  position: fixed;
+  inset: 0;
+  background: var(--clr-bg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 25000;
+  flex-direction: column;
+  gap: var(--space-md);
+}
+#loadingOverlay .logo {
+  width: 4rem;
+  height: 4rem;
+  background: var(--clr-primary);
+  border-radius: var(--radius-full);
+  animation: breathe 2s ease-in-out infinite;
+}
+#loadingOverlay .loading-text {
+  margin-top: var(--space-sm);
+  font-size: 1rem;
+  color: var(--clr-text-light);
+}
+
+/* ==========================================================================
+   63. Fine‑Tuned Responsive Tweaks
+   ========================================================================== */
+@media (max-width: 1024px) {
+  header#therapyHeader {
+    padding: 0 var(--space-md);
+  }
+  aside#sessionList {
+    width: 14rem;
+  }
+  main#chatArea {
+    left: 14rem;
+  }
+}
+@media (max-width: 900px) {
+  aside#sessionList {
+    width: 12rem;
+  }
+  main#chatArea {
+    left: 12rem;
+  }
+}
+@media (max-width: 768px) {
+  header#therapyHeader {
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    align-items: center;
+    gap: var(--space-sm);
+  }
+  .header-left, .header-right {
+    display: none;
+  }
+  #menuToggle {
+    display: inline-flex;
+  }
+}
+
+/* ==========================================================================
+   64. Print Styles
+   ========================================================================== */
+@media print {
+  body, #chatArea, #sessionsUl, #sessionList, header, footer {
+    background: #fff !important;
+    color: #000 !important;
+  }
+  .bubble {
+    box-shadow: none !important;
+    border: 1px solid #ddd;
+  }
+  .copy-btn, .speak-btn, #chatAreaControls, .modal, .toast {
+    display: none !important;
+  }
+  .date-separator {
+    color: #333 !important;
+  }
+}
+
+
+[tabindex] {
+  outline: none;
+}
+[tabindex]:focus-visible {
+  outline: 2px dashed var(--clr-accent);
+  outline-offset: 2px;
+}
+a:focus-visible, button:focus-visible {
+  outline: 2px dashed var(--clr-accent);
+  outline-offset: 2px;
+}
 
 </style>
 
