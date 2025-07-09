@@ -1297,6 +1297,47 @@ html.dark #chatInputForm input {
   }
 }
 
+#quickReplies {
+  position: relative;
+}
+
+#quickReplies::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 30px;
+  height: 100%;
+  background: linear-gradient(to right, rgba(255,255,255,0), var(--color-surface));
+  pointer-events: none;
+}
+
+@media (max-width: 600px) {
+  #quickReplies::after {
+    background: linear-gradient(to right, rgba(243,246,251,0), var(--color-surface));
+  }
+}
+
+.message[data-status="✓"] .bubble::before,
+.message[data-status="✓✓"] .bubble::before {
+  content: attr(data-status);
+  position: absolute;
+  bottom: -1.5rem;
+  right: 0.5rem;
+  font-size: 0.75rem;
+  color: var(--color-muted);
+}
+
+#searchSessions:focus {
+  outline: none;
+  border-color: var(--color-primary);
+}
+
+html.dark .message[data-status="✓"] .bubble::before,
+html.dark .message[data-status="✓✓"] .bubble::before {
+  color: var(--color-muted);
+}
+
 
 html.dark {
   --bg: #121212;
