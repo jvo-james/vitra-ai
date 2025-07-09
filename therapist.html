@@ -1364,7 +1364,79 @@ html.dark .quick-reply:hover {
   background: var(--primary);
   color: #fff;
 }
+.back-btn {
+  position: absolute;
+  right: 1rem;
+  bottom: 4.5rem;       
+  background: var(--primary);
+  color: #fff;
+  border: none;
+  border-radius: 50%;
+  width: 40px; height: 40px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+  cursor: pointer;
+  z-index: 1001;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+#quickReplies {
+  overflow-x: auto; -webkit-overflow-scrolling: touch;
+  flex-wrap: nowrap !important;
+ }
+  .bubble {
+  position: relative;
+  padding: 0.75rem 1rem;
+  border-radius: 1.25rem;
+  background: var(--surface);
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+.therapist-msg .bubble::after,
+.user-msg .bubble::after {
+  content: '';
+  position: absolute;
+  width: 12px; height: 12px;
+  bottom: 0;
+  background: inherit;
+}
+.therapist-msg .bubble::after {
+  left: 16px;
+  border-bottom-left-radius: 0;
+  clip-path: polygon(0 0, 100% 0, 0 100%);
+}
+.user-msg .bubble::after {
+  right: 16px;
+  border-bottom-right-radius: 0;
+  clip-path: polygon(100% 0, 0 0, 100% 100%);
+}
 
+#stickerPicker {
+  position: absolute;
+  bottom: calc(var(--header-height) + 4rem);
+  left: 1rem;
+  right: 1rem;
+  background: var(--surface);
+  border-radius: var(--radius);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  padding: 0.5rem;
+  max-height: 200px;
+  overflow-y: auto;
+  z-index: 1100;
+}
+#stickerPicker img {
+  width: 48px; height: 48px;
+  border-radius: 0.5rem;
+  cursor: pointer;
+}
+.bubble-sticker {
+  display: block;
+  max-width: 120px;
+  border-radius: var(--radius);
+  margin: 0.5rem 0;
+}
 
 </style>
 
@@ -1427,6 +1499,18 @@ html.dark .quick-reply:hover {
       <button class="quick-reply">What’s a positive affirmation?</button>
     </div>
   </div>
+  
+ <div id="stickerPicker" hidden>
+   <img src="stickers/heart.png" alt="heart">
+   <img src="stickers/smile.png" alt="smile">
+   <img src="stickers/star.png" alt="star">
+   <img src="stickers/thumbs-up.png" alt="thumbs up">
+   <img src="stickers/fire.png" alt="fire">
+   <img src="stickers/party.png" alt="party">
+   <img src="stickers/coffee.png" alt="coffee">
+   <img src="stickers/flower.png" alt="flower">
+ </div>
+
     <form id="chatInputForm" autocomplete="off">
       <button id="attachBtn" type="button" title="Attach file"><i class="fas fa-paperclip"></i></button>
       <input type="text" id="chatInput" placeholder="Type your message…">
@@ -1434,6 +1518,9 @@ html.dark .quick-reply:hover {
       <button id="sendBtn" type="submit" title="Send"><i class="fas fa-paper-plane"></i></button>
     </form>
 </div>
+    <button id="backToBottom" class="back-btn" hidden>
+    <i class="fas fa-arrow-down"></i>
+  </button>
   </main>
 
 
@@ -1461,12 +1548,12 @@ html.dark .quick-reply:hover {
   <script>
 document.addEventListener('DOMContentLoaded', () => {
 
-  document.addEventListener('touchstart', e => {
-    const form = document.getElementById('chatInputForm');
-    if (!e.target.closest('#chatInputForm')) {
-      document.getElementById('chatInput').blur();
-    }
-  });
+ let isDragging = false;
+ document.addEventListener('touchmove', () => { isDragging = true; }, { passive: true });
+ document.addEventListener('touchend', e => {
+   if (!isDragging && !e.target.closest('#chatInputForm')) chatInput.blur();
+   isDragging = false;
+ });
   
    let lastInterim = '';
   
@@ -1484,6 +1571,8 @@ document.addEventListener('DOMContentLoaded', () => {
   const regenBtn      = document.getElementById('regenerateReply');
   const editBtn       = document.getElementById('editLast');
   const quickReplies  = document.querySelectorAll('.quick-reply');
+  const backBtn   = document.getElementById('backToBottom');
+ const stickerPicker = document.getElementById('stickerPicker');
 
   const menuToggle = document.getElementById('menuToggle');
  menuToggle.addEventListener('click', () => {
@@ -1496,6 +1585,35 @@ document.addEventListener('DOMContentLoaded', () => {
       sidebar.classList.remove('visible');
     }
   });
+
+  chatLog.addEventListener('scroll', () => {
+   const atBottom = chatLog.scrollHeight - chatLog.scrollTop <= chatLog.clientHeight + 10;
+   backBtn.hidden = atBottom;
+ });
+ backBtn.addEventListener('click', () => {
+   chatLog.scrollTo({ top: chatLog.scrollHeight, behavior: 'smooth' });
+ });
+
+  attachBtn.addEventListener('click', () => {
+  stickerPicker.hidden = !stickerPicker.hidden;
+});
+
+stickerPicker.querySelectorAll('img').forEach(stk => {
+  stk.addEventListener('click', () => {
+    appendMessage('user', `<img src="${stk.src}" class="bubble-sticker">`, new Date().toISOString(), '✓');
+    chatHistory.push({ who:'user', text:`<img src="${stk.src}">`, time: new Date().toISOString(), status:'✓' });
+    persistCurrent();
+    stickerPicker.hidden = true;
+    scrollToBottom();
+  });
+});
+
+  chatInput.addEventListener('focus', () => {
+  setTimeout(() => {
+    window.scrollTo(0, 0);
+    document.getElementById('therapyHeader').scrollIntoView();
+  }, 100);
+});
 
   sessionsUl.addEventListener('click', () => sidebar.classList.remove('visible'));
   newSessionBtn.addEventListener('click', () => sidebar.classList.remove('visible'));
