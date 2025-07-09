@@ -72,7 +72,7 @@ html, body {
   }
 }
 #therapyHeader {
-  position: fixed;
+  position: sticky;
   top: 0; left: 0; right: 0;
   height: 64px;
   background: var(--surface);
@@ -389,7 +389,8 @@ position: absolute;
 
 
 #chatAreaControls {
-  position: relative; 
+position: sticky;
+  bottom: 0;
   background: var(--surface);
   border-top: 1px solid var(--muted);
   padding: 0.75rem var(--padding);
@@ -1434,6 +1435,33 @@ html.dark .quick-reply:hover {
   pointer-events: none;
 }
 
+  #chatLog {
+ background: var(--bg) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='32' height='32'%3E%3Ctext x='0' y='24' font-family='Font Awesome 6 Free' font-size='24' fill='%23D0E7FF'%3E%F0%9F%92%9C%3C/text%3E%3C/svg%3E") repeat;
+ }
+
+  .therapist-msg .bubble::after,
+.user-msg .bubble::after {
+  content: "";
+  position: absolute;
+  width: 16px; height: 16px;
+  bottom: -2px;
+  background: inherit;
+}
+.therapist-msg .bubble::after {
+  left: 16px;
+  clip-path: polygon(0 0, 0 100%, 100% 100%);
+}
+.user-msg .bubble::after {
+  right: 16px;
+  clip-path: polygon(100% 0, 0 100%, 100% 100%);
+}
+
+  +#backToBottom {
+  display: none;
+}
+#backToBottom.show {
+  display: flex;
+}
 </style>
 
   
@@ -1482,7 +1510,7 @@ html.dark .quick-reply:hover {
     <div id="chatLog" role="log" aria-live="polite">
       <div class="date-separator">Welcome! Start a session or click “New Session”.</div>
     </div>
-     <button id="backToBottom" class="back-btn" hidden>
+     <button id="backToBottom" class="back-btn">
     <i class="fas fa-arrow-down"></i>
   </button>
 <div id="chatAreaControls">
@@ -1498,7 +1526,9 @@ html.dark .quick-reply:hover {
       <button class="quick-reply">What’s a positive affirmation?</button>
     </div>
   </div>
-  
+  <div id="listeningIndicator" hidden class="listening">
+  <i class="fas fa-microphone-slash"></i> Listening…
+</div>
     <form id="chatInputForm" autocomplete="off">
       <button id="attachBtn" type="button" title="Attach file"><i class="fas fa-paperclip"></i></button>
       <input type="text" id="chatInput" placeholder="Type your message…">
@@ -1578,32 +1608,21 @@ qr.addEventListener('touchstart', e => {
   scrollX = qr.scrollLeft;
 }, { passive: true });
 qr.addEventListener('touchmove', e => {
-  const dx = startX - e.touches[0].pageX;
+ const dx = startX - e.touches[0].pageX;
   qr.scrollLeft = scrollX + dx;
+  e.preventDefault();
 }, { passive: false });
 
   
   chatLog.addEventListener('scroll', () => {
-   const atBottom = chatLog.scrollHeight - chatLog.scrollTop <= chatLog.clientHeight + 10;
-   backBtn.hidden = atBottom;
+  const atBottom = chatLog.scrollHeight - chatLog.scrollTop <= chatLog.clientHeight + 10;
+  backBtn.classList.toggle('show', !atBottom);
  });
  backBtn.addEventListener('click', () => {
    chatLog.scrollTo({ top: chatLog.scrollHeight, behavior: 'smooth' });
  });
 
-chatInput.addEventListener('focus', () => {
-  setTimeout(() => {
-    document.getElementById('therapyHeader').style.top = '0';
-    document.getElementById('chatAreaControls')
-      .style.position = 'fixed';
-    document.getElementById('chatAreaControls')
-      .style.bottom   = '0';
-  }, 50);
-});
-chatInput.addEventListener('blur', () => {
-  document.getElementById('chatAreaControls').style.position = '';
-});
-  
+
   sessionsUl.addEventListener('click', () => sidebar.classList.remove('visible'));
   newSessionBtn.addEventListener('click', () => sidebar.classList.remove('visible'));
 
@@ -2044,6 +2063,8 @@ filterBtn.addEventListener('click', () => {
     rec.onstart = () => {
       micBtn.classList.add('listening');
       micBtn.innerHTML = '<i class="fas fa-microphone-slash"></i>';
+      chatForm.hidden = true;
+      document.getElementById('listeningIndicator').hidden = false; 
     };
 
    rec.onresult = event => {
@@ -2070,6 +2091,8 @@ filterBtn.addEventListener('click', () => {
     rec.onend = () => {
       micBtn.classList.remove('listening');
       micBtn.innerHTML = '<i class="fas fa-microphone"></i>';
+      document.getElementById('listeningIndicator').hidden = true;
+     chatForm.hidden = false;
     };
    rec.onerror = err => {
      console.error('SpeechRecognition error', err);
