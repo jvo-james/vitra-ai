@@ -92,7 +92,7 @@ img {
   position: fixed;
   top: 0;
   left: 0;
-  z-index: 1000;
+  z-index: 10000;
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
   transition: var(--transition);
 }
@@ -190,7 +190,6 @@ img {
   }
 }
 
-/* Sidebar Styling */
 #sessionList {
   position: fixed;
   top: var(--header-height);
@@ -201,7 +200,7 @@ img {
   box-shadow: 2px 0 12px rgba(0, 0, 0, 0.05);
   overflow-y: auto;
   padding: var(--padding);
-  z-index: 999;
+  z-index: 2000;
   transition: transform var(--transition);
 }
 
@@ -228,7 +227,6 @@ img {
 }
 
 #sessionList #newSession {
-  margin-top: 1rem;
   width: 100%;
   background: var(--secondary);
   color: white;
@@ -241,6 +239,31 @@ img {
   gap: 0.5rem;
 }
 
+   @media (min-width: 824px) {
+ #sessionList {
+    display: flex;
+    flex-direction: column;
+    padding-bottom: calc(var(--padding) + 3rem); 
+  }
+  #sessionList #newSession {
+    position: absolute;
+    bottom: var(--padding);
+    left: var(--padding);
+    right: var(--padding);
+    margin: 0;
+  }
+ }
+
+ @media (max-width: 768px) {
+ #sessionList {
+    display: flex;
+    flex-direction: column;
+  }
+  #sessionList #newSession {
+    order: -1;
+    margin-bottom: 1rem;
+  }
+ }
 #sessionsUl {
   list-style: none;
   display: flex;
@@ -259,7 +282,15 @@ img {
 
 #sessionsUl li.active {
   background: var(--primary);
-  color: white;
+}
+#sessionsUl li.active .session-title,
+#sessionsUl li.active .snippet,
+#sessionsUl li.active .session-meta-line,
+#sessionsUl li.active .dots-btn {
+  color: #FFFFFF !important;
+}
+#sessionsUl li.active .snippet {
+  opacity: 0.85;
 }
 
 #sessionsUl .session-title {
@@ -363,7 +394,6 @@ img {
   position: relative;
 }
 
-/* Date Separator */
 .date-separator {
   text-align: center;
   font-size: var(--font-size-sm);
@@ -374,7 +404,6 @@ img {
   align-self: center;
 }
 
-/* Message Containers */
 .message {
   display: flex;
   align-items: flex-end;
@@ -390,7 +419,6 @@ img {
   justify-content: flex-start;
 }
 
-/* Bubbles */
 .bubble {
   max-width: 70%;
   padding: 0.75rem 1rem;
@@ -411,57 +439,74 @@ img {
   border-radius: var(--radius) var(--radius) 0.25rem var(--radius);
 }
 
-/* Bubble Tails */
-.user-msg .bubble::after {
-  content: "🗨️";
-  position: absolute;
-  right: -1rem;
-  bottom: 0.25rem;
-  font-size: 1.5rem;
-  line-height: 1;
-}
+.user-msg .bubble {
+   position: relative;
+ }
+ .user-msg .bubble::after {
+   content: "";
+   position: absolute;
+   bottom: 0;
+   right: -0.75rem;
+   border-width: 0.75rem 0 0.75rem 0.75rem;
+   border-style: solid;
+   border-color: transparent transparent transparent var(--secondary-light);
+ }
 
-.therapist-msg .bubble::before {
-  content: "💬";
-  position: absolute;
-  left: -1rem;
-  bottom: 0.25rem;
-  font-size: 1.5rem;
-  line-height: 1;
-}
-
-/* Time & Buttons */
+ .therapist-msg .bubble {
+   position: relative;
+ }
+ .therapist-msg .bubble::before {
+   content: "";
+   position: absolute;
+   bottom: 0;
+   left: -0.75rem;
+   border-width: 0.75rem 0.75rem 0.75rem 0;
+   border-style: solid;
+   border-color: transparent var(--primary-light) transparent transparent;
+ }
+  
 .bubble time {
   display: block;
   font-size: var(--font-size-sm);
   color: var(--muted);
   margin-top: 0.25rem;
 }
-
-.copy-btn,
-.speak-btn {
+.msg-time {
+   font-size: var(--font-size-sm);
+   color: var(--muted);
+   margin: 0.25rem 1rem;
+   display: block;
+ }
+.copy-btn {
   position: absolute;
   opacity: 0;
   transition: var(--transition);
 }
-
+.speak-btn {
+  position: absolute;
+  opacity: 1;
+  transition: var(--transition);
+}
 .copy-btn {
-  top: 0.5rem;
-  right: 0.5rem;
+ bottom: 0.5rem; right: 0.5rem;
 }
 
 .speak-btn {
   bottom: 0.5rem;
-  right: 0.5rem;
+ right: -2.5rem;   
 }
-
-/* Show on Hover */
+.avatar-small {
+   width: 32px;
+   height: 32px;
+   border-radius: 50%;
+   margin-right: 0.5rem;     
+   object-fit: cover;
+ }
 .message:hover .copy-btn,
 .message:hover .speak-btn {
   opacity: 1;
 }
 
-/* Back to Bottom Button */
 .back-btn {
   position: sticky;
   bottom: 1rem;
@@ -482,7 +527,6 @@ img {
   display: flex;
 }
 
-/* Chat Area Controls */
 #chatAreaControls {
   position: fixed;
   bottom: 0;
@@ -492,6 +536,7 @@ img {
   padding: var(--padding) 0;
   box-shadow: 0 -2px 10px rgba(0,0,0,0.05);
   display: flex;
+  flex-direction: column;  
   align-items: center;
   gap: 1rem;
   z-index: 1000;
@@ -539,14 +584,24 @@ img {
   display: flex;
 }
 
-/* Quick Replies */
 #quickReplies {
   display: flex;
   gap: 0.5rem;
-  overflow-x: auto;
+  overflow-x: auto;                     
+  -webkit-overflow-scrolling: touch;     
+  scrollbar-width: thin;           
   padding-bottom: 0.25rem;
 }
-
+ #quickReplies::-webkit-scrollbar {
+   height: 6px;
+ }
+ #quickReplies::-webkit-scrollbar-track {
+   background: var(--bg);
+ }
+ #quickReplies::-webkit-scrollbar-thumb {
+   background: var(--primary-light);
+   border-radius: var(--radius);
+ }
 .quick-reply {
   white-space: nowrap;
   padding: 0.5rem 1rem;
@@ -557,9 +612,9 @@ img {
   flex-shrink: 0;
 }
 
-/* Input Form */
 #chatInputForm {
   display: flex;
+  margin-top: 0.5rem; 
   align-items: center;
   gap: 0.5rem;
   padding: 0 var(--padding);
@@ -598,7 +653,6 @@ img {
   display: none;
 }
 
-/* Modals, Toasts, Spinner */
 .modal {
   position: fixed;
   top: 0;
@@ -674,7 +728,6 @@ img {
   margin-bottom: 1rem;
 }
 
-/* Dark Mode */
 .dark {
   background: #1E1E1E;
   color: #E0E0E0;
@@ -717,7 +770,6 @@ img {
   color: white;
 }
 
-/* Mobile & iPhone 11 Specific */
 @media (max-width: 414px) {
   #chatAreaControls {
     flex-wrap: wrap;
@@ -762,7 +814,6 @@ img {
   border: 2px solid var(--bg);
 }
 
-/* ===== Sidebar Advanced ===== */
 #sessionList .session-search input:focus {
   border-color: var(--primary);
   box-shadow: 0 0 0 2px var(--primary-light);
@@ -784,7 +835,6 @@ img {
   color: var(--primary-dark);
 }
 
-/* ===== Dropdown Improved ===== */
 .dots-dropdown button + button {
   border-top: 1px solid var(--muted);
 }
@@ -793,7 +843,6 @@ img {
   border-bottom: none;
 }
 
-/* ===== Search Filter Panel ===== */
 #filterPanel {
   position: absolute;
   top: calc(var(--header-height) + var(--padding));
@@ -833,7 +882,6 @@ img {
   border-radius: var(--radius);
 }
 
-/* ===== Tooltip ===== */
 .tooltip {
   position: absolute;
   background: var(--text);
@@ -851,7 +899,6 @@ img {
   opacity: 1;
 }
 
-/* ===== Button Variants ===== */
 .btn-primary {
   background: var(--primary);
   color: white;
@@ -882,7 +929,6 @@ img {
   color: white;
 }
 
-/* ===== Form Elements ===== */
 input[type="text"],
 input[type="email"],
 input[type="password"],
@@ -910,7 +956,6 @@ textarea[disabled] {
   opacity: 0.6;
 }
 
-/* ===== Alerts ===== */
 .alert {
   padding: 1rem;
   border-radius: var(--radius);
@@ -935,7 +980,6 @@ textarea[disabled] {
   font-size: 1.5rem;
 }
 
-/* ===== Animations ===== */
 @keyframes fadeInUp {
   from {
     opacity: 0;
@@ -966,7 +1010,6 @@ textarea[disabled] {
   animation: fadeOutDown 0.4s ease both;
 }
 
-/* ===== Session Item Animations ===== */
 #sessionsUl li {
   animation: fadeInUp 0.3s ease both;
 }
@@ -975,7 +1018,6 @@ textarea[disabled] {
   animation: fadeOutDown 0.3s ease both;
 }
 
-/* ===== File Attach Preview ===== */
 .file-preview {
   display: flex;
   flex-wrap: wrap;
@@ -997,7 +1039,6 @@ textarea[disabled] {
   color: var(--primary-dark);
 }
 
-/* ===== Responsive Tweaks ===== */
 @media (min-width: 1024px) {
   #sessionList {
     transform: translateX(0);
@@ -1013,7 +1054,6 @@ textarea[disabled] {
   }
 }
 
-/* ===== Accessibility Focus States ===== */
 button:focus-visible,
 input:focus-visible,
 a:focus-visible {
@@ -1021,7 +1061,6 @@ a:focus-visible {
   outline-offset: 2px;
 }
 
-/* ===== Utility Classes ===== */
 .mt-1 { margin-top: 0.25rem; }
 .mt-2 { margin-top: 0.5rem; }
 .mt-3 { margin-top: 1rem; }
@@ -1038,14 +1077,12 @@ a:focus-visible {
 
 .hidden { display: none !important; }
 
-/* ===== System Message Styling ===== */
 .system-msg {
   font-style: italic;
   color: var(--muted);
   text-align: center;
 }
 
-/* ===== Mentions & Tags ===== */
 .mention {
   background: var(--primary-light);
   color: var(--primary-dark);
@@ -1054,7 +1091,6 @@ a:focus-visible {
   font-weight: 600;
 }
 
-/* ===== Dark Mode Overrides Continued ===== */
 .dark .alert-info {
   background: #357ABD;
 }
@@ -1099,7 +1135,6 @@ a:focus-visible {
   background: var(--primary);
 }
 
-/* ===== Accordion ===== */
 .accordion {
   border: 1px solid var(--muted);
   border-radius: var(--radius);
@@ -1147,7 +1182,6 @@ a:focus-visible {
   padding: 1rem;
 }
 
-/* ===== Progress Bar ===== */
 .progress {
   width: 100%;
   background: var(--primary-light);
@@ -1164,7 +1198,6 @@ a:focus-visible {
   transition: width 0.4s ease;
 }
 
-/* ===== Skeleton Loader ===== */
 .skeleton {
   background: var(--primary-light);
   border-radius: var(--radius);
@@ -1192,7 +1225,6 @@ a:focus-visible {
   100% { transform: translateX(150%); }
 }
 
-/* ===== Badge ===== */
 .badge {
   display: inline-block;
   padding: 0.25rem 0.5rem;
@@ -1203,7 +1235,6 @@ a:focus-visible {
   font-weight: 600;
 }
 
-/* ===== Notification Panel ===== */
 .notification-panel {
   position: fixed;
   top: var(--header-height);
@@ -1253,7 +1284,6 @@ a:focus-visible {
   color: var(--muted);
 }
 
-/* ===== Avatar Group ===== */
 .avatar-group {
   display: flex;
   align-items: center;
@@ -1270,7 +1300,6 @@ a:focus-visible {
   z-index: 2;
 }
 
-/* ===== File Upload ===== */
 .file-upload {
   border: 2px dashed var(--muted);
   border-radius: var(--radius);
@@ -1289,7 +1318,6 @@ a:focus-visible {
   display: none;
 }
 
-/* ===== Audio Player ===== */
 .audio-player {
   display: flex;
   align-items: center;
@@ -1316,7 +1344,6 @@ a:focus-visible {
   flex: 1;
 }
 
-/* ===== Video Player ===== */
 .video-container {
   position: relative;
   padding-top: 56.25%;
@@ -1330,7 +1357,6 @@ a:focus-visible {
   border-radius: var(--radius);
 }
 
-/* ===== Slider ===== */
 .slider {
   position: relative;
   width: 100%;
@@ -1347,7 +1373,6 @@ a:focus-visible {
   flex-shrink: 0;
 }
 
-/* ===== Chart Placeholder ===== */
 .chart {
   width: 100%;
   height: 300px;
@@ -1356,7 +1381,6 @@ a:focus-visible {
   position: relative;
 }
 
-/* ===== Tooltip Adjustments ===== */
 .tooltip[data-position="top"] {
   transform: translateY(-100%);
   bottom: 100%;
@@ -1367,7 +1391,6 @@ a:focus-visible {
   top: 100%;
 }
 
-/* ===== Print Styles ===== */
 @media print {
   #therapyHeader,
   #sessionList,
@@ -1384,7 +1407,6 @@ a:focus-visible {
   }
 }
 
-/* ===== RTL Support ===== */
 [dir="rtl"] {
   direction: rtl;
 }
@@ -1405,7 +1427,6 @@ a:focus-visible {
   border-radius: var(--radius) 0.25rem var(--radius) var(--radius);
 }
 
-/* ===== Final Utility Enhancements ===== */
 .text-primary { color: var(--primary) !important; }
 .text-secondary { color: var(--secondary) !important; }
 .bg-primary { background: var(--primary) !important; }
@@ -1442,7 +1463,6 @@ a:focus-visible {
   background: var(--primary);
 }
 
-/* ===== Accordion ===== */
 .accordion {
   border: 1px solid var(--muted);
   border-radius: var(--radius);
@@ -1490,7 +1510,6 @@ a:focus-visible {
   padding: 1rem;
 }
 
-/* ===== Progress Bar ===== */
 .progress {
   width: 100%;
   background: var(--primary-light);
@@ -1507,7 +1526,6 @@ a:focus-visible {
   transition: width 0.4s ease;
 }
 
-/* ===== Skeleton Loader ===== */
 .skeleton {
   background: var(--primary-light);
   border-radius: var(--radius);
@@ -1535,7 +1553,6 @@ a:focus-visible {
   100% { transform: translateX(150%); }
 }
 
-/* ===== Badge ===== */
 .badge {
   display: inline-block;
   padding: 0.25rem 0.5rem;
@@ -1546,7 +1563,6 @@ a:focus-visible {
   font-weight: 600;
 }
 
-/* ===== Notification Panel ===== */
 .notification-panel {
   position: fixed;
   top: var(--header-height);
@@ -1596,7 +1612,6 @@ a:focus-visible {
   color: var(--muted);
 }
 
-/* ===== Avatar Group ===== */
 .avatar-group {
   display: flex;
   align-items: center;
@@ -1613,7 +1628,6 @@ a:focus-visible {
   z-index: 2;
 }
 
-/* ===== File Upload ===== */
 .file-upload {
   border: 2px dashed var(--muted);
   border-radius: var(--radius);
@@ -1632,7 +1646,6 @@ a:focus-visible {
   display: none;
 }
 
-/* ===== Audio Player ===== */
 .audio-player {
   display: flex;
   align-items: center;
@@ -1659,7 +1672,6 @@ a:focus-visible {
   flex: 1;
 }
 
-/* ===== Video Player ===== */
 .video-container {
   position: relative;
   padding-top: 56.25%;
@@ -1673,7 +1685,6 @@ a:focus-visible {
   border-radius: var(--radius);
 }
 
-/* ===== Slider ===== */
 .slider {
   position: relative;
   width: 100%;
@@ -1690,7 +1701,6 @@ a:focus-visible {
   flex-shrink: 0;
 }
 
-/* ===== Chart Placeholder ===== */
 .chart {
   width: 100%;
   height: 300px;
@@ -1699,7 +1709,6 @@ a:focus-visible {
   position: relative;
 }
 
-/* ===== Tooltip Adjustments ===== */
 .tooltip[data-position="top"] {
   transform: translateY(-100%);
   bottom: 100%;
@@ -1710,7 +1719,6 @@ a:focus-visible {
   top: 100%;
 }
 
-/* ===== Print Styles ===== */
 @media print {
   #therapyHeader,
   #sessionList,
@@ -1780,7 +1788,6 @@ a:focus-visible {
   padding: 1rem 0;
 }
 
-/* ===== Confirm Modal Buttons ===== */
 .modal-buttons .cancel {
   background: var(--muted);
   color: white;
@@ -1806,7 +1813,6 @@ a:focus-visible {
   background: #c03939;
 }
 
-/* ===== Overlay Spinner Content ===== */
 #overlaySpinner .overlay-content {
   display: flex;
   flex-direction: column;
@@ -1819,24 +1825,20 @@ a:focus-visible {
   margin: 0;
 }
 
-/* ===== Search Input Placeholder ===== */
 #searchSessions::placeholder {
   color: var(--muted);
   opacity: 1;
 }
 
-/* ===== Attach Button Hover ===== */
 #attachBtn:hover {
   background: var(--primary);
   color: white;
 }
 
-/* ===== End Session Confirmation Alert ===== */
 #confirmModal[open] .modal-content {
   animation: fadeInUp 0.4s ease both;
 }
 
-/* ===== Ensure Copy Toast Fades ===== */
 .toast.show {
   animation: fadeInUp 0.3s ease both;
 }
@@ -1982,7 +1984,93 @@ a:focus-visible {
   color: #E0E0E0;
 }
 
+#listeningIndicator {
+  display: none;             
+}
+#listeningIndicator:not([hidden]) {
+  display: flex;          
 
+  .spinner {
+  width: 3rem;
+  height: 3rem;
+  margin: 2rem auto;
+  border: 4px solid var(--primary-light);
+  border-top: 4px solid var(--primary-dark);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite, fade-in-up 0.4s ease both;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+   .dark #therapyHeader,
+ .dark .header-left i,
+ .dark .therapist-info h1,
+ .dark .header-right button i {
+  color: #E0E0E0;
+ }
+
+ .dark #sessionList,
+ .dark #sessionList .session-title,
+ .dark #sessionList .snippet,
+ .dark #sessionList .session-meta-line {
+  color: #E0E0E0;
+ }
+
+ .dark #chatArea,
+ .dark #chatLog {
+  background: #1E1E1E;
+ }
+
+ .dark .date-separator {
+ background: #2A2A2A;
+  color: #CCCCCC;
+ }
+
+ .dark .back-btn {
+ background: var(--primary-light);
+  color: var(--primary-dark);
+ }
+
+ .dark #chatAreaControls i,
+ .dark #chatAreaControls .dropdown-toggle,
+ .dark #chatAreaControls .quick-reply {
+  color: #E0E0E0;
+ }
+
+ .dark #chatInput {
+  border-color: #555;
+  color: #E0E0E0;
+ }
+ .dark #chatInput::placeholder {
+  color: #888;
+ }
+
+ .dark .dropdown-content {
+  background: #2A2A2A;
+  color: #E0E0E0;
+ }
+
+ .dark button {
+ color: #E0E0E0;
+ }
+
+ .dark .toast {
+  background: #357ABD;
+  color: #FFF;
+ }
+ .dark .spinner-large,
+ .dark .spinner {
+ color: #4A90E2;
+ }
+
+  
+  #chatAreaControls {
+    left: var(--sidebar-width);   
+    width: calc(100% - var(--sidebar-width));
+  }
+ 
 </style>
 
   
@@ -2090,8 +2178,10 @@ a:focus-visible {
 
   <script>
   document.addEventListener('DOMContentLoaded', () => {
-    const toggle = document.getElementById('moreActions');
-    const menu   = document.getElementById('moreActionsMenu');
+  const regenBtn      = document.getElementById('regenerateReply');
+  const editBtn       = document.getElementById('editLast');
+  const clearBtn      = document.getElementById('clearHistory');
+  const exportBtn     = document.getElementById('exportTranscript');
 
     toggle.addEventListener('click', e => {
       e.stopPropagation();
@@ -2103,13 +2193,13 @@ a:focus-visible {
     });
 
     document.getElementById('regenerateReplyMenu')
-      .addEventListener('click', () => document.getElementById('regenerateReply').click());
+    .addEventListener('click', () => regenBtn.click());
     document.getElementById('editLastMenu')
-      .addEventListener('click', () => document.getElementById('editLast').click());
+    .addEventListener('click', () => editBtn.click());
     document.getElementById('clearChatMenu')
-      .addEventListener('click', () => document.getElementById('clearHistory').click());
+    .addEventListener('click', () => clearBtn.click());
     document.getElementById('exportChatMenu')
-      .addEventListener('click', () => document.getElementById('exportTranscript').click());
+    .addEventListener('click', () => exportBtn.click());
   });
   </script>
   <script>
