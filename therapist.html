@@ -114,7 +114,67 @@ header#therapyHeader .end-text {
   margin-left: 0.25rem;
   font-size: var(--font-size-sm);
 }
-
+aside#sessionList {
+  width: var(--sidebar-width);
+  background-color: var(--surface);
+  border-right: 1px solid var(--muted);
+  display: flex;
+  flex-direction: column;
+  transition: transform var(--transition);
+}
+aside#sessionList .mobile-header-icons {
+  display: none;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--padding);
+  border-bottom: 1px solid var(--muted);
+}
+aside#sessionList .session-search {
+  display: flex;
+  align-items: center;
+  padding: var(--padding);
+  gap: 0.5rem;
+}
+aside#sessionList .session-search input {
+  flex: 1;
+  padding: 0.5rem;
+  border: 1px solid var(--muted);
+  border-radius: var(--radius);
+  font-size: var(--font-size-sm);
+}
+aside#sessionList .session-search button {
+  font-size: 1rem;
+  color: var(--muted);
+}
+aside#sessionList ul#sessionsUl {
+  flex: 1;
+  overflow-y: auto;
+}
+aside#sessionList ul#sessionsUl li {
+  padding: var(--padding);
+  border-bottom: 1px solid var(--muted);
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  position: relative;
+}
+aside#sessionList ul#sessionsUl li.active {
+  background-color: var(--primary-light);
+}
+aside#sessionList ul#sessionsUl li .session-title {
+  font-weight: 600;
+  color: var(--text);
+}
+aside#sessionList ul#sessionsUl li .snippet {
+  font-size: var(--font-size-sm);
+  color: var(--muted);
+}
+aside#sessionList ul#sessionsUl li .session-meta-line {
+  display: flex;
+  justify-content: space-between;
+  font-size: var(--font-size-sm);
+  color: var(--muted);
+}
 aside#sessionList ul#sessionsUl li .dots-btn {
   position: absolute;
   top: var(--padding);
@@ -153,229 +213,100 @@ aside#sessionList button#newSession {
   font-weight: 600;
   text-align: center;
 }
- 
-.session-meta {
-  display: flex; align-items: center; gap: var(--padding);
-  font-size: var(--font-size-sm); color: var(--muted);
-}
-
-#sessionList {
-  position: fixed; top: var(--header-height); left: 0;
-  width: var(--sidebar-width);
-  height: calc(100% - var(--header-height));
-  background: var(--surface);
-  padding: var(--padding);
-  box-shadow: 2px 0 8px rgba(0,0,0,0.05);
-  overflow-y: auto;
-  display: flex; flex-direction: column;
-}
-#sessionList .session-search {
-  display: flex; gap: 0.5rem; margin-bottom: var(--padding);
-}
-  @media (max-width: 724px) {
- #sessionList {
-    display: none;
-    position: absolute;
-    top: 0;                       
-    left: 0;
-    width: var(--sidebar-width);
-    height: 100vh;             
-     z-index: 1100;
-     background: var(--surface);
-     flex-direction: column;
-     box-shadow: 2px 0 8px rgba(0,0,0,0.05);
-   }
-  }
-#searchSessions {
-  flex: 1; padding: 0.5rem; border: 1px solid var(--muted);
-  border-radius: var(--radius);
-}
-#filterBtn {
-  background: var(--primary); color: #fff;
-  border: none; border-radius: var(--radius);
-  padding: 0 0.75rem; cursor: pointer;
-  transition: background var(--transition);
-}
-#filterBtn:hover {
-  background: var(--primary-dark);
-}
-#sessionsUl {
-  list-style: none; flex: 1; overflow-y: auto;
-}
-#sessionsUl li {
-  display: flex; flex-direction: column; padding: 0.75rem;
-  margin-bottom: 0.5rem; border-radius: var(--radius);
-  background: transparent; cursor: pointer;
-  transition: background var(--transition);
-}
-#sessionsUl li.active,
-#sessionsUl li:hover {
-  background: var(--primary-light);
-}
-#sessionsUl li strong {
-  font-size: var(--font-size-sm); margin-bottom: 0.25rem;
-  color: var(--primary-dark);
-}
-#sessionsUl li .snippet {
-  font-size: var(--font-size-sm); color: var(--muted);
-}
-#sessionsUl li time {
-  font-size: var(--font-size-sm); color: var(--muted);
-  align-self: flex-end;
-}
-#newSession {
-  width: 100%; padding: 0.75rem; margin-top: 0.5rem;
-  border: none; border-radius: var(--radius);
-  font-weight: 600; cursor: pointer;
-  transition: background var(--transition);
-}
-#newSession {
-  background: var(--secondary); color: #fff;
-}
-#newSession:hover {
-  background: var(--secondary-dark);
-}
-#endSession {
-  background: var(--error); color: #fff;
-}
-#endSession:hover {
-background: #c12e3a; }
-.dots-dropdown button {
+main#chatArea {
+  flex: 1;
   display: flex;
-  align-items: center;
+  flex-direction: column;
+  background-color: var(--bg);
+  position: relative;
+}
+main#chatArea #chatLog {
+  flex: 1;
+  padding: var(--padding);
+  overflow-y: auto;
+  position: relative;
+}
+main#chatArea #chatLog .date-separator {
+  text-align: center;
+  margin: var(--padding) 0;
+  font-size: var(--font-size-sm);
+  color: var(--muted);
+}
+main#chatArea #chatLog .message {
+  display: flex;
+  align-items: flex-end;
+  margin-bottom: var(--padding);
   gap: 0.5rem;
-  padding: 0.5rem 1rem;
 }
-
-
-#chatArea {
- position: fixed;
-  top: calc(var(--header-height) + 1px);
-  left: var(--sidebar-width);
-  right: 0; bottom: 0;
-  background: var(--bg);
-  padding-bottom: 0;
-  display: flex; flex-direction: column;
+main#chatArea #chatLog .message.user-msg {
+  justify-content: flex-end;
 }
-
-#chatLog {
-  flex: 1; overflow-y: auto; padding-right: var(--padding);
+main#chatArea #chatLog .message.therapist-msg {
+  justify-content: flex-start;
+}
+main#chatArea #chatLog .message .avatar-small {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+}
+main#chatArea #chatLog .message .bubble {
+  max-width: 70%;
+  background-color: var(--surface);
+  padding: 0.75rem;
+  border-radius: var(--radius);
   position: relative;
 }
-.date-separator {
-  text-align: center; margin: var(--padding) 0;
-  font-size: var(--font-size-sm); color: var(--muted);
-}
-.listening {
- background: var(--secondary);
-  color: #fff;
- }
-  
-.message {
- display: flex; align-items: flex-end;
-   margin-bottom: 1.5rem;  max-width: 75%;
-  position: relative;
-}
-.therapist-msg { flex-direction: row; }
-.user-msg      { flex-direction: row-reverse; margin-left: auto; }
-
-.avatar-small {
-  width: 32px; height: 32px; border-radius: 50%;
-  margin: 0 0.5rem;
-  flex-shrink: 0;
-}
-.bubble {
-  position: relative;
-  background: var(--surface);
-  padding: 0.75rem 1rem 0.75rem 0.75rem;
-  border-radius: 1.25rem;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.05);
-  position: relative;
-  line-height: 1.4;
-  transition: background var(--transition);
-}
-.user-msg .bubble {
-  background: var(--primary);
+main#chatArea #chatLog .message.user-msg .bubble {
+  background-color: var(--primary);
   color: #fff;
 }
-.bubble p { margin-bottom: 0.25rem; }
-
- .bubble .copy-btn {
- position: absolute;
-  bottom: 0.5rem; 
-  top: auto;      
-  right: 0.75rem; 
-  opacity: 0;
-   background: none;
-   border: none;
-   cursor: pointer;
-   transition: opacity var(--transition);
- }
-
- .speak-btn {
-position: absolute;
+main#chatArea #chatLog .message .bubble time {
+  display: block;
+  font-size: var(--font-size-sm);
+  color: var(--muted);
+  margin-top: 0.5rem;
+}
+main#chatArea #chatLog .message .bubble .copy-btn {
+  position: absolute;
   bottom: 0.5rem;
-  left: 50%;
-  transform: translateX(-50%);
-  color: var(--info);
-   background: none;
-   border: none;
-   cursor: pointer;
-   transition: opacity var(--transition);
- }
-
-.bubble .copy-btn { right: 1.5rem; color: var(--muted); }
-.speak-btn       { right: 0.5rem; color: var(--info); }
-
-.message:hover .bubble .copy-btn,
-.message:hover .speak-btn {
-  opacity: 1;
+  right: 0.5rem;
+  font-size: 0.875rem;
+  color: var(--muted);
 }
-.bubble h1, .bubble h2, .bubble h3,
-.bubble h4, .bubble h5, .bubble h6 {
-  margin: 0.5rem 0;
-  color: var(--primary-dark);
+main#chatArea #chatLog .message.user-msg .bubble::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  right: -8px;
+  width: 0;
+  height: 0;
+  border-top: 8px solid var(--primary);
+  border-left: 8px solid transparent;
 }
-.bubble p {
-  margin: 0.5rem 0;
-  line-height: 1.6;
+main#chatArea #chatLog .message.therapist-msg .bubble::before {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: -8px;
+  width: 0;
+  height: 0;
+  border-top: 8px solid var(--surface);
+  border-right: 8px solid transparent;
 }
-.bubble ul, .bubble ol {
-  margin: 0.5rem 0 0.5rem 1rem;
+main#chatArea #chatLog .back-btn {
+  position: sticky;
+  bottom: var(--padding);
+  margin: 0 auto;
+  display: none;
+  background-color: var(--secondary);
+  color: #fff;
+  padding: 0.5rem;
+  border-radius: 50%;
+  z-index: 500;
 }
-.bubble li {
-  margin-bottom: 0.25rem;
+main#chatArea #chatLog .back-btn.show {
+  display: block;
 }
-.bubble strong { font-weight: 600; }
-.bubble em     { font-style: italic; }
-.bubble a {
-  color: var(--primary);
-  text-decoration: underline;
-}
-
-.bubble time {
-  position: absolute; bottom: -1.25rem; right: 0.5rem;
-  font-size: var(--font-size-sm); color: var(--muted);
-}
-
-  
-.spinner {
-  display: flex; align-items: center; justify-content: center;
-  font-size: 1.5rem; color: var(--primary);
-  margin: 1rem auto;
-  animation: spin 1s linear infinite;
-}
-@keyframes spin {
-  from { transform: rotate(0deg); }
-  to   { transform: rotate(360deg); }
-}
-
-}
-#sessionsUl li:hover .dots-btn {
-  opacity: 1;
-  color: var(--primary-dark);  
- }
-
 #chatAreaControls {
   background-color: var(--surface);
   padding: var(--padding);
