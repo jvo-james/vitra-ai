@@ -1297,27 +1297,6 @@ html.dark #chatInputForm input {
   }
 }
 
-#quickReplies {
-  position: relative;
-}
-
-#quickReplies::after {
-  content: '';
-  position: absolute;
-  top: 0;
-  right: 0;
-  width: 30px;
-  height: 100%;
-  background: linear-gradient(to right, rgba(255,255,255,0), var(--color-surface));
-  pointer-events: none;
-}
-
-@media (max-width: 600px) {
-  #quickReplies::after {
-    background: linear-gradient(to right, rgba(243,246,251,0), var(--color-surface));
-  }
-}
-
 .message[data-status="✓"] .bubble::before,
 .message[data-status="✓✓"] .bubble::before {
   content: attr(data-status);
@@ -1570,11 +1549,7 @@ html.dark .quick-reply:hover {
     padding: 0.5rem 0;
     gap: 0.5rem;
   }
-    #quickReplies {
-   width: 100%;
-    flex-wrap: nowrap;
-  }
-  
+
   #chatControls button {
     width: 32px; height: 32px;
     padding: 0;
@@ -1646,63 +1621,6 @@ html.dark .quick-reply:hover {
     display: none;
   }
 }
-#quickReplies {
-  display: flex;
-  gap: 0.5rem;
-  overflow-x: auto;
-  flex-wrap: nowrap !important;
-  padding: 0.5rem 0;
-  -webkit-overflow-scrolling: touch;
-  background: var(--surface);
-}
-#quickReplies::-webkit-scrollbar { display: none; }
-
-#quickReplies .quick-reply {
-  flex: 0 0 auto;
-  white-space: nowrap;
-  padding: 0.5rem 1rem;
-  border: 1px solid var(--primary);
-  border-radius: var(--radius);
-  background: var(--primary-light);
-  color: var(--primary);
-  font-size: var(--font-size-sm);
-  cursor: pointer;
-  transition: background var(--transition), color var(--transition);
-}
-#quickReplies .quick-reply:hover {
-  background: var(--primary);
-  color: #fff;
-}
-
-
-#quickReplies {
-  display: flex;
-  gap: 0.5rem;
-  overflow-x: auto !important;
-  white-space: nowrap;
-  padding: 0.5rem var(--padding);
-  background: var(--surface);
-  -webkit-overflow-scrolling: touch;
-  scrollbar-width: none;
-}
-#quickReplies::-webkit-scrollbar {
-  display: none;
-}
-#quickReplies .quick-reply {
-  flex: 0 0 auto;
-  padding: 0.5rem 1rem;
-  border: 1px solid var(--primary);
-  border-radius: var(--radius);
-  background: var(--primary-light);
-  color: var(--primary);
-  font-size: 0.875rem;
-  cursor: pointer;
-  transition: background var(--transition), color var(--transition);
-}
-#quickReplies .quick-reply:hover {
-  background: var(--primary);
-  color: #fff;
-}
 
 html.dark {
   --bg: #121212;
@@ -1748,30 +1666,7 @@ html.dark #quickReplies .quick-reply:hover {
   #therapyHeader button { width: 36px; height: 36px; }
 }
 
-  #quickReplies {
-  display: flex;
-  overflow-x: auto;
-  -webkit-overflow-scrolling: touch;
-  white-space: nowrap;
-  gap: 0.5rem;
-  padding: 0.5rem var(--padding);
-  background: var(--surface);
-}
-#quickReplies::-webkit-scrollbar { display: none; }
-#quickReplies .quick-reply {
-  flex: 0 0 auto;
-  padding: 0.5rem 1rem;
-  border: 1px solid var(--primary);
-  border-radius: var(--radius);
-  background: var(--primary-light);
-  color: var(--primary);
-  cursor: pointer;
-  transition: background var(--transition), color var(--transition);
-}
-#quickReplies .quick-reply:hover {
-  background: var(--primary);
-  color: #fff;
-}
+
   @media (max-width: 600px) {
   #therapyHeader {
     position: fixed;
@@ -1818,6 +1713,10 @@ html.dark #quickReplies .quick-reply:hover {
   #chatInputForm input {
   touch-action: manipulation;
 }
+  #chatLog {
+  position: relative;
+}
+
   .back-btn {
   position: absolute;
   right: var(--padding);
@@ -1834,6 +1733,195 @@ html.dark #quickReplies .quick-reply:hover {
   z-index: 1001;
 }
 .back-btn.show { display: flex; }
+
+#quickReplies {
+  display: flex !important;
+  flex: 1 1 auto;               
+  overflow-x: auto !important;
+  -webkit-overflow-scrolling: touch;
+  white-space: nowrap;
+  gap: 0.5rem;
+  padding: 0.5rem var(--padding);
+  background: var(--surface);
+}
+
+#quickReplies::-webkit-scrollbar {
+  display: none;
+}
+
+#quickReplies .quick-reply {
+  flex: 0 0 auto;
+  padding: 0.5rem 1rem;
+  border: 1px solid var(--primary);
+  border-radius: var(--radius);
+  background: var(--primary-light);
+  color: var(--primary);
+  font-size: var(--font-size-sm);
+  cursor: pointer;
+  transition: background var(--transition), color var(--transition);
+}
+
+#quickReplies .quick-reply:hover {
+  background: var(--primary);
+  color: #fff;
+}
+
+  @media (max-width: 600px) {
+  #therapyHeader {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    z-index: 2000;           
+    height: var(--header-height);
+  }
+
+  #chatAreaControls {
+    position: fixed;
+    bottom: 0; left: 0; right: 0;
+    z-index: 2000;
+  }
+
+  #chatLog {
+    position: absolute;
+    top: var(--header-height);
+    bottom: var(--header-height);
+    left: 0; right: 0;
+    overflow-y: auto;
+    padding: var(--padding) 0; 
+  }
+
+  #chatArea {
+    padding: 0;
+  }
+}
+.more-btn { display: none; }
+
+@media (max-width: 600px) {
+  .more-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--surface);
+    border: 1px solid var(--muted);
+    border-radius: 50%;
+    width: 36px; height: 36px;
+    margin-right: 0.5rem;
+  }
+  #chatControls {
+    display: none;
+    position: absolute;
+    top: -4rem;                
+    right: var(--padding);
+    background: var(--surface);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    border-radius: var(--radius);
+    flex-direction: column;
+    padding: 0.5rem;
+    gap: 0.5rem;
+    z-index: 1500;
+  }
+  #chatControls.show {
+    display: flex;
+  }
+}
+
+#chatInputForm       { display: flex; align-items: center; gap: 0.5rem; }
+#chatInputForm input { flex: 1; transition: flex 0.2s ease; }
+#micBtn              { opacity: 1; transition: opacity 0.2s ease; }
+#sendBtn             { opacity: 0.6; transition: opacity 0.2s ease; }
+
+#chatInputForm.has-text input {
+  flex: 1 1 0;
+}
+#chatInputForm.has-text #micBtn {
+  opacity: 0;
+  pointer-events: none;
+}
+#chatInputForm.has-text #sendBtn {
+  opacity: 1;
+  animation: send-pulse 1.2s ease-in-out infinite;
+  background: var(--primary);
+  color: #fff;
+}
+@keyframes send-pulse {
+  0%,100% { transform: scale(1); }
+  50%     { transform: scale(1.05); }
+}
+
+  
+.mobile-header-icons {
+  display: none;               
+}
+@media (max-width: 600px) {
+  .mobile-header-icons {
+    display: flex;
+    gap: 0.5rem;
+    padding: var(--padding);
+    border-bottom: 1px solid var(--muted);
+    background: var(--surface);
+  }
+}
+@media (max-width: 600px) {
+  #sessionList #newSession {
+    display: block !important;
+    position: sticky;
+    bottom: 0;
+    left: 0; right: 0;
+    margin: 0;
+    border-radius: 0;
+    padding: 1rem;
+    background: var(--secondary);
+    color: #fff;
+    font-weight: 600;
+    text-align: center;
+    box-shadow: 0 -2px 4px rgba(0,0,0,0.1);
+    z-index: 100;
+  }
+  #sessionList ul {
+    padding-bottom: 4rem;
+  }
+}
+
+.mobile-header-icons button {
+  flex: 1;
+  height: 40px;
+  border: 1px solid var(--primary);
+  border-radius: var(--radius);
+  background: var(--primary-light);
+  color: var(--primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background var(--transition), color var(--transition);
+}
+.mobile-header-icons button:hover {
+  background: var(--primary);
+  color: #fff;
+}
+
+
+.message .bubble {
+  position: relative;
+}
+
+
+.therapist-msg .bubble::after {
+  content: '';
+  position: absolute;
+  bottom: 0; left: 16px;
+  width: 12px; height: 12px;
+  background: var(--surface);
+  clip-path: polygon(0 0, 100% 100%, 0 100%);
+}
+
+
+.user-msg .bubble::after {
+  content: '';
+  position: absolute;
+  bottom: 0; right: 16px;
+  width: 12px; height: 12px;
+  background: var(--primary);
+  clip-path: polygon(100% 0, 0 100%, 100% 100%);
+}
 </style>
 
   
@@ -1887,12 +1975,16 @@ html.dark #quickReplies .quick-reply:hover {
   <main id="chatArea">
     <div id="chatLog" role="log" aria-live="polite">
       <div class="date-separator">Welcome! Start a session or click “New Session”.</div>
-    </div>
-     <button id="backToBottom" class="back-btn">
+    <button id="backToBottom" class="back-btn">
     <i class="fas fa-arrow-down"></i>
   </button>
+    </div>
+   
 <div id="chatAreaControls">
     <div id="chatQuickToolbar">
+       <button id="moreActions" class="more-btn" aria-label="More actions">
+    <i class="fas fa-ellipsis-h"></i>
+  </button>
     <div id="chatControls">
       <button id="regenerateReply" title="Regenerate"><i class="fas fa-redo"></i></button>
       <button id="editLast" title="Edit last"><i class="fas fa-edit"></i></button>
@@ -1973,6 +2065,28 @@ document.addEventListener('DOMContentLoaded', () => {
    sidebar.classList.toggle('visible');
  });
 
+  const moreBtn = document.getElementById('moreActions');
+const controls = document.getElementById('chatControls');
+
+moreBtn.addEventListener('click', () => {
+  controls.classList.toggle('show');
+});
+
+document.addEventListener('click', e => {
+  if (!e.target.closest('#chatControls') 
+   && !e.target.closest('#moreActions')) {
+    controls.classList.remove('show');
+  }
+});
+
+  const chatForm = document.getElementById('chatInputForm');
+const chatInput = document.getElementById('chatInput');
+
+chatInput.addEventListener('input', () => {
+  const hasText = chatInput.value.trim().length > 0;
+  chatForm.classList.toggle('has-text', hasText);
+});
+  
    document.addEventListener('click', e => {
    if (!e.target.closest('#sessionList') && !e.target.closest('#menuToggle')) {
       sidebar.classList.remove('visible');
