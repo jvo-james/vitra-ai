@@ -1748,6 +1748,92 @@ html.dark #quickReplies .quick-reply:hover {
   #therapyHeader button { width: 36px; height: 36px; }
 }
 
+  #quickReplies {
+  display: flex;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  white-space: nowrap;
+  gap: 0.5rem;
+  padding: 0.5rem var(--padding);
+  background: var(--surface);
+}
+#quickReplies::-webkit-scrollbar { display: none; }
+#quickReplies .quick-reply {
+  flex: 0 0 auto;
+  padding: 0.5rem 1rem;
+  border: 1px solid var(--primary);
+  border-radius: var(--radius);
+  background: var(--primary-light);
+  color: var(--primary);
+  cursor: pointer;
+  transition: background var(--transition), color var(--transition);
+}
+#quickReplies .quick-reply:hover {
+  background: var(--primary);
+  color: #fff;
+}
+  @media (max-width: 600px) {
+  #therapyHeader {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: var(--header-height);
+    padding: 0 1rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    z-index: 10000;
+  }
+   #therapyHeader .header-left,
+  #therapyHeader .therapist-info,
+  #therapyHeader #endSession {
+    display: flex;
+  }
+  #therapyHeader .header-right > button:not(#endSession),
+  #therapyHeader #dataControls {
+    display: none !important;
+  }
+
+  #chatArea {
+    top: var(--header-height);
+  }
+  html { scroll-padding-top: var(--header-height); }
+}
+  .mobile-header-icons {
+    display: none; }
+  @media (max-width: 600px) {
+  .mobile-header-icons {
+    display: flex;
+    gap: 0.5rem;
+    padding: var(--padding);
+    border-bottom: 1px solid var(--muted);
+  }
+  #therapyHeader #darkModeToggle,
+  #therapyHeader #dataControls,
+  #therapyHeader #collapseBtn {
+    display: none;
+  }
+}
+  #chatInputForm input {
+  touch-action: manipulation;
+}
+  .back-btn {
+  position: absolute;
+  right: var(--padding);
+  bottom: calc(var(--padding) + 2.5rem);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: var(--primary);
+  color: #fff;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+  z-index: 1001;
+}
+.back-btn.show { display: flex; }
 </style>
 
   
@@ -1784,6 +1870,12 @@ html.dark #quickReplies .quick-reply:hover {
 
 
   <aside id="sessionList">
+      <div class="mobile-header-icons">
+    <button id="collapseBtn"><i class="fas fa-arrow-left"></i></button>
+    <button id="darkModeToggle"><i class="fas fa-moon"></i></button>
+    <button id="clearHistory"><i class="fas fa-trash"></i></button>
+    <button id="exportTranscript"><i class="fas fa-file-export"></i></button>
+  </div>
     <div class="session-search">
       <input type="search" id="searchSessions" placeholder="Search sessions…">
       <button id="filterBtn"><i class="fas fa-filter"></i></button>
