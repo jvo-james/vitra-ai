@@ -71,70 +71,6 @@ html, body {
     height: -webkit-fill-available;
   }
 }
-#therapyHeader {
-  position: sticky;
-  top: 0; left: 0; right: 0;
-  height: 64px;
-  background: var(--surface);
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 0 var(--padding);
-  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-  z-index: 1000;
-}
-
-#therapyHeader .header-left {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-}
-
-#collapseBtn,
-#menuToggle {
-  font-size: 1.1rem;
-  background: none;
-  border: 2px solid var(--primary);
-  color: var(--primary);
-  width: 36px;
-  height: 36px;
-  border-radius: 50%;
-  cursor: pointer;
-  transition: background var(--transition), color var(--transition), border-color var(--transition);
-}
-
-#collapseBtn:hover,
-#menuToggle:hover {
-  background: var(--primary);
-  border-color: var(--primary);
-  color: #fff;
-}
-
-  
-.therapist-info {
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-}
-
-#endSession {
-  background: linear-gradient(135deg, #E24A4A, #C72E3A);
-  color: #fff;
-  padding: 0.5rem 1rem;
-  border: none;
-  border-radius: var(--radius);
-  font-size: var(--font-size-sm);
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.2);
-  transition: transform 0.2s ease, box-shadow var(--transition);
-}
-#endSession:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 6px 16px rgba(0,0,0,0.3);
-}
-
 
 @media (min-width: 768px) {
   #menuToggle {
@@ -142,35 +78,52 @@ html, body {
   }
 }
 
-@media (max-width: 600px) {
-  #therapyHeader {
-    flex-wrap: nowrap;
-    height: auto;
-    padding: 0.5rem;
-    gap: 0.5rem;
-  }
-  #therapyHeader .header-left {
-    order: 1;
-  }
-  .therapist-info {
-    order: 2;
-    justify-content: center;
-  }
-  #endSession {
-    order: 3;
-    margin-left: auto;
-  }
+header#therapyHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: var(--header-height);
+  padding: 0 var(--padding);
+  background-color: var(--surface);
+  border-bottom: 1px solid var(--muted);
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+}
+header#therapyHeader .header-left,
+header#therapyHeader .header-right {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+header#therapyHeader .therapist-info {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+header#therapyHeader .therapist-info .avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+}
+header#therapyHeader .therapist-info h1 {
+  font-size: var(--font-size-lg);
+  font-weight: 600;
+  color: var(--text);
+}
+header#therapyHeader button i {
+  font-size: 1.25rem;
+  color: var(--muted);
+}
+header#therapyHeader button:hover i {
+  color: var(--primary);
+}
+header#therapyHeader .end-text {
+  margin-left: 0.25rem;
+  font-size: var(--font-size-sm);
 }
 
-.therapist-info {
-  display: flex; align-items: center; gap: 0.75rem;
-}
-.therapist-info .avatar {
-  width: 48px; height: 48px;
-  border-radius: 50%;
-  border: 2px solid var(--primary);
-  object-fit: cover;
-}
+  
 .session-meta {
   display: flex; align-items: center; gap: var(--padding);
   font-size: var(--font-size-sm); color: var(--muted);
@@ -387,63 +340,83 @@ position: absolute;
   to   { transform: rotate(360deg); }
 }
 
-
+}
 #chatAreaControls {
-position: sticky;
-  bottom: 0;
-  background: var(--surface);
+  background-color: var(--surface);
+  padding: var(--padding);
   border-top: 1px solid var(--muted);
-  padding: 0.75rem var(--padding);
   display: flex;
-   flex-direction: column;      
-  align-items: stretch;   
-  gap: 1rem;
-  box-shadow: 0 -2px 6px rgba(0,0,0,0.05);
+  flex-direction: column;
+  gap: 0.75rem;
 }
-  #chatInputForm {
-  flex: none;       }
-  #chatQuickToolbar {
- margin-bottom: 1rem;
- }
- #chatControls {
- display: flex; gap: 0.5rem;
+#chatQuickToolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
 }
-#chatControls button {
-  background: var(--surface); color: var(--muted);
-  border: 1px solid var(--muted); border-radius: 50%;
-  width: 36px; height: 36px; cursor: pointer;
-  display: flex; align-items: center; justify-content: center;
-  transition: all var(--transition);
+#chatControls {
+  display: flex;
+  gap: 0.5rem;
 }
-#chatControls button:hover {
-  background: var(--primary);
-  color: #fff; border-color: var(--primary);
+#chatControls.show {
+  display: flex;
 }
-
+#chatQuickToolbar .more-btn i {
+  font-size: 1.25rem;
+  color: var(--muted);
+}
+#quickReplies {
+  display: flex;
+  gap: 0.5rem;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+#quickReplies .quick-reply {
+  flex-shrink: 0;
+  background-color: var(--primary-light);
+  color: var(--primary-dark);
+  padding: 0.5rem 1rem;
+  border-radius: var(--radius);
+  font-size: var(--font-size-sm);
+  white-space: nowrap;
+}
+#listeningIndicator {
+  text-align: center;
+  font-size: var(--font-size-sm);
+  color: var(--error);
+}
 #chatInputForm {
-  display: flex; align-items: center; gap: 0.5rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
 }
-#chatInputForm input {
-  flex: 1; padding: 0.75rem 1rem;
-  border: 1px solid var(--muted); border-radius: var(--radius);
+#chatInputForm.has-text #chatInput {
+  flex: 1;
+}
+#chatInputForm input#chatInput {
+  flex: 1;
+  padding: 0.75rem;
+  border: 1px solid var(--muted);
+  border-radius: var(--radius);
   font-size: var(--font-size-base);
-  transition: border-color var(--transition), box-shadow var(--transition);
+  transition: var(--transition);
 }
-#chatInputForm input:focus {
+#chatInputForm input#chatInput:focus {
   outline: none;
   border-color: var(--primary);
-  box-shadow: 0 0 0 2px rgba(74,144,226,0.2);
 }
 #chatInputForm button {
-  background: var(--primary); color: #fff;
-  width: 36px; height: 36px; border: none;
-  border-radius: 50%; cursor: pointer;
-  display: flex; align-items: center; justify-content: center;
-  transition: background var(--transition);
+  font-size: 1.25rem;
+  color: var(--muted);
 }
-#chatInputForm button:hover {
-  background: var(--primary-dark);
+#chatInputForm button#sendBtn {
+  color: var(--primary);
 }
+#chatInputForm button#micBtn.listening i {
+  color: var(--error);
+}
+
+
  #sessionsUl li:hover .dots-btn {
   opacity: 1;
   color: var(--primary-dark);  
@@ -485,7 +458,215 @@ position: sticky;
   border-radius: 50%; box-shadow: 0 2px 8px rgba(0,0,0,0.1);
 }
 
+  @media (max-width: 768px) {
   
+  header#therapyHeader .header-left button:not(#menuToggle):not(#collapseBtn) {
+    display: none;
+  }
+  header#therapyHeader .header-right button:not(#darkModeToggle):not(#endSession) {
+    display: none;
+  }
+  header#therapyHeader .therapist-info h1 {
+    font-size: var(--font-size-base);
+  }
+  #chatAreaControls {
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+  #chatControls {
+    display: none;
+  }
+  #chatControls.show {
+    display: flex;
+    position: absolute;
+    bottom: calc(var(--header-height) + var(--padding));
+    right: var(--padding);
+    background: var(--surface);
+    border: 1px solid var(--muted);
+    border-radius: var(--radius);
+    flex-direction: column;
+  }
+    #quickReplies {
+    scrollbar-width: thin;
+    scrollbar-color: var(--muted) var(--primary-light);
+  }
+  #quickReplies::-webkit-scrollbar {
+    height: 6px;
+  }
+  #quickReplies::-webkit-scrollbar-track {
+    background: var(--primary-light);
+    border-radius: 3px;
+  }
+  #quickReplies::-webkit-scrollbar-thumb {
+    background-color: var(--muted);
+    border-radius: 3px;
+  }
+  #chatInputForm button#sendBtn {
+    display: none;
+  }
+  #chatInputForm.has-text button#sendBtn {
+    display: inline-flex;
+  }
+  #chatInputForm.has-text #micBtn {
+    display: none;
+  }
+  #chatInputForm.has-text #sendBtn i {
+    transform: rotate(45deg);
+  }
+  #newSession {
+    display: block;
+  }
+}
+@media (min-width: 769px) {
+  header#therapyHeader .header-left button,
+  header#therapyHeader .header-right button {
+    display: inline-flex;
+  }
+  #chatControls {
+    display: flex !important;
+    position: static;
+    background: none;
+    border: none;
+    flex-direction: row;
+  }
+  #chatControls button {
+    background: var(--primary-light);
+    color: var(--primary-dark);
+    padding: 0.5rem;
+    border-radius: var(--radius);
+  }
+}
+.dropdown {
+  position: relative;
+  display: inline-block;
+  font-size: var(--font-size-base);
+}
+.dropdown-toggle {
+  background: var(--primary-light);
+  color: var(--primary-dark);
+  padding: 0.5rem 1rem;
+  border-radius: var(--radius);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+.dropdown-content {
+  display: none;
+  position: absolute;
+  right: 0;
+  background-color: var(--surface);
+  min-width: 160px;
+  border: 1px solid var(--muted);
+  border-radius: var(--radius);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  z-index: 1000;
+  flex-direction: column;
+}
+.dropdown-content.show {
+  display: flex;
+}
+.dropdown-content button {
+  padding: 0.75rem 1rem;
+  text-align: left;
+  font-size: var(--font-size-sm);
+  color: var(--text);
+}
+[data-theme="dark"] header#therapyHeader {
+  background-color: var(--surface);
+  border-color: var(--muted);
+}
+[data-theme="dark"] #chatAreaControls {
+  background-color: var(--surface);
+  border-color: var(--muted);
+}
+[data-theme="dark"] #chatInputForm input#chatInput {
+  background-color: var(--bg);
+  color: var(--text);
+  border-color: var(--muted);
+}
+[data-theme="dark"] #chatInputForm input#chatInput:focus {
+  border-color: var(--primary-light);
+}
+[data-theme="dark"] #quickReplies .quick-reply {
+  background-color: var(--primary-dark);
+  color: #fff;
+}
+[data-theme="dark"] .dropdown-content {
+  background-color: var(--surface);
+  border-color: var(--muted);
+}
+[data-theme="dark"] .dropdown-content button {
+  color: var(--text);
+}
+@media (max-width: 480px) {
+  .therapist-info .avatar {
+    width: 32px;
+    height: 32px;
+  }
+  header#therapyHeader .therapist-info h1 {
+    font-size: var(--font-size-sm);
+  }
+  #chatAreaControls {
+    gap: 0.5rem;
+  }
+  #chatQuickToolbar {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  #chatInputForm {
+    gap: 0.25rem;
+  }
+  #chatInputForm input#chatInput {
+    font-size: var(--font-size-sm);
+  }
+  #quickReplies .quick-reply {
+    padding: 0.5rem;
+    font-size: var(--font-size-sm);
+  }
+  .dropdown-toggle {
+    padding: 0.5rem;
+    font-size: var(--font-size-sm);
+  }
+  .dropdown-content {
+    min-width: 140px;
+  }
+}
+#chatInput::-webkit-textarea-placeholder-shown + #sendBtn {
+  display: none;
+}
+#chatInput:not(:placeholder-shown) + #sendBtn {
+  display: inline-flex;
+}
+button[disabled] {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+#moreActions[disabled] i {
+  color: var(--muted);
+}
+#listeningIndicator {
+  position: absolute;
+  bottom: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+}
+#listeningIndicator.show {
+  display: block;
+}
+#attachBtn::after {
+  content: attr(data-filename);
+  display: block;
+  font-size: var(--font-size-sm);
+  color: var(--muted);
+  margin-top: 0.25rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.file-list li .file-icon {
+  margin-right: 0.5rem;
+}
+
 #sessionSummary {
   position: absolute; bottom: 80px; right: var(--padding);
   background: var(--surface); padding: var(--padding);
@@ -636,42 +817,7 @@ position: sticky;
   #sessionList { display: none; }
   #chatArea { left: 0; }
 }
-@media (max-width: 600px) {
-  #therapyHeader {
-    display: flex !important;    
-    flex-wrap: nowrap;
-    height: auto;
-    padding: 0.5rem;
-    gap: 0.5rem;
-  }
-  #therapyHeader .header-left { order: 0; }
-  #therapyHeader .therapist-info { order: 1; }
-  #therapyHeader .header-right { order: 2; margin-left: auto; }
 
-  #therapyHeader .therapist-info h1 {
-    font-size: 1rem;            
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-  }
-  .session-meta { display: none; }
-#chatAreaControls {
-    flex-wrap: wrap;
-  }
-  #chatInputForm {
-    display: flex; flex: 1; min-width: 0;
-    gap: 0.5rem; margin-top: 0.25rem;  
-  }
-  #chatInputForm input { width: 100%; }
-}
-@media only screen 
-  and (device-width: 414px) 
-  and (device-height: 896px) 
-  and (-webkit-device-pixel-ratio: 2) {
-  body { font-size: 0.95rem; }
-  #chatArea { padding: 0.75rem; }
-  .bubble { padding: 0.6rem; }
-}
  @media (max-width: 724px) {
    #sessionList {
      display: none;
@@ -701,10 +847,6 @@ position: sticky;
   margin-bottom: 0;
 }
 
-#chatControls {
-  display: flex;
-  gap: 0.5rem;
-}
 
 @media (max-width: 600px) {
   #chatQuickToolbar {
@@ -1219,30 +1361,7 @@ html.dark #chatInputForm input {
     padding-right: 1.5rem; 
   }
 
-  #chatAreaControls {
-    flex-wrap: wrap;
-    padding: 0.5rem 0;
-    gap: 0.5rem;
-  }
-  
-  #chatControls button {
-    width: 32px; height: 32px;
-    padding: 0;
-    font-size: 1rem;
-  }
  
-  #chatInputForm {
-    width: 100%;
-    gap: 0.25rem;
-  }
-  #chatInputForm input {
-    flex: 1;
-    height: 36px;
-    font-size: 0.95rem;
-  }
-  #chatInputForm button {
-    width: 36px; height: 36px;
-  }
 
   .modal-content, #confirmModal .modal-content {
     max-width: 90%;
@@ -1565,11 +1684,7 @@ html.dark .quick-reply:hover {
     padding-right: 1.5rem; 
   }
 
-  #chatAreaControls {
-    flex-wrap: wrap;
-    padding: 0.5rem 0;
-    gap: 0.5rem;
-  }
+
     #quickReplies {
    width: 100%;
     flex-wrap: nowrap;
@@ -1581,18 +1696,7 @@ html.dark .quick-reply:hover {
     font-size: 1rem;
   }
  
-  #chatInputForm {
-    width: 100%;
-    gap: 0.25rem;
-  }
-  #chatInputForm input {
-    flex: 1;
-    height: 36px;
-    font-size: 0.95rem;
-  }
-  #chatInputForm button {
-    width: 36px; height: 36px;
-  }
+ 
 
   .modal-content, #confirmModal .modal-content {
     max-width: 90%;
@@ -1646,63 +1750,7 @@ html.dark .quick-reply:hover {
     display: none;
   }
 }
-#quickReplies {
-  display: flex;
-  gap: 0.5rem;
-  overflow-x: auto;
-  flex-wrap: nowrap !important;
-  padding: 0.5rem 0;
-  -webkit-overflow-scrolling: touch;
-  background: var(--surface);
-}
-#quickReplies::-webkit-scrollbar { display: none; }
 
-#quickReplies .quick-reply {
-  flex: 0 0 auto;
-  white-space: nowrap;
-  padding: 0.5rem 1rem;
-  border: 1px solid var(--primary);
-  border-radius: var(--radius);
-  background: var(--primary-light);
-  color: var(--primary);
-  font-size: var(--font-size-sm);
-  cursor: pointer;
-  transition: background var(--transition), color var(--transition);
-}
-#quickReplies .quick-reply:hover {
-  background: var(--primary);
-  color: #fff;
-}
-
-
-#quickReplies {
-  display: flex;
-  gap: 0.5rem;
-  overflow-x: auto !important;
-  white-space: nowrap;
-  padding: 0.5rem var(--padding);
-  background: var(--surface);
-  -webkit-overflow-scrolling: touch;
-  scrollbar-width: none;
-}
-#quickReplies::-webkit-scrollbar {
-  display: none;
-}
-#quickReplies .quick-reply {
-  flex: 0 0 auto;
-  padding: 0.5rem 1rem;
-  border: 1px solid var(--primary);
-  border-radius: var(--radius);
-  background: var(--primary-light);
-  color: var(--primary);
-  font-size: 0.875rem;
-  cursor: pointer;
-  transition: background var(--transition), color var(--transition);
-}
-#quickReplies .quick-reply:hover {
-  background: var(--primary);
-  color: #fff;
-}
 
 html.dark {
   --bg: #121212;
@@ -1784,6 +1832,12 @@ html.dark #quickReplies .quick-reply:hover {
 
 
   <aside id="sessionList">
+      <div class="mobile-header-icons">
+    <button id="collapseBtn"><i class="fas fa-arrow-left"></i></button>
+    <button id="darkModeToggle"><i class="fas fa-moon"></i></button>
+    <button id="clearHistory"><i class="fas fa-trash"></i></button>
+    <button id="exportTranscript"><i class="fas fa-file-export"></i></button>
+  </div>
     <div class="session-search">
       <input type="search" id="searchSessions" placeholder="Search sessions…">
       <button id="filterBtn"><i class="fas fa-filter"></i></button>
@@ -1795,12 +1849,16 @@ html.dark #quickReplies .quick-reply:hover {
   <main id="chatArea">
     <div id="chatLog" role="log" aria-live="polite">
       <div class="date-separator">Welcome! Start a session or click “New Session”.</div>
-    </div>
      <button id="backToBottom" class="back-btn">
     <i class="fas fa-arrow-down"></i>
   </button>
+    </div>
+     
 <div id="chatAreaControls">
     <div id="chatQuickToolbar">
+       <button id="moreActions" class="more-btn" aria-label="More actions">
+    <i class="fas fa-ellipsis-h"></i>
+  </button>
     <div id="chatControls">
       <button id="regenerateReply" title="Regenerate"><i class="fas fa-redo"></i></button>
       <button id="editLast" title="Edit last"><i class="fas fa-edit"></i></button>
@@ -1847,6 +1905,37 @@ html.dark #quickReplies .quick-reply:hover {
     <p>Ending session…</p>
   </div>
 </div>
+
+  <script>
+document.addEventListener('DOMContentLoaded', () => {
+  const moreBtn = document.getElementById('moreActions');
+  const dropdown = document.createElement('div');
+  dropdown.className = 'regen-edit-dropdown';
+  dropdown.innerHTML = `
+    <button id="regenerateInMenu"><i class="fas fa-redo"></i> Regenerate</button>
+    <button id="editInMenu"><i class="fas fa-edit"></i> Edit Last</button>
+    <button id="clearInMenu"><i class="fas fa-trash"></i> Clear Chat</button>
+    <button id="exportInMenu"><i class="fas fa-file-export"></i> Export Chat</button>
+  `;
+  moreBtn.insertAdjacentElement('afterend', dropdown);
+
+  moreBtn.addEventListener('click', e => {
+    e.stopPropagation();
+    dropdown.classList.toggle('show');
+  });
+  document.addEventListener('click', e => {
+    if (!e.target.closest('.regen-edit-dropdown') && !e.target.closest('#moreActions')) {
+      dropdown.classList.remove('show');
+    }
+  });
+
+  document.getElementById('regenerateInMenu').addEventListener('click', () => regenBtn.click());
+  document.getElementById('editInMenu').addEventListener('click', () => editBtn.click());
+  document.getElementById('clearInMenu').addEventListener('click', () => clearBtn.click());
+  document.getElementById('exportInMenu').addEventListener('click', () => exportBtn.click());
+});
+  </script>
+
   <script>
 document.addEventListener('DOMContentLoaded', () => {
 
