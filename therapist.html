@@ -1898,6 +1898,215 @@ aside#sessionList.visible {
     overflow-x: hidden;
   }
 }
+
+    /* 1. Perfect circles for send, file, mic buttons */
+#attachBtn, #micBtn, #sendBtn {
+  width: 2.5rem;
+  height: 2.5rem;
+  padding: 0;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* 2 & 3. AI bubble text styling and overflow fix */
+.message.therapist-msg .bubble {
+  word-wrap: break-word;
+  white-space: pre-wrap;
+  hyphens: auto;
+}
+.message.therapist-msg .bubble h1,
+.message.therapist-msg .bubble h2,
+.message.therapist-msg .bubble h3 {
+  margin: 0.75rem 0 0.5rem;
+  font-weight: 600;
+}
+.message.therapist-msg .bubble strong {
+  color: var(--primary-dark);
+}
+.message.therapist-msg .bubble em {
+  font-style: italic;
+  color: var(--secondary-dark);
+}
+.message.therapist-msg .bubble code {
+  background: var(--primary-light);
+  padding: 0.25rem 0.5rem;
+  border-radius: var(--radius);
+  display: inline-block;
+  margin: 0.25rem 0;
+}
+.message.therapist-msg .bubble ul,
+.message.therapist-msg .bubble ol {
+  margin: 0.5rem 0 0.5rem 1.25rem;
+  padding: 0;
+}
+.message.therapist-msg .bubble li {
+  overflow-wrap: break-word;
+  word-break: break-word;
+  margin-bottom: 0.25rem;
+}
+
+/* ensure list markers stay inside bubble */
+.message.therapist-msg .bubble ul {
+  list-style-position: inside;
+}
+    /* 4. White copy button for user messages */
+.message.user-msg .copy-btn {
+  color: #fff;
+}
+
+
+@media (max-width: 768px) {
+  #chatAreaControls {
+    position: fixed;
+    bottom: 0.5rem;
+    left: 0;
+    right: 0;
+    padding-bottom: env(safe-area-inset-bottom);
+    z-index: 1000;
+  }
+  #chatLog {
+    padding-bottom: calc(2.5rem + 1.5rem); /* control height + extra gap */
+  }
+}
+
+    /* 7. Ensure back-to-bottom button always shows when .show */
+.back-btn {
+  display: none; /* default hidden */
+  opacity: 0.6;
+  position: sticky;
+  bottom: calc(var(--header-height) + var(--padding));
+  margin: 0 auto;
+  z-index: 900;
+  transition: opacity var(--transition), transform var(--transition);
+}
+.back-btn.show {
+  display: block !important;
+}
+
+/* style hover */
+.back-btn:hover {
+  opacity: 1;
+  transform: scale(1.1);
+}
+
+/* 8. Combine regenerate/edit, clear, export into one toggle dropdown */
+.more-btn {
+  background: var(--primary-light);
+  color: var(--primary-dark);
+  padding: 0.5rem;
+  border-radius: var(--radius);
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+.more-btn i {
+  transition: transform var(--transition), color var(--transition);
+}
+.more-btn:hover {
+  background: var(--primary);
+  color: #fff;
+}
+.regen-edit-dropdown {
+  display: none;
+  position: absolute;
+  bottom: calc(100% + 0.5rem);
+  right: var(--padding);
+  background: var(--surface);
+  border: 1px solid var(--muted);
+  border-radius: var(--radius);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  flex-direction: column;
+  z-index: 1100;
+  min-width: 180px;
+}
+.regen-edit-dropdown.show {
+  display: flex;
+}
+.regen-edit-dropdown button {
+  background: none;
+  border: none;
+  text-align: left;
+  padding: 0.75rem 1rem;
+  font-size: var(--font-size-sm);
+  color: var(--text);
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+.regen-edit-dropdown button:hover {
+  background: var(--primary-light);
+  color: var(--primary-dark);
+}
+
+/* 9. On large screens, sidebar pushes content instead of covering */
+@media (min-width: 769px) {
+  aside#sessionList {
+    position: relative !important;
+    transform: none !important;
+    width: var(--sidebar-width);
+    float: left;
+    height: auto;
+  }
+  main#chatArea {
+    margin-left: var(--sidebar-width);
+  }
+}
+
+/* 10. Restyle bubbles to mimic the “💬” emoji shape with a stretched circular tail */
+
+/* Base bubble shape */
+.message .bubble {
+  position: relative;
+  background-color: var(--surface);
+  border-radius: 1.25rem;
+  padding: 0.75rem 1rem;
+}
+
+/* User bubble background override */
+.message.user-msg .bubble {
+  background-color: var(--primary);
+  color: #fff;
+}
+
+/* Tail for therapist bubbles */
+.message.therapist-msg .bubble::after {
+  content: "";
+  position: absolute;
+  bottom: 0;
+  left: 1rem;
+  width: 1rem;
+  height: 1rem;
+  background-color: var(--surface);
+  transform: translateY(50%) rotate(45deg);
+  border-radius: 0.25rem;
+}
+
+/* Tail for user bubbles */
+.message.user-msg .bubble::after {
+  content: "";
+  position: absolute;
+  bottom: 0;
+  right: 1rem;
+  width: 1rem;
+  height: 1rem;
+  background-color: var(--primary);
+  transform: translateY(50%) rotate(45deg);
+  border-radius: 0.25rem;
+}
+
+/* Ensure the tail sits flush against the bubble */
+.message .bubble::after {
+  box-shadow: -1px 1px 0 rgba(0,0,0,0.05);
+}
+
+/* ensure regenerate toggle sits above fixed controls */
+#chatAreaControls {
+  position: sticky;
+  bottom: 0;
+  z-index: 1000;
+}
 </style>
 
 </head>
@@ -2006,6 +2215,38 @@ aside#sessionList.visible {
     <p>Ending session…</p>
   </div>
 </div>
+
+  <script>
+    // 8. Populate the dropdown with regenerate, edit, clear, export buttons
+document.addEventListener('DOMContentLoaded', () => {
+  const moreBtn = document.getElementById('moreActions');
+  const dropdown = document.createElement('div');
+  dropdown.className = 'regen-edit-dropdown';
+  dropdown.innerHTML = `
+    <button id="regenerateInMenu"><i class="fas fa-redo"></i> Regenerate</button>
+    <button id="editInMenu"><i class="fas fa-edit"></i> Edit Last</button>
+    <button id="clearInMenu"><i class="fas fa-trash"></i> Clear Chat</button>
+    <button id="exportInMenu"><i class="fas fa-file-export"></i> Export Chat</button>
+  `;
+  moreBtn.insertAdjacentElement('afterend', dropdown);
+
+  moreBtn.addEventListener('click', e => {
+    e.stopPropagation();
+    dropdown.classList.toggle('show');
+  });
+  document.addEventListener('click', e => {
+    if (!e.target.closest('.regen-edit-dropdown') && !e.target.closest('#moreActions')) {
+      dropdown.classList.remove('show');
+    }
+  });
+
+  // Wire up new menu buttons
+  document.getElementById('regenerateInMenu').addEventListener('click', () => regenBtn.click());
+  document.getElementById('editInMenu').addEventListener('click', () => editBtn.click());
+  document.getElementById('clearInMenu').addEventListener('click', () => clearBtn.click());
+  document.getElementById('exportInMenu').addEventListener('click', () => exportBtn.click());
+});
+  </script>
   <script>
 document.addEventListener('DOMContentLoaded', () => {
 
