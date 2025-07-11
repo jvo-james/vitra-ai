@@ -477,6 +477,11 @@ position: fixed;
   color: var(--error);
 }
 
+  #listeningIndicator,
+#recordingOverlay {
+  display: none !important;
+}
+
   
 #audio, #guidedAudio {
   width: 100%; margin-top: var(--padding);
@@ -2119,7 +2124,8 @@ html, body {
 .chat-menu-dropdown {
   position: absolute;
   bottom: calc(100% + 0.5rem);
-  right: 0;
+  left: 50%;
+  transform: translateX(-50%);
   background: var(--surface);
   border: 1px solid var(--muted);
   border-radius: var(--radius);
@@ -2134,6 +2140,7 @@ html, body {
   display: none;
   flex-direction: column;
   z-index: 2000;   
+  min-width: 200px; 
 }
 .chat-menu-dropdown button {
   background: none;
@@ -2142,6 +2149,7 @@ html, body {
   text-align: left;
   cursor: pointer;
   transition: background var(--transition);
+  white-space: nowrap;
 }
 .chat-menu-dropdown button:hover {
   background: var(--primary-light);
@@ -2153,7 +2161,11 @@ html, body {
 .chat-menu-container.open .chat-menu-dropdown {
   display: flex;
 }
-
+@media (max-width: 500px) {
+   .chat-menu-dropdown {
+  left: 0; transform: none; right: 0; margin: auto;
+   }
+ }
    .chat-menu-dropdown button {
   padding: 0.5rem 1.5rem;
   font-size: var(--font-size-sm);
@@ -2722,11 +2734,9 @@ if (chatInput.value.trim().length === 0) {
    if (!file || !currentId) return;
    const now = new Date().toISOString();
 
-   const url = URL.createObjectURL(file);
-   const linkMarkdown = `[📎 ${file.name}](${url})`;
-
-   appendMessage('user', linkMarkdown, now, '✓');
-   chatHistory.push({ who:'user', text: linkMarkdown, time: now, status: '✓' });
+    const txt = await file.text();
+  appendMessage('user', `📎 ${file.name}`, now, '✓');
+  chatHistory.push({ who:'user', text: txt, time: now, status:'✓' });
    sessions[currentId].updated = Date.now();
    persistCurrent();
 
@@ -3163,10 +3173,26 @@ filterBtn.addEventListener('click', () => {
     });
 
     rec.onstart = () => {
-         document.getElementById('chatAreaControls').hidden = true;
          document.getElementById('recordingOverlay').hidden = false;
-         micBtn.classList.add('listening');
        };
+
+    let audioCtx, analyser, dataArray;
+ navigator.mediaDevices.getUserMedia({ audio: true }).then(stream => {
+   audioCtx  = new (window.AudioContext||window.webkitAudioContext)();
+   analyser  = audioCtx.createAnalyser();
+   const source = audioCtx.createMediaStreamSource(stream);
+   source.connect(analyser);
+   analyser.fftSize = 32;
+   dataArray = new Uint8Array(analyser.frequencyBinCount);
+   (function draw() {
+     analyser.getByteFrequencyData(dataArray);
+     document.querySelectorAll('.rec-bars .bar').forEach((bar,i) => {
+       const h = (dataArray[i]/255)*100;
+       bar.style.height = `${Math.max(10,h)}%`;
+    });
+     requestAnimationFrame(draw);
+   })();
+ });
 
    rec.onresult = event => {
        let finalTranscript   = '';
