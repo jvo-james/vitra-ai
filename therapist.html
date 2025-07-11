@@ -2234,6 +2234,177 @@ html, body {
 #sessionList { display: none; }
 
 }
+#therapyHeader,
+#chatAreaControls {
+  position: fixed;
+  left: 0; right: 0;
+  z-index: 1000;
+}
+#therapyHeader { top: 0; }
+#chatAreaControls { bottom: 0; }
+
+#chatArea {
+  padding-top: var(--header-height);
+  padding-bottom: calc(var(--header-height) + 0.5rem);
+}
+#chatLog {
+  margin-bottom: calc(var(--header-height) + 0.5rem);
+}
+
+#chatAreaControls button,
+#chatInputForm button,
+#chatControls button,
+.dropdown-toggle {
+  background: var(--primary);
+  color: #fff;
+  border: none;
+  width: 36px; height: 36px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background var(--transition), transform var(--transition);
+}
+#chatInputForm button:hover,
+#chatControls button:hover,
+.dropdown-toggle:hover {
+  background: var(--primary-dark);
+  transform: scale(1.1);
+}
+#sendBtn {
+  background: var(--secondary);
+}
+#micBtn.listening {
+  background: var(--error);
+  color: #fff;
+}
+
+#chatControls i,
+#chatInputForm i,
+.dropdown-toggle i {
+  font-size: 1.25rem;
+}
+
+.dropdown {
+  position: relative;
+}
+.dropdown-toggle {
+  width: auto;
+  padding: 0.5rem;
+  border-radius: var(--radius);
+}
+.dropdown-content {
+  position: absolute;
+  bottom: calc(100% + 0.25rem);
+  right: 0;
+  display: none;
+  flex-direction: column;
+  background: var(--surface);
+  border-radius: var(--radius);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  overflow: hidden;
+  z-index: 1001;
+}
+.dropdown-content.show {
+  display: flex;
+}
+.dropdown-content button {
+  padding: 0.5rem 1rem;
+  width: 100%;
+  background: none;
+  color: var(--text);
+  text-align: left;
+}
+.dropdown-content button:hover {
+  background: var(--primary-light);
+  color: var(--primary-dark);
+}
+
+#chatInputForm {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+  background: var(--surface);
+  padding: 0.5rem var(--padding);
+}
+#chatInput {
+  flex: 1;
+  min-width: 0;
+  padding: 0.75rem;
+  border: 1px solid var(--muted);
+  border-radius: var(--radius);
+  font-size: var(--font-size-base);
+  transition: border-color var(--transition);
+}
+#chatInput:focus {
+  border-color: var(--primary);
+}
+
+@media (max-width: 480px) {
+  #chatQuickToolbar { flex-wrap: wrap; gap: 0.5rem; }
+  #chatInputForm { padding: 0.5rem; gap: 0.25rem; }
+  #chatInput { font-size: var(--font-size-sm); }
+  #micBtn, #sendBtn {
+    width: 32px; height: 32px;
+  }
+}
+
+#listeningIndicator {
+  position: fixed;
+  bottom: calc(var(--header-height) + 3.5rem);
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--secondary-dark);
+  color: #fff;
+  padding: 0.5rem 1rem;
+  border-radius: var(--radius);
+  display: none;
+  align-items: center;
+  gap: 0.5rem;
+}
+#listeningIndicator.show {
+  display: flex;
+}
+#listeningIndicator i {
+  font-size: 1rem;
+}
+
+#quickReplies {
+  display: flex;
+  gap: 0.5rem;
+  overflow-x: auto;
+  padding: 0.5rem 0;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+}
+#quickReplies::-webkit-scrollbar { display: none; }
+#quickReplies .quick-reply {
+  flex: 0 0 auto;
+  background: var(--primary-light);
+  color: var(--primary-dark);
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: var(--radius);
+  white-space: nowrap;
+  transition: background var(--transition), color var(--transition);
+}
+#quickReplies .quick-reply:hover {
+  background: var(--primary);
+  color: #fff;
+}
+
+@supports (position: sticky) {
+  #chatAreaControls { position: sticky; }
+  #chatAreaControls { bottom: 0; }
+}
+#chatLog {
+  padding-bottom: calc(var(--header-height) + 1rem);
+}
+#regenerateReply{ display: none; }
+    #editLast { display: none; }
+.dropdown-content button[id$="InMenu"] {
+  cursor: pointer;
+}
 
 </style>
 
