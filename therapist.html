@@ -2079,6 +2079,14 @@ html, body {
 #sessionList { display: none; }
 
 }
+    @media (max-width:600px){
+  #quickReplies {
+    overflow-x: scroll !important;
+    -webkit-overflow-scrolling: touch !important;
+    touch-action: pan-x !important;
+  }
+}
+
     #dataControls { display: none; }
 @media (max-width: 600px) {
   #chatQuickToolbar {
@@ -2285,7 +2293,21 @@ qr.addEventListener('wheel', e => {
       ? '<i class="fas fa-sun"></i>'
      : '<i class="fas fa-moon"></i>';
   });
-    
+
+;(function(){
+  const qr = document.getElementById('quickReplies');
+  let startX = 0, scrollX = 0;
+  qr.addEventListener('touchstart', e => {
+    startX   = e.touches[0].pageX;
+    scrollX  = qr.scrollLeft;
+  }, {passive:true});
+  qr.addEventListener('touchmove', e => {
+    const x = e.touches[0].pageX;
+    qr.scrollLeft = scrollX + (startX - x);
+  }, {passive:false});
+})();
+
+  
   function showOverlaySpinner() {
       document.getElementById('overlaySpinner').removeAttribute('hidden');
     }
