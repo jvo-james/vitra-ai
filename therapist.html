@@ -271,7 +271,7 @@ background: #c12e3a; }
   left: var(--sidebar-width);
   right: 0; bottom: 0;
   background: var(--bg);
-  padding-bottom: 120px;
+  padding-bottom: 124px;
   display: flex; flex-direction: column;
 }
 
@@ -392,6 +392,7 @@ position: absolute;
 position: fixed;
   bottom: 0;
    left: var(--sidebar-width);
+   width: calc(100% - var(--sidebar-width));
  right: 0;
   background: var(--surface);
   border-top: 1px solid var(--muted);
@@ -402,6 +403,22 @@ position: fixed;
   gap: 1rem;
   box-shadow: 0 -2px 6px rgba(0,0,0,0.05);
 }
+ @media (min-width: 1000px) {
+#chatAreaControls {
+    left: var(--sidebar-width);
+    width: calc(100% - var(--sidebar-width));
+  }
+ }
+    @media (max-width: 600px) {
+ #chatAreaControls {
+   left: 0 !important;
+   width: 100% !important;
+   box-sizing: border-box;
+   padding: 0.75rem var(--padding);
+ }
+ }
+   .chat-menu-dropdown {
+  z-index: 3000;    }
   #chatInputForm {
   flex: none;       }
   #chatQuickToolbar {
@@ -3108,10 +3125,12 @@ filterBtn.addEventListener('click', () => {
 
     micBtn.addEventListener('click', () => {
       if (micBtn.classList.contains('listening')) {
-        rec.stop();
-      } else {
-        rec.start();
-      }
+      rec.stop();
+    } else {
+      rec.start();
+      micBtn.classList.add('listening');
+      micBtn.innerHTML = '<i class="fas fa-microphone-slash"></i>';
+    }
     });
 
     rec.onstart = () => {
@@ -3159,6 +3178,7 @@ filterBtn.addEventListener('click', () => {
 
     rec.onend = () => {
          micBtn.classList.remove('listening');
+        micBtn.innerHTML = '<i class="fas fa-microphone"></i>';
        };
 
       const stopBtn = document.getElementById('stopRecordingBtn');
