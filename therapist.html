@@ -2445,7 +2445,7 @@ html.dark #backToBottom:hover {
 
  #chatAreaControls {
   display: flex;
-  flex-direction: row;
+ flex-direction: column;
    align-items: center;
   gap: 0.75rem;
    background: var(--surface);
@@ -2797,20 +2797,6 @@ if (chatInput.value.trim().length === 0) {
   
 document.getElementById('listeningIndicator').hidden = true;
 
-rec.onstart = () => {
-  document.getElementById('listeningIndicator').hidden = false;
-};
-
-rec.onend = () => {
-  document.getElementById('listeningIndicator').hidden = true;
-};
-
-rec.onerror = err => {
-  console.error('SpeechRecognition error', err);
-  document.getElementById('listeningIndicator').hidden = true;
-  micBtn.classList.remove('listening');
-  micBtn.innerHTML = '<i class="fas fa-microphone"></i>';
-};
 
   function persistSessions() {
     localStorage.setItem('sessions', JSON.stringify(sessions));
@@ -3174,6 +3160,18 @@ filterBtn.addEventListener('click', () => {
    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
    if (SpeechRecognition) {
      rec = new SpeechRecognition();
+      rec.onstart = () => {
+        document.getElementById('listeningIndicator').hidden = false;
+      };
+      rec.onend = () => {
+        document.getElementById('listeningIndicator').hidden = true;
+      };
+      rec.onerror = err => {
+        console.error('SpeechRecognition error', err);
+        document.getElementById('listeningIndicator').hidden = true;
+        micBtn.classList.remove('listening');
+        micBtn.innerHTML = '<i class="fas fa-microphone"></i>';
+      };
     rec.lang            = 'en-US';
     rec.interimResults  = true;
     rec.maxAlternatives = 1;
