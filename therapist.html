@@ -40,17 +40,19 @@
   box-sizing: border-box;
   margin: 0; padding: 0;
 }
-html, body {
-  height: auto;
-  min-height: 100vh;
-  width: 100%;
+
+html {
   font-family: var(--font-base);
   font-size: var(--font-size-base);
   line-height: var(--line-height);
-  background: var(--bg);
+  background-color: var(--bg);
   color: var(--text);
-  overflow: hidden;
-   overscroll-behavior: contain;
+  height: 100%;
+}
+body {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
 }
 
 ::-webkit-scrollbar {
@@ -387,64 +389,86 @@ position: absolute;
   from { transform: rotate(0deg); }
   to   { transform: rotate(360deg); }
 }
-
-
 #chatAreaControls {
-position: sticky;
-  bottom: 0;
-  background: var(--surface);
+  background-color: var(--surface);
+  padding: var(--padding);
   border-top: 1px solid var(--muted);
-  padding: 0.75rem var(--padding);
   display: flex;
-   flex-direction: column;      
-  align-items: stretch;   
-  gap: 1rem;
-  box-shadow: 0 -2px 6px rgba(0,0,0,0.05);
-}
-  #chatInputForm {
-  flex: none;       }
-  #chatQuickToolbar {
- margin-bottom: 1rem;
- }
- #chatControls {
- display: flex; gap: 0.5rem;
-}
-#chatControls button {
-  background: var(--surface); color: var(--muted);
-  border: 1px solid var(--muted); border-radius: 50%;
-  width: 36px; height: 36px; cursor: pointer;
-  display: flex; align-items: center; justify-content: center;
-  transition: all var(--transition);
-}
-#chatControls button:hover {
-  background: var(--primary);
-  color: #fff; border-color: var(--primary);
-}
+  flex-direction: column;
+  gap: 0.75rem;
+  position: sticky;
+  bottom: 0;
 
+}
+#chatQuickToolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+#chatControls {
+  display: flex;
+  gap: 0.5rem;
+}
+#chatControls.show {
+  display: flex;
+}
+#chatQuickToolbar .more-btn i {
+  font-size: 1.25rem;
+  color: var(--muted);
+}
+#quickReplies {
+  display: flex;
+  gap: 0.5rem;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+#quickReplies .quick-reply {
+  flex-shrink: 0;
+  background-color: var(--primary-light);
+  color: var(--primary-dark);
+  padding: 0.5rem 1rem;
+  border-radius: var(--radius);
+  font-size: var(--font-size-sm);
+  white-space: nowrap;
+}
+#listeningIndicator {
+  text-align: center;
+  font-size: var(--font-size-sm);
+  color: var(--error);
+}
 #chatInputForm {
-  display: flex; align-items: center; gap: 0.5rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
 }
-#chatInputForm input {
-  flex: 1; padding: 0.75rem 1rem;
-  border: 1px solid var(--muted); border-radius: var(--radius);
+#chatInputForm.has-text #chatInput {
+  flex: 1;
+}
+#chatInputForm input#chatInput {
+  flex: 1;
+  padding: 0.75rem;
+  border: 1px solid var(--muted);
+  border-radius: var(--radius);
   font-size: var(--font-size-base);
-  transition: border-color var(--transition), box-shadow var(--transition);
+  transition: var(--transition);
 }
-#chatInputForm input:focus {
+#chatInputForm input#chatInput:focus {
   outline: none;
   border-color: var(--primary);
-  box-shadow: 0 0 0 2px rgba(74,144,226,0.2);
 }
 #chatInputForm button {
-  background: var(--primary); color: #fff;
-  width: 36px; height: 36px; border: none;
-  border-radius: 50%; cursor: pointer;
-  display: flex; align-items: center; justify-content: center;
-  transition: background var(--transition);
+  font-size: 1.25rem;
+  color: var(--muted);
 }
-#chatInputForm button:hover {
-  background: var(--primary-dark);
+#chatInputForm button#sendBtn {
+  color: var(--primary);
 }
+#chatInputForm button#micBtn.listening i {
+  color: var(--error);
+}
+
+
+
  #sessionsUl li:hover .dots-btn {
   opacity: 1;
   color: var(--primary-dark);  
@@ -656,14 +680,6 @@ position: sticky;
     text-overflow: ellipsis;
   }
   .session-meta { display: none; }
-#chatAreaControls {
-    flex-wrap: wrap;
-  }
-  #chatInputForm {
-    display: flex; flex: 1; min-width: 0;
-    gap: 0.5rem; margin-top: 0.25rem;  
-  }
-  #chatInputForm input { width: 100%; }
 }
 @media only screen 
   and (device-width: 414px) 
@@ -693,25 +709,7 @@ position: sticky;
      left: 0;
    }
  }
-
-#chatQuickToolbar {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 0.5rem;
-  margin-bottom: 0;
-}
-
-#chatControls {
-  display: flex;
-  gap: 0.5rem;
-}
-
-@media (max-width: 600px) {
-  #chatQuickToolbar {
-    flex-wrap: wrap;
-  }
-}
+  
 #sessionsUl li .session-meta-line {
   display: flex;
   justify-content: space-between;
@@ -1220,30 +1218,7 @@ html.dark #chatInputForm input {
     padding-right: 1.5rem; 
   }
 
-  #chatAreaControls {
-    flex-wrap: wrap;
-    padding: 0.5rem 0;
-    gap: 0.5rem;
-  }
-  
-  #chatControls button {
-    width: 32px; height: 32px;
-    padding: 0;
-    font-size: 1rem;
-  }
- 
-  #chatInputForm {
-    width: 100%;
-    gap: 0.25rem;
-  }
-  #chatInputForm input {
-    flex: 1;
-    height: 36px;
-    font-size: 0.95rem;
-  }
-  #chatInputForm button {
-    width: 36px; height: 36px;
-  }
+
 
   .modal-content, #confirmModal .modal-content {
     max-width: 90%;
@@ -1295,27 +1270,6 @@ html.dark #chatInputForm input {
   #therapyHeader .session-meta,
   .session-meta-line {
     display: none;
-  }
-}
-
-#quickReplies {
-  position: relative;
-}
-
-#quickReplies::after {
-  content: '';
-  position: absolute;
-  top: 0;
-  right: 0;
-  width: 30px;
-  height: 100%;
-  background: linear-gradient(to right, rgba(255,255,255,0), var(--color-surface));
-  pointer-events: none;
-}
-
-@media (max-width: 600px) {
-  #quickReplies::after {
-    background: linear-gradient(to right, rgba(243,246,251,0), var(--color-surface));
   }
 }
 
@@ -1489,7 +1443,7 @@ html.dark .quick-reply:hover {
   clip-path: polygon(100% 0, 0 100%, 100% 100%);
 }
 
-  +#backToBottom {
+#backToBottom {
   display: none;
 }
 #backToBottom.show {
@@ -1566,15 +1520,6 @@ html.dark .quick-reply:hover {
     padding-right: 1.5rem; 
   }
 
-  #chatAreaControls {
-    flex-wrap: wrap;
-    padding: 0.5rem 0;
-    gap: 0.5rem;
-  }
-    #quickReplies {
-   width: 100%;
-    flex-wrap: nowrap;
-  }
   #backToBottom {
   position: fixed;
   display: none;
@@ -1583,25 +1528,6 @@ html.dark .quick-reply:hover {
 #backToBottom.show {
   display: flex;
 }
-
-  #chatControls button {
-    width: 32px; height: 32px;
-    padding: 0;
-    font-size: 1rem;
-  }
- 
-  #chatInputForm {
-    width: 100%;
-    gap: 0.25rem;
-  }
-  #chatInputForm input {
-    flex: 1;
-    height: 36px;
-    font-size: 0.95rem;
-  }
-  #chatInputForm button {
-    width: 36px; height: 36px;
-  }
 
   .modal-content, #confirmModal .modal-content {
     max-width: 90%;
@@ -1655,63 +1581,6 @@ html.dark .quick-reply:hover {
     display: none;
   }
 }
-#quickReplies {
-  display: flex;
-  gap: 0.5rem;
-  overflow-x: auto;
-  flex-wrap: nowrap !important;
-  padding: 0.5rem 0;
-  -webkit-overflow-scrolling: touch;
-  background: var(--surface);
-}
-#quickReplies::-webkit-scrollbar { display: none; }
-
-#quickReplies .quick-reply {
-  flex: 0 0 auto;
-  white-space: nowrap;
-  padding: 0.5rem 1rem;
-  border: 1px solid var(--primary);
-  border-radius: var(--radius);
-  background: var(--primary-light);
-  color: var(--primary);
-  font-size: var(--font-size-sm);
-  cursor: pointer;
-  transition: background var(--transition), color var(--transition);
-}
-#quickReplies .quick-reply:hover {
-  background: var(--primary);
-  color: #fff;
-}
-
-
-#quickReplies {
-  display: flex;
-  gap: 0.5rem;
-  overflow-x: auto !important;
-  white-space: nowrap;
-  padding: 0.5rem var(--padding);
-  background: var(--surface);
-  -webkit-overflow-scrolling: touch;
-  scrollbar-width: none;
-}
-#quickReplies::-webkit-scrollbar {
-  display: none;
-}
-#quickReplies .quick-reply {
-  flex: 0 0 auto;
-  padding: 0.5rem 1rem;
-  border: 1px solid var(--primary);
-  border-radius: var(--radius);
-  background: var(--primary-light);
-  color: var(--primary);
-  font-size: 0.875rem;
-  cursor: pointer;
-  transition: background var(--transition), color var(--transition);
-}
-#quickReplies .quick-reply:hover {
-  background: var(--primary);
-  color: #fff;
-}
 
 html.dark {
   --bg: #121212;
@@ -1760,6 +1629,308 @@ html.dark #quickReplies .quick-reply:hover {
   background: var(--secondary-light);
   color: var(--text);
 }
+
+  @media (max-width: 768px) {
+ 
+  #chatAreaControls {
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+  #chatControls {
+    display: none;
+  }
+  #chatControls.show {
+    display: flex;
+    position: absolute;
+    bottom: calc(var(--header-height) + var(--padding));
+    right: var(--padding);
+    background: var(--surface);
+    border: 1px solid var(--muted);
+    border-radius: var(--radius);
+    flex-direction: column;
+  }
+    #quickReplies {
+    scrollbar-width: thin;
+    scrollbar-color: var(--muted) var(--primary-light);
+  }
+  #quickReplies::-webkit-scrollbar {
+    height: 6px;
+  }
+  #quickReplies::-webkit-scrollbar-track {
+    background: var(--primary-light);
+    border-radius: 3px;
+  }
+  #quickReplies::-webkit-scrollbar-thumb {
+    background-color: var(--muted);
+    border-radius: 3px;
+  }
+  #chatInputForm button#sendBtn {
+    display: none;
+  }
+  #chatInputForm.has-text button#sendBtn {
+    display: inline-flex;
+  }
+  #chatInputForm.has-text #micBtn {
+    display: none;
+  }
+  #chatInputForm.has-text #sendBtn i {
+    transform: rotate(45deg);
+  }
+  #newSession {
+    display: block;
+  }
+}
+@media (min-width: 769px) {
+
+  #chatControls {
+    display: flex !important;
+    position: static;
+    background: none;
+    border: none;
+    flex-direction: row;
+  }
+  #chatControls button {
+    background: var(--primary-light);
+    color: var(--primary-dark);
+    padding: 0.5rem;
+    border-radius: var(--radius);
+  }
+}
+  @media (max-width: 480px) {
+  #chatAreaControls {
+    gap: 0.5rem;
+  }
+  #chatQuickToolbar {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  #chatInputForm {
+    gap: 0.25rem;
+  }
+  #chatInputForm input#chatInput {
+    font-size: var(--font-size-sm);
+  }
+  #quickReplies .quick-reply {
+    padding: 0.5rem;
+    font-size: var(--font-size-sm);
+  }
+  .dropdown-toggle {
+    padding: 0.5rem;
+    font-size: var(--font-size-sm);
+  }
+  .dropdown-content {
+    min-width: 140px;
+  }
+}
+
+#chatInput {
+  height: auto;
+  min-height: calc(var(--font-size-base) * 2);
+  max-height: 6rem;
+  overflow-y: auto;
+  resize: none;
+}
+#chatInputForm.has-text #chatInput {
+  padding-right: calc(var(--padding) * 2.5);
+}
+#chatInput::-webkit-textarea-placeholder-shown + #sendBtn {
+  display: none;
+}
+#chatInput:not(:placeholder-shown) + #sendBtn {
+  display: inline-flex;
+}
+@media (max-width: 360px) {
+  #quickReplies .quick-reply {
+    font-size: 0.75rem;
+    padding: 0.25rem 0.5rem;
+  }
+  .sidebar-icons {
+    gap: 0.5rem;
+  }
+  .sidebar-icons button {
+    padding: 0.5rem;
+  }
+}
+input[type="search"]::-webkit-search-cancel-button {
+  -webkit-appearance: none;
+}
+input[type="search"]::-ms-clear {
+  display: none;
+}
+input[type="search"]::-ms-reveal {
+  display: none;
+}
+input[type="search"]::-webkit-search-decoration {
+  display: none;
+}
+#searchSessions:focus + #filterBtn {
+  color: var(--primary);
+}
+#confirmModal[open] .modal-content {
+  animation: fadeInModal var(--transition) forwards;
+}
+@keyframes fadeInModal {
+  from { opacity: 0; transform: translateY(-10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@keyframes fadeOutModal {
+  from { opacity: 1; transform: translateY(0); }
+  to { opacity: 0; transform: translateY(-10px); }
+}
+.modal[closing] .modal-content {
+  animation: fadeOutModal var(--transition) forwards;
+}
+button[disabled] {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+#moreActions[disabled] i {
+  color: var(--muted);
+}
+#listeningIndicator {
+  position: absolute;
+  bottom: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+}
+#listeningIndicator.show {
+  display: block;
+}
+#attachBtn::after {
+  content: attr(data-filename);
+  display: block;
+  font-size: var(--font-size-sm);
+  color: var(--muted);
+  margin-top: 0.25rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+ @media only screen and (max-width: 414px) {
+  :root {
+    --header-height: 56px;
+    --sidebar-width: 100%;
+    --font-size-base: 0.95rem;
+    --font-size-sm: 0.8rem;
+    --font-size-lg: 1rem;
+    --padding: 0.75rem;
+    --radius: 0.5rem;
+  }
+
+  #chatAreaControls {
+    padding: var(--padding);
+  }
+  #chatQuickToolbar {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.5rem;
+  }
+  #chatControls {
+    position: absolute;
+    bottom: calc(var(--header-height) + var(--padding));
+    right: var(--padding);
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+  #moreActions i {
+    font-size: 1.2rem;
+  }
+  #quickReplies {
+    gap: 0.4rem;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+  .quick-reply {
+    padding: 0.4rem 0.8rem;
+    font-size: var(--font-size-sm);
+  }
+  #chatInputForm {
+    gap: 0.4rem;
+  }
+  #chatInput {
+    font-size: var(--font-size-base);
+    padding: 0.6rem;
+    border-radius: var(--radius);
+  }
+  #chatInput:focus {
+    box-shadow: 0 0 0 2px var(--primary-light);
+  }
+  #attachBtn, #micBtn, #sendBtn {
+    font-size: 1.1rem;
+    padding: 0.5rem;
+  }
+  #sendBtn {
+    display: none;
+  }
+  #chatInputForm.has-text #sendBtn {
+    display: inline-flex;
+  }
+  #chatInputForm.has-text #micBtn {
+    display: none;
+  }
+  .dropdown-toggle {
+    font-size: var(--font-size-base);
+    padding: 0.5rem;
+  }
+  .dropdown-content,
+  .regen-edit-dropdown {
+    right: var(--padding);
+    min-width: 140px;
+  }
+  .dropdown-content button,
+  .regen-edit-dropdown button {
+    padding: 0.6rem 0.8rem;
+    font-size: var(--font-size-sm);
+  }
+ 
+  
+  body {
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+}
+
+#chatAreaControls {
+  position: fixed;
+  bottom: 0;
+  z-index: 1000;
+}
+
+.dropdown {
+  position: relative;
+  display: inline-block;
+  font-size: var(--font-size-base);
+}
+.dropdown-toggle {
+  background: var(--primary-light);
+  color: var(--primary-dark);
+  padding: 0.5rem 1rem;
+  border-radius: var(--radius);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+.dropdown-content {
+  display: none;
+  position: absolute;
+  right: 0;
+  background-color: var(--surface);
+  min-width: 160px;
+  border: 1px solid var(--muted);
+  border-radius: var(--radius);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  z-index: 1000;
+  flex-direction: column;
+}
+.dropdown-content.show {
+  display: flex;
+}
+.dropdown-content button {
+  padding: 0.75rem 1rem;
+  text-align: left;
+  font-size: var(--font-size-sm);
+  color: var(--text);
+}
+
 </style>
 
   <style>
@@ -2020,9 +2191,6 @@ html, body {
 #backToBottom.show {
   display: flex;
 }
-
-
-
 #sendBtn {
   display: none;
   width: 36px;
@@ -2119,6 +2287,9 @@ html, body {
   </button>
 <div id="chatAreaControls">
     <div id="chatQuickToolbar">
+      <button id="moreActions" class="more-btn" aria-label="More actions">
+    <i class="fas fa-ellipsis-h"></i>
+  </button>
     <div id="chatControls">
       <button id="regenerateReply" title="Regenerate"><i class="fas fa-redo"></i></button>
       <button id="editLast" title="Edit last"><i class="fas fa-edit"></i></button>
@@ -2165,6 +2336,36 @@ html, body {
     <p>Ending session…</p>
   </div>
 </div>
+   <script>
+document.addEventListener('DOMContentLoaded', () => {
+  const moreBtn = document.getElementById('moreActions');
+  const dropdown = document.createElement('div');
+  dropdown.className = 'regen-edit-dropdown';
+  dropdown.innerHTML = `
+    <button id="regenerateInMenu"><i class="fas fa-redo"></i> Regenerate</button>
+    <button id="editInMenu"><i class="fas fa-edit"></i> Edit Last</button>
+    <button id="clearInMenu"><i class="fas fa-trash"></i> Clear Chat</button>
+    <button id="exportInMenu"><i class="fas fa-file-export"></i> Export Chat</button>
+  `;
+  moreBtn.insertAdjacentElement('afterend', dropdown);
+
+  moreBtn.addEventListener('click', e => {
+    e.stopPropagation();
+    dropdown.classList.toggle('show');
+  });
+  document.addEventListener('click', e => {
+    if (!e.target.closest('.regen-edit-dropdown') && !e.target.closest('#moreActions')) {
+      dropdown.classList.remove('show');
+    }
+  });
+
+  document.getElementById('regenerateInMenu').addEventListener('click', () => regenBtn.click());
+  document.getElementById('editInMenu').addEventListener('click', () => editBtn.click());
+  document.getElementById('clearInMenu').addEventListener('click', () => clearBtn.click());
+  document.getElementById('exportInMenu').addEventListener('click', () => exportBtn.click());
+});
+  </script>
+
   <script>
 document.addEventListener('DOMContentLoaded', () => {
 
