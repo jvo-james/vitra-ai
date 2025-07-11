@@ -2443,6 +2443,42 @@ html.dark #backToBottom:hover {
   background: darken(var(--error),10%);
 }
 
+ #chatAreaControls {
+  display: flex;
+  flex-direction: row;
+   align-items: center;
+  gap: 0.75rem;
+   background: var(--surface);
+   border-top: 1px solid var(--muted);
+   padding: 0.75rem var(--padding);
+   box-shadow: 0 -2px 6px rgba(0,0,0,0.05);
+ }
+
+#chatQuickToolbar {
+  flex: 0 0 auto;
+  margin-right: 1rem;
+}
+
+#chatInputForm {
+  flex: 1 1 auto;
+  display: flex;
+     align-items: center;
+  gap: 0.5rem;
++}
+
+ @media (max-width: 600px) {
+#chatAreaControls {
+  flex-direction: column;
+}
+ #chatQuickToolbar {
+   width: 100%;
+   margin-right: 0;
+   margin-bottom: 0.5rem;
+ }
+ #chatInputForm {
+   width: 100%;
+ }
+ }
 
 
 </style>
@@ -2577,7 +2613,9 @@ document.addEventListener('DOMContentLoaded', () => {
     !e.target.closest('#chatInputForm') &&
     !e.target.closest('#chatAreaControls')
   ) {
-    chatInput.blur();
+    if (document.activeElement && document.activeElement.blur) {
+      document.activeElement.blur();
+    }
   }
    isDragging = false;
  });
@@ -3122,7 +3160,7 @@ const filterBtn   = document.getElementById('filterBtn');
 searchInput.addEventListener('input', () => {
   const q = searchInput.value.trim().toLowerCase();
   document.querySelectorAll('#sessionsUl li').forEach(li => {
-    const title   = li.querySelector('strong').textContent.toLowerCase();
+    const title   = li.querySelector('.session-title').textContent.toLowerCase();
     const snippet = li.querySelector('.snippet').textContent.toLowerCase();
     li.style.display = (title.includes(q) || snippet.includes(q)) ? 'flex' : 'none';
   });
