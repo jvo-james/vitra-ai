@@ -1304,21 +1304,6 @@ html.dark #chatInputForm input {
   }
 }
 
-#quickReplies {
-  position: relative;
-}
-
-#quickReplies::after {
-  content: '';
-  position: absolute;
-  top: 0;
-  right: 0;
-  width: 30px;
-  height: 100%;
-  background: linear-gradient(to right, rgba(255,255,255,0), var(--color-surface));
-  pointer-events: none;
-}
-
 @media (max-width: 600px) {
   #quickReplies::after {
     background: linear-gradient(to right, rgba(243,246,251,0), var(--color-surface));
@@ -1577,10 +1562,7 @@ html.dark .quick-reply:hover {
     padding: 0.5rem 0;
     gap: 0.5rem;
   }
-    #quickReplies {
-   width: 100%;
-    flex-wrap: nowrap;
-  }
+ 
 #backToBottom {
  position: fixed;
  display: none;
@@ -1669,6 +1651,7 @@ html.dark .quick-reply:hover {
   padding: 0.5rem 0;
   -webkit-overflow-scrolling: touch;
   background: var(--surface);
+  white-space: nowrap;  
 }
 #quickReplies::-webkit-scrollbar { display: none; }
 
@@ -1717,6 +1700,28 @@ html.dark .quick-reply:hover {
 #quickReplies .quick-reply:hover {
   background: var(--primary);
   color: #fff;
+}
+
+#chatQuickToolbar {
+  overflow-x: visible;
+}
+
+@media (max-width: 600px) {
+  #quickReplies {
+    display: flex !important;
+    flex-wrap: nowrap !important;
+    overflow-x: auto !important;
+    -webkit-overflow-scrolling: touch !important;
+    white-space: nowrap !important;
+    scrollbar-width: none !important;  
+  }
+  #quickReplies::-webkit-scrollbar {
+    display: none;
+  }
+  #quickReplies .quick-reply {
+    flex: 0 0 auto !important;
+    white-space: nowrap !important;
+  }
 }
 
 html.dark {
