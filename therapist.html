@@ -1750,7 +1750,433 @@ html.dark #quickReplies .quick-reply:hover {
 
 </style>
 
-  
+  <style>
+@media only screen and (device-width: 414px) and (device-height: 896px) and (-webkit-device-pixel-ratio: 2) and (orientation: portrait) {
+
+:root {
+  --header-h: 56px;
+  --sidebar-w: 280px;
+  --pad: 0.75rem;
+  --r: 0.5rem;
+  --f-base: 0.95rem;
+  --f-sm: 0.8rem;
+  --f-lg: 1.05rem;
+  --trans: 0.25s ease;
+}
+
+html, body {
+  height: 100vh;
+  margin: 0;
+  font-family: var(--font-base);
+  font-size: var(--f-base);
+  background: var(--bg);
+  color: var(--text);
+  overscroll-behavior: contain;
+}
+
+#therapyHeader {
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  height: var(--header-h);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 var(--pad);
+  background: var(--surface);
+  box-shadow: 0 1px 4px rgba(0,0,0,0.1);
+  z-index: 1000;
+}
+
+#therapyHeader .header-left,
+#therapyHeader .header-right {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+#therapyHeader .therapist-info {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+}
+
+#therapyHeader .therapist-info h1 {
+  font-size: var(--f-lg);
+  margin: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+#therapyHeader button {
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  border-radius: 50%;
+  border: none;
+  background: var(--primary-light);
+  color: var(--primary-dark);
+  transition: background var(--trans), color var(--trans);
+}
+
+#therapyHeader button:hover {
+  background: var(--primary);
+  color: #fff;
+}
+
+#sessionList {
+  position: fixed;
+  top: var(--header-h);
+  left: 0;
+  width: var(--sidebar-w);
+  height: calc(100vh - var(--header-h));
+  background: var(--surface);
+  display: none;
+  flex-direction: column;
+  padding: var(--pad);
+  box-shadow: 2px 0 8px rgba(0,0,0,0.05);
+  z-index: 1100;
+}
+
+#sessionList.visible {
+  display: flex;
+}
+
+#sessionList .session-search {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: var(--pad);
+}
+
+#sessionList input,
+#sessionList button {
+  font-size: var(--f-sm);
+}
+
+#sessionList input {
+  flex: 1;
+  padding: 0.5rem;
+  border: 1px solid var(--muted);
+  border-radius: var(--r);
+}
+
+#sessionList button {
+  padding: 0.5rem;
+  border-radius: var(--r);
+  background: var(--primary);
+  color: #fff;
+  border: none;
+}
+
+#sessionsUl {
+  flex: 1;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  overflow-y: auto;
+}
+
+#sessionsUl li {
+  padding: 0.5rem;
+  margin-bottom: 0.5rem;
+  border-radius: var(--r);
+  background: var(--primary-light);
+  transition: background var(--trans);
+}
+
+#sessionsUl li.active,
+#sessionsUl li:hover {
+  background: var(--primary);
+}
+
+#sessionsUl li * {
+  font-size: var(--f-sm);
+}
+
+#newSession {
+  width: 100%;
+  padding: 0.5rem;
+  border-radius: var(--r);
+  background: var(--secondary);
+  color: #fff;
+  font-size: var(--f-sm);
+  border: none;
+  margin-top: var(--pad);
+  transition: background var(--trans);
+}
+
+#newSession:hover {
+  background: var(--secondary-dark);
+}
+
+#chatArea {
+  position: fixed;
+  top: var(--header-h);
+  left: 0;
+  right: 0;
+  bottom: var(--header-h);
+  display: flex;
+  flex-direction: column;
+  background: var(--bg);
+}
+
+#chatLog {
+  flex: 1;
+  overflow-y: auto;
+  padding: var(--pad);
+}
+
+.date-separator {
+  text-align: center;
+  font-size: var(--f-sm);
+  color: var(--muted);
+  margin: var(--pad) 0;
+}
+
+.message {
+  display: flex;
+  align-items: flex-end;
+  gap: 0.5rem;
+  margin-bottom: var(--pad);
+}
+
+.avatar-small {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.bubble {
+  position: relative;
+  background: var(--surface);
+  padding: 0.6rem;
+  border-radius: var(--r);
+  max-width: calc(100% - 72px);
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+  word-wrap: break-word;
+}
+
+.user-msg .bubble {
+  background: var(--primary);
+  color: #fff;
+}
+
+.therapist-msg .bubble {
+  background: var(--secondary-light);
+  color: var(--text);
+}
+
+.bubble::after {
+  content: "";
+  position: absolute;
+  width: 12px;
+  height: 12px;
+  bottom: 0;
+  background: inherit;
+}
+
+.therapist-msg .bubble::after {
+  left: 16px;
+  clip-path: polygon(0 0, 0 100%, 100% 100%);
+}
+
+.user-msg .bubble::after {
+  right: 16px;
+  clip-path: polygon(100% 0, 0 100%, 100% 100%);
+}
+
+.msg-time {
+  font-size: var(--f-sm);
+  color: var(--muted);
+  margin: 0.25rem var(--pad);
+}
+
+.copy-btn {
+  position: absolute;
+  bottom: 0.4rem;
+  right: 0.4rem;
+  opacity: 0;
+  background: none;
+  border: none;
+  font-size: var(--f-sm);
+}
+
+.message:hover .copy-btn {
+  opacity: 1;
+}
+
+.speak-btn {
+  position: absolute;
+  bottom: 0.4rem;
+  right: -2.2rem;
+  font-size: var(--f-sm);
+  color: var(--info);
+}
+
+.spinner {
+  width: 32px;
+  height: 32px;
+  margin: 2rem auto;
+  border: 3px solid var(--primary-light);
+  border-top: 3px solid var(--primary-dark);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+#backToBottom {
+  position: fixed;
+  right: var(--pad);
+  bottom: calc(var(--header-h) + 3.5rem);
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  background: var(--primary);
+  color: #fff;
+}
+
+#backToBottom.show {
+  display: flex;
+}
+
+#chatAreaControls {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  display: flex;
+  align-items: center;
+  padding: 0.5rem var(--pad);
+  gap: 0.5rem;
+  background: var(--surface);
+  box-shadow: 0 -1px 4px rgba(0,0,0,0.1);
+}
+
+#chatQuickToolbar {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex: 1;
+}
+
+#quickReplies {
+  display: flex;
+  gap: 0.5rem;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+}
+
+#quickReplies::-webkit-scrollbar {
+  display: none;
+}
+
+#chatInputForm {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex: 1;
+}
+
+#chatInput {
+  flex: 1;
+  padding: 0.6rem 0.8rem;
+  font-size: var(--f-base);
+  border: 1px solid var(--muted);
+  border-radius: var(--r);
+}
+
+#micBtn {
+  font-size: var(--f-lg);
+}
+
+.has-text #micBtn {
+  display: none;
+}
+
+.has-text #sendBtn {
+  display: inline-flex;
+}
+
+#sendBtn {
+  display: none;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: var(--secondary);
+  color: #fff;
+  align-items: center;
+  justify-content: center;
+}
+
+.modal-content {
+  max-width: 90%;
+  padding: var(--pad);
+  border-radius: var(--r);
+  background: var(--surface);
+}
+
+.close-modal {
+  position: absolute;
+  top: 0.5rem;
+  right: 0.5rem;
+  font-size: var(--f-lg);
+  color: var(--muted);
+}
+
+.modal-buttons {
+  display: flex;
+  gap: var(--pad);
+  margin-top: var(--pad);
+}
+
+.modal-buttons button {
+  flex: 1;
+  padding: 0.5rem;
+  border-radius: var(--r);
+  border: none;
+}
+
+#copyToast {
+  bottom: 1.25rem;
+  font-size: var(--f-sm);
+  padding: 0.5rem 1rem;
+}
+
+#offlineToast,
+#reminderBanner {
+  font-size: var(--f-sm);
+  padding: 0.5rem;
+}
+
+#consentBanner {
+  flex-direction: column;
+  align-items: stretch;
+}
+
+#dataControls {
+  display: flex;
+  gap: 0.25rem;
+}
+
+#dataControls button {
+  width: 48px;
+  height: 32px;
+  font-size: var(--f-sm);
+}
+
+}
+</style>
+
 </head>
 
 <body>
