@@ -1,8 +1,7 @@
 <!DOCTYPE html>
 <html lang="en" aria-theme="light">
 <head>
-  <meta charset="UTF-8">
-<head>
+   <meta charset="UTF-8">
  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
   <title>Vitra AI Therapist</title>
 
@@ -2567,6 +2566,9 @@ html.dark #backToBottom:hover {
   <script>
 document.addEventListener('DOMContentLoaded', () => {
 
+   let rec = null;
+  const sendBtn = document.getElementById('sendBtn');
+  
  let isDragging = false;
  document.addEventListener('touchmove', () => { isDragging = true; }, { passive: true });
  document.addEventListener('touchend', e => {
@@ -3132,8 +3134,8 @@ filterBtn.addEventListener('click', () => {
 
  if ('webkitSpeechRecognition' in window) {
    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
- if (SpeechRecognition) {
-   const rec = new SpeechRecognition();
+   if (SpeechRecognition) {
+     rec = new SpeechRecognition();
     rec.lang            = 'en-US';
     rec.interimResults  = true;
     rec.maxAlternatives = 1;
