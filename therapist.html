@@ -555,7 +555,13 @@ position: sticky;
 #sessionsUl li.open .dots-dropdown {
   display: flex;
 }
-
+.session-title {
+  display: block;
+  width: 100%;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
   
 #reminderBanner {
   position: fixed; top: var(--header-height); right: var(--padding);
@@ -2199,11 +2205,15 @@ document.addEventListener('DOMContentLoaded', () => {
    sidebar.classList.toggle('visible');
  });
 
-   document.addEventListener('click', e => {
-   if (!e.target.closest('#sessionList') && !e.target.closest('#menuToggle')) {
-      sidebar.classList.remove('visible');
-    }
-  });
+  document.addEventListener('click', e => {
+   if (
+     !e.target.closest('#sessionList') &&
+     !e.target.closest('#menuToggle') &&
+     !e.target.closest('#therapyHeader')
+   ) {
+     sidebar.classList.remove('visible');
+   }
+ });
 
  const qr = document.getElementById('quickReplies');
 qr.addEventListener('wheel', e => {
