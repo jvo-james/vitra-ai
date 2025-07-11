@@ -1,8 +1,7 @@
 <!DOCTYPE html>
 <html lang="en" aria-theme="light">
 <head>
-  <meta charset="UTF-8">
-<head>
+   <meta charset="UTF-8">
  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
   <title>Vitra AI Therapist</title>
 
@@ -390,7 +389,7 @@ position: absolute;
 
 
 #chatAreaControls {
-position: sticky;
+position: fixed;
   bottom: 0;
   background: var(--surface);
   border-top: 1px solid var(--muted);
@@ -475,6 +474,11 @@ position: sticky;
 }
 .close-modal:hover {
   color: var(--error);
+}
+
+  #listeningIndicator,
+#recordingOverlay {
+  display: none !important;
 }
 
   
@@ -877,9 +881,9 @@ html.dark {
   --surface: #1e1e1e;
   --text: #e0e0e0;
   --muted: #888888;
-  --primary: #4A90E2;
-  --primary-light: rgba(74, 144, 226, 0.2);
-  --primary-dark: #357abd;
+ --primary: #6EE7B7;              
++  --primary-light: rgba(110, 231, 183, 0.2);
++  --primary-dark: #34D399;
   --secondary: #50c878;
   --secondary-light: rgba(80, 200, 120, 0.2);
   --secondary-dark: #3ea664;
@@ -2118,15 +2122,24 @@ html, body {
 
 .chat-menu-dropdown {
   position: absolute;
-  top: calc(100% + 0.5rem);
-  left: 0;
+  bottom: calc(100% + 0.5rem);
+  left: 50%;
+  transform: translateX(-50%);
   background: var(--surface);
   border: 1px solid var(--muted);
   border-radius: var(--radius);
   box-shadow: 0 4px 12px rgba(0,0,0,0.1);
   display: none;
   flex-direction: column;
-  z-index: 100;
+  background: var(--surface);
+  border: 1px solid var(--muted);
+  border-radius: var(--radius);
+  box-shadow: 0 4px 16px rgba(0,0,0,0.15);
+  padding: 0.5rem 0;
+  display: none;
+  flex-direction: column;
+  z-index: 2000;   
+  min-width: 200px; 
 }
 .chat-menu-dropdown button {
   background: none;
@@ -2135,16 +2148,48 @@ html, body {
   text-align: left;
   cursor: pointer;
   transition: background var(--transition);
+  white-space: nowrap;
 }
 .chat-menu-dropdown button:hover {
   background: var(--primary-light);
 }
-
+.chat-menu-container {
+  position: relative;   
+  overflow: visible;    
+}
 .chat-menu-container.open .chat-menu-dropdown {
   display: flex;
 }
+@media (max-width: 500px) {
+   .chat-menu-dropdown {
+  left: 0; transform: none; right: 0; margin: auto;
+   }
+ }
+   .chat-menu-dropdown button {
+  padding: 0.5rem 1.5rem;
+  font-size: var(--font-size-sm);
+  color: var(--text);
+  transition: background var(--transition), color var(--transition);
+}
+.chat-menu-dropdown button + button {
+  border-top: 1px solid var(--muted);
+}
+.chat-menu-dropdown button:hover {
+  background: var(--primary-light);
+  color: var(--primary-dark);
+}
 
-   
+html.dark .chat-menu-dropdown {
+  background: rgba(30,30,30,0.95);
+  border-color: rgba(255,255,255,0.1);
+}
+html.dark .chat-menu-dropdown button {
+  color: var(--text);
+}
+html.dark .chat-menu-dropdown button:hover {
+  background: var(--secondary-dark);
+  color: var(--surface);
+}
 #quickReplies .quick-reply:nth-child(2n) {
   background: var(--secondary-light);
   border-color: var(--secondary);
@@ -2340,6 +2385,102 @@ html.dark #backToBottom:hover {
   box-shadow: 0 0 12px var(--primary-light);
 }
 
+    #recordingOverlay {
+  position: fixed;
+  bottom: 0;
+  left: 0; right: 0;
+  height: auto;
+  background: rgba(0,0,0,0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+  z-index: 1100;
+}
+
+.rec-ui {
+  background: var(--surface);
+  padding: 1rem 2rem;
+  border-radius: var(--radius);
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.rec-bars {
+  display: flex;
+  gap: 0.25rem;
+}
+.rec-bars .bar {
+  width: 4px;
+  height: 24px;
+  background: var(--primary);
+  animation: barAnim 0.5s infinite ease-in-out;
+}
+.rec-bars .bar:nth-child(2) { animation-delay: 0.1s; }
+.rec-bars .bar:nth-child(3) { animation-delay: 0.2s; }
+.rec-bars .bar:nth-child(4) { animation-delay: 0.3s; }
+.rec-bars .bar:nth-child(5) { animation-delay: 0.4s; }
+
+@keyframes barAnim {
+  0%,100% { transform: scaleY(0.3); }
+  50%     { transform: scaleY(1.0); }
+}
+
+#stopRecordingBtn {
+  background: var(--error);
+  color: #fff;
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: var(--radius);
+  font-size: 1rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  cursor: pointer;
+}
+#stopRecordingBtn:hover {
+  background: darken(var(--error),10%);
+}
+
+ #chatAreaControls {
+  display: flex;
+ flex-direction: column;
+   align-items: center;
+  gap: 0.75rem;
+   background: var(--surface);
+   border-top: 1px solid var(--muted);
+   padding: 0.75rem var(--padding);
+   box-shadow: 0 -2px 6px rgba(0,0,0,0.05);
+ }
+
+#chatQuickToolbar {
+  flex: 0 0 auto;
+  margin-right: 1rem;
+}
+
+#chatInputForm {
+  flex: 1 1 auto;
+  display: flex;
+     align-items: center;
+  gap: 0.5rem;
++}
+
+ @media (max-width: 600px) {
+#chatAreaControls {
+  flex-direction: column;
+}
+ #chatQuickToolbar {
+   width: 100%;
+   margin-right: 0;
+   margin-bottom: 0.5rem;
+ }
+ #chatInputForm {
+   width: 100%;
+ }
+ }
+
+
 </style>
 
 </head>
@@ -2421,7 +2562,19 @@ html.dark #backToBottom:hover {
       <button id="sendBtn" type="submit" title="Send"><i class="fas fa-paper-plane"></i></button>
     </form>
 </div>
-   
+    
+    <div id="recordingOverlay" hidden>
+    <div class="rec-ui">
+      <div class="rec-bars">
+        <div class="bar"></div><div class="bar"></div><div class="bar"></div>
+        <div class="bar"></div><div class="bar"></div>
+      </div>
+      <button id="stopRecordingBtn" title="Stop recording">
+        <i class="fas fa-stop-circle"></i> Stop
+      </button>
+    </div>
+  </div>
+
   </main>
 
 
@@ -2449,6 +2602,9 @@ html.dark #backToBottom:hover {
   <script>
 document.addEventListener('DOMContentLoaded', () => {
 
+   let rec = null;
+  const sendBtn = document.getElementById('sendBtn');
+  
  let isDragging = false;
  document.addEventListener('touchmove', () => { isDragging = true; }, { passive: true });
  document.addEventListener('touchend', e => {
@@ -2457,7 +2613,9 @@ document.addEventListener('DOMContentLoaded', () => {
     !e.target.closest('#chatInputForm') &&
     !e.target.closest('#chatAreaControls')
   ) {
-    chatInput.blur();
+    if (document.activeElement && document.activeElement.blur) {
+      document.activeElement.blur();
+    }
   }
    isDragging = false;
  });
@@ -2591,11 +2749,9 @@ if (chatInput.value.trim().length === 0) {
    if (!file || !currentId) return;
    const now = new Date().toISOString();
 
-   const url = URL.createObjectURL(file);
-   const linkMarkdown = `[📎 ${file.name}](${url})`;
-
-   appendMessage('user', linkMarkdown, now, '✓');
-   chatHistory.push({ who:'user', text: linkMarkdown, time: now, status: '✓' });
+    const txt = await file.text();
+  appendMessage('user', `📎 ${file.name}`, now, '✓');
+  chatHistory.push({ who:'user', text: txt, time: now, status:'✓' });
    sessions[currentId].updated = Date.now();
    persistCurrent();
 
@@ -2639,6 +2795,8 @@ if (chatInput.value.trim().length === 0) {
    chatHistory = [...sessions[currentId].history];
  }
   
+document.getElementById('listeningIndicator').hidden = true;
+
 
   function persistSessions() {
     localStorage.setItem('sessions', JSON.stringify(sessions));
@@ -2988,7 +3146,7 @@ const filterBtn   = document.getElementById('filterBtn');
 searchInput.addEventListener('input', () => {
   const q = searchInput.value.trim().toLowerCase();
   document.querySelectorAll('#sessionsUl li').forEach(li => {
-    const title   = li.querySelector('strong').textContent.toLowerCase();
+    const title   = li.querySelector('.session-title').textContent.toLowerCase();
     const snippet = li.querySelector('.snippet').textContent.toLowerCase();
     li.style.display = (title.includes(q) || snippet.includes(q)) ? 'flex' : 'none';
   });
@@ -3000,8 +3158,20 @@ filterBtn.addEventListener('click', () => {
 
  if ('webkitSpeechRecognition' in window) {
    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
- if (SpeechRecognition) {
-   const rec = new SpeechRecognition();
+   if (SpeechRecognition) {
+     rec = new SpeechRecognition();
+      rec.onstart = () => {
+        document.getElementById('listeningIndicator').hidden = false;
+      };
+      rec.onend = () => {
+        document.getElementById('listeningIndicator').hidden = true;
+      };
+      rec.onerror = err => {
+        console.error('SpeechRecognition error', err);
+        document.getElementById('listeningIndicator').hidden = true;
+        micBtn.classList.remove('listening');
+        micBtn.innerHTML = '<i class="fas fa-microphone"></i>';
+      };
     rec.lang            = 'en-US';
     rec.interimResults  = true;
     rec.maxAlternatives = 1;
@@ -3016,13 +3186,26 @@ filterBtn.addEventListener('click', () => {
     });
 
     rec.onstart = () => {
-      micBtn.classList.add('listening');
-      micBtn.innerHTML = '<i class="fas fa-microphone-slash"></i>';
-   chatForm.querySelector('input').style.display = 'none';
-  chatForm.querySelector('#attachBtn').style.display = 'none';
-  chatForm.querySelector('#sendBtn').style.display = 'none';
-  document.getElementById('listeningIndicator').hidden = false; 
-    };
+         document.getElementById('recordingOverlay').hidden = false;
+       };
+
+    let audioCtx, analyser, dataArray;
+ navigator.mediaDevices.getUserMedia({ audio: true }).then(stream => {
+   audioCtx  = new (window.AudioContext||window.webkitAudioContext)();
+   analyser  = audioCtx.createAnalyser();
+   const source = audioCtx.createMediaStreamSource(stream);
+   source.connect(analyser);
+   analyser.fftSize = 32;
+   dataArray = new Uint8Array(analyser.frequencyBinCount);
+   (function draw() {
+     analyser.getByteFrequencyData(dataArray);
+     document.querySelectorAll('.rec-bars .bar').forEach((bar,i) => {
+       const h = (dataArray[i]/255)*100;
+       bar.style.height = `${Math.max(10,h)}%`;
+    });
+     requestAnimationFrame(draw);
+   })();
+ });
 
    rec.onresult = event => {
        let finalTranscript   = '';
@@ -3046,13 +3229,15 @@ filterBtn.addEventListener('click', () => {
      };
 
     rec.onend = () => {
-      micBtn.classList.remove('listening');
-      micBtn.innerHTML = '<i class="fas fa-microphone"></i>';
-      document.getElementById('listeningIndicator').hidden = true;
-  chatForm.querySelector('input').style.display = '';
-  chatForm.querySelector('#attachBtn').style.display = '';
-  chatForm.querySelector('#sendBtn').style.display = '';
-    };
+         micBtn.classList.remove('listening');
+       };
+
+      const stopBtn = document.getElementById('stopRecordingBtn');
+      stopBtn.addEventListener('click', () => {
+       document.getElementById('recordingOverlay').hidden = true;
+        document.getElementById('chatAreaControls').hidden = false;
+        chatInput.focus();
+      });
    rec.onerror = err => {
      console.error('SpeechRecognition error', err);
      micBtn.classList.remove('listening');
