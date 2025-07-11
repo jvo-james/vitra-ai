@@ -2308,7 +2308,6 @@ qr.addEventListener('wheel', e => {
       const li = document.createElement('li');
       li.innerHTML = `
         <div class="session-title">${data.title}</div>
-        <div class="snippet">${(data.history.slice(-1)[0]?.text||'…').slice(0,30)}…</div>
         <div class="session-meta-line">
           <span class="session-date">${new Date(+id).toLocaleDateString()}</span>
           <span class="session-number">Session ${data.number}</span>
@@ -2432,9 +2431,6 @@ const count = Object.keys(sessions).length + 1;
         .replace(/["*]/g, '')
         .replace(/\b[Tt]itle[:\-]?\s*/g, '')
         .trim();
-      if (aiTitle.length > 15) {
-        aiTitle = aiTitle.slice(0, 15).trim() + '…';
-      }
       sessions[currentId].title     = aiTitle;
       sessions[currentId].aiRenamed = true;
       persistSessions();
