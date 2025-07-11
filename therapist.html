@@ -1,8 +1,7 @@
 <!DOCTYPE html>
 <html lang="en" aria-theme="light">
 <head>
-  <meta charset="UTF-8">
-<head>
+   <meta charset="UTF-8">
  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
   <title>Vitra AI Therapist</title>
 
@@ -392,6 +391,8 @@ position: absolute;
 #chatAreaControls {
 position: fixed;
   bottom: 0;
+   left: var(--sidebar-width);
+ right: 0;
   background: var(--surface);
   border-top: 1px solid var(--muted);
   padding: 0.75rem var(--padding);
@@ -477,12 +478,27 @@ position: fixed;
   color: var(--error);
 }
 
+   html.dark #chatAreaControls {
+  bottom: 0 !important;
+ z-index: 1000;   
+  transform: none !important; 
+}
   #listeningIndicator,
 #recordingOverlay {
   display: none !important;
 }
-
-  
+    #chatQuickToolbar {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+ }
+@media (max-width: 600px) {
+  #chatAreaControls {
+    left: 0;
+    width: 100%;
+  }
+ }
+  #chatLog {
+ padding-bottom: 120px; }
 #audio, #guidedAudio {
   width: 100%; margin-top: var(--padding);
 }
@@ -647,6 +663,7 @@ position: fixed;
 @media (max-width: 1024px) {
   #sessionList { display: none; }
   #chatArea { left: 0; }
+   #chatAreaControls { left: 0; }
 }
 @media (max-width: 600px) {
   #therapyHeader {
@@ -1233,11 +1250,6 @@ html.dark #chatInputForm input {
     padding-right: 1.5rem; 
   }
 
-  #chatAreaControls {
-    flex-wrap: wrap;
-    padding: 0.5rem 0;
-    gap: 0.5rem;
-  }
   
   #chatControls button {
     width: 32px; height: 32px;
@@ -1245,10 +1257,7 @@ html.dark #chatInputForm input {
     font-size: 1rem;
   }
  
-  #chatInputForm {
-    width: 100%;
-    gap: 0.25rem;
-  }
+
   #chatInputForm input {
     flex: 1;
     height: 36px;
@@ -1570,25 +1579,6 @@ html.dark #chatInputForm input {
   display: flex;
 }
 
-  #chatControls button {
-    width: 32px; height: 32px;
-    padding: 0;
-    font-size: 1rem;
-  }
- 
-  #chatInputForm {
-    width: 100%;
-    gap: 0.25rem;
-  }
-  #chatInputForm input {
-    flex: 1;
-    height: 36px;
-    font-size: 0.95rem;
-  }
-  #chatInputForm button {
-    width: 36px; height: 36px;
-  }
-
   .modal-content, #confirmModal .modal-content {
     max-width: 90%;
     padding: 1rem;
@@ -1876,14 +1866,6 @@ html, body {
   padding: 0.5rem;
   border-radius: var(--r);
   border: none;
-}
-
-#sessionsUl {
-  flex: 1;
-  margin: 0;
-  padding: 0;
-  list-style: none;
-  overflow-y: auto;
 }
 
 #sessionsUl li {
@@ -2428,48 +2410,6 @@ html.dark #backToBottom:hover {
   50%     { transform: scaleY(1.0); }
 }
 
-#stopRecordingBtn {
-  background: var(--error);
-  color: #fff;
-  border: none;
-  padding: 0.5rem 1rem;
-  border-radius: var(--radius);
-  font-size: 1rem;
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  cursor: pointer;
-}
-#stopRecordingBtn:hover {
-  background: darken(var(--error),10%);
-}
-
-#chatQuickToolbar {
-  overflow-x: auto !important;
-  -webkit-overflow-scrolling: touch;
-}
-
-#chatAreaControls,
-#chatArea,
-#chatQuickToolbar {
-  overflow: visible !important;
-}
-
-#quickReplies {
-  display: flex;  
-  flex-wrap: nowrap;
-  overflow-x: auto !important;
-  -webkit-overflow-scrolling: touch;
-  touch-action: pan-x;
-  scrollbar-width: none;
-  padding-bottom: 0.5rem;  
-}
-#quickReplies::-webkit-scrollbar {
-  display: none;
-}
-#quickReplies .quick-reply {
-  flex: 0 0 auto;
-}
 
 </style>
 
@@ -2592,6 +2532,9 @@ html.dark #backToBottom:hover {
   <script>
 document.addEventListener('DOMContentLoaded', () => {
 
+   let rec = null;
+  const sendBtn = document.getElementById('sendBtn');
+  
  let isDragging = false;
  document.addEventListener('touchmove', () => { isDragging = true; }, { passive: true });
  document.addEventListener('touchend', e => {
@@ -2600,7 +2543,9 @@ document.addEventListener('DOMContentLoaded', () => {
     !e.target.closest('#chatInputForm') &&
     !e.target.closest('#chatAreaControls')
   ) {
-    chatInput.blur();
+    if (document.activeElement && document.activeElement.blur) {
+      document.activeElement.blur();
+    }
   }
    isDragging = false;
  });
@@ -2782,20 +2727,6 @@ if (chatInput.value.trim().length === 0) {
   
 document.getElementById('listeningIndicator').hidden = true;
 
-rec.onstart = () => {
-  document.getElementById('listeningIndicator').hidden = false;
-};
-
-rec.onend = () => {
-  document.getElementById('listeningIndicator').hidden = true;
-};
-
-rec.onerror = err => {
-  console.error('SpeechRecognition error', err);
-  document.getElementById('listeningIndicator').hidden = true;
-  micBtn.classList.remove('listening');
-  micBtn.innerHTML = '<i class="fas fa-microphone"></i>';
-};
 
   function persistSessions() {
     localStorage.setItem('sessions', JSON.stringify(sessions));
@@ -3145,7 +3076,7 @@ const filterBtn   = document.getElementById('filterBtn');
 searchInput.addEventListener('input', () => {
   const q = searchInput.value.trim().toLowerCase();
   document.querySelectorAll('#sessionsUl li').forEach(li => {
-    const title   = li.querySelector('strong').textContent.toLowerCase();
+    const title   = li.querySelector('.session-title').textContent.toLowerCase();
     const snippet = li.querySelector('.snippet').textContent.toLowerCase();
     li.style.display = (title.includes(q) || snippet.includes(q)) ? 'flex' : 'none';
   });
@@ -3157,8 +3088,20 @@ filterBtn.addEventListener('click', () => {
 
  if ('webkitSpeechRecognition' in window) {
    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
- if (SpeechRecognition) {
-   const rec = new SpeechRecognition();
+   if (SpeechRecognition) {
+     rec = new SpeechRecognition();
+      rec.onstart = () => {
+        document.getElementById('listeningIndicator').hidden = false;
+      };
+      rec.onend = () => {
+        document.getElementById('listeningIndicator').hidden = true;
+      };
+      rec.onerror = err => {
+        console.error('SpeechRecognition error', err);
+        document.getElementById('listeningIndicator').hidden = true;
+        micBtn.classList.remove('listening');
+        micBtn.innerHTML = '<i class="fas fa-microphone"></i>';
+      };
     rec.lang            = 'en-US';
     rec.interimResults  = true;
     rec.maxAlternatives = 1;
