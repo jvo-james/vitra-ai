@@ -390,7 +390,7 @@ position: absolute;
 
 
 #chatAreaControls {
-position: fixed;
+position: sticky;
   bottom: 0;
   background: var(--surface);
   border-top: 1px solid var(--muted);
@@ -877,9 +877,9 @@ html.dark {
   --surface: #1e1e1e;
   --text: #e0e0e0;
   --muted: #888888;
- --primary: #6EE7B7;              
-+  --primary-light: rgba(110, 231, 183, 0.2);
-+  --primary-dark: #34D399;
+  --primary: #4A90E2;
+  --primary-light: rgba(74, 144, 226, 0.2);
+  --primary-dark: #357abd;
   --secondary: #50c878;
   --secondary-light: rgba(80, 200, 120, 0.2);
   --secondary-dark: #3ea664;
@@ -2118,22 +2118,15 @@ html, body {
 
 .chat-menu-dropdown {
   position: absolute;
-  bottom: calc(100% + 0.5rem);
-  right: 0;
+  top: calc(100% + 0.5rem);
+  left: 0;
   background: var(--surface);
   border: 1px solid var(--muted);
   border-radius: var(--radius);
   box-shadow: 0 4px 12px rgba(0,0,0,0.1);
   display: none;
   flex-direction: column;
-  background: var(--surface);
-  border: 1px solid var(--muted);
-  border-radius: var(--radius);
-  box-shadow: 0 4px 16px rgba(0,0,0,0.15);
-  padding: 0.5rem 0;
-  display: none;
-  flex-direction: column;
-  z-index: 2000;   
+  z-index: 100;
 }
 .chat-menu-dropdown button {
   background: none;
@@ -2146,39 +2139,12 @@ html, body {
 .chat-menu-dropdown button:hover {
   background: var(--primary-light);
 }
-.chat-menu-container {
-  position: relative;   
-  overflow: visible;    
-}
+
 .chat-menu-container.open .chat-menu-dropdown {
   display: flex;
 }
 
-   .chat-menu-dropdown button {
-  padding: 0.5rem 1.5rem;
-  font-size: var(--font-size-sm);
-  color: var(--text);
-  transition: background var(--transition), color var(--transition);
-}
-.chat-menu-dropdown button + button {
-  border-top: 1px solid var(--muted);
-}
-.chat-menu-dropdown button:hover {
-  background: var(--primary-light);
-  color: var(--primary-dark);
-}
-
-html.dark .chat-menu-dropdown {
-  background: rgba(30,30,30,0.95);
-  border-color: rgba(255,255,255,0.1);
-}
-html.dark .chat-menu-dropdown button {
-  color: var(--text);
-}
-html.dark .chat-menu-dropdown button:hover {
-  background: var(--secondary-dark);
-  color: var(--surface);
-}
+   
 #quickReplies .quick-reply:nth-child(2n) {
   background: var(--secondary-light);
   border-color: var(--secondary);
@@ -2374,91 +2340,6 @@ html.dark #backToBottom:hover {
   box-shadow: 0 0 12px var(--primary-light);
 }
 
-    #recordingOverlay {
-  position: fixed;
-  bottom: 0;
-  left: 0; right: 0;
-  height: auto;
-  background: rgba(0,0,0,0.6);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 1rem;
-  z-index: 1100;
-}
-
-.rec-ui {
-  background: var(--surface);
-  padding: 1rem 2rem;
-  border-radius: var(--radius);
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-}
-
-.rec-bars {
-  display: flex;
-  gap: 0.25rem;
-}
-.rec-bars .bar {
-  width: 4px;
-  height: 24px;
-  background: var(--primary);
-  animation: barAnim 0.5s infinite ease-in-out;
-}
-.rec-bars .bar:nth-child(2) { animation-delay: 0.1s; }
-.rec-bars .bar:nth-child(3) { animation-delay: 0.2s; }
-.rec-bars .bar:nth-child(4) { animation-delay: 0.3s; }
-.rec-bars .bar:nth-child(5) { animation-delay: 0.4s; }
-
-@keyframes barAnim {
-  0%,100% { transform: scaleY(0.3); }
-  50%     { transform: scaleY(1.0); }
-}
-
-#stopRecordingBtn {
-  background: var(--error);
-  color: #fff;
-  border: none;
-  padding: 0.5rem 1rem;
-  border-radius: var(--radius);
-  font-size: 1rem;
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  cursor: pointer;
-}
-#stopRecordingBtn:hover {
-  background: darken(var(--error),10%);
-}
-
-#chatQuickToolbar {
-  overflow-x: auto !important;
-  -webkit-overflow-scrolling: touch;
-}
-
-#chatAreaControls,
-#chatArea,
-#chatQuickToolbar {
-  overflow: visible !important;
-}
-
-#quickReplies {
-  display: flex;  
-  flex-wrap: nowrap;
-  overflow-x: auto !important;
-  -webkit-overflow-scrolling: touch;
-  touch-action: pan-x;
-  scrollbar-width: none;
-  padding-bottom: 0.5rem;  
-}
-#quickReplies::-webkit-scrollbar {
-  display: none;
-}
-#quickReplies .quick-reply {
-  flex: 0 0 auto;
-}
-
 </style>
 
 </head>
@@ -2540,19 +2421,7 @@ html.dark #backToBottom:hover {
       <button id="sendBtn" type="submit" title="Send"><i class="fas fa-paper-plane"></i></button>
     </form>
 </div>
-    
-    <div id="recordingOverlay" hidden>
-    <div class="rec-ui">
-      <div class="rec-bars">
-        <div class="bar"></div><div class="bar"></div><div class="bar"></div>
-        <div class="bar"></div><div class="bar"></div>
-      </div>
-      <button id="stopRecordingBtn" title="Stop recording">
-        <i class="fas fa-stop-circle"></i> Stop
-      </button>
-    </div>
-  </div>
-
+   
   </main>
 
 
@@ -2770,22 +2639,6 @@ if (chatInput.value.trim().length === 0) {
    chatHistory = [...sessions[currentId].history];
  }
   
-document.getElementById('listeningIndicator').hidden = true;
-
-rec.onstart = () => {
-  document.getElementById('listeningIndicator').hidden = false;
-};
-
-rec.onend = () => {
-  document.getElementById('listeningIndicator').hidden = true;
-};
-
-rec.onerror = err => {
-  console.error('SpeechRecognition error', err);
-  document.getElementById('listeningIndicator').hidden = true;
-  micBtn.classList.remove('listening');
-  micBtn.innerHTML = '<i class="fas fa-microphone"></i>';
-};
 
   function persistSessions() {
     localStorage.setItem('sessions', JSON.stringify(sessions));
@@ -3163,10 +3016,13 @@ filterBtn.addEventListener('click', () => {
     });
 
     rec.onstart = () => {
-         document.getElementById('chatAreaControls').hidden = true;
-         document.getElementById('recordingOverlay').hidden = false;
-         micBtn.classList.add('listening');
-       };
+      micBtn.classList.add('listening');
+      micBtn.innerHTML = '<i class="fas fa-microphone-slash"></i>';
+   chatForm.querySelector('input').style.display = 'none';
+  chatForm.querySelector('#attachBtn').style.display = 'none';
+  chatForm.querySelector('#sendBtn').style.display = 'none';
+  document.getElementById('listeningIndicator').hidden = false; 
+    };
 
    rec.onresult = event => {
        let finalTranscript   = '';
@@ -3190,15 +3046,13 @@ filterBtn.addEventListener('click', () => {
      };
 
     rec.onend = () => {
-         micBtn.classList.remove('listening');
-       };
-
-      const stopBtn = document.getElementById('stopRecordingBtn');
-      stopBtn.addEventListener('click', () => {
-       document.getElementById('recordingOverlay').hidden = true;
-        document.getElementById('chatAreaControls').hidden = false;
-        chatInput.focus();
-      });
+      micBtn.classList.remove('listening');
+      micBtn.innerHTML = '<i class="fas fa-microphone"></i>';
+      document.getElementById('listeningIndicator').hidden = true;
+  chatForm.querySelector('input').style.display = '';
+  chatForm.querySelector('#attachBtn').style.display = '';
+  chatForm.querySelector('#sendBtn').style.display = '';
+    };
    rec.onerror = err => {
      console.error('SpeechRecognition error', err);
      micBtn.classList.remove('listening');
