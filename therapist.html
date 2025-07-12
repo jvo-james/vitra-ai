@@ -340,7 +340,16 @@ body {
 }
 #sendBtn:hover { transform: scale(1.1); }
 
-
+ @media (min-width: 1025px) {
+ #chatAreaControls {
+    height: 180px;
+    padding: 24px 32px;
+    box-shadow: none;       
+    background: var(--surface);
+    border-top: none;
+  }
+ }
+  
 @media (max-width: 1024px) {
   #chatAreaControls {
     left: 0;
@@ -407,9 +416,6 @@ body {
   }
   #quickReplies {
     gap: 6px;
-  }
-  #chatArea {
-    padding-bottom: 200px;
   }
 }
 
@@ -1081,6 +1087,10 @@ body.dark #chatAreaControls #quickReplies {
   }
   #sessionList {dispaly: none; }
 }
+
+  #chatArea {
+ padding-bottom: 160px; 
+ }
 </style>
 
 <style>
@@ -2883,10 +2893,10 @@ filterBtn.addEventListener('click', () => {
   filterBtn.classList.toggle('active');
  });
 
- if ('webkitSpeechRecognition' in window) {
-   const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
- if (SpeechRecognition) {
-   const rec = new SpeechRecognition();
+let rec, audioContext, analyser, dataArray, sourceNode, animationId, micStream;
+  if ('SpeechRecognition' in window || 'webkitSpeechRecognition' in window) {
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    rec = new SpeechRecognition();
     rec.lang            = 'en-US';
     rec.interimResults  = true;
     rec.maxAlternatives = 1;
@@ -2906,6 +2916,29 @@ filterBtn.addEventListener('click', () => {
       const ctrl = document.getElementById('chatAreaControls');
     ctrl.classList.add('recording');
     ctrl.querySelector('.levels').removeAttribute('hidden');
+       ctrl.querySelector('.recording-actions').removeAttribute('hidden');
+
+      navigator.mediaDevices.getUserMedia({ audio: true })
+        .then(stream => {
+          micStream = stream;
+          audioContext = new AudioContext();
+         sourceNode   = audioContext.createMediaStreamSource(stream);
+          analyser     = audioContext.createAnalyser();
+         analyser.fftSize = 32;
+          sourceNode.connect(analyser);
+          dataArray = new Uint8Array(analyser.frequencyBinCount);
+          const bars = document.querySelectorAll('.levels .bar');
+          function draw() {
+            analyser.getByteFrequencyData(dataArray);
+           bars.forEach((bar, i) => {
+              const v = dataArray[i] / 255;
+              bar.style.height = Math.max(v * 100, 10) + '%';
+            });
+            animationId = requestAnimationFrame(draw);
+          }
+          draw();
+        })
+        .catch(console.error);
    chatForm.querySelector('input').style.display = 'none';
   chatForm.querySelector('#attachBtn').style.display = 'none';
   chatForm.querySelector('#sendBtn').style.display = 'none';
@@ -2939,7 +2972,13 @@ filterBtn.addEventListener('click', () => {
       const ctrl2 = document.getElementById('chatAreaControls');
     ctrl2.classList.remove('recording');
     ctrl2.querySelector('.levels').hidden = true;
-    ctrl2.querySelector('.recording-actions').hidden = true;  
+    ctrl2.querySelector('.recording-actions').hidden = true; 
+
+      if (animationId) cancelAnimationFrame(animationId);
+    if (audioContext) audioContext.close();
+    if (micStream) micStream.getTracks().forEach(t => t.stop());
+    document.querySelectorAll('.levels .bar')
+            .forEach(b => b.style.height = '0');
     };
    rec.onerror = err => {
      console.error('SpeechRecognition error', err);
