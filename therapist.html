@@ -346,9 +346,51 @@ body {
     left: 0;
     padding: 10px 16px;
   }
-  #chatArea {
-    padding-bottom: 180px;
-  }
+}
+#chatAreaControls {
+  height: auto;
+  padding-top: 8px;
+  padding-bottom: env(safe-area-inset-bottom, 8px);
+}
+#chatAreaControls {
+  background: var(--surface);
+  padding: 12px 24px;
+  border-top-left-radius: var(--radius);
+  border-top-right-radius: var(--radius);
+  box-shadow: 0 -4px 12px rgba(0, 0, 0, 0.1);
+}
+.dark #chatAreaControls {
+  background: var(--surface);
+}
+
+#chatQuickToolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+#chatControls {
+  display: flex;
+  align-items: center;
+}
+
+#menuToggleControls {
+  margin-right: 12px;
+}
+
+#quickReplies {
+  flex: 1;
+  overflow-x: auto;
+}
+
+.controls-dropdown {
+  background: var(--surface);
+  border: none;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.15);
+}
+
+.controls-dropdown button {
+  font-size: 14px;
 }
 
 @media (max-width: 768px) {
@@ -1844,6 +1886,69 @@ html.dark #quickReplies .quick-reply:hover {
   color: var(--dark-text-color);
 }
 
+
+  .controls-dropdown {
+  position: absolute;
+  bottom: 100%;
+  right: 0;
+  background: var(--surface);
+  border: 1px solid var(--muted);
+  border-radius: var(--radius);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  display: none;
+  flex-direction: column;
+  z-index: 200;
+}
+
+.controls-dropdown button {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  background: none;
+  border: none;
+  text-align: left;
+  width: 100%;
+  cursor: pointer;
+  transition: background var(--transition);
+}
+.controls-dropdown button:hover {
+  background: var(--primary-light);
+}
+
+#menuToggleControls {
+  background: none;
+  border: none;
+  font-size: 18px;
+  cursor: pointer;
+}
+
+  #attachBtn, #micBtn {
+  font-size: 20px;
+  background: var(--surface);
+  border: none;
+  color: var(--text);
+  padding: 8px;
+  border-radius: var(--radius);
+  transition: background var(--transition);
+}
+#attachBtn:hover, #micBtn:hover {
+  background: var(--primary-light);
+}
+.dark #attachBtn, .dark #micBtn {
+  background: transparent;
+  border: none;
+  color: var(--text);
+}
+
+  .dark .message.user-msg .bubble {
+  background-color: var(--primary-dark) !important;
+  color: #fff !important;
+}
+.dark .message.user-msg .bubble * {
+  color: inherit !important;
+}
+
 </style>
   
 </head>
@@ -1866,7 +1971,7 @@ html.dark #quickReplies .quick-reply:hover {
   <button id="darkModeToggle" title="Toggle dark mode">
     <i class="fas fa-moon"></i>
   </button>
-       <div id="dataControls" hidden>
+       <div id="dataControls" style="display:none;">
       <button id="clearHistory"><i class="fas fa-trash" title="Clear Chat"></i> </button>
       <button id="exportTranscript"><i class="fas fa-file-export"title="Export Chat"></i></button>
     </div>
@@ -1896,9 +2001,14 @@ html.dark #quickReplies .quick-reply:hover {
   </button>
 <div id="chatAreaControls">
     <div id="chatQuickToolbar">
-    <div id="chatControls">
-      <button id="regenerateReply" title="Regenerate"><i class="fas fa-redo"></i></button>
-      <button id="editLast" title="Edit last"><i class="fas fa-edit"></i></button>
+     <div id="chatControls">
+      <button id="menuToggleControls" title="Options"><i class="fas fa-ellipsis-h"></i></button>
+    </div>
+    <div id="controlsDropdown" class="controls-dropdown">
+      <button id="regenerateReply"><i class="fas fa-redo"></i> Regenerate</button>
+      <button id="editLast"><i class="fas fa-edit"></i> Edit Last</button>
+      <button id="clearHistory"><i class="fas fa-trash"></i> Clear Chat</button>
+      <button id="exportTranscript"><i class="fas fa-file-export"></i> Export</button>
     </div>
 
     <div id="quickReplies">
@@ -1963,6 +2073,8 @@ document.addEventListener('DOMContentLoaded', () => {
   const chatInput     = document.getElementById('chatInput');
   const micBtn        = document.getElementById('micBtn');
   const attachBtn     = document.getElementById('attachBtn');
+  const menuToggleControls = document.getElementById('menuToggleControls');
+  const controlsDropdown   = document.getElementById('controlsDropdown');
   const clearBtn      = document.getElementById('clearHistory');
   const exportBtn     = document.getElementById('exportTranscript');
   const regenBtn      = document.getElementById('regenerateReply');
@@ -2500,6 +2612,18 @@ filterBtn.addEventListener('click', () => {
       chatForm.dispatchEvent(new Event('submit'));
     })
   );
+
+   menuToggleControls.addEventListener('click', e => {
+    e.stopPropagation();
+    controlsDropdown.style.display =
+      controlsDropdown.style.display === 'flex' ? 'none' : 'flex';
+  });
+  document.addEventListener('click', e => {
+    if (!e.target.closest('#controlsDropdown')
+     && !e.target.closest('#menuToggleControls')) {
+      controlsDropdown.style.display = 'none';
+    }
+  });
   regenBtn.addEventListener('click', ()=>{
     if (!lastUserMsg) return;
     chatInput.value = lastUserMsg;
