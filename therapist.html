@@ -2221,6 +2221,55 @@ html.dark #quickReplies .quick-reply:hover {
   background: rgba(74,144,226,0.15);
 }
 
+#chatAreaControls.recording .recording-actions {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.5rem 1rem;
+}
+
+#chatAreaControls.recording .recording-actions button {
+  flex: 1;
+  background: var(--primary);
+  color: #fff;
+  border: none;
+  border-radius: var(--radius);
+  padding: 0.75rem;
+  font-weight: 600;
+  transition: transform var(--transition);
+}
+#chatAreaControls.recording .recording-actions button:hover {
+  transform: scale(1.05);
+}
+
+#chatAreaControls.recording #chatQuickToolbar,
+#chatAreaControls.recording #quickReplies,
+#chatAreaControls.recording form#chatInputForm {
+  display: none;
+}
+
+#sessionsUl li .session-title {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+@media (max-width: 600px) {
+  #sessionList {
+    padding-bottom: calc(var(--padding) + env(safe-area-inset-bottom, 0px));
+  }
+  #sessionList {
+    display: flex;
+    flex-direction: column;
+  }
+  #sessionsUl { flex: 1; overflow-y: auto; }
+   #chatArea {
+    overflow: hidden;
+  }
+  #chatLog {
+    overflow-y: auto;
+    flex: 1;
+  }
+}
 </style>
   
 </head>
@@ -2293,6 +2342,14 @@ html.dark #quickReplies .quick-reply:hover {
     <div class="bar"></div>
     <div class="bar"></div>
     <div class="bar"></div>
+  </div>
+  <div class="recording-actions" hidden>
+    <button id="recCancel" type="button" title="Cancel recording">
+      <i class="fas fa-times"></i> Cancel
+    </button>
+    <button id="recConfirm" type="button" title="Confirm recording">
+      <i class="fas fa-check"></i> Confirm
+    </button>
   </div>
   <div id="listeningIndicator" hidden class="listening">
   <i class="fas fa-microphone-slash"></i> Listening…
@@ -2473,7 +2530,11 @@ chatInput.addEventListener('input', updateInputUI);
     sessionsUl.innerHTML = '';
    sessionCounter = 0;
   Object.entries(sessions)
-    .sort((a,b)=> (b[1].updated || b[0]) - (a[1].updated || a[0]))
+    .sort(([, aData], [, bData]) => {
+      const aTime = aData.updated || parseInt(aData.id || 0) || 0;
+      const bTime = bData.updated || parseInt(bData.id || 0) || 0;
+      return bTime - aTime;
+    })
     .forEach(([id, data]) => {
       sessionCounter++;
       const li = document.createElement('li');
@@ -2603,10 +2664,7 @@ const count = Object.keys(sessions).length + 1;
         .replace(/["*]/g, '')
         .replace(/\b[Tt]itle[:\-]?\s*/g, '')
         .trim();
-      if (aiTitle.length > 15) {
-        aiTitle = aiTitle.slice(0, 15).trim() + '…';
-      }
-      sessions[currentId].title     = aiTitle;
+     sessions[currentId].title = aiTitle;
       sessions[currentId].aiRenamed = true;
       persistSessions();
     } 
@@ -2876,13 +2934,10 @@ filterBtn.addEventListener('click', () => {
     rec.onend = () => {
       micBtn.classList.remove('listening');
       micBtn.innerHTML = '<i class="fas fa-microphone"></i>';
-      document.getElementById('listeningIndicator').hidden = true;
-  chatForm.querySelector('input').style.display = '';
-  chatForm.querySelector('#attachBtn').style.display = '';
-  chatForm.querySelector('#sendBtn').style.display = '';
-      const ctrl = document.getElementById('chatAreaControls');
-    ctrl.classList.remove('recording');
-    ctrl.querySelector('.levels').hidden = true;
+      const ctrl2 = document.getElementById('chatAreaControls');
+    ctrl2.classList.remove('recording');
+    ctrl2.querySelector('.levels').hidden = true;
+    ctrl2.querySelector('.recording-actions').hidden = true;  
     };
    rec.onerror = err => {
      console.error('SpeechRecognition error', err);
@@ -2891,7 +2946,19 @@ filterBtn.addEventListener('click', () => {
    };
   }
  }
-                          
+
+  const recCancel  = document.getElementById('recCancel');
+const recConfirm = document.getElementById('recConfirm');
+
+recCancel.addEventListener('click', () => {
+  rec.stop();
+  document.getElementById('chatInput').value = '';
+});
+
+recConfirm.addEventListener('click', () => {
+  rec.stop();
+});
+  
   quickReplies.forEach(btn=>
     btn.addEventListener('click', ()=>{
       chatInput.value = btn.textContent;
