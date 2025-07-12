@@ -1,7 +1,8 @@
 <!DOCTYPE html>
 <html lang="en" aria-theme="light">
 <head>
-   <meta charset="UTF-8">
+  <meta charset="UTF-8">
+<head>
  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
   <title>Vitra AI Therapist</title>
 
@@ -40,8 +41,7 @@
   margin: 0; padding: 0;
 }
 html, body {
-  height: auto;
-  min-height: 100vh;
+  height: 100dvh;    
   width: 100%;
   font-family: var(--font-base);
   font-size: var(--font-size-base);
@@ -72,7 +72,7 @@ html, body {
   }
 }
 #therapyHeader {
-  position: fixed; 
+  position: sticky;
   top: 0; left: 0; right: 0;
   height: 64px;
   background: var(--surface);
@@ -271,7 +271,7 @@ background: #c12e3a; }
   left: var(--sidebar-width);
   right: 0; bottom: 0;
   background: var(--bg);
-  padding-bottom: 124px;
+  padding-bottom: 0;
   display: flex; flex-direction: column;
 }
 
@@ -389,11 +389,8 @@ position: absolute;
 
 
 #chatAreaControls {
-position: fixed;
+position: sticky;
   bottom: 0;
-   left: var(--sidebar-width);
-   width: calc(100% - var(--sidebar-width));
- right: 0;
   background: var(--surface);
   border-top: 1px solid var(--muted);
   padding: 0.75rem var(--padding);
@@ -403,22 +400,6 @@ position: fixed;
   gap: 1rem;
   box-shadow: 0 -2px 6px rgba(0,0,0,0.05);
 }
- @media (min-width: 1000px) {
-#chatAreaControls {
-    left: var(--sidebar-width);
-    width: calc(100% - var(--sidebar-width));
-  }
- }
-    @media (max-width: 600px) {
- #chatAreaControls {
-   left: 0 !important;
-   width: 100% !important;
-   box-sizing: border-box;
-   padding: 0.75rem var(--padding);
- }
- }
-   .chat-menu-dropdown {
-  z-index: 3000;    }
   #chatInputForm {
   flex: none;       }
   #chatQuickToolbar {
@@ -495,26 +476,7 @@ position: fixed;
   color: var(--error);
 }
 
-   html.dark #chatAreaControls {
-  bottom: 0 !important;
- z-index: 1000;   
-  transform: none !important; 
-}
-  #listeningIndicator,
-#recordingOverlay {
-  display: none !important;
-}
-    #chatQuickToolbar {
-  overflow-x: auto;
-  -webkit-overflow-scrolling: touch;
- }
-@media (max-width: 600px) {
-  #chatAreaControls {
-    left: 0;
-    width: 100%;
-  }
- }
-
+  
 #audio, #guidedAudio {
   width: 100%; margin-top: var(--padding);
 }
@@ -592,13 +554,7 @@ position: fixed;
 #sessionsUl li.open .dots-dropdown {
   display: flex;
 }
-.session-title {
-  display: block;
-  width: 100%;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
+
   
 #reminderBanner {
   position: fixed; top: var(--header-height); right: var(--padding);
@@ -679,7 +635,6 @@ position: fixed;
 @media (max-width: 1024px) {
   #sessionList { display: none; }
   #chatArea { left: 0; }
-   #chatAreaControls { left: 0; }
 }
 @media (max-width: 600px) {
   #therapyHeader {
@@ -700,7 +655,9 @@ position: fixed;
     text-overflow: ellipsis;
   }
   .session-meta { display: none; }
-
+#chatAreaControls {
+    flex-wrap: wrap;
+  }
   #chatInputForm {
     display: flex; flex: 1; min-width: 0;
     gap: 0.5rem; margin-top: 0.25rem;  
@@ -750,12 +707,8 @@ position: fixed;
 }
 
 @media (max-width: 600px) {
- #chatQuickToolbar {
-    display: flex !important;
-    flex-wrap: nowrap !important;
-    overflow-x: auto !important;
-    -webkit-overflow-scrolling: touch !important;
-    gap: 0.5rem !important;
+  #chatQuickToolbar {
+    flex-wrap: wrap;
   }
 }
 #sessionsUl li .session-meta-line {
@@ -915,9 +868,9 @@ html.dark {
   --surface: #1e1e1e;
   --text: #e0e0e0;
   --muted: #888888;
- --primary: #6EE7B7;              
-  --primary-light: rgba(110, 231, 183, 0.2);
-  --primary-dark: #34D399;
+  --primary: #4A90E2;
+  --primary-light: rgba(74, 144, 226, 0.2);
+  --primary-dark: #357abd;
   --secondary: #50c878;
   --secondary-light: rgba(80, 200, 120, 0.2);
   --secondary-dark: #3ea664;
@@ -1266,6 +1219,11 @@ html.dark #chatInputForm input {
     padding-right: 1.5rem; 
   }
 
+  #chatAreaControls {
+    flex-wrap: wrap;
+    padding: 0.5rem 0;
+    gap: 0.5rem;
+  }
   
   #chatControls button {
     width: 32px; height: 32px;
@@ -1273,7 +1231,10 @@ html.dark #chatInputForm input {
     font-size: 1rem;
   }
  
-
+  #chatInputForm {
+    width: 100%;
+    gap: 0.25rem;
+  }
   #chatInputForm input {
     flex: 1;
     height: 36px;
@@ -1336,6 +1297,21 @@ html.dark #chatInputForm input {
   }
 }
 
+#quickReplies {
+  position: relative;
+}
+
+#quickReplies::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 30px;
+  height: 100%;
+  background: linear-gradient(to right, rgba(255,255,255,0), var(--color-surface));
+  pointer-events: none;
+}
+
 @media (max-width: 600px) {
   #quickReplies::after {
     background: linear-gradient(to right, rgba(243,246,251,0), var(--color-surface));
@@ -1357,7 +1333,47 @@ html.dark #chatInputForm input {
   border-color: var(--color-primary);
 }
 
+html.dark .message[data-status="✓"] .bubble::before,
+html.dark .message[data-status="✓✓"] .bubble::before {
+  color: var(--color-muted);
+}
 
+
+html.dark {
+  --bg: #121212;
+  --surface: #1e1e1e;
+  --text: #e0e0e0;
+  --muted: #555555;
+  --primary: #4A90E2;
+  --primary-light: rgba(74,144,226,0.2);
+  --primary-dark: #357ABD;
+}
+
+html.dark #therapyHeader {
+  background: var(--primary-dark);
+}
+html.dark .bubble {
+  background: var(--surface);
+  border: 1px solid var(--primary);
+}
+html.dark .user-msg .bubble {
+  background: var(--primary);
+  color: #fff;
+}
+html.dark #chatInputForm button,
+html.dark #chatControls button {
+  background: var(--primary);
+  color: #fff;
+  border-color: var(--primary);
+}
+html.dark .quick-reply {
+  background: var(--primary-light);
+  color: var(--primary);
+}
+html.dark .quick-reply:hover {
+  background: var(--primary);
+  color: #fff;
+}
 .back-btn {
   position: absolute;
   right: 1rem;
@@ -1454,37 +1470,6 @@ html.dark #chatInputForm input {
   border-color: transparent transparent transparent var(--primary);
 }
 
-.listening {
-  position: absolute;
- bottom: calc(var(--header-height) + 80px);
-  left: 50%;
-  transform: translateX(-50%);
-  background: linear-gradient(135deg, var(--secondary-dark), var(--secondary-light));
-  color: #fff;
-  padding: 0.75rem 1.5rem;
-  border-radius: var(--radius);
-  font-weight: 600;
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.2);
-  animation: pulse 1.5s ease-in-out infinite;
-}
-
-@keyframes pulse {
-  0%, 100% { opacity: 1; transform: translate(-50%, 0) scale(1); }
-  50%      { opacity: 0.8; transform: translate(-50%, 0) scale(1.05); }
-}
-
-.listening i {
-  font-size: 1.25rem;
-  animation: bounce 1s ease-in-out infinite alternate;
-}
-
-@keyframes bounce {
-  from { transform: translateY(0); }
-  to   { transform: translateY(-4px); }
-}
 
   .therapist-msg .bubble::after,
 .user-msg .bubble::after {
@@ -1503,7 +1488,7 @@ html.dark #chatInputForm input {
   clip-path: polygon(100% 0, 0 100%, 100% 100%);
 }
 
-  #backToBottom {
+  +#backToBottom {
   display: none;
 }
 #backToBottom.show {
@@ -1585,15 +1570,29 @@ html.dark #chatInputForm input {
     padding: 0.5rem 0;
     gap: 0.5rem;
   }
+    #quickReplies {
+   width: 100%;
+    flex-wrap: nowrap;
+  }
+  
+  #chatControls button {
+    width: 32px; height: 32px;
+    padding: 0;
+    font-size: 1rem;
+  }
  
-#backToBottom {
- position: fixed;
- display: none;
-}
-
-#backToBottom.show {
-  display: flex;
-}
+  #chatInputForm {
+    width: 100%;
+    gap: 0.25rem;
+  }
+  #chatInputForm input {
+    flex: 1;
+    height: 36px;
+    font-size: 0.95rem;
+  }
+  #chatInputForm button {
+    width: 36px; height: 36px;
+  }
 
   .modal-content, #confirmModal .modal-content {
     max-width: 90%;
@@ -1650,18 +1649,14 @@ html.dark #chatInputForm input {
 #quickReplies {
   display: flex;
   gap: 0.5rem;
-  overflow-x: auto !important;
+  overflow-x: auto;
   flex-wrap: nowrap !important;
   padding: 0.5rem 0;
   -webkit-overflow-scrolling: touch;
   background: var(--surface);
-  white-space: nowrap;  
 }
 #quickReplies::-webkit-scrollbar { display: none; }
 
-  #quickReplies::-webkit-scrollbar { display: none; }
-#quickReplies { scrollbar-width: none; touch-action: pan-x; }
-  
 #quickReplies .quick-reply {
   flex: 0 0 auto;
   white-space: nowrap;
@@ -1709,47 +1704,42 @@ html.dark #chatInputForm input {
   color: #fff;
 }
 
-#chatQuickToolbar {
-  overflow-x: hidden;
+html.dark {
+  --bg: #121212;
+  --surface: #1e1e1e;
+  --text: #e0e0e0;
+  --muted: #888888;
+  --primary: #4A90E2;
+  --primary-dark: #2B6CB0;
 }
-
-@media (max-width: 600px) {
-  #quickReplies {
-    display: flex !important;
-    flex-wrap: nowrap !important;
-    overflow-x: auto !important;
-    -webkit-overflow-scrolling: touch !important;
-    white-space: nowrap !important;
-    scrollbar-width: none !important;  
-  }
-  #quickReplies::-webkit-scrollbar {
-    display: none;
-  }
-  #quickReplies .quick-reply {
-    flex: 0 0 auto !important;
-    white-space: nowrap !important;
-  }
+html.dark body {
+  background: var(--bg);
+  color: var(--text);
 }
-
-
-
-#sendBtn {
-  display: none;    
+html.dark #therapyHeader {
+  background: linear-gradient(135deg, var(--primary-dark), var(--primary));
 }
-
-#sendBtn.radiant {
-  background: radial-gradient(circle at 50% 50%, var(--secondary-light), var(--secondary-dark));
-  box-shadow: 0 0 8px var(--secondary-light), 0 0 16px var(--secondary-dark);
-  animation: glow 2s ease-in-out infinite alternate;
+html.dark #therapyHeader button {
+  background: rgba(255,255,255,0.1);
+  border-color: rgba(255,255,255,0.4);
 }
-
-@keyframes glow {
-  from {
-    box-shadow: 0 0 4px var(--secondary-light), 0 0 8px var(--secondary-dark);
-  }
-  to {
-    box-shadow: 0 0 12px var(--secondary-light), 0 0 24px var(--secondary-dark);
-  }
+html.dark #therapyHeader button:hover {
+  background: rgba(255,255,255,0.2);
+}
+html.dark #therapyHeader #endSession {
+  background: #D64550;
+}
+html.dark #quickReplies {
+  background: var(--surface);
+}
+html.dark #quickReplies .quick-reply {
+  background: rgba(74,144,226,0.2);
+  color: var(--primary);
+  border-color: var(--primary);
+}
+html.dark #quickReplies .quick-reply:hover {
+  background: var(--primary);
+  color: #fff;
 }
 
 @media (max-width: 600px) {
@@ -1757,678 +1747,10 @@ html.dark #chatInputForm input {
   #therapyHeader .avatar { width: 40px; height: 40px; }
   #therapyHeader button { width: 36px; height: 36px; }
 }
-.therapist-msg .bubble {
-  background: var(--secondary-light);
-  color: var(--text);
-}
-</style>
-
-  <style>
-@media (max-width: 414px) {
-:root {
-  --header-h: 56px;
-  --sidebar-w: 280px;
-  --pad: 0.75rem;
-  --r: 0.5rem;
-  --f-base: 0.95rem;
-  --f-sm: 0.8rem;
-  --f-lg: 1.05rem;
-  --trans: 0.25s ease;
-}
-
-html, body {
-  margin: 0;
-  font-family: var(--font-base);
-  font-size: var(--f-base);
-  background: var(--bg);
-  color: var(--text);
-}
-
-#therapyHeader {
-  position: fixed;
-  top: 0; left: 0; right: 0;
-  height: var(--header-h);
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 0 var(--pad);
-  background: var(--surface);
-  box-shadow: 0 1px 4px rgba(0,0,0,0.1);
-  z-index: 1000;
-}
-
-#therapyHeader .header-left,
-#therapyHeader .header-right {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-}
-
-#therapyHeader .therapist-info {
-  flex: 1;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.5rem;
-}
-
-#therapyHeader .therapist-info h1 {
-  font-size: var(--f-lg);
-  margin: 0;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-#therapyHeader button {
-  width: 32px;
-  height: 32px;
-  padding: 0;
-  border-radius: 50%;
-  border: none;
-  background: var(--primary-light);
-  color: var(--primary-dark);
-  transition: background var(--trans), color var(--trans);
-}
-
-#therapyHeader button:hover {
-  background: var(--primary);
-  color: #fff;
-}
- #dataControls { display: none; }
-#sessionList {
-  position: fixed;
-  top: var(--header-h);
-  left: 0;
-  width: var(--sidebar-w);
-  height: calc(100vh - var(--header-h));
-  display: none;
-  flex-direction: column;
-  padding: var(--pad);
-  box-shadow: 2px 0 8px rgba(0,0,0,0.05);
-  z-index: 1100;
-}
-
-#sessionList.visible {
-  display: flex;
-}
- #sessionList {
-    display: flex;
-    flex-direction: column;
-  }
-  #sessionList #newSession {
-    order: -1;
-    margin-bottom: 1rem;
-  }
-#sessionList .session-search {
-  display: flex;
-  gap: 0.5rem;
-  margin-bottom: var(--pad);
-}
-
-#sessionList input,
-#sessionList button {
-  font-size: var(--f-sm);
-}
-
-#sessionList input {
-  flex: 1;
-  padding: 0.5rem;
-  border: 1px solid var(--muted);
-  border-radius: var(--r);
-}
-
-#sessionList button {
-  padding: 0.5rem;
-  border-radius: var(--r);
-  border: none;
-}
-
-#sessionsUl li {
-  padding: 0.5rem;
-  margin-bottom: 0.5rem;
-  border-radius: var(--r);
-  transition: background var(--trans);
-}
-
-#sessionsUl li * {
-  font-size: var(--f-sm);
-}
-
-#newSession {
-  width: 100%;
-  padding: 0.5rem;
-  border-radius: var(--r);
-  background: var(--secondary);
-  color: #fff;
-  font-size: var(--f-sm);
-  border: none;
-  margin-top: var(--pad);
-  transition: background var(--trans);
-}
-
-#newSession:hover {
-  background: var(--secondary-dark);
-}
-
-
-.date-separator {
-  text-align: center;
-  font-size: var(--f-sm);
-  color: var(--muted);
-  margin: var(--pad) 0;
-}
-
-.message {
-  display: flex;
-  align-items: flex-end;
-  gap: 0.5rem;
-  margin-bottom: var(--pad);
-}
-
-.avatar-small {
-  width: 32px;
-  height: 32px;
-  border-radius: 50%;
-  flex-shrink: 0;
-}
-
-.bubble {
-  position: relative;
-  background: var(--surface);
-  padding: 0.6rem;
-  border-radius: var(--r);
-  max-width: calc(100% - 72px);
-  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-  word-wrap: break-word;
-}
-
-.user-msg .bubble {
-  background: var(--primary);
-  color: #fff;
-}
-
-.therapist-msg .bubble {
-  background: var(--secondary-light);
-  color: var(--text);
-}
-
-.msg-time {
-  font-size: var(--f-sm);
-  color: var(--muted);
-  margin: 0.25rem var(--pad);
-}
-
-.copy-btn {
-  position: absolute;
-  bottom: 0.4rem;
-  right: 0.4rem;
-  opacity: 0;
-  background: none;
-  border: none;
-  font-size: var(--f-sm);
-  color: #f0f0f0;
-}
-
-.message:hover .copy-btn {
-  opacity: 1;
-}
-
-.speak-btn {
-  position: absolute;
-  bottom: 0.4rem;
-  right: -2.2rem;
-  font-size: var(--f-sm);
-  color: var(--info);
-}
-
-.spinner {
-  width: 32px;
-  height: 32px;
-  margin: 2rem auto;
-  border: 3px solid var(--primary-light);
-  border-top: 3px solid var(--primary-dark);
-  border-radius: 50%;
-  animation: spin 0.8s linear infinite;
-}
-
-@keyframes spin {
-  to { transform: rotate(360deg); }
-}
-
-#backToBottom {
-  position: fixed;
-  right: var(--pad);
-  bottom: calc(var(--header-h) + 3.5rem);
-  width: 36px;
-  height: 36px;
-  border-radius: 50%;
-  display: none;
-  align-items: center;
-  justify-content: center;
-  background: var(--primary);
-  color: #fff;
-}
-
-#backToBottom.show {
-  display: flex;
-}
-
-
-
-#sendBtn {
-  display: none;
-  width: 36px;
-  height: 36px;
-  border-radius: 50%;
-  background: var(--secondary);
-  color: #fff;
-  align-items: center;
-  justify-content: center;
-}
-
-.modal-content {
-  max-width: 90%;
-  padding: var(--pad);
-  border-radius: var(--r);
-  background: var(--surface);
-}
-
-.close-modal {
-  position: absolute;
-  top: 0.5rem;
-  right: 0.5rem;
-  font-size: var(--f-lg);
-  color: var(--muted);
-}
-
-.modal-buttons {
-  display: flex;
-  gap: var(--pad);
-  margin-top: var(--pad);
-}
-
-.modal-buttons button {
-  flex: 1;
-  padding: 0.5rem;
-  border-radius: var(--r);
-  border: none;
-}
-
-
-#sessionList { display: none; }
-
-}
-    @media (max-width:600px){
-  #quickReplies {
-    overflow-x: scroll !important;
-    -webkit-overflow-scrolling: touch !important;
-    touch-action: pan-x !important;
-  }
-}
-
-    #dataControls { display: none; }
-@media (max-width: 600px) {
-  #chatQuickToolbar {
-    display: flex !important;
-    flex-wrap: nowrap !important;
-    overflow-x: visible !important;
-  }
-
-  #quickReplies {
-    width: 100% !important;         
-    display: flex !important;
-    flex-wrap: nowrap !important;
-     overflow-x: scroll !important;
-    -webkit-overflow-scrolling: touch !important;
-    white-space: nowrap !important;
-    scrollbar-width: none !important; 
-    touch-action: pan-x !important;
-  }
-  #quickReplies::-webkit-scrollbar {
-    display: none;
-  }
-
-  #quickReplies .quick-reply {
-    flex: 0 0 auto !important;
-    white-space: nowrap !important;
-  }
-}
-
-.chat-menu-container {
-  position: relative;
-  display: flex;
-  align-items: center;
-}
-
-.menu-toggle {
-  background: var(--surface);
-  border: 1px solid var(--muted);
-  border-radius: var(--radius);
-  width: 36px;
-  height: 36px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  transition: background var(--transition), border-color var(--transition), color var(--transition);
-}
-.menu-toggle:hover {
-  background: var(--primary);
-  border-color: var(--primary);
-  color: #fff;
-}
-
-.chat-menu-dropdown {
-  position: absolute;
-  bottom: calc(100% + 0.5rem);
-  left: 50%;
-  transform: translateX(-50%);
-  background: var(--surface);
-  border: 1px solid var(--muted);
-  border-radius: var(--radius);
-  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-  display: none;
-  flex-direction: column;
-  background: var(--surface);
-  border: 1px solid var(--muted);
-  border-radius: var(--radius);
-  box-shadow: 0 4px 16px rgba(0,0,0,0.15);
-  padding: 0.5rem 0;
-  display: none;
-  flex-direction: column;
-  z-index: 2000;   
-  min-width: 200px; 
-}
-.chat-menu-dropdown button {
-  background: none;
-  border: none;
-  padding: 0.5rem 1rem;
-  text-align: left;
-  cursor: pointer;
-  transition: background var(--transition);
-  white-space: nowrap;
-}
-.chat-menu-dropdown button:hover {
-  background: var(--primary-light);
-}
-.chat-menu-container {
-  position: relative;   
-  overflow: visible;    
-}
-.chat-menu-container.open .chat-menu-dropdown {
-  display: flex;
-}
-@media (max-width: 500px) {
-   .chat-menu-dropdown {
-  left: 0; transform: none; right: 0; margin: auto;
-   }
- }
-   .chat-menu-dropdown button {
-  padding: 0.5rem 1.5rem;
-  font-size: var(--font-size-sm);
-  color: var(--text);
-  transition: background var(--transition), color var(--transition);
-}
-.chat-menu-dropdown button + button {
-  border-top: 1px solid var(--muted);
-}
-.chat-menu-dropdown button:hover {
-  background: var(--primary-light);
-  color: var(--primary-dark);
-}
-
-html.dark .chat-menu-dropdown {
-  background: rgba(30,30,30,0.95);
-  border-color: rgba(255,255,255,0.1);
-}
-html.dark .chat-menu-dropdown button {
-  color: var(--text);
-}
-html.dark .chat-menu-dropdown button:hover {
-  background: var(--secondary-dark);
-  color: var(--surface);
-}
-#quickReplies .quick-reply:nth-child(2n) {
-  background: var(--secondary-light);
-  border-color: var(--secondary);
-  color: var(--secondary-dark);
-}
-#quickReplies .quick-reply:nth-child(2n):hover {
-  background: var(--secondary);
-  color: #fff;
-}
-
-#attachBtn {
-  background: var(--secondary);
-  border-color: var(--secondary-dark);
-  color: #fff;
-}
-#attachBtn:hover {
-  background: var(--secondary-dark);
-}
-
-#menuToggle {
-  border-color: var(--secondary);
-  color: var(--secondary);
-}
-#menuToggle:hover {
-  background: var(--secondary);
-  color: #fff;
-}
-
-#backToBottom {
-  background: var(--secondary);
-  color: #fff;
-}
-#backToBottom:hover {
-  box-shadow: 0 0 8px var(--secondary-light), 0 0 16px var(--secondary-dark);
-}
-
-.menu-toggle {
-  border-color: var(--secondary);
-  color: var(--secondary);
-}
-.menu-toggle:hover {
-  background: var(--secondary);
-  color: #fff;
-}
-
-#darkModeToggle {
-  border-color: var(--secondary);
-  color: var(--secondary);
-}
-#darkModeToggle:hover {
-  background: var(--secondary-light);
-  color: var(--secondary-dark);
-}
-
-#newSession {
-  background: linear-gradient(135deg, var(--secondary-dark), var(--secondary-light));
-  color: #fff;
-}
-#newSession:hover {
-  background: var(--secondary);
-}
-
-.chat-menu-dropdown button:nth-child(odd) {
-  color: var(--secondary-dark);
-}
-.chat-menu-dropdown button:nth-child(odd):hover {
-  background: var(--secondary-light);
-}
-.chat-menu-dropdown button:nth-child(even):hover {
-  background: var(--primary-light);
-}
-
-:root.dark {
-  --bg: #0A0F1E;                 
-  --surface: rgba(20, 25, 45, 0.85);
-  --text: #E0E5F8;               
-  --muted: #6A7B95;               
-  --primary: #39FF14;            
-  --primary-light: rgba(57, 255, 20, 0.2);
-  --primary-dark: #22AA10;
-  --secondary: #29B6F6;            
-  --secondary-light: rgba(41, 182, 246, 0.2);
-  --secondary-dark: #1C8EC1;
-  --radius: 1rem;
-  --transition: 0.3s ease;
-}
-
-html.dark {
-  background: var(--bg);
-  color: var(--text);
-}
-
-html.dark body,
-html.dark #chatArea,
-html.dark #sessionList,
-html.dark #therapyHeader {
-  background: var(--surface);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.6);
-}
-
-html.dark #therapyHeader {
-  border-bottom: 1px solid rgba(255,255,255,0.1);
-}
-html.dark #therapyHeader .avatar {
-  border-color: var(--primary);
-}
-
-html.dark button,
-html.dark .menu-toggle,
-html.dark #darkModeToggle {
-  background: transparent;
-  border: 1px solid var(--muted);
-  color: var(--text);
-  transition: background var(--transition), box-shadow var(--transition);
-}
-html.dark button:hover,
-html.dark .menu-toggle:hover,
-html.dark #darkModeToggle:hover {
-  background: var(--primary-light);
-  box-shadow: 0 0 8px var(--primary);
-  color: var(--primary);
-}
-
-html.dark #quickReplies {
-  background: transparent;
-}
-html.dark #quickReplies .quick-reply {
-  background: var(--secondary-light);
-  border-color: var(--secondary);
-  color: var(--secondary-dark);
-  box-shadow: 0 2px 6px rgba(0,0,0,0.3);
-}
-html.dark #quickReplies .quick-reply:hover {
-  background: var(--secondary);
-  color: var(--bg);
-}
-
-html.dark .bubble {
-  background: rgba(30, 35, 60, 0.9);
-  border: 1px solid rgba(255,255,255,0.1);
-  color: var(--text);
-}
-html.dark .user-msg .bubble {
-  background: var(--primary-dark);
-  color: #000;
-}
-html.dark .therapist-msg .bubble {
-  background: var(--secondary-dark);
-  color: #fff;
-}
-
-html.dark #chatInputForm input {
-  background: rgba(20, 25, 45, 0.9);
-  border: 1px solid var(--muted);
-  color: var(--text);
-}
-html.dark #chatInputForm button#sendBtn.radiant {
-  background: radial-gradient(circle at center, var(--primary), var(--primary-dark));
-  box-shadow: 0 0 12px var(--primary), 0 0 24px var(--primary-light);
-}
-html.dark #chatInputForm button#micBtn {
-  border-color: var(--secondary);
-  color: var(--secondary);
-}
-
-html.dark .chat-menu-dropdown,
-html.dark .modal-content,
-html.dark #confirmModal .modal-content {
-  background: rgba(20, 25, 45, 0.95);
-  border: 1px solid var(--muted);
-}
-html.dark .chat-menu-dropdown button:hover,
-html.dark .modal-buttons button:hover {
-  background: var(--secondary);
-  color: var(--bg);
-}
-
-html.dark ::-webkit-scrollbar-thumb {
-  background: var(--muted);
-  border-radius: 8px;
-}
-html.dark ::-webkit-scrollbar-track {
-  background: var(--surface);
-}
-
-html.dark #backToBottom {
-  background: var(--primary);
-  color: #000;
-}
-html.dark #backToBottom:hover {
-  box-shadow: 0 0 12px var(--primary-light);
-}
-
-    #recordingOverlay {
-  position: fixed;
-  bottom: 0;
-  left: 0; right: 0;
-  height: auto;
-  background: rgba(0,0,0,0.6);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 1rem;
-  z-index: 1100;
-}
-
-.rec-ui {
-  background: var(--surface);
-  padding: 1rem 2rem;
-  border-radius: var(--radius);
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-}
-
-.rec-bars {
-  display: flex;
-  gap: 0.25rem;
-}
-.rec-bars .bar {
-  width: 4px;
-  height: 24px;
-  background: var(--primary);
-  animation: barAnim 0.5s infinite ease-in-out;
-}
-.rec-bars .bar:nth-child(2) { animation-delay: 0.1s; }
-.rec-bars .bar:nth-child(3) { animation-delay: 0.2s; }
-.rec-bars .bar:nth-child(4) { animation-delay: 0.3s; }
-.rec-bars .bar:nth-child(5) { animation-delay: 0.4s; }
-
-@keyframes barAnim {
-  0%,100% { transform: scaleY(0.3); }
-  50%     { transform: scaleY(1.0); }
-}
-
 
 </style>
 
+  
 </head>
 
 <body>
@@ -2479,22 +1801,15 @@ html.dark #backToBottom:hover {
   </button>
 <div id="chatAreaControls">
     <div id="chatQuickToolbar">
-    <div class="chat-menu-container">
-      <button id="chatMenuToggle" class="menu-toggle" title="Menu">
-        <i class="fas fa-ellipsis-h"></i>
-      </button>
-      <div id="chatMenuDropdown" class="chat-menu-dropdown">
-        <button id="regenerateReply"><i class="fas fa-redo"></i> Regenerate</button>
-        <button id="editLast">       <i class="fas fa-edit"></i> Edit Last</button>
-        <button id="clearHistory"><i class="fas fa-trash-alt"></i> Clear Chat</button>
-        <button id="exportTranscript"><i class="fas fa-file-export"></i> Export Chat</button>
-      </div>
+    <div id="chatControls">
+      <button id="regenerateReply" title="Regenerate"><i class="fas fa-redo"></i></button>
+      <button id="editLast" title="Edit last"><i class="fas fa-edit"></i></button>
     </div>
 
     <div id="quickReplies">
       <button class="quick-reply">Can you help me reframe that?</button>
       <button class="quick-reply">Tell me more about that.</button>
-      <button class="quick-reply">Tell me a positive affirmation.</button>
+      <button class="quick-reply">What’s a positive affirmation?</button>
     </div>
   </div>
   <div id="listeningIndicator" hidden class="listening">
@@ -2502,25 +1817,12 @@ html.dark #backToBottom:hover {
 </div>
     <form id="chatInputForm" autocomplete="off">
       <button id="attachBtn" type="button" title="Attach file"><i class="fas fa-paperclip"></i></button>
-      <input type="file" id="fileInput" hidden>
       <input type="text" id="chatInput" placeholder="Type your message…">
       <button id="micBtn" type="button" title="Speak"><i class="fas fa-microphone"></i></button>
       <button id="sendBtn" type="submit" title="Send"><i class="fas fa-paper-plane"></i></button>
     </form>
 </div>
-    
-    <div id="recordingOverlay" hidden>
-    <div class="rec-ui">
-      <div class="rec-bars">
-        <div class="bar"></div><div class="bar"></div><div class="bar"></div>
-        <div class="bar"></div><div class="bar"></div>
-      </div>
-      <button id="stopRecordingBtn" title="Stop recording">
-        <i class="fas fa-stop-circle"></i> Stop
-      </button>
-    </div>
-  </div>
-
+   
   </main>
 
 
@@ -2548,21 +1850,10 @@ html.dark #backToBottom:hover {
   <script>
 document.addEventListener('DOMContentLoaded', () => {
 
-   let rec = null;
-  const sendBtn = document.getElementById('sendBtn');
-  
  let isDragging = false;
  document.addEventListener('touchmove', () => { isDragging = true; }, { passive: true });
  document.addEventListener('touchend', e => {
- if (
-    !isDragging &&
-    !e.target.closest('#chatInputForm') &&
-    !e.target.closest('#chatAreaControls')
-  ) {
-    if (document.activeElement && document.activeElement.blur) {
-      document.activeElement.blur();
-    }
-  }
+   if (!isDragging && !e.target.closest('#chatInputForm')) chatInput.blur();
    isDragging = false;
  });
   
@@ -2577,7 +1868,6 @@ document.addEventListener('DOMContentLoaded', () => {
   const chatInput     = document.getElementById('chatInput');
   const micBtn        = document.getElementById('micBtn');
   const attachBtn     = document.getElementById('attachBtn');
-  const fileInput = document.getElementById('fileInput');
   const clearBtn      = document.getElementById('clearHistory');
   const exportBtn     = document.getElementById('exportTranscript');
   const regenBtn      = document.getElementById('regenerateReply');
@@ -2591,29 +1881,11 @@ document.addEventListener('DOMContentLoaded', () => {
    sidebar.classList.toggle('visible');
  });
 
-  document.addEventListener('click', e => {
-   if (
-     !e.target.closest('#sessionList') &&
-     !e.target.closest('#menuToggle') &&
-     !e.target.closest('#therapyHeader')
-   ) {
-     sidebar.classList.remove('visible');
-   }
- });
-
-const chatMenuContainer = document.querySelector('.chat-menu-container');
-const chatMenuToggle    = document.getElementById('chatMenuToggle');
-
-chatMenuToggle.addEventListener('click', e => {
-  e.stopPropagation();
-  chatMenuContainer.classList.toggle('open');
-});
-
-document.addEventListener('click', e => {
-  if (!e.target.closest('.chat-menu-container')) {
-    chatMenuContainer.classList.remove('open');
-  }
-});
+   document.addEventListener('click', e => {
+   if (!e.target.closest('#sessionList') && !e.target.closest('#menuToggle')) {
+      sidebar.classList.remove('visible');
+    }
+  });
 
  const qr = document.getElementById('quickReplies');
 qr.addEventListener('wheel', e => {
@@ -2621,27 +1893,7 @@ qr.addEventListener('wheel', e => {
   qr.scrollLeft += e.deltaY;
 }, { passive: false });
 
-chatInput.addEventListener('input', () => {
-  const hasText = chatInput.value.trim().length > 0;
-  if (hasText) {
-    micBtn.style.display  = 'none';
-    sendBtn.style.display = 'flex';
-    sendBtn.classList.add('radiant');
-  } else {
-    micBtn.style.display  = 'flex';
-    sendBtn.style.display = 'none';
-    sendBtn.classList.remove('radiant');
-  }
-});
 
-if (chatInput.value.trim().length === 0) {
-  micBtn.style.display  = 'flex';
-  sendBtn.style.display = 'none';
-} else {
-  micBtn.style.display  = 'none';
-  sendBtn.style.display = 'flex';
-  sendBtn.classList.add('radiant');
-}
   
   chatLog.addEventListener('scroll', () => {
   const atBottom = chatLog.scrollHeight - chatLog.scrollTop <= chatLog.clientHeight + 10;
@@ -2671,39 +1923,7 @@ if (chatInput.value.trim().length === 0) {
       ? '<i class="fas fa-sun"></i>'
      : '<i class="fas fa-moon"></i>';
   });
-
-;(function(){
-  const qr = document.getElementById('quickReplies');
-  let startX = 0, scrollX = 0;
-  qr.addEventListener('touchstart', e => {
-    startX   = e.touches[0].pageX;
-    scrollX  = qr.scrollLeft;
-  }, {passive:true});
-  qr.addEventListener('touchmove', e => {
-    const x = e.touches[0].pageX;
-    qr.scrollLeft = scrollX + (startX - x);
-  }, {passive:false});
-})();
-
-
-   attachBtn.addEventListener('click', () => {
-   fileInput.click();
- });
-
- fileInput.addEventListener('change', async () => {
-   const file = fileInput.files[0];
-   if (!file || !currentId) return;
-   const now = new Date().toISOString();
-
-    const txt = await file.text();
-  appendMessage('user', `📎 ${file.name}`, now, '✓');
-  chatHistory.push({ who:'user', text: txt, time: now, status:'✓' });
-   sessions[currentId].updated = Date.now();
-   persistCurrent();
-
-   fileInput.value = '';
- });
-  
+    
   function showOverlaySpinner() {
       document.getElementById('overlaySpinner').removeAttribute('hidden');
     }
@@ -2741,8 +1961,6 @@ if (chatInput.value.trim().length === 0) {
    chatHistory = [...sessions[currentId].history];
  }
   
-document.getElementById('listeningIndicator').hidden = true;
-
 
   function persistSessions() {
     localStorage.setItem('sessions', JSON.stringify(sessions));
@@ -2762,6 +1980,7 @@ document.getElementById('listeningIndicator').hidden = true;
       const li = document.createElement('li');
       li.innerHTML = `
         <div class="session-title">${data.title}</div>
+        <div class="snippet">${(data.history.slice(-1)[0]?.text||'…').slice(0,30)}…</div>
         <div class="session-meta-line">
           <span class="session-date">${new Date(+id).toLocaleDateString()}</span>
           <span class="session-number">Session ${data.number}</span>
@@ -2885,6 +2104,9 @@ const count = Object.keys(sessions).length + 1;
         .replace(/["*]/g, '')
         .replace(/\b[Tt]itle[:\-]?\s*/g, '')
         .trim();
+      if (aiTitle.length > 15) {
+        aiTitle = aiTitle.slice(0, 15).trim() + '…';
+      }
       sessions[currentId].title     = aiTitle;
       sessions[currentId].aiRenamed = true;
       persistSessions();
@@ -3092,7 +2314,7 @@ const filterBtn   = document.getElementById('filterBtn');
 searchInput.addEventListener('input', () => {
   const q = searchInput.value.trim().toLowerCase();
   document.querySelectorAll('#sessionsUl li').forEach(li => {
-    const title   = li.querySelector('.session-title').textContent.toLowerCase();
+    const title   = li.querySelector('strong').textContent.toLowerCase();
     const snippet = li.querySelector('.snippet').textContent.toLowerCase();
     li.style.display = (title.includes(q) || snippet.includes(q)) ? 'flex' : 'none';
   });
@@ -3104,20 +2326,8 @@ filterBtn.addEventListener('click', () => {
 
  if ('webkitSpeechRecognition' in window) {
    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-   if (SpeechRecognition) {
-     rec = new SpeechRecognition();
-      rec.onstart = () => {
-        document.getElementById('listeningIndicator').hidden = false;
-      };
-      rec.onend = () => {
-        document.getElementById('listeningIndicator').hidden = true;
-      };
-      rec.onerror = err => {
-        console.error('SpeechRecognition error', err);
-        document.getElementById('listeningIndicator').hidden = true;
-        micBtn.classList.remove('listening');
-        micBtn.innerHTML = '<i class="fas fa-microphone"></i>';
-      };
+ if (SpeechRecognition) {
+   const rec = new SpeechRecognition();
     rec.lang            = 'en-US';
     rec.interimResults  = true;
     rec.maxAlternatives = 1;
@@ -3125,35 +2335,20 @@ filterBtn.addEventListener('click', () => {
 
     micBtn.addEventListener('click', () => {
       if (micBtn.classList.contains('listening')) {
-      rec.stop();
-    } else {
-      rec.start();
-      micBtn.classList.add('listening');
-      micBtn.innerHTML = '<i class="fas fa-microphone-slash"></i>';
-    }
+        rec.stop();
+      } else {
+        rec.start();
+      }
     });
 
     rec.onstart = () => {
-         document.getElementById('recordingOverlay').hidden = false;
-       };
-
-    let audioCtx, analyser, dataArray;
- navigator.mediaDevices.getUserMedia({ audio: true }).then(stream => {
-   audioCtx  = new (window.AudioContext||window.webkitAudioContext)();
-   analyser  = audioCtx.createAnalyser();
-   const source = audioCtx.createMediaStreamSource(stream);
-   source.connect(analyser);
-   analyser.fftSize = 32;
-   dataArray = new Uint8Array(analyser.frequencyBinCount);
-   (function draw() {
-     analyser.getByteFrequencyData(dataArray);
-     document.querySelectorAll('.rec-bars .bar').forEach((bar,i) => {
-       const h = (dataArray[i]/255)*100;
-       bar.style.height = `${Math.max(10,h)}%`;
-    });
-     requestAnimationFrame(draw);
-   })();
- });
+      micBtn.classList.add('listening');
+      micBtn.innerHTML = '<i class="fas fa-microphone-slash"></i>';
+   chatForm.querySelector('input').style.display = 'none';
+  chatForm.querySelector('#attachBtn').style.display = 'none';
+  chatForm.querySelector('#sendBtn').style.display = 'none';
+  document.getElementById('listeningIndicator').hidden = false; 
+    };
 
    rec.onresult = event => {
        let finalTranscript   = '';
@@ -3177,16 +2372,14 @@ filterBtn.addEventListener('click', () => {
      };
 
     rec.onend = () => {
-         micBtn.classList.remove('listening');
-        micBtn.innerHTML = '<i class="fas fa-microphone"></i>';
-       };
-
-      const stopBtn = document.getElementById('stopRecordingBtn');
-      stopBtn.addEventListener('click', () => {
-       document.getElementById('recordingOverlay').hidden = true;
-        document.getElementById('chatAreaControls').hidden = false;
-        chatInput.focus();
-      });
+      micBtn.classList.remove('listening');
+      micBtn.innerHTML = '<i class="fas fa-microphone"></i>';
+      document.getElementById('listeningIndicator').hidden = true;
+  chatForm.querySelector('input').style.display = '';
+  chatForm.querySelector('#attachBtn').style.display = '';
+  chatForm.querySelector('#sendBtn').style.display = '';
+  chatForm.dispatchEvent(new Event('submit'));
+    };
    rec.onerror = err => {
      console.error('SpeechRecognition error', err);
      micBtn.classList.remove('listening');
