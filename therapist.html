@@ -51,66 +51,161 @@ header#therapyHeader {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  background-color: var(--header-bg);
-  padding: 10px 16px;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+  padding: 0 24px;
+  height: 72px;
+  background: linear-gradient(135deg, var(--primary-color), var(--accent-color));
   position: fixed;
   top: 0;
   left: 0;
   right: 0;
-  height: 64px;
-  z-index: 1000;
-  transition: background-color var(--transition);
+  z-index: 10000;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
 }
 
 body.dark header#therapyHeader {
-  background-color: var(--dark-header-bg);
+  background: linear-gradient(135deg, darken(var(--primary-color),10%), darken(var(--accent-color),10%));
 }
 
-.header-left,
-.header-right {
+header#therapyHeader .header-left,
+header#therapyHeader .header-right {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 16px;
 }
 
-#therapyHeader button {
-  background: none;
+header#therapyHeader .header-left button,
+header#therapyHeader .header-right button {
+  width: 44px;
+  height: 44px;
   border: none;
-  color: var(--primary-color);
-  font-size: 20px;
-  cursor: pointer;
-  transition: color var(--transition), transform var(--transition);
+  border-radius: 50%;
+  background: rgba(255,255,255,0.25);
+  color: #fff;
+  font-size: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background var(--transition), transform var(--transition);
 }
 
-#therapyHeader button:hover {
-  color: var(--accent-color);
+header#therapyHeader .header-left button:hover,
+header#therapyHeader .header-right button:hover {
+  background: rgba(255,255,255,0.4);
   transform: scale(1.1);
 }
 
-.therapist-info {
+header#therapyHeader .therapist-info {
   display: flex;
   align-items: center;
   gap: 12px;
 }
 
-.therapist-info h1 {
-  font-size: 20px;
-  font-weight: 600;
-  margin: 0;
-  color: var(--text-color);
-}
-
-body.dark .therapist-info h1 {
-  color: var(--dark-text-color);
-}
-
-.avatar {
-  width: 40px;
-  height: 40px;
+header#therapyHeader .therapist-info .avatar {
+  width: 48px;
+  height: 48px;
   border-radius: 50%;
-  border: 2px solid var(--primary-color);
+  border: 2px solid #fff;
   object-fit: cover;
+  transition: transform var(--transition);
+}
+
+header#therapyHeader .therapist-info .avatar:hover {
+  transform: scale(1.05);
+}
+
+header#therapyHeader .therapist-info h1 {
+  margin: 0;
+  font-size: 20px;
+  font-weight: 700;
+  color: #fff;
+  letter-spacing: 0.5px;
+}
+
+header#therapyHeader #darkModeToggle {
+  position: relative;
+}
+
+header#therapyHeader #dataControls {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+header#therapyHeader #dataControls button {
+  width: auto;
+  padding: 8px 10px;
+  background: rgba(255,255,255,0.2);
+  color: #fff;
+  border-radius: var(--radius);
+  font-size: 14px;
+  transition: background var(--transition), transform var(--transition);
+}
+
+header#therapyHeader #dataControls button:hover {
+  background: rgba(255,255,255,0.35);
+  transform: scale(1.05);
+}
+
+header#therapyHeader #endSession {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: #fff;
+  color: var(--primary-color);
+  padding: 8px 14px;
+  border-radius: var(--radius);
+  font-weight: 600;
+  transition: background var(--transition), color var(--transition), transform var(--transition);
+}
+
+header#therapyHeader #endSession:hover {
+  background: #f5f5f5;
+  transform: translateY(-2px);
+}
+
+body.dark header#therapyHeader #endSession {
+  background: rgba(255,255,255,0.1);
+  color: #fff;
+}
+
+body.dark header#therapyHeader #endSession:hover {
+  background: rgba(255,255,255,0.2);
+}
+
+@media (max-width: 1024px) {
+  header#therapyHeader {
+    padding: 0 16px;
+    height: 64px;
+  }
+  header#therapyHeader .therapist-info h1 {
+    font-size: 18px;
+  }
+  header#therapyHeader .therapist-info .avatar {
+    width: 40px;
+    height: 40px;
+  }
+  header#therapyHeader #endSession {
+    padding: 6px 10px;
+    font-size: 14px;
+  }
+}
+
+@media (max-width: 768px) {
+  header#therapyHeader .header-left #collapseBtn {
+    display: none;
+  }
+  header#therapyHeader .header-left #menuToggle {
+    display: flex;
+  }
+  header#therapyHeader .header-right .end-text {
+    display: none;
+  }
+}
+
+@media (min-width: 769px) {
+  header#therapyHeader .header-left #menuToggle {
+    display: none;
+  }
 }
 
 #sessionList {
