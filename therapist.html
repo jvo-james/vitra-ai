@@ -2577,11 +2577,14 @@ filterBtn.addEventListener('click', () => {
       chatForm.dispatchEvent(new Event('submit'));
     })
   );
+  if (regenBtn) {
   regenBtn.addEventListener('click', ()=>{
     if (!lastUserMsg) return;
     chatInput.value = lastUserMsg;
     chatForm.dispatchEvent(new Event('submit'));
   });
+  }
+   if (editBtn) {
   editBtn.addEventListener('click', ()=>{
     const last = chatHistory.pop();
     if (!last || last.who!=='user') return;
@@ -2589,7 +2592,9 @@ filterBtn.addEventListener('click', () => {
     persistCurrent();
     renderChat();
   });
-
+   }
+  
+  if (clearBtn) {
  clearBtn.addEventListener('click', async () => {
   if (!currentId) return;
   const ok = await askConfirm({
@@ -2602,6 +2607,9 @@ filterBtn.addEventListener('click', () => {
   persistCurrent();
   renderChat();
 });
+  }
+
+  if (exportBtn) {
   exportBtn.addEventListener('click', ()=>{
     if (!currentId) return;
     const txt = chatHistory.map(m=>`${m.who}: ${m.text}`).join('\n');
@@ -2610,7 +2618,7 @@ filterBtn.addEventListener('click', () => {
     const a = document.createElement('a');
     a.href = url; a.download = 'transcript.txt'; a.click();
   });
-
+  }
 
 function askConfirm({ title, message, confirmText }) {
   return new Promise(resolve => {
