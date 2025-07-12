@@ -32,7 +32,13 @@
   --transition: 0.3s ease;
   --radius: 14px;
   --chat-height-offset: 64px;
-   --sidebar-width: 280px;
+   --padding: 1rem;
+  --transition: 0.3s ease;
+  --header-height: 64px;
+  --sidebar-width: 280px;
+    --radius: 0.75rem;
+
+
 }
 
 body {
@@ -49,12 +55,12 @@ body {
 }
 
 #chatArea {
-  position: fixed;         
-  top: 64px;               
-  left:  var(--sidebar-width);         
-  right: 0;
-  bottom: 120px;           
-  overflow: hidden; 
+ position: fixed;
+  top: calc(var(--header-height) + 1px);
+  left: var(--sidebar-width);
+  right: 0; bottom: 0;
+  padding-bottom: 0;
+  display: flex; flex-direction: column;
   background-color: var(--chat-bg);
   transition: background-color var(--transition);
 }
@@ -64,10 +70,8 @@ body {
 }
 
 #chatLog {
- padding: 20px 16px;
-  height: 100%;            
-  overflow-y: auto;       
-  padding-bottom: 0px; 
+flex: 1; overflow-y: auto; padding-right: var(--padding);
+  position: relative;
 }
 
 .date-separator {
@@ -172,15 +176,12 @@ body {
   #chatAreaControls {
   position: fixed;
   bottom: 0;
-   left: var(--sidebar-width);
-  right: 0;
   background-color: var(--header-bg);
-  padding: 16px 24px;
-  height: 120px;  
+ padding: 0.75rem var(--padding) 
   box-shadow: 0 -2px 8px rgba(0,0,0,0.1);
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 1rem;
   z-index: 1000;
   transition: background-color var(--transition);
 }
@@ -200,6 +201,10 @@ body {
   display: flex;
   gap: 12px;
 }
+ #sessionsUl li:hover .dots-btn {
+  opacity: 1;
+  color: var(--primary-dark);  
+ }
 
 #chatControls button {
   background: var(--sidebar-bg);
