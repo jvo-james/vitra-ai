@@ -903,7 +903,7 @@ body.dark #chatAreaControls #quickReplies {
 
 .controls-dropdown {
   position: absolute;
-  bottom: 100%;
+  top: 100%;
   right: 0;
   display: none;
   flex-direction: column;
@@ -988,6 +988,48 @@ body.dark #chatAreaControls #quickReplies {
   --header-height: 64px;
   --sidebar-width: 280px;
 }
+
+  #quickReplies {
+  scrollbar-width: thin;
+  scrollbar-color: var(--primary-color) var(--sidebar-bg);
+}
+#quickReplies::-webkit-scrollbar {
+  height: 6px;
+}
+#quickReplies::-webkit-scrollbar-track {
+  background: var(--sidebar-bg);
+}
+#quickReplies::-webkit-scrollbar-thumb {
+  background: var(--primary-color);
+  border-radius: 3px;
+}
+#quickReplies::-webkit-scrollbar-thumb:hover {
+  background: var(--accent-color);
+}
+
+#chatAreaControls.recording {
+  background: var(--accent-color);
+  color: #fff;
+}
+#chatAreaControls.recording #chatQuickToolbar,
+#chatAreaControls.recording #quickReplies {
+  display: none;
+}
+#chatAreaControls.recording .levels {
+  display: flex;
+  align-items: flex-end;
+  gap: 4px;
+  height: 24px;
+  margin-bottom: 8px;
+}
+#chatAreaControls.recording .levels .bar {
+  width: 6px;
+  background: #fff;
+  animation: pulse 0.5s infinite ease-in-out alternate;
+}
+#chatAreaControls.recording .levels .bar:nth-child(2) { animation-delay: 0.1s; }
+#chatAreaControls.recording .levels .bar:nth-child(3) { animation-delay: 0.2s; }
+
 </style>
 
 <style>
@@ -2247,11 +2289,17 @@ html.dark #quickReplies .quick-reply:hover {
       <button class="quick-reply">What’s a positive affirmation?</button>
     </div>
   </div>
+   <div class="levels" hidden>
+    <div class="bar"></div>
+    <div class="bar"></div>
+    <div class="bar"></div>
+  </div>
   <div id="listeningIndicator" hidden class="listening">
   <i class="fas fa-microphone-slash"></i> Listening…
 </div>
     <form id="chatInputForm" autocomplete="off">
       <button id="attachBtn" type="button" title="Attach file"><i class="fas fa-paperclip"></i></button>
+      <input id="fileInput" type="file" hidden>
       <input type="text" id="chatInput" placeholder="Type your message…">
       <button id="micBtn" type="button" title="Speak"><i class="fas fa-microphone"></i></button>
       <button id="sendBtn" type="submit" title="Send"><i class="fas fa-paper-plane"></i></button>
@@ -2303,6 +2351,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const chatInput     = document.getElementById('chatInput');
   const micBtn        = document.getElementById('micBtn');
   const attachBtn     = document.getElementById('attachBtn');
+  const fileInput     = document.getElementById('fileInput');
   const menuToggleControls = document.getElementById('menuToggleControls');
   const controlsDropdown   = document.getElementById('controlsDropdown');
   const clearBtn      = document.getElementById('clearHistory');
@@ -2794,6 +2843,9 @@ filterBtn.addEventListener('click', () => {
     rec.onstart = () => {
       micBtn.classList.add('listening');
       micBtn.innerHTML = '<i class="fas fa-microphone-slash"></i>';
+      const ctrl = document.getElementById('chatAreaControls');
+    ctrl.classList.add('recording');
+    ctrl.querySelector('.levels').removeAttribute('hidden');
    chatForm.querySelector('input').style.display = 'none';
   chatForm.querySelector('#attachBtn').style.display = 'none';
   chatForm.querySelector('#sendBtn').style.display = 'none';
@@ -2828,7 +2880,9 @@ filterBtn.addEventListener('click', () => {
   chatForm.querySelector('input').style.display = '';
   chatForm.querySelector('#attachBtn').style.display = '';
   chatForm.querySelector('#sendBtn').style.display = '';
-  chatForm.dispatchEvent(new Event('submit'));
+      const ctrl = document.getElementById('chatAreaControls');
+    ctrl.classList.remove('recording');
+    ctrl.querySelector('.levels').hidden = true;
     };
    rec.onerror = err => {
      console.error('SpeechRecognition error', err);
@@ -2898,6 +2952,21 @@ clearDropdownBtn.addEventListener('click', async () => {
     controlsDropdown.classList.remove('show');
   });
 
+  fileInput.addEventListener('change', async e => {
+    const file = e.target.files[0];
+    if (!file) return;
+    const text = await file.text();
+   appendMessage('user', `📎 ${file.name}\n\n${text}`);
+    chatHistory.push({ who:'user', text, time:new Date().toISOString(), status:'✓' });
+    const reply = await callAI([
+      { role:'system', content: "User attached a file." },
+      ...chatHistory.map(m=>({ role: m.who==='user'?'user':'assistant', content: m.text }))
+    ]);
+    appendMessage('therapist', reply, new Date().toISOString(), '✓✓');
+    chatHistory.push({ who:'therapist', text:reply, time:new Date().toISOString(), status:'✓✓' });
+    persistCurrent();
+  });
+  
 function askConfirm({ title, message, confirmText }) {
   return new Promise(resolve => {
     const modal = document.getElementById('confirmModal');
