@@ -325,32 +325,21 @@ body {
   color: var(--primary-color);
 }
 
-  #chatInputForm button#micBtn {
- display: inline-flex;       
-}
-  
-#chatInputForm.empty #micBtn {
-  display: block;
-}
+#chatInputForm.empty  #micBtn { display: inline-flex; }
+#chatInputForm.empty  #sendBtn { display: none; }
 
-  #chatInputForm input#chatInput:placeholder-shown ~ #micBtn {
-  display: inline-flex;        
-}
-#chatInputForm.empty #sendBtn {
-  display: none;
-}
+#chatInputForm:not(.empty)  #micBtn { display: none; }
+#chatInputForm:not(.empty)  #sendBtn { display: inline-flex; }
 
-#chatInputForm:not(.empty) #micBtn {
-  display: none;
+#sendBtn {
+  background: var(--primary-color);
+  color: #fff;
+  border-radius: var(--radius);
+  padding: 8px 12px;
+  transition: transform 0.2s ease;
 }
+#sendBtn:hover { transform: scale(1.1); }
 
-#chatInputForm:not(.empty) #sendBtn {
-  display: block;
-}
-
-#chatArea {
-  padding-bottom: calc(160px);
-}
 
 @media (max-width: 1024px) {
   #chatAreaControls {
@@ -1833,6 +1822,27 @@ html.dark #quickReplies .quick-reply:hover {
   color: #fff;
 }
 
+  @media (max-width: 600px) {
+  #sessionList {
+    display: flex;
+    flex-direction: column;
+  }
+  #newSession {
+    order: -1;       
+    margin-bottom: 1rem;
+  }
+}
+@media (max-width: 600px) {
+  #chatLog {
+    padding-bottom: 100px; 
+  }
+}
+
+  html.dark .message.user-msg .bubble {
+  background-color: var(--bubble-user) !important;
+  color: var(--dark-text-color);
+}
+
 </style>
   
 </head>
@@ -2045,6 +2055,17 @@ qr.addEventListener('wheel', e => {
    chatHistory = [...sessions[currentId].history];
  }
   
+function updateInputUI() {
+  if (chatInput.value.trim() === '') {
+    chatForm.classList.add('empty');
+  } else {
+    chatForm.classList.remove('empty');
+  }
+}
+
+updateInputUI();
+
+chatInput.addEventListener('input', updateInputUI);
 
   function persistSessions() {
     localStorage.setItem('sessions', JSON.stringify(sessions));
