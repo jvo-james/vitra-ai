@@ -1833,72 +1833,6 @@ html.dark #quickReplies .quick-reply:hover {
   color: #fff;
 }
 
-  /* toggle button */
-#toolsToggle {
-  background: var(--accent);
-  border: none;
-  color: white;
-  padding: 0.5rem;
-  border-radius: var(--radius);
-  font-size: 1.2rem;
-  cursor: pointer;
-  transition: background 0.2s ease;
-}
-#toolsToggle:hover {
-  background: var(--primary-dark);
-}
-
-.tools-dropdown {
-  position: absolute;
-  bottom: calc(100% + 0.5rem);
-  right: 0;
-  display: none;
-  flex-direction: column;
-  background: var(--surface);
-  border: 1px solid var(--border-light);
-  border-radius: var(--radius);
-  box-shadow: var(--shadow);
-  overflow: hidden;
-  z-index: 1200;
-  min-width: 180px;
-}
-.tools-dropdown button {
-  background: none;
-  border: none;
-  width: 100%;
-  padding: 0.75rem 1rem;
-  text-align: left;
-  font-size: 0.95rem;
-  color: var(--text);
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  transition: background 0.2s ease;
-}
-.tools-dropdown button:hover {
-  background: var(--bg-light);
-}
-
-.tools-dropdown.show {
-  display: flex;
-}
-
-.dark .tools-dropdown {
-  background: #2a2b33;
-  border-color: var(--border-dark);
-}
-.dark .tools-dropdown button {
-  color: var(--text-dark);
-}
-.dark .tools-dropdown button:hover {
-  background: #3a3b44;
-}
-
-#chatQuickToolbar {
-  position: relative;
-}
-
 </style>
   
 </head>
@@ -1921,7 +1855,10 @@ html.dark #quickReplies .quick-reply:hover {
   <button id="darkModeToggle" title="Toggle dark mode">
     <i class="fas fa-moon"></i>
   </button>
-     <div id="dataControls" hidden></div>
+       <div id="dataControls" hidden>
+      <button id="clearHistory"><i class="fas fa-trash" title="Clear Chat"></i> </button>
+      <button id="exportTranscript"><i class="fas fa-file-export"title="Export Chat"></i></button>
+    </div>
   <button id="endSession" title="End session">
     <i class="fas fa-sign-out-alt"></i> 
     <span class="end-text"> End Session</span>
@@ -1949,7 +1886,8 @@ html.dark #quickReplies .quick-reply:hover {
 <div id="chatAreaControls">
     <div id="chatQuickToolbar">
     <div id="chatControls">
-    <button id="toolsToggle"    title="More actions"><i class="fas fa-ellipsis-h"></i></button>
+      <button id="regenerateReply" title="Regenerate"><i class="fas fa-redo"></i></button>
+      <button id="editLast" title="Edit last"><i class="fas fa-edit"></i></button>
     </div>
 
     <div id="quickReplies">
@@ -1957,13 +1895,6 @@ html.dark #quickReplies .quick-reply:hover {
       <button class="quick-reply">Tell me more about that.</button>
       <button class="quick-reply">What’s a positive affirmation?</button>
     </div>
-       <div id="toolsDropdown" class="tools-dropdown" aria-hidden="true">
-        <button data-action="editLast"><i class="fas fa-edit"></i> Edit last</button>
-        <button data-action="regenerateReply"><i class="fas fa-redo"></i> Regenerate</button>
-       <button data-action="clearHistory"><i class="fas fa-trash"></i> Clear Chat</button>
-        <button data-action="exportTranscript"><i class="fas fa-file-export"></i> Export Chat</button>
-      </div>
-
   </div>
   <div id="listeningIndicator" hidden class="listening">
   <i class="fas fa-microphone-slash"></i> Listening…
@@ -2046,32 +1977,6 @@ qr.addEventListener('wheel', e => {
   qr.scrollLeft += e.deltaY;
 }, { passive: false });
 
-
-  const toolsToggle   = document.getElementById('toolsToggle');
-const toolsDropdown = document.getElementById('toolsDropdown');
-
-toolsToggle.addEventListener('click', e => {
-  e.stopPropagation();
-  const open = toolsDropdown.classList.toggle('show');
-  toolsDropdown.setAttribute('aria-hidden', !open);
-});
-
-toolsDropdown.addEventListener('click', e => {
-  const btn = e.target.closest('button[data-action]');
-  if (!btn) return;
-  const actionId = btn.getAttribute('data-action');
-  const target   = document.getElementById(actionId);
-  if (target) target.click();
-  toolsDropdown.classList.remove('show');
-});
-
-document.addEventListener('click', () => {
-  toolsDropdown.classList.remove('show');
-});
-
-toolsDropdown.addEventListener('click', e => {
-  e.stopPropagation();
-});
 
   
   chatLog.addEventListener('scroll', () => {
