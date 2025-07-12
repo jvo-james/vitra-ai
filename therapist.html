@@ -1949,6 +1949,75 @@ html.dark #quickReplies .quick-reply:hover {
   color: inherit !important;
 }
 
+@keyframes dropdownIn {
+  0%   { opacity: 0; transform: translateY(10px) scale(0.95); }
+  100% { opacity: 1; transform: translateY(0)    scale(1); }
+}
+
+.controls-dropdown {
+  position: absolute;
+  bottom: 100%;
+  right: 0;
+  display: none;
+  flex-direction: column;
+  min-width: 200px;
+  margin-bottom: 8px;
+  padding: 8px 0;
+  background: rgba(255,255,255,0.85);
+  backdrop-filter: blur(12px);
+  border-radius: var(--radius);
+  box-shadow: 0 8px 24px rgba(0,0,0,0.12), 0 2px 6px rgba(0,0,0,0.08);
+  z-index: 200;
+}
+
+.controls-dropdown.show {
+  display: flex;
+  animation: dropdownIn 0.2s ease-out forwards;
+}
+
+.controls-dropdown button {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  width: 100%;
+  padding: 0.75rem 1rem;
+  font-size: 0.95rem;
+  font-weight: 500;
+  background: none;
+  border: none;
+  color: var(--text);
+  cursor: pointer;
+  transition: background 0.2s var(--transition), padding-left 0.2s var(--transition);
+}
+
+.controls-dropdown button + button {
+  margin-top: 4px;
+}
+
+.controls-dropdown button:hover {
+  background: var(--primary-light);
+  padding-left: 1.2rem;
+}
+
+.controls-dropdown button:hover i {
+  color: var(--primary);
+  transform: translateX(4px);
+  transition: transform 0.2s var(--transition), color 0.2s var(--transition);
+}
+
+.dark .controls-dropdown {
+  background: rgba(30,30,30,0.85);
+  box-shadow: 0 8px 24px rgba(0,0,0,0.4), 0 2px 6px rgba(0,0,0,0.3);
+}
+
+.dark .controls-dropdown button {
+  color: var(--text);
+}
+
+.dark .controls-dropdown button:hover {
+  background: rgba(74,144,226,0.15);
+}
+
 </style>
   
 </head>
@@ -2007,8 +2076,8 @@ html.dark #quickReplies .quick-reply:hover {
     <div id="controlsDropdown" class="controls-dropdown">
       <button id="regenerateReply"><i class="fas fa-redo"></i> Regenerate</button>
       <button id="editLast"><i class="fas fa-edit"></i> Edit Last</button>
-      <button id="clearHistory"><i class="fas fa-trash"></i> Clear Chat</button>
-      <button id="exportTranscript"><i class="fas fa-file-export"></i> Export</button>
+      <button id="clearHistoryDropdown"><i class="fas fa-trash"></i> Clear Chat</button>
+      <button id="exportTranscriptDropdown"><i class="fas fa-file-export"></i> Export</button>
     </div>
 
     <div id="quickReplies">
@@ -2081,6 +2150,8 @@ document.addEventListener('DOMContentLoaded', () => {
   const editBtn       = document.getElementById('editLast');
   const quickReplies  = document.querySelectorAll('.quick-reply');
   const backBtn   = document.getElementById('backToBottom');
+  const clearDropdownBtn       = document.getElementById('clearHistoryDropdown');
+  const exportDropdownBtn      = document.getElementById('exportTranscriptDropdown');
 
   const menuToggle = document.getElementById('menuToggle');
  menuToggle.addEventListener('click', () => {
@@ -2657,7 +2728,14 @@ filterBtn.addEventListener('click', () => {
     const a = document.createElement('a');
     a.href = url; a.download = 'transcript.txt'; a.click();
   });
-
+clearDropdownBtn.addEventListener('click', async () => {
+    clearBtn.click();
+    controlsDropdown.classList.remove('show');
+  });
+  exportDropdownBtn.addEventListener('click', () => {
+    exportBtn.click();
+    controlsDropdown.classList.remove('show');
+  });
 
 function askConfirm({ title, message, confirmText }) {
   return new Promise(resolve => {
