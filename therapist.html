@@ -2,6 +2,7 @@
 <html lang="en" aria-theme="light">
 <head>
   <meta charset="UTF-8">
+<head>
  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
   <title>Vitra AI Therapist</title>
 
@@ -1897,8 +1898,7 @@ html.dark #quickReplies .quick-reply:hover {
 #chatQuickToolbar {
   position: relative;
 }
-#dataControls {display: none; }
-  
+
 </style>
   
 </head>
@@ -1949,11 +1949,7 @@ html.dark #quickReplies .quick-reply:hover {
 <div id="chatAreaControls">
     <div id="chatQuickToolbar">
     <div id="chatControls">
-    <button id="toolsToggle" title="More actions"><i class="fas fa-ellipsis-h"></i></button>
-    <div style="display:none;">
-    <button id="regenerateReply"></button>
-    <button id="editLast"></button>
-  </div>
+    <button id="toolsToggle"    title="More actions"><i class="fas fa-ellipsis-h"></i></button>
     </div>
 
     <div id="quickReplies">
@@ -2577,14 +2573,11 @@ filterBtn.addEventListener('click', () => {
       chatForm.dispatchEvent(new Event('submit'));
     })
   );
-  if (regenBtn) {
   regenBtn.addEventListener('click', ()=>{
     if (!lastUserMsg) return;
     chatInput.value = lastUserMsg;
     chatForm.dispatchEvent(new Event('submit'));
   });
-  }
-   if (editBtn) {
   editBtn.addEventListener('click', ()=>{
     const last = chatHistory.pop();
     if (!last || last.who!=='user') return;
@@ -2592,9 +2585,7 @@ filterBtn.addEventListener('click', () => {
     persistCurrent();
     renderChat();
   });
-   }
-  
-  if (clearBtn) {
+
  clearBtn.addEventListener('click', async () => {
   if (!currentId) return;
   const ok = await askConfirm({
@@ -2607,9 +2598,6 @@ filterBtn.addEventListener('click', () => {
   persistCurrent();
   renderChat();
 });
-  }
-
-  if (exportBtn) {
   exportBtn.addEventListener('click', ()=>{
     if (!currentId) return;
     const txt = chatHistory.map(m=>`${m.who}: ${m.text}`).join('\n');
@@ -2618,7 +2606,7 @@ filterBtn.addEventListener('click', () => {
     const a = document.createElement('a');
     a.href = url; a.download = 'transcript.txt'; a.click();
   });
-  }
+
 
 function askConfirm({ title, message, confirmText }) {
   return new Promise(resolve => {
