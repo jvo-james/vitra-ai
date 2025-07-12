@@ -12,9 +12,9 @@
 
 <style>
 :root {
-  --primary-color: #6C63FF;
+  --primary-color: #4A90E2;
   --accent-color: #FF6F91;
-  --background-color: #F7F7F7;
+  --background-color: #F3F6FB;
   --text-color: #333;
   --muted-text: #666;
   --header-bg: #ffffff;
@@ -42,436 +42,10 @@ body {
   transition: background-color var(--transition), color var(--transition);
 }
 
-body.dark {
+.dark {
   background-color: var(--dark-bg);
   color: var(--dark-text-color);
 }
-
-  header#therapyHeader {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 0 24px;
-  height: 64px;
-  background-color: var(--header-bg);
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
-  z-index: 1000;
-  transition: background-color var(--transition);
-}
-
-.dark header#therapyHeader {
-  background-color: var(--dark-header-bg);
-}
-
-header#therapyHeader .header-left,
-header#therapyHeader .header-right {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
-
-header#therapyHeader .therapist-info {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
-
-header#therapyHeader .therapist-info .avatar {
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
-  border: 2px solid var(--primary-color);
-  object-fit: cover;
-  transition: transform var(--transition);
-}
-
-header#therapyHeader .therapist-info .avatar:hover {
-  transform: scale(1.05);
-}
-
-header#therapyHeader .therapist-info h1 {
-  margin: 0;
-  font-size: 18px;
-  font-weight: 600;
-  color: var(--text-color);
-  transition: color var(--transition);
-}
-
-.dark header#therapyHeader .therapist-info h1 {
-  color: var(--dark-text-color);
-}
-
-header#therapyHeader button {
-  background: none;
-  border: none;
-  padding: 8px;
-  font-size: 18px;
-  color: var(--text-color);
-  cursor: pointer;
-  transition: color var(--transition), transform var(--transition);
-}
-
-.dark header#therapyHeader button {
-  color: var(--dark-text-color);
-}
-
-header#therapyHeader button:hover {
-  color: var(--primary-color);
-  transform: scale(1.1);
-}
-
-#darkModeToggle {
-  font-size: 20px;
-}
-
-#dataControls {
-  display: flex;
-  gap: 8px;
-}
-
-#dataControls button {
-  background: var(--sidebar-bg);
-  color: var(--text-color);
-  border-radius: var(--radius);
-  padding: 6px 8px;
-  font-size: 14px;
-  transition: background var(--transition), color var(--transition), transform var(--transition);
-}
-
-.dark #dataControls button {
-  background: var(--dark-sidebar-bg);
-  color: var(--dark-text-color);
-}
-
-#dataControls button:hover {
-  background: var(--primary-color);
-  color: #fff;
-  transform: scale(1.05);
-}
-
-#endSession {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  background-color: var(--accent-color);
-  color: #fff;
-  padding: 8px 14px;
-  border: none;
-  border-radius: var(--radius);
-  font-size: 14px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: background-color var(--transition), transform var(--transition);
-}
-
-#endSession i {
-  font-size: 16px;
-}
-
-#endSession:hover {
-  background-color: var(--primary-color);
-  transform: translateY(-2px);
-}
-
-.dark #endSession {
-  background-color: var(--accent-color);
-  color: #121212;
-}
-
-.dark #endSession:hover {
-  background-color: var(--primary-color);
-}
-
-@media (max-width: 1024px) {
-  header#therapyHeader {
-    padding: 0 16px;
-    height: 56px;
-  }
-  header#therapyHeader .therapist-info .avatar {
-    width: 36px;
-    height: 36px;
-  }
-  header#therapyHeader .therapist-info h1 {
-    font-size: 16px;
-  }
-  #endSession {
-    padding: 6px 10px;
-    font-size: 12px;
-  }
-}
-
-@media (max-width: 768px) {
-  #collapseBtn {
-    display: none;
-  }
-  #menuToggle {
-    display: inline-flex;
-  }
-  header#therapyHeader .therapist-info h1 {
-    display: none;
-  }
-}
-
-@media (min-width: 769px) {
-  #menuToggle {
-    display: none;
-  }
-}
-
-  #sessionList {
-  position: fixed;
-  top: 40px;
-  left: 0;
-  bottom: 0;
-  width: 280px;
-  background-color: var(--sidebar-bg);
-  display: flex;
-  flex-direction: column;
-  box-shadow: 2px 0 6px rgba(0,0,0,0.1);
-  transition: background-color var(--transition);
-  z-index: 11000;
-}
-
-.dark #sessionList {
-  background-color: var(--dark-sidebar-bg);
-}
-
-#sessionList .session-search {
-  display: flex;
-  align-items: center;
-  padding: 16px;
-  gap: 8px;
-}
-
-#searchSessions {
-  flex: 1;
-  padding: 10px 12px;
-  border: 2px solid var(--sidebar-bg);
-  border-radius: var(--radius);
-  font-size: 14px;
-  outline: none;
-  transition: border-color var(--transition);
-}
-
-.dark #searchSessions {
-  background-color: #2b2b3a;
-  border-color: var(--dark-sidebar-bg);
-  color: var(--dark-text-color);
-}
-
-#searchSessions:focus {
-  border-color: var(--primary-color);
-}
-
-#filterBtn {
-  background: var(--primary-color);
-  color: #fff;
-  border: none;
-  padding: 10px;
-  border-radius: var(--radius);
-  font-size: 16px;
-  cursor: pointer;
-  transition: background var(--transition), transform var(--transition);
-}
-
-#filterBtn:hover {
-  background: var(--accent-color);
-  transform: scale(1.05);
-}
-
-#sessionsUl {
-  flex: 1;
-overflow: visible; 
-  padding: 0 16px;
-  margin: 0;
-}
-
-#sessionsUl::-webkit-scrollbar {
-  width: 6px;
-}
-#sessionsUl::-webkit-scrollbar-track {
-  background: transparent;
-}
-#sessionsUl::-webkit-scrollbar-thumb {
-  background: var(--scrollbar-thumb);
-  border-radius: 3px;
-}
-
-.dark #sessionsUl::-webkit-scrollbar-thumb {
-  background: #444;
-}
-
-#sessionsUl li {
-  background-color: var(--header-bg);
-  margin-bottom: 12px;
-  padding: 12px 16px;
-  border-radius: var(--radius);
-  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-  display: flex;
-  flex-direction: column;
-  cursor: pointer;
-  transition: transform var(--transition), background-color var(--transition);
-  position: relative;
-   overflow: visible;  
-}
-
-.dark #sessionsUl li {
-  background-color: #2a2a39;
-  box-shadow: none;
-}
-
-#sessionsUl li:hover {
-  transform: translateY(-2px);
-  background-color: var(--sidebar-bg);
-}
-
-#sessionsUl li.active {
-  border-left: 4px solid var(--primary-color);
-}
-
-.session-title {
-  font-weight: 600;
-  font-size: 15px;
-  color: var(--text-color);
-  margin-bottom: 4px;
-}
-
-.dark .session-title {
-  color: var(--dark-text-color);
-}
-
-.snippet {
-  font-size: 13px;
-  color: var(--muted-text);
-  line-height: 1.3;
-}
-
-.dark .snippet {
-  color: var(--dark-muted-text);
-}
-
-.session-meta-line {
-  display: flex;
-  justify-content: space-between;
-  font-size: 12px;
-  color: var(--muted-text);
-  margin-top: 8px;
-}
-
-.dark .session-meta-line {
-  color: var(--dark-muted-text);
-}
-
-.dots-btn {
-  position: absolute;
-  top: 12px;
-  right: 12px;
-  background: none;
-  border: none;
-  color: var(--muted-text);
-  font-size: 18px;
-  cursor: pointer;
-  transition: color var(--transition), transform var(--transition);
-}
-
-.dots-btn:hover {
-  color: var(--primary-color);
-  transform: scale(1.1);
-}
-
-.dots-dropdown {
-  position: absolute;
-  top: 36px;
-  right: 12px;
-  background: var(--header-bg);
-  border: 1px solid var(--dropdown-border);
-  border-radius: var(--radius);
-  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-   overflow: visible;  
-  display: none;
-  z-index: 1100;
-}
-
-.dark .dots-dropdown {
-  background: var(--dark-dropdown-bg);
-  border-color: var(--dark-dropdown-border);
-}
-
-.dots-dropdown button {
-  width: 100%;
-  padding: 10px 14px;
-  background: none;
-  border: none;
-  text-align: left;
-  font-size: 14px;
-  color: var(--text-color);
-  transition: background var(--transition), color var(--transition);
-}
-
-.dark .dots-dropdown button {
-  color: var(--dark-text-color);
-}
-
-.dots-dropdown button:hover {
-  background: var(--dropdown-hover);
-}
-
-.dark .dots-dropdown button:hover {
-  background: var(--dark-dropdown-hover);
-}
-
-#sessionsUl li.open .dots-dropdown {
-  display: block;
-}
-
-#newSession {
-  background: var(--primary-color);
-  color: #fff;
-  border: none;
-  padding: 14px;
-  font-size: 16px;
-  font-weight: 600;
-  border-radius: 0 0 var(--radius) var(--radius);
-  cursor: pointer;
-  text-align: center;
-  transition: background var(--transition), transform var(--transition);
-}
-
-#newSession:hover {
-  background: var(--accent-color);
-  transform: scale(1.03);
-}
-
-.dark #newSession {
-  background: var(--accent-color);
-  color: #121212;
-}
-
-.dark #newSession:hover {
-  background: var(--primary-color);
-}
-
-@media (max-width: 1024px) {
-  #sessionList {
-    transform: translateX(-300px);
-  }
-  #sessionList.visible {
-    transform: translateX(0);
-  }
-}
-
-@media (prefers-color-scheme: dark) {
-  body:not(.dark) #sessionList,
-  body:not(.dark) #newSession {
-    background-color: var(--dark-sidebar-bg);
-    color: var(--dark-text-color);
-  }
-}
-
 
 #chatArea {
   position: fixed;         
@@ -1883,7 +1457,970 @@ body.dark option {
 
 </style>
 
+<style>
 
+:root {
+  --primary: #4A90E2;
+  --primary-light: #D0E7FF;
+  --primary-dark: #357ABD;
+  --secondary: #50C878;
+  --secondary-light: #A8E6C1;
+  --secondary-dark: #3EA664;
+  --bg: #F3F6FB;
+  --surface: #FFFFFF;
+  --text: #333333;
+  --muted: #777777;
+  --error: #E24A4A;
+  --info: #4A90E2;
+  --font-base: 'Montserrat', sans-serif;
+  --font-size-base: 1rem;
+  --font-size-sm: 0.875rem;
+  --font-size-lg: 1.125rem;
+  --line-height: 1.5;
+  --radius: 0.75rem;
+  --padding: 1rem;
+  --transition: 0.3s ease;
+  --header-height: 64px;
+  --sidebar-width: 280px;
+}
+
+#therapyHeader {
+  position: sticky;
+  top: 0; left: 0; right: 0;
+  height: 64px;
+  background: var(--surface);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 var(--padding);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  z-index: 1000;
+}
+
+#therapyHeader .header-left {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+#collapseBtn,
+#menuToggle {
+  font-size: 1.1rem;
+  background: none;
+  border: 2px solid var(--primary);
+  color: var(--primary);
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  cursor: pointer;
+  transition: background var(--transition), color var(--transition), border-color var(--transition);
+}
+
+#collapseBtn:hover,
+#menuToggle:hover {
+  background: var(--primary);
+  border-color: var(--primary);
+  color: #fff;
+}
+
+  
+.therapist-info {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+#endSession {
+  background: linear-gradient(135deg, #E24A4A, #C72E3A);
+  color: #fff;
+  padding: 0.5rem 1rem;
+  border: none;
+  border-radius: var(--radius);
+  font-size: var(--font-size-sm);
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+  transition: transform 0.2s ease, box-shadow var(--transition);
+}
+#endSession:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(0,0,0,0.3);
+}
+
+
+@media (min-width: 768px) {
+  #menuToggle {
+    display: none;
+  }
+}
+
+@media (max-width: 600px) {
+  #therapyHeader {
+    flex-wrap: nowrap;
+    height: auto;
+    padding: 0.5rem;
+    gap: 0.5rem;
+  }
+  #therapyHeader .header-left {
+    order: 1;
+  }
+  .therapist-info {
+    order: 2;
+    justify-content: center;
+  }
+  #endSession {
+    order: 3;
+    margin-left: auto;
+  }
+}
+
+.therapist-info {
+  display: flex; align-items: center; gap: 0.75rem;
+}
+.therapist-info .avatar {
+  width: 48px; height: 48px;
+  border-radius: 50%;
+  border: 2px solid var(--primary);
+  object-fit: cover;
+}
+.session-meta {
+  display: flex; align-items: center; gap: var(--padding);
+  font-size: var(--font-size-sm); color: var(--muted);
+}
+
+#sessionList {
+  position: fixed; top: var(--header-height); left: 0;
+  width: var(--sidebar-width);
+  height: calc(100% - var(--header-height));
+  background: var(--surface);
+  padding: var(--padding);
+  box-shadow: 2px 0 8px rgba(0,0,0,0.05);
+  overflow-y: auto;
+  display: flex; flex-direction: column;
+}
+#sessionList .session-search {
+  display: flex; gap: 0.5rem; margin-bottom: var(--padding);
+}
+  @media (max-width: 724px) {
+ #sessionList {
+    display: none;
+    position: absolute;
+    top: 0;                       
+    left: 0;
+    width: var(--sidebar-width);
+    height: 100vh;             
+     z-index: 1100;
+     background: var(--surface);
+     flex-direction: column;
+     box-shadow: 2px 0 8px rgba(0,0,0,0.05);
+   }
+  }
+#searchSessions {
+  flex: 1; padding: 0.5rem; border: 1px solid var(--muted);
+  border-radius: var(--radius);
+}
+#filterBtn {
+  background: var(--primary); color: #fff;
+  border: none; border-radius: var(--radius);
+  padding: 0 0.75rem; cursor: pointer;
+  transition: background var(--transition);
+}
+#filterBtn:hover {
+  background: var(--primary-dark);
+}
+#sessionsUl {
+  list-style: none; flex: 1; overflow-y: auto;
+}
+#sessionsUl li {
+  display: flex; flex-direction: column; padding: 0.75rem;
+  margin-bottom: 0.5rem; border-radius: var(--radius);
+  background: transparent; cursor: pointer;
+  transition: background var(--transition);
+}
+#sessionsUl li.active,
+#sessionsUl li:hover {
+  background: var(--primary-light);
+}
+#sessionsUl li strong {
+  font-size: var(--font-size-sm); margin-bottom: 0.25rem;
+  color: var(--primary-dark);
+}
+#sessionsUl li .snippet {
+  font-size: var(--font-size-sm); color: var(--muted);
+}
+#sessionsUl li time {
+  font-size: var(--font-size-sm); color: var(--muted);
+  align-self: flex-end;
+}
+#newSession {
+  width: 100%; padding: 0.75rem; margin-top: 0.5rem;
+  border: none; border-radius: var(--radius);
+  font-weight: 600; cursor: pointer;
+  transition: background var(--transition);
+}
+#newSession {
+  background: var(--secondary); color: #fff;
+}
+#newSession:hover {
+  background: var(--secondary-dark);
+}
+#endSession {
+  background: var(--error); color: #fff;
+}
+#endSession:hover {
+background: #c12e3a; }
+.dots-dropdown button {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+}
+  .spinner {
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1.5rem; color: var(--primary);
+  margin: 1rem auto;
+  animation: spin 1s linear infinite;
+}
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+}
+
+  .modal {
+  position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+  background: rgba(0,0,0,0.4);
+  display: none; align-items: center; justify-content: center;
+  padding: var(--padding); z-index: 2000;
+}
+.modal[open] { display: flex; }
+.modal-content {
+  background: var(--surface); border-radius: var(--radius);
+  max-width: 500px; width: 100%; padding: var(--padding);
+  box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+  position: relative;
+}
+.modal-content h2 {
+  margin-bottom: var(--padding);
+  color: var(--primary-dark);
+}
+.close-modal {
+  position: absolute; top: 0.75rem; right: 0.75rem;
+  background: none; border: none; font-size: 1.25rem;
+  color: var(--muted); cursor: pointer;
+  transition: color var(--transition);
+}
+.close-modal:hover {
+  color: var(--error);
+}
+ 
+#sessionSummary {
+  position: absolute; bottom: 80px; right: var(--padding);
+  background: var(--surface); padding: var(--padding);
+  border-radius: var(--radius);
+  box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+  width: 260px; display: none;
+}
+#sessionSummary[open] { display: block; }
+#sessionSummary h2 {
+  margin-bottom: 0.5rem; color: var(--primary);
+}
+#sessionSummary ul {
+  list-style: disc inside; margin-bottom: var(--padding);
+}
+#exportSummary {
+  width: 100%; padding: 0.5rem;
+  background: var(--primary); color: #fff;
+  border: none; border-radius: var(--radius);
+  cursor: pointer; text-align: center;
+  transition: background var(--transition);
+}
+#exportSummary:hover {
+  background: var(--primary-dark);
+}
+#sessionsUl li {
+  position: relative;
+}
+
+.dots-btn {
+  position: absolute;
+  top: 0.5rem; right: 0.5rem;
+  background: none; border: none;
+  font-size: 1.25rem; color: var(--muted);
+  opacity: 0; cursor: pointer;
+  transition: opacity var(--transition);
+}
+#sessionsUl li:hover .dots-btn {
+  opacity: 1;
+}
+.modal[open] {
+  display: flex;
+}
+.dots-dropdown {
+  position: absolute;
+  top: 2rem; right: 0.5rem;
+  background: var(--surface);
+  border: 1px solid var(--muted);
+  border-radius: var(--radius);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  display: none;
+  flex-direction: column;
+  z-index: 200;
+}
+.dots-dropdown button {
+  background: none; border: none;
+  padding: 0.5rem 1rem;
+  text-align: left;
+  width: 100%;
+  cursor: pointer;
+  transition: background var(--transition);
+}
+.dots-dropdown button:hover {
+  background: var(--primary-light);
+}
+
+#sessionsUl li.open .dots-dropdown {
+  display: flex;
+}
+
+#dataControls {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-left: 1rem;       
+}
+#dataControls button {
+  flex: 1;                   
+  padding: 0.5rem 0.75rem;    
+  background: var(--surface);
+  color: var(--text);
+  border: 1px solid var(--muted);
+  border-radius: var(--radius);
+  font-size: var(--font-size-base);
+  cursor: pointer;
+  transition: background var(--transition), border-color var(--transition);
+}
+#dataControls button:hover {
+  background: var(--primary);
+  color: #fff;
+  border-color: var(--primary);
+}
+#clearHistory:hover, #exportTranscript:hover {
+  background: var(--primary); color: #fff;
+  border-color: var(--primary);
+}
+
+  
+@media (max-width: 1024px) {
+  #sessionList { display: none; }
+  #chatArea { left: 0; }
+}
+@media (max-width: 600px) {
+  #therapyHeader {
+    display: flex !important;    
+    flex-wrap: nowrap;
+    height: auto;
+    padding: 0.5rem;
+    gap: 0.5rem;
+  }
+  #therapyHeader .header-left { order: 0; }
+  #therapyHeader .therapist-info { order: 1; }
+  #therapyHeader .header-right { order: 2; margin-left: auto; }
+
+  #therapyHeader .therapist-info h1 {
+    font-size: 1rem;            
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .session-meta { display: none; }
+
+}
+
+ @media (max-width: 724px) {
+   #sessionList {
+     display: none;
+     position: absolute;
+     top: var(--header-height);
+     left: 0;
+     width: var(--sidebar-width);
+     height: calc(100% - var(--header-height));
+     z-index: 1100;
+     background: var(--surface);
+     flex-direction: column;
+     box-shadow: 2px 0 8px rgba(0,0,0,0.05);
+   }
+   #sessionList.visible {
+     display: flex;
+   }
+ 
+ }
+
+
+
+#sessionsUl li .session-meta-line {
+  display: flex;
+  justify-content: space-between;
+  font-size: var(--font-size-sm);
+  color: var(--muted);
+}
+
+#sessionsUl li .session-number {
+  margin-left: auto; 
+}
+
+#confirmModal .modal-content {
+  max-width: 400px;
+  text-align: center;
+}
+#confirmModal h2 {
+  margin-bottom: 0.5rem;
+  color: var(--error);
+}
+#confirmModal p {
+  margin-bottom: 1.5rem;
+  color: var(--text);
+}
+#confirmModal .modal-buttons {
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+}
+#confirmModal .modal-buttons .cancel,
+#confirmModal .modal-buttons .confirm {
+  padding: 0.5rem 1rem;
+  border-radius: var(--radius);
+  border: none;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background var(--transition);
+}
+#confirmModal .modal-buttons .cancel {
+  background: var(--muted);
+  color: #fff;
+}
+#confirmModal .modal-buttons .cancel:hover {
+  background: var(--text);
+}
+#confirmModal .modal-buttons .confirm {
+  background: var(--error);
+  color: #fff;
+}
+#confirmModal .modal-buttons .confirm:hover {
+  background: darken(var(--error), 10%);
+}
+#copyToast {
+  position: fixed;
+  bottom: 2rem;
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--primary);
+  color: #fff;
+  padding: 0.75rem 1.5rem;
+  border-radius: var(--radius);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+  font-size: var(--font-size-sm);
+  transition: opacity var(--transition);
+  opacity: 0;
+  pointer-events: none;
+}
+#copyToast.show {
+  opacity: 1;
+}
+#sessionsUl li .session-title {
+  font-weight: 600;
+  font-size: var(--font-size-base);
+  margin-bottom: 0.25rem;
+  white-space: nowrap;         
+  overflow: hidden;           
+  text-overflow: ellipsis; 
+}
+
+#sessionsUl li .snippet {
+  color: var(--muted);
+  font-size: var(--font-size-sm);
+  margin-bottom: 0.25rem;
+}
+
+#sessionsUl li .session-date {
+  color: var(--muted);
+  font-size: var(--font-size-sm);
+}
+
+  .modal {
+  background: rgba(0, 0, 0, 0.6);  
+}
+
+#confirmModal .modal-content {
+  max-width: 320px;
+  padding: 1.5rem;
+  border-radius: var(--radius);
+  text-align: center;
+}
+
+#confirmModal h2 {
+  font-size: 1.25rem;
+  color: var(--error);
+  margin-bottom: 0.75rem;
+}
+
+#confirmModal p {
+  margin-bottom: 1.25rem;
+  line-height: 1.4;
+}
+
+#confirmModal .modal-buttons .cancel,
+#confirmModal .modal-buttons .confirm {
+  min-width: 100px;
+}
+
+#confirmModal .modal-buttons .confirm {
+  background: var(--error);
+  color: #fff;
+}
+
+#confirmModal .modal-buttons .cancel {
+  background: var(--muted);
+  color: #fff;
+}
+
+  #overlaySpinner {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0,0,0,0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2000;
+}
+#overlaySpinner[hidden] {
+  display: none;
+}
+.overlay-content {
+  text-align: center;
+  color: #fff;
+}
+.spinner-large {
+  font-size: 3rem;
+  margin-bottom: 1rem;
+}
+.overlay-content p {
+  font-size: 1.25rem;
+  margin: 0;
+}
+
+
+html.dark {
+  --bg: #121212;
+  --surface: #1e1e1e;
+  --text: #e0e0e0;
+  --muted: #888888;
+  --primary: #4A90E2;
+  --primary-light: rgba(74, 144, 226, 0.2);
+  --primary-dark: #357abd;
+  --secondary: #50c878;
+  --secondary-light: rgba(80, 200, 120, 0.2);
+  --secondary-dark: #3ea664;
+  --error: #e24a4a;
+  --info: #4a90e2;
+}
+
+html.dark body,
+html.dark #chatArea,
+html.dark #sessionList,
+html.dark #therapyHeader {
+  background: var(--bg);
+  color: var(--text);
+}
+
+html.dark #therapyHeader {
+  background: var(--surface);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.7);
+}
+html.dark #therapyHeader button,
+html.dark #therapyHeader .therapist-info h1 {
+  color: var(--text);
+}
+
+html.dark #sessionList {
+  background: var(--surface);
+  box-shadow: 2px 0 8px rgba(0, 0, 0, 0.7);
+}
+html.dark #sessionsUl li {
+  background: transparent;
+  border: 1px solid rgba(255,255,255,0.1);
+}
+html.dark #sessionsUl li:hover,
+html.dark #sessionsUl li.active {
+  background: var(--primary-light);
+}
+html.dark #sessionsUl li .session-title,
+html.dark #sessionsUl li .snippet,
+html.dark #sessionsUl li .session-date,
+html.dark #sessionsUl li .session-number {
+  color: var(--text);
+}
+html.dark #newSession,
+html.dark #filterBtn {
+  background: var(--secondary);
+  color: var(--bg);
+}
+
+html.dark #chatLog,
+html.dark #chatAreaControls {
+  background: var(--surface);
+  border-top: 1px solid rgba(255,255,255,0.1);
+}
+html.dark .date-separator {
+  color: var(--muted);
+}
+
+html.dark #chatControls button,
+html.dark .quick-reply,
+html.dark #regenerateReply,
+html.dark #editLast,
+html.dark #attachBtn,
+html.dark #micBtn,
+html.dark #sendBtn {
+  background: var(--surface);
+  border: 1px solid var(--muted);
+  color: var(--text);
+}
+html.dark #chatControls button:hover,
+html.dark .quick-reply:hover,
+html.dark #chatInputForm button:hover {
+  background: var(--primary);
+  color: #fff;
+  border-color: var(--primary);
+}
+
+html.dark #chatInputForm input {
+  background: var(--bg);
+  border: 1px solid var(--muted);
+  color: var(--text);
+}
+html.dark #chatInputForm input:focus {
+  box-shadow: 0 0 0 2px rgba(74,144,226,0.4);
+}
+
+html.dark .bubble {
+  background: var(--bg);
+  color: var(--text);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.7);
+}
+html.dark .user-msg .bubble {
+  background: var(--primary-dark);
+  color: #fff;
+}
+html.dark .bubble time,
+html.dark .bubble .copy-btn,
+html.dark .speak-btn {
+  color: var(--muted);
+}
+
+html.dark .modal,
+html.dark #overlaySpinner {
+  background: rgba(0, 0, 0, 0.7);
+}
+html.dark .modal-content,
+html.dark .overlay-content {
+  background: var(--surface);
+  color: var(--text);
+}
+html.dark .close-modal,
+html.dark .modal-buttons button {
+  color: var(--text);
+}
+html.dark .modal-buttons .confirm {
+  background: var(--error);
+}
+html.dark .modal-buttons .cancel {
+  background: var(--muted);
+}
+
+html.dark #dataControls {
+  background: var(--surface);
+}
+html.dark #clearHistory,
+html.dark #exportTranscript {
+  background: var(--surface);
+  border: 1px solid var(--muted);
+  color: var(--text);
+}
+html.dark #clearHistory:hover,
+html.dark #exportTranscript:hover {
+  background: var(--primary);
+  color: #fff;
+}
+
+html.dark #darkModeToggle {
+  background: var(--surface);
+  color: var(--text);
+  border: 1px solid var(--muted);
+}
+html.dark #darkModeToggle:hover {
+  background: var(--primary);
+  color: #fff;
+}
+  
+#darkModeToggle {
+  background: none;
+  border: 2px solid var(--primary);
+  color: var(--primary);
+  width: 36px; height: 36px;
+  border-radius: 50%;
+  cursor: pointer;
+  transition: background var(--transition), color var(--transition), border-color var(--transition);
+}
+#darkModeToggle:hover {
+  background: var(--primary);
+  color: #fff;
+}
+html.dark #darkModeToggle {
+  border-color: var(--muted);
+  color: var(--text);
+}
+html.dark #darkModeToggle:hover {
+  background: var(--muted);
+  color: var(--bg);
+}
+#therapyHeader .header-right {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+  @media (max-width: 600px) {
+  #endSession .end-text {
+    display: none;
+  }
+}
+
+  @media only screen
+  and (device-width: 414px)
+  and (device-height: 896px)
+  and (-webkit-device-pixel-ratio: 2) {
+
+  #therapyHeader {
+    padding: 0 0.5rem;
+  }
+  .therapist-info h1 {
+    font-size: 0.9rem;
+  }
+  #dataControls {
+    margin-left: 0.5rem;
+    gap: 0.25rem;
+  }
+
+
+  #therapyHeader .header-left button,
+  #therapyHeader .header-right button,
+  #dataControls button {
+    width: 32px;
+    height: 32px;
+  }
+
+  #therapyHeader .header-left,
+  #therapyHeader .header-right {
+    gap: 0.25rem;
+  }
+}
+
+@media only screen
+  and (min-width: 768px)
+  and (max-width: 1024px)
+  and (orientation: portrait) {
+
+  #therapyHeader {
+    padding: 0 1rem;
+  }
+  .therapist-info h1 {
+    font-size: 1.1rem;
+  }
+
+  #dataControls {
+    margin-left: 1rem;
+    gap: 0.5rem;
+  }
+}
+
+html.dark #chatControls button,
+html.dark .quick-reply {
+  background: linear-gradient(135deg, rgba(50,50,50,0.8), rgba(30,30,30,0.8));
+  border-color: var(--primary);
+  color: #fff;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.8);
+}
+
+html.dark .dots-dropdown button {
+  background: linear-gradient(135deg, rgba(40,40,40,0.9), rgba(20,20,20,0.9));
+  border-radius: var(--radius);
+  color: var(--text);
+  transition: background 0.3s ease;
+}
+
+html.dark .dots-dropdown button:hover {
+  background: linear-gradient(135deg, var(--primary-dark), var(--primary));
+  color: #fff;
+}
+
+  html.dark #searchSessions {
+ background: var(--surface);
+  border-color: var(--muted);
+  color: var(--text);
+}
+html.dark #filterBtn {
+  background: var(--secondary-light);
+  color: var(--text);
+  border: 1px solid var(--secondary);
+}
+html.dark #filterBtn:hover {
+  background: var(--secondary);
+  color: var(--bg);
+}
+
+html.dark #chatInputForm button {
+  background: var(--surface);
+  border: 1px solid var(--muted);
+  color: var(--text);
+}
+html.dark #chatInputForm button:hover {
+  background: var(--primary);
+  border-color: var(--primary);
+  color: #fff;
+}
+
+html.dark #chatInputForm input {
+  background: var(--surface);
+  border-color: var(--muted);
+  color: var(--text);
+}
+
+  
+@media only screen 
+  and (device-width: 414px) 
+  and (device-height: 896px) 
+  and (-webkit-device-pixel-ratio: 2) {
+
+  html, body {
+    font-size: 0.95rem;
+    padding: 0; margin: 0;
+  }
+
+  #therapyHeader {
+    flex-wrap: nowrap;
+    padding: 0.5rem;
+    height: 56px;
+  }
+  #therapyHeader .header-left,
+  #therapyHeader .header-right {
+    gap: 0.25rem;
+  }
+  #therapyHeader .therapist-info h1 {
+    font-size: 1rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  #therapyHeader button {
+    width: 32px; height: 32px;
+  }
+  #endSession .end-text {
+    display: none; 
+  }
+
+  #sessionList {
+    display: none;
+    position: fixed;
+    top: 56px; left: 0;
+    width: 280px; height: calc(100vh - 56px);
+    z-index: 1100;
+  }
+  #sessionList.visible {
+    display: flex;
+  }
+
+  
+html.dark .message[data-status="✓"] .bubble::before,
+html.dark .message[data-status="✓✓"] .bubble::before {
+  color: var(--color-muted);
+}
+
+
+html.dark {
+  --bg: #121212;
+  --surface: #1e1e1e;
+  --text: #e0e0e0;
+  --muted: #555555;
+  --primary: #4A90E2;
+  --primary-light: rgba(74,144,226,0.2);
+  --primary-dark: #357ABD;
+}
+
+html.dark #therapyHeader {
+  background: var(--primary-dark);
+}
+html.dark .bubble {
+  background: var(--surface);
+  border: 1px solid var(--primary);
+}
+html.dark .user-msg .bubble {
+  background: var(--primary);
+  color: #fff;
+}
+html.dark #chatInputForm button,
+html.dark #chatControls button {
+  background: var(--primary);
+  color: #fff;
+  border-color: var(--primary);
+}
+html.dark .quick-reply {
+  background: var(--primary-light);
+  color: var(--primary);
+}
+html.dark .quick-reply:hover {
+  background: var(--primary);
+  color: #fff;
+}
+
+html.dark {
+  --bg: #121212;
+  --surface: #1e1e1e;
+  --text: #e0e0e0;
+  --muted: #888888;
+  --primary: #4A90E2;
+  --primary-dark: #2B6CB0;
+}
+html.dark body {
+  background: var(--bg);
+  color: var(--text);
+}
+html.dark #therapyHeader {
+  background: linear-gradient(135deg, var(--primary-dark), var(--primary));
+}
+html.dark #therapyHeader button {
+  background: rgba(255,255,255,0.1);
+  border-color: rgba(255,255,255,0.4);
+}
+html.dark #therapyHeader button:hover {
+  background: rgba(255,255,255,0.2);
+}
+html.dark #therapyHeader #endSession {
+  background: #D64550;
+}
+html.dark #quickReplies {
+  background: var(--surface);
+}
+html.dark #quickReplies .quick-reply {
+  background: rgba(74,144,226,0.2);
+  color: var(--primary);
+  border-color: var(--primary);
+}
+html.dark #quickReplies .quick-reply:hover {
+  background: var(--primary);
+  color: #fff;
+}
+
+</style>
   
 </head>
 
