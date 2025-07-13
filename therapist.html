@@ -462,7 +462,9 @@ body {
   opacity: 1;
   visibility: visible;
 }
-
+.recording-actions { display: none; }
+  .levels {display: none; }
+  
 .back-btn {
   position: absolute;
   bottom: 140px; 
@@ -760,6 +762,13 @@ body {
     transition: none;
   }
 }
+#chatAreaControls > *:not(#chatQuickToolbar):not(.levels):not(.recording-actions):not(#listeningIndicator):not(form) {
+  display: none !important;
+}
+#chatLog {
+  padding-bottom: calc( (var(--header-height) * 0) +  (env(safe-area-inset-bottom,0)) + 64px );
+}
+
 #overlaySpinner .overlay-content {
   display: flex;
   flex-direction: column;
@@ -1029,8 +1038,6 @@ body.dark #chatAreaControls #quickReplies {
 }
 #chatAreaControls.recording .levels .bar:nth-child(2) { animation-delay: 0.1s; }
 #chatAreaControls.recording .levels .bar:nth-child(3) { animation-delay: 0.2s; }
-
-  
   
 #chatAreaControls.recording .recording-actions {
   display: flex;
@@ -2384,15 +2391,15 @@ html.dark #quickReplies .quick-reply:hover {
     </div>
 
     <div id="quickReplies">
-      <button class="quick-reply">I’m feeling stuck, can you guide me?</button>
-      <button class="quick-reply">What coping strategies might help?</button>
-      <button class="quick-reply">Can you help me reframe that?</button>
-      <button class="quick-reply">What’s one small goal I can set?</button>
+            <button class="quick-reply">Can you help me reframe that?</button>
+       <button class="quick-reply">I’m feeling stuck, can you guide me?</button>
+  <button class="quick-reply">What coping strategies might help?</button>
+  <button class="quick-reply">What’s one small goal I can set?</button>
       <button class="quick-reply">Tell me more about that.</button>
-      <button class="quick-reply">Tell me a positive affirmation.</button>
+      <button class="quick-reply">Tell me a positive affirmation?</button>
     </div>
     </div>
-  <div class="levels" hidden>
+    <div class="levels" hidden>
     <div class="bar"></div>
     <div class="bar"></div>
     <div class="bar"></div>
@@ -2405,7 +2412,7 @@ html.dark #quickReplies .quick-reply:hover {
       <i class="fas fa-check"></i> Confirm
     </button>
   </div>
-  <div id="listeningIndicator" hidden class="listening" style="display:none;">
+  <div id="listeningIndicator" hidden class="listening">
   <i class="fas fa-microphone-slash"></i> Listening…
 </div>
     <form id="chatInputForm" autocomplete="off">
@@ -2416,6 +2423,7 @@ html.dark #quickReplies .quick-reply:hover {
       <button id="sendBtn" type="submit" title="Send"><i class="fas fa-paper-plane"></i></button>
     </form>
 </div>
+   
   </main>
 
 
