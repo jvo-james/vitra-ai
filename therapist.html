@@ -37,6 +37,7 @@
   --transition: 0.3s ease;
   --header-height: 64px;
   --sidebar-width: 280px;
+  --chat-area-controls-height: 120px;
 }
 
 body {
@@ -56,7 +57,8 @@ body {
   position: fixed;
   top: calc(var(--header-height) + 1px);
   left: var(--sidebar-width);
-  right: 0; bottom: 0;
+  right: 0; 
+  bottom: var(--chat-area-controls-height);
   background: var(--bg);
   padding-bottom: 0;
   display: flex; flex-direction: column;
@@ -462,9 +464,7 @@ body {
   opacity: 1;
   visibility: visible;
 }
-.recording-actions { display: none; }
-  .levels {display: none; }
-  
+
 .back-btn {
   position: absolute;
   bottom: 140px; 
@@ -762,13 +762,6 @@ body {
     transition: none;
   }
 }
-#chatAreaControls > *:not(#chatQuickToolbar):not(.levels):not(.recording-actions):not(#listeningIndicator):not(form) {
-  display: none !important;
-}
-#chatLog {
-  padding-bottom: calc( (var(--header-height) * 0) +  (env(safe-area-inset-bottom,0)) + 64px );
-}
-
 #overlaySpinner .overlay-content {
   display: flex;
   flex-direction: column;
@@ -846,7 +839,10 @@ body.dark #chatAreaControls #quickReplies {
   .controls-dropdown {
   position: absolute;
   bottom: 100%;
-  right: 0;
+ left:   0;    
+  max-width:  90vw;  
+  max-height: 80vh;   
+  overflow:   auto;
   background: var(--surface);
   border: 1px solid var(--muted);
   border-radius: var(--radius);
@@ -910,6 +906,11 @@ body.dark #chatAreaControls #quickReplies {
   100% { opacity: 1; transform: translateY(0)    scale(1); }
 }
 
+  #chatAreaControls:not(.recording) .levels,
+#chatAreaControls:not(.recording) .recording-actions {
+  display: none!important;
+}
+  
 .controls-dropdown {
   position: absolute;
   bottom: 100%;
@@ -1038,6 +1039,8 @@ body.dark #chatAreaControls #quickReplies {
 }
 #chatAreaControls.recording .levels .bar:nth-child(2) { animation-delay: 0.1s; }
 #chatAreaControls.recording .levels .bar:nth-child(3) { animation-delay: 0.2s; }
+
+  
   
 #chatAreaControls.recording .recording-actions {
   display: flex;
@@ -1079,13 +1082,14 @@ body.dark #chatAreaControls #quickReplies {
   #sessionList {
     padding-bottom: calc(var(--padding) + env(safe-area-inset-bottom, 0px));
   }
-  #sessionList {
+ #sessionList {
     display: flex;
     flex-direction: column;
+    padding-bottom: calc(var(--padding) + env(safe-area-inset-bottom, 16px));
   }
   #sessionsUl { flex: 1; overflow-y: auto; }
-   #chatArea {
-    overflow: hidden;
+ #chatArea {
+    bottom: var(--chat-area-controls-height);
   }
   #chatLog {
     overflow-y: auto;
@@ -1098,10 +1102,7 @@ body.dark #chatAreaControls #quickReplies {
           }
 }
 
-#chatAreaControls:not(.recording) .levels,
-#chatAreaControls:not(.recording) .recording-actions {
-  display: none!important;
-}
+
 
 .levels {
   display: flex;
@@ -2394,15 +2395,15 @@ html.dark #quickReplies .quick-reply:hover {
     </div>
 
     <div id="quickReplies">
-            <button class="quick-reply">Can you help me reframe that?</button>
-       <button class="quick-reply">I’m feeling stuck, can you guide me?</button>
-  <button class="quick-reply">What coping strategies might help?</button>
-  <button class="quick-reply">What’s one small goal I can set?</button>
+      <button class="quick-reply">I’m feeling stuck, can you guide me?</button>
+      <button class="quick-reply">What coping strategies might help?</button>
+      <button class="quick-reply">Can you help me reframe that?</button>
+      <button class="quick-reply">What’s one small goal I can set?</button>
       <button class="quick-reply">Tell me more about that.</button>
-      <button class="quick-reply">Tell me a positive affirmation?</button>
+      <button class="quick-reply">Tell me a positive affirmation.</button>
     </div>
     </div>
-    <div class="levels" hidden>
+  <div class="levels" hidden>
     <div class="bar"></div>
     <div class="bar"></div>
     <div class="bar"></div>
@@ -2415,7 +2416,7 @@ html.dark #quickReplies .quick-reply:hover {
       <i class="fas fa-check"></i> Confirm
     </button>
   </div>
-  <div id="listeningIndicator" hidden class="listening">
+  <div id="listeningIndicator" hidden class="listening" style="display:none;">
   <i class="fas fa-microphone-slash"></i> Listening…
 </div>
     <form id="chatInputForm" autocomplete="off">
@@ -2426,7 +2427,6 @@ html.dark #quickReplies .quick-reply:hover {
       <button id="sendBtn" type="submit" title="Send"><i class="fas fa-paper-plane"></i></button>
     </form>
 </div>
-   
   </main>
 
 
