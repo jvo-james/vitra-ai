@@ -1340,11 +1340,31 @@ html.dark .history-modal .history-content {
   }
  }
 
- .pgx-grid {
+.pgx-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(220px,1fr));
+  grid-template-columns: repeat(3, 1fr);
+  grid-auto-rows: auto;
   gap: 1rem;
+  align-items: start;
 }
+
+.pgx-field {
+  display: flex;
+  flex-direction: column;
+}
+
+.pgx-field label {
+  margin-bottom: 0.25rem;
+  font-weight: 600;
+}
+
+.pgx-field input,
+.pgx-field select {
+  padding: 0.6rem 0.8rem;
+  font-size: 0.95rem;
+  border: 1px solid rgba(0,0,0,0.15);
+}
+
 .pgx-field {
   display: flex;
   flex-direction: column;
@@ -1368,32 +1388,66 @@ html.dark .history-modal .history-content {
 
 .voice-modal {
   position: fixed; inset:0;
-  background: rgba(0,0,0,.5);
+  background: rgba(0,0,0,0.6);
+  backdrop-filter: blur(4px);
   display: flex; align-items:center; justify-content:center;
   z-index:2000;
 }
 .voice-content {
   background: var(--surface);
-  padding: 1.5rem;
-  border-radius: var(--radius);
-  text-align:center;
+  padding: 2rem 1.5rem;
+ border-radius: calc(var(--radius) * 1.5);
+  box-shadow: 0 8px 24px rgba(0,0,0,0.15);
+  text-align: center;
   width: 90%;
-  max-width: 320px;
+  max-width: 340px;
 }
 .voice-meter {
   display: flex; gap: .5rem;
-  margin-bottom:1rem;
+  margin-bottom:1.5rem;
 }
 .voice-meter .bar {
-  flex:1;
+ flex: 1;
   height: 6px;
-  background: var(--muted);
-  transition: height .1s;
+  background: linear-gradient(180deg, var(--secondary), var(--primary));
+  border-radius: 4px;
+  transition: height 0.1s ease-out, background 0.3s;
+}
+.voice-buttons {
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
 }
 .voice-buttons button {
-  margin: 0 .5rem;
+ margin: 0;
+  padding: 0.6rem 1.2rem;
+  font-size: 0.9rem;
+  font-weight: 600;
+  border-radius: var(--radius);
+  border: none;
+  cursor: pointer;
+  transition: transform var(--transition), background var(--transition);
 }
-#voice-modal { display: none; }
+.voice-buttons .btn-secondary {
+  background: #f0f0f0;
+  color: var(--text);
+}
+.voice-buttons .btn-secondary:hover {
+  background: #e0e0e0;
+  transform: translateY(-2px);
+}
+.voice-buttons .btn-primary {
+  background: var(--primary);
+  color: #fff;
+}
+.voice-buttons .btn-primary:hover {
+  background: var(--secondary);
+  transform: translateY(-2px);
+}
+
+#voice-modal {
+ display: none;
+}
 </style>
 
   <body>
@@ -2926,15 +2980,16 @@ You are a clinical research coordinator specializing in psychiatric trials. When
       }
     })();
 
-   // Voice recording controls
 const startBtn = document.getElementById('startSpeech');
 const modal = document.getElementById('voice-modal');
 const cancelBtn = document.getElementById('cancelRec');
 const confirmBtn = document.getElementById('confirmRec');
+const chatInputRow = document.querySelector('.chat-input-row');
 const bars = [...modal.querySelectorAll('.bar')];
 let recorder, audioStream;
 
 startBtn.addEventListener('click', async () => {
+  chatInputRow.style.display = 'none';
   modal.hidden = false;
   audioStream = await navigator.mediaDevices.getUserMedia({ audio: true });
   recorder = new MediaRecorder(audioStream);
@@ -2958,6 +3013,7 @@ cancelBtn.addEventListener('click', () => {
   recorder.stop();
   audioStream.getTracks().forEach(t=>t.stop());
   modal.hidden = true;
+ chatInputRow.style.display = '';
 });
 
 confirmBtn.addEventListener('click', () => {
@@ -2971,6 +3027,7 @@ confirmBtn.addEventListener('click', () => {
     reader.readAsText(e.data);
   };
   modal.hidden = true;
+ chatInputRow.style.display = '';
 });
 
      (function() {
