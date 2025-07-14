@@ -376,32 +376,6 @@ height: 36px;
     color: var(--muted);
     margin-bottom: var(--padding);
 }
-.hero-actions .btn-primary,
-.hero-actions .btn-secondary {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.5rem;
-    padding: 0.75rem 1.25rem;
-    border-radius: var(--radius);
-    font-weight: 600;
-    transition: background var(--transition), color var(--transition), transform var(--transition);
-}
-.btn-primary {
-    background: var(--primary);
-    color: #fff;
-}
-.btn-primary:hover {
-    background: darken(var(--primary),10%);
-    transform: translateY(-2px);
-}
-.btn-secondary {
-    background: var(--secondary);
-    color: #fff;
-}
-.btn-secondary:hover {
-    background: darken(var(--secondary),10%);
-    transform: translateY(-2px);
-}
 
 .hero-image img {
     width: 100%;
@@ -426,19 +400,10 @@ height: 36px;
 .hero-module {
   position: relative;
   overflow: hidden;
-  background: var(--surface);
   border-radius: var(--radius);
   padding: 0;
 }
-.hero-bg-overlay {
-  position: absolute;
-  inset: 0;
-  background:
-    linear-gradient(135deg, rgba(226,74,74,0.6), rgba(74,144,226,0.6)),
-    url('mental.jpg') center/cover no-repeat;
-  filter: brightness(0.7);
-  z-index: 0;
-}
+
 .hero-inner {
   position: relative;
   display: grid;
@@ -513,6 +478,15 @@ height: 36px;
   .hero-content h1 { font-size: 2rem; }
   .hero-subtitle { font-size: 1rem; }
   .hero-actions { grid-template-columns: repeat(auto-fit,minmax(120px,1fr)); }
+.hero-bg-overlay {
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(135deg, rgba(226,74,74,0.6), rgba(74,144,226,0.6)),
+    url('mental.jpg') center/cover no-repeat;
+  filter: brightness(0.7);
+  z-index: 0;
+}
 }
 
 #neurotransmitter form .two-column-grid {
@@ -1365,6 +1339,33 @@ html.dark .history-modal .history-content {
     height: auto !important;
   }
  }
+
+ .pgx-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px,1fr));
+  gap: 1rem;
+}
+.pgx-field {
+  display: flex;
+  flex-direction: column;
+}
+.pgx-field label {
+  margin-bottom: .25rem;
+  font-weight: 600;
+}
+.pgx-field .other-input {
+  margin-top: .5rem;
+  display: none;
+}
+.pgx-field select[value="Other"] + .other-input,
+.pgx-field input[type="text"]:not([placeholder=""]) {
+  display: block;
+}
+.pgx-submit {
+  grid-column: 1 / -1;
+  text-align: right;
+}
+
 </style>
 
   <body>
@@ -1423,9 +1424,9 @@ html.dark .history-modal .history-content {
         AI‑powered toolkit for therapy, mood insights, neurochemical balance, and clinical trial matching—all in one interactive dashboard.
       </p>
       <div class="hero-actions">
-        <a href="therapist.html" class="btn-primary"><i class="fas fa-comments"></i> Vitra Therapist</a>
-        <a href="#neurotransmitter" class="btn-primary"><i class="fas fa-vial"></i> Neuro Balance</a>
-        <a href="#pharmacogenomics" class="btn-secondary"><i class="fas fa-dna"></i> Pharmaco‑Genomics</a>
+        <a href="therapist.html" class="btn-quick"><i class="fas fa-comments"></i> Vitra Therapist</a>
+        <a href="#neurotransmitter" class="btn-quick"><i class="fas fa-vial"></i> Neuro Balance</a>
+        <a href="#pharmacogenomics" class="btn-quick"><i class="fas fa-dna"></i> Pharmaco‑Genomics</a>
         <a href="#therapybot" class="btn-quick"><i class="fas fa-robot"></i> Chat</a>
         <a href="#moodTracker" class="btn-quick"><i class="fas fa-heart"></i> Mood Tracker</a>
         <a href="#moodStats" class="btn-quick"><i class="fas fa-chart-line"></i> Stats</a>
@@ -1641,27 +1642,30 @@ html.dark .history-modal .history-content {
         Upload a validated Variant Call Format (VCF) file containing genotypic polymorphisms (e.g., CYP2C19, CYP2D6). Enter demographic and clinical parameters 
         (e.g., age, sex). 
       </p>
-      <form id="pgx-form">
-        <div class="two-column-grid">
-          <div>
-        <label for="pgxUpload">Upload Genotype (VCF/JSON):</label>
-        <input type="file" id="pgxUpload" accept=".vcf,.txt,.json" required/>
-
-        <label for="pgxSex">Sex:</label>
-        <select id="pgxSex" required>
-          <option>Male</option>
-          <option>Female</option>
-          <option value="Other">Other</option>
-        </select>
-        <input type="text" id="pgxSexOther" class="other-input hidden" placeholder="Please specify…"/>
-
-        <label for="pgxAge">Age (years):</label>
-        <input type="number" id="pgxAge" min="0" required/>
-
-        <label for="pgxWeight">Weight (kg):</label>
-        <input type="number" id="pgxWeight" min="1"/>
-
-        <label for="pgxDrug">Drug:</label>
+     <form id="pgx-form" class="pgx-grid">
+    <div class="pgx-field">
+      <label for="pgxUpload">Upload Genotype (VCF/JSON)</label>
+      <input type="file" id="pgxUpload" accept=".vcf,.txt,.json" required>
+    </div>
+    <div class="pgx-field">
+      <label for="pgxSex">Sex</label>
+      <select id="pgxSex" required>
+        <option>Male</option>
+        <option>Female</option>
+        <option value="Other">Other</option>
+      </select>
+      <input type="text" id="pgxSexOther" class="other-input" placeholder="Specify…" />
+    </div>
+    <div class="pgx-field">
+      <label for="pgxAge">Age (years)</label>
+      <input type="number" id="pgxAge" min="0" required>
+    </div>
+    <div class="pgx-field">
+      <label for="pgxWeight">Weight (kg)</label>
+      <input type="number" id="pgxWeight" min="1">
+    </div>
+    <div class="pgx-field">
+      <label for="pgxDrug">Drug</label>
          <select id="pgxDrug" required>
             <option>Clopidogrel</option>
             <option>Warfarin</option>
@@ -1675,9 +1679,10 @@ html.dark .history-modal .history-content {
             <option>Lamotrigine</option>
             <option value="Other">Other</option>
           </select>
-        <input type="text" id="pgxDrugOther" class="other-input hidden" placeholder="Please specify…"/>
-
-        <label for="pgxGene">Gene Variant:</label>
+        <input type="text" id="pgxDrugOther" class="other-input" placeholder="Specify…" />
+    </div>
+    <div class="pgx-field">
+      <label for="pgxGene">Gene Variant</label>
         <select id="pgxGene" required>
             <option>CYP2C19*1</option>
             <option>CYP2C19*2</option>
@@ -1692,11 +1697,13 @@ html.dark .history-modal .history-content {
             <option>SLCO1B1*5</option>
             <option value="Other">Other</option>
           </select>
-        <input type="text" id="pgxGeneOther" class="other-input hidden" placeholder="Please specify…"/>
- </div>
-       </div>
-        <button id="runPGx" class="btn-primary" type="submit"><i class="fas fa-flask"></i> Run Analysis</button>
-      </form>
+         <input type="text" id="pgxGeneOther" class="other-input" placeholder="Specify…" />
+    </div>
+    <div class="pgx-submit">
+      <button id="runPGx" class="btn-primary" type="submit"><i class="fas fa-flask"></i> Run Analysis</button>
+    </div>
+  </form>
+
       <div id="pharmacogenomicsPanel" class="response" hidden>
         <button class="close-btn" aria-label="Close result">×</button>
         <div class="result-content"></div>
