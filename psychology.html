@@ -1366,6 +1366,34 @@ html.dark .history-modal .history-content {
   text-align: right;
 }
 
+.voice-modal {
+  position: fixed; inset:0;
+  background: rgba(0,0,0,.5);
+  display: flex; align-items:center; justify-content:center;
+  z-index:2000;
+}
+.voice-content {
+  background: var(--surface);
+  padding: 1.5rem;
+  border-radius: var(--radius);
+  text-align:center;
+  width: 90%;
+  max-width: 320px;
+}
+.voice-meter {
+  display: flex; gap: .5rem;
+  margin-bottom:1rem;
+}
+.voice-meter .bar {
+  flex:1;
+  height: 6px;
+  background: var(--muted);
+  transition: height .1s;
+}
+.voice-buttons button {
+  margin: 0 .5rem;
+}
+
 </style>
 
   <body>
@@ -1455,7 +1483,22 @@ html.dark .history-modal .history-content {
         </div>
       </div>
       <div id="chatBox" class="chat-box" role="log" aria-live="polite"></div>
-      <div class="chat-input-row">
+<div id="voice-modal" class="voice-modal" hidden>
+  <div class="voice-content">
+    <div class="voice-meter">
+      <div class="bar" id="bar1"></div>
+      <div class="bar" id="bar2"></div>
+      <div class="bar" id="bar3"></div>
+      <div class="bar" id="bar4"></div>
+    </div>
+    <div class="voice-buttons">
+      <button id="cancelRec" class="btn-secondary">Cancel</button>
+      <button id="confirmRec" class="btn-primary">Confirm</button>
+    </div>
+  </div>
+</div>
+
+     <div class="chat-input-row">
       <button id="startSpeech" title="Speak"><i class="fas fa-microphone"></i></button>
         <input id="chatInput" placeholder="Type your message…" aria-label="Type your question"/>
         <button id="sendChat" aria-label="Send message"><i class="fas fa-paper-plane"></i></button>
@@ -1463,6 +1506,7 @@ html.dark .history-modal .history-content {
    <a href="therapist.html">  <span class="hero-help-text">
     Click here to view the full therapy interface →
   </span> </a>
+     
     </section>
 
     <section id="moodTracker" class="module">
@@ -2881,6 +2925,53 @@ You are a clinical research coordinator specializing in psychiatric trials. When
         addTools(panel);
       }
     })();
+
+   // Voice recording controls
+const startBtn = document.getElementById('startSpeech');
+const modal = document.getElementById('voice-modal');
+const cancelBtn = document.getElementById('cancelRec');
+const confirmBtn = document.getElementById('confirmRec');
+const bars = [...modal.querySelectorAll('.bar')];
+let recorder, audioStream;
+
+startBtn.addEventListener('click', async () => {
+  modal.hidden = false;
+  audioStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+  recorder = new MediaRecorder(audioStream);
+  recorder.start();
+  const audioContext = new AudioContext();
+  const source = audioContext.createMediaStreamSource(audioStream);
+  const analyser = audioContext.createAnalyser();
+  source.connect(analyser);
+  const data = new Uint8Array(analyser.frequencyBinCount);
+
+  function updateMeter() {
+    analyser.getByteFrequencyData(data);
+    const level = data.reduce((a,b)=>a+b,0)/data.length;
+    bars.forEach((b,i)=> b.style.height = `${4 + (level/20)*(i+1)}px`);
+    if (recorder.state === 'recording') requestAnimationFrame(updateMeter);
+  }
+  updateMeter();
+});
+
+cancelBtn.addEventListener('click', () => {
+  recorder.stop();
+  audioStream.getTracks().forEach(t=>t.stop());
+  modal.hidden = true;
+});
+
+confirmBtn.addEventListener('click', () => {
+  recorder.stop();
+  audioStream.getTracks().forEach(t=>t.stop());
+  recorder.ondataavailable = e => {
+    const reader = new FileReader();
+    reader.onload = () => {
+      document.getElementById('chatInput').value = reader.result;
+    };
+    reader.readAsText(e.data);
+  };
+  modal.hidden = true;
+});
 
      (function() {
       const form = document.getElementById("mood-form");
