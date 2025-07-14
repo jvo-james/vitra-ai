@@ -423,6 +423,122 @@ height: 36px;
     color: rgba(243, 246, 251, 0.05);
   }
 
+.hero-module {
+  position: relative;
+  overflow: hidden;
+  background: var(--surface);
+  border-radius: var(--radius);
+  padding: 0;
+}
+.hero-bg-overlay {
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(135deg, rgba(226,74,74,0.6), rgba(74,144,226,0.6)),
+    url('mental.jpg') center/cover no-repeat;
+  filter: brightness(0.7);
+  z-index: 0;
+}
+.hero-inner {
+  position: relative;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--padding);
+  align-items: center;
+  padding: calc(var(--padding)*2);
+}
+.hero-content {
+  position: relative;
+  z-index: 1;
+  max-width: 600px;
+  color: #fff;
+}
+.hero-content h1 {
+  font-size: 2.5rem;
+  margin-bottom: 0.5rem;
+  text-shadow: 0 2px 8px rgba(0,0,0,0.4);
+}
+.hero-subtitle {
+  font-size: 1.1rem;
+  opacity: 0.9;
+  margin-bottom: var(--padding);
+}
+.hero-actions {
+  display: grid;
+  grid-template-columns: repeat(auto-fit,minmax(140px,1fr));
+  gap: 0.75rem;
+}
+.hero-actions a {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.8rem 1rem;
+  border-radius: var(--radius);
+  font-weight: 600;
+  font-size: 0.9rem;
+  transition: transform var(--transition), box-shadow var(--transition);
+  text-decoration: none;
+}
+.btn-primary {
+  background: #fff;
+  color: var(--primary);
+}
+.btn-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(0,0,0,0.2);
+}
+.btn-secondary {
+  background: var(--secondary);
+  color: #fff;
+}
+.btn-secondary:hover {
+  background: var(--primary);
+  transform: translateY(-2px);
+}
+.btn-quick {
+  background: rgba(255,255,255,0.2);
+  color: #fff;
+  font-size: 0.85rem;
+}
+.btn-quick:hover {
+  background: rgba(255,255,255,0.4);
+  transform: translateY(-1px);
+}
+
+@media (max-width: 768px) {
+  .hero-inner { grid-template-columns: 1fr; text-align: center; }
+  .hero-image { display: none; }
+  .hero-inner { padding: var(--padding); }
+  .hero-content h1 { font-size: 2rem; }
+  .hero-subtitle { font-size: 1rem; }
+  .hero-actions { grid-template-columns: repeat(auto-fit,minmax(120px,1fr)); }
+}
+
+#neurotransmitter form .two-column-grid {
+  display: grid;
+  grid-template-columns: repeat(2,1fr);
+  gap: var(--padding);
+}
+#neurotransmitter form .two-column-grid > div {
+  display: contents;
+}
+#pharmacogenomics form .two-column-grid {
+  display: grid;
+  grid-template-columns: repeat(3,1fr);
+  gap: var(--padding);
+}
+#pharmacogenomics form .two-column-grid > div {
+  display: contents;
+}
+@media (max-width: 640px) {
+  input, select, textarea, button {
+    flex: none !important;
+    width: auto !important;
+    max-width: 100% !important;
+  }
+}
+
   #therapybot .chat-controls {
     display: flex;
     justify-content: flex-end;
@@ -1298,33 +1414,36 @@ html.dark .history-modal .history-content {
   </header>
 
   <main role="main">
-    <section id="hero" class="module hero-module">
-      <div class="hero-inner">
-        <div class="hero-content">
-          <h1><i class="fas fa-brain"></i> Empower Your Mental Wellness</h1>
-          <p class="hero-subtitle">
-            AI-powered toolkit for therapy, mood insights, neurochemical balance, and clinical trial matching—all in one interactive dashboard.
-        </p>
-          <div class="hero-actions">
-            <a href="therapist.html" class="btn-primary">
-              <i class="fas fa-comments"></i> Vitra Therapist
-            </a>
-           
-            <a href="#neurotransmitter" class="btn-primary">
-              <i class="fas fa-vial"></i> Neuro Balance
-            </a>
-            <a href="#pharmacogenomics" class="btn-secondary">
-              <i class="fas fa-dna"></i> Pharmaco-Genomics
-            </a>
-          </div>
-        </div>
-        <div class="hero-image">
-          <img src="mental.jpg" alt="Abstract illustration of mind–body wellness">
-        </div>
+   <section id="hero" class="module hero-module">
+  <div class="hero-bg-overlay"></div>
+  <div class="hero-inner">
+    <div class="hero-content">
+      <h1><i class="fas fa-brain"></i> Empower Your Mental Wellness</h1>
+      <p class="hero-subtitle">
+        AI‑powered toolkit for therapy, mood insights, neurochemical balance, and clinical trial matching—all in one interactive dashboard.
+      </p>
+      <div class="hero-actions">
+        <a href="therapist.html" class="btn-primary"><i class="fas fa-comments"></i> Vitra Therapist</a>
+        <a href="#neurotransmitter" class="btn-primary"><i class="fas fa-vial"></i> Neuro Balance</a>
+        <a href="#pharmacogenomics" class="btn-secondary"><i class="fas fa-dna"></i> Pharmaco‑Genomics</a>
+        <a href="#therapybot" class="btn-quick"><i class="fas fa-robot"></i> Chat</a>
+        <a href="#moodTracker" class="btn-quick"><i class="fas fa-heart"></i> Mood Tracker</a>
+        <a href="#moodStats" class="btn-quick"><i class="fas fa-chart-line"></i> Stats</a>
+        <a href="#interactions" class="btn-quick"><i class="fas fa-pills"></i> Interactions</a>
+        <a href="#eeg" class="btn-quick"><i class="fas fa-wave-square"></i> EEG</a>
+        <a href="#trialmatch" class="btn-quick"><i class="fas fa-clipboard-list"></i> Trials</a>
+        <a href="#analytics" class="btn-quick"><i class="fas fa-chart-pie"></i> Analytics</a>
+        <a href="#meet-expert" class="btn-quick"><i class="fas fa-user-md"></i> Meet Expert</a>
       </div>
+    </div>
+    <div class="hero-image">
+      <img src="mental.jpg" alt="Abstract illustration of mind–body wellness">
+    </div>
+  </div>
      <i class="fas fa-pills hero-bg-icon" style="top: 10%; left: 10%;"></i>
     <i class="fas fa-wave-square hero-bg-icon" style="bottom: 15%; left: 5%;"></i>
-     <i class="fas fa-chart-line hero-bg-icon" style="top: 20%; left: 40%;"></i>    </section>
+     <i class="fas fa-chart-line hero-bg-icon" style="top: 20%; left: 40%;"></i>   
+</section>
 
     <section id="therapybot" class="module">
       <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem;">
