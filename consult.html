@@ -2432,6 +2432,13 @@ ${providers.map(p => `
     buildCalendar(year, month);
   });
 
+  [confirmForm, urgentDetailsForm, matchForm].forEach(f => {
+ if (f) f.addEventListener('submit', e => e.preventDefault());
+ });
+ document.querySelectorAll('#confirmForm input, #urgentDetailsForm input').forEach(inp => {
+ inp.addEventListener('keydown', e => { if (e.key === 'Enter') e.preventDefault(); });
+ });
+  
   function buildCalendar(y, m) {
     calendarHeader.textContent = new Date(y, m).toLocaleString("default", { month: "long", year: "numeric" });
     calendarGrid.innerHTML = "";
@@ -2533,52 +2540,54 @@ ${providers.map(p => `
     confirmForm.scrollIntoView({ behavior: "smooth" });
   });
 
-  modalConfirm.addEventListener("click", () => {
-    if (urgentFlow) {
-      const email = urgentClientEmail.value.trim();
-      const handler = PaystackPop.setup({
-        key: "pk_test_297586e51710e83d3c159bfe71ff45c7e23411fa",
-        email: email,
-        amount: URGENT_FEE_KOBO,
-        currency: "GHS",
-        ref: generateId("U"),
-        onClose: function() {},
-        callback: function(response) {
-          const id = generateId();
-      appointments.push({
-        id,
-        name: providerName,
-        date: selDate,
-        time: selTime,
-        urgent: false,
-        isFav: false            
-      });
-          localStorage.setItem("appointments", JSON.stringify(appointments));
-          addToRichDashboard({ id, name: urgentProviderName, date: uDate, time: uTime, urgent: true });
-          renderUpcomingCalendarWidget();
-          urgentFlow = false;
-        confirmModal.hidden = true;
-       showToast("Urgent appointment booked!");
-        }
-      });
-      handler.openIframe();
-    } else {
-      const id = generateId();
-     appointments.push({
-            id,
-            name: urgentProviderName,
-            date: uDate,
-            time: uTime,
-            urgent: true,
-            isFav: false     
-          });
-      localStorage.setItem("appointments", JSON.stringify(appointments));
-      addToRichDashboard({ id, name: providerName, date: selDate, time: selTime, urgent: false });
-      renderUpcomingCalendarWidget();
-      confirmModal.hidden = true;
-      showToast("Appointment booked!");
-    }
-  });
+ modalConfirm.addEventListener("click", () => {
+ if (urgentFlow) {
+ const email = urgentClientEmail.value.trim();
+ const handler = PaystackPop.setup({
+ key: "pk_test_297586e51710e83d3c159bfe71ff45c7e23411fa",
+ email: email,
+ amount: URGENT_FEE_KOBO,
+ currency: "GHS",
+ ref: generateId("U"),
+ onClose: function() {},
+ callback: function(response) {
+ const id = generateId();
+ const appt = {
+ id,
+ name: urgentProviderName,
+ date: uDate,
+ time: uTime,
+ urgent: true,
+ isFav: false
+ };
+ appointments.push(appt);
+ localStorage.setItem("appointments", JSON.stringify(appointments));
+ addToRichDashboard(appt);
+ renderUpcomingCalendarWidget();
+ urgentFlow = false;
+ confirmModal.hidden = true;
+ showToast("Urgent appointment booked!");
+ }
+ });
+ handler.openIframe();
+ } else {
+ const id = generateId();
+ const appt = {
+ id,
+ name: providerName,
+ date: selDate,
+ time: selTime,
+ urgent: false,
+ isFav: false
+ };
+ appointments.push(appt);
+ localStorage.setItem("appointments", JSON.stringify(appointments));
+ addToRichDashboard(appt);
+ renderUpcomingCalendarWidget();
+ confirmModal.hidden = true;
+ showToast("Appointment booked!");
+ }
+ });
 
 
   cancelYes.addEventListener("click", () => {
